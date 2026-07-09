@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.1.0] - 2026-08-06
+
+### Added
+
+- 현금영수증 관련 문구(`cash_receipt.*` — 발급 용도, 식별번호 종류, 발급/취소 이력 상태, 배송비 과세 방식, 오류 안내) 일본어 번역 추가 — 현금영수증 발급 화면과 이커머스 환경설정이 일본어 로케일에서 자연스럽게 표시됩니다.
+
 ## [1.0.8] - 2026-08-01
 
 ### Added
