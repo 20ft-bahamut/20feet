@@ -11,7 +11,8 @@
 2. 위치: 코어 = docs/backend/api/, 확장 = {modules|plugins}/_bundled/{id}/docs/api/
 3. 생성: php artisan api:docgen — 코드에서 추출한 스캐폴딩 + 사람이 서술 보강 (순수 수기 금지)
 4. 추출 불가분(훅 주입 파라미터·동적 응답)은 <!-- TODO --> 마커 남기고 사람이 채움
-5. Swagger/OpenAPI 도구 미사용 — 마크다운 레퍼런스 전용
+5. src/routes/api.php 가 없는 web 전용 확장(브라우저 콜백)은 문서 대상 아님
+6. Swagger/OpenAPI 도구 미사용 — 마크다운 레퍼런스 전용
 ```
 
 ---
@@ -50,6 +51,25 @@ G7 의 REST API 는 라우트 `->name()` 규약은 있으나 엔드포인트별 
 확장 API 문서는 **확장이 소유**한다(코어에 모으지 않음). 확장을 배포/삭제하면 그 API 문서도 함께 이동한다.
 
 도메인 그룹핑은 URI/라우트명 prefix 기준(`api.admin.users.*` → `users.md`)으로 커맨드가 자동 분류한다.
+
+### 문서 대상이 아닌 확장 (web 전용 라우트)
+
+확장의 `api/` prefix 라우트는 `src/routes/api.php` 를 통해서만 등록된다
+(`{Plugin,Module}RouteServiceProvider` 가 `api.php` → `api/{type}/{id}`, `web.php` → `{type}/{id}` 로 로드).
+
+따라서 `web.php` 만 가진 확장은 API 레퍼런스 문서 대상이 아니다. 브라우저 리다이렉트/콜백
+(PG 승인 결과 수신 등)은 JSON API 계약이 아니라 사용자 브라우저를 향한 302 응답이며,
+`api:docgen --scope={type}:{id}` 는 이 경우 `범위 '...' 에 해당하는 API 라우트가 없습니다` 로 응답한다.
+
+| 확장 | 라우트 | `docs/api/` |
+| --- | --- | --- |
+| `sirsoft-pay_kginicis` | `api.php` + `web.php` | 있음 — `api/` 엔드포인트 22건만 문서화 (web 콜백 9건 제외) |
+| `sirsoft-tosspayments` | `web.php` | 없음 — PG 콜백 2건 전부 브라우저 리다이렉트 |
+| `gnuboard7-hello_plugin` | `web.php` | 없음 |
+
+정적 검사는 `src/routes/api.php` 존재 여부로 이를 판정해, 해당 확장의
+라우트/컨트롤러/FormRequest 변경에는 문서 동반을 요구하지 않는다. 확장에 `api.php` 를 추가하면
+그 시점부터 자동으로 검사 대상이 되므로, 문서 생성을 함께 수행한다.
 
 ### 문서 목차와 발견성 (README.md 규약)
 
@@ -364,12 +384,15 @@ php artisan api:docgen-backfill-fields
   즉 코어 API 표면(`routes/api.php`·`app/Http/{Controllers,Requests,Resources}/**`)을
   변경하면서 코어 API 문서를 함께 갱신하지 않으면 그 변경은 통과하지 못한다. 나머지 확장은 문서
   완비 시 순차로 차단 대상에 편입된다.
+- 면제: `src/routes/api.php` 가 없는 web 전용 확장은 문서 대상이 아니므로 검사 대상에서 제외된다
+  ("문서 대상이 아닌 확장" 참조).
 
 ---
 
 ## 체크리스트
 
 ```text
+□ 그 확장에 api/ 표면이 있는가? (src/routes/api.php 부재 = web 전용 → 문서 대상 아님)
 □ 엔드포인트가 대응 위치(코어 docs/backend/api/ 또는 확장 docs/api/)에 문서화되었는가?
 □ 요청 파라미터 표에 위치/타입/필수/허용값/용도가 모두 기재되었는가?
 □ 요청 예시(raw HTTP 요청) 블록이 방출되었는가? (curl 금지, 인증 필요 시 Bearer {YOUR_TOKEN} 마스킹)
