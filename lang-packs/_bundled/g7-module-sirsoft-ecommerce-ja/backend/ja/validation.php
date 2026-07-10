@@ -836,6 +836,13 @@ return [
         'guest_lookup_password_min' => '注文照会パスワードは8文字以上である必要があります。',
         'guest_lookup_password_confirmed' => '注文照会パスワードが一致しません。',
         'guest_lookup_password_confirmation_required' => '注文照会パスワード確認を入力してください。',
+        'cash_receipt_type_required' => '現金領収証の発行目的を選択してください。',
+        'cash_receipt_type_invalid' => '現金領収証の発行目的が正しくありません。',
+        'cash_receipt_identifier_type_required' => '現金領収証の発行方法を選択してください。',
+        'cash_receipt_identifier_type_invalid' => '現金領収証の発行方法が正しくありません。',
+        'cash_receipt_identifier_required' => '現金領収証の発行に使用する番号を入力してください。',
+        'refund_bank_required_with' => '返金口座は銀行·口座番号·預金者をすべて入力する必要があります。',
+        'refund_bank_required_for_vbank' => '入金が完了した仮想口座注文は返金口座が必要です。',
     ],
     'order_bulk' => [
         'ids_required' => '変更する注文を選択してください。',

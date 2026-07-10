@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.1.0] - 2026-08-06
+
+### Added
+
+- 주문서의 환불 계좌 입력란 문구(`shop.checkout.refund_bank_*` — 안내 제목, 은행 선택, 계좌번호·예금주 입력 안내, 부분 입력 주의) 일본어 번역 추가 — 무통장입금·가상계좌로 주문할 때 환불받을 계좌를 남기는 영역이 일본어 로케일에서 자연스럽게 표시됩니다.
+
 ## [1.0.2] - 2026-07-22
 
 ### Added

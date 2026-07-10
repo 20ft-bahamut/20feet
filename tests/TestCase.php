@@ -278,34 +278,40 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
-     * g7_testing DB의 좀비 커넥션을 정리합니다.
+     * 테스트 DB 의 좀비 커넥션을 정리합니다.
      *
      * 현재 프로세스의 커넥션은 제외하고,
-     * g7_testing DB에 연결된 다른 모든 커넥션을 KILL합니다.
+     * 테스트 DB 에 연결된 다른 모든 커넥션을 KILL 합니다.
      */
     private function killStaleTestingConnections(): void
     {
-        // phpunit.xml에서 DB_DATABASE=g7_testing으로 설정됨
-        $testingDb = config('database.connections.mysql.database');
-
+        // config('database.connections.mysql.database') 를 읽지 않는다 — mysql 커넥션은
+        // read/write 분리 구조라 최상위 'database' 키가 존재하지 않아 항상 null 이 된다.
+        // null 이면 아래 비교(`($process->db ?? '') === $testingDb`)가 어떤 커넥션과도
+        // 매칭되지 않아, 좀비 정리가 조용히 전면 무력화된다(예외도 나지 않는다).
+        // 실제 접속 DB 이름은 커넥션에 직접 묻는다(write 설정이 반영된 값).
         try {
-            $currentId = DB::selectOne('SELECT CONNECTION_ID() as id')->id;
-            $processes = DB::select('SHOW PROCESSLIST');
-            $killed = 0;
+            $testingDb = DB::connection()->getDatabaseName();
 
-            foreach ($processes as $process) {
+            if ($testingDb === '') {
+                return;
+            }
+
+            $currentId = DB::selectOne('SELECT CONNECTION_ID() as id')->id;
+
+            // 정리 결과를 출력하지 않는다 — PHPUnit 은 테스트 실행 중의 예기치 않은 STDOUT/STDERR
+            // 출력을 오류(`PHPUnit\Framework\Exception`)로 처리한다. 과거에는 대상 DB 판정이
+            // null 이라 아무것도 KILL 하지 못해 출력이 없었고, 판정을 고치자 그 출력 때문에
+            // 무관한 테스트들이 무더기로 깨졌다.
+            // 실제 정리 여부는 tests/Unit/TestCaseKillStaleConnectionsTest 가 행동으로 검증한다.
+            foreach (DB::select('SHOW PROCESSLIST') as $process) {
                 if (($process->db ?? '') === $testingDb && $process->Id !== $currentId) {
                     try {
                         DB::statement('KILL '.$process->Id);
-                        $killed++;
                     } catch (\Throwable) {
                         // 이미 종료된 커넥션은 무시
                     }
                 }
-            }
-
-            if ($killed > 0) {
-                fwrite(STDERR, "\n[TestCase] Killed {$killed} stale g7_testing connection(s)\n");
             }
         } catch (\Throwable) {
             // DB 연결 실패 시 무시 (첫 마이그레이션에서 처리됨)

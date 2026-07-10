@@ -58,4 +58,9 @@ return [
         'reissued' => '現金領収書が再発行されました。',
         'status_retrieved' => '現金領収書情報を照会しました。',
     ],
+    'result_status' => [
+        'in_progress' => '処理中',
+        'completed' => '完了',
+        'failed' => '失敗',
+    ],
 ];

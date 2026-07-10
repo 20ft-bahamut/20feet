@@ -54,9 +54,9 @@
                                 {
                                     "type": "click",
                                     "handler": "setState",
+                                    "target": "local",
                                     "params": {
-                                        "target": "_local.paymentErrorMessage",
-                                        "value": null
+                                        "paymentErrorMessage": null
                                     }
                                 },
                                 {
