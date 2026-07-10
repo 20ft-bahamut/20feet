@@ -205,6 +205,13 @@ class ParameterDescriber
      */
     public function describe(string $name, string $location = '', string $type = ''): ?string
     {
+        // path 파라미터는 언제나 리소스 식별자다(라우트 모델 바인딩). 이름이 무엇이든
+        // 정렬·필터 같은 조회 파라미터 의미를 가질 수 없으므로 이름 기반 규칙보다 앞서 처리한다.
+        // (회귀: `{order}` path 가 "정렬 방향 asc/desc" 로 설명되던 문제)
+        if ($location === 'path') {
+            return self::EXACT[$name] ?? $this->describePathParam($name);
+        }
+
         // sort_order / order 는 타입에 따라 의미가 갈린다:
         //   - 문자열: 정렬 방향(asc/desc)
         //   - 정수: 표시 정렬 순서 값(작을수록 우선 — 컬럼 값)
@@ -232,11 +239,7 @@ class ParameterDescriber
             return self::EXACT[$name];
         }
 
-        // path 파라미터는 대부분 리소스 식별자 — 위치를 근거로 유추.
-        if ($location === 'path') {
-            return $this->describePathParam($name);
-        }
-
+        // path 파라미터는 위 진입부에서 이미 처리했다.
         return $this->byPattern($name, $type);
     }
 

@@ -52,6 +52,32 @@ class ParameterDescriberTest extends TestCase
     }
 
     #[Test]
+    public function path_의_order_는_정렬방향이_아니라_리소스_식별자다(): void
+    {
+        // 라우트 모델 바인딩 {order} 는 주문 리소스를 가리킨다 — 정렬 방향일 수 없다.
+        // (회귀: `| order | path | ... | 정렬 방향 (asc 오름차순 / desc 내림차순) |` 오염)
+        $describer = new ParameterDescriber;
+
+        $description = $describer->describe('order', 'path', 'string');
+
+        $this->assertNotNull($description);
+        $this->assertStringNotContainsString('정렬 방향', $description);
+        $this->assertStringNotContainsString('asc', $description);
+        $this->assertStringContainsString('식별자', $description);
+    }
+
+    #[Test]
+    public function path_의_sort_order_도_정렬방향으로_설명하지_않는다(): void
+    {
+        // path 에 sort_order 가 올 일은 없지만, 위치 우선 규칙이 이름보다 앞서야 한다.
+        $describer = new ParameterDescriber;
+
+        $description = $describer->describe('sort_order', 'path', 'string');
+
+        $this->assertStringNotContainsString('정렬 방향', (string) $description);
+    }
+
+    #[Test]
     public function path_식별자_파라미터를_위치_기반으로_설명한다(): void
     {
         $describer = new ParameterDescriber;

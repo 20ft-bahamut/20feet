@@ -348,6 +348,335 @@ class ApiDocPipelineTest extends TestCase
     }
 
     #[Test]
+    public function 재생성_시_파라미터_표의_사람_용도_셀을_보존한다(): void
+    {
+        // 회귀: 전체 재생성이 @generated 블록 안 파라미터 표를 통째로 재조립하면서
+        // 정적 추출로 재현 불가능한 도메인 서술(`용도` 셀)이 TODO 로 되돌아가던 문제.
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/y', 'name' => 'api.y.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        // `memo` 는 ParameterDescriber 가 설명할 수 없는 도메인 특이 파라미터 → TODO 스텁이 된다.
+        $request = [
+            'request_class' => null,
+            'params' => [['name' => 'memo', 'location' => 'body', 'type' => 'string', 'required' => false, 'allowed' => '', 'rules' => []]],
+            'hook_filters' => [],
+        ];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+        $header = "# Y\n";
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.y.store']);
+        $this->assertStringContainsString('<!-- TODO: 용도 -->', $first);
+
+        // 사람이 `용도` 셀을 채운다 (마지막 열만 치환).
+        $withCell = preg_replace(
+            '/^\| memo \|(.*)\| <!-- TODO: 용도 --> \|$/m',
+            '| memo |$1| 관리자 메모 (내부 관리용, 고객 비노출) |',
+            $first
+        );
+        $this->assertStringContainsString('관리자 메모 (내부 관리용, 고객 비노출)', $withCell);
+
+        // 재생성해도 사람이 채운 셀이 살아남아야 한다.
+        $regenerated = $scaffolder->mergeDocument($withCell, $header, [$section], ['api.y.store']);
+
+        $this->assertStringContainsString('관리자 메모 (내부 관리용, 고객 비노출)', $regenerated);
+        $this->assertStringNotContainsString('<!-- TODO: 용도 -->', $regenerated);
+    }
+
+    #[Test]
+    public function 실측_제외_응답_섹션을_사람이_채우면_재생성해도_보존한다(): void
+    {
+        // 회귀: 쓰기 메서드·미치환 path 등으로 실측이 불가한 엔드포인트는 응답 필드/예시 자리에
+        // `<!-- 실측 제외: ... -->` 마커만 남는다. 사람이 그 자리를 코드 근거로 채워도 다음 재생성이
+        // 블록을 통째로 재조립하며 마커로 되돌려, 작성분이 통째로 사라지던 문제.
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/z', 'name' => 'api.z.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+
+        // 실측 실패(쓰기 메서드) → 응답 필드·예시 모두 마커
+        $section = $scaffolder->endpointSection($route, $request, null, ['status' => null, 'skipped_reason' => 'write-method']);
+        $header = "# Z\n";
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.z.store']);
+        $this->assertStringContainsString('실측 제외: write-method — 응답 필드는 사람이 작성하세요.', $first);
+        $this->assertStringContainsString('실측 제외: write-method — 응답 예시는 사람이 작성하세요.', $first);
+
+        // 사람이 두 자리를 코드 근거로 채운다.
+        $withBody = str_replace(
+            '<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->',
+            "| 필드 | 타입 | 설명 |\n| --- | --- | --- |\n| issuable | boolean | 지금 발급이 가능한지 여부 |",
+            $first
+        );
+        $withBody = str_replace(
+            '<!-- 실측 제외: write-method — 응답 예시는 사람이 작성하세요. -->',
+            "```json\n{\n    \"success\": true,\n    \"data\": null\n}\n```",
+            $withBody
+        );
+
+        // 재생성해도 사람이 채운 응답 필드 표와 응답 예시가 살아남아야 한다.
+        $regenerated = $scaffolder->mergeDocument($withBody, $header, [$section], ['api.z.store']);
+
+        $this->assertStringContainsString('| issuable | boolean | 지금 발급이 가능한지 여부 |', $regenerated);
+        $this->assertStringContainsString('"success": true', $regenerated);
+        $this->assertStringNotContainsString('응답 필드는 사람이 작성하세요.', $regenerated);
+        $this->assertStringNotContainsString('응답 예시는 사람이 작성하세요.', $regenerated);
+    }
+
+    #[Test]
+    public function 문서에_엔드포인트가_여러_개여도_각자의_응답_본문만_보존한다(): void
+    {
+        // 회귀: extractGeneratedBlock() 은 앞의 `## ` 헤딩까지 거슬러 올라가는데 엔드포인트 헤딩은
+        // `### ` 라서 문서 상단까지 올라가 여러 엔드포인트를 한 덩어리로 반환한다. 위치 기반으로
+        // 응답 본문을 떼어내면 항상 "그 덩어리의 첫 엔드포인트" 본문을 집어, 두 번째 이후
+        // 엔드포인트의 사람 작성분이 소실되고 첫 엔드포인트 본문이 복제되던 문제.
+        $scaffolder = new ApiDocScaffolder;
+
+        $makeRoute = fn (string $name, string $uri): array => [
+            'method' => 'POST', 'uri' => $uri, 'name' => $name,
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $skipped = ['status' => null, 'skipped_reason' => 'write-method'];
+
+        $keys = ['api.a.store', 'api.b.store'];
+        $sections = [
+            $scaffolder->endpointSection($makeRoute('api.a.store', '/api/a'), $request, null, $skipped),
+            $scaffolder->endpointSection($makeRoute('api.b.store', '/api/b'), $request, null, $skipped),
+        ];
+
+        // 문서 상단에 `## ` 헤딩이 있고 엔드포인트는 `### ` 로 나열되는 실제 구조를 재현한다.
+        $header = "# Multi\n\n## TL;DR (5초 요약)\n\n설명\n";
+        $first = $scaffolder->mergeDocument(null, $header, $sections, $keys);
+
+        // 두 엔드포인트의 응답 필드를 서로 다른 내용으로 채운다.
+        $filled = preg_replace_callback(
+            '/<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요\. -->/',
+            function () {
+                static $n = 0;
+                $n++;
+
+                return "| 필드 | 타입 | 설명 |\n| --- | --- | --- |\n| field_{$n} | string | 엔드포인트 {$n} 전용 필드 |";
+            },
+            $first
+        );
+
+        $this->assertStringContainsString('엔드포인트 1 전용 필드', $filled);
+        $this->assertStringContainsString('엔드포인트 2 전용 필드', $filled);
+
+        $regenerated = $scaffolder->mergeDocument($filled, $header, $sections, $keys);
+
+        // 각 엔드포인트가 자기 본문을 유지해야 한다 (2번이 1번 본문으로 덮이면 안 된다).
+        $this->assertStringContainsString('엔드포인트 1 전용 필드', $regenerated);
+        $this->assertStringContainsString('엔드포인트 2 전용 필드', $regenerated);
+        $this->assertSame(1, substr_count($regenerated, '엔드포인트 1 전용 필드'));
+        $this->assertSame(1, substr_count($regenerated, '엔드포인트 2 전용 필드'));
+    }
+
+    #[Test]
+    public function 실측에_성공해도_사람이_쓴_응답_예시는_덮어쓰지_않는다(): void
+    {
+        // 회귀: `reissue` 는 실측 표본이 `data: null`(전액 환불) 하나뿐인데, 사람은 코드를 읽고
+        // 성공 케이스 예시까지 써 두었다. "실측이 사람을 이긴다" 규칙은 그 성공 예시를 지웠다.
+        // 실측은 기본값이지 덮어쓰기 권한이 아니다.
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/r', 'name' => 'api.r.reissue',
+            'controller' => 'C', 'controller_method' => 'reissue', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+
+        // 실측은 성공하지만 표본이 빈약하다 (data: null).
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+        $probeMeta = ['status' => 200, 'skipped_reason' => null, 'body' => ['success' => true, 'data' => null]];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, $probeMeta);
+        $header = "# R\n";
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.r.reissue']);
+
+        // 실측 산출 예시에는 출처 마커가 붙는다.
+        $this->assertStringContainsString('<!-- @probed -->', $first);
+
+        // 사람이 성공 케이스 예시를 덧붙여 더 풍부하게 만든다 (출처 마커 없음).
+        $humanExample = "재발급 성공:\n\n```json\n{\n    \"success\": true,\n    \"data\": {\"id\": 14}\n}\n```\n\n전액 환불 시:\n\n```json\n{\n    \"success\": true,\n    \"data\": null\n}\n```";
+        $withHuman = preg_replace(
+            '/<!-- @probed -->.*?(?=\*\*에러 응답\*\*)/s',
+            $humanExample."\n\n",
+            $first
+        );
+        $this->assertStringContainsString('재발급 성공:', $withHuman);
+        $this->assertStringNotContainsString('<!-- @probed -->', $withHuman);
+
+        // 같은 실측 결과로 재생성해도 사람이 쓴 예시가 살아남아야 한다.
+        $regenerated = $scaffolder->mergeDocument($withHuman, $header, [$section], ['api.r.reissue']);
+
+        $this->assertStringContainsString('재발급 성공:', $regenerated);
+        $this->assertStringContainsString('전액 환불 시:', $regenerated);
+        $this->assertStringNotContainsString('<!-- @probed -->', $regenerated);
+    }
+
+    #[Test]
+    public function 실측이_가능해지면_비어있던_응답_섹션은_실측_결과로_갱신된다(): void
+    {
+        // 위 보존 규칙이 "영원히 갱신 불가"가 되면 안 된다 — 사람이 손대지 않은 마커 상태에서
+        // 실측이 성공하면 실측 표/예시로 갱신되어야 한다.
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/z', 'name' => 'api.z.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# Z\n";
+
+        $skipped = $scaffolder->endpointSection($route, $request, null, ['status' => null, 'skipped_reason' => 'write-method']);
+        $first = $scaffolder->mergeDocument(null, $header, [$skipped], ['api.z.store']);
+        $this->assertStringContainsString('실측 제외: write-method', $first);
+
+        // 이번 run 에서 실측 성공
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [['name' => 'id', 'type' => 'integer', 'sample' => '1']], 'pagination' => false];
+        $probed = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+
+        $regenerated = $scaffolder->mergeDocument($first, $header, [$probed], ['api.z.store']);
+
+        $this->assertStringNotContainsString('실측 제외: write-method', $regenerated);
+        $this->assertStringContainsString('| id |', $regenerated);
+    }
+
+    #[Test]
+    public function 재생성_시_응답_필드_표의_사람_설명_셀을_보존한다(): void
+    {
+        // 파라미터 표와 동일한 회귀 — 응답 필드 표의 마지막 열(용도/설명)도 사람이 채운다.
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/z', 'name' => 'api.z.show',
+            'controller' => 'C', 'controller_method' => 'show', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        // `nickname` 은 ResourceFieldDescriber 가 설명하지 못하는 도메인 특이 필드.
+        $schema = [
+            'envelope' => ['data'], 'shape' => 'object',
+            'fields' => [['name' => 'nickname', 'type' => 'string', 'sample' => 'gnu']],
+            'pagination' => false,
+        ];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+        $header = "# Z\n";
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.z.show']);
+        $this->assertStringContainsString('<!-- TODO: 설명 -->', $first);
+
+        // 응답 필드 표의 마지막 열을 사람이 채운 상태로 만든다.
+        $withCell = preg_replace(
+            '/^\| nickname \|(.*)\| <!-- TODO: 설명 --> \|$/m',
+            '| nickname |$1| 화면에 표시되는 별명 (중복 허용) |',
+            $first
+        );
+        $this->assertStringContainsString('화면에 표시되는 별명 (중복 허용)', $withCell);
+
+        $regenerated = $scaffolder->mergeDocument($withCell, $header, [$section], ['api.z.show']);
+
+        $this->assertStringContainsString('화면에 표시되는 별명 (중복 허용)', $regenerated);
+    }
+
+    #[Test]
+    public function 재생성_시_사람이_고쳐쓴_셀은_자동_설명으로_되돌아가지_않는다(): void
+    {
+        // 회귀: ParameterDescriber 가 값을 만들어내는 셀(TODO 가 아닌 셀)은
+        // 사람이 도메인에 맞게 고쳐도 매 재생성마다 자동 설명으로 덮어써지던 문제.
+        // 예: `identifier` → "대상 확장/리소스의 식별자" (도메인 무관 일반화)
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/w', 'name' => 'api.w.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = [
+            'request_class' => null,
+            'params' => [['name' => 'identifier', 'location' => 'body', 'type' => 'string', 'required' => true, 'allowed' => '', 'rules' => []]],
+            'hook_filters' => [],
+        ];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+        $header = "# W\n";
+
+        // 최초 생성: describer 가 일반 설명을 채운다 (TODO 아님).
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.w.store']);
+        $this->assertStringContainsString('식별자', $first);
+        $this->assertStringNotContainsString('<!-- TODO: 용도 -->', $first);
+
+        // 사람이 도메인 설명으로 고쳐 쓴다.
+        $withCell = preg_replace(
+            '/^\| identifier \|(.*)\| [^|]+ \|$/m',
+            '| identifier |$1| 현금영수증 식별번호 (휴대폰/카드/사업자번호) |',
+            $first
+        );
+        $this->assertStringContainsString('현금영수증 식별번호', $withCell);
+
+        // 재생성해도 사람이 고친 셀이 유지되어야 한다.
+        $regenerated = $scaffolder->mergeDocument($withCell, $header, [$section], ['api.w.store']);
+
+        $this->assertStringContainsString('현금영수증 식별번호', $regenerated);
+    }
+
+    #[Test]
+    public function 재생성_시_이스케이프된_파이프를_담은_셀도_보존한다(): void
+    {
+        // 회귀: 표 셀에 `\|` (이스케이프된 파이프)가 있으면 열 분해가 어긋나
+        // 보존 대상 행으로 인식되지 못하고 TODO 로 퇴행하던 문제.
+        // 실제 사례: `인증 대상 해시 필터 (SHA256(email\|phone), PII 원본 대신 해시로 추적)`
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/v', 'name' => 'api.v.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = [
+            'request_class' => null,
+            'params' => [['name' => 'target_hash', 'location' => 'query', 'type' => 'string', 'required' => false, 'allowed' => '', 'rules' => []]],
+            'hook_filters' => [],
+        ];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+        $header = "# V\n";
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section], ['api.v.index']);
+        $this->assertStringContainsString('<!-- TODO: 용도 -->', $first);
+
+        $human = '인증 대상 해시 필터 (SHA256(email\\|phone), PII 원본 대신 해시로 추적)';
+        $stubRow = '| target_hash | query | string | 아니오 | — | <!-- TODO: 용도 --> |';
+        $humanRow = '| target_hash | query | string | 아니오 | — | '.$human.' |';
+
+        $this->assertStringContainsString($stubRow, $first);
+        $withCell = str_replace($stubRow, $humanRow, $first);
+
+        $regenerated = $scaffolder->mergeDocument($withCell, $header, [$section], ['api.v.index']);
+
+        $this->assertStringContainsString($human, $regenerated);
+        $this->assertStringNotContainsString('<!-- TODO: 용도 -->', $regenerated);
+    }
+
+    #[Test]
     public function ge_t_인증_엔드포인트_요청_예시가_raw_htt_p_요청이다(): void
     {
         $scaffolder = new ApiDocScaffolder;
