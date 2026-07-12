@@ -77,13 +77,14 @@ describe('plugin_settings 시맨틱 클래스 매핑', () => {
   });
 
   describe('섹션 제목 H3', () => {
-    it('테스트/라이브/리다이렉트 섹션 제목은 section-heading-md 를 가져야 한다', () => {
+    it('모든 section_* 제목은 section-heading-md 를 가져야 한다', () => {
       const sectionHeadings = collect(
         pluginSettingsLayout,
         (n) => n.name === 'H3' && typeof n.text === 'string' && n.text.startsWith('$t:sirsoft-tosspayments.settings.section_'),
       );
 
-      expect(sectionHeadings).toHaveLength(3);
+      // 테스트키 · 라이브키 · 리다이렉트 · 결제방식(S4) · 가상계좌(S4) = 5개
+      expect(sectionHeadings).toHaveLength(5);
       for (const heading of sectionHeadings) {
         expect(classNameOf(heading)).toBe('section-heading-md');
       }

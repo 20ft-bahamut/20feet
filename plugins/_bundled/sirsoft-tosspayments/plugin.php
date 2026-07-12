@@ -96,6 +96,106 @@ class Plugin extends AbstractPlugin
                     'en' => 'Supports relative paths or full URLs. Error details are appended as query parameters.',
                 ],
             ],
+
+            // 결제 방식 — 주문서형(결제수단을 우리 체크아웃에서 선택) vs 결제창형(토스 통합결제창)
+            'order_sheet_mode' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '주문서형 결제', 'en' => 'Order-sheet Mode'],
+                'hint' => [
+                    'ko' => '켜면 체크아웃에서 결제수단을 직접 선택합니다. 끄면 토스 통합결제창(카드) 하나로 처리됩니다.',
+                    'en' => 'When ON, payment methods are chosen at checkout. When OFF, a single TossPayments integrated window (card) is used.',
+                ],
+            ],
+
+            // 주문서형에서 노출할 결제수단 토글 (order_sheet_mode 가 true 일 때만 유효)
+            'method_card' => [
+                'type' => 'boolean',
+                'default' => true,
+                'label' => ['ko' => '카드', 'en' => 'Card'],
+            ],
+            'method_virtual_account' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '가상계좌', 'en' => 'Virtual Account'],
+            ],
+            'method_transfer' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '계좌이체', 'en' => 'Bank Transfer'],
+            ],
+            'method_mobile_phone' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '휴대폰', 'en' => 'Mobile Phone'],
+            ],
+            'method_tosspay' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '토스페이', 'en' => 'TossPay'],
+            ],
+            'method_kakaopay' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '카카오페이', 'en' => 'KakaoPay'],
+            ],
+            'method_naverpay' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '네이버페이', 'en' => 'NaverPay'],
+            ],
+            'method_payco' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '페이코', 'en' => 'PAYCO'],
+            ],
+            'method_samsungpay' => [
+                'type' => 'boolean',
+                'default' => false,
+                'label' => ['ko' => '삼성페이', 'en' => 'Samsung Pay'],
+            ],
+
+            // 가상계좌 옵션
+            'vbank_valid_hours' => [
+                'type' => 'integer',
+                'default' => 24,
+                'label' => ['ko' => '가상계좌 입금기한(시간)', 'en' => 'Virtual Account Valid Hours'],
+                'hint' => [
+                    'ko' => '가상계좌 발급 후 입금 가능한 시간입니다. 최대 2160시간(90일).',
+                    'en' => 'Hours available for deposit after issuing a virtual account. Max 2160 (90 days).',
+                ],
+            ],
+            'vbank_cash_receipt_type' => [
+                'type' => 'string',
+                'default' => '',
+                'label' => ['ko' => '가상계좌 현금영수증 유형', 'en' => 'Virtual Account Cash Receipt Type'],
+                'hint' => [
+                    'ko' => '가상계좌 발급 시 토스가 자동 발급할 현금영수증 유형입니다. 비워두면 발급하지 않습니다.',
+                    'en' => 'Cash receipt type TossPayments auto-issues when a virtual account is created. Leave blank to skip.',
+                ],
+            ],
+
+            // 에스크로 — 3-상태 (가상계좌·계좌이체에만 적용)
+            'use_escrow' => [
+                'type' => 'string',
+                'default' => 'off',
+                'label' => ['ko' => '에스크로 사용', 'en' => 'Use Escrow'],
+                'hint' => [
+                    'ko' => '가상계좌·계좌이체 결제에만 적용됩니다. 구매자 선택은 결제창에서 구매자가 직접 결정합니다.',
+                    'en' => 'Applies to virtual account and bank transfer only. "Buyer choice" lets the buyer decide in the payment window.',
+                ],
+            ],
+
+            // 가상계좌 입금통보(DEPOSIT_CALLBACK) 웹훅 secret 대조 강제
+            'webhook_secret_verify' => [
+                'type' => 'boolean',
+                'default' => true,
+                'label' => ['ko' => '웹훅 secret 검증', 'en' => 'Webhook Secret Verification'],
+                'hint' => [
+                    'ko' => '가상계좌 입금통보 웹훅의 secret 을 결제 승인 응답과 대조해 위조 요청을 차단합니다.',
+                    'en' => 'Verifies the deposit webhook secret against the payment confirmation response to block forged requests.',
+                ],
+            ],
         ];
     }
 
@@ -114,6 +214,20 @@ class Plugin extends AbstractPlugin
             'live_secret_key' => '',
             'redirect_success_url' => '/shop/orders/{orderId}/complete',
             'redirect_fail_url' => '/shop/checkout',
+            'order_sheet_mode' => false,
+            'method_card' => true,
+            'method_virtual_account' => false,
+            'method_transfer' => false,
+            'method_mobile_phone' => false,
+            'method_tosspay' => false,
+            'method_kakaopay' => false,
+            'method_naverpay' => false,
+            'method_payco' => false,
+            'method_samsungpay' => false,
+            'vbank_valid_hours' => 24,
+            'vbank_cash_receipt_type' => '',
+            'use_escrow' => 'off',
+            'webhook_secret_verify' => true,
         ];
     }
 
@@ -126,7 +240,10 @@ class Plugin extends AbstractPlugin
     {
         return [
             Listeners\RegisterPgProviderListener::class,
+            Listeners\RegisterTossPaymentMethodsListener::class,
+            Listeners\AdjustEcommercePaymentMethodsLayoutListener::class,
             Listeners\PaymentRefundListener::class,
+            Listeners\ValidateTossSettingsListener::class,
         ];
     }
 

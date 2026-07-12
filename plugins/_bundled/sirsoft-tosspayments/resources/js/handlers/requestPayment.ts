@@ -15,6 +15,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+interface EscrowProduct {
+    id: string;
+    name: string;
+    code: string;
+    unitPrice: number;
+    quantity: number;
+}
+
 interface PgPaymentData {
     order_number: string;
     order_name: string;
@@ -24,15 +32,32 @@ interface PgPaymentData {
     customer_email?: string;
     customer_phone?: string;
     customer_key?: string | null;
+    escrow_products?: EscrowProduct[];
 }
 
 interface RequestPaymentParams {
     pgPaymentData: PgPaymentData;
+    // 주문서형에서 사용자가 선택한 결제수단 id (toss_*). 미지정 시 _local.paymentMethod 참조.
+    paymentMethod?: string;
+}
+
+interface EnabledMethod {
+    id: string;
+    method: string;
+    easy_pay_provider: string | null;
+    core_payment_method: string;
 }
 
 interface ClientConfig {
     client_key: string;
     sdk_url: string;
+    order_sheet_mode?: boolean;
+    enabled_methods?: EnabledMethod[];
+    vbank?: {
+        valid_hours: number;
+        cash_receipt_type: string;
+    };
+    use_escrow?: string;
     callback_urls: {
         success: string;
         fail: string;
@@ -77,8 +102,96 @@ function loadScript(src: string): Promise<void> {
  * @param action 액션 정의 (handler, params 등)
  * @param _context 액션 컨텍스트
  */
+/**
+ * 선택된 결제수단 id 를 SDK 파라미터로 변환합니다.
+ *
+ * 서버가 내려준 enabled_methods 에서 선택 id 를 찾아 SDK method / easyPay provider 를
+ * 결정한다. 프론트는 결제수단 매핑을 하드코딩하지 않는다 (서버가 SSoT).
+ * order_sheet_mode 가 off 이거나 선택 id 를 못 찾으면 통합결제창 카드(CARD)로 처리한다.
+ *
+ * @param config 클라이언트 설정 (enabled_methods 포함)
+ * @param selectedId 선택된 toss_* 결제수단 id
+ * @returns SDK method 와 easyPay provider
+ */
+function resolveMethod(config: ClientConfig, selectedId?: string): { method: string; easyPay: string | null } {
+    if (!config.order_sheet_mode || !selectedId) {
+        return { method: 'CARD', easyPay: null };
+    }
+
+    const entry = (config.enabled_methods ?? []).find((m) => m.id === selectedId);
+    if (!entry) {
+        return { method: 'CARD', easyPay: null };
+    }
+
+    return { method: entry.method, easyPay: entry.easy_pay_provider };
+}
+
+/**
+ * use_escrow 설정 문자열을 SDK useEscrow boolean/undefined 로 변환합니다.
+ *
+ * off → false, on → true, buyer_choice → undefined(키 생략 → 결제창에서 구매자 선택).
+ *
+ * @param useEscrow 설정값 (off | on | buyer_choice)
+ * @returns SDK useEscrow 값 (undefined 면 키를 넣지 않음)
+ */
+function resolveEscrowFlag(useEscrow?: string): boolean | undefined {
+    if (useEscrow === 'on') return true;
+    if (useEscrow === 'off') return false;
+    // buyer_choice (또는 미설정) → 키 자체를 생략
+    return undefined;
+}
+
+/**
+ * 가상계좌 SDK 페이로드를 구성합니다.
+ *
+ * @param config 클라이언트 설정 (vbank / use_escrow 포함)
+ * @param pgPaymentData PG 결제 데이터 (escrow_products 포함)
+ * @returns virtualAccount 페이로드
+ */
+function buildVirtualAccountPayload(config: ClientConfig, pgPaymentData: PgPaymentData): any {
+    const vbank: any = {
+        validHours: config.vbank?.valid_hours ?? 24,
+    };
+
+    // 현금영수증 자동 발급 유형 (설정 시에만)
+    const receiptType = config.vbank?.cash_receipt_type ?? '';
+    if (receiptType) {
+        vbank.cashReceipt = { type: receiptType };
+    }
+
+    // 에스크로 (off → false, on → true, buyer_choice → 키 생략)
+    const useEscrow = resolveEscrowFlag(config.use_escrow);
+    if (useEscrow !== undefined) {
+        vbank.useEscrow = useEscrow;
+    }
+
+    return vbank;
+}
+
+/**
+ * 에스크로 사용 시 필수인 escrowProducts 배열을 페이로드에 부착합니다.
+ *
+ * use_escrow 가 off 가 아니고(강제 on 또는 구매자 선택) escrow_products 가 있으면 부착한다.
+ *
+ * @param payload 결제 요청 페이로드 (변경됨)
+ * @param config 클라이언트 설정
+ * @param pgPaymentData PG 결제 데이터
+ * @returns void
+ */
+function attachEscrowProducts(payload: any, config: ClientConfig, pgPaymentData: PgPaymentData): void {
+    if (config.use_escrow === 'off') {
+        return;
+    }
+
+    const products = pgPaymentData.escrow_products ?? [];
+    if (products.length > 0) {
+        payload.escrowProducts = products;
+    }
+}
+
 export async function requestPaymentHandler(action: any, _context?: any): Promise<void> {
-    const { pgPaymentData } = (action.params || {}) as RequestPaymentParams;
+    const params = (action.params || {}) as RequestPaymentParams;
+    const { pgPaymentData } = params;
 
     if (!pgPaymentData) {
         console.error('[sirsoft-tosspayments] pgPaymentData is required');
@@ -86,6 +199,10 @@ export async function requestPaymentHandler(action: any, _context?: any): Promis
     }
 
     const G7Core = (window as any).G7Core;
+
+    // 선택된 결제수단 id — action.params 우선, 없으면 _local.paymentMethod 참조
+    const selectedMethodId: string | undefined =
+        params.paymentMethod ?? G7Core?.state?.getLocal?.()?.paymentMethod;
 
     try {
         // 1. Client Config API 호출
@@ -119,13 +236,28 @@ export async function requestPaymentHandler(action: any, _context?: any): Promis
             customerKey: pgPaymentData.customer_key ?? window.TossPayments.ANONYMOUS,
         });
 
-        // 4. 결제 요청 (통합결제창)
-        const origin = window.location.origin;
+        // 4. 결제수단 결정 + 비KRW 차단
+        const currency = pgPaymentData.currency ?? 'KRW';
+        const { method, easyPay } = resolveMethod(config, selectedMethodId);
 
-        await payment.requestPayment({
-            method: 'CARD',
+        // 토스 국내 전용 수단(가상계좌·계좌이체·휴대폰·간편결제)은 비KRW 결제 불가. 카드만 허용.
+        const domesticOnly = method !== 'CARD' || easyPay !== null;
+        if (currency !== 'KRW' && domesticOnly) {
+            console.warn('[sirsoft-tosspayments] non-KRW currency supports card only', { currency, method });
+            G7Core?.state?.setLocal?.({
+                paymentErrorMessage: G7Core?.t?.('sirsoft-tosspayments.errors.non_krw_method') ?? 'This payment method is available for KRW only.',
+                isSubmittingOrder: false,
+            });
+            G7Core?.modal?.open?.('tosspayments_payment_error_modal');
+            return;
+        }
+
+        // 5. 결제 요청 페이로드 조립
+        const origin = window.location.origin;
+        const requestPayload: any = {
+            method,
             amount: {
-                currency: pgPaymentData.currency ?? 'KRW',
+                currency,
                 value: pgPaymentData.amount,
             },
             orderId: pgPaymentData.order_number,
@@ -135,13 +267,32 @@ export async function requestPaymentHandler(action: any, _context?: any): Promis
             customerEmail: pgPaymentData.customer_email ?? undefined,
             customerName: pgPaymentData.customer_name ?? undefined,
             customerMobilePhone: pgPaymentData.customer_phone ?? undefined,
-            card: {
-                useEscrow: false,
+        };
+
+        if (method === 'CARD') {
+            requestPayload.card = {
                 flowMode: 'DEFAULT',
                 useCardPoint: false,
                 useAppCardOnly: false,
-            },
-        });
+            };
+            // 간편결제(easyPay)는 CARD method 에 easyPay provider 를 실어 호출한다.
+            if (easyPay) {
+                requestPayload.easyPay = { provider: easyPay };
+            }
+        } else if (method === 'VIRTUAL_ACCOUNT') {
+            // 가상계좌 — 에스크로 적용 대상 (escrowProducts 는 에스크로 사용 시 필수)
+            requestPayload.virtualAccount = buildVirtualAccountPayload(config, pgPaymentData);
+            attachEscrowProducts(requestPayload, config, pgPaymentData);
+        } else if (method === 'TRANSFER') {
+            // 계좌이체 — 에스크로만 적용 대상
+            const useEscrow = resolveEscrowFlag(config.use_escrow);
+            if (useEscrow !== undefined) {
+                requestPayload.transfer = { useEscrow };
+            }
+            attachEscrowProducts(requestPayload, config, pgPaymentData);
+        }
+
+        await payment.requestPayment(requestPayload);
         // → 브라우저가 successUrl 또는 failUrl로 리다이렉트됨
 
     } catch (error: any) {

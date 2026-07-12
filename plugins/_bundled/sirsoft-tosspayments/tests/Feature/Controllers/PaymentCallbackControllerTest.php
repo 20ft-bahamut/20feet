@@ -3,6 +3,7 @@
 namespace Plugins\Sirsoft\Tosspayments\Tests\Feature\Controllers;
 
 use App\Models\User;
+use App\Services\PluginSettingsService;
 use Illuminate\Support\Facades\Http;
 use Modules\Sirsoft\Ecommerce\Database\Factories\OrderFactory;
 use Modules\Sirsoft\Ecommerce\Database\Factories\OrderPaymentFactory;
@@ -14,16 +15,20 @@ use Plugins\Sirsoft\Tosspayments\Tests\PluginTestCase;
 
 /**
  * 토스페이먼츠 결제 콜백 컨트롤러 기능 테스트
+ *
+ * @scenario payment_method=toss_virtual_account, use_escrow=on
+ *
+ * @effects vbank_account_stored_without_completing, vbank_secret_stored_for_webhook,
+ *          is_escrow_snapshot_persisted
  */
 class PaymentCallbackControllerTest extends PluginTestCase
 {
     /**
      * 토스페이먼츠 Confirm API 성공 응답 mock 데이터
      *
-     * @param string $paymentKey 결제 키
-     * @param string $orderId 주문번호
-     * @param int $amount 결제 금액
-     * @return array
+     * @param  string  $paymentKey  결제 키
+     * @param  string  $orderId  주문번호
+     * @param  int  $amount  결제 금액
      */
     private function makeMockConfirmResponse(string $paymentKey, string $orderId, int $amount): array
     {
@@ -54,8 +59,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
     /**
      * 테스트용 주문 + 결제 레코드 생성
      *
-     * @param int $totalAmount 주문 총액
-     * @return Order
+     * @param  int  $totalAmount  주문 총액
      */
     private function createTestOrder(int $totalAmount = 50000): Order
     {
@@ -63,7 +67,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
 
         $order = OrderFactory::new()->create([
             'user_id' => $user->id,
-            'order_number' => 'ORD-TEST-' . random_int(10000, 99999),
+            'order_number' => 'ORD-TEST-'.random_int(10000, 99999),
             'order_status' => OrderStatusEnum::PENDING_ORDER,
             'subtotal_amount' => $totalAmount,
             'total_discount_amount' => 0,
@@ -99,7 +103,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
     /**
      * 플러그인 설정을 mock합니다.
      *
-     * @param array $overrides 기본 설정을 덮어쓸 값
+     * @param  array  $overrides  기본 설정을 덮어쓸 값
      */
     private function mockPluginSettings(array $overrides = []): void
     {
@@ -111,11 +115,11 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'redirect_fail_url' => '/shop/checkout',
         ];
 
-        $settingsMock = $this->createMock(\App\Services\PluginSettingsService::class);
+        $settingsMock = $this->createMock(PluginSettingsService::class);
         $settingsMock->method('get')
             ->willReturn(array_merge($defaults, $overrides));
 
-        $this->app->instance(\App\Services\PluginSettingsService::class, $settingsMock);
+        $this->app->instance(PluginSettingsService::class, $settingsMock);
     }
 
     // ===== Success 콜백 테스트 =====
@@ -137,7 +141,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             ),
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => $paymentKey,
             'orderId' => $order->order_number,
             'amount' => 50000,
@@ -165,7 +169,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
     {
         $this->mockPluginSettings();
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => 'pk_test_xxx',
             'orderId' => 'NON_EXISTENT_ORDER',
             'amount' => 50000,
@@ -191,7 +195,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             ], 400),
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => 'pk_test_fail',
             'orderId' => $order->order_number,
             'amount' => 50000,
@@ -221,7 +225,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             ),
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => 'pk_test_mismatch',
             'orderId' => $order->order_number,
             'amount' => 99999,
@@ -238,7 +242,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
      */
     public function test_fail_redirects_to_checkout_with_error_params(): void
     {
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/fail?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/fail?'.http_build_query([
             'code' => 'USER_CANCEL',
             'message' => '사용자가 취소했습니다.',
             'orderId' => 'ORD-TEST-12345',
@@ -257,7 +261,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
     {
         $order = $this->createTestOrder(30000);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/fail?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/fail?'.http_build_query([
             'code' => 'PAY_PROCESS_CANCELED',
             'message' => '결제가 취소되었습니다.',
             'orderId' => $order->order_number,
@@ -279,7 +283,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
      */
     public function test_fail_handles_missing_order_id_gracefully(): void
     {
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/fail?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/fail?'.http_build_query([
             'code' => 'UNKNOWN_ERROR',
             'message' => '알 수 없는 오류',
         ]));
@@ -309,7 +313,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             ),
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => $paymentKey,
             'orderId' => $order->order_number,
             'amount' => 50000,
@@ -327,7 +331,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'redirect_fail_url' => '/custom/checkout/error',
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/fail?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/fail?'.http_build_query([
             'code' => 'USER_CANCEL',
             'message' => '사용자가 취소했습니다.',
             'orderId' => 'ORD-TEST-99999',
@@ -349,7 +353,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'redirect_fail_url' => '/custom/checkout/error',
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => 'pk_test_xxx',
             'orderId' => 'NON_EXISTENT_ORDER',
             'amount' => 50000,
@@ -370,7 +374,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'redirect_fail_url' => 'https://example.com/checkout?ref=toss',
         ]);
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/fail?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/fail?'.http_build_query([
             'code' => 'NETWORK_ERROR',
             'message' => '네트워크 오류',
             'orderId' => 'ORD-TEST-88888',
@@ -393,7 +397,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
         $this->mockPluginSettings();
 
         // paymentKey 누락
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'orderId' => 'ORD-TEST-12345',
             'amount' => 50000,
         ]));
@@ -409,7 +413,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
     {
         $this->mockPluginSettings();
 
-        $response = $this->get("/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
             'paymentKey' => 'pk_test_xxx',
             'orderId' => 'ORD-TEST-12345',
             'amount' => 0,
@@ -452,7 +456,7 @@ class PaymentCallbackControllerTest extends PluginTestCase
         ]);
 
         $response = $this->get(
-            "/plugins/sirsoft-tosspayments/payment/success?" . http_build_query([
+            '/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
                 'paymentKey' => $paymentKey,
                 'orderId' => $order->order_number,
                 'amount' => 50000,
@@ -465,5 +469,91 @@ class PaymentCallbackControllerTest extends PluginTestCase
         $payment = $order->payment;
         $payment->refresh();
         $this->assertEquals('mobile', $payment->payment_device);
+    }
+
+    // ===== 가상계좌(WAITING_FOR_DEPOSIT) 분기 =====
+
+    /**
+     * confirm 응답이 WAITING_FOR_DEPOSIT 이면 completePayment 하지 않고 계좌 정보만 저장한다.
+     */
+    public function test_success_virtual_account_stores_vbank_without_completing(): void
+    {
+        $order = $this->createTestOrder(50000);
+        $paymentKey = 'pk_test_vbank';
+        $this->mockPluginSettings();
+
+        Http::fake([
+            'api.tosspayments.com/v1/payments/confirm' => Http::response([
+                'paymentKey' => $paymentKey,
+                'orderId' => $order->order_number,
+                'status' => 'WAITING_FOR_DEPOSIT',
+                'method' => '가상계좌',
+                'totalAmount' => 50000,
+                'secret' => 'wsec_confirm_secret',
+                'virtualAccount' => [
+                    'accountNumber' => '12345678901234',
+                    'bankCode' => '20',
+                    'bank' => '우리은행',
+                    'customerName' => '홍길동',
+                    'dueDate' => now()->addDay()->toIso8601String(),
+                    'useEscrow' => false,
+                ],
+            ], 200),
+        ]);
+
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
+            'paymentKey' => $paymentKey,
+            'orderId' => $order->order_number,
+            'amount' => 50000,
+        ]));
+
+        $response->assertRedirect("/shop/orders/{$order->order_number}/complete");
+
+        $order->refresh();
+        $payment = $order->payment;
+
+        // 결제완료로 전이되지 않음
+        $this->assertNotSame(OrderStatusEnum::PAYMENT_COMPLETE, $order->order_status);
+        $this->assertSame(PaymentStatusEnum::WAITING_DEPOSIT->value, $payment->payment_status->value);
+        // 계좌 정보 저장
+        $this->assertSame('12345678901234', $payment->vbank_number);
+        $this->assertSame('20', $payment->vbank_code);
+        // 웹훅 secret 저장 (대조용)
+        $this->assertSame('wsec_confirm_secret', $payment->payment_meta['toss_secret']);
+    }
+
+    /**
+     * 가상계좌 응답의 useEscrow 가 is_escrow 스냅샷으로 저장된다.
+     */
+    public function test_success_virtual_account_persists_escrow_flag(): void
+    {
+        $order = $this->createTestOrder(50000);
+        $paymentKey = 'pk_test_vbank_escrow';
+        $this->mockPluginSettings();
+
+        Http::fake([
+            'api.tosspayments.com/v1/payments/confirm' => Http::response([
+                'paymentKey' => $paymentKey,
+                'orderId' => $order->order_number,
+                'status' => 'WAITING_FOR_DEPOSIT',
+                'method' => '가상계좌',
+                'totalAmount' => 50000,
+                'secret' => 'wsec_x',
+                'virtualAccount' => [
+                    'accountNumber' => '999',
+                    'bankCode' => '20',
+                    'useEscrow' => true,
+                ],
+            ], 200),
+        ]);
+
+        $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
+            'paymentKey' => $paymentKey,
+            'orderId' => $order->order_number,
+            'amount' => 50000,
+        ]))->assertRedirect("/shop/orders/{$order->order_number}/complete");
+
+        $order->refresh();
+        $this->assertTrue((bool) $order->payment->is_escrow);
     }
 }

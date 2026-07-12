@@ -4,11 +4,14 @@ namespace Plugins\Sirsoft\Tosspayments\Controllers;
 
 use App\Extension\HookManager;
 use App\Services\PluginSettingsService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Modules\Sirsoft\Ecommerce\Enums\PaymentStatusEnum;
 use Modules\Sirsoft\Ecommerce\Exceptions\PaymentAmountMismatchException;
 use Modules\Sirsoft\Ecommerce\Helpers\DeviceDetector;
+use Modules\Sirsoft\Ecommerce\Models\Order;
 use Modules\Sirsoft\Ecommerce\Services\OrderProcessingService;
 use Plugins\Sirsoft\Tosspayments\Http\Requests\FailCallbackRequest;
 use Plugins\Sirsoft\Tosspayments\Http\Requests\SuccessCallbackRequest;
@@ -66,7 +69,7 @@ class PaymentCallbackController
      * GET /plugins/sirsoft-tosspayments/payment/success
      *     ?paymentKey={PK}&orderId={OID}&amount={AMT}
      *
-     * @param SuccessCallbackRequest $request 검증된 콜백 요청
+     * @param  SuccessCallbackRequest  $request  검증된 콜백 요청
      * @return RedirectResponse SPA 페이지로 리다이렉트
      */
     public function success(SuccessCallbackRequest $request): RedirectResponse
@@ -93,7 +96,16 @@ class PaymentCallbackController
 
             HookManager::doAction('sirsoft-tosspayments.payment.after_confirm', $order, $pgResponse);
 
-            // 3. 주문 상태 업데이트 (금액 검증 + PG 응답 → order_payments 매핑)
+            // 3-a. 가상계좌 발급 — 아직 입금 전이므로 completePayment 하지 않고 계좌 정보만 저장한다.
+            //      실제 결제완료는 입금통보 웹훅(DEPOSIT_CALLBACK, status=DONE)에서 처리한다.
+            //      웹훅 secret 은 이 confirm 응답에만 내려오므로 payment_meta 에 저장해 대조에 쓴다.
+            if (($pgResponse['status'] ?? null) === 'WAITING_FOR_DEPOSIT') {
+                $this->handleVirtualAccountIssued($order, $pgResponse, $paymentKey, $request);
+
+                return redirect($this->resolveSuccessUrl($orderId));
+            }
+
+            // 3-b. 즉시 결제완료(카드/계좌이체/휴대폰/간편결제) — 기존 경로
             $this->orderService->completePayment($order, [
                 'transaction_id' => $pgResponse['paymentKey'] ?? null,
                 'card_approval_number' => $pgResponse['card']['approveNo'] ?? null,
@@ -147,7 +159,7 @@ class PaymentCallbackController
      * GET /plugins/sirsoft-tosspayments/payment/fail
      *     ?code={ERR}&message={MSG}&orderId={OID}
      *
-     * @param FailCallbackRequest $request 검증된 콜백 요청
+     * @param  FailCallbackRequest  $request  검증된 콜백 요청
      * @return RedirectResponse SPA 체크아웃 페이지로 리다이렉트
      */
     public function fail(FailCallbackRequest $request): RedirectResponse
@@ -179,9 +191,68 @@ class PaymentCallbackController
     }
 
     /**
+     * 가상계좌 발급 처리 — completePayment 없이 계좌 정보와 웹훅 secret 만 저장한다.
+     *
+     * 토스 confirm 응답의 status 가 WAITING_FOR_DEPOSIT 이면 호출된다. 실제 결제완료는
+     * 입금통보 웹훅(deposit)에서 처리한다. secret 은 이 응답에만 내려오므로 payment_meta 에
+     * 저장해 웹훅 위조 방지 대조(hash_equals)에 사용한다.
+     *
+     * @param  Order  $order  대상 주문
+     * @param  array<string, mixed>  $pgResponse  토스 confirm 응답
+     * @param  string  $paymentKey  토스 결제 키
+     * @param  Request  $request  HTTP 요청 (디바이스 판별용)
+     */
+    private function handleVirtualAccountIssued(Order $order, array $pgResponse, string $paymentKey, Request $request): void
+    {
+        $vbank = $pgResponse['virtualAccount'] ?? [];
+
+        $dueAt = null;
+        $dueDate = $vbank['dueDate'] ?? null;
+        if (is_string($dueDate) && $dueDate !== '') {
+            try {
+                $dueAt = Carbon::parse($dueDate);
+            } catch (\Exception) {
+                $dueAt = null;
+            }
+        }
+
+        // 에스크로 여부는 결제 시점 스냅샷 — 응답의 useEscrow 를 그대로 저장한다.
+        $isEscrow = (bool) ($vbank['useEscrow'] ?? $pgResponse['useEscrow'] ?? false);
+
+        $order->payment()->update(array_filter([
+            'pg_provider' => 'tosspayments',
+            'payment_status' => PaymentStatusEnum::WAITING_DEPOSIT->value,
+            'transaction_id' => $paymentKey ?: null,
+            'vbank_code' => $vbank['bankCode'] ?? null,
+            'vbank_name' => $vbank['bank'] ?? ($vbank['bankCode'] ?? null),
+            'vbank_number' => $vbank['accountNumber'] ?? null,
+            'vbank_holder' => $vbank['customerName'] ?? null,
+            'vbank_due_at' => $dueAt,
+            'vbank_issued_at' => Carbon::now(),
+            'is_escrow' => $isEscrow,
+            'payment_device' => DeviceDetector::detect($request),
+            'payment_meta' => [
+                'status' => 'WAITING_FOR_DEPOSIT',
+                'method' => $pgResponse['method'] ?? null,
+                // 웹훅 secret — DEPOSIT_CALLBACK 대조용 (이 응답에만 존재)
+                'toss_secret' => $pgResponse['secret'] ?? null,
+                'pg_raw_response' => $pgResponse,
+            ],
+        ], fn ($v) => $v !== null));
+
+        Log::info('TossPayments: virtual account issued', [
+            'orderId' => $order->order_number,
+            'paymentKey' => $paymentKey,
+            'vbank_number' => $vbank['accountNumber'] ?? null,
+            'vbank_due_at' => $dueAt?->toDateTimeString(),
+            'is_escrow' => $isEscrow,
+        ]);
+    }
+
+    /**
      * 카드 발급사 코드 → 이름 변환
      *
-     * @param string|null $issuerCode 발급사 코드
+     * @param  string|null  $issuerCode  발급사 코드
      * @return string|null 카드사명
      */
     private function resolveCardIssuer(?string $issuerCode): ?string
@@ -196,7 +267,7 @@ class PaymentCallbackController
     /**
      * 결제 성공 리다이렉트 URL 생성
      *
-     * @param string $orderId 주문번호
+     * @param  string  $orderId  주문번호
      * @return string 리다이렉트 URL
      */
     private function resolveSuccessUrl(string $orderId): string
@@ -210,7 +281,7 @@ class PaymentCallbackController
     /**
      * 결제 실패 리다이렉트 URL 생성
      *
-     * @param array $queryParams 쿼리 파라미터
+     * @param  array  $queryParams  쿼리 파라미터
      * @return string 리다이렉트 URL
      */
     private function resolveFailUrl(array $queryParams = []): string
@@ -225,13 +296,13 @@ class PaymentCallbackController
         $query = http_build_query(array_filter($queryParams));
         $separator = str_contains($baseUrl, '?') ? '&' : '?';
 
-        return $baseUrl . $separator . $query;
+        return $baseUrl.$separator.$query;
     }
 
     /**
      * 결제 디바이스 판별 (User-Agent 기반)
      *
-     * @param Request $request HTTP 요청
+     * @param  Request  $request  HTTP 요청
      * @return string 디바이스 유형 (pc/mobile)
      */
 }
