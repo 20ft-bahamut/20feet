@@ -61,13 +61,22 @@ class PaymentCallbackControllerTest extends PluginTestCase
      *
      * @param  int  $totalAmount  주문 총액
      */
+    /**
+     * 주문번호 충돌 방지용 시퀀스.
+     *
+     * random_int 로 만들면 같은 스위트 내 다른 테스트가 만든 주문과 번호가 겹칠 수 있고,
+     * 그때 콜백이 엉뚱한 주문을 찾아 금액 불일치(amount_mismatch)로 실패한다 —
+     * 낮은 확률로만 터지므로 "간헐적 실패" 로 나타나 원인을 오해하기 쉽다.
+     */
+    private static int $orderSequence = 0;
+
     private function createTestOrder(int $totalAmount = 50000): Order
     {
         $user = User::factory()->create();
 
         $order = OrderFactory::new()->create([
             'user_id' => $user->id,
-            'order_number' => 'ORD-TEST-'.random_int(10000, 99999),
+            'order_number' => 'ORD-TEST-'.(++self::$orderSequence),
             'order_status' => OrderStatusEnum::PENDING_ORDER,
             'subtotal_amount' => $totalAmount,
             'total_discount_amount' => 0,

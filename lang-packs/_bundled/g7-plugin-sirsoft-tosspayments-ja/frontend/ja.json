@@ -73,5 +73,22 @@
     "order_not_found": "注文が見つかりません。",
     "payment_failed": "決済に失敗しました。",
     "non_krw_method": "この決済方法はウォン(KRW)決済にのみ使用できます。"
+  },
+  "user": {
+    "payment_type_label": "決済方法",
+    "escrow_yes": "エスクロー",
+    "receipt_label": "領収書",
+    "receipt_view": "領収書を表示",
+    "cash_receipt_label": "現金領収書",
+    "cash_receipt_view": "現金領収書を表示"
+  },
+  "admin": {
+    "payment_panel_title": "Toss Payments決済情報",
+    "escrow_label": "決済方法",
+    "escrow_yes": "エスクロー",
+    "vbank_label": "仮想口座",
+    "vbank_due_label": "入金期限",
+    "receipt_label": "領収書",
+    "receipt_view": "領収書を表示"
   }
 }

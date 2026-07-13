@@ -241,9 +241,11 @@ class Plugin extends AbstractPlugin
         return [
             Listeners\RegisterPgProviderListener::class,
             Listeners\RegisterTossPaymentMethodsListener::class,
+            Listeners\RegisterCashReceiptProviderListener::class,
             Listeners\AdjustEcommercePaymentMethodsLayoutListener::class,
             Listeners\PaymentRefundListener::class,
             Listeners\ValidateTossSettingsListener::class,
+            Listeners\RestoreLayoutExtensionsAfterUpdateListener::class,
         ];
     }
 
@@ -269,6 +271,22 @@ class Plugin extends AbstractPlugin
                 'description' => [
                     'ko' => '토스페이먼츠 결제 승인 완료 후',
                     'en' => 'After TossPayments confirm API completed',
+                ],
+            ],
+            [
+                'name' => 'sirsoft-tosspayments.payment.before_cancel',
+                'type' => 'action',
+                'description' => [
+                    'ko' => '토스페이먼츠 결제 취소 API 호출 전',
+                    'en' => 'Before TossPayments cancel API call',
+                ],
+            ],
+            [
+                'name' => 'sirsoft-tosspayments.payment.after_cancel',
+                'type' => 'action',
+                'description' => [
+                    'ko' => '토스페이먼츠 결제 취소 완료 후',
+                    'en' => 'After TossPayments cancel API completed',
                 ],
             ],
         ];

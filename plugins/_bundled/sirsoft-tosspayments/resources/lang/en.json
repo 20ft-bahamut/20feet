@@ -73,5 +73,22 @@
         "order_not_found": "Order not found.",
         "payment_failed": "Payment failed.",
         "non_krw_method": "This payment method is available for KRW payments only."
+    },
+    "user": {
+        "payment_type_label": "Payment type",
+        "escrow_yes": "Escrow",
+        "receipt_label": "Receipt",
+        "receipt_view": "View receipt",
+        "cash_receipt_label": "Cash receipt",
+        "cash_receipt_view": "View cash receipt"
+    },
+    "admin": {
+        "payment_panel_title": "TossPayments payment info",
+        "escrow_label": "Payment type",
+        "escrow_yes": "Escrow",
+        "vbank_label": "Virtual account",
+        "vbank_due_label": "Deposit deadline",
+        "receipt_label": "Receipt",
+        "receipt_view": "View receipt"
     }
 }

@@ -73,5 +73,22 @@
         "order_not_found": "주문을 찾을 수 없습니다.",
         "payment_failed": "결제에 실패했습니다.",
         "non_krw_method": "이 결제수단은 원화(KRW) 결제에만 사용할 수 있습니다."
+    },
+    "user": {
+        "payment_type_label": "결제 유형",
+        "escrow_yes": "에스크로",
+        "receipt_label": "영수증",
+        "receipt_view": "영수증 보기",
+        "cash_receipt_label": "현금영수증",
+        "cash_receipt_view": "현금영수증 보기"
+    },
+    "admin": {
+        "payment_panel_title": "토스페이먼츠 결제 정보",
+        "escrow_label": "결제 유형",
+        "escrow_yes": "에스크로",
+        "vbank_label": "가상계좌",
+        "vbank_due_label": "입금 기한",
+        "receipt_label": "영수증",
+        "receipt_view": "영수증 보기"
     }
 }

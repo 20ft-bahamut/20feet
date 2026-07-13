@@ -4,6 +4,16 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.1.0] - 2026-08-06
+
+### Added
+
+- 현금영수증 발급사 이름(`cash_receipt.provider_name`) 일본어 번역 추가.
+
+### Removed
+
+- KG이니시스 전용 현금영수증 발행 화면이 제거되면서 함께 쓰이지 않게 된 발행 오류 안내 3종의 번역을 정리했습니다.
+
 ## [1.0.3] - 2026-07-22
 
 ### Added
