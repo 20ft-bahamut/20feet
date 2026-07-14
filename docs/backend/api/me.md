@@ -135,7 +135,7 @@ _단건 응답: `data` 객체의 필드._
 | channels | array | `[{"key":"email_subscription","label":"광고성 이메일 수신","enable…` | 관리자 정의 전체 마케팅 채널 목록 (원소 key/label/enabled/terms_slug, 마케팅 플러그인 주입) |
 | consent_histories | array | `[]` | 동의 변경 이력 (원소 channel_key/action/source/created_at, 마케팅 플러그인 주입) |
 | ecommerce_mileage | object | `{"enabled":false}` | 마일리지 정보 (enabled: 기능 활성 여부, 잔액, 이커머스 모듈 주입) |
-| ecommerce_preferred_currency | null | `null` | 선호 결제 통화 (이커머스 모듈 주입, 미설정 시 null) |
+| ecommerce_preferred_currency | string | `KRW` | 선호 결제 통화 (이커머스 모듈 주입, 미설정 시 null) |
 | ecommerce_preferred_shipping_country | null | `null` | 선호 배송 국가 코드 (이커머스 모듈 주입, 미설정 시 null) |
 | ecommerce_preferred_shipping_country_name | null | `null` | 선호 배송 국가 이름 (코드 파생, 이커머스 모듈 주입, 미설정 시 null) |
 

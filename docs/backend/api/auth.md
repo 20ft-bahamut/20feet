@@ -295,6 +295,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -345,6 +346,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -395,6 +397,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -586,6 +589,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -638,6 +642,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -737,7 +742,7 @@ _단건 응답: `data` 객체의 필드._
 | channels | array | `[{"key":"email_subscription","label":"광고성 이메일 수신","enable…` | 관리자 정의 전체 마케팅 채널 목록 (원소 key/label/enabled/terms_slug — marketing 플러그인 주입) |
 | consent_histories | array | `[]` | 동의 변경 이력 (원소 channel_key/action/source/created_at — marketing 플러그인 주입) |
 | ecommerce_mileage | object | `{"enabled":false}` | 마일리지 정보 (enabled/잔액 — ecommerce 모듈 주입, 모듈 비활성 시 enabled=false) |
-| ecommerce_preferred_currency | null | `null` | 선호 결제 통화 (ecommerce 모듈 주입, 미설정 시 null) |
+| ecommerce_preferred_currency | string | `KRW` | 선호 결제 통화 (ecommerce 모듈 주입, 미설정 시 null) |
 | ecommerce_preferred_shipping_country | null | `null` | 선호 배송 국가 코드 (ecommerce 모듈 주입, 미설정 시 null) |
 | ecommerce_preferred_shipping_country_name | null | `null` | 선호 배송 국가 이름 (국가 코드에서 현지화 파생 — ecommerce 모듈 주입, 미설정 시 null) |
 
@@ -818,6 +823,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -858,6 +864,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.auth.logout`)이 없는 경우 |
 
 <!-- @generated:end -->
@@ -898,6 +905,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.auth.logout`)이 없는 경우 |
 
 <!-- @generated:end -->
@@ -938,6 +946,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.auth.refresh`)이 없는 경우 |
 
 <!-- @generated:end -->
@@ -978,6 +987,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.auth.user`)이 없는 경우 |
 
 <!-- @generated:end -->

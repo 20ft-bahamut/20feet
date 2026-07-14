@@ -8,7 +8,7 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Webhook 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(raw HTTP) + 실측 응답 필드 표 + 응답 예시(envelope)
 3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
@@ -111,6 +111,9 @@ OK
 | eventType | body | string | 아니오 | max 64 | 토스 이벤트 종류 (예: `PAYMENT_STATUS_CHANGED`). |
 | createdAt | body | string | 아니오 | max 64 | 토스가 이벤트를 생성한 시각. |
 | data | body | array | 예 | — | 결제 정보 객체. `data.orderId`(주문번호)와 `data.status`(토스 결제상태)를 읽어 로컬 상태와 대조한다. |
+| data.orderId | body | string | 예 | max 100 | <!-- TODO: 용도 --> |
+| data.status | body | string | 예 | max 40 | <!-- TODO: 용도 --> |
+| data.paymentKey | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
 
 **요청 예시**
 
@@ -125,7 +128,10 @@ Content-Type: application/json
     "createdAt": "예시값",
     "data": [
         "예시값"
-    ]
+    ],
+    "data.orderId": "예시값",
+    "data.status": "예시값",
+    "data.paymentKey": "예시값"
 }
 ```
 

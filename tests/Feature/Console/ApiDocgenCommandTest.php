@@ -93,6 +93,63 @@ class ApiDocgenCommandTest extends TestCase
     }
 
     /**
+     * (c-2) 중첩 객체 파라미터(`refund_bank.bank_code`)도 추출합니다.
+     *
+     * 회귀: 배열 요소 규칙(`items.*.id`)을 상위 필드로 대표시키려는 스킵 조건이
+     * 점(`.`) 포함 여부만 봐서, 와일드카드가 없는 중첩 **객체** 필드까지 함께 버렸다.
+     * 그 결과 코어 환경설정(`general.*`·`mail.*`), 이커머스 주문(`orderer.*`·`refund_bank.*`) 등
+     * 17개 엔드포인트의 파라미터 수백 개가 문서에서 통째로 빠졌고, 사람이 수기로 채워 넣은
+     * 행은 재생성 때마다 다시 삭제됐다.
+     */
+    #[Test]
+    public function 중첩_객체_파라미터를_추출하고_배열_요소는_상위로_대표시킨다(): void
+    {
+        $introspector = app(FormRequestIntrospector::class);
+
+        $rules = [
+            'payment_method' => 'required|string',
+            // 중첩 객체 — 문서에 개별 행으로 노출되어야 한다
+            'refund_bank.bank_code' => ['nullable', 'string', 'max:10'],
+            'refund_bank.holder' => ['nullable', 'string', 'max:50'],
+            // 배열 요소 — 상위(items)만 대표로 노출하고 개별 행은 만들지 않는다
+            'items' => 'array',
+            'items.*.id' => 'required|integer',
+            'items.*.qty' => 'required|integer',
+        ];
+
+        $params = $this->invokeRulesToParams($introspector, $rules);
+        $names = array_column($params, 'name');
+
+        $this->assertContains('refund_bank.bank_code', $names, '중첩 객체 필드가 추출되어야 한다.');
+        $this->assertContains('refund_bank.holder', $names);
+        $this->assertContains('payment_method', $names);
+        $this->assertContains('items', $names);
+
+        $this->assertNotContains('items.*.id', $names, '배열 요소 규칙은 상위(items)로 대표시킨다.');
+        $this->assertNotContains('items.*.qty', $names);
+
+        // 추출된 중첩 필드도 타입/필수 메타를 갖는다
+        $bankCode = collect($params)->firstWhere('name', 'refund_bank.bank_code');
+        $this->assertSame('string', $bankCode['type']);
+        $this->assertFalse($bankCode['required']);
+    }
+
+    /**
+     * private rulesToParams 를 호출합니다 (규칙 배열 → 파라미터 메타 변환만 검증).
+     *
+     * @param  FormRequestIntrospector  $introspector  대상 인스턴스
+     * @param  array<string, mixed>  $rules  검증 규칙 배열
+     * @return array<int, array<string, mixed>> 파라미터 메타데이터 목록
+     */
+    private function invokeRulesToParams(FormRequestIntrospector $introspector, array $rules): array
+    {
+        $method = new \ReflectionMethod($introspector, 'rulesToParams');
+        $method->setAccessible(true);
+
+        return $method->invoke($introspector, $rules);
+    }
+
+    /**
      * (d) 재생성해도 사람이 채운 서술은 보존되고 추출 블록만 갱신됩니다(멱등).
      */
     #[Test]

@@ -506,7 +506,10 @@ class ApiDocScaffolder
      *   - 바디 있는 메서드(POST/PUT/PATCH)는 요청 파라미터 표의 필수 파라미터 + 타입별 샘플값을
      *     빈 줄 뒤 JSON 바디로 붙입니다.
      *
-     * path 파라미터가 실측 치환값(`resolved_uri`)으로 채워졌으면 그 값을, 아니면 `{param}` placeholder 를 쓴다.
+     * path 파라미터는 실측 치환값이 아니라 라우트 정의의 `{param}` placeholder 로 고정한다.
+     * 실측 치환값(`resolved_uri`)을 쓰면 실측 성패·시드 데이터에 따라 같은 엔드포인트의 예시가
+     * `/brands/1` ↔ `/brands/{brand}` 로 흔들려, 재실행마다 무관한 문서까지 diff 가 발생한다.
+     * 레퍼런스 문서는 "어떤 파라미터를 넣는가"를 보여주는 것이 목적이므로 placeholder 가 정본이다.
      *
      * @param  array<string, mixed>  $route  라우트 메타데이터
      * @param  array<string, mixed>  $request  FormRequest 분석 결과
@@ -516,7 +519,7 @@ class ApiDocScaffolder
     public function requestExampleBlock(array $route, array $request, array $probeMeta): string
     {
         $method = strtoupper((string) $route['method']);
-        $path = (string) ($probeMeta['resolved_uri'] ?? $route['uri']);
+        $path = (string) $route['uri'];
 
         // GET/DELETE 의 query 파라미터는 URL 쿼리스트링으로 반영한다(바디가 아니라 URL).
         if (in_array($method, ['GET', 'DELETE'], true)) {
@@ -1072,7 +1075,19 @@ class ApiDocScaffolder
                 $withTables,
                 $this->extractGeneratedBlockBody($existing, $key) ?? $legacy
             );
-            $merged .= $this->restoreErrorSection($withBodies, $existing, $key, $legacy)."\n";
+            $withErrors = $this->restoreErrorSection($withBodies, $existing, $key, $legacy);
+            // 에러 표는 상태코드 행 단위로도 병합한다 — restoreErrorSection 은 새 표가 통째로
+            // 스텁일 때의 복원만 다루므로, 자동 추론이 초안을 만들어 낸 경우 사람이 보강한
+            // 행(409 충돌·429 제한 등 도메인 특이 에러)이 덮여 사라진다. 행 병합을 겹쳐
+            // 같은 상태코드는 사람 행이 이기고, 자동 추론에만 있는 상태코드는 새로 편입한다.
+            // 에러 표는 상태코드가 엔드포인트마다 중복되어 키가 고유하지 않으므로, 이 엔드포인트만
+            // 정확히 잘라낸 블록으로만 대조한다. extractGeneratedBlockBody 가 아니라
+            // exactGeneratedBlock 을 쓰는 이유: 에러 표 추출(extractErrorTable)은 생성 블록
+            // 종료 마커를 표의 끝 경계로 삼는데, 전자는 그 마커를 잘라내고 돌려준다.
+            $merged .= $this->applyPreservedErrorTable(
+                $withErrors,
+                $this->exactGeneratedBlock($existing, $key)
+            )."\n";
         }
 
         return $merged;
@@ -1092,6 +1107,11 @@ class ApiDocScaffolder
      * "사람이 작성한 설명은 보존됩니다" 를 표 셀에도 적용한다. 사실이 바뀌면 사람이 그 셀을
      * 고치거나 비우고, 비운 셀은 다음 재생성이 채운다.
      *
+     * 응답 필드 표의 `실측 예시값` 열도 보존한다. 실측값은 호출 시점 DB 상태가 낳은 표본
+     * 하나라, 매번 새 값으로 덮으면 스펙이 그대로인 무관한 문서까지 재실행마다 diff 가 난다.
+     * 스펙이 실제로 바뀐 경우에만 갱신하도록, 같은 필드의 타입이 그대로면 기존 예시값을 유지하고
+     * 타입이 달라졌으면 새 실측값을 채택한다. 기존 문서에 없던 신규 필드는 새 값을 그대로 쓴다.
+     *
      * @param  string  $section  새로 생성된 섹션
      * @param  string  $existing  기존 문서 전체
      * @param  string  $key  라우트명(생성 블록 키)
@@ -1105,33 +1125,211 @@ class ApiDocScaffolder
             return $section;
         }
 
-        $oldDescriptions = $this->collectRowDescriptions($oldBlock);
-        if ($oldDescriptions === []) {
+        $previousCells = $this->collectTableCells($oldBlock);
+        if ($previousCells === []) {
             return $section;
         }
 
         $lines = explode("\n", $section);
         foreach ($lines as $index => $line) {
-            if (! str_starts_with(trim($line), '|')) {
+            $parsed = $this->parseTableRow($line);
+            if ($parsed === null) {
                 continue;
             }
 
-            $cells = $this->splitRowCells($line);
-            if (count($cells) < 2) {
+            $previousRow = $previousCells[$parsed['key']] ?? null;
+
+            // 기존 문서에 없던 행(= 신규 필드/파라미터)은 새로 생성된 값을 그대로 채택한다.
+            if ($previousRow === null) {
                 continue;
             }
 
-            $lastIndex = count($cells) - 1;
-            $rowKey = $this->rowKey($cells);
-            if ($rowKey === null || ! isset($oldDescriptions[$rowKey])) {
-                continue;
+            $cols = $parsed['cols'];
+
+            // 응답 필드 표(4열)의 타입·실측 예시값 열을 보존한다.
+            // 실측값은 호출 시점 DB 상태의 표본 하나라, 매번 새 값으로 덮으면 스펙이 그대로인
+            // 무관한 문서까지 재실행마다 diff 가 난다. 타입이 그대로면 기존 예시값을 유지하고,
+            // 타입이 바뀌었으면(스펙 변경) 새 실측값으로 갱신한다.
+            //
+            // 단 nullable 필드는 그 행의 표본이 null 이냐에 따라 관측 타입이 흔들린다
+            // (`loggable_type` 이 string ↔ null). null 관측은 "타입이 바뀌었다"가 아니라
+            // "이번 표본에는 값이 없었다" 는 뜻이므로, 기존에 실제 값을 관측해 둔 행은 유지한다.
+            if (count($cols) === 4 && count($previousRow['cols']) === 4) {
+                $previousType = $previousRow['cols'][1];
+                $previousExample = $previousRow['cols'][2];
+                $observedNothing = $cols[1] === 'null';
+
+                $keepPrevious = $previousExample !== ''
+                    && ($previousType === $cols[1] || ($observedNothing && $previousType !== 'null'));
+
+                if ($keepPrevious) {
+                    $cols[1] = $previousType;
+                    $cols[2] = $previousExample;
+                }
             }
 
-            $cells[$lastIndex] = ' '.$oldDescriptions[$rowKey].' ';
-            $lines[$index] = '|'.implode('|', $cells).'|';
+            // 마지막 열(사람 서술)은 기존 값이 있으면 언제나 우선한다.
+            if ($previousRow['value'] !== null) {
+                $cols[count($cols) - 1] = $previousRow['value'];
+            }
+
+            $rebuilt = '| '.implode(' | ', $cols).' |';
+
+            if ($rebuilt !== $line) {
+                $lines[$index] = $rebuilt;
+            }
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * 사람이 보강한 에러 응답 표를 보존합니다.
+     *
+     * 에러 표는 라우트 메타(미들웨어·FormRequest 유무)에서 대표 상태코드만 추론하는 초안이라,
+     * 도메인 특이 에러(409 충돌·429 제한, 구체적 발생 조건)는 사람이 행을 직접 추가해 채운다.
+     * 재생성이 그 표를 자동 추론 결과로 덮으면 사람이 쓴 행이 통째로 사라진다
+     * (실제로 KG이니시스 결제 문서의 403·404·422·429 행이 "대표 에러 없음" 으로 지워졌다).
+     *
+     * 행 키(상태코드) 단위로 병합한다. 자동 추론이 만든 행은 그대로 두되(라우트 메타가 바뀌면
+     * 그 결과가 정본이다), 기존 문서에만 있는 행 — 사람이 추가한 도메인 특이 에러 — 은
+     * 상태코드 오름차순 자리에 되살린다. 같은 상태코드가 양쪽에 있으면 사람이 쓴 발생 조건이
+     * 자동 문구보다 구체적이므로 기존 행을 우선한다.
+     *
+     * @param  string  $section  표 셀 보존이 끝난 섹션
+     * @param  string|null  $previous  기존 문서의 같은 엔드포인트 생성 블록
+     * @return string 에러 표가 보존된 섹션
+     */
+    private function applyPreservedErrorTable(string $section, ?string $previous): string
+    {
+        if ($previous === null) {
+            return $section;
+        }
+
+        $previousRows = $this->errorTableRows($previous);
+
+        if ($previousRows === []) {
+            return $section;
+        }
+
+        $currentBody = $this->extractErrorTable($section);
+
+        if ($currentBody === null) {
+            return $section;
+        }
+
+        // 상태코드 키로 병합. `+` 는 왼쪽 우선이므로 기존 행을 먼저 둬서, 같은 상태코드면
+        // 사람이 쓴 구체적 조건이 자동 문구를 이긴다. 자동 추론에만 있는 상태코드는 새로 편입된다.
+        $merged = $previousRows + $this->errorTableRows($section);
+
+        if ($merged === []) {
+            return $section;
+        }
+
+        ksort($merged, SORT_NUMERIC);
+
+        $table = "| 상태코드 | 의미 | 발생 조건 |\n| --- | --- | --- |\n".implode("\n", $merged);
+
+        return str_replace($currentBody, $table, $section);
+    }
+
+    /**
+     * 섹션의 에러 응답 표에서 [상태코드 => 행] 맵을 수집합니다.
+     *
+     * @param  string  $section  엔드포인트 섹션 (또는 생성 블록)
+     * @return array<string, string> 상태코드 => 표 행 원문
+     */
+    private function errorTableRows(string $section): array
+    {
+        $body = $this->extractErrorTable($section);
+
+        if ($body === null) {
+            return [];
+        }
+
+        $rows = [];
+
+        foreach (explode("\n", $body) as $line) {
+            if (! preg_match('/^\|\s*(\d{3})\s*\|/', $line, $m)) {
+                continue;
+            }
+
+            $rows[$m[1]] = rtrim($line);
+        }
+
+        return $rows;
+    }
+
+    /**
+     * 응답 예시 본문에서 JSON 의 키 구조(값 제외)를 추출합니다.
+     *
+     * 값이 아니라 **필드 집합**만 비교하기 위한 지문이다. 리소스에 필드가 추가/삭제되면
+     * 지문이 달라지므로 새 실측 예시를 채택하고, 값만 달라진 경우(`updated_at` 등)에는
+     * 지문이 같아 기존 예시를 유지한다.
+     *
+     * @param  string  $body  응답 예시 본문 (```json 블록 포함)
+     * @return string|null 키 구조 지문 (JSON 블록이 없거나 파싱 실패 시 null)
+     */
+    private function exampleKeyShape(string $body): ?string
+    {
+        if (! preg_match('/```json\n(.*?)\n```/s', $body, $m)) {
+            return null;
+        }
+
+        $decoded = json_decode($m[1], true);
+
+        if (! is_array($decoded)) {
+            return null;
+        }
+
+        $shape = function (mixed $value) use (&$shape): mixed {
+            if (! is_array($value)) {
+                return '_';
+            }
+
+            // 리스트는 첫 원소의 구조만 대표로 본다(원소 수는 데이터 양에 따라 달라진다).
+            if (array_is_list($value)) {
+                return $value === [] ? [] : [$shape($value[0])];
+            }
+
+            $out = [];
+
+            foreach ($value as $k => $v) {
+                $out[$k] = $shape($v);
+            }
+
+            ksort($out);
+
+            return $out;
+        };
+
+        return json_encode($shape($decoded));
+    }
+
+    /**
+     * 섹션에서 `**에러 응답**` 본문(표 또는 "대표 에러 없음" 문구)을 잘라냅니다.
+     *
+     * @param  string  $section  엔드포인트 섹션
+     * @return string|null 에러 응답 본문 (없으면 null)
+     */
+    private function extractErrorTable(string $section): ?string
+    {
+        $start = strpos($section, '**에러 응답**');
+
+        if ($start === false) {
+            return null;
+        }
+
+        $bodyStart = $start + strlen('**에러 응답**');
+        $end = strpos($section, self::GEN_END, $bodyStart);
+
+        if ($end === false) {
+            return null;
+        }
+
+        $body = trim(substr($section, $bodyStart, $end - $bodyStart));
+
+        return $body === '' ? null : $body;
     }
 
     /**
@@ -1345,45 +1543,6 @@ class ApiDocScaffolder
         return substr($existing, $startPos, $endPos - $startPos);
     }
 
-    /**
-     * 표 블록에서 `행 키 => 설명` 맵을 수집합니다 (TODO 셀은 제외).
-     *
-     * @param  string  $block  생성 블록 본문
-     * @return array<string, string> 행 키 => 설명
-     */
-    private function collectRowDescriptions(string $block): array
-    {
-        $map = [];
-
-        foreach (explode("\n", $block) as $line) {
-            if (! str_starts_with(trim($line), '|')) {
-                continue;
-            }
-
-            $cells = $this->splitRowCells($line);
-            if (count($cells) < 2) {
-                continue;
-            }
-
-            $description = trim($cells[count($cells) - 1]);
-            if ($description === '' || str_contains($description, '<!-- TODO')) {
-                continue;
-            }
-
-            // 구분선(`| --- | --- |`)은 건너뛴다.
-            if (preg_match('/^-{2,}$/', $description)) {
-                continue;
-            }
-
-            $rowKey = $this->rowKey($cells);
-            if ($rowKey !== null) {
-                $map[$rowKey] = $description;
-            }
-        }
-
-        return $map;
-    }
-
     /** @var string 분해 중 인라인 코드 안 파이프를 감춰 두는 자리표시자 (문서에 등장할 수 없는 제어문자) */
     private const CELL_PIPE_PLACEHOLDER = "\x00PIPE\x00";
 
@@ -1393,7 +1552,7 @@ class ApiDocScaffolder
      * 셀 구분자가 아닌 파이프는 두 종류다. 이스케이프된 파이프(`\|`)와 **인라인 코드 스팬 안의
      * 파이프**다. 후자는 실제 문서에 흔하다 — 셸 메타문자 안내처럼 파이프 자체를 설명하는 문장이
      * 그렇다. 이를 구분자로 보면 셀 수가 늘어 마지막 셀(=설명)이 파이프 뒤 조각으로 바뀌고,
-     * {@see self::collectRowDescriptions()} 가 그 조각을 사람이 쓴 설명으로 승계해 문장 앞부분이
+     * {@see self::parseTableRow()} 가 그 조각을 사람이 쓴 설명으로 승계해 문장 앞부분이
      * 통째로 잘려 나간다. 오류 없이 문서만 훼손되므로 분해 단계에서 막는다.
      *
      * @param  string  $line  표 행
@@ -1423,30 +1582,6 @@ class ApiDocScaffolder
             static fn (string $cell): string => str_replace(self::CELL_PIPE_PLACEHOLDER, '|', $cell),
             $parts
         );
-    }
-
-    /**
-     * 표 행의 식별 키를 만듭니다.
-     *
-     * 파라미터 표는 `이름 + 위치(query/body/path)` 로, 응답 필드/에러 표는 이름(또는 상태코드)만으로
-     * 식별한다. 두 표의 키가 섞이지 않도록 두 번째 셀이 위치 값일 때만 결합한다.
-     *
-     * @param  array<int, string>  $cells  셀 배열
-     * @return string|null 행 키 (식별 불가 시 null)
-     */
-    private function rowKey(array $cells): ?string
-    {
-        $name = trim($cells[0]);
-        if ($name === '' || preg_match('/^-{2,}$/', $name)) {
-            return null;
-        }
-
-        $second = isset($cells[1]) ? trim($cells[1]) : '';
-        if (in_array($second, ['query', 'body', 'path', 'header'], true)) {
-            return $name.'@'.$second;
-        }
-
-        return $name;
     }
 
     /**
@@ -1495,8 +1630,7 @@ class ApiDocScaffolder
         foreach ($subsections as [$label, $terminators, $isAutoGenerated]) {
             $previousBody = $this->extractSubsectionBody($previous, $label, $terminators);
 
-            // 기존 본문이 없거나 자동 생성 결과면 되살릴 것이 없다.
-            if ($previousBody === null || $isAutoGenerated($previousBody)) {
+            if ($previousBody === null) {
                 continue;
             }
 
@@ -1508,6 +1642,37 @@ class ApiDocScaffolder
 
             [$start, $end] = $bounds;
             $newBody = substr($section, $start, $end - $start);
+
+            // 이번 실측이 실패했으면(마커만 생성) 기존에 관측해 둔 실측 본문을 유지한다.
+            // 실측 성패는 호출 시점 데이터 유무에 좌우된다 — 예컨대 DELETE /checkout 은 삭제할
+            // 체크아웃이 없으면 404 다. 실측 실패는 "새로 관측하지 못했다"는 뜻이지 "기존 관측이
+            // 무효"라는 뜻이 아니므로, 마커로 덮어 지난 응답 예시를 지우면 정보만 잃는다.
+            $probeFailedNow = $this->isProbeSkipMarker($newBody);
+            $previousWasProbed = str_contains($previousBody, self::PROBED_BODY_MARKER);
+
+            if ($probeFailedNow && $previousWasProbed) {
+                $section = substr_replace($section, $previousBody, $start, $end - $start);
+
+                continue;
+            }
+
+            // 양쪽 다 실측 산출물이고 응답의 **키 구조**가 같으면 기존 예시를 유지한다.
+            // 응답 예시 JSON 은 호출 시점 표본이라 `updated_at` · `cache_version` 처럼 매 실측마다
+            // 달라지는 값이 섞여 들어온다. 스펙이 그대로인데 값만 바뀐 diff 를 재실행마다 만들지
+            // 않도록, 필드 집합이 달라졌을 때(= 스펙 변경)만 새 실측값으로 갱신한다.
+            if ($previousWasProbed
+                && str_contains($newBody, self::PROBED_BODY_MARKER)
+                && $this->exampleKeyShape($previousBody) === $this->exampleKeyShape($newBody)
+            ) {
+                $section = substr_replace($section, $previousBody, $start, $end - $start);
+
+                continue;
+            }
+
+            // 기존 본문이 이번 run 과 같은 자동 생성 결과면 되살릴 것이 없다.
+            if ($isAutoGenerated($previousBody)) {
+                continue;
+            }
 
             // 새 본문이 사람 작성분이면(= 이 run 이 만든 것이 아니면) 손대지 않는다.
             // 실무상 새 섹션은 항상 자동 생성이지만, 방어적으로 확인한다.
@@ -1586,6 +1751,91 @@ class ApiDocScaffolder
         return substr($block, $start, $end - $start);
     }
 
+    /**
+     * 생성 블록에서 표 행의 [키 => 기존 행 정보] 맵을 수집합니다.
+     *
+     * `value` 는 마지막 열(사람 서술, TODO 스텁이면 null), `cols` 는 행 전체 열이다.
+     * 응답 필드 표의 실측 예시값 열을 보존하려면 행 전체가 필요하다.
+     *
+     * @param  string  $block  생성 블록 원문
+     * @return array<string, array{value: string|null, cols: array<int, string>}> 키 => 기존 행 정보
+     */
+    private function collectTableCells(string $block): array
+    {
+        $cells = [];
+
+        foreach (explode("\n", $block) as $line) {
+            $parsed = $this->parseTableRow($line);
+
+            if ($parsed === null) {
+                continue;
+            }
+
+            // 마지막 열(사람 서술)이 TODO 스텁이어도 예시값 열은 보존 대상이므로 행 자체는 수집한다.
+            $cells[$parsed['key']] = [
+                'value' => $this->isTodoCell($parsed['value']) ? null : $parsed['value'],
+                'cols' => $parsed['cols'],
+            ];
+        }
+
+        return $cells;
+    }
+
+    /**
+     * 표 데이터 행을 파싱합니다 (헤더·구분선 제외).
+     *
+     * @param  string  $line  한 줄
+     * @return array{key: string, value: string, prefix: string, cols: array<int, string>}|null 파싱 결과 (표 행이 아니면 null)
+     */
+    private function parseTableRow(string $line): ?array
+    {
+        if (! str_starts_with($line, '| ') || ! str_ends_with($line, ' |')) {
+            return null;
+        }
+
+        // 헤더/구분선 제외
+        if (str_starts_with($line, '| --- ')
+            || str_starts_with($line, '| 이름 |')
+            || str_starts_with($line, '| 필드 |')
+            || str_starts_with($line, '| 상태코드 |')
+        ) {
+            return null;
+        }
+
+        // 셀 구분자가 아닌 파이프는 두 종류다 — 이스케이프된 파이프(`\|`)와 인라인 코드 스팬
+        // 안의 파이프. 구분자로 오인하면 셀 수가 늘어 마지막 셀(=설명)이 파이프 뒤 조각으로
+        // 바뀌고, 그 조각이 사람 서술로 승계돼 문장 앞부분이 잘린다. 두 경우 모두 가리는
+        // splitRowCells 로 분해한다.
+        $cols = array_map('trim', $this->splitRowCells($line));
+
+        // 파라미터 표 6열(이름+위치가 키) / 응답 필드 표 4열(필드가 키) / 에러 응답 표 3열(상태코드가 키)
+        $key = match (count($cols)) {
+            6 => $cols[0].'|'.$cols[1],
+            4 => $cols[0],
+            3 => $cols[0],
+            default => null,
+        };
+
+        if ($key === null || $cols[0] === '') {
+            return null;
+        }
+
+        $lastIndex = count($cols) - 1;
+        $prefix = '| '.implode(' | ', array_slice($cols, 0, $lastIndex)).' |';
+
+        return ['key' => $key, 'value' => $cols[$lastIndex], 'prefix' => $prefix, 'cols' => $cols];
+    }
+
+    /**
+     * 셀이 사람이 채워야 할 TODO 스텁인지 확인합니다.
+     *
+     * @param  string  $value  셀 값
+     * @return bool TODO 스텁 여부
+     */
+    private function isTodoCell(string $value): bool
+    {
+        return $value === '' || str_contains($value, '<!-- TODO:');
+    }
 
     /**
      * README 헤더(인용 블록)와 첫 생성 블록 사이의 사람 개요를 추출합니다.
@@ -1677,6 +1927,35 @@ class ApiDocScaffolder
         $from = $headingPos !== null ? $headingPos : $startPos;
 
         return trim(substr($existing, $from, ($endPos + strlen(self::GEN_END)) - $from));
+    }
+
+    /**
+     * 기존 문서에서 이 엔드포인트의 생성 블록만 종료 마커까지 정확히 잘라냅니다.
+     *
+     * {@see self::extractGeneratedBlock()} 은 앞의 `## ` 헤딩까지 거슬러 올라가 여러 엔드포인트를
+     * 함께 반환할 수 있고, {@see self::extractGeneratedBlockBody()} 는 종료 마커를 잘라내고
+     * 돌려준다. 에러 표 병합처럼 "이 엔드포인트 하나 + 종료 마커를 끝 경계로" 가 필요한
+     * 소비자를 위해 시작~종료 마커 구간을 원문 그대로 돌려준다.
+     *
+     * @param  string  $existing  기존 문서
+     * @param  string  $key  생성 블록 키
+     * @return string|null 블록 원문 (없으면 null)
+     */
+    private function exactGeneratedBlock(string $existing, string $key): ?string
+    {
+        $startPos = strpos($existing, self::GEN_START.$key.' -->');
+
+        if ($startPos === false) {
+            return null;
+        }
+
+        $endPos = strpos($existing, self::GEN_END, $startPos);
+
+        if ($endPos === false) {
+            return null;
+        }
+
+        return substr($existing, $startPos, ($endPos + strlen(self::GEN_END)) - $startPos);
     }
 
     /**

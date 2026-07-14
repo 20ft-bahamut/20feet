@@ -171,6 +171,111 @@ HTTP/1.1 200
 | advanced | body | array | 아니오 | — | 고급 탭 설정 묶음 (캐시·디버그·코어 업데이트·GeoIP 설정) |
 | notifications | body | array | 아니오 | — | 알림 탭 설정 묶음. channels 배열로 각 알림 채널의 id·is_active(활성 여부)·sort_order(표시 순서)를 저장 |
 | identity | body | array | 아니오 | — | 본인인증(IDV) 탭 설정 묶음 (기본 provider·목적별 provider 매핑·챌린지 유효시간·최대 시도 횟수) |
+| notifications.channels | body | array | 아니오 | — | <!-- TODO: 용도 --> |
+| general.site_name | body | string | 예 | max 100 | general.site 이름 (식별자) |
+| general.site_url | body | string | 예 | max 255 | <!-- TODO: 용도 --> |
+| general.site_description | body | string | 아니오 | max 500 | <!-- TODO: 용도 --> |
+| general.admin_email | body | email | 예 | max 255 | <!-- TODO: 용도 --> |
+| general.timezone | body | string | 예 | — | <!-- TODO: 용도 --> |
+| general.language | body | string | 예 | — | <!-- TODO: 용도 --> |
+| general.currency | body | string | 아니오 | max 10 | <!-- TODO: 용도 --> |
+| general.maintenance_mode | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| general.site_logo | body | array | 아니오 | — | <!-- TODO: 용도 --> |
+| mail.mailer | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| mail.host | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.port | body | integer | 아니오 | min 1, max 65535 | <!-- TODO: 용도 --> |
+| mail.username | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.password | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.encryption | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| mail.mailgun_domain | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.mailgun_secret | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.mailgun_endpoint | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.ses_key | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.ses_secret | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.ses_region | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.from_address | body | email | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| mail.from_name | body | string | 아니오 | max 255 | mail.from 이름 (식별자) |
+| upload.max_file_size | body | integer | 아니오 | min 1, max 1024 | <!-- TODO: 용도 --> |
+| upload.allowed_extensions | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| upload.image_max_width | body | integer | 아니오 | min 100, max 10000 | <!-- TODO: 용도 --> |
+| upload.image_max_height | body | integer | 아니오 | min 100, max 10000 | <!-- TODO: 용도 --> |
+| upload.image_quality | body | integer | 아니오 | min 1, max 100 | <!-- TODO: 용도 --> |
+| seo.meta_title_suffix | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
+| seo.meta_description | body | string | 아니오 | max 160 | <!-- TODO: 용도 --> |
+| seo.meta_keywords | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| seo.google_analytics_id | body | string | 아니오 | max 50 | seo.google analytics 식별자 |
+| seo.google_site_verification | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
+| seo.naver_site_verification | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
+| seo.bot_user_agents | body | array | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.bot_detection_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.bot_detection_library_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.og_default_site_name | body | string | 아니오 | max 200 | seo.og default site 이름 (식별자) |
+| seo.og_image_default_width | body | integer | 아니오 | min 0, max 8000 | <!-- TODO: 용도 --> |
+| seo.og_image_default_height | body | integer | 아니오 | min 0, max 8000 | <!-- TODO: 용도 --> |
+| seo.twitter_default_card | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.twitter_default_site | body | string | 아니오 | max 50 | <!-- TODO: 용도 --> |
+| seo.cache_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.cache_ttl | body | integer | 아니오 | min 60, max 86400 | <!-- TODO: 용도 --> |
+| seo.sitemap_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.sitemap_cache_ttl | body | integer | 아니오 | min 3600, max 604800 | <!-- TODO: 용도 --> |
+| seo.sitemap_schedule | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.sitemap_schedule_time | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.generator_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| seo.generator_content | body | string | 아니오 | max 200 | <!-- TODO: 용도 --> |
+| security.force_https | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| security.login_attempt_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| security.auth_token_lifetime | body | integer | 아니오 | min 0, max 3600 | <!-- TODO: 용도 --> |
+| security.max_login_attempts | body | integer | 아니오 | min 0, max 100 | <!-- TODO: 용도 --> |
+| security.login_lockout_time | body | integer | 아니오 | min 0, max 1440 | <!-- TODO: 용도 --> |
+| advanced.cache_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.layout_cache_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.layout_cache_ttl | body | integer | 아니오 | min 0, max 14400 | <!-- TODO: 용도 --> |
+| advanced.stats_cache_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.stats_cache_ttl | body | integer | 아니오 | min 0, max 14400 | <!-- TODO: 용도 --> |
+| advanced.seo_cache_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.seo_cache_ttl | body | integer | 아니오 | min 0, max 14400 | <!-- TODO: 용도 --> |
+| advanced.debug_mode | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.sql_query_log | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.core_update_github_url | body | string | 아니오 | max 500 | <!-- TODO: 용도 --> |
+| advanced.core_update_github_token | body | string | 아니오 | max 500 | <!-- TODO: 용도 --> |
+| advanced.geoip_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| advanced.geoip_license_key | body | string | 아니오 | max 200 | <!-- TODO: 용도 --> |
+| advanced.geoip_auto_update_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.storage_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.s3_bucket | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.s3_region | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.s3_access_key | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.s3_secret_key | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.s3_url | body | string | 아니오 | max 500 | <!-- TODO: 용도 --> |
+| drivers.cache_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.redis_host | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.redis_port | body | integer | 아니오 | min 1, max 65535 | <!-- TODO: 용도 --> |
+| drivers.redis_password | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.redis_database | body | integer | 아니오 | min 0, max 15 | <!-- TODO: 용도 --> |
+| drivers.memcached_host | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.memcached_port | body | integer | 아니오 | min 1, max 65535 | <!-- TODO: 용도 --> |
+| drivers.session_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.session_lifetime | body | integer | 아니오 | min 1, max 43200 | <!-- TODO: 용도 --> |
+| drivers.queue_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.websocket_enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.websocket_app_id | body | string | 아니오 | max 255 | drivers.websocket app 식별자 |
+| drivers.websocket_app_key | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.websocket_app_secret | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.websocket_host | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.websocket_port | body | integer | 아니오 | min 1, max 65535 | <!-- TODO: 용도 --> |
+| drivers.websocket_scheme | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.websocket_verify_ssl | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.websocket_server_host | body | string | 아니오 | max 255 | <!-- TODO: 용도 --> |
+| drivers.websocket_server_port | body | integer | 아니오 | min 1, max 65535 | <!-- TODO: 용도 --> |
+| drivers.websocket_server_scheme | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.search_engine_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.log_driver | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.log_level | body | string | 아니오 | — | <!-- TODO: 용도 --> |
+| drivers.log_days | body | integer | 아니오 | min 1, max 365 | <!-- TODO: 용도 --> |
+| identity.default_provider | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
+| identity.purpose_providers | body | array | 아니오 | — | <!-- TODO: 용도 --> |
+| identity.challenge_ttl_minutes | body | integer | 아니오 | min 1, max 1440 | <!-- TODO: 용도 --> |
+| identity.max_attempts | body | integer | 아니오 | min 1, max 20 | <!-- TODO: 용도 --> |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.settings.save_validation_rules`, `core.search.engine_drivers`).
 
@@ -211,7 +316,120 @@ Content-Type: application/json
     ],
     "identity": [
         "예시값"
-    ]
+    ],
+    "notifications.channels": [
+        "예시값"
+    ],
+    "general.site_name": "예시 이름",
+    "general.site_url": "https://example.com",
+    "general.site_description": "예시 내용입니다.",
+    "general.admin_email": "user@example.com",
+    "general.timezone": "Asia/Seoul",
+    "general.language": "예시값",
+    "general.currency": "예시값",
+    "general.maintenance_mode": true,
+    "general.site_logo": [
+        "예시값"
+    ],
+    "mail.mailer": "예시값",
+    "mail.host": "예시값",
+    "mail.port": 1,
+    "mail.username": "예시 이름",
+    "mail.password": "Password123!",
+    "mail.encryption": "예시값",
+    "mail.mailgun_domain": "예시값",
+    "mail.mailgun_secret": "예시값",
+    "mail.mailgun_endpoint": "예시값",
+    "mail.ses_key": "예시값",
+    "mail.ses_secret": "예시값",
+    "mail.ses_region": "예시값",
+    "mail.from_address": "user@example.com",
+    "mail.from_name": "예시 이름",
+    "upload.max_file_size": 1,
+    "upload.allowed_extensions": "예시값",
+    "upload.image_max_width": 1,
+    "upload.image_max_height": 1,
+    "upload.image_quality": 1,
+    "seo.meta_title_suffix": "예시 제목",
+    "seo.meta_description": "예시 내용입니다.",
+    "seo.meta_keywords": "예시값",
+    "seo.google_analytics_id": "예시값",
+    "seo.google_site_verification": "예시값",
+    "seo.naver_site_verification": "예시값",
+    "seo.bot_user_agents": [
+        "예시값"
+    ],
+    "seo.bot_detection_enabled": true,
+    "seo.bot_detection_library_enabled": true,
+    "seo.og_default_site_name": "예시 이름",
+    "seo.og_image_default_width": 1,
+    "seo.og_image_default_height": 1,
+    "seo.twitter_default_card": "예시값",
+    "seo.twitter_default_site": "예시값",
+    "seo.cache_enabled": true,
+    "seo.cache_ttl": 1,
+    "seo.sitemap_enabled": true,
+    "seo.sitemap_cache_ttl": 1,
+    "seo.sitemap_schedule": "예시값",
+    "seo.sitemap_schedule_time": "예시값",
+    "seo.generator_enabled": true,
+    "seo.generator_content": "예시 내용입니다.",
+    "security.force_https": true,
+    "security.login_attempt_enabled": true,
+    "security.auth_token_lifetime": 1,
+    "security.max_login_attempts": 1,
+    "security.login_lockout_time": 1,
+    "advanced.cache_enabled": true,
+    "advanced.layout_cache_enabled": true,
+    "advanced.layout_cache_ttl": 1,
+    "advanced.stats_cache_enabled": true,
+    "advanced.stats_cache_ttl": 1,
+    "advanced.seo_cache_enabled": true,
+    "advanced.seo_cache_ttl": 1,
+    "advanced.debug_mode": true,
+    "advanced.sql_query_log": true,
+    "advanced.core_update_github_url": "https://example.com",
+    "advanced.core_update_github_token": "{YOUR_TOKEN}",
+    "advanced.geoip_enabled": true,
+    "advanced.geoip_license_key": "예시값",
+    "advanced.geoip_auto_update_enabled": true,
+    "drivers.storage_driver": "예시값",
+    "drivers.s3_bucket": "예시값",
+    "drivers.s3_region": "예시값",
+    "drivers.s3_access_key": "예시값",
+    "drivers.s3_secret_key": "예시값",
+    "drivers.s3_url": "https://example.com",
+    "drivers.cache_driver": "예시값",
+    "drivers.redis_host": "예시값",
+    "drivers.redis_port": 1,
+    "drivers.redis_password": "Password123!",
+    "drivers.redis_database": 1,
+    "drivers.memcached_host": "예시값",
+    "drivers.memcached_port": 1,
+    "drivers.session_driver": "예시값",
+    "drivers.session_lifetime": 1,
+    "drivers.queue_driver": "예시값",
+    "drivers.websocket_enabled": true,
+    "drivers.websocket_app_id": "예시값",
+    "drivers.websocket_app_key": "예시값",
+    "drivers.websocket_app_secret": "예시값",
+    "drivers.websocket_host": "예시값",
+    "drivers.websocket_port": 1,
+    "drivers.websocket_scheme": "예시값",
+    "drivers.websocket_verify_ssl": true,
+    "drivers.websocket_server_host": "예시값",
+    "drivers.websocket_server_port": 1,
+    "drivers.websocket_server_scheme": "예시값",
+    "drivers.search_engine_driver": "예시값",
+    "drivers.log_driver": "예시값",
+    "drivers.log_level": "예시값",
+    "drivers.log_days": 1,
+    "identity.default_provider": "예시값",
+    "identity.purpose_providers": [
+        "예시값"
+    ],
+    "identity.challenge_ttl_minutes": 1,
+    "identity.max_attempts": 1
 }
 ```
 
@@ -228,7 +446,7 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -327,7 +545,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -368,7 +586,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -409,7 +627,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -450,7 +668,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -503,7 +721,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -553,7 +771,7 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -604,7 +822,7 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -840,7 +1058,7 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -919,7 +1137,7 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -1015,9 +1233,9 @@ Content-Type: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

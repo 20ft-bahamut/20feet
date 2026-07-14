@@ -143,7 +143,7 @@ Content-Type: application/json
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 403 | Forbidden | 요구 권한(`core.profile.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.profile.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -224,7 +224,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 400 | Bad Request | `language` 값이 `config('app.supported_locales')`(기본 `['ko','en']`)에 포함되지 않는 미지원 로케일인 경우 |
+| 403 | Forbidden | 요구 권한(`core.profile.read`)이 없는 경우 |
 
 <!-- @generated:end -->
 

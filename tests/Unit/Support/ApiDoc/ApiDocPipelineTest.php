@@ -1485,4 +1485,325 @@ MD;
         $this->assertStringContainsString('"identifier": "sirsoft-admin_basic"', $block);
         $this->assertStringNotContainsString('생략', $block);
     }
+
+    /**
+     * 응답 필드 표의 실측 예시값은 스펙이 그대로면 재생성에도 유지된다.
+     *
+     * 회귀: 실측값은 호출 시점 DB 상태가 낳은 표본 하나인데 재생성마다 새 값으로 덮어써서,
+     * 코드가 하나도 안 바뀐 무관한 문서 수십 개가 docgen 재실행마다 diff 에 걸렸다
+     * (예: `id` 예시값 127 → 43, created_at 날짜 변경).
+     */
+    #[Test]
+    public function 재생성_시_타입이_같은_필드의_실측_예시값을_보존한다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/z', 'name' => 'api.z.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# Z\n";
+
+        $schemaOf = fn (string $sample): array => [
+            'envelope' => ['data'],
+            'shape' => 'object',
+            'fields' => [['name' => 'id', 'type' => 'integer', 'sample' => $sample]],
+            'pagination' => false,
+        ];
+
+        // 최초 생성 — 그 시점 DB 의 id 는 127
+        $first = $scaffolder->mergeDocument(
+            null,
+            $header,
+            [$scaffolder->endpointSection($route, $request, $schemaOf('127'), ['status' => 200, 'skipped_reason' => null])],
+            ['api.z.index'],
+        );
+        $this->assertStringContainsString('`127`', $first);
+
+        // 재생성 — DB 가 바뀌어 실측 id 가 43 이 되었지만 스펙(타입)은 그대로다
+        $regenerated = $scaffolder->mergeDocument(
+            $first,
+            $header,
+            [$scaffolder->endpointSection($route, $request, $schemaOf('43'), ['status' => 200, 'skipped_reason' => null])],
+            ['api.z.index'],
+        );
+
+        $this->assertStringContainsString('`127`', $regenerated, '스펙이 그대로면 기존 실측 예시값을 유지해야 한다');
+        $this->assertStringNotContainsString('`43`', $regenerated);
+    }
+
+    /**
+     * 필드가 새로 생기거나 타입이 바뀌면(= 스펙 변경) 실측 예시값이 갱신된다.
+     *
+     * 예시값 보존이 "문서가 코드 변경을 영영 반영하지 않는다"로 퇴화하지 않도록 하는 반대편 가드.
+     */
+    #[Test]
+    public function 신규_필드와_타입_변경은_실측_예시값을_갱신한다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/z', 'name' => 'api.z.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# Z\n";
+
+        $build = fn (array $fields): string => $scaffolder->endpointSection(
+            $route,
+            $request,
+            ['envelope' => ['data'], 'shape' => 'object', 'fields' => $fields, 'pagination' => false],
+            ['status' => 200, 'skipped_reason' => null],
+        );
+
+        $first = $scaffolder->mergeDocument(
+            null,
+            $header,
+            [$build([['name' => 'amount', 'type' => 'integer', 'sample' => '1000']])],
+            ['api.z.index'],
+        );
+
+        // amount 의 타입이 바뀌고(스펙 변경), is_escrow 필드가 새로 추가된 리소스
+        $regenerated = $scaffolder->mergeDocument(
+            $first,
+            $header,
+            [$build([
+                ['name' => 'amount', 'type' => 'string', 'sample' => '1000.00'],
+                ['name' => 'is_escrow', 'type' => 'boolean', 'sample' => 'true'],
+            ])],
+            ['api.z.index'],
+        );
+
+        $this->assertStringContainsString('`1000.00`', $regenerated, '타입이 바뀌면 새 실측값으로 갱신해야 한다');
+        $this->assertStringContainsString('is_escrow', $regenerated, '신규 필드는 표에 추가되어야 한다');
+        $this->assertStringContainsString('`true`', $regenerated);
+    }
+
+    /**
+     * nullable 필드가 이번 표본에서 null 로 관측돼도 기존에 관측한 실제 값을 유지한다.
+     *
+     * 회귀: nullable 필드는 표본에 값이 있느냐에 따라 관측 타입이 흔들린다(`loggable_type` 이
+     * string ↔ null). "타입이 바뀌면 갱신" 규칙이 이 흔들림을 스펙 변경으로 오인해, 실제 값을
+     * 관측해 둔 행을 `null` 로 덮어써 문서가 열화됐다.
+     */
+    #[Test]
+    public function nullable_필드가_null_로_관측돼도_기존_예시값을_유지한다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/t', 'name' => 'api.t.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# T\n";
+
+        $build = fn (string $type, string $sample): string => $scaffolder->endpointSection(
+            $route,
+            $request,
+            [
+                'envelope' => ['data'],
+                'shape' => 'object',
+                'fields' => [['name' => 'loggable_type', 'type' => $type, 'sample' => $sample]],
+                'pagination' => false,
+            ],
+            ['status' => 200, 'skipped_reason' => null],
+        );
+
+        // 값이 있는 표본을 관측한 상태
+        $first = $scaffolder->mergeDocument(null, $header, [$build('string', 'App\\Models\\Post')], ['api.t.index']);
+        $this->assertStringContainsString('App\\Models\\Post', $first);
+
+        // 이번 표본에는 값이 없어 null 로 관측됐다 — 스펙 변경이 아니다.
+        $regenerated = $scaffolder->mergeDocument($first, $header, [$build('null', 'null')], ['api.t.index']);
+
+        $this->assertStringContainsString('App\\Models\\Post', $regenerated, 'null 관측이 기존 값을 덮어써서는 안 된다');
+        $this->assertStringContainsString('| loggable_type | string |', $regenerated, '타입도 유지되어야 한다');
+    }
+
+    /**
+     * 응답 예시 JSON 은 필드 집합이 같으면 유지되고, 달라지면 갱신된다.
+     *
+     * 회귀: 응답 예시는 호출 시점 표본이라 `updated_at` · `cache_version` 처럼 매 실측마다 값이
+     * 달라지는 필드가 섞여 들어온다. 매번 새 값으로 덮으면 코드가 하나도 안 바뀐 문서까지
+     * docgen 재실행마다 diff 가 난다.
+     */
+    #[Test]
+    public function 응답_예시는_필드집합이_같으면_유지되고_달라지면_갱신된다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/u', 'name' => 'api.u.show',
+            'controller' => 'C', 'controller_method' => 'show', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# U\n";
+
+        $build = fn (array $data): string => $scaffolder->endpointSection(
+            $route,
+            $request,
+            ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false],
+            [
+                'status' => 200,
+                'skipped_reason' => null,
+                'base_url' => 'https://api.example.com',
+                'resolved_uri' => '/api/u',
+                'body' => ['data' => $data],
+            ],
+        );
+
+        $first = $scaffolder->mergeDocument(
+            null, $header, [$build(['id' => 1, 'updated_at' => '2026-07-14 13:05:11'])], ['api.u.show'],
+        );
+        $this->assertStringContainsString('2026-07-14 13:05:11', $first);
+
+        // 값만 바뀐 재실측 — 필드 집합은 그대로 → 기존 예시 유지
+        $sameShape = $scaffolder->mergeDocument(
+            $first, $header, [$build(['id' => 1, 'updated_at' => '2026-07-14 13:07:04'])], ['api.u.show'],
+        );
+        $this->assertStringContainsString('2026-07-14 13:05:11', $sameShape, '값만 달라졌으면 기존 예시를 유지해야 한다');
+        $this->assertStringNotContainsString('13:07:04', $sameShape);
+
+        // 필드가 추가된 재실측 — 스펙 변경 → 새 예시 채택
+        $newShape = $scaffolder->mergeDocument(
+            $first,
+            $header,
+            [$build(['id' => 1, 'updated_at' => '2026-07-14 13:07:04', 'is_escrow' => false])],
+            ['api.u.show'],
+        );
+        $this->assertStringContainsString('is_escrow', $newShape, '필드가 추가되면 새 실측 예시로 갱신해야 한다');
+        $this->assertStringContainsString('13:07:04', $newShape);
+    }
+
+    /**
+     * 이번 실측이 실패해도 기존에 관측해 둔 응답 예시는 유지된다.
+     *
+     * 회귀: 실측 성패는 호출 시점 데이터 유무에 좌우된다(예: DELETE /checkout 은 삭제할 체크아웃이
+     * 없으면 404). 실측 실패 시 "실측 제외" 마커로 덮어써서, 이전 실행이 관측해 둔 응답 예시가
+     * 통째로 사라졌다. 실측 실패는 "새로 관측하지 못했다"는 뜻이지 기존 관측이 무효라는 뜻이 아니다.
+     */
+    #[Test]
+    public function 실측_실패_시_기존_실측_응답_예시를_유지한다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'DELETE', 'uri' => '/api/v', 'name' => 'api.v.destroy',
+            'controller' => 'C', 'controller_method' => 'destroy', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $header = "# V\n";
+
+        // 1회차: 실측 성공 — 응답 예시가 @probed 로 기록된다.
+        $probed = $scaffolder->endpointSection(
+            $route,
+            $request,
+            ['envelope' => ['success', 'message', 'data'], 'shape' => 'object', 'fields' => [], 'pagination' => false],
+            [
+                'status' => 200,
+                'skipped_reason' => null,
+                'base_url' => 'https://api.example.com',
+                'resolved_uri' => '/api/v',
+                'body' => ['success' => true, 'message' => 'Deleted.', 'data' => null],
+            ],
+        );
+
+        $first = $scaffolder->mergeDocument(null, $header, [$probed], ['api.v.destroy']);
+        $this->assertStringContainsString('Deleted.', $first);
+
+        // 2회차: 대상 데이터가 없어 실측이 404 로 실패한다.
+        $failed = $scaffolder->endpointSection(
+            $route,
+            $request,
+            null,
+            ['status' => 404, 'skipped_reason' => 'http-404'],
+        );
+
+        $regenerated = $scaffolder->mergeDocument($first, $header, [$failed], ['api.v.destroy']);
+
+        $this->assertStringContainsString('Deleted.', $regenerated, '기존 실측 응답 예시가 유지되어야 한다');
+    }
+
+    /**
+     * 사람이 보강한 에러 응답 표는 재생성에도 보존된다.
+     *
+     * 회귀: 에러 표는 라우트 메타에서 대표 상태코드만 추론하는 초안인데, 재생성이 그 초안으로
+     * 표를 통째로 덮어써 사람이 채운 도메인 특이 에러(403·404·422·429와 구체적 발생 조건)가
+     * "대표 에러 없음" 으로 지워졌다.
+     */
+    #[Test]
+    public function 재생성_시_사람이_보강한_에러_응답_표를_보존한다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        // 미들웨어·FormRequest 가 없어 자동 추론은 "대표 에러 없음" 을 낸다.
+        $route = [
+            'method' => 'POST', 'uri' => '/api/w', 'name' => 'api.w.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+        $header = "# W\n";
+
+        $section = fn (): string => $scaffolder->endpointSection(
+            $route, $request, $schema, ['status' => 200, 'skipped_reason' => null],
+        );
+
+        $first = $scaffolder->mergeDocument(null, $header, [$section()], ['api.w.store']);
+        $this->assertStringContainsString('대표 에러 없음', $first);
+
+        // 사람이 도메인 특이 에러 표를 직접 채운다.
+        $humanTable = "| 상태코드 | 의미 | 발생 조건 |\n"
+            ."| --- | --- | --- |\n"
+            ."| 429 | Too Many Requests | 동일 IP 에서 분당 10회를 초과해 요청한 경우 |";
+        $withTable = str_replace(
+            '_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_',
+            $humanTable,
+            $first,
+        );
+
+        // 재생성해도 사람이 채운 표가 살아남는다.
+        $regenerated = $scaffolder->mergeDocument($withTable, $header, [$section()], ['api.w.store']);
+
+        $this->assertStringContainsString('429', $regenerated, '사람이 추가한 에러 행이 보존되어야 한다');
+        $this->assertStringContainsString('동일 IP 에서 분당 10회', $regenerated);
+        $this->assertStringNotContainsString('대표 에러 없음', $regenerated);
+    }
+
+    /**
+     * 요청 예시의 path 파라미터는 실측 치환값이 아니라 placeholder 로 고정된다.
+     *
+     * 회귀: 실측 성공 시 `/brands/1`, 실패 시 `/brands/{brand}` 로 바뀌어 같은 엔드포인트의
+     * 예시가 재실행마다 흔들렸다.
+     */
+    #[Test]
+    public function 요청_예시의_path_파라미터는_placeholder_로_고정된다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'DELETE', 'uri' => '/api/admin/brands/{brand}', 'name' => 'api.admin.brands.destroy',
+            'controller' => 'C', 'controller_method' => 'destroy', 'permission' => null,
+            'middleware' => ['auth:sanctum'], 'path_params' => ['brand'],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+
+        // 실측이 실제 id 로 치환된 경우에도 예시는 placeholder 를 쓴다.
+        $block = $scaffolder->requestExampleBlock(
+            $route,
+            $request,
+            ['status' => 200, 'skipped_reason' => null, 'resolved_uri' => '/api/admin/brands/1'],
+        );
+
+        $this->assertStringContainsString('/api/admin/brands/{brand}', $block);
+        $this->assertStringNotContainsString('/api/admin/brands/1', $block);
+    }
 }
