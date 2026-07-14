@@ -40,6 +40,9 @@ class ValidateTossSettingsListener implements HookListenerInterface
             'core.plugin_settings.before_save' => [
                 'method' => 'validateBeforeSave',
                 'priority' => 10,
+                // 저장을 차단하는 인라인 가드 — Action 훅 기본값(큐 디스패치)이면 ValidationException 이
+                // 워커 안에서 죽고 PluginSettingsService::save() 가 저장을 그대로 진행한다.
+                'sync' => true,
             ],
         ];
     }
