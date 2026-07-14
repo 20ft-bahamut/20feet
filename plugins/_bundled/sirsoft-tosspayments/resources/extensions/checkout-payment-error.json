@@ -7,7 +7,7 @@
             "name": "Modal",
             "props": {
                 "title": "$t:sirsoft-tosspayments.payment_error_title",
-                "size": "sm"
+                "width": "420px"
             },
             "children": [
                 {
@@ -54,8 +54,8 @@
                                 {
                                     "type": "click",
                                     "handler": "setState",
-                                    "target": "local",
                                     "params": {
+                                        "target": "local",
                                         "paymentErrorMessage": null
                                     }
                                 },
@@ -79,7 +79,7 @@
             "name": "Modal",
             "props": {
                 "title": "$t:sirsoft-tosspayments.payment_cancel_title",
-                "size": "sm"
+                "width": "420px"
             },
             "children": [
                 {
