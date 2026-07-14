@@ -705,75 +705,309 @@
                                                 "children": [
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_card",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_card"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_card",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_card}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_card": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_card"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_virtual_account",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_virtual_account"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_virtual_account",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_virtual_account}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_virtual_account": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_virtual_account"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_transfer",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_transfer"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_transfer",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_transfer}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_transfer": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_transfer"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_mobile_phone",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_mobile_phone"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_mobile_phone",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_mobile_phone}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_mobile_phone": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_mobile_phone"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_tosspay",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_tosspay"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_tosspay",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_tosspay}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_tosspay": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_tosspay"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_kakaopay",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_kakaopay"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_kakaopay",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_kakaopay}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_kakaopay": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_kakaopay"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_naverpay",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_naverpay"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_naverpay",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_naverpay}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_naverpay": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_naverpay"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_payco",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_payco"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_payco",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_payco}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_payco": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_payco"
+                                                            }
+                                                        ]
                                                     },
                                                     {
                                                         "type": "basic",
-                                                        "name": "Checkbox",
+                                                        "name": "Label",
                                                         "props": {
-                                                            "name": "method_samsungpay",
-                                                            "label": "$t:sirsoft-tosspayments.settings.method_samsungpay"
-                                                        }
+                                                            "className": "flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Checkbox",
+                                                                "props": {
+                                                                    "name": "method_samsungpay",
+                                                                    "autoBinding": false,
+                                                                    "checked": "{{!!_local.form?.method_samsungpay}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "setState",
+                                                                        "params": {
+                                                                            "target": "local",
+                                                                            "form.method_samsungpay": "{{$event.target.checked}}",
+                                                                            "hasChanges": true
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "text": "$t:sirsoft-tosspayments.settings.method_samsungpay"
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             },

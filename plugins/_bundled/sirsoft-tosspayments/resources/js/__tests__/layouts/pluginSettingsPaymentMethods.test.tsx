@@ -61,6 +61,62 @@ describe('plugin_settings — 결제 방식 섹션', () => {
     expect(names).toHaveLength(9);
   });
 
+  it('결제수단 9종의 라벨이 Label 래핑 + Span 텍스트로 렌더된다', () => {
+    // Checkbox 컴포넌트는 label prop 을 렌더하지 않는다 (부모 Label 이 처리).
+    // label prop 에만 의존하면 화면에 라벨이 표시되지 않으므로 사용을 금지한다.
+    const checkboxes = collect(pluginSettingsLayout, (n) => n.name === 'Checkbox');
+    const withLabelProp = checkboxes.filter((n) => (n.props as Record<string, unknown>)?.label !== undefined);
+    expect(withLabelProp).toHaveLength(0);
+
+    // 각 method_* 체크박스는 Label 로 감싸이고 형제 Span 이 라벨 텍스트를 갖는다.
+    const wrappers = collect(pluginSettingsLayout, (n) => {
+      if (n.name !== 'Label' || !Array.isArray(n.children)) return false;
+      const children = n.children as Record<string, unknown>[];
+      return children.some((c) => c.name === 'Checkbox' && nameOf(c).startsWith('method_'));
+    });
+    expect(wrappers).toHaveLength(9);
+
+    for (const wrapper of wrappers) {
+      const children = wrapper.children as Record<string, unknown>[];
+      const checkbox = children.find((c) => c.name === 'Checkbox')!;
+      const span = children.find((c) => c.name === 'Span');
+      expect(span, `${nameOf(checkbox)} 라벨 Span 누락`).toBeDefined();
+      expect(String(span!.text)).toBe(`$t:sirsoft-tosspayments.settings.${nameOf(checkbox)}`);
+    }
+  });
+
+  it('결제수단 체크박스는 boolean 저장을 보장한다 (autoBinding 우회 + checked 강제 + change 액션)', () => {
+    // 엔진의 폼 자동바인딩은 현재 값이 boolean 일 때만 checked 바인딩을 쓴다
+    // (DynamicRenderer `isCheckedBinding`: typeof currentValue === 'boolean').
+    // 저장값이 null/undefined 면 value 바인딩으로 떨어져 빈 문자열('')이 전송되고,
+    // 서버가 그것을 null 로 저장하면 defaults(false) 를 덮어 영구 고착된다.
+    // → 레이아웃이 boolean 을 직접 보장해야 한다.
+    const checkboxes = collect(pluginSettingsLayout, (n) => n.name === 'Checkbox' && nameOf(n).startsWith('method_'));
+    expect(checkboxes).toHaveLength(9);
+
+    for (const box of checkboxes) {
+      const name = nameOf(box);
+      const props = (box.props ?? {}) as Record<string, unknown>;
+
+      // 자동바인딩의 value 분기 개입을 차단한다.
+      expect(props.autoBinding, `${name}: autoBinding=false 누락`).toBe(false);
+
+      // checked 는 !! 로 boolean 강제 — 저장값이 null 이어도 false 로 렌더된다.
+      expect(String(props.checked), `${name}: checked 가 boolean 강제(!!)가 아님`).toBe(
+        `{{!!_local.form?.${name}}}`
+      );
+
+      // change 액션이 $event.target.checked(항상 boolean)를 직접 기록한다.
+      const actions = (box.actions ?? []) as Record<string, unknown>[];
+      const change = actions.find((a) => a.type === 'change');
+      expect(change, `${name}: change 액션 누락`).toBeDefined();
+
+      const params = (change!.params ?? {}) as Record<string, unknown>;
+      expect(params[`form.${name}`], `${name}: boolean 이 아닌 값을 기록`).toBe('{{$event.target.checked}}');
+      expect(params.hasChanges, `${name}: hasChanges 미설정 — 저장 버튼이 비활성 유지됨`).toBe(true);
+    }
+  });
+
   it('결제수단 그룹은 order_sheet_mode 가 켜졌을 때만 노출된다 (if)', () => {
     const group = findById(pluginSettingsLayout, 'enabled_methods_group');
     expect(group).toBeDefined();
