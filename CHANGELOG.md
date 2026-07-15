@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [7.0.5] - 2026-07-15
+
+### Added
+
+- 확장 기능이 화면을 그릴 때, 방문자의 접속 기기 종류처럼 요청마다 달라지는 정보를 화면 구성 데이터에 함께 실어 보낼 수 있는 통로를 마련했습니다. 쇼핑몰의 애플페이가 iOS 기기에서만 표시되도록 하는 데 이 통로가 쓰입니다.
+
 ## [7.0.4] - 2026-07-14
 
 ### Security
