@@ -38,9 +38,19 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
+_단건 응답: `data` 객체의 필드. 본인확인 record 가 없는 사용자는 `data` 가 `null` 이다(컨트롤러가 `ResponseHelper::success('messages.success', null)` 로 분기)._
 
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| method | string | `"KG이니시스 본인확인"` | 본인확인 수단 표시 라벨 (Resource 고정 문자열) |
+| verified_at | string\|null | `"2026-07-01 14:22:10"` | 최종 본인확인 시각 (`Y-m-d H:i:s`). 재인증 이력이 있으면 `re_verified_at`, 없으면 최초 `verified_at` |
+| name_masked | string | `"홍**"` | 마스킹된 실명 (첫 글자 + 나머지 `*`) |
+| birthday_masked | string | `"1990-**-**"` | 마스킹된 생년월일 (연도 4자리만 노출) |
+| phone_masked | string | `"010-****-5678"` | 마스킹된 휴대폰 번호 (앞 3자리 + 뒤 4자리) |
+| is_adult | boolean | `true` | 성인 여부 (생년월일 기반 만 19세 이상 자동 계산값) |
+| is_foreigner | boolean | `false` | 외국인 여부 (이니시스 `isForeign`) |
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+`di`/`ci`/`ci2` 등 동일인 식별값과 평문 PII 는 응답에 포함하지 않는다. `InicisIdentityResource` 는 `resourceMeta()` 를 spread 하지 않으므로 `is_owner`/`abilities` 메타도 포함되지 않는다.
 
 **응답 예시**
 
@@ -53,7 +63,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": null
 }
 ```
@@ -85,7 +95,7 @@ HTTP/1.1 200
   | is_adult | boolean | `true` | 성인 여부(연령 게이팅 판정에 사용). |
   | is_foreigner | boolean | `false` | 외국인 여부. |
 
-  이 외에 `BaseApiResource` 공통 메타 `is_owner`(항상 본인이므로 `true`) + `abilities` 가 함께 붙는다.
+  `InicisIdentityResource` 는 `BaseApiResource` 를 상속하지만 `resourceMeta()` 를 spread 하지 않으므로 `is_owner`/`abilities` 메타 필드는 응답에 포함되지 않는다(대상이 항상 본인이며 조회 전용이라 불필요).
 - **응답 예시 주의**: 실측 시 샘플 사용자에게 본인인증 record 가 없어 `data: null`(record 없음) 응답만 관측된다. 아래 두 응답 예시 중 "record 존재 시" 는 `InicisIdentityResource` 구조 기준 정적 작성이다. 실제 record 가 있는 사용자로 실측하면 마스킹된 본인확인 정보가 채워진다.
 
 **응답 예시** (record 존재 시 — 정적, `InicisIdentityResource` 구조 기준)
@@ -93,6 +103,7 @@ HTTP/1.1 200
 ```json
 {
   "success": true,
+  "message": "성공적으로 처리되었습니다.",
   "data": {
     "method": "KG이니시스 본인확인",
     "verified_at": "2026-07-01 14:22:10",
@@ -100,12 +111,8 @@ HTTP/1.1 200
     "birthday_masked": "1990-**-**",
     "phone_masked": "010-****-5678",
     "is_adult": true,
-    "is_foreigner": false,
-    "is_owner": true,
-    "abilities": {}
-  },
-  "message": "성공적으로 처리되었습니다.",
-  "error": null
+    "is_foreigner": false
+  }
 }
 ```
 
@@ -114,9 +121,8 @@ HTTP/1.1 200
 ```json
 {
   "success": true,
-  "data": null,
   "message": "성공적으로 처리되었습니다.",
-  "error": null
+  "data": null
 }
 ```
 

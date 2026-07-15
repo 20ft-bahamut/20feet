@@ -50,7 +50,7 @@ class GdprAdminConsentLogController extends AdminBaseController
     {
         $paginator = $this->consentLogService->paginateForAdmin($request->filters(), $request->perPage());
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'data' => GdprConsentLogResource::collection($paginator->items()),
             'pagination' => [
                 'current_page' => $paginator->currentPage(),

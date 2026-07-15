@@ -176,7 +176,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read| core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -216,19 +216,60 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`data.module` 은 목록과 동일한 `ModuleResource` 형태)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| module | object | `{"identifier":"sirsoft-board", ...}` | 활성화된 모듈 정보 (`ModuleResource` — 목록 응답 항목과 동일 필드 구성) |
+| pending_language_packs | array | `[]` | 이전 비활성화 시 cascade 로 함께 비활성화됐던 번들 언어팩 목록 (재활성화 안내 모달용). 각 항목: `id`, `identifier`, `locale`, `locale_native_name`. 없으면 빈 배열 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 활성화되었습니다.",
+    "data": {
+        "module": {
+            "identifier": "sirsoft-board",
+            "vendor": "sirsoft",
+            "name": "게시판",
+            "version": "1.0.0",
+            "description": "게시판 관리를 위한 모듈",
+            "dependencies": [],
+            "status": "active",
+            "assets": null,
+            "update_available": false,
+            "update_source": null,
+            "latest_version": null,
+            "file_version": "1.0.0",
+            "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+            "github_changelog_url": "https://github.com/gnuboard/g7-module-sirsoft-board/releases",
+            "is_pending": false,
+            "is_bundled": false,
+            "deactivated_reason": null,
+            "deactivated_at": null,
+            "incompatible_required_version": null,
+            "abilities": {
+                "can_install": true,
+                "can_activate": true,
+                "can_uninstall": true
+            }
+        },
+        "pending_language_packs": []
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 409 | Conflict | `force` 없이 호출했고 필요한 의존 확장이 미충족인 경우 (`error` 에 `warning`, `missing_modules`, `missing_plugins` 포함) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 활성화 처리 중 예외 발생 (`module.activate_failed`) |
 
 <!-- @generated:end -->
 
@@ -256,19 +297,45 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| updated_count | integer | `1` | 업데이트가 가능한 것으로 감지된 모듈 수 |
+| details | array | `[{"identifier":"sirsoft-board", ...}]` | 업데이트 가능한 모듈만 담은 목록 (아래 하위 필드) |
+| details[].identifier | string | `sirsoft-board` | 모듈 식별자 |
+| details[].current_version | string | `1.0.0` | 현재 설치된 버전 |
+| details[].latest_version | string | `1.0.1` | 감지된 최신 버전 |
+| details[].update_source | string | `github` | 업데이트 감지 출처 (`github` \| `bundled`) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "업데이트 확인이 완료되었습니다.",
+    "data": {
+        "updated_count": 1,
+        "details": [
+            {
+                "identifier": "sirsoft-board",
+                "current_version": "1.0.0",
+                "latest_version": "1.0.1",
+                "update_source": "github"
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 업데이트 확인 처리가 실패한 경우 (`modules.check_updates_failed`) |
+| 500 | Internal Server Error | 업데이트 확인 중 예외 발생 |
 
 <!-- @generated:end -->
 
@@ -307,19 +374,75 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 비활성화된 모듈의 `ModuleResource` 객체 (목록 응답 항목과 동일 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 모듈 고유 식별자 (vendor-module 형식) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 모듈 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 (현재 로케일로 해석) |
+| dependencies | array | `[]` | 의존 확장 목록 (manifest 파생) |
+| status | string | `inactive` | 비활성화 후 상태 |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 (js/css/priority) |
+| update_available | boolean | `false` | 최신 버전 대비 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board/releases` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `manual` | 비활성화 사유 (`manual` \| `incompatible_core`) |
+| deactivated_at | string\|null | `2026-07-14 10:00:00` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 비활성화되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "inactive",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": "https://github.com/gnuboard/g7-module-sirsoft-board/releases",
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": "manual",
+        "deactivated_at": "2026-07-14 10:00:00",
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 409 | Conflict | `force` 없이 호출했고 이 모듈에 의존하는 활성 확장이 있는 경우 (`error` 에 `warning`, `dependent_templates`, `dependent_modules`, `dependent_plugins` 포함) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 비활성화 처리 중 예외 발생 (`module.deactivate_failed`) |
 
 <!-- @generated:end -->
 
@@ -366,19 +489,80 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 설치된 모듈의 `ModuleResource` 필드 + `language_pack_failures` (HTTP 201)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 설치된 모듈 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 설치된 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched — identifier/name/type/required_version/is_met 등) |
+| status | string | `inactive` | 설치 직후 상태 (설치만으로 활성화되지 않음) |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 (js/css/priority) |
+| update_available | boolean | `false` | 업데이트 가능 여부 (설치 직후 기본 false) |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
+| language_pack_failures | array | `[]` | cascade 2단계(번들 언어팩 best-effort 설치)에서 실패한 항목. 각 항목: `identifier`, `reason`. 실패 없으면 빈 배열 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "inactive",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        },
+        "language_pack_failures": []
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패, 또는 설치 파이프라인이 던진 검증 오류 (의존 확장 cascade 설치 실패·이미 설치됨 등 — `error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 설치 처리 중 예외 발생 (`modules.installation_failed`) |
 
 <!-- @generated:end -->
 
@@ -418,19 +602,78 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 설치된 모듈의 `ModuleResource` 객체 (HTTP 201 — 목록 응답 항목과 동일 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 설치된 모듈 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 설치된 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched) |
+| status | string | `inactive` | 설치 직후 상태 |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "inactive",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 파일 검증 실패(ZIP 아님·50MB 초과), 또는 ZIP 처리 오류 (module.json 미존재/형식 오류·식별자 누락·이미 설치됨) |
+| 500 | Internal Server Error | 설치 처리 중 예외 발생 (`module.install_failed`) |
 
 <!-- @generated:end -->
 
@@ -467,19 +710,78 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 설치된 모듈의 `ModuleResource` 객체 (HTTP 201 — 목록 응답 항목과 동일 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 설치된 모듈 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 설치된 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched) |
+| status | string | `inactive` | 설치 직후 상태 |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "inactive",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | URL 형식 검증 실패, 또는 GitHub 처리 오류 (저장소 미존재·다운로드 실패·module.json 형식 오류·이미 설치됨) |
+| 500 | Internal Server Error | 설치 처리 중 예외 발생 (`module.install_failed`) |
 
 <!-- @generated:end -->
 
@@ -620,7 +922,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -659,19 +961,48 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| manifest | object\|null | `{"identifier":"sirsoft-board","version":"1.0.0", ...}` | ZIP 에서 추출한 module.json 원본 내용. 추출 실패 시 `null` |
+| validation | object | `{"errors":[],"is_valid":true, ...}` | 검증 결과 묶음 (아래 하위 필드) |
+| validation.errors | array | `[]` | 추출/검증 과정에서 발생한 오류 메시지 목록 (없으면 빈 배열) |
+| validation.is_valid | boolean | `true` | 오류가 없고 manifest 추출에 성공했는지 여부 |
+| validation.already_installed | boolean | `false` | 해당 식별자의 모듈이 이미 설치되어 있는지 여부 |
+| validation.existing_version | string\|null | `1.0.0` | 이미 설치된 경우 그 버전 (미설치 시 `null`) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "manifest 미리보기를 완료했습니다.",
+    "data": {
+        "manifest": {
+            "identifier": "sirsoft-board",
+            "vendor": "sirsoft",
+            "name": "게시판",
+            "version": "1.0.0",
+            "g7_version": "7.0.0"
+        },
+        "validation": {
+            "errors": [],
+            "is_valid": true,
+            "already_installed": false,
+            "existing_version": null
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 파일 검증 실패(ZIP 아님·50MB 초과), 또는 미리보기 처리 실패 (`module.preview_failed` — `error.error` 에 사유) |
 
 <!-- @generated:end -->
 
@@ -708,19 +1039,74 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 갱신된 모듈의 `ModuleResource` 객체 (목록 응답 항목과 동일 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 모듈 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 모듈 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched) |
+| status | string | `active` | 모듈 상태 (레이아웃 갱신은 활성 모듈만 가능) |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈 레이아웃이 성공적으로 갱신되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "active",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패, 또는 레이아웃 갱신 실패 (모듈 미존재·비활성 상태 — `modules.refresh_layouts_failed`) |
+| 500 | Internal Server Error | 갱신 처리 중 예외 발생 (`module.refresh_layouts_failed`) |
 
 <!-- @generated:end -->
 
@@ -753,19 +1139,25 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만). 컨트롤러가 `success('module.uninstall_success')` 를 데이터 인자 없이 호출합니다._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 제거되었습니다."
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 제거 처리 중 예외 발생 (`module.uninstall_failed`) |
 
 <!-- @generated:end -->
 
@@ -850,7 +1242,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -908,7 +1300,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
@@ -944,12 +1336,12 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| identifier | string | `sirsoft-basic` | 모듈 고유 식별자 (vendor-module 형식) |
-| name | string | `Basic` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
-| version | string | `1.0.4` | 모듈 버전 |
-| type | string | `user` | <!-- TODO: 설명 --> |
-| status | string | `active` | 상태 값 (도메인별 상태 집합 — 사람이 읽는 라벨은 status_label, UI 변형은 status_variant 참조) |
-| required_version | string | `>=1.0.5` | <!-- TODO: 설명 --> |
+| identifier | string | `gnuboard7-hello_module` | 모듈 고유 식별자 (vendor-module 형식) |
+| name | string | `Hello 모듈` | 모듈 이름 (다국어 JSON) |
+| version | string | `0.1.0` | 모듈 버전 |
+| type | string | `user` | 의존 템플릿의 타입 (admin: 관리자 템플릿 / user: 사용자 템플릿) |
+| status | string | `uninstalled` | 상태 (active: 활성화, inactive: 비활성화, installing: 설치 중, uninstalling: 제거 중, updating: 업데이트 중) |
+| required_version | string | `>=1.0.0` | 요구되는 최소 버전 |
 
 **응답 예시**
 
@@ -982,7 +1374,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
@@ -1041,7 +1433,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
@@ -1073,20 +1465,94 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`ModuleResource::toDetailArray()` + 주입된 `language_packs`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 모듈 고유 식별자 (vendor-module 형식) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 모듈 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| requires_core | string\|null | `7.0.0` | 요구하는 코어 최소 버전 (manifest `g7_version`) |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched — identifier/name/type/required_version/installed_version/is_active/is_met) |
+| status | string | `active` | 상태 (`active` \| `inactive` \| `installing` \| `uninstalling` \| `updating` \| `uninstalled`) |
+| is_installed | boolean | `true` | 활성 디렉토리에 설치되어 DB 레코드가 있는지 여부 |
+| permissions | array | `[]` | manifest 가 선언한 권한 카테고리 목록 |
+| roles | array | `[]` | manifest 가 선언한 역할 목록 |
+| admin_menus | array | `[]` | manifest 가 선언한 관리자 메뉴 정의 |
+| license | string\|null | `MIT` | 라이선스 식별자 |
+| layouts_count | integer | `12` | 모듈이 제공하는 레이아웃 파일 수 |
+| config | object | `{}` | manifest 의 config 블록 |
+| metadata | object | `{"identifier":"sirsoft-board", ...}` | manifest 원본 메타데이터 |
+| update_available | boolean | `false` | 최신 버전 대비 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 (`github` \| `bundled`) |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일의 manifest 버전 |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 (`manual` \| `incompatible_core`) |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| created_at | string\|null | `2026-07-01 09:00:00` | 설치(레코드 생성) 일시 (사용자 타임존 변환) |
+| updated_at | string\|null | `2026-07-10 11:20:00` | 최종 갱신 일시 (사용자 타임존 변환) |
+| language_packs | array | `[]` | 이 모듈을 대상으로 하는 언어팩 목록 (`LanguagePackResource` — identifier/locale/version/status 등). 없으면 빈 배열 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈을 성공적으로 가져왔습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.0",
+        "description": "게시판 관리를 위한 모듈",
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "requires_core": "7.0.0",
+        "dependencies": [],
+        "status": "active",
+        "is_installed": true,
+        "permissions": [],
+        "roles": [],
+        "admin_menus": [],
+        "license": "MIT",
+        "layouts_count": 12,
+        "config": {},
+        "metadata": {
+            "identifier": "sirsoft-board",
+            "vendor": "sirsoft",
+            "version": "1.0.0"
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "created_at": "2026-07-01 09:00:00",
+        "updated_at": "2026-07-10 11:20:00",
+        "language_packs": []
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 모듈이 활성/_pending/_bundled 어디에도 없는 경우 (`module.not_found`) |
+| 500 | Internal Server Error | 조회 중 예외 발생 (`module.fetch_failed`) |
 
 <!-- @generated:end -->
 
@@ -1116,20 +1582,48 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| has_modified_layouts | boolean | `true` | 사용자가 수정한 레이아웃이 하나라도 있는지 여부 (원본 content 해시와 현재 해시 비교) |
+| modified_count | integer | `2` | 수정된 레이아웃 수 |
+| modified_layouts | array | `[{"id":31, ...}]` | 수정된 레이아웃 목록 (아래 하위 필드) |
+| modified_layouts[].id | integer | `31` | 레이아웃 ID |
+| modified_layouts[].name | string | `admin/board/index` | 레이아웃 이름 |
+| modified_layouts[].updated_at | string\|null | `2026-07-10 11:20:00` | 최종 수정 일시 (`Y-m-d H:i:s`) |
+| modified_layouts[].size_diff | integer | `128` | 원본 대비 현재 content 크기 차이(바이트, 음수 가능) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "수정된 레이아웃 확인이 완료되었습니다.",
+    "data": {
+        "has_modified_layouts": true,
+        "modified_count": 1,
+        "modified_layouts": [
+            {
+                "id": 31,
+                "name": "admin/board/index",
+                "updated_at": "2026-07-10 11:20:00",
+                "size_diff": 128
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read`)이 없는 경우 |
-| 404 | Not Found | 해당 식별자의 모듈이 설치되어 있지 않은 경우 (레이아웃 0건과 구분됨) |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 모듈이 활성/_pending/_bundled 어디에도 없는 경우 (`module.not_found`) |
+| 422 | Unprocessable Entity | 수정 레이아웃 확인 실패 (`modules.check_modified_layouts_failed` — `error.errors.module_name`) |
+| 500 | Internal Server Error | 확인 처리 중 예외 발생 |
 
 <!-- @generated:end -->
 
@@ -1159,20 +1653,84 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`target` + `dependencies[]` + `language_packs[]`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| target.identifier | string | `sirsoft-ecommerce` | 설치 대상 모듈 식별자 |
+| target.name | string\|null | `이커머스` | 설치 대상 모듈 이름 (현재 로케일) |
+| target.version | string\|null | `1.0.1` | 설치 대상 모듈 버전 |
+| dependencies | array | `[{"type":"module", ...}]` | 의존 확장 cascade 후보 목록 (아래 하위 필드) |
+| dependencies[].type | string | `module` | 의존 확장 유형 (`module` \| `plugin`) |
+| dependencies[].identifier | string | `sirsoft-board` | 의존 확장 식별자 |
+| dependencies[].name | string\|null | `게시판` | 의존 확장 이름 |
+| dependencies[].required_version | string\|null | `^1.0` | manifest 가 요구하는 버전 제약 |
+| dependencies[].installed_version | string\|null | `null` | 현재 설치된 버전 (미설치면 null) |
+| dependencies[].is_installed | boolean | `false` | 설치 여부 |
+| dependencies[].is_active | boolean | `false` | 활성 여부 |
+| dependencies[].is_met | boolean | `false` | 의존 조건 충족 여부 |
+| dependencies[].available | boolean | `true` | cascade 후보로 선택 가능한지 (미충족 의존성만 true) |
+| dependencies[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 (미충족 + 미설치 시 true) |
+| language_packs | array | `[{"bundled_identifier":"g7-module-sirsoft-ecommerce-ja", ...}]` | 함께 설치 가능한 미설치 번들 언어팩 목록 (아래 하위 필드) |
+| language_packs[].bundled_identifier | string | `g7-module-sirsoft-ecommerce-ja` | 번들 언어팩 식별자 (install API 의 `language_packs[]` 값) |
+| language_packs[].locale | string | `ja` | 언어 코드 |
+| language_packs[].locale_native_name | string\|null | `日本語` | 현지 표기 언어명 |
+| language_packs[].locale_name | string\|null | `일본어` | 언어명 |
+| language_packs[].version | string | `1.0.0` | 언어팩 버전 |
+| language_packs[].depends_on_extension | string\|null | `null` | 이 언어팩이 귀속된 의존 확장 식별자 (본 확장용이면 null) |
+| language_packs[].available | boolean | `true` | 선택 가능 여부 (항상 true — 미설치 항목만 수집) |
+| language_packs[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈을 성공적으로 가져왔습니다.",
+    "data": {
+        "target": {
+            "identifier": "sirsoft-ecommerce",
+            "name": "이커머스",
+            "version": "1.0.1"
+        },
+        "dependencies": [
+            {
+                "type": "module",
+                "identifier": "sirsoft-board",
+                "name": "게시판",
+                "required_version": "^1.0",
+                "installed_version": null,
+                "is_installed": false,
+                "is_active": false,
+                "is_met": false,
+                "available": true,
+                "default_selected": true
+            }
+        ],
+        "language_packs": [
+            {
+                "bundled_identifier": "g7-module-sirsoft-ecommerce-ja",
+                "locale": "ja",
+                "locale_native_name": "日本語",
+                "locale_name": "일본어",
+                "version": "1.0.0",
+                "depends_on_extension": null,
+                "available": true,
+                "default_selected": true
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 모듈이 활성/_pending/_bundled 어디에도 없는 경우 (`module.not_found`) |
+| 500 | Internal Server Error | 대상 확장을 찾을 수 없거나 프리뷰 빌드 중 예외 발생 (`module.fetch_failed`) |
 
 <!-- @generated:end -->
 
@@ -1202,20 +1760,70 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| tables | array | `[{"name":"board_posts", ...}]` | 모듈이 소유한 DB 테이블 목록 (마이그레이션 정적 추출 + 동적 테이블 병합). 각 항목: `name`, `size_bytes`(MySQL 외 드라이버는 null), `size_formatted` |
+| storage_directories | array | `[{"name":"attachments", ...}]` | `storage/app/modules/{identifier}` 하위 1-depth 디렉토리 목록. 각 항목: `name`, `size_bytes`, `size_formatted` |
+| vendor_directory | object\|null | `{"items":[...],"total_size_bytes":10485760, ...}` | Composer vendor 디렉토리·composer.lock 정보 (둘 다 없으면 null). `items[]` 각 항목: `name`, `size_bytes`, `size_formatted` |
+| extension_directory | object\|null | `{"path":"modules/sirsoft-board", ...}` | 모듈 설치 디렉토리 정보 (`path`, `size_bytes`, `size_formatted`). 디렉토리 없으면 null |
+| shared_records | array | `[{"table":"layouts","label_key":"layouts","count":12}]` | 코어 공유 테이블에 적재된 이 모듈의 레코드 수 (`delete_data=true` 시 정리 대상). 0건 항목은 제외 |
+| total_table_size_bytes | integer | `2097152` | 모듈 테이블 용량 합계(바이트) |
+| total_table_size_formatted | string | `2 MB` | 모듈 테이블 용량 합계(사람이 읽는 형식) |
+| total_storage_size_bytes | integer | `524288` | 스토리지 디렉토리 용량 합계(바이트) |
+| total_storage_size_formatted | string | `512 KB` | 스토리지 디렉토리 용량 합계(사람이 읽는 형식) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈 삭제 정보를 성공적으로 조회했습니다.",
+    "data": {
+        "tables": [
+            {
+                "name": "board_posts",
+                "size_bytes": 2097152,
+                "size_formatted": "2 MB"
+            }
+        ],
+        "storage_directories": [
+            {
+                "name": "attachments",
+                "size_bytes": 524288,
+                "size_formatted": "512 KB"
+            }
+        ],
+        "vendor_directory": null,
+        "extension_directory": {
+            "path": "modules/sirsoft-board",
+            "size_bytes": 1048576,
+            "size_formatted": "1 MB"
+        },
+        "shared_records": [
+            {
+                "table": "layouts",
+                "label_key": "layouts",
+                "count": 12
+            }
+        ],
+        "total_table_size_bytes": 2097152,
+        "total_table_size_formatted": "2 MB",
+        "total_storage_size_bytes": 524288,
+        "total_storage_size_formatted": "512 KB"
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 모듈을 찾을 수 없는 경우 (`module.not_found`) |
+| 500 | Internal Server Error | 삭제 정보 조회 중 예외 발생 (`module.uninstall_info_failed`) |
 
 <!-- @generated:end -->
 
@@ -1259,20 +1867,75 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 업데이트된 모듈의 `ModuleResource` 객체 (목록 응답 항목과 동일 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-board` | 모듈 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `게시판` | 모듈 이름 (현재 로케일로 해석) |
+| version | string | `1.0.1` | 업데이트 후 버전 |
+| description | string | `게시판 관리를 위한 모듈` | 모듈 설명 |
+| dependencies | array | `[]` | 의존 확장 목록 (enriched) |
+| status | string | `active` | 업데이트 후 복원된 상태 |
+| assets | object\|null | `null` | 프론트엔드 에셋 매니페스트 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `null` | 설치된 파일 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-module-sirsoft-board` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소 항목 여부 |
+| is_bundled | boolean | `false` | 코어 선탑재 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 요구 코어 버전 미충족 시 필요한 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자가 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "모듈이 성공적으로 업데이트되었습니다.",
+    "data": {
+        "identifier": "sirsoft-board",
+        "vendor": "sirsoft",
+        "name": "게시판",
+        "version": "1.0.1",
+        "description": "게시판 관리를 위한 모듈",
+        "dependencies": [],
+        "status": "active",
+        "assets": null,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": null,
+        "github_url": "https://github.com/gnuboard/g7-module-sirsoft-board",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 모듈을 찾을 수 없는 경우 (`module.not_found`) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패, 또는 업데이트 실패 (업데이트 소스 없음·다운그레이드 차단·코어 버전 비호환 — `error.errors.module_name` 에 사유) |
+| 500 | Internal Server Error | 업데이트 처리 중 예외 발생 (`modules.errors.update_failed`) |
 
 <!-- @generated:end -->
 
@@ -1343,20 +2006,27 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 요청한 에셋 파일의 원본 바이트를 그대로 서빙합니다 (`Content-Type` 은 파일 MIME, `ETag` + `Cache-Control: max-age=31536000`). 에러 시에만 표준 JSON 에러 봉투를 반환합니다._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/javascript
+ETag: "a1b2c3d4e5f6"
+Cache-Control: public, max-age=31536000
+
+(에셋 파일 원본 내용)
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 허용되지 않은 파일 확장자를 요청한 경우 (`modules.errors.file_type_not_allowed`) |
+| 404 | Not Found | 모듈이 없거나 비활성 상태인 경우, 또는 요청한 파일이 없는 경우 (`modules.errors.not_found` / `modules.errors.file_not_found`) |
+| 422 | Unprocessable Entity | 경로 검증 실패 (경로 탈출 시도 등 — FormRequest 검증) |
+| 500 | Internal Server Error | 알 수 없는 오류 (`modules.errors.unknown_error`) |
 
 <!-- @generated:end -->
 
@@ -1383,19 +2053,22 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 활성 모듈 CSS 를 병합한 원본 텍스트를 `text/css` 로 서빙합니다 (`ETag` + 환경별 `Cache-Control`). 활성 global 모듈 에셋이 없으면 빈 본문의 200 응답._
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/css
+ETag: "a1b2c3d4e5f6"
+Cache-Control: public, max-age=31536000
+
+(활성 모듈 CSS 병합 내용)
+```
 
 **에러 응답**
 
-| 상태코드 | 의미 | 발생 조건 |
-| --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+_에러 응답 없음 — 공개 엔드포인트이며, 병합 대상이 없어도 빈 본문의 200(text/css)을 반환합니다._
 
 <!-- @generated:end -->
 
@@ -1422,19 +2095,22 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 활성 모듈 IIFE JS 를 병합한 원본 텍스트를 `text/javascript` 로 서빙합니다 (`ETag` + 환경별 `Cache-Control`). 활성 global 모듈 에셋이 없으면 빈 본문의 200 응답._
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/javascript
+ETag: "a1b2c3d4e5f6"
+Cache-Control: public, max-age=31536000
+
+(활성 모듈 IIFE JS 병합 내용)
+```
 
 **에러 응답**
 
-| 상태코드 | 의미 | 발생 조건 |
-| --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+_에러 응답 없음 — 공개 엔드포인트이며, 병합 대상이 없어도 빈 본문의 200(text/javascript)을 반환합니다._
 
 <!-- @generated:end -->
 
@@ -1589,7 +2265,19 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+
+
+_이 엔드포인트는 표준 `success/message/data` 봉투를 사용하지 않습니다 — 모듈의 `components.json` 파일 내용을 최상위 JSON 으로 그대로 반환합니다 (1시간 캐시). 파일 미생성(구버전 모듈) 시 빈 객체로 폴백._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| $schema | string | `https://json-schema.org/draft/2020-12/schema` | 컴포넌트 매니페스트 JSON 스키마 URL |
+| identifier | string | `sirsoft-ecommerce` | 컴포넌트를 제공하는 모듈 식별자 (네임스페이스 병합 키) |
+| version | string | `1.0.0-beta.5` | 컴포넌트 매니페스트 버전 |
+| components | object | `{"basic":[],"composite":[],"layout":[]}` | 타입별 컴포넌트 정의 묶음 |
+| components.basic | array | `[]` | Basic 타입 컴포넌트 정의 목록 |
+| components.composite | array | `[]` | Composite 타입 컴포넌트 정의 목록 |
+| components.layout | array | `[]` | Layout 타입 컴포넌트 정의 목록 |
 
 **응답 예시**
 
@@ -1600,7 +2288,7 @@ Accept: application/json
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
@@ -1693,7 +2381,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.modules.read | core.menus.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.modules.read \| core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 

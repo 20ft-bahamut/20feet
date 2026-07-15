@@ -38,11 +38,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-500 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-500 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "회원 탈퇴가 완료되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -309,11 +315,83 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`UserResource::toArray()` 산물 — GET /api/me 의 `toProfileArray()` 와 필드 구성이 다르다)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| uuid | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `홍길동` | 사용자 이름 |
+| nickname | string\|null | `gildong` | 닉네임 |
+| email | string | `user@example.com` | 이메일 주소 |
+| avatar | string\|null | `null` | 아바타 이미지 URL (`User::getAvatarUrl()` 산물, 미등록 시 null) |
+| language | string | `ko` | 사용자 언어 설정 (ko: 한국어, en: 영어) |
+| language_label | string\|null | `한국어` | 언어 코드의 다국어 라벨 (`user.language.{code}` 번역문) |
+| country | string\|null | `KR` | 국가 코드 (ISO 3166-1 alpha-2) |
+| status | string | `active` | 계정 상태 (active, inactive, blocked, withdrawn, pending_verification) |
+| status_label | string\|null | `활성` | 상태의 사람이 읽는 라벨 (UserStatus::label() 산물) |
+| status_variant | string\|null | `success` | 상태 표시 색상/스타일 변형 키 (UserStatus::variant() 산물 — UI 배지용) |
+| is_admin | boolean | `false` | 관리자 역할 보유 여부 (`User::isAdmin()` — 역할 관계 기반 파생) |
+| homepage | string\|null | `https://example.com` | 홈페이지 URL |
+| mobile | string\|null | `010-1234-5678` | 휴대폰 번호 |
+| phone | string\|null | `02-123-4567` | 전화번호 |
+| zipcode | string\|null | `06234` | 우편번호 |
+| address | string\|null | `서울특별시 강남구 테헤란로 1` | 기본 주소 |
+| address_detail | string\|null | `101동 202호` | 상세 주소 |
+| signature | string\|null | `null` | 서명 |
+| bio | string\|null | `null` | 자기소개 |
+| last_login_at | string\|null | `2026-07-07 10:41:24` | 마지막 로그인 일시 (사용자 시간대 기준 문자열) |
+| email_verified_at | string\|null | `null` | 이메일 인증 일시 (미인증 시 null) |
+| timezone | string\|null | `Asia/Seoul` | 사용자 시간대 (예: Asia/Seoul, UTC) |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 (사용자 시간대 기준 문자열) |
+| updated_at | string | `2026-07-08 11:02:10` | 수정 일시 (사용자 시간대 기준 문자열) |
+| is_owner | boolean | `true` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_read":false,"can_create":false,"can_update":false,"can_delete":false,"can_assign_roles":false}` | 현재 사용자의 이 리소스에 대한 권한 맵 (core.users.read/create/update/delete, core.permissions.update 기준. 슈퍼관리자 계정은 `can_delete` 가 항상 false) |
+
+관계형 필드(`modules`, `plugins`, `menus`, `roles`, `permissions`, `consents`, `terms_consent`, `privacy_consent`)와 카운트 필드(`modules_count`, `plugins_count`, `menus_count`)는 해당 관계가 로드된 경우에만 응답에 포함된다 (프로필 수정 응답에서는 로드하지 않으므로 나타나지 않는다).
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "사용자 정보가 성공적으로 업데이트되었습니다.",
+    "data": {
+        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "name": "예시 이름",
+        "nickname": "예시 이름",
+        "email": "user@example.com",
+        "avatar": null,
+        "language": "ko",
+        "language_label": "한국어",
+        "country": "KR",
+        "status": "active",
+        "status_label": "활성",
+        "status_variant": "success",
+        "is_admin": false,
+        "homepage": "https://example.com",
+        "mobile": "010-1234-5678",
+        "phone": "010-1234-5678",
+        "zipcode": "06234",
+        "address": "서울특별시 강남구 테헤란로 1",
+        "address_detail": "서울특별시 강남구 테헤란로 1",
+        "signature": "예시값",
+        "bio": "예시 내용입니다.",
+        "last_login_at": "2026-07-07 10:41:24",
+        "email_verified_at": null,
+        "timezone": "Asia/Seoul",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 11:02:10",
+        "is_owner": true,
+        "abilities": {
+            "can_read": false,
+            "can_create": false,
+            "can_update": false,
+            "can_delete": false,
+            "can_assign_roles": false
+        }
+    }
+}
+```
 
 **에러 응답**
 

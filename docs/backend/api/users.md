@@ -293,11 +293,85 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (생성된 사용자 — `UserResource::toArray()`, 관계 미로드이므로 modules/plugins/menus/roles/permissions/consents 키는 응답에 포함되지 않음)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| uuid | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `API 문서 샘플 사용자` | 사용자 이름 |
+| nickname | string\|null | `null` | 닉네임 |
+| email | string | `apidoc-sample-user@example.com` | 이메일 주소 |
+| avatar | string\|null | `null` | 프로필 아바타 이미지 URL (미설정 시 null) |
+| language | string | `ko` | 사용자 언어 설정 (ko: 한국어, en: English) |
+| language_label | string | `한국어` | 언어 코드의 현지화 라벨 (`user.language.{code}` 번역) |
+| country | string\|null | `KR` | 국가 코드 (ISO 3166-1 alpha-2) |
+| status | string | `active` | 계정 상태 (UserStatus Enum: active/inactive/blocked/withdrawn) |
+| status_label | string | `활성` | 상태의 사람이 읽는 라벨 (UserStatus::label()) |
+| status_variant | string | `success` | 상태 표시 색상/스타일 변형 키 (UserStatus::variant() — UI 배지용) |
+| is_admin | boolean | `false` | 관리자 역할 보유 여부 (User::isAdmin()) |
+| homepage | string\|null | `null` | 홈페이지 URL |
+| mobile | string\|null | `null` | 휴대폰 번호 |
+| phone | string\|null | `null` | 전화번호 |
+| zipcode | string\|null | `null` | 우편번호 |
+| address | string\|null | `null` | 기본 주소 |
+| address_detail | string\|null | `null` | 상세 주소 |
+| signature | string\|null | `null` | 서명 |
+| bio | string\|null | `null` | 자기소개 |
+| last_login_at | string\|null | `null` | 마지막 로그인 일시 (신규 생성 시 null) |
+| email_verified_at | string\|null | `null` | 이메일 인증 일시 (미인증 시 null) |
+| timezone | string\|null | `Asia/Seoul` | 사용자 시간대 |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 10:41:24` | 최종 수정 일시 |
+| is_owner | boolean | `false` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_read":true,"can_create":true,"can_update":true,"can_delete":true,"can_assign_roles":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (슈퍼관리자 대상은 can_delete=false 강제) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "사용자가 성공적으로 생성되었습니다.",
+    "data": {
+        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "name": "예시 이름",
+        "nickname": null,
+        "email": "user@example.com",
+        "avatar": null,
+        "language": "ko",
+        "language_label": "한국어",
+        "country": "KR",
+        "status": "active",
+        "status_label": "활성",
+        "status_variant": "success",
+        "is_admin": false,
+        "homepage": null,
+        "mobile": "010-1234-5678",
+        "phone": null,
+        "zipcode": null,
+        "address": null,
+        "address_detail": null,
+        "signature": null,
+        "bio": null,
+        "last_login_at": null,
+        "email_verified_at": null,
+        "timezone": "Asia/Seoul",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 10:41:24",
+        "is_owner": false,
+        "abilities": {
+            "can_read": true,
+            "can_create": true,
+            "can_update": true,
+            "can_delete": true,
+            "can_assign_roles": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -306,6 +380,7 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 사용자 생성 중 예외 발생 (`user.create_failed`, `errors.error` 에 예외 메시지) |
 
 <!-- @generated:end -->
 
@@ -348,11 +423,29 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (UserService::bulkUpdateStatus() 반환값)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| updated_count | integer | `3` | 실제로 상태가 변경된 사용자 수 (요청자 본인 제외 규칙 적용 후 갱신된 행 수) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": ":count명의 사용자 상태가 변경되었습니다.",
+    "data": {
+        "updated_count": 3
+    }
+}
+```
+
+> `user.bulk_status_updated` 메시지는 `:count` 치환자를 갖지만 컨트롤러가 messageParams 를 넘기지 않으므로 응답 message 에는 치환되지 않은 원문이 그대로 담긴다. 실제 변경 건수는 `data.updated_count` 로 판단한다.
 
 **에러 응답**
 
@@ -360,7 +453,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — 예: 요청자 본인 UUID 포함 시 `ExcludeCurrentUser` 위반) |
+| 500 | Internal Server Error | 일괄 변경 중 예외 발생 (`user.bulk_update_status_failed`) |
 
 <!-- @generated:end -->
 
@@ -401,11 +495,29 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| available | boolean | `true` | 해당 이메일의 사용 가능 여부 (true: 사용 가능, false: 이미 사용 중). `exclude_user_id` 로 지정한 사용자가 소유한 이메일이면 true 로 판정 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "사용 가능한 이메일입니다.",
+    "data": {
+        "available": true
+    }
+}
+```
+
+> 이미 사용 중인 이메일이면 동일한 200 응답에 `message` 가 `이미 사용 중인 이메일입니다.` (`user.email_unavailable`), `data.available` 이 `false` 로 반환된다.
 
 **에러 응답**
 
@@ -413,7 +525,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — 이메일 형식/필수, exclude_user_id UUID 형식·존재 여부) |
+| 500 | Internal Server Error | 중복 확인 중 예외 발생 (`user.email_check_failed`) |
 
 <!-- @generated:end -->
 
@@ -695,11 +808,87 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data[]` 배열 항목의 필드 (페이지네이션 없는 단순 컬렉션 — `UserResource::collection()`, 관계 미로드이므로 modules/plugins/menus/roles/permissions/consents 키는 포함되지 않음). 일치하는 사용자가 없으면 `data` 는 빈 배열._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| uuid | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `API 문서 샘플 사용자` | 사용자 이름 |
+| nickname | string\|null | `null` | 닉네임 |
+| email | string | `apidoc-sample-user@example.com` | 이메일 주소 |
+| avatar | string\|null | `null` | 프로필 아바타 이미지 URL (미설정 시 null) |
+| language | string | `ko` | 사용자 언어 설정 (ko: 한국어, en: English) |
+| language_label | string | `한국어` | 언어 코드의 현지화 라벨 (`user.language.{code}` 번역) |
+| country | string\|null | `KR` | 국가 코드 (ISO 3166-1 alpha-2) |
+| status | string | `active` | 계정 상태 (UserStatus Enum: active/inactive/blocked/withdrawn) |
+| status_label | string | `활성` | 상태의 사람이 읽는 라벨 (UserStatus::label()) |
+| status_variant | string | `success` | 상태 표시 색상/스타일 변형 키 (UserStatus::variant() — UI 배지용) |
+| is_admin | boolean | `true` | 관리자 역할 보유 여부 (User::isAdmin()) |
+| homepage | string\|null | `null` | 홈페이지 URL |
+| mobile | string\|null | `null` | 휴대폰 번호 |
+| phone | string\|null | `null` | 전화번호 |
+| zipcode | string\|null | `null` | 우편번호 |
+| address | string\|null | `null` | 기본 주소 |
+| address_detail | string\|null | `null` | 상세 주소 |
+| signature | string\|null | `null` | 서명 |
+| bio | string\|null | `null` | 자기소개 |
+| last_login_at | string\|null | `2026-07-07 10:41:24` | 마지막 로그인 일시 (미로그인 시 null) |
+| email_verified_at | string\|null | `2026-07-08 10:41:24` | 이메일 인증 일시 (미인증 시 null) |
+| timezone | string\|null | `Asia/Seoul` | 사용자 시간대 |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 10:41:24` | 최종 수정 일시 |
+| is_owner | boolean | `false` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_read":true,"can_create":true,"can_update":true,"can_delete":true,"can_assign_roles":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "사용자 검색을 성공적으로 완료했습니다.",
+    "data": [
+        {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "nickname": null,
+            "email": "apidoc-sample-user@example.com",
+            "avatar": null,
+            "language": "ko",
+            "language_label": "한국어",
+            "country": "KR",
+            "status": "active",
+            "status_label": "활성",
+            "status_variant": "success",
+            "is_admin": true,
+            "homepage": null,
+            "mobile": null,
+            "phone": null,
+            "zipcode": null,
+            "address": null,
+            "address_detail": null,
+            "signature": null,
+            "bio": null,
+            "last_login_at": "2026-07-07 10:41:24",
+            "email_verified_at": "2026-07-08 10:41:24",
+            "timezone": "Asia/Seoul",
+            "created_at": "2026-07-08 10:41:24",
+            "updated_at": "2026-07-08 10:41:24",
+            "is_owner": true,
+            "abilities": {
+                "can_read": true,
+                "can_create": true,
+                "can_update": true,
+                "can_delete": true,
+                "can_assign_roles": true
+            }
+        }
+    ]
+}
+```
 
 **에러 응답**
 
@@ -707,7 +896,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — `keyword`/`uuid` 를 모두 생략한 경우 포함) |
+| 500 | Internal Server Error | 검색 중 예외 발생 (`user.search_failed`) |
 
 <!-- @generated:end -->
 
@@ -809,7 +999,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `data` 는 `null`)._
 
 **응답 예시**
 
@@ -1151,11 +1341,85 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 사용자 — `UserResource::toArray()`, 관계 미로드이므로 modules/plugins/menus/roles/permissions/consents 키는 응답에 포함되지 않음)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| uuid | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `API 문서 샘플 사용자` | 사용자 이름 |
+| nickname | string\|null | `null` | 닉네임 |
+| email | string | `apidoc-sample-user@example.com` | 이메일 주소 |
+| avatar | string\|null | `null` | 프로필 아바타 이미지 URL (미설정 시 null) |
+| language | string | `ko` | 사용자 언어 설정 (ko: 한국어, en: English) |
+| language_label | string | `한국어` | 언어 코드의 현지화 라벨 (`user.language.{code}` 번역) |
+| country | string\|null | `KR` | 국가 코드 (ISO 3166-1 alpha-2) |
+| status | string | `active` | 계정 상태 (UserStatus Enum: active/inactive/blocked/withdrawn) |
+| status_label | string | `활성` | 상태의 사람이 읽는 라벨 (UserStatus::label()) |
+| status_variant | string | `success` | 상태 표시 색상/스타일 변형 키 (UserStatus::variant() — UI 배지용) |
+| is_admin | boolean | `true` | 관리자 역할 보유 여부 (User::isAdmin()) |
+| homepage | string\|null | `https://example.com` | 홈페이지 URL |
+| mobile | string\|null | `010-1234-5678` | 휴대폰 번호 |
+| phone | string\|null | `null` | 전화번호 |
+| zipcode | string\|null | `null` | 우편번호 |
+| address | string\|null | `null` | 기본 주소 |
+| address_detail | string\|null | `null` | 상세 주소 |
+| signature | string\|null | `null` | 서명 |
+| bio | string\|null | `null` | 자기소개 |
+| last_login_at | string\|null | `2026-07-07 10:41:24` | 마지막 로그인 일시 (미로그인 시 null) |
+| email_verified_at | string\|null | `2026-07-08 10:41:24` | 이메일 인증 일시 (미인증 시 null) |
+| timezone | string\|null | `Asia/Seoul` | 사용자 시간대 |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 11:02:07` | 최종 수정 일시 |
+| is_owner | boolean | `false` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_read":true,"can_create":true,"can_update":true,"can_delete":true,"can_assign_roles":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (슈퍼관리자 대상은 can_delete=false 강제) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "사용자 정보가 성공적으로 업데이트되었습니다.",
+    "data": {
+        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "name": "예시 이름",
+        "nickname": null,
+        "email": "user@example.com",
+        "avatar": null,
+        "language": "ko",
+        "language_label": "한국어",
+        "country": "KR",
+        "status": "active",
+        "status_label": "활성",
+        "status_variant": "success",
+        "is_admin": false,
+        "homepage": "https://example.com",
+        "mobile": "010-1234-5678",
+        "phone": null,
+        "zipcode": null,
+        "address": null,
+        "address_detail": null,
+        "signature": null,
+        "bio": null,
+        "last_login_at": null,
+        "email_verified_at": null,
+        "timezone": "Asia/Seoul",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 11:02:07",
+        "is_owner": false,
+        "abilities": {
+            "can_read": true,
+            "can_create": true,
+            "can_update": true,
+            "can_delete": true,
+            "can_assign_roles": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -1164,7 +1428,8 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — 마지막 관리자 본인의 admin 역할 제거 시도 시 `user.last_admin_role_cannot_remove` 포함) |
+| 500 | Internal Server Error | 수정 중 예외 발생 (`user.update_failed`, `errors.error` 에 예외 메시지) |
 
 <!-- @generated:end -->
 

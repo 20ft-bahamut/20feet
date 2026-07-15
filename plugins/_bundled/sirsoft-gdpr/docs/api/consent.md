@@ -53,15 +53,38 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| user_id | integer\|null | `6` | 동의를 저장한 회원의 식별자. 게스트 호출이면 `null` 입니다 |
+| session_id | string\|null | `9f1c1c1e-4b2a-4d0e-9d3f-1a2b3c4d5e6f` | 게스트 호출 시 사용된 세션 식별자(`gdpr_session` 쿠키 값 또는 신규 발급 UUID). 회원 호출이면 `null` 입니다 |
+| consents | object | `{"cookie_necessary":true,"cookie_analytics":false}` | 이번 요청으로 저장된 카테고리별 동의 값(요청 본문의 `consents` 를 그대로 반향). 키는 `cookie_` 접두사가 붙은 consent_key, 값은 boolean 입니다 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "동의가 저장되었습니다.",
+    "data": {
+        "user_id": null,
+        "session_id": "9f1c1c1e-4b2a-4d0e-9d3f-1a2b3c4d5e6f",
+        "consents": {
+            "cookie_necessary": true,
+            "cookie_functional": true,
+            "cookie_analytics": false,
+            "cookie_marketing": false
+        }
+    }
+}
+```
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 422 | Validation Error | `consents` 누락/비배열/빈 배열, 값이 boolean 이 아님, `source` 가 `banner\|preference_center\|register\|mypage` 외의 값, 카탈로그에 없는 consent_key 전달(`유효하지 않은 동의 항목입니다.`), 필수 카테고리를 `false` 로 전달(`필수 항목은 철회할 수 없습니다.`) |
 
 <!-- @generated:end -->
 
@@ -108,7 +131,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "has_consented": false,
         "consents": [],
@@ -121,7 +144,7 @@ HTTP/1.1 200
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_
+_에러 응답 없음 — 공개 조회 엔드포인트입니다. 요청 파라미터가 없어 검증 실패(422)가 발생하지 않고, 컨트롤러/Service 가 도메인 예외를 던지지 않습니다. 미인증 호출도 게스트로 정상 처리되어 401 도 발생하지 않습니다._
 
 <!-- @generated:end -->
 
@@ -149,17 +172,30 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| consent_key | string | `cookie_analytics` | 이번 호출로 동의(`true`)가 부여된 동의 항목 키. 요청 본문의 `consent_key` 를 그대로 반향하며, 프론트가 해당 행만 갱신하는 데 사용합니다 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "동의가 갱신되었습니다.",
+    "data": {
+        "consent_key": "cookie_analytics"
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 422 | Validation Error | `consent_key` 누락/문자열 아님/50자 초과, 또는 쿠키 카테고리 카탈로그에 없는 키(`유효하지 않은 동의 항목입니다.`) |
 
 <!-- @generated:end -->
 
@@ -202,7 +238,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "histories": []
     }
@@ -259,7 +295,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "user_id": 6,
         "needs_renewal": false,
@@ -424,17 +460,30 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| consent_key | string | `cookie_marketing` | 이번 호출로 철회(`false`)된 동의 항목 키. 요청 본문의 `consent_key` 를 그대로 반향하며, 프론트가 해당 행만 갱신하는 데 사용합니다 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "동의가 철회되었습니다.",
+    "data": {
+        "consent_key": "cookie_marketing"
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 422 | Validation Error | `consent_key` 누락/문자열 아님/50자 초과, 카탈로그에 없는 키(`유효하지 않은 동의 항목입니다.`), 또는 필수(strictly necessary) 카테고리 철회 시도(`필수 항목은 철회할 수 없습니다.`) |
 
 <!-- @generated:end -->
 

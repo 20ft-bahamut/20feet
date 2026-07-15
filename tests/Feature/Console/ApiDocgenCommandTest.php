@@ -220,6 +220,54 @@ class ApiDocgenCommandTest extends TestCase
     }
 
     /**
+     * (e-2) --check 는 실측 제외를 drift 로 보지 않습니다.
+     *
+     * 회귀: `--check` 가 `skipped_reason` 이 있는 엔드포인트(쓰기 메서드·부수효과·미치환 path)를
+     * 전부 drift 로 집계해 **항상 FAILURE** 를 반환했다. 실측 제외는 설계상 정상 동작이며
+     * (부수효과 쓰기는 의도적으로 호출하지 않는다), 그 자리는 사람이 코드 근거로 채운다.
+     * 실측 제외를 결함으로 세면 문서가 완전해도 통과할 수 없어 기준이 무의미해진다.
+     *
+     * drift 판정 대상은 (1) 문서 파일 부재 (2) 미채움 마커 잔존 두 가지다.
+     */
+    #[Test]
+    public function check는_실측제외를_drift로_보지_않는다(): void
+    {
+        // 문서가 완비된 확장(미채움 0건)에서 --check 는 성공해야 한다.
+        // ckeditor5 는 엔드포인트 2건 모두 실측 제외(unresolved-path-param / side-effectful-write)지만
+        // 사람이 응답 필드/예시를 채워 두었으므로 문서 자체는 완전하다.
+        $this->artisan('api:docgen', ['--scope' => 'plugin:sirsoft-ckeditor5', '--check' => true])
+            ->assertSuccessful();
+    }
+
+    /**
+     * (e-3) --check 는 미채움 마커가 남아 있으면 drift 로 검출합니다.
+     */
+    #[Test]
+    public function check는_미채움_마커_잔존을_drift로_검출한다(): void
+    {
+        $target = base_path('plugins/_bundled/sirsoft-ckeditor5/docs/api/upload.md');
+
+        if (! File::exists($target)) {
+            $this->markTestSkipped('대상 문서 없음');
+        }
+
+        $backup = File::get($target);
+
+        try {
+            // 사람이 채운 응답 필드 자리를 미채움 마커로 되돌린다.
+            File::put(
+                $target,
+                $backup."\n<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->\n"
+            );
+
+            $this->artisan('api:docgen', ['--scope' => 'plugin:sirsoft-ckeditor5', '--check' => true])
+                ->assertFailed();
+        } finally {
+            File::put($target, $backup);
+        }
+    }
+
+    /**
      * README 목차 항목/확장 목록 샘플을 반환합니다.
      *
      * @return array{0: array<int, array{domain: string, file: string, count: int}>, 1: array<int, array{id: string, type: string, path: string, docs: int, endpoints: int}>}

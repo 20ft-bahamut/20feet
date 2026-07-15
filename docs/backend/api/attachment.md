@@ -27,7 +27,7 @@
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| hash | path | string | 예 | — | 대상 리소스의 해시 식별자 |
+| hash | path | string | 예 | — | 다운로드할 첨부파일의 해시 식별자 (`attachments.hash`) |
 
 **요청 예시**
 
@@ -39,17 +39,45 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투(`data`)를 반환하지 않습니다. 성공 시 파일 바이너리 본문을 그대로 응답합니다 (실패 시에만 JSON 에러 봉투)._
+
+| 응답 헤더 | 값 | 용도/설명 |
+| --- | --- | --- |
+| Content-Type | `image/png` 등 | 첨부파일의 MIME 타입 (`attachments.mime_type`) |
+| Content-Disposition | `attachment; filename="원본파일명.pdf"` | 이미지가 아닌 파일에만 부여 — 원본 파일명으로 다운로드 |
+| Cache-Control | `public, max-age=86400, immutable` (프로덕션) / `no-cache` (그 외) | 이미지 응답의 캐싱 정책. max-age 는 환경설정 `cache.layout_ttl` (기본 86400초) |
+| Expires | `Wed, 15 Jul 2026 00:00:00 GMT` | 이미지 응답의 만료 시각 (현재 시각 + max-age) |
+| ETag | `9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d` | 이미지 응답의 검증자 (파일 수정시각 + 크기의 MD5). 요청의 `If-None-Match` 와 일치하면 `304 Not Modified` |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200 OK
+Content-Type: image/png
+Cache-Control: public, max-age=86400, immutable
+Expires: Wed, 15 Jul 2026 00:00:00 GMT
+ETag: 9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d
+
+<파일 바이너리>
+```
+
+이미지가 아닌 파일:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="manual.pdf"
+
+<파일 바이너리>
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 304 | Not Modified | 이미지 응답에서 요청 `If-None-Match` 헤더가 현재 ETag 와 일치하는 경우 (본문 없음) |
+| 403 | Forbidden | 첨부파일 접근 권한 없음 (`core.attachment.download` 훅 권한 미충족) 또는 스토리지에 실제 파일이 없는 경우 — `{"success": false, "message": "이 첨부파일에 대한 접근 권한이 없습니다."}` |
+| 404 | Not Found | 해당 해시의 첨부파일이 존재하지 않는 경우 — `{"success": false, "message": "첨부파일을 찾을 수 없습니다."}` |
 
 <!-- @generated:end -->
 

@@ -1763,7 +1763,7 @@ MD;
         // 사람이 도메인 특이 에러 표를 직접 채운다.
         $humanTable = "| 상태코드 | 의미 | 발생 조건 |\n"
             ."| --- | --- | --- |\n"
-            ."| 429 | Too Many Requests | 동일 IP 에서 분당 10회를 초과해 요청한 경우 |";
+            .'| 429 | Too Many Requests | 동일 IP 에서 분당 10회를 초과해 요청한 경우 |';
         $withTable = str_replace(
             '_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_',
             $humanTable,
@@ -1805,5 +1805,244 @@ MD;
 
         $this->assertStringContainsString('/api/admin/brands/{brand}', $block);
         $this->assertStringNotContainsString('/api/admin/brands/1', $block);
+    }
+
+    #[Test]
+    public function 같은_라우트명의_ge_t_pos_t_는_서로_다른_생성블록_키를_갖는다(): void
+    {
+        // 회귀: Route::match(['get','post'], ...)->name('x') 는 하나의 라우트명으로 두 메서드를
+        // 등록한다(KG이니시스 CBT/모바일 콜백). 생성 블록 키가 라우트명뿐이면 한 문서에 같은
+        // `@generated:start:x` 가 두 번 나오고, strpos 기반 블록 조회가 언제나 첫 블록만 잡아
+        // 두 번째(POST) 블록의 사람 서술이 재생성마다 유실된다.
+        // (실측: pay_kginicis payment.md 의 body 파라미터 용도 12건)
+        $scaffolder = new ApiDocScaffolder;
+
+        $base = [
+            'uri' => '/plugins/sirsoft-pay_kginicis/payment/cbt/callback',
+            'name' => 'web.plugins.sirsoft-pay_kginicis.payment.cbt.callback',
+            'controller' => 'C', 'controller_method' => 'handle', 'permission' => null,
+            'middleware' => ['web'], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'pagination' => false,
+            'fields' => [['name' => 'status', 'type' => 'string', 'sample' => 'ok']]];
+        $probe = ['status' => 200, 'skipped_reason' => null];
+
+        // 라우트명이 문서 안에서 중복이면 커맨드가 methodScopedKey=true 로 호출한다.
+        $get = $scaffolder->endpointSection(['method' => 'GET'] + $base, $request, $schema, $probe, [], true);
+        $post = $scaffolder->endpointSection(['method' => 'POST'] + $base, $request, $schema, $probe, [], true);
+
+        $extractKey = static fn (string $s): string => (string) preg_replace(
+            '/^.*<!-- @generated:start:([^ ]+) -->.*$/s', '$1', explode("\n", $s)[1]
+        );
+
+        $this->assertNotSame(
+            $extractKey($get),
+            $extractKey($post),
+            '같은 라우트명이라도 메서드가 다르면 생성 블록 키가 달라야 한다'
+        );
+
+        // 스캐폴더의 키 생성기는 커맨드가 쓰는 섹션 키와 동일해야 한다 (mergeDocument 대조 키).
+        $this->assertSame($extractKey($get), $scaffolder->generatedKey(['method' => 'GET'] + $base, true));
+        $this->assertSame($extractKey($post), $scaffolder->generatedKey(['method' => 'POST'] + $base, true));
+
+        // 중복이 아닌 라우트는 키를 그대로 둔다 (전 문서 키 변경 시 사람 서술 유실 방지).
+        $this->assertSame($base['name'], $scaffolder->generatedKey(['method' => 'GET'] + $base));
+    }
+
+    #[Test]
+    public function 같은_라우트명_두_메서드의_사람_서술이_각각_보존된다(): void
+    {
+        // 위 키 고유화가 실제 보존으로 이어지는지 — GET/POST 두 블록의 파라미터 용도가
+        // 서로 섞이거나 유실되지 않고 각자 자리에 되살아나야 한다.
+        $scaffolder = new ApiDocScaffolder;
+
+        $base = [
+            'uri' => '/plugins/sirsoft-pay_kginicis/payment/cbt/callback',
+            'name' => 'web.plugins.sirsoft-pay_kginicis.payment.cbt.callback',
+            'controller' => 'C', 'controller_method' => 'handle', 'permission' => null,
+            'middleware' => ['web'], 'path_params' => [],
+        ];
+        $schema = ['envelope' => ['data'], 'shape' => 'object', 'pagination' => false,
+            'fields' => [['name' => 'status', 'type' => 'string', 'sample' => 'ok']]];
+        $probe = ['status' => 200, 'skipped_reason' => null];
+
+        // GET 은 query, POST 는 body 로 같은 이름의 파라미터를 받는다 (실제 콜백 계약).
+        $getRequest = ['request_class' => null, 'hook_filters' => [], 'params' => [
+            ['name' => 'sid', 'location' => 'query', 'type' => 'string', 'required' => false, 'allowed' => '—'],
+        ]];
+        $postRequest = ['request_class' => null, 'hook_filters' => [], 'params' => [
+            ['name' => 'sid', 'location' => 'body', 'type' => 'string', 'required' => false, 'allowed' => '—'],
+        ]];
+
+        $getSection = $scaffolder->endpointSection(['method' => 'GET'] + $base, $getRequest, $schema, $probe, [], true);
+        $postSection = $scaffolder->endpointSection(['method' => 'POST'] + $base, $postRequest, $schema, $probe, [], true);
+
+        // 사람이 두 블록의 용도를 각각 채운 기존 문서
+        $existing = "# 결제\n\n"
+            .str_replace('<!-- TODO: 용도 -->', 'GET 콜백의 세션 ID', $getSection)."\n"
+            .str_replace('<!-- TODO: 용도 -->', 'POST 콜백의 세션 ID', $postSection)."\n";
+
+        $merged = $scaffolder->mergeDocument(
+            $existing,
+            '# 결제',
+            [$getSection, $postSection],
+            [
+                $scaffolder->generatedKey(['method' => 'GET'] + $base, true),
+                $scaffolder->generatedKey(['method' => 'POST'] + $base, true),
+            ],
+        );
+
+        $this->assertStringContainsString('GET 콜백의 세션 ID', $merged);
+        $this->assertStringContainsString('POST 콜백의 세션 ID', $merged, 'POST 블록의 사람 서술이 유실되면 안 된다');
+        $this->assertStringNotContainsString('<!-- TODO: 용도 -->', $merged);
+    }
+
+    #[Test]
+    public function 사람이_응답_필드_라벨을_고쳐도_채운_본문을_보존한다(): void
+    {
+        // 회귀: 봉투(`success`/`message`/`data`)를 쓰지 않고 JSON 을 root 에 그대로 내리는
+        // 엔드포인트(LayoutPreviewController@serve 등)에서는 `**응답 필드** (`data` 내부)` 라벨이
+        // 사실과 다르다. 사람이 이를 `**응답 필드**` 로 정정하면, 라벨 정확 일치를 요구하던
+        // 보존 로직이 기존 본문을 찾지 못해 사람이 채운 내용이 통째로 마커로 퇴행했다.
+        // (실측: docs/backend/api/layouts.md 의 미리보기 서빙 응답 필드 표)
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/layouts/{name}', 'name' => 'api.layouts.preview',
+            'controller' => 'C', 'controller_method' => 'serve', 'permission' => null,
+            'middleware' => ['api', 'optional.sanctum'], 'path_params' => ['name'],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = ['envelope' => [], 'shape' => 'object', 'fields' => [], 'pagination' => false];
+
+        // 실측 불가(unresolved-path-param) → 응답 필드 자리에 마커만 생성된다.
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => null, 'skipped_reason' => 'unresolved-path-param']);
+        $this->assertStringContainsString('실측 응답에 필드 없음', $section, '마커 생성 전제 확인');
+
+        // 사람이 라벨을 정정하고(`(data 내부)` 제거) 본문을 서술로 채운 기존 문서.
+        // 표가 아니라 서술이므로 applyPreservedTableCells 의 행 키 대조로는 지켜지지 않는다 —
+        // 오직 라벨로 본문 구간을 찾는 applyPreservedResponseBodies 만이 이를 되살릴 수 있고,
+        // 라벨 정확 일치만 보면 사람이 고친 라벨 때문에 구간을 못 찾아 마커로 퇴행한다.
+        $filled = str_replace('**응답 필드** (`data` 내부)', '**응답 필드**', $section);
+        $filled = preg_replace(
+            '/_단건 응답[^\n]*_\n\n<!-- 실측 응답에 필드 없음[^\n]*-->/',
+            '_이 엔드포인트는 봉투를 사용하지 않고 레이아웃 JSON 을 root 에 그대로 반환합니다._',
+            $filled
+        );
+        $this->assertStringNotContainsString('실측 응답에 필드 없음', $filled, '테스트 픽스처가 마커를 실제로 대체했는지 확인');
+
+        $existing = "# 레이아웃\n\n".$filled;
+
+        $merged = $scaffolder->mergeDocument($existing, '# 레이아웃', [$section], ['api.layouts.preview']);
+
+        $this->assertStringContainsString('봉투를 사용하지 않고', $merged, '라벨을 고친 문서의 사람 본문이 보존되어야 한다');
+        $this->assertStringNotContainsString('실측 응답에 필드 없음', $merged, '사람 본문이 마커로 퇴행하면 안 된다');
+    }
+
+    #[Test]
+    public function 에러_응답_자리의_사람_서술은_대표_에러_없음_초안에_덮이지_않는다(): void
+    {
+        // 회귀: 자동 추론이 에러 행을 하나도 만들지 못하는 공개 조회 엔드포인트는
+        // `_대표 에러 없음 (공개 조회). <!-- TODO ... -->_` 초안을 낸다. 사람이 그 자리를
+        // "이 엔드포인트는 도메인 에러를 반환하지 않습니다 (근거...)" 같은 서술로 채우면,
+        // 표 행이 없으므로 errorTableRows() 가 빈 배열을 반환해 보존이 건너뛰어지고
+        // 재생성 때마다 TODO 초안으로 퇴행한다. (실측: locales.md / modules.md / plugins.md)
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/locales', 'name' => 'api.locales.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => ['api'], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = ['envelope' => ['data'], 'shape' => 'collection', 'pagination' => false,
+            'fields' => [['name' => 'code', 'type' => 'string', 'sample' => 'ko']]];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+        $this->assertStringContainsString('대표 에러 없음', $section, '자동 초안 전제 확인');
+
+        $prose = '_이 엔드포인트는 도메인 에러를 반환하지 않습니다. 공개 조회이므로 인증 실패(401)가 없습니다._';
+        $filled = preg_replace('/_대표 에러 없음[^\n]*_/', $prose, $section);
+        $existing = "# 로케일\n\n".$filled;
+
+        $merged = $scaffolder->mergeDocument($existing, '# 로케일', [$section], ['api.locales.index']);
+
+        $this->assertStringContainsString('도메인 에러를 반환하지 않습니다', $merged, '사람이 쓴 에러 서술이 보존되어야 한다');
+        $this->assertStringNotContainsString('대표 에러 없음', $merged, '사람 서술이 자동 초안으로 퇴행하면 안 된다');
+    }
+
+    #[Test]
+    public function crl_f_문서에서도_사람이_채운_표_셀을_보존한다(): void
+    {
+        // 회귀: Windows 체크아웃(core.autocrlf=true)에서 문서가 CRLF 로 저장되면
+        // parseTableRow 의 `str_ends_with($line, ' |')` 가드가 줄 끝 \r 때문에 전부 실패해
+        // 표 셀 보존이 통째로 무력화된다 → 사람이 채운 설명이 재생성 때마다 TODO 로 퇴행.
+        // (실측: docs/backend/api/notifications.md 의 응답 필드 설명 10건 유실)
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET', 'uri' => '/api/admin/notifications', 'name' => 'api.admin.notifications.index',
+            'controller' => 'C', 'controller_method' => 'index', 'permission' => null,
+            'middleware' => ['api', 'auth:sanctum'], 'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = [
+            'envelope' => ['data'], 'shape' => 'collection', 'pagination' => false,
+            'fields' => [['name' => 'type', 'type' => 'string', 'sample' => 'new_order_admin']],
+        ];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+
+        // 사람이 설명을 채운 기존 문서를 CRLF 로 구성한다.
+        $filled = str_replace(
+            '<!-- TODO: 설명 -->',
+            '알림 유형 식별자 (알림 정의의 type)',
+            $section
+        );
+        $existingCrlf = str_replace("\n", "\r\n", "# 알림\n\n".$filled);
+
+        $merged = $scaffolder->mergeDocument(
+            $existingCrlf,
+            '# 알림',
+            [$section],
+            ['api.admin.notifications.index'],
+        );
+
+        $this->assertStringContainsString('알림 유형 식별자', $merged, 'CRLF 문서의 사람 서술이 보존되어야 한다');
+        $this->assertStringNotContainsString('<!-- TODO: 설명 -->', $merged, '보존된 셀이 TODO 로 퇴행하면 안 된다');
+    }
+
+    #[Test]
+    public function 에러표의_권한_셀은_파이프를_이스케이프한다(): void
+    {
+        // 회귀: permission 이 여러 권한의 OR 조합(`core.modules.read | core.menus.read`)일 때
+        // 파이프를 이스케이프하지 않으면 셀이 갈라져 3열 표가 4열로 깨진다.
+        // (docs/backend/api/modules.md 의 403 행 24건이 이 상태로 생성돼 있었다)
+        $scaffolder = new ApiDocScaffolder;
+
+        $route = [
+            'method' => 'GET',
+            'uri' => '/api/admin/modules',
+            'name' => 'api.admin.modules.index',
+            'controller' => 'C',
+            'controller_method' => 'index',
+            'permission' => 'core.modules.read | core.menus.read',
+            'middleware' => ['api', 'auth:sanctum', 'permission:admin,core.modules.read'],
+            'path_params' => [],
+        ];
+        $request = ['request_class' => null, 'params' => [], 'hook_filters' => []];
+        $schema = ['envelope' => ['data'], 'shape' => 'collection', 'fields' => [['name' => 'id', 'type' => 'integer', 'sample' => '1']], 'pagination' => false];
+
+        $section = $scaffolder->endpointSection($route, $request, $schema, ['status' => 200, 'skipped_reason' => null]);
+
+        // 403 행을 찾아 열 수를 센다 (이스케이프된 \| 는 셀 구분자가 아니다)
+        $line = collect(explode("\n", $section))->first(fn (string $l): bool => str_starts_with($l, '| 403 |'));
+
+        $this->assertNotNull($line, '403 에러 행이 생성되어야 한다');
+        $this->assertStringContainsString('\\|', $line, '권한 셀의 파이프가 이스케이프되어야 한다');
+
+        $cells = preg_split('/(?<!\\\\)\|/', trim($line, '| '));
+        $this->assertCount(3, $cells, "403 행은 3열(상태코드/의미/발생 조건)이어야 한다: {$line}");
     }
 }

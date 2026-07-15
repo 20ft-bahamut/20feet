@@ -63,7 +63,7 @@ class PluginSettingsController extends AdminBaseController
             return $this->notFound('plugins.not_found');
         }
 
-        return $this->success('messages.success', $this->maskSensitive($identifier, $settings));
+        return $this->success('common.success', $this->maskSensitive($identifier, $settings));
     }
 
     /**
@@ -109,6 +109,6 @@ class PluginSettingsController extends AdminBaseController
             return $this->notFound('plugins.not_found');
         }
 
-        return $this->success('messages.success', $layout);
+        return $this->success('common.success', $layout);
     }
 }

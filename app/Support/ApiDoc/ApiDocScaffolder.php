@@ -70,6 +70,28 @@ class ApiDocScaffolder
     ) {}
 
     /**
+     * 엔드포인트의 `@generated` 블록 키를 만듭니다.
+     *
+     * 기본은 라우트명이다. 다만 `Route::match(['get','post'], ...)->name('x')` 처럼 **하나의
+     * 라우트명이 여러 메서드**를 등록하면(KG이니시스 CBT/모바일 콜백), 한 문서에 같은 키의
+     * 생성 블록이 둘 생긴다. 블록 조회는 `strpos` 로 첫 출현을 잡으므로 두 번째 블록의 사람
+     * 서술이 재생성마다 유실된다. 그런 라우트에 한해 메서드를 접미로 붙여 키를 고유화한다.
+     *
+     * 중복이 아닌 절대다수의 라우트는 키를 그대로 둔다 — 전 문서의 키를 바꾸면 기존 블록과
+     * 대조가 어긋나 사람 서술이 통째로 유실되기 때문이다.
+     *
+     * @param  array<string, mixed>  $route  라우트 메타데이터
+     * @param  bool  $methodScoped  라우트명이 문서 안에서 중복되는가 (메서드 접미 필요)
+     * @return string 생성 블록 키
+     */
+    public function generatedKey(array $route, bool $methodScoped = false): string
+    {
+        $name = $route['name'] ?: $route['uri'];
+
+        return $methodScoped ? $name.'::'.strtolower((string) $route['method']) : $name;
+    }
+
+    /**
      * 단일 엔드포인트의 마크다운 섹션을 생성합니다.
      *
      * @param  array<string, mixed>  $route  라우트 메타데이터
@@ -77,13 +99,14 @@ class ApiDocScaffolder
      * @param  array<string, mixed>|null  $schema  실측 응답 스키마 (null=실측 안 됨)
      * @param  array<string, mixed>  $probeMeta  실측 메타 (status, skipped_reason, base_url, resolved_uri, body)
      * @param  array<string, string>  $commentMap  컬럼명 => 주석 (필드 설명 기본값)
+     * @param  bool  $methodScopedKey  라우트명이 문서 안에서 중복되어 메서드 접미가 필요한가
      * @return string 마크다운 섹션
      */
-    public function endpointSection(array $route, array $request, ?array $schema, array $probeMeta, array $commentMap = []): string
+    public function endpointSection(array $route, array $request, ?array $schema, array $probeMeta, array $commentMap = [], bool $methodScopedKey = false): string
     {
         $name = $route['name'] ?: '(unnamed)';
         $heading = "### {$route['method']} {$route['uri']}";
-        $genKey = $name;
+        $genKey = $this->generatedKey($route, $methodScopedKey);
 
         $lines = [];
         $lines[] = $heading;
@@ -173,6 +196,9 @@ class ApiDocScaffolder
         ?string $existing = null,
         ?array $extensions = null
     ): string {
+        // 줄 끝 정규화 — mergeDocument 와 같은 이유 (CRLF 체크아웃에서 줄 단위 매칭이 전부 실패).
+        $existing = $existing === null ? null : $this->normalizeEol($existing);
+
         usort($entries, fn ($a, $b) => strcmp($a['domain'], $b['domain']));
         $total = array_sum(array_column($entries, 'count'));
 
@@ -472,9 +498,11 @@ class ApiDocScaffolder
         }
 
         // 403: admin 게이트 또는 permission 요구 → 권한 부족.
+        // permission 은 여러 권한의 OR 조합(`core.modules.read | core.menus.read`)일 수 있으므로
+        // 셀에 박기 전에 파이프를 이스케이프한다 — 안 하면 3열 표가 갈라져 깨진다.
         if ($this->hasMiddleware($mw, 'AdminMiddleware') || ! empty($route['permission'])) {
             $cond = ! empty($route['permission'])
-                ? "요구 권한(`{$route['permission']}`)이 없는 경우"
+                ? '요구 권한(`'.$this->escapeCell((string) $route['permission']).'`)이 없는 경우'
                 : '관리자 권한이 없는 경우';
             $rows[] = "| 403 | Forbidden | {$cond} |";
         }
@@ -1041,6 +1069,24 @@ class ApiDocScaffolder
     }
 
     /**
+     * 기존 문서의 줄 끝을 LF 로 정규화합니다.
+     *
+     * 보존 로직(표 셀·응답 본문·에러 표·사람 서술)은 전부 `explode("\n")` 후 줄 끝 매칭
+     * (`str_ends_with($line, ' |')` 등)으로 동작한다. Windows 체크아웃(core.autocrlf=true)이
+     * 내려준 CRLF 문서에서는 줄 끝에 \r 이 남아 이 매칭이 전부 실패하고, 결과적으로 사람이
+     * 채운 셀·본문이 하나도 보존되지 않은 채 TODO/마커로 퇴행한다.
+     *
+     * 문서는 `.gitattributes` 가 `eol=lf` 로 저장하므로 정규화가 저장 형식을 바꾸지 않는다.
+     *
+     * @param  string  $content  기존 문서 내용
+     * @return string LF 로 정규화된 내용
+     */
+    private function normalizeEol(string $content): string
+    {
+        return str_replace(["\r\n", "\r"], "\n", $content);
+    }
+
+    /**
      * 기존 문서에 새 생성 블록을 병합합니다. 사람 서술은 보존합니다.
      *
      * @param  string|null  $existing  기존 문서 내용 (null=신규)
@@ -1054,6 +1100,12 @@ class ApiDocScaffolder
         if ($existing === null) {
             return $header."\n".implode("\n", $sections);
         }
+
+        // Windows 체크아웃(core.autocrlf=true)은 문서를 CRLF 로 내려준다. 아래 보존 로직은
+        // 전부 `explode("\n")` + 줄 끝 매칭(`str_ends_with($line, ' |')`) 기반이라, 줄 끝에
+        // \r 이 남아 있으면 표 행이 하나도 파싱되지 않아 사람이 채운 셀이 통째로 유실된다.
+        // 파싱 전에 줄 끝을 LF 로 정규화한다 (문서는 .gitattributes 가 eol=lf 로 저장한다).
+        $existing = $this->normalizeEol($existing);
 
         $merged = $header."\n";
 
@@ -1207,14 +1259,27 @@ class ApiDocScaffolder
         }
 
         $previousRows = $this->errorTableRows($previous);
-
-        if ($previousRows === []) {
-            return $section;
-        }
-
         $currentBody = $this->extractErrorTable($section);
 
         if ($currentBody === null) {
+            return $section;
+        }
+
+        // 기존 본문이 표가 아닌 사람 서술인 경우 (자동 추론이 에러 행을 만들지 못하는 공개 조회
+        // 엔드포인트에서, 사람이 `대표 에러 없음` 초안 자리를 "왜 도메인 에러가 없는지" 로 채운 것).
+        // 표 행이 없다고 보존을 건너뛰면 재생성이 그 서술을 TODO 초안으로 덮는다.
+        if ($previousRows === []) {
+            $previousBody = $this->extractErrorTable($previous);
+
+            $previousIsHumanProse = $previousBody !== null
+                && trim($previousBody) !== ''
+                && ! $this->isTodoCell($previousBody)
+                && ! str_contains($previousBody, '대표 에러 없음');
+
+            if ($previousIsHumanProse) {
+                return str_replace($currentBody, trim($previousBody), $section);
+            }
+
             return $section;
         }
 
@@ -1708,12 +1773,32 @@ class ApiDocScaffolder
     private function locateSubsectionBody(string $block, string $label, array $terminators): ?array
     {
         $labelPos = strpos($block, $label);
+        $labelLength = strlen($label);
 
+        // 라벨 정확 일치 실패 시 베이스 라벨(굵은 제목)만으로 재시도한다.
+        // 봉투를 쓰지 않는 엔드포인트(레이아웃 JSON 을 root 에 그대로 내리는 미리보기 서빙 등)에서는
+        // `**응답 필드** (`data` 내부)` 라벨이 사실과 달라 사람이 접미를 떼어낸다. 정확 일치만 보면
+        // 기존 본문 구간을 못 찾아, 표가 아닌 **서술**로 채운 내용이 마커로 퇴행한다
+        // (표는 applyPreservedTableCells 가 행 키로 따로 지키지만, 서술은 이 경로가 유일하다).
+        // 라벨 줄 전체를 라벨 길이로 삼아야 본문 시작 위치가 어긋나지 않는다.
         if ($labelPos === false) {
-            return null;
+            $base = Str::before($label, ' (');
+
+            if ($base === $label) {
+                return null;
+            }
+
+            $labelPos = strpos($block, $base);
+
+            if ($labelPos === false) {
+                return null;
+            }
+
+            $lineEnd = strpos($block, "\n", $labelPos);
+            $labelLength = ($lineEnd === false ? strlen($block) : $lineEnd) - $labelPos;
         }
 
-        $bodyStart = $labelPos + strlen($label);
+        $bodyStart = $labelPos + $labelLength;
 
         $candidates = [];
         foreach ($terminators as $terminator) {
@@ -2033,6 +2118,9 @@ class ApiDocScaffolder
      */
     public function insertExampleBlocks(string $content, array $exampleBlocks): array
     {
+        // 줄 끝 정규화 — mergeDocument 와 같은 이유 (CRLF 체크아웃에서 줄 단위 매칭이 전부 실패).
+        $content = $this->normalizeEol($content);
+
         $inserted = 0;
 
         foreach ($exampleBlocks as $key => $blocks) {

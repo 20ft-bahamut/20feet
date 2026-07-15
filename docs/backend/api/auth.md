@@ -38,9 +38,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@logout` 이 `success('auth.logout_success')` 를 인자 없이 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
@@ -285,18 +283,59 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-500 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`AuthService::login()` 이 반환한 배열 — `user` 만 `UserResource` 로 감싼다)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| user | object | `{"uuid":"a234c2b1-…","name":"관리자","is_admin":true, …}` | 로그인한 관리자 정보 (`UserResource` — 필드 전수는 `GET /api/admin/auth/user` 응답 필드 표와 동일) |
+| token | string | `75\|WgPUplvLGTv8YIj4507uIR6dEOHTXyNUed…` | 발급된 Sanctum 접근 토큰 평문 (이후 `Authorization: Bearer` 헤더로 사용, 발급 시 1회만 노출) |
+| token_type | string | `Bearer` | 토큰 타입 (항상 `Bearer` — `AuthService::login()` 이 상수로 반환) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-500 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "관리자 로그인이 성공했습니다.",
+    "data": {
+        "user": {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "email": "apidoc-sample-user@example.com",
+            "status": "active",
+            "is_admin": true,
+            "roles": [
+                { "id": 1, "identifier": "admin", "name": "관리자" }
+            ],
+            "is_owner": true,
+            "abilities": {
+                "can_read": true,
+                "can_create": true,
+                "can_update": true,
+                "can_delete": true,
+                "can_assign_roles": true
+            }
+        },
+        "token": "{MASKED}",
+        "token_type": "Bearer"
+    }
+}
+```
+
+> `user` 객체는 지면 절약을 위해 축약했습니다. 실제로는 `GET /api/admin/auth/user` 의 `data` 와 동일한 `UserResource` 필드 전수가 내려옵니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 401 | Unauthenticated | 이메일/비밀번호가 일치하지 않는 경우 (`auth.login_failed`) |
+| 403 | Forbidden | 자격 증명은 맞지만 관리자 역할이 아닌 경우 (`auth.admin_required`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 423 | Locked | 로그인 실패 누적으로 계정이 잠긴 경우 (`auth.account_locked` — `error.locked_until`, `error.retry_after_seconds` 포함) |
 
 <!-- @generated:end -->
 
@@ -336,18 +375,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@forgotPassword` 가 `success('auth.password_reset_email_sent')` 를 인자 없이 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "비밀번호 재설정 이메일이 발송되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우, 또는 등록되지 않은 이메일인 경우 (`auth.password_reset_failed` — `error.errors.email` 에 `auth.email_not_registered` 메시지) |
 
 <!-- @generated:end -->
 
@@ -387,18 +435,56 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-500 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`AuthService::login()` 이 반환한 배열 — `user` 만 `UserResource` 로 감싼다)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| user | object | `{"uuid":"a234c2b1-…","name":"홍길동","is_admin":false, …}` | 로그인한 사용자 정보 (`UserResource` — 필드 전수는 `GET /api/auth/user` 응답 필드 표의 기본(코어) 필드와 동일) |
+| token | string | `75\|WgPUplvLGTv8YIj4507uIR6dEOHTXyNUed…` | 발급된 Sanctum 접근 토큰 평문 (이후 `Authorization: Bearer` 헤더로 사용, 발급 시 1회만 노출) |
+| token_type | string | `Bearer` | 토큰 타입 (항상 `Bearer`) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-500 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "로그인이 성공했습니다.",
+    "data": {
+        "user": {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "email": "apidoc-sample-user@example.com",
+            "language": "ko",
+            "status": "active",
+            "is_admin": false,
+            "is_owner": true,
+            "abilities": {
+                "can_read": true,
+                "can_create": true,
+                "can_update": true,
+                "can_delete": true,
+                "can_assign_roles": true
+            }
+        },
+        "token": "{MASKED}",
+        "token_type": "Bearer"
+    }
+}
+```
+
+> `user` 객체는 지면 절약을 위해 축약했습니다. 실제로는 `UserResource` 필드 전수가 내려옵니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 401 | Unauthenticated | 이메일/비밀번호가 일치하지 않거나 계정 상태가 활성이 아닌 경우 (`auth.login_failed`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 423 | Locked | 로그인 실패 누적으로 계정이 잠긴 경우 (`auth.account_locked` — `error.locked_until`, `error.retry_after_seconds` 포함) |
 
 <!-- @generated:end -->
 
@@ -491,9 +577,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@logout` 이 `success('auth.logout_success')` 를 인자 없이 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
@@ -579,18 +663,56 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`AuthService::register()` 이 반환한 배열 — `user` 만 `UserResource` 로 감싼다). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| user | object | `{"uuid":"a234c2b1-…","name":"홍길동","status":"active", …}` | 생성된 사용자 정보 (`UserResource`. `status` 는 `active`, 가입 후 본인인증 정책이 걸린 경우 `pending_verification`) |
+| token | string | `75\|WgPUplvLGTv8YIj4507uIR6dEOHTXyNUed…` | 가입 즉시 발급되는 Sanctum 접근 토큰 평문 (가입 직후 로그인 상태로 이어짐) |
+| token_type | string | `Bearer` | 토큰 타입 (항상 `Bearer`) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "회원가입이 성공했습니다.",
+    "data": {
+        "user": {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "nickname": null,
+            "email": "apidoc-sample-user@example.com",
+            "language": "ko",
+            "status": "active",
+            "is_admin": false,
+            "is_owner": true,
+            "abilities": {
+                "can_read": true,
+                "can_create": true,
+                "can_update": true,
+                "can_delete": true,
+                "can_assign_roles": true
+            }
+        },
+        "token": "{MASKED}",
+        "token_type": "Bearer"
+    }
+}
+```
+
+> `user` 객체는 지면 절약을 위해 축약했습니다. 실제로는 `UserResource` 필드 전수가 내려옵니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`auth.register_failed` — `error.errors` 에 필드별 메시지) |
+| 428 | Precondition Required | 가입 전 본인인증 정책이 매칭되었으나 유효한 `verification_token` 이 없는 경우 (`core.auth.before_register` 훅) |
 
 <!-- @generated:end -->
 
@@ -632,18 +754,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@resetPassword` 가 `success('auth.password_reset_success')` 를 인자 없이 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "비밀번호가 성공적으로 재설정되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반했거나, 토큰이 유효하지 않거나 만료된 경우 (`auth.password_reset_failed` — `error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -813,18 +944,33 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`AuthService::validateResetToken()` 의 반환 배열)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| valid | boolean | `true` | 토큰 유효 여부. 성공 응답에서는 항상 `true` (유효하지 않으면 컨트롤러가 422 로 전환하므로 이 필드가 `false` 인 200 응답은 없음) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "valid": true
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반, 또는 토큰이 유효하지 않거나 만료된 경우 / 미등록 이메일 (`auth.reset_token_invalid` — `error.errors.token` 에 사유 메시지) |
 
 <!-- @generated:end -->
 
@@ -854,11 +1000,21 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@logout` 이 `success('auth.logout_success')` 를 인자 없이 호출하므로 `data` 는 `null`). 공용 `POST /api/auth/logout` 과 동일한 컨트롤러 메서드._
 
 **응답 예시**
 
-<!-- 실측 제외: http-403 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "로그아웃이 성공했습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -895,11 +1051,21 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `AuthController@logoutFromAllDevices` 가 `success('auth.logout_all_devices_success')` 를 인자 없이 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-403 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "모든 디바이스에서 로그아웃되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -936,11 +1102,47 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`AuthService::refreshToken()` 반환 배열 — 공용 `POST /api/admin/auth/refresh` 와 동일 shape)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| user | object | `{"uuid":"a234c2b1-…","name":"홍길동", …}` | 토큰을 갱신한 사용자 정보 (`UserResource`) |
+| token | string | `75\|WgPUplvLGTv8YIj4507uIR6dEOHTXyNUed…` | 새로 발급된 Sanctum 접근 토큰 평문 (기존 토큰은 폐기됨) |
+| token_type | string | `Bearer` | 토큰 타입 (항상 `Bearer`) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-403 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "user": {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "email": "apidoc-sample-user@example.com",
+            "status": "active",
+            "is_admin": false,
+            "is_owner": true,
+            "abilities": {
+                "can_read": true,
+                "can_create": true,
+                "can_update": true,
+                "can_delete": true,
+                "can_assign_roles": true
+            }
+        },
+        "token": "{MASKED}",
+        "token_type": "Bearer"
+    }
+}
+```
+
+> `user` 객체는 지면 절약을 위해 축약했습니다. 실제로는 `UserResource` 필드 전수가 내려옵니다.
 
 **에러 응답**
 
@@ -977,11 +1179,70 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드. 컨트롤러 메서드가 공용 `GET /api/auth/user` 와 동일한 `AuthController@user` 이므로, 응답은 `UserResource::toAuthArray()` 산물(코어 필드 + `core.user.filter_resource_data` 로 확장이 병합한 필드)로 그 문서의 응답 필드 표와 동일합니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| uuid | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `API 문서 샘플 사용자` | 사용자 이름 |
+| nickname | string \| null | `song.hyunji` | 닉네임 (미설정 시 null) |
+| email | string | `apidoc-sample-user@example.com` | 이메일 주소 |
+| language | string | `ko` | 사용자 언어 설정 |
+| status | string | `active` | 계정 상태 (active / inactive / blocked / withdrawn / pending_verification) |
+| is_admin | boolean | `false` | 관리자 역할 보유 여부 |
+| roles | array | `[{"id":2,"identifier":"user","name":"일반회원"}]` | 부여된 역할 목록 (id/identifier/name) |
+| permissions | array | `[{"id":81,"identifier":"sirsoft-ecommerce.user-products.read","name":"상품 조회"}]` | 역할 경유 권한 목록 (id/identifier/name) |
+| is_owner | boolean | `true` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_read":true,"can_update":true, …}` | 이 리소스에 수행 가능한 작업 불리언 맵 |
+| (확장 병합 필드) | — | `notify_*`, `marketing_consent*`, `ecommerce_*` 등 | marketing 플러그인·ecommerce 모듈이 `core.user.filter_resource_data` 필터로 병합 — 전수는 `GET /api/auth/user` 응답 필드 표 참조 |
+
+> 필드 전수(코어 + 확장 병합)는 `GET /api/auth/user` 의 응답 필드 표와 동일하므로 그 표를 SSoT 로 참조합니다. 게스트(비인증) 요청은 `optional.sanctum` 을 통과하지만 `request()->user()` 가 없으므로 이 경로는 인증 사용자 컨텍스트에서만 사용자 객체를 반환합니다.
 
 **응답 예시**
 
-<!-- 실측 제외: http-403 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "name": "API 문서 샘플 사용자",
+        "nickname": "song.hyunji",
+        "email": "apidoc-sample-user@example.com",
+        "language": "ko",
+        "status": "active",
+        "is_admin": false,
+        "roles": [
+            { "id": 2, "identifier": "user", "name": "일반회원" }
+        ],
+        "permissions": [],
+        "is_owner": true,
+        "abilities": {
+            "can_read": true,
+            "can_create": true,
+            "can_update": true,
+            "can_delete": true,
+            "can_assign_roles": true
+        },
+        "notify_post_complete": false,
+        "notify_post_reply": false,
+        "notify_comment": false,
+        "notify_reply_comment": false,
+        "ecommerce_mileage": {
+            "enabled": false
+        },
+        "ecommerce_preferred_currency": null,
+        "ecommerce_preferred_shipping_country": null,
+        "ecommerce_preferred_shipping_country_name": null
+    }
+}
+```
+
+> 지면 절약을 위해 축약했습니다. 실제 응답은 `GET /api/auth/user` 의 응답 예시와 동일한 필드 전수를 포함합니다.
 
 **에러 응답**
 

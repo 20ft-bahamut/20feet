@@ -427,8 +427,33 @@ php artisan api:docgen-backfill-fields
 □ 응답 필드 표가 envelope 의 data 내부 기준으로 작성되었는가?
 □ 응답 예시(envelope 전문 JSON) 블록이 방출되었는가? (목록은 2항목 절단)
 □ 훅 주입 파라미터가 있으면 주석 + 사람 보강이 되었는가?
-□ TODO 마커가 모두 채워졌는가?
+□ 미채움 마커 5종이 전수 0 인가? (아래 참조 — `TODO:` 만 세는 부분 집계 금지)
 □ api:docgen --check 가 drift 0 인가?
+```
+
+### 미채움 마커 5종 (전수 0 이 완료 기준)
+
+`api:docgen` 은 실측할 수 없는 자리에 "사람이 작성하세요" 마커를 남긴다. **실측 불가는 그 자리를 비워둘
+사유가 아니다.** 컨트롤러/Resource/FormRequest/Enum/lang 을 읽어 코드 근거로 채우는 것이 규정이다.
+
+| 마커 | 채울 것 | 근거 소스 |
+| --- | --- | --- |
+| `<!-- 실측 제외: {사유} — 응답 필드는 사람이 작성하세요. -->` | 응답 필드 표 | Resource `toArray()` 의 키 전수 + 타입, Enum `label()`/`variant()` |
+| `<!-- 실측 제외: {사유} — 응답 예시는 사람이 작성하세요. -->` | 응답 예시 JSON | 컨트롤러의 `ResponseHelper::success/paginated/dataSource` 호출 형태 + Resource + lang 의 message 문구 |
+| `<!-- TODO: 용도 -->` | 요청 파라미터 설명 셀 | FormRequest `rules()`/`messages()`, 설정 키는 관리자 설정 UI 다국어 라벨 |
+| `<!-- TODO: 설명 -->` | 응답 필드 설명 셀 | Resource `toArray()` 파생 로직, 모델 `$casts`/관계, 마이그레이션 한국어 comment |
+| `_대표 에러 없음 ... <!-- TODO: ... -->_` | 도메인 특이 에러 표 | 컨트롤러의 `abort()`/예외 throw, Service 의 커스텀 Exception |
+
+도메인 무관하게 의미가 고정된 파라미터/필드는 문서에 손으로 쓰지 말고 `ParameterDescriber`/
+`ResourceFieldDescriber` 사전에 등재한다 — 사전은 재생성에 영속하고 신규 문서에도 자동 적용된다.
+반대로 **도메인 특이 의미를 공통 사전에 넣지 않는다** (오설명이 전 문서로 퍼진다).
+
+전수 집계는 5종 마커를 한 번에 세야 한다. `TODO:` 만 세면 그 바깥의 미채움(`실측 제외` 등)이 집계에서
+빠져 부분 집계가 완료로 통과한다:
+
+```bash
+grep -rcE "실측 제외:|TODO: 용도|TODO: 설명|실측 응답에 필드 없음|대표 에러 없음" \
+  --include=*.md docs/backend/api {modules,plugins}/_bundled/*/docs/api
 ```
 
 ---

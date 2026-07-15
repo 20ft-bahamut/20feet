@@ -15,12 +15,6 @@ return [
         'status_changed' => 'カテゴリの状態が変更されました。',
         'order_updated' => 'カテゴリの順序が変更されました。',
     ],
-    'category_images' => [
-        'uploaded' => 'カテゴリ画像がアップロードされました。',
-        'not_found' => 'カテゴリ画像が見つかりません。',
-        'deleted' => 'カテゴリ画像が削除されました。',
-        'reordered' => 'カテゴリ画像の順序が変更されました。',
-    ],
     'settings' => [
         'fetch_success' => '設定を閲覧しました。',
         'fetch_failed' => '設定の取得に失敗しました。',
@@ -78,6 +72,12 @@ return [
         'reordered' => '画像の順序が変更されました。',
         'thumbnail_set' => 'メイン画像が設定されました。',
         'not_found' => '商品画像が見つかりません。',
+    ],
+    'category_images' => [
+        'uploaded' => '画像がアップロードされました。',
+        'deleted' => '画像が削除されました。',
+        'reordered' => '画像の順序が変更されました。',
+        'not_found' => 'カテゴリー画像が見つかりません。',
     ],
     'brands' => [
         'list_retrieved' => 'ブランド一覧を閲覧しました。',

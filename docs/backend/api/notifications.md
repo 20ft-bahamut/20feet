@@ -49,16 +49,16 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| number | integer | `23` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
-| id | string | `518b9c94-5853-4b68-8193-83af1851bbc6` | 기본 키 (내부 식별자) |
-| type | string | `inquiry_received` | <!-- TODO: 설명 --> |
-| type_label | string | `상품 문의 접수` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| subject | string | `새로운 상품 문의가 접수되었습니다` | <!-- TODO: 설명 --> |
-| body | string | `옥혜진님이 "면 손수건 3매입 #1" 상품에 문의를 남겼습니다.` | <!-- TODO: 설명 --> |
-| url | string | `https://g7_2.dev/admin/ecommerce/prod…` | <!-- TODO: 설명 --> |
-| data | object | `{"type":"inquiry_received","subject":"새로운 상품 문의가 접수되었습니다"…` | <!-- TODO: 설명 --> |
-| read_at | string | `2026-07-31 22:06:53` | read 일시 |
-| created_at | string | `2026-07-31 21:41:58` | 생성 일시 |
+| number | integer | `92` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
+| id | string | `02ee1121-ec63-4812-b77a-a0ffb4040acb` | 기본 키 (내부 식별자) |
+| type | string | `new_order_admin` | 알림 유형 식별자 (알림 정의의 type — 발송 트리거를 구분) |
+| type_label | string | `신규 주문 관리자 알림` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
+| subject | string | `새로운 주문이 접수되었습니다` | 알림 제목 (알림 템플릿의 subject 를 변수 치환해 렌더한 문자열) |
+| body | string | `소경은님이 주문번호 20260713-0038038875 (결제금액:…` | 알림 본문 (알림 템플릿의 body 를 변수 치환해 렌더한 문자열) |
+| url | string | `https://g7.dev/admin/ecommerce/orders…` | 알림 클릭 시 이동할 URL (템플릿의 click_url 우선, 없으면 메일 CTA action_url) |
+| data | object | `{"type":"new_order_admin","subject":"새로운 주문이 접수되었습니다","bo…` | 알림 원본 페이로드 객체 (type/subject/body/click_url 과 발송 시 전달된 변수 data 를 포함) |
+| read_at | null | `null` | read 일시 |
+| created_at | string | `2026-07-13 09:38:04` | 생성 일시 |
 
 **응답 예시**
 
@@ -302,11 +302,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| marked_count | integer | `2` | 실제로 읽음 처리된 알림 건수 (요청한 `ids` 중 본인 소유이면서 미읽음 상태였던 항목만 집계) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림을 읽음 처리했습니다.",
+    "data": {
+        "marked_count": 2
+    }
+}
+```
 
 **에러 응답**
 
@@ -404,11 +420,21 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림이 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -449,11 +475,51 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (읽음 처리 후 갱신된 알림 1건 — `UserNotificationResource`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | string | `02ee1121-ec63-4812-b77a-a0ffb4040acb` | 알림 기본 키 (UUID) |
+| type | string | `new_order_admin` | 알림 유형 식별자 (알림 정의의 type — 발송 트리거를 구분) |
+| type_label | string | `신규 주문 관리자 알림` | `type` 값의 사람이 읽는 라벨 (알림 정의의 현지화 이름, 정의 미존재 시 빈 문자열) |
+| subject | string | `새로운 주문이 접수되었습니다` | 알림 제목 (알림 템플릿의 subject 를 변수 치환해 렌더한 문자열) |
+| body | string | `소경은님이 주문번호 20260713-0038038875 (결제금액:…` | 알림 본문 (알림 템플릿의 body 를 변수 치환해 렌더한 문자열) |
+| url | string \| null | `https://g7.dev/admin/ecommerce/orders/1` | 알림 클릭 시 이동할 URL (템플릿의 `click_url` 우선, 없으면 메일 CTA `action_url`, 둘 다 없으면 `null`) |
+| data | object | `{"type":"new_order_admin","subject":"...","body":"...","click_url":"..."}` | 알림 원본 페이로드 객체 (type/subject/body/click_url 과 발송 시 전달된 변수 data 를 포함) |
+| read_at | string \| null | `2026-07-13 09:40:11` | 읽음 처리 일시 (사용자 타임존 기준 `Y-m-d H:i:s`) — 이 엔드포인트 성공 시 항상 값이 채워짐 |
+| created_at | string \| null | `2026-07-13 09:38:04` | 알림 생성 일시 (사용자 타임존 기준 `Y-m-d H:i:s`) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림을 읽음 처리했습니다.",
+    "data": {
+        "id": "02ee1121-ec63-4812-b77a-a0ffb4040acb",
+        "type": "new_order_admin",
+        "type_label": "신규 주문 관리자 알림",
+        "subject": "새로운 주문이 접수되었습니다",
+        "body": "소경은님이 주문번호 20260713-0038038875 주문을 접수했습니다.",
+        "url": "https://g7.dev/admin/ecommerce/orders/1",
+        "data": {
+            "type": "new_order_admin",
+            "subject": "새로운 주문이 접수되었습니다",
+            "body": "소경은님이 주문번호 20260713-0038038875 주문을 접수했습니다.",
+            "click_url": "https://g7.dev/admin/ecommerce/orders/1",
+            "data": {
+                "action_url": "https://g7.dev/admin/ecommerce/orders/1"
+            }
+        },
+        "read_at": "2026-07-13 09:40:11",
+        "created_at": "2026-07-13 09:38:04"
+    }
+}
+```
 
 **에러 응답**
 
@@ -503,16 +569,16 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| number | integer | `23` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
-| id | string | `518b9c94-5853-4b68-8193-83af1851bbc6` | 기본 키 (내부 식별자) |
-| type | string | `inquiry_received` | <!-- TODO: 설명 --> |
-| type_label | string | `상품 문의 접수` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| subject | string | `새로운 상품 문의가 접수되었습니다` | <!-- TODO: 설명 --> |
-| body | string | `옥혜진님이 "면 손수건 3매입 #1" 상품에 문의를 남겼습니다.` | <!-- TODO: 설명 --> |
-| url | string | `https://g7_2.dev/admin/ecommerce/prod…` | <!-- TODO: 설명 --> |
-| data | object | `{"type":"inquiry_received","subject":"새로운 상품 문의가 접수되었습니다"…` | <!-- TODO: 설명 --> |
-| read_at | string | `2026-07-31 22:06:53` | read 일시 |
-| created_at | string | `2026-07-31 21:41:58` | 생성 일시 |
+| number | integer | `92` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
+| id | string | `02ee1121-ec63-4812-b77a-a0ffb4040acb` | 기본 키 (내부 식별자) |
+| type | string | `new_order_admin` | 알림 유형 식별자 (알림 정의의 type — 발송 트리거를 구분) |
+| type_label | string | `신규 주문 관리자 알림` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
+| subject | string | `새로운 주문이 접수되었습니다` | 알림 제목 (알림 템플릿의 subject 를 변수 치환해 렌더한 문자열) |
+| body | string | `소경은님이 주문번호 20260713-0038038875 (결제금액:…` | 알림 본문 (알림 템플릿의 body 를 변수 치환해 렌더한 문자열) |
+| url | string | `https://g7.dev/admin/ecommerce/orders…` | 알림 클릭 시 이동할 URL (템플릿의 click_url 우선, 없으면 메일 CTA action_url) |
+| data | object | `{"type":"new_order_admin","subject":"새로운 주문이 접수되었습니다","bo…` | 알림 원본 페이로드 객체 (type/subject/body/click_url 과 발송 시 전달된 변수 data 를 포함) |
+| read_at | null | `null` | read 일시 |
+| created_at | string | `2026-07-13 09:38:04` | 생성 일시 |
 
 **응답 예시**
 
@@ -756,11 +822,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| marked_count | integer | `2` | 실제로 읽음 처리된 알림 건수 (요청한 `ids` 중 본인 소유이면서 미읽음 상태였던 항목만 집계) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림을 읽음 처리했습니다.",
+    "data": {
+        "marked_count": 2
+    }
+}
+```
 
 **에러 응답**
 
@@ -858,11 +940,21 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림이 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -903,11 +995,51 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (읽음 처리 후 갱신된 알림 1건 — `UserNotificationResource`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | string | `9f2c1a44-1b6e-4a55-8b0e-4c8a3f1d90ab` | 알림 기본 키 (UUID) |
+| type | string | `order_shipped` | 알림 유형 식별자 (알림 정의의 type — 발송 트리거를 구분) |
+| type_label | string | `배송 시작 알림` | `type` 값의 사람이 읽는 라벨 (알림 정의의 현지화 이름, 정의 미존재 시 빈 문자열) |
+| subject | string | `주문하신 상품이 발송되었습니다` | 알림 제목 (알림 템플릿의 subject 를 변수 치환해 렌더한 문자열) |
+| body | string | `주문번호 20260713-0038038875 상품이 발송되었습니다.` | 알림 본문 (알림 템플릿의 body 를 변수 치환해 렌더한 문자열) |
+| url | string \| null | `https://g7.dev/mypage/orders/1` | 알림 클릭 시 이동할 URL (템플릿의 `click_url` 우선, 없으면 메일 CTA `action_url`, 둘 다 없으면 `null`) |
+| data | object | `{"type":"order_shipped","subject":"...","body":"...","click_url":"..."}` | 알림 원본 페이로드 객체 (type/subject/body/click_url 과 발송 시 전달된 변수 data 를 포함) |
+| read_at | string \| null | `2026-07-13 10:02:33` | 읽음 처리 일시 (사용자 타임존 기준 `Y-m-d H:i:s`) — 이 엔드포인트 성공 시 항상 값이 채워짐 |
+| created_at | string \| null | `2026-07-13 09:58:12` | 알림 생성 일시 (사용자 타임존 기준 `Y-m-d H:i:s`) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림을 읽음 처리했습니다.",
+    "data": {
+        "id": "9f2c1a44-1b6e-4a55-8b0e-4c8a3f1d90ab",
+        "type": "order_shipped",
+        "type_label": "배송 시작 알림",
+        "subject": "주문하신 상품이 발송되었습니다",
+        "body": "주문번호 20260713-0038038875 상품이 발송되었습니다.",
+        "url": "https://g7.dev/mypage/orders/1",
+        "data": {
+            "type": "order_shipped",
+            "subject": "주문하신 상품이 발송되었습니다",
+            "body": "주문번호 20260713-0038038875 상품이 발송되었습니다.",
+            "click_url": "https://g7.dev/mypage/orders/1",
+            "data": {
+                "action_url": "https://g7.dev/mypage/orders/1"
+            }
+        },
+        "read_at": "2026-07-13 10:02:33",
+        "created_at": "2026-07-13 09:58:12"
+    }
+}
+```
 
 **에러 응답**
 

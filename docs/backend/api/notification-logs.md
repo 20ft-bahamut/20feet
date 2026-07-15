@@ -208,11 +208,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| deleted_count | integer | `3` | 실제로 삭제된 알림 발송 이력 건수 (요청한 `ids` 중 존재하는 행만 카운트) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "선택한 알림 발송 이력이 삭제되었습니다.",
+    "data": {
+        "deleted_count": 3
+    }
+}
+```
 
 **에러 응답**
 
@@ -250,9 +266,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success(__('notification_log.delete_success'))` 만 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 

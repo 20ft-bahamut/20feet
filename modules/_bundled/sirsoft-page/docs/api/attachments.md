@@ -63,11 +63,45 @@ Content-Disposition: form-data; name="temp_key"
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: FileUploader 컴포넌트 규약에 맞춰 `data.data` 객체에 업로드된 첨부 1건(`PageAttachmentResource`)이 담깁니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| data.id | integer | `1` | 첨부파일 ID (기본 키) |
+| data.hash | string | `"a1b2c3d4e5f6"` | URL용 고유 해시 (12자, 생성 시 자동 부여). 공개 다운로드/미리보기 라우트의 식별자 |
+| data.original_filename | string | `"example.pdf"` | 업로드된 원본 파일명 |
+| data.mime_type | string | `"application/pdf"` | MIME 타입 (예: `image/jpeg`, `application/pdf`) |
+| data.size | integer | `102400` | 파일 크기 (바이트) |
+| data.collection | string | `"attachments"` | 첨부 컬렉션 그룹명 (미지정 시 `attachments`) |
+| data.order | integer | `0` | 정렬 순서 (0 이상) |
+| data.is_image | boolean | `false` | 이미지 파일 여부 (`mime_type` 이 `image/` 로 시작하는지) |
+| data.download_url | string | `"/api/modules/sirsoft-page/pages/attachment/a1b2c3d4e5f6"` | 공개 hash 다운로드 URL |
+| data.preview_url | string\|null | `null` | 공개 hash 이미지 미리보기 URL (이미지가 아니면 `null`) |
+| data.created_at | string\|null | `"2026-07-14 10:30:00"` | 업로드 일시 (사용자 타임존 기준 포맷) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "첨부파일이 업로드되었습니다.",
+    "data": {
+        "data": {
+            "id": 1,
+            "hash": "a1b2c3d4e5f6",
+            "original_filename": "example.pdf",
+            "mime_type": "application/pdf",
+            "size": 102400,
+            "collection": "attachments",
+            "order": 0,
+            "is_image": false,
+            "download_url": "/api/modules/sirsoft-page/pages/attachment/a1b2c3d4e5f6",
+            "preview_url": null,
+            "created_at": "2026-07-14 10:30:00"
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -75,7 +109,8 @@ Content-Disposition: form-data; name="temp_key"
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`sirsoft-page.pages.create`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). 파일 누락/파일 아님/10MB 초과/허용되지 않은 확장자(`jpg,jpeg,png,gif,webp,pdf,zip,doc,docx,xls,xlsx,ppt,pptx,hwp,txt` 외) |
+| 500 | Internal Server Error | 저장 중 예외 발생 시 `첨부파일 업로드에 실패했습니다.` (`error` 에 예외 메시지) |
 
 <!-- @generated:end -->
 
@@ -114,11 +149,17 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만, `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "첨부파일 순서가 변경되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -126,7 +167,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`sirsoft-page.pages.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). `order` 누락/배열 아님/빈 배열, 각 원소의 `id`(정수) 또는 `order`(0 이상 정수) 누락 |
+| 500 | Internal Server Error | 순서 갱신 중 예외 발생 시 `첨부파일 순서 변경에 실패했습니다.` (`error` 에 예외 메시지) |
 
 <!-- @generated:end -->
 
@@ -156,11 +198,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만, `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "첨부파일이 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -168,7 +216,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`sirsoft-page.pages.update`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | `{id}` 에 해당하는 첨부파일이 없는 경우 (`첨부파일을 찾을 수 없습니다.`) |
+| 500 | Internal Server Error | 삭제 실패 또는 삭제 중 예외 발생 시 `첨부파일 삭제에 실패했습니다.` |
 
 <!-- @generated:end -->
 

@@ -54,7 +54,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "urls": [],
         "count": 0
@@ -106,11 +106,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| cleared | integer \| string | `12` / `"all"` | 삭제 결과. `layout` 을 지정한 경우 해당 레이아웃에서 무효화된 캐시 항목 수(정수), 미지정 시 전체 캐시를 삭제했음을 뜻하는 문자열 `"all"`. |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "cleared": "all"
+    }
+}
+```
 
 **에러 응답**
 
@@ -119,6 +135,7 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 캐시 무효화(`invalidateByLayout` / `clearAll`) 중 예외가 발생한 경우 (`messages.error_occurred`) |
 
 <!-- @generated:end -->
 
@@ -315,7 +332,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "overall": {
             "total_entries": 0,
@@ -365,11 +382,29 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| status | string | `dispatched` | 워밍업 요청 접수 상태. 현재 구현에서는 항상 `dispatched` 고정값이며, 실제 사전 렌더가 완료되었음을 뜻하지는 않는다. |
+| message | string | `SEO 캐시 워밍업이 시작되었습니다.` | 관리자에게 노출할 안내 문구 (`seo.warmup_dispatched` 다국어 키). |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "status": "dispatched",
+        "message": "SEO 캐시 워밍업이 시작되었습니다."
+    }
+}
+```
 
 **에러 응답**
 
@@ -377,6 +412,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 500 | Internal Server Error | 워밍업 처리 중 예외가 발생한 경우 (`messages.error_occurred`) |
 
 <!-- @generated:end -->
 

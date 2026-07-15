@@ -55,11 +55,25 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| subject | string | `[사이트명] 회원가입을 환영합니다` | 요청 `locale`(미지정 시 현재 앱 로케일) 의 제목에서 `{변수}` 를 정의(`definition_id`)의 변수 설명(`[설명]`)으로 치환한 결과 |
+| body | string | `<h1>[회원 이름]님, 환영합니다!</h1>...` | 동일 로케일 본문에서 `{변수}` 를 정의의 변수 설명으로 치환한 결과. 해당 로케일 값이 없으면 빈 문자열 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "미리보기를 생성했습니다.",
+    "data": {
+        "subject": "[사이트명] 회원가입을 환영합니다",
+        "body": "<h1>[회원 이름]님, 환영합니다!</h1><p>[사이트명]에 가입해 주셔서 감사합니다.</p>"
+    }
+}
+```
 
 **에러 응답**
 
@@ -119,11 +133,67 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`NotificationTemplateResource`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| definition_id | integer | `1` | 소속 알림 정의 식별자 |
+| channel | string | `mail` | 발송 채널 (`mail`, `database`, `fcm`) |
+| subject | object | `{"ko":"[{app_name}] 회원가입을 환영합니다","en":"..."}` | 다국어 제목 (로케일 키 → 문자열, 로케일당 최대 500자) |
+| body | object | `{"ko":"<h1>{name}님, 환영합니다!</h1>...","en":"..."}` | 다국어 본문 (로케일 키 → 문자열, 로케일당 최대 65535자) |
+| click_url | string \| null | `null` | 알림 클릭 시 이동할 대상 URL (미설정 시 `null`) |
+| recipients | array | `[{"type":"role","value":"admin","display_name":"관리자"}]` | 수신자 규칙 목록. `type` 은 `trigger_user`/`related_user`/`role`/`specific_users`. `role` 이면 `display_name`, `specific_users` 면 `display_names` 가 표시용으로 부가됨 |
+| is_active | boolean | `true` | 활성 여부 (false 면 해당 채널 발송 중단) |
+| is_default | boolean | `false` | 기본값 상태 여부 (수정 시 항상 `false` 로 전환됨) |
+| user_overrides | array \| null | `["subject","body"]` | 사용자가 직접 수정한 필드명 목록 (`HasUserOverrides`) |
+| updated_by | string \| null | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 최종 수정한 사용자 UUID (없으면 `null`) |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:14:43` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (모두 `core.settings.update` 권한 기반) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "알림 템플릿이 수정되었습니다.",
+    "data": {
+        "id": 1,
+        "definition_id": 1,
+        "channel": "mail",
+        "subject": {
+            "ko": "[{app_name}] 회원가입을 환영합니다",
+            "en": "[{app_name}] Welcome to Our Service"
+        },
+        "body": {
+            "ko": "<h1>{name}님, 환영합니다!</h1>",
+            "en": "<h1>Welcome, {name}!</h1>"
+        },
+        "click_url": "/admin/notifications",
+        "recipients": [
+            {
+                "type": "role",
+                "value": "admin",
+                "display_name": "관리자"
+            }
+        ],
+        "is_active": true,
+        "is_default": false,
+        "user_overrides": [
+            "subject",
+            "body"
+        ],
+        "updated_by": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 12:14:43",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 

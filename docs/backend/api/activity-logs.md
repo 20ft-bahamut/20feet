@@ -214,7 +214,7 @@ HTTP/1.1 200
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| ids | body | array | 예 | min 1 | 대상 리소스 식별자 배열 (대량 작업 대상) |
+| ids | body | array | 예 | min 1 | 삭제할 활동 로그 ID 배열 (원소는 integer 이며 `activity_logs.id` 에 존재해야 함) |
 
 **요청 예시**
 
@@ -234,11 +234,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| deleted_count | integer | `3` | 실제로 삭제된 활동 로그 건수 (`ActivityLogService::deleteMany()` 반환값 — 요청한 `ids` 중 삭제에 성공한 개수) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "선택한 활동 로그가 삭제되었습니다.",
+    "data": {
+        "deleted_count": 3
+    }
+}
+```
 
 **에러 응답**
 
@@ -276,9 +292,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('activity_log.delete_success')` 를 데이터 인자 없이 호출하여 `data` 는 `null`)._
 
 **응답 예시**
 

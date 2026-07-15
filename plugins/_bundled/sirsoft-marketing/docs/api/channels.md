@@ -38,17 +38,49 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드. `data.channels` 는 저장 후 확정된 채널 배열(시스템 채널 병합 결과)이며, 요청 body 의 `channels` 와 동일한 구조를 그대로 되돌려준다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| channels | array | `[{...}]` | 저장된 최종 채널 목록 (누락된 시스템 채널이 앞에 병합됨) |
+| channels[].key | string | `email_subscription` | 채널 식별자 (소문자·숫자·밑줄) |
+| channels[].label | object | `{"ko":"광고성 이메일 수신","en":"Email Marketing"}` | 로케일별 채널 라벨 |
+| channels[].label_key | string | `sirsoft-marketing::channels.email_subscription.label` | 시스템 채널이 병합될 때만 포함되는 언어팩 라벨 키 |
+| channels[].page_slug | string \| null | `""` | 연결 약관 페이지 slug (없으면 빈 문자열/`null`) |
+| channels[].enabled | boolean | `true` | 채널 노출 여부 |
+| channels[].is_system | boolean | `true` | 시스템 채널 여부 (삭제·플래그 변경 불가) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "채널이 저장되었습니다.",
+    "data": {
+        "channels": [
+            {
+                "key": "email_subscription",
+                "label_key": "sirsoft-marketing::channels.email_subscription.label",
+                "label": {
+                    "ko": "광고성 이메일 수신",
+                    "en": "Email Marketing"
+                },
+                "page_slug": "",
+                "enabled": true,
+                "is_system": true
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 관리자 권한이 없는 사용자가 호출한 경우 (`AdminBaseController`) |
+| 422 | 동의 이력 존재 | 삭제 대상 채널에 동의한 회원이 있는 경우 — "채널(:key)에 동의한 회원이 :count명 있어 삭제할 수 없습니다." |
 
 <!-- @generated:end -->
 
@@ -79,7 +111,7 @@ Authorization: Bearer {YOUR_TOKEN}
   "success": true,
   "data": {
     "channels": [
-      { "key": "email_subscription", "label": { "ko": "광고성 이메일 수신", "en": "Marketing email" }, "page_slug": null, "enabled": true, "is_system": true }
+      { "key": "email_subscription", "label": { "ko": "광고성 이메일 수신", "en": "Email Marketing" }, "page_slug": "", "enabled": true, "is_system": true }
     ]
   },
   "message": "채널이 저장되었습니다.",

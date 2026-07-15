@@ -63,7 +63,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "marketing_consent_enabled": true,
         "marketing_consent_terms_slug": "marketing-terms",
@@ -93,7 +93,7 @@ HTTP/1.1 200
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_
+_에러 없음 (공개 조회 — 인증·검증·도메인 예외 경로가 없다. 요청 파라미터가 없어 422 가 발생하지 않고, `PublicBaseController` 라 401/403 도 없으며, 설정 미존재 시에도 기본값으로 200 을 반환한다)._
 
 <!-- @generated:end -->
 

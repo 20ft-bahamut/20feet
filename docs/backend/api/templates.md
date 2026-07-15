@@ -238,11 +238,55 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| template | object | `{"identifier":"sirsoft-admin_basic","status":"active", …}` | 활성화된 템플릿 리소스 (TemplateResource 목록 필드 전체 — identifier/vendor/name/version/type/status/description/dependencies/dependencies_met/update_available/update_source/latest_version/file_version/github_url/github_changelog_url/is_pending/is_bundled/deactivated_reason/deactivated_at/incompatible_required_version/abilities) |
+| pending_language_packs | array | `[]` | 이 템플릿 재활성화로 함께 되살아날 수 있는 비활성 번들 언어팩 목록 (각 항목: id, identifier, locale, locale_native_name) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 활성화되었습니다.",
+    "data": {
+        "template": {
+            "identifier": "sirsoft-admin_basic",
+            "vendor": "sirsoft",
+            "name": "Admin Basic",
+            "version": "1.0.0",
+            "type": "admin",
+            "status": "active",
+            "description": "그누보드7 기본 관리자 템플릿",
+            "dependencies": {
+                "modules": [],
+                "plugins": []
+            },
+            "dependencies_met": true,
+            "update_available": false,
+            "update_source": null,
+            "latest_version": null,
+            "file_version": "1.0.0",
+            "github_url": null,
+            "github_changelog_url": null,
+            "is_pending": false,
+            "is_bundled": true,
+            "deactivated_reason": null,
+            "deactivated_at": null,
+            "incompatible_required_version": null,
+            "abilities": {
+                "can_install": true,
+                "can_activate": true,
+                "can_uninstall": true,
+                "can_edit_layouts": true
+            }
+        },
+        "pending_language_packs": []
+    }
+}
+```
 
 **에러 응답**
 
@@ -250,7 +294,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
+| 409 | Conflict | 필요한 의존 모듈/플러그인이 충족되지 않은 경우 (`errors` 에 `warning`, `missing_modules`, `missing_plugins`, `message`) — `force=true` 로 우회 가능 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 활성화 처리 실패 (이미 활성 상태·미설치·코어 버전 비호환 등) |
 
 <!-- @generated:end -->
 
@@ -278,11 +324,36 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| updated_count | integer | `1` | 업데이트 가능으로 판정된 템플릿 개수 |
+| details | array | `[{"identifier":"sirsoft-basic", …}]` | 업데이트 가능한 템플릿 목록 (각 항목: identifier, current_version, latest_version, update_source) |
+| details[].identifier | string | `sirsoft-basic` | 템플릿 식별자 |
+| details[].current_version | string | `1.0.0` | 현재 설치된 버전 |
+| details[].latest_version | string | `1.0.1` | 감지된 최신 버전 |
+| details[].update_source | string | `github` | 업데이트 감지 출처 (`github` \| `bundled`) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "업데이트 확인이 완료되었습니다.",
+    "data": {
+        "updated_count": 1,
+        "details": [
+            {
+                "identifier": "sirsoft-basic",
+                "current_version": "1.0.0",
+                "latest_version": "1.0.1",
+                "update_source": "github"
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -291,6 +362,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 업데이트 확인 처리 실패 (GitHub API 호출 실패 등) |
 
 <!-- @generated:end -->
 
@@ -327,11 +399,71 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 (vendor-name 형식) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Admin Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 템플릿 버전 |
+| type | string | `admin` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `inactive` | 상태 (비활성화 직후 `inactive`) |
+| description | string | `그누보드7 기본 관리자 템플릿` | 템플릿 설명 (현재 로케일 값) |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 ({modules, plugins} — 각 항목 identifier/name/type) |
+| dependencies_met | boolean | `true` | 의존 확장이 모두 활성·버전 충족인지 여부 |
+| update_available | boolean | `false` | 최신 버전 대비 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 (`github` \| `bundled` \| null) |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `null` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기소에 있어 설치 대기 중인지 여부 |
+| is_bundled | boolean | `true` | 코어 선탑재(번들) 확장 여부 |
+| deactivated_reason | string\|null | `manual` | 비활성화 사유 (`manual` \| `incompatible_core` \| null) |
+| deactivated_at | string\|null | `2026-07-14 10:00:00` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자가 이 템플릿에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 비활성화되었습니다.",
+    "data": {
+        "identifier": "sirsoft-admin_basic",
+        "vendor": "sirsoft",
+        "name": "Admin Basic",
+        "version": "1.0.0",
+        "type": "admin",
+        "status": "inactive",
+        "description": "그누보드7 기본 관리자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": "manual",
+        "deactivated_at": "2026-07-14 10:00:00",
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -340,6 +472,7 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 비활성화 처리 실패 (템플릿 미존재 등) |
 
 <!-- @generated:end -->
 
@@ -384,11 +517,73 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource + cascade 결과)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 설치된 템플릿 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 설치된 템플릿 버전 |
+| type | string | `user` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `inactive` | 설치 직후 상태 (설치만 수행 — 활성화는 별도 API) |
+| description | string | `그누보드7 기본 사용자 템플릿` | 템플릿 설명 (현재 로케일 값) |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 ({modules, plugins}) |
+| dependencies_met | boolean | `true` | 의존 확장이 모두 활성·버전 충족인지 여부 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `null` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `true` | 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자의 수행 가능 작업 맵 |
+| language_pack_failures | array | `[]` | cascade 2단계에서 설치 실패한 동반 번들 언어팩 목록 (각 항목: identifier, reason). best-effort 이므로 실패해도 설치 자체는 성공 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "vendor": "sirsoft",
+        "name": "Basic",
+        "version": "1.0.0",
+        "type": "user",
+        "status": "inactive",
+        "description": "그누보드7 기본 사용자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        },
+        "language_pack_failures": []
+    }
+}
+```
 
 **에러 응답**
 
@@ -396,7 +591,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 설치 실패 (이미 설치됨·manifest 오류·cascade 의존 확장 설치 실패 등 — `errors` 에 번역된 사유) |
+| 500 | Server Error | 설치 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -436,11 +632,71 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource — 목록 응답 항목과 동일한 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 설치된 템플릿 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 설치된 템플릿 버전 |
+| type | string | `user` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `inactive` | 설치 직후 상태 |
+| description | string | `그누보드7 기본 사용자 템플릿` | 템플릿 설명 |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 |
+| dependencies_met | boolean | `true` | 의존 확장 충족 여부 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `null` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `false` | 번들 확장 여부 (ZIP 업로드 설치이므로 false) |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "vendor": "sirsoft",
+        "name": "Basic",
+        "version": "1.0.0",
+        "type": "user",
+        "status": "inactive",
+        "description": "그누보드7 기본 사용자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -448,7 +704,8 @@ Content-Type: application/octet-stream
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 파일 검증 위반 또는 ZIP 처리 실패 (template.json 누락/무효, 이미 설치된 식별자, 잘못된 디렉토리명 등) |
+| 500 | Server Error | 설치 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -485,11 +742,71 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource — 목록 응답 항목과 동일한 필드 구성)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 설치된 템플릿 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 설치된 템플릿 버전 |
+| type | string | `user` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `inactive` | 설치 직후 상태 |
+| description | string | `그누보드7 기본 사용자 템플릿` | 템플릿 설명 |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 |
+| dependencies_met | boolean | `true` | 의존 확장 충족 여부 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-template-basic` | manifest 에 선언된 GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `false` | 번들 확장 여부 (GitHub 설치이므로 false) |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 성공적으로 설치되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "vendor": "sirsoft",
+        "name": "Basic",
+        "version": "1.0.0",
+        "type": "user",
+        "status": "inactive",
+        "description": "그누보드7 기본 사용자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": "https://github.com/gnuboard/g7-template-basic",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -497,7 +814,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | URL 검증 위반 또는 설치 실패 (유효하지 않은 GitHub URL, 저장소 없음, 다운로드 실패, 이미 설치된 식별자 등) |
+| 500 | Server Error | 설치 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -527,11 +845,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (`data`: `null`, 성공 메시지만)._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "첨부 파일을 삭제했습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -541,6 +865,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 첨부 파일 삭제 실패 (스토리지/DB 삭제 실패 — `첨부 파일 삭제에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -578,11 +903,41 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| manifest | object\|null | `{"identifier":"sirsoft-basic","version":"1.0.0", …}` | ZIP 안의 `template.json` 원본 내용 (파싱 실패 시 null) |
+| validation | object | `{"errors":[],"is_valid":true, …}` | 설치 전 검증 결과 |
+| validation.errors | array | `[]` | 추출/검증 중 발생한 오류 메시지 배열 (문자열) |
+| validation.is_valid | boolean | `true` | manifest 추출 성공 + 오류 없음 여부 |
+| validation.already_installed | boolean | `false` | 동일 식별자의 템플릿이 이미 설치되어 있는지 여부 |
+| validation.existing_version | string\|null | `1.0.0` | 이미 설치된 경우 그 버전 (미설치면 null) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "manifest 미리보기를 완료했습니다.",
+    "data": {
+        "manifest": {
+            "identifier": "sirsoft-basic",
+            "vendor": "sirsoft",
+            "name": "Basic",
+            "version": "1.0.0",
+            "type": "user",
+            "description": "그누보드7 기본 사용자 템플릿"
+        },
+        "validation": {
+            "errors": [],
+            "is_valid": true,
+            "already_installed": false,
+            "existing_version": null
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -590,7 +945,7 @@ Content-Type: application/octet-stream
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 파일 검증 위반 또는 ZIP 열기 실패 (`manifest 미리보기에 실패했습니다.` + `errors.error`) |
 
 <!-- @generated:end -->
 
@@ -627,11 +982,71 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource — 갱신 후 템플릿 정보)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-admin_basic` | 템플릿 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Admin Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 템플릿 버전 |
+| type | string | `admin` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `active` | 템플릿 상태 |
+| description | string | `그누보드7 기본 관리자 템플릿` | 템플릿 설명 |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 |
+| dependencies_met | boolean | `true` | 의존 확장 충족 여부 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `null` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `true` | 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿 레이아웃이 성공적으로 갱신되었습니다.",
+    "data": {
+        "identifier": "sirsoft-admin_basic",
+        "vendor": "sirsoft",
+        "name": "Admin Basic",
+        "version": "1.0.0",
+        "type": "admin",
+        "status": "active",
+        "description": "그누보드7 기본 관리자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -639,7 +1054,8 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 레이아웃 갱신 실패 (레이아웃 JSON 무효, layout_name 누락 등) |
+| 500 | Server Error | 레이아웃 갱신 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -672,11 +1088,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (`data`: `null`, 성공 메시지만)._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿이 성공적으로 제거되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -684,7 +1106,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 제거 실패 (활성 상태·파일 삭제 실패 등 — `errors.identifier` 에 번역된 사유) |
+| 500 | Server Error | 제거 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -860,10 +1283,10 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 (vendor-name 형식, 예: sirsoft-admin_basic) |
-| js | array | `["\/api\/templates\/assets\/sirsoft-admin_basic?file=js%2…` | <!-- TODO: 설명 --> |
-| css | array | `["\/api\/admin\/templates\/sirsoft-admin_basic\/editor\/c…` | <!-- TODO: 설명 --> |
-| manifest_present | boolean | `true` | <!-- TODO: 설명 --> |
-| manifest_source | string | `active` | <!-- TODO: 설명 --> |
+| js | array | `["\/api\/templates\/assets\/sirsoft-admin_basic\/js\/comp…` | 프론트엔드 JS 에셋 목록 (manifest assets 파생) |
+| css | array | `["\/api\/admin\/templates\/sirsoft-admin_basic\/editor\/c…` | 프론트엔드 CSS 에셋 목록 (manifest assets 파생) |
+| manifest_present | boolean | `true` | manifest 파일 존재 여부 |
+| manifest_source | string | `active` | manifest 를 읽어온 출처 경로 (활성/_bundled 구분) |
 
 **응답 예시**
 
@@ -933,8 +1356,8 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 (vendor-name 형식, 예: sirsoft-admin_basic) |
-| channels | array | `[{"name":"core.admin.dashboard","source":{"kind":"core"}}…` | <!-- TODO: 설명 --> |
-| events | array | `[]` | <!-- TODO: 설명 --> |
+| channels | array | `[{"name":"core.admin.dashboard","source":{"kind":"core"}}…` | 이 템플릿에서 구독 가능한 브로드캐스트 채널 목록 (각 원소 name/source — 코어·모듈·플러그인이 등록한 채널) |
+| events | array | `[]` | 이벤트 정의 목록 |
 
 **응답 예시**
 
@@ -1046,11 +1469,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-200 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다. 본문은 `Content-Type: text/css; charset=UTF-8` 의 CSS 원문이며, 템플릿에 components.css 가 없으면 빈 본문(200)으로 폴백합니다._
 
 **응답 예시**
 
-<!-- 실측 제외: http-200 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/css; charset=UTF-8
+
+.g7-editor-preview-dark .bg-white { background-color: #1f2937; }
+/* (템플릿 components.css 를 프리뷰 격리 규칙으로 변환한 CSS 원문) */
+```
 
 **에러 응답**
 
@@ -1137,10 +1566,10 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| $schema | string | `https://json-schema.org/draft/2020-12…` | <!-- TODO: 설명 --> |
-| templateId | string | `sirsoft-admin_basic` | <!-- TODO: 설명 --> |
+| $schema | string | `https://json-schema.org/draft/2020-12…` | JSON 스키마 선언 URL (편집기/검증 도구용) |
+| templateId | string | `sirsoft-admin_basic` | 대상 템플릿의 식별자 |
 | version | string | `1.0.0` | 템플릿 버전 (예: 1.0.0) |
-| components | object | `{"basic":[{"name":"Button","type":"basic","description":"…` | <!-- TODO: 설명 --> |
+| components | object | `{"basic":[{"name":"Button","type":"basic","description":"…` | 컴포넌트 트리 (레이아웃이 렌더할 컴포넌트 정의) |
 
 **응답 예시**
 
@@ -93157,11 +93586,26 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 템플릿 `lang/{locale}.json` 의 내용을 그대로 담은 객체입니다 (번역 키 → 번역문). 고정 필드 스키마가 없으며 키 집합은 템플릿마다 다릅니다. 파일 부재 시 빈 객체로 폴백합니다 (message: `다국어 데이터가 비어 있습니다.`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| (템플릿 번역 키) | string\|object | `{"common":{"save":"저장"}}` | 템플릿 `lang/{locale}.json` 이 선언한 번역 키와 번역문 (중첩 객체 허용) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "다국어 데이터를 조회했습니다.",
+    "data": {
+        "common": {
+            "save": "저장",
+            "cancel": "취소"
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -93330,10 +93774,10 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | version | string | `1.0.0` | 템플릿 버전 (예: 1.0.0) |
-| routes | array | `[{"path":"*\/admin","redirect":"\/admin\/dashboard","auth…` | <!-- TODO: 설명 --> |
-| base_layouts | array | `[{"layout_name":"_admin_base","label":null}]` | <!-- TODO: 설명 --> |
-| modals | array | `[{"modal_id":"identity-challenge-modal","host_layout":"_a…` | <!-- TODO: 설명 --> |
-| layout_versions | array | `[]` | <!-- TODO: 설명 --> |
+| routes | array | `[{"path":"*\/admin","redirect":"\/admin\/dashboard","auth…` | 라우트 정의 목록 |
+| base_layouts | array | `[{"layout_name":"_admin_base","label":null}]` | 상속 가능한 베이스 레이아웃 목록 |
+| modals | array | `[{"modal_id":"identity-challenge-modal","host_layout":"_a…` | 모달 컴포넌트 정의 배열 |
+| layout_versions | array | `[]` | 레이아웃 버전 이력 목록 |
 
 **응답 예시**
 
@@ -93554,11 +93998,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 미리보기를 요청한 템플릿 식별자 |
+| enabled | boolean | `true` | 이 레이아웃이 봇 HTML 로 렌더되는지 여부 (`meta.seo.enabled=false` 이거나 미렌더 시 false) |
+| html | string\|null | `<!DOCTYPE html>…` | 렌더된 봇 HTML 원문 (SEO 캐시 우회 실시간 렌더). 미노출이면 null |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "enabled": true,
+        "html": "<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n<title>상품 목록</title>\n</head>\n<body>...</body>\n</html>"
+    }
+}
+```
 
 **에러 응답**
 
@@ -93606,10 +94066,10 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 (vendor-name 형식, 예: sirsoft-admin_basic) |
-| page_types | array | `[{"value":"boards","owner":{"type":"module","id":"sirsoft…` | <!-- TODO: 설명 --> |
-| toggle_settings | array | `[{"ref":"$module_settings:sirsoft-board:seo.seo_boards","…` | <!-- TODO: 설명 --> |
-| vars | array | `[]` | <!-- TODO: 설명 --> |
-| extensions | array | `[{"type":"module","id":"gnuboard7-hello_module","label":"…` | <!-- TODO: 설명 --> |
+| page_types | array | `[{"value":"boards","owner":{"type":"module","id":"sirsoft…` | SEO 템플릿 키로 사용 가능한 페이지 유형 목록 |
+| toggle_settings | array | `[{"ref":"$module_settings:sirsoft-board:seo.seo_boards","…` | 토글 가능한 설정 항목 목록 |
+| vars | array | `[]` | SEO 변수 선언 맵 (데이터 소스 값의 표현식 매핑) |
+| extensions | array | `[{"type":"module","id":"sirsoft-board","label":"게시판"},{"t…` | SEO 변수를 제공하는 확장 목록 (각 원소 type/id/label — 레이아웃 meta.seo.extensions 에 선언 가능한 후보) |
 
 **응답 예시**
 
@@ -93912,11 +94372,89 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 미리보기를 요청한 템플릿 식별자 |
+| defaultsAvailable | boolean | `true` | 모듈 기본값 계산 가능 여부 (`extensions` 와 `page_type` 이 모두 지정된 경우에만 true) |
+| missing | array | `["page_type"]` | 기본값 계산에 부족한 입력 키 목록 (`extensions` \| `page_type`) |
+| og | array | `[{"key":"title","effectiveValue":"상품 목록", …}]` | og 키별 cascade 결과 목록 |
+| og[].key | string | `title` | og 메타 키 (title, description, image, type, url 등) |
+| og[].effectiveValue | mixed | `상품 목록` | 최종 적용될 값 (필터 잠김이면 필터 적용 후 값) |
+| og[].source | string | `module:sirsoft-ecommerce` | 값 출처 (`filter` \| `inherited` \| `layout` \| `module:{id}` \| `core`) |
+| og[].overriddenByLayout | boolean | `false` | 이 레이아웃이 직접 값을 덮었는지 여부 (상속은 false) |
+| og[].inheritedFromBase | boolean | `false` | 베이스 레이아웃에서 상속된 값인지 여부 |
+| og[].lockedByFilter | boolean | `false` | 확장 필터 훅이 값을 강제해 편집 불가인지 여부 |
+| og[].sourceExpr | string | `{{product.name}}` | 모듈 자동값일 때 연결된 데이터 경로 표현식 (모듈 출처 + 메타 선언 시에만 동반) |
+| og[].label | string | `상품 이름` | 모듈 자동값의 표시 라벨 (현재 로케일) |
+| twitter | array | `[{"key":"card","effectiveValue":"summary_large_image", …}]` | twitter 키별 cascade 결과 목록 (og 와 동일 항목 구조) |
+| structured | object | `{"autoBlock":{…},"hasLayoutBlock":false, …}` | 구조화 데이터(JSON-LD) 미리보기 |
+| structured.autoBlock | object\|null | `{"@type":"Product", …}` | 모듈이 자동 생성한 구조화 블록 (레이아웃 미선언 시 노출) |
+| structured.autoMeta | object | `{"name":{"expr":"{{product.name}}","label":"상품 이름"}}` | 자동 블록의 점 경로 키별 데이터 경로 메타 (연결 칩) |
+| structured.hasLayoutBlock | boolean | `false` | 레이아웃이 직접 구조화 블록을 선언했는지 여부 (선언 시 모듈 자동값을 통째로 덮음) |
+| structured.lockedByFilter | boolean | `false` | 확장 필터 훅이 구조화 블록을 강제해 편집 불가인지 여부 |
+| structured.filteredBlock | object\|null | `null` | 필터 잠김 시 필터 적용 후 최종 블록 (잠기지 않으면 null) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "defaultsAvailable": true,
+        "missing": [],
+        "og": [
+            {
+                "key": "title",
+                "effectiveValue": "상품 목록",
+                "source": "layout",
+                "overriddenByLayout": true,
+                "inheritedFromBase": false,
+                "lockedByFilter": false
+            },
+            {
+                "key": "image",
+                "effectiveValue": "https://example.com/storage/products/1.jpg",
+                "source": "module:sirsoft-ecommerce",
+                "overriddenByLayout": false,
+                "inheritedFromBase": false,
+                "lockedByFilter": false,
+                "sourceExpr": "{{product.image_url}}",
+                "label": "상품 이미지"
+            }
+        ],
+        "twitter": [
+            {
+                "key": "card",
+                "effectiveValue": "summary_large_image",
+                "source": "core",
+                "overriddenByLayout": false,
+                "inheritedFromBase": false,
+                "lockedByFilter": false
+            }
+        ],
+        "structured": {
+            "autoBlock": {
+                "@context": "https://schema.org",
+                "@type": "Product",
+                "name": "예시 상품"
+            },
+            "autoMeta": {
+                "name": {
+                    "expr": "{{product.name}}",
+                    "label": "상품 이름"
+                }
+            },
+            "hasLayoutBlock": false,
+            "lockedByFilter": false,
+            "filteredBlock": null
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -93960,7 +94498,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_목록 응답: `data` 는 첨부 항목 배열입니다 (페이지네이션 없음). 첨부가 없으면 빈 배열._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 첨부 파일 기본 키 (삭제 시 path 파라미터로 사용) |
+| layout_name | string\|null | `main` | 이 첨부가 속한 레이아웃 이름 (레이아웃 무관 첨부면 null) |
+| original_name | string | `hero-bg.png` | 업로드 당시 원본 파일명 |
+| mime_type | string | `image/png` | 파일 MIME 타입 |
+| size | integer | `204800` | 파일 크기 (바이트) |
+| url | string | `/storage/template-layout-attachments/sirsoft-basic/hero-bg.png` | 첨부 파일 접근 URL |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 업로드 일시 (ISO 8601) |
 
 **응답 예시**
 
@@ -94031,11 +94579,33 @@ Content-Disposition: form-data; name="layout_name"
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 생성된 첨부 파일 기본 키 (삭제 시 path 파라미터로 사용) |
+| layout_name | string\|null | `main` | 이 첨부가 속한 레이아웃 이름 (미지정 시 null) |
+| original_name | string | `hero-bg.png` | 업로드된 원본 파일명 |
+| mime_type | string | `image/png` | 파일 MIME 타입 |
+| size | integer | `204800` | 파일 크기 (바이트) |
+| url | string | `/storage/template-layout-attachments/sirsoft-basic/hero-bg.png` | 업로드된 파일의 접근 URL (편집기 ImagePickerControl 이 사용) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "첨부 파일을 업로드했습니다.",
+    "data": {
+        "id": 1,
+        "layout_name": "main",
+        "original_name": "hero-bg.png",
+        "mime_type": "image/png",
+        "size": 204800,
+        "url": "/storage/template-layout-attachments/sirsoft-basic/hero-bg.png"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94043,8 +94613,9 @@ Content-Disposition: form-data; name="layout_name"
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 (`템플릿을 찾을 수 없습니다.`) |
+| 422 | Unprocessable Entity | 파일 검증 위반 (이미지 아님, 지원하지 않는 형식 jpg/jpeg/png/gif/webp/svg 외, 크기 초과 등) |
+| 500 | Server Error | 스토리지 저장 실패 (`첨부 파일 업로드에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -94135,11 +94706,88 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (TemplateResource::toDetailArray + `language_packs`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Admin Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.0` | 템플릿 버전 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `null` | 업데이트 감지 출처 (`github` \| `bundled`) |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| type | string | `admin` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `active` | 템플릿 상태 |
+| description | string | `그누보드7 기본 관리자 템플릿` | 템플릿 설명 (현재 로케일 값) |
+| github_url | string\|null | `null` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `null` | GitHub 변경 내역 URL |
+| requires_core | string\|null | `>=7.0.0` | 요구 코어 버전 제약 (manifest `g7_version`) |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `true` | 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 (`manual` \| `incompatible_core` \| null) |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| locales | array | `["ko","en"]` | 템플릿이 지원하는 로케일 목록 |
+| layouts_count | integer | `42` | 이 템플릿이 등록한 레이아웃 수 |
+| components | object | `{"basic":[…],"composite":[…]}` | 템플릿이 제공하는 컴포넌트 목록 (basic/composite) |
+| license | string\|null | `MIT` | 라이선스 표기 |
+| metadata | object | `{}` | manifest 부가 메타데이터 |
+| externals | object | `{}` | 외부 리소스 선언 (template.json `externals` 정규화 결과) |
+| dependencies | object | `{"modules":[…],"plugins":[…]}` | 의존 확장 상세 (각 항목: identifier, name, required_version, installed_version, is_active, is_met) |
+| created_at | string\|null | `2026-07-14 09:00:00` | 설치(레코드 생성) 일시 |
+| updated_at | string\|null | `2026-07-14 10:00:00` | 최종 갱신 일시 |
+| language_packs | array | `[]` | 이 템플릿을 대상으로 하는 언어팩 목록 (LanguagePackResource — id, identifier, locale, version, status, is_protected 등) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "identifier": "sirsoft-admin_basic",
+        "vendor": "sirsoft",
+        "name": "Admin Basic",
+        "version": "1.0.0",
+        "latest_version": null,
+        "update_available": false,
+        "update_source": null,
+        "file_version": "1.0.0",
+        "type": "admin",
+        "status": "active",
+        "description": "그누보드7 기본 관리자 템플릿",
+        "github_url": null,
+        "github_changelog_url": null,
+        "requires_core": ">=7.0.0",
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "locales": [
+            "ko",
+            "en"
+        ],
+        "layouts_count": 42,
+        "components": {
+            "basic": [],
+            "composite": []
+        },
+        "license": "MIT",
+        "metadata": {},
+        "externals": {},
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "created_at": "2026-07-14 09:00:00",
+        "updated_at": "2026-07-14 10:00:00",
+        "language_packs": []
+    }
+}
+```
 
 **에러 응답**
 
@@ -94147,8 +94795,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 식별자의 템플릿이 없는 경우 (`템플릿을 찾을 수 없습니다.`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 템플릿 정보 조회 처리 실패 |
 
 <!-- @generated:end -->
 
@@ -94178,11 +94827,38 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| has_modified_layouts | boolean | `true` | 사용자가 수정한 레이아웃이 하나라도 있는지 여부 (설치 시 해시와 현재 내용 비교) |
+| modified_count | integer | `2` | 수정된 레이아웃 개수 |
+| modified_layouts | array | `[{"id":12,"name":"main", …}]` | 수정된 레이아웃 목록 |
+| modified_layouts[].id | integer | `12` | 레이아웃 레코드 ID |
+| modified_layouts[].name | string | `main` | 레이아웃 이름 |
+| modified_layouts[].updated_at | string\|null | `2026-07-14 10:00:00` | 마지막 수정 일시 |
+| modified_layouts[].size_diff | integer | `128` | 설치 당시 대비 내용 크기 변화량 (바이트, 음수 가능) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "수정된 레이아웃 확인이 완료되었습니다.",
+    "data": {
+        "has_modified_layouts": true,
+        "modified_count": 1,
+        "modified_layouts": [
+            {
+                "id": 12,
+                "name": "main",
+                "updated_at": "2026-07-14 10:00:00",
+                "size_diff": 128
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -94190,8 +94866,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | 해당 식별자의 템플릿이 설치되어 있지 않은 경우 (레이아웃 0건과 구분됨) |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 확인 실패 (`errors.template_name`) |
+| 500 | Server Error | 확인 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -94224,11 +94901,23 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| deleted | integer | `3` | 실제로 삭제된 커스텀 다국어 키 개수 (요청 `ids` 중 해당 템플릿 소속만 삭제하므로 요청 건수보다 적을 수 있음. 소속 키가 하나도 없으면 `0`) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "deleted": 3
+    }
+}
+```
 
 **에러 응답**
 
@@ -94236,8 +94925,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`ids` 누락 또는 빈 배열 등) |
+| 500 | Server Error | 삭제 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94271,11 +94961,44 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data` 는 커스텀 다국어 키 배열입니다 (페이지네이션 없음)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 커스텀 다국어 키 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| layout_name | string\|null | `main` | 생성 출처 레이아웃 이름 |
+| translation_key | string | `custom.main.a1b2c3` | 다국어 키 (`$t:` 참조 경로) |
+| values | object | `{"ko":"저장","en":"Save"}` | 로케일별 번역 값 맵 |
+| status | string | `active` | 상태 (`active`: 레이아웃에서 사용 중, `orphaned`: 참조가 사라진 고아 키) |
+| lock_version | integer | `0` | 낙관적 잠금 버전 (수정 시 `expected_lock_version` 으로 되돌려 보냄) |
+| created_at | string\|null | `2026-07-14T10:00:00.000000Z` | 생성 일시 |
+| updated_at | string\|null | `2026-07-14T10:00:00.000000Z` | 최종 수정 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": [
+        {
+            "id": 1,
+            "template_id": 1,
+            "layout_name": "main",
+            "translation_key": "custom.main.a1b2c3",
+            "values": {
+                "ko": "저장",
+                "en": "Save"
+            },
+            "status": "active",
+            "lock_version": 0,
+            "created_at": "2026-07-14T10:00:00.000000Z",
+            "updated_at": "2026-07-14T10:00:00.000000Z"
+        }
+    ]
+}
+```
 
 **에러 응답**
 
@@ -94283,7 +95006,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94326,11 +95049,41 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (생성된 커스텀 다국어 키, HTTP 201)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 생성된 커스텀 다국어 키 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| layout_name | string\|null | `main` | 생성 출처 레이아웃 이름 |
+| translation_key | string | `custom.main.a1b2c3` | 자동 생성된 다국어 키 (`$t:` 참조 경로) |
+| values | object | `{"ko":"저장"}` | 로케일별 번역 값 맵 (요청의 `locale`/`value` 로 초기화) |
+| status | string | `active` | 상태 (`active` \| `orphaned`) |
+| lock_version | integer | `0` | 낙관적 잠금 버전 (생성 직후 0) |
+| created_at | string\|null | `2026-07-14T10:00:00.000000Z` | 생성 일시 |
+| updated_at | string\|null | `2026-07-14T10:00:00.000000Z` | 최종 수정 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 1,
+        "template_id": 1,
+        "layout_name": "main",
+        "translation_key": "custom.main.a1b2c3",
+        "values": {
+            "ko": "저장"
+        },
+        "status": "active",
+        "lock_version": 0,
+        "created_at": "2026-07-14T10:00:00.000000Z",
+        "updated_at": "2026-07-14T10:00:00.000000Z"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94338,8 +95091,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 키 생성 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94370,11 +95124,17 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (`data`: `null`, 성공 메시지만)._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -94382,8 +95142,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 없거나, 해당 키가 없거나, 그 키가 경로의 템플릿 소속이 아닌 경우 (교차 템플릿 삭제 차단) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 삭제 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94426,11 +95187,42 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 커스텀 다국어 키)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 커스텀 다국어 키 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| layout_name | string\|null | `main` | 생성 출처 레이아웃 이름 |
+| translation_key | string | `custom.main.a1b2c3` | 다국어 키 (`$t:` 참조 경로) |
+| values | object | `{"ko":"저장","en":"Save"}` | 수정 후 로케일별 번역 값 맵 |
+| status | string | `active` | 상태 (`active` \| `orphaned`) |
+| lock_version | integer | `2` | 수정 후 증가된 낙관적 잠금 버전 (다음 수정 시 이 값을 `expected_lock_version` 으로 전달) |
+| created_at | string\|null | `2026-07-14T10:00:00.000000Z` | 생성 일시 |
+| updated_at | string\|null | `2026-07-14T11:00:00.000000Z` | 최종 수정 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 1,
+        "template_id": 1,
+        "layout_name": "main",
+        "translation_key": "custom.main.a1b2c3",
+        "values": {
+            "ko": "저장",
+            "en": "Save"
+        },
+        "status": "active",
+        "lock_version": 2,
+        "created_at": "2026-07-14T10:00:00.000000Z",
+        "updated_at": "2026-07-14T11:00:00.000000Z"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94438,8 +95230,10 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 없거나, 해당 키가 없거나, 그 키가 경로의 템플릿 소속이 아닌 경우 |
+| 409 | Conflict | 낙관적 잠금 충돌 — 다른 사용자가 먼저 수정 (`errors`: `error=concurrent_modification`, `current_version`, `your_version`, `resource`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 수정 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94469,11 +95263,73 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| target | object | `{"identifier":"sirsoft-basic","name":"Basic","version":"1.0.0"}` | 설치 대상 템플릿 요약 (identifier, name, version) |
+| dependencies | array | `[{"type":"module","identifier":"sirsoft-board", …}]` | 함께 설치가 필요한 의존 확장 후보 목록 (cascade 체크리스트) |
+| dependencies[].type | string | `module` | 확장 종류 (`module` \| `plugin`) |
+| dependencies[].identifier | string | `sirsoft-board` | 의존 확장 식별자 |
+| dependencies[].name | string\|null | `게시판` | 의존 확장 이름 (현재 로케일) |
+| dependencies[].required_version | string\|null | `>=1.0.0` | manifest 가 요구하는 버전 제약 |
+| dependencies[].installed_version | string\|null | `null` | 현재 설치된 버전 (미설치면 null) |
+| dependencies[].is_installed | boolean | `false` | 설치 여부 |
+| dependencies[].is_active | boolean | `false` | 활성 여부 |
+| dependencies[].is_met | boolean | `false` | 의존성 충족 여부 (활성 + 버전 제약 만족) |
+| dependencies[].available | boolean | `true` | cascade 설치 후보로 선택 가능한지 여부 (미충족 항목만 true) |
+| dependencies[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 (미충족 + 미설치면 true) |
+| language_packs | array | `[{"bundled_identifier":"g7-template-basic-ja", …}]` | 함께 설치 가능한 미설치 번들 언어팩 후보 (본 템플릿용 우선, 이어서 의존 확장용) |
+| language_packs[].bundled_identifier | string | `g7-template-basic-ja` | 번들 언어팩 식별자 |
+| language_packs[].locale | string | `ja` | 언어팩 로케일 코드 |
+| language_packs[].locale_native_name | string | `日本語` | 로케일 자국어 표기 |
+| language_packs[].locale_name | string | `일본어` | 로케일 이름 |
+| language_packs[].version | string | `1.0.0` | 언어팩 버전 |
+| language_packs[].depends_on_extension | string\|null | `null` | 이 언어팩이 귀속된 의존 확장 식별자 (본 템플릿용이면 null) |
+| language_packs[].available | boolean | `true` | 설치 후보 선택 가능 여부 |
+| language_packs[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "target": {
+            "identifier": "sirsoft-basic",
+            "name": "Basic",
+            "version": "1.0.0"
+        },
+        "dependencies": [
+            {
+                "type": "module",
+                "identifier": "sirsoft-board",
+                "name": "게시판",
+                "required_version": ">=1.0.0",
+                "installed_version": null,
+                "is_installed": false,
+                "is_active": false,
+                "is_met": false,
+                "available": true,
+                "default_selected": true
+            }
+        ],
+        "language_packs": [
+            {
+                "bundled_identifier": "g7-template-basic-ja",
+                "locale": "ja",
+                "locale_native_name": "日本語",
+                "locale_name": "일본어",
+                "version": "1.0.0",
+                "depends_on_extension": null,
+                "available": true,
+                "default_selected": true
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -94483,6 +95339,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 대상 템플릿을 찾을 수 없거나 프리뷰 구성 실패 |
 
 <!-- @generated:end -->
 
@@ -94512,11 +95369,80 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data` 는 출처(모듈/플러그인)별 그룹 배열입니다 (페이지네이션 없음)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| source_identifier | string | `sirsoft-ecommerce` | 그룹 출처 확장의 식별자 (템플릿 오버라이드 행은 대상 확장 기준으로 묶임) |
+| source_type | string | `module` | 그룹 출처 종류 (`module` \| `plugin` \| `template`) |
+| source_label | string | `이커머스` | 그룹 출처 표시명 (현재 로케일) |
+| extensions | array | `[{"id":3,"extension_type":"overlay", …}]` | 그 출처가 주입한 레이아웃 확장 목록 |
+| extensions[].id | integer | `3` | 레이아웃 확장 ID |
+| extensions[].template_id | integer | `1` | 소속 템플릿 ID |
+| extensions[].extension_type | string | `overlay` | 확장 방식 (`overlay`: 특정 레이아웃 오버레이, `extension_point`: 확장점 주입) |
+| extensions[].target_name | string | `main` | 대상 레이아웃명 또는 확장점 이름 |
+| extensions[].source_type | string | `module` | 이 확장 행의 출처 종류 (`template` 이면 템플릿 오버라이드 행) |
+| extensions[].source_identifier | string | `sirsoft-ecommerce` | 이 확장 행의 출처 식별자 |
+| extensions[].source_label | string | `이커머스` | 출처 표시명 |
+| extensions[].override_target | integer\|null | `null` | 템플릿 오버라이드인 경우 덮어쓰는 원본 확장 ID |
+| extensions[].is_override | boolean | `false` | 템플릿 오버라이드 행 여부 |
+| extensions[].priority | integer | `10` | 주입 우선순위 (낮을수록 먼저) |
+| extensions[].is_active | boolean | `true` | 활성 여부 |
+| extensions[].host_layouts | array | `["main","product_list"]` | 이 확장이 실제로 주입되는 호스트 레이아웃명 목록 |
+| extensions[].content | string | `"{\n  \"injections\": [...]\n}"` | 확장 content JSON 문자열 (pretty-print) |
+| extensions[].size | integer | `2048` | content JSON 바이트 크기 |
+| extensions[].size_formatted | string | `2.0 KB` | 사람이 읽는 크기 표기 |
+| extensions[].is_modified | boolean | `false` | 관리자가 원본 content 를 수정했는지 여부 (해시 비교) |
+| extensions[].lock_version | integer | `0` | 낙관적 잠금 버전 (수정 시 `expected_lock_version` 으로 전달) |
+| extensions[].current_version | integer\|null | `2` | 현재(최신) 저장 버전 번호 (이력 없으면 null) |
+| extensions[].created_at | string | `2026-07-14T10:00:00+09:00` | 생성 일시 (사용자 타임존 ISO 8601) |
+| extensions[].updated_at | string | `2026-07-14T10:00:00+09:00` | 최종 수정 일시 |
+| extensions[].abilities | object | `{"can_update":true}` | 현재 사용자의 수행 가능 작업 맵 (`core.templates.layouts.edit` 기반) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": [
+        {
+            "source_identifier": "sirsoft-ecommerce",
+            "source_type": "module",
+            "source_label": "이커머스",
+            "extensions": [
+                {
+                    "id": 3,
+                    "template_id": 1,
+                    "extension_type": "overlay",
+                    "target_name": "main",
+                    "source_type": "module",
+                    "source_identifier": "sirsoft-ecommerce",
+                    "source_label": "이커머스",
+                    "override_target": null,
+                    "is_override": false,
+                    "priority": 10,
+                    "is_active": true,
+                    "host_layouts": [
+                        "main"
+                    ],
+                    "content": "{\n    \"target_layout\": \"main\"\n}",
+                    "size": 34,
+                    "size_formatted": "34 B",
+                    "is_modified": false,
+                    "lock_version": 0,
+                    "current_version": null,
+                    "created_at": "2026-07-14T10:00:00+09:00",
+                    "updated_at": "2026-07-14T10:00:00+09:00",
+                    "abilities": {
+                        "can_update": true
+                    }
+                }
+            ]
+        }
+    ]
+}
+```
 
 **에러 응답**
 
@@ -94524,7 +95450,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94556,11 +95482,67 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (LayoutExtensionResource + `host_layouts`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `3` | 레이아웃 확장 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| extension_type | string | `overlay` | 확장 방식 (`overlay` \| `extension_point`) |
+| target_name | string | `main` | 대상 레이아웃명 또는 확장점 이름 |
+| source_type | string | `module` | 출처 종류 (`module` \| `plugin` \| `template`) |
+| source_identifier | string | `sirsoft-ecommerce` | 출처 확장 식별자 |
+| source_label | string | `sirsoft-ecommerce` | 출처 표시명 (index 응답과 달리 라벨 미부착 시 식별자로 폴백) |
+| override_target | integer\|null | `null` | 템플릿 오버라이드인 경우 덮어쓰는 원본 확장 ID |
+| is_override | boolean | `false` | 템플릿 오버라이드 행 여부 |
+| priority | integer | `10` | 주입 우선순위 |
+| is_active | boolean | `true` | 활성 여부 |
+| host_layouts | array | `["main"]` | 편집 캔버스가 병합 렌더할 호스트 레이아웃 후보 (overlay 는 대상 레이아웃, extension_point 는 그 확장점을 포함한 레이아웃 전체) |
+| content | string | `"{\n    \"target_layout\": \"main\"\n}"` | 확장 content JSON 문자열 (pretty-print) |
+| size | integer | `34` | content JSON 바이트 크기 |
+| size_formatted | string | `34 B` | 사람이 읽는 크기 표기 |
+| is_modified | boolean | `false` | 관리자가 원본 content 를 수정했는지 여부 |
+| lock_version | integer | `0` | 낙관적 잠금 버전 |
+| current_version | integer\|null | `null` | 현재 저장 버전 번호 (상세 응답에서는 미부착 → null) |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 생성 일시 |
+| updated_at | string | `2026-07-14T10:00:00+09:00` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 3,
+        "template_id": 1,
+        "extension_type": "overlay",
+        "target_name": "main",
+        "source_type": "module",
+        "source_identifier": "sirsoft-ecommerce",
+        "source_label": "sirsoft-ecommerce",
+        "override_target": null,
+        "is_override": false,
+        "priority": 10,
+        "is_active": true,
+        "content": "{\n    \"target_layout\": \"main\"\n}",
+        "size": 34,
+        "size_formatted": "34 B",
+        "is_modified": false,
+        "lock_version": 0,
+        "current_version": null,
+        "created_at": "2026-07-14T10:00:00+09:00",
+        "updated_at": "2026-07-14T10:00:00+09:00",
+        "abilities": {
+            "can_update": true
+        },
+        "host_layouts": [
+            "main"
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -94568,7 +95550,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 템플릿/확장이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94591,8 +95573,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | expected_lock_version | body | integer | 예 | min 0 | 낙관적 잠금 버전 (동시 편집 충돌 감지) |
 | content | body | array | 예 | — | 본문 내용 |
 | priority | body | integer | 아니오 | min 0, max 9999 | 우선순위 (작을수록 우선) |
-| content.priority | body | integer | 아니오 | min 0, max 9999 | <!-- TODO: 용도 --> |
-| content.data_sources | body | array | 아니오 | — | <!-- TODO: 용도 --> |
+| content.priority | body | integer | 아니오 | min 0, max 9999 | 우선순위 (작을수록 우선) |
+| content.data_sources | body | array | 아니오 | — | API 데이터 소스 정의 배열 (id/endpoint/method) |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.layout_extension.update_content_validation_rules`).
 
@@ -94620,11 +95602,65 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 LayoutExtensionResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `3` | 레이아웃 확장 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| extension_type | string | `overlay` | 확장 방식 (`overlay` \| `extension_point`) |
+| target_name | string | `main` | 대상 레이아웃명 또는 확장점 이름 |
+| source_type | string | `module` | 출처 종류 |
+| source_identifier | string | `sirsoft-ecommerce` | 출처 확장 식별자 |
+| source_label | string | `sirsoft-ecommerce` | 출처 표시명 |
+| override_target | integer\|null | `null` | 템플릿 오버라이드인 경우 원본 확장 ID |
+| is_override | boolean | `false` | 템플릿 오버라이드 행 여부 |
+| priority | integer | `10` | 주입 우선순위 (요청에 `priority` 를 보내면 갱신됨) |
+| is_active | boolean | `true` | 활성 여부 |
+| host_layouts | array | `[]` | 호스트 레이아웃 목록 (수정 응답에서는 미부착 → 빈 배열) |
+| content | string | `"{\n    \"target_layout\": \"main\"\n}"` | 저장된 확장 content JSON 문자열 |
+| size | integer | `34` | content JSON 바이트 크기 |
+| size_formatted | string | `34 B` | 사람이 읽는 크기 표기 |
+| is_modified | boolean | `true` | 원본 대비 수정 여부 |
+| lock_version | integer | `1` | 증가된 낙관적 잠금 버전 (다음 저장 시 `expected_lock_version` 으로 전달) |
+| current_version | integer\|null | `2` | 저장으로 기록된 최신 버전 번호 |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 생성 일시 |
+| updated_at | string | `2026-07-14T11:00:00+09:00` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 3,
+        "template_id": 1,
+        "extension_type": "overlay",
+        "target_name": "main",
+        "source_type": "module",
+        "source_identifier": "sirsoft-ecommerce",
+        "source_label": "sirsoft-ecommerce",
+        "override_target": null,
+        "is_override": false,
+        "priority": 10,
+        "is_active": true,
+        "host_layouts": [],
+        "content": "{\n    \"target_layout\": \"main\"\n}",
+        "size": 34,
+        "size_formatted": "34 B",
+        "is_modified": true,
+        "lock_version": 1,
+        "current_version": 2,
+        "created_at": "2026-07-14T10:00:00+09:00",
+        "updated_at": "2026-07-14T11:00:00+09:00",
+        "abilities": {
+            "can_update": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -94632,8 +95668,10 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 템플릿/확장이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
+| 409 | Conflict | 낙관적 잠금 충돌 — 다른 사용자가 먼저 수정 (`errors`: `error=concurrent_modification`, `current_version`, `your_version`, `resource`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 저장 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94676,11 +95714,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| token | string | `9f2c1a4e8b7d…` | 미리보기 토큰 (임시 저장된 확장 content 를 식별) |
+| preview_url | string | `/preview/9f2c1a4e8b7d…` | 미리보기 페이지 경로 (새 탭으로 열어 확인) |
+| expires_at | string | `2026-07-14T11:00:00+09:00` | 미리보기 만료 일시 (ISO 8601) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "token": "9f2c1a4e8b7d3c5f",
+        "preview_url": "/preview/9f2c1a4e8b7d3c5f",
+        "expires_at": "2026-07-14T11:00:00+09:00"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94688,8 +95742,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 템플릿/확장이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 `extension_point` 타입인데 `preview_layout` 이 없는 경우 (대표 레이아웃 결정 불가) |
+| 500 | Server Error | 미리보기 생성 실패 |
 
 <!-- @generated:end -->
 
@@ -94723,11 +95778,46 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data` 는 버전 이력 배열입니다 (페이지네이션 없음)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `7` | 버전 레코드 ID (복원 시 path 파라미터 `versionId` 로 사용) |
+| extension_id | integer | `3` | 소속 레이아웃 확장 ID |
+| version | integer | `2` | 버전 번호 (증가 순서) |
+| content | string | `"{\n    \"target_layout\": \"main\"\n}"` | 그 버전의 확장 content JSON 문자열 |
+| changes_summary | object | `{"added_count":3,"removed_count":1,"char_diff":42}` | 직전 버전 대비 변경 요약 |
+| changes_summary.added_count | integer | `3` | 추가된 라인 수 |
+| changes_summary.removed_count | integer | `1` | 삭제된 라인 수 |
+| changes_summary.char_diff | integer | `42` | 문자 수 변화량 (음수 가능) |
+| created_by_name | string\|null | `관리자` | 저장자 이름 (탈퇴 사용자/관계 미로딩 시 null — 사용자 ID 는 미노출) |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 버전 저장 일시 |
+| updated_at | string | `2026-07-14T10:00:00+09:00` | 레코드 갱신 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": [
+        {
+            "id": 7,
+            "extension_id": 3,
+            "version": 2,
+            "content": "{\n    \"target_layout\": \"main\"\n}",
+            "changes_summary": {
+                "added_count": 3,
+                "removed_count": 1,
+                "char_diff": 42
+            },
+            "created_by_name": "관리자",
+            "created_at": "2026-07-14T10:00:00+09:00",
+            "updated_at": "2026-07-14T10:00:00+09:00"
+        }
+    ]
+}
+```
 
 **에러 응답**
 
@@ -94735,8 +95825,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 템플릿/확장이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94769,11 +95858,41 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (복원 결과로 새로 기록된 버전)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `9` | 복원으로 새로 생성된 버전 레코드 ID |
+| extension_id | integer | `3` | 소속 레이아웃 확장 ID |
+| version | integer | `3` | 새 버전 번호 (복원도 새 버전으로 기록) |
+| content | string | `"{\n    \"target_layout\": \"main\"\n}"` | 복원된 확장 content JSON 문자열 |
+| changes_summary | object | `{"added_count":1,"removed_count":3,"char_diff":-42}` | 직전 버전 대비 변경 요약 (added_count, removed_count, char_diff) |
+| created_by_name | string\|null | `관리자` | 복원 수행자 이름 (탈퇴 사용자/관계 미로딩 시 null) |
+| created_at | string | `2026-07-14T11:00:00+09:00` | 복원 일시 |
+| updated_at | string | `2026-07-14T11:00:00+09:00` | 레코드 갱신 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 9,
+        "extension_id": 3,
+        "version": 3,
+        "content": "{\n    \"target_layout\": \"main\"\n}",
+        "changes_summary": {
+            "added_count": 1,
+            "removed_count": 3,
+            "char_diff": -42
+        },
+        "created_by_name": "관리자",
+        "created_at": "2026-07-14T11:00:00+09:00",
+        "updated_at": "2026-07-14T11:00:00+09:00"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94781,8 +95900,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 템플릿/확장/버전이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 복원 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -94814,11 +95934,41 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (LayoutExtensionVersionResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `7` | 버전 레코드 ID |
+| extension_id | integer | `3` | 소속 레이아웃 확장 ID |
+| version | integer | `2` | 버전 번호 (path 파라미터 `version` 과 일치) |
+| content | string | `"{\n    \"target_layout\": \"main\"\n}"` | 그 버전의 확장 content JSON 문자열 (diff 비교용) |
+| changes_summary | object | `{"added_count":3,"removed_count":1,"char_diff":42}` | 직전 버전 대비 변경 요약 (added_count, removed_count, char_diff) |
+| created_by_name | string\|null | `관리자` | 저장자 이름 (탈퇴 사용자/관계 미로딩 시 null) |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 버전 저장 일시 |
+| updated_at | string | `2026-07-14T10:00:00+09:00` | 레코드 갱신 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 7,
+        "extension_id": 3,
+        "version": 2,
+        "content": "{\n    \"target_layout\": \"main\"\n}",
+        "changes_summary": {
+            "added_count": 3,
+            "removed_count": 1,
+            "char_diff": 42
+        },
+        "created_by_name": "관리자",
+        "created_at": "2026-07-14T10:00:00+09:00",
+        "updated_at": "2026-07-14T10:00:00+09:00"
+    }
+}
+```
 
 **에러 응답**
 
@@ -94826,7 +95976,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 템플릿/확장/버전이 없거나, 확장이 경로의 템플릿 소속이 아닌 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94916,7 +96066,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94948,11 +96098,59 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (LayoutResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `12` | 레이아웃 레코드 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| name | string | `main` | 레이아웃 이름 |
+| description | string | `메인 화면` | 레이아웃 설명 (`content.meta.description`, 없으면 이름) |
+| endpoint | string\|null | `null` | 레이아웃이 선언한 기본 엔드포인트 |
+| route_path | string\|null | `null` | 라우트 path (상세 응답에서는 매핑 미주입 → null) |
+| components | array | `[…]` | 레이아웃 컴포넌트 트리 |
+| data_sources | array | `[…]` | 레이아웃 데이터소스 정의 |
+| metadata | object | `{}` | 레이아웃 메타데이터 |
+| content | string | `"{\n    \"layout_name\": \"main\"\n}"` | 레이아웃 content JSON 문자열 (코드 편집기 표시 원문) |
+| size | integer | `32` | content JSON 바이트 크기 |
+| size_formatted | string | `32 B` | 사람이 읽는 크기 표기 |
+| has_update | boolean | `false` | 템플릿 파일 대비 갱신 필요 여부 (현재 항상 false) |
+| lock_version | integer | `0` | 낙관적 잠금 버전 |
+| current_version | integer\|null | `null` | 현재 저장 버전 번호 (상세 응답에서는 null) |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 생성 일시 |
+| updated_at | string | `2026-07-14T10:00:00+09:00` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 12,
+        "template_id": 1,
+        "name": "main",
+        "description": "메인 화면",
+        "endpoint": null,
+        "route_path": null,
+        "components": [],
+        "data_sources": [],
+        "metadata": {},
+        "content": "{\n    \"layout_name\": \"main\"\n}",
+        "size": 32,
+        "size_formatted": "32 B",
+        "has_update": false,
+        "lock_version": 0,
+        "current_version": null,
+        "created_at": "2026-07-14T10:00:00+09:00",
+        "updated_at": "2026-07-14T10:00:00+09:00",
+        "abilities": {
+            "can_update": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -94960,7 +96158,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿 또는 해당 이름의 레이아웃이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -94982,65 +96180,65 @@ Authorization: Bearer {YOUR_TOKEN}
 | name | path | string | 예 | — | 대상의 이름/명칭 |
 | expected_lock_version | body | integer | 예 | min 0 | 낙관적 잠금 버전 (동시 편집 충돌 감지) |
 | content | body | array | 예 | — | 본문 내용 |
-| content.version | body | string | 예 | — | <!-- TODO: 용도 --> |
+| content.version | body | string | 예 | — | 레이아웃 JSON 스키마 버전 (예: `1.0`) |
 | content.layout_name | body | string | 예 | max 255 | content.layout 이름 (식별자) |
-| content.extends | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.slots | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.data_sources | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.metadata | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.title | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.description | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.keywords | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.auth_required | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.is_base | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.guest_only | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.is_error_layout | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.error_code | body | integer | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.data_sources | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.priority | body | number | 아니오 | min 0, max 1 | <!-- TODO: 용도 --> |
-| content.meta.seo.changefreq | body | string | 아니오 | `always`, `hourly`, `daily`, `weekly`, `monthly`, `yearly`, `never` | <!-- TODO: 용도 --> |
-| content.meta.seo.og | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.structured_data | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.page_type | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.toggle_setting | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.vars | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.meta.seo.extensions | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.modals | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.state | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.init_actions | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.defines | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.init_state | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.initLocal | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.initGlobal | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.initIsolated | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.global_state | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.errorHandling | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.actions | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.pageConfig | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.schema | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.routes | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.computed | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.named_actions | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.permissions | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.globalHeaders | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.enabled | body | boolean | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.style | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.target | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
-| content.transition_overlay.fallback_target | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
-| content.transition_overlay.skeleton | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.skeleton.component | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
-| content.transition_overlay.skeleton.animation | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.skeleton.iteration_count | body | integer | 아니오 | min 1, max 50 | <!-- TODO: 용도 --> |
-| content.transition_overlay.spinner | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.transition_overlay.spinner.component | body | string | 아니오 | max 100 | <!-- TODO: 용도 --> |
-| content.transition_overlay.spinner.text | body | string | 아니오 | max 200 | <!-- TODO: 용도 --> |
-| content.transition_overlay.wait_for | body | array | 아니오 | — | <!-- TODO: 용도 --> |
-| content.endpoint | body | string | 아니오 | — | <!-- TODO: 용도 --> |
-| content.components | body | array | 예 | — | <!-- TODO: 용도 --> |
+| content.extends | body | string | 아니오 | — | 상속할 베이스 레이아웃 이름 |
+| content.slots | body | array | 아니오 | — | 슬롯별 삽입 콘텐츠 맵 (베이스 레이아웃의 slot 위치에 주입) |
+| content.data_sources | body | array | 아니오 | — | API 데이터 소스 정의 배열 (id/endpoint/method) |
+| content.metadata | body | array | 아니오 | — | 레거시 메타데이터 맵 (`metadata` 키를 쓰던 구버전 레이아웃 호환) |
+| content.meta | body | array | 아니오 | — | 레이아웃 메타 정보 객체 (title/description/auth_required/seo 등 하위 키) |
+| content.meta.title | body | string | 아니오 | — | 제목 |
+| content.meta.description | body | string | 아니오 | — | 설명 |
+| content.meta.keywords | body | string | 아니오 | — | 검색 키워드 메타태그 값 (쉼표 구분 문자열) |
+| content.meta.auth_required | body | boolean | 아니오 | — | 로그인 필수 화면 여부 (미인증 접근 시 로그인 리다이렉트) |
+| content.meta.is_base | body | boolean | 아니오 | — | base 여부 |
+| content.meta.guest_only | body | boolean | 아니오 | — | 비로그인 전용 화면 여부 (로그인 상태면 리다이렉트, SEO/sitemap 제외 판정에도 사용) |
+| content.meta.is_error_layout | body | boolean | 아니오 | — | error layout 여부 |
+| content.meta.error_code | body | integer | 아니오 | — | 에러 레이아웃일 때 담당하는 HTTP 상태 코드 (예: 404, 500) |
+| content.meta.seo | body | array | 아니오 | — | SEO 메타데이터 객체 (봇 HTML 렌더/sitemap 생성기가 소비하는 하위 키 묶음) |
+| content.meta.seo.enabled | body | boolean | 아니오 | — | 사용 여부 |
+| content.meta.seo.data_sources | body | array | 아니오 | — | API 데이터 소스 정의 배열 (id/endpoint/method) |
+| content.meta.seo.priority | body | number | 아니오 | min 0, max 1 | 우선순위 (작을수록 우선) |
+| content.meta.seo.changefreq | body | string | 아니오 | `always`, `hourly`, `daily`, `weekly`, `monthly`, `yearly`, `never` | sitemap changefreq 값 (daily/weekly/monthly 등) |
+| content.meta.seo.og | body | array | 아니오 | — | Open Graph 메타태그 정의 맵 |
+| content.meta.seo.structured_data | body | array | 아니오 | — | JSON-LD 구조화 데이터 정의 |
+| content.meta.seo.page_type | body | string | 아니오 | — | SEO 템플릿 키를 결정하는 페이지 유형 |
+| content.meta.seo.toggle_setting | body | string | 아니오 | — | SEO 활성화 여부를 결정하는 설정 경로 |
+| content.meta.seo.vars | body | array | 아니오 | — | SEO 변수 선언 맵 (데이터 소스 값의 표현식 매핑) |
+| content.meta.seo.extensions | body | array | 아니오 | — | 이 화면의 SEO 기본값을 제공하는 확장 목록 (`[{type, id}]` — 모듈/플러그인 declaration 적용 대상) |
+| content.modals | body | array | 아니오 | — | 모달 컴포넌트 정의 배열 |
+| content.state | body | array | 아니오 | — | 레이아웃 레벨 초기 상태 정의 맵 |
+| content.init_actions | body | array | 아니오 | — | 레이아웃 로드 시 실행할 초기화 액션 배열 |
+| content.defines | body | array | 아니오 | — | 재사용 컴포넌트 정의 맵 (컴포넌트 트리에서 참조) |
+| content.init_state | body | array | 아니오 | — | 초기 상태 값 맵 |
+| content.initLocal | body | array | 아니오 | — | API 응답을 `_local` 상태에 자동 복사할 키/경로 |
+| content.initGlobal | body | array | 아니오 | — | API 응답을 `_global` 상태에 자동 복사할 키/경로 |
+| content.initIsolated | body | array | 아니오 | — | API 응답을 `_isolated` 상태에 자동 복사할 키/경로 |
+| content.global_state | body | array | 아니오 | — | 전역 상태 초기값 맵 |
+| content.errorHandling | body | array | 아니오 | — | 레이아웃 레벨 에러 핸들링 설정 (에러 코드별 핸들러 매핑) |
+| content.actions | body | array | 아니오 | — | 레이아웃 레벨 재사용 액션 정의 (컴포넌트가 id 로 참조) |
+| content.pageConfig | body | array | 아니오 | — | 페이지 단위 설정 객체 |
+| content.schema | body | array | 아니오 | — | 플러그인 설정 레이아웃 전용 — 설정 항목 스키마 정의 |
+| content.routes | body | array | 아니오 | — | 레이아웃이 선언하는 라우트 정의 배열 |
+| content.computed | body | array | 아니오 | — | 계산된 값 정의 맵 (키 → 표현식) |
+| content.named_actions | body | array | 아니오 | — | 이름으로 호출 가능한 재사용 액션 정의 맵 |
+| content.permissions | body | string | 아니오 | — | 이 레이아웃 접근에 필요한 권한 (권한 식별자 배열 또는 OR/AND 구조) |
+| content.globalHeaders | body | array | 아니오 | — | 전역 HTTP 헤더 규칙 배열 (pattern + headers) |
+| content.transition_overlay | body | string | 아니오 | — | 페이지 전환 오버레이 설정 (스켈레톤/스피너) |
+| content.transition_overlay.enabled | body | boolean | 아니오 | — | 사용 여부 |
+| content.transition_overlay.style | body | string | 아니오 | — | 전환 오버레이 표시 방식 (`opaque`, `blur`, `fade`, `skeleton`, `spinner`) |
+| content.transition_overlay.target | body | string | 아니오 | max 100 | 오버레이를 씌울 대상 컴포넌트 id |
+| content.transition_overlay.fallback_target | body | string | 아니오 | max 100 | target 을 찾지 못했을 때 대체로 씌울 컴포넌트 id |
+| content.transition_overlay.skeleton | body | array | 아니오 | — | 스켈레톤 오버레이 설정 객체 (component/animation/iteration_count) |
+| content.transition_overlay.skeleton.component | body | string | 아니오 | max 100 | 스켈레톤으로 반복 렌더할 컴포넌트 이름 (skeleton 지정 시 필수) |
+| content.transition_overlay.skeleton.animation | body | string | 아니오 | — | 스켈레톤 애니메이션 (`pulse`, `wave`, `none`) |
+| content.transition_overlay.skeleton.iteration_count | body | integer | 아니오 | min 1, max 50 | 스켈레톤 반복 렌더 개수 (1~50) |
+| content.transition_overlay.spinner | body | array | 아니오 | — | 스피너 오버레이 설정 객체 (component/text) |
+| content.transition_overlay.spinner.component | body | string | 아니오 | max 100 | 스피너로 렌더할 컴포넌트 이름 |
+| content.transition_overlay.spinner.text | body | string | 아니오 | max 200 | 스피너와 함께 표시할 안내 문구 |
+| content.transition_overlay.wait_for | body | array | 아니오 | — | 오버레이를 유지할 데이터소스 id 배열 (progressive/blocking 데이터소스 fetch 완료까지 표시) |
+| content.endpoint | body | string | 아니오 | — | 이 화면이 주로 조회하는 데이터 API 경로 (레거시 최상위 필드 — 신규 레이아웃은 data_sources 사용) |
+| content.components | body | array | 예 | — | 컴포넌트 트리 배열 (레이아웃이 렌더할 컴포넌트 정의) |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.layout.update_content_validation_rules`).
 
@@ -95184,11 +96382,59 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 LayoutResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `12` | 레이아웃 레코드 ID |
+| template_id | integer | `1` | 소속 템플릿 ID |
+| name | string | `main` | 레이아웃 이름 |
+| description | string | `메인 화면` | 레이아웃 설명 (`content.meta.description`) |
+| endpoint | string\|null | `null` | 레이아웃이 선언한 기본 엔드포인트 |
+| route_path | string\|null | `null` | 라우트 path (저장 응답에서는 매핑 미주입 → null) |
+| components | array | `[…]` | 저장된 컴포넌트 트리 |
+| data_sources | array | `[…]` | 저장된 데이터소스 정의 |
+| metadata | object | `{}` | 레이아웃 메타데이터 |
+| content | string | `"{\n    \"layout_name\": \"main\"\n}"` | 저장된 content JSON 문자열 |
+| size | integer | `32` | content JSON 바이트 크기 |
+| size_formatted | string | `32 B` | 사람이 읽는 크기 표기 |
+| has_update | boolean | `false` | 템플릿 파일 대비 갱신 필요 여부 (현재 항상 false) |
+| lock_version | integer | `1` | 증가된 낙관적 잠금 버전 (다음 저장 시 `expected_lock_version` 으로 전달) |
+| current_version | integer\|null | `3` | 이번 저장으로 기록된 최신 버전 번호 |
+| created_at | string | `2026-07-14T10:00:00+09:00` | 생성 일시 |
+| updated_at | string | `2026-07-14T11:00:00+09:00` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true}` | 현재 사용자의 수행 가능 작업 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 12,
+        "template_id": 1,
+        "name": "main",
+        "description": "메인 화면",
+        "endpoint": null,
+        "route_path": null,
+        "components": [],
+        "data_sources": [],
+        "metadata": {},
+        "content": "{\n    \"layout_name\": \"main\"\n}",
+        "size": 32,
+        "size_formatted": "32 B",
+        "has_update": false,
+        "lock_version": 1,
+        "current_version": 3,
+        "created_at": "2026-07-14T10:00:00+09:00",
+        "updated_at": "2026-07-14T11:00:00+09:00",
+        "abilities": {
+            "can_update": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -95196,8 +96442,10 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
+| 409 | Conflict | 낙관적 잠금 충돌 — 다른 사용자가 먼저 수정 (`errors`: `error=concurrent_modification`, `current_version`, `your_version`, `resource`) |
+| 422 | Unprocessable Entity | content 구조 검증 위반 (레이아웃 구조/슬롯/데이터소스 병합/엔드포인트 화이트리스트/외부 URL 차단/권한 구조 규칙) |
+| 500 | Server Error | 저장 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -95236,11 +96484,27 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| token | string | `9f2c1a4e8b7d3c5f` | 미리보기 토큰 (임시 저장된 레이아웃 content 를 식별) |
+| preview_url | string | `/preview/9f2c1a4e8b7d3c5f` | 미리보기 페이지 경로 (새 탭으로 열어 확인) |
+| expires_at | string | `2026-07-14T11:00:00+09:00` | 미리보기 만료 일시 (ISO 8601) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "token": "9f2c1a4e8b7d3c5f",
+        "preview_url": "/preview/9f2c1a4e8b7d3c5f",
+        "expires_at": "2026-07-14T11:00:00+09:00"
+    }
+}
+```
 
 **에러 응답**
 
@@ -95248,8 +96512,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿이 존재하지 않는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 미리보기 생성 실패 |
 
 <!-- @generated:end -->
 
@@ -95283,11 +96548,49 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data` 는 버전 이력 배열입니다 (페이지네이션 없음. 목록에는 `full_content` 미포함)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `31` | 버전 레코드 ID (복원 시 path 파라미터 `versionId` 로 사용) |
+| layout_id | integer | `12` | 소속 레이아웃 ID |
+| version | integer | `3` | 버전 번호 |
+| endpoint | string\|null | `null` | 그 버전 content 의 `endpoint` 값 |
+| components | array | `[…]` | 그 버전의 컴포넌트 트리 |
+| data_sources | array | `[…]` | 그 버전의 데이터소스 정의 |
+| metadata | object | `{}` | 그 버전의 메타데이터 |
+| changes_summary | object | `{"added_count":5,"removed_count":2,"char_diff":180}` | 직전 버전 대비 변경 요약 (added_count, removed_count, char_diff) |
+| created_by_name | string\|null | `관리자` | 저장자 이름 (탈퇴 사용자/관계 미로딩 시 null — 사용자 ID 는 미노출) |
+| created_at | string | `2026-07-14T11:00:00+09:00` | 버전 저장 일시 |
+| updated_at | string | `2026-07-14T11:00:00+09:00` | 레코드 갱신 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": [
+        {
+            "id": 31,
+            "layout_id": 12,
+            "version": 3,
+            "endpoint": null,
+            "components": [],
+            "data_sources": [],
+            "metadata": {},
+            "changes_summary": {
+                "added_count": 5,
+                "removed_count": 2,
+                "char_diff": 180
+            },
+            "created_by_name": "관리자",
+            "created_at": "2026-07-14T11:00:00+09:00",
+            "updated_at": "2026-07-14T11:00:00+09:00"
+        }
+    ]
+}
+```
 
 **에러 응답**
 
@@ -95295,8 +96598,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿 또는 레이아웃이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -95329,11 +96631,47 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (복원 결과로 새로 기록된 버전)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `33` | 복원으로 새로 생성된 버전 레코드 ID |
+| layout_id | integer | `12` | 소속 레이아웃 ID |
+| version | integer | `4` | 새 버전 번호 (복원도 새 버전으로 기록) |
+| endpoint | string\|null | `null` | 복원된 content 의 `endpoint` 값 |
+| components | array | `[…]` | 복원된 컴포넌트 트리 |
+| data_sources | array | `[…]` | 복원된 데이터소스 정의 |
+| metadata | object | `{}` | 복원된 메타데이터 |
+| changes_summary | object | `{"added_count":2,"removed_count":5,"char_diff":-180}` | 직전 버전 대비 변경 요약 |
+| created_by_name | string\|null | `관리자` | 복원 수행자 이름 |
+| created_at | string | `2026-07-14T12:00:00+09:00` | 복원 일시 |
+| updated_at | string | `2026-07-14T12:00:00+09:00` | 레코드 갱신 일시 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 33,
+        "layout_id": 12,
+        "version": 4,
+        "endpoint": null,
+        "components": [],
+        "data_sources": [],
+        "metadata": {},
+        "changes_summary": {
+            "added_count": 2,
+            "removed_count": 5,
+            "char_diff": -180
+        },
+        "created_by_name": "관리자",
+        "created_at": "2026-07-14T12:00:00+09:00",
+        "updated_at": "2026-07-14T12:00:00+09:00"
+    }
+}
+```
 
 **에러 응답**
 
@@ -95341,8 +96679,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿·레이아웃·버전이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 복원 트랜잭션 실패 |
 
 <!-- @generated:end -->
 
@@ -95374,11 +96713,53 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (LayoutVersionResource + `full_content` — 단건 조회에서만 원본 전체 노출)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `31` | 버전 레코드 ID |
+| layout_id | integer | `12` | 소속 레이아웃 ID |
+| version | integer | `3` | 버전 번호 (path 파라미터 `version` 과 일치) |
+| endpoint | string\|null | `null` | 그 버전 content 의 `endpoint` 값 |
+| components | array | `[…]` | 그 버전의 컴포넌트 트리 |
+| data_sources | array | `[…]` | 그 버전의 데이터소스 정의 |
+| metadata | object | `{}` | 그 버전의 메타데이터 |
+| changes_summary | object | `{"added_count":5,"removed_count":2,"char_diff":180}` | 직전 버전 대비 변경 요약 |
+| created_by_name | string\|null | `관리자` | 저장자 이름 (탈퇴 사용자/관계 미로딩 시 null) |
+| created_at | string | `2026-07-14T11:00:00+09:00` | 버전 저장 일시 |
+| updated_at | string | `2026-07-14T11:00:00+09:00` | 레코드 갱신 일시 |
+| full_content | object | `{"layout_name":"main","components":[…]}` | 그 버전의 content 원본 전체 (slots/extends 등 분해되지 않는 키 포함 — 버전 비교 diff 용. 목록 응답에는 미포함) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 31,
+        "layout_id": 12,
+        "version": 3,
+        "endpoint": null,
+        "components": [],
+        "data_sources": [],
+        "metadata": {},
+        "changes_summary": {
+            "added_count": 5,
+            "removed_count": 2,
+            "char_diff": 180
+        },
+        "created_by_name": "관리자",
+        "created_at": "2026-07-14T11:00:00+09:00",
+        "updated_at": "2026-07-14T11:00:00+09:00",
+        "full_content": {
+            "version": "1.0",
+            "layout_name": "main",
+            "components": []
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -95386,7 +96767,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 대상 템플릿·레이아웃·버전이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -95417,11 +96798,30 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| extension_directory | object\|null | `{"path":"templates/sirsoft-basic", …}` | 제거 시 삭제될 템플릿 설치 디렉토리 정보 (디렉토리가 없으면 null) |
+| extension_directory.path | string | `templates/sirsoft-basic` | 삭제 대상 디렉토리 경로 (프로젝트 루트 기준) |
+| extension_directory.size_bytes | integer | `5242880` | 디렉토리 전체 용량 (바이트) |
+| extension_directory.size_formatted | string | `5.0 MB` | 사람이 읽는 용량 표기 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "extension_directory": {
+            "path": "templates/sirsoft-basic",
+            "size_bytes": 5242880,
+            "size_formatted": "5.0 MB"
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -95429,8 +96829,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 식별자의 템플릿이 없는 경우 (`템플릿을 찾을 수 없습니다.`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 삭제 정보 조회 실패 |
 
 <!-- @generated:end -->
 
@@ -95470,11 +96871,73 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (업데이트 후 TemplateResource)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 템플릿 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Basic` | 템플릿 이름 (현재 로케일 값) |
+| version | string | `1.0.1` | 업데이트 후 버전 |
+| type | string | `user` | 템플릿 타입 (`admin` \| `user`) |
+| status | string | `active` | 업데이트 후 상태 (업데이트 전 상태로 복원됨) |
+| description | string | `그누보드7 기본 사용자 템플릿` | 템플릿 설명 |
+| dependencies | object | `{"modules":[],"plugins":[]}` | 의존 확장 요약 |
+| dependencies_met | boolean | `true` | 의존 확장 충족 여부 |
+| update_available | boolean | `false` | 업데이트 가능 여부 (업데이트 직후 false) |
+| update_source | string\|null | `github` | 업데이트를 가져온 출처 (`github` \| `bundled`) |
+| latest_version | string\|null | `1.0.1` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.1` | 설치된 파일의 manifest 버전 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-template-basic` | GitHub 저장소 URL |
+| github_changelog_url | string\|null | `https://github.com/gnuboard/g7-template-basic/blob/main/CHANGELOG.md` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | `_pending` 대기 여부 |
+| is_bundled | boolean | `true` | 번들 확장 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 요구 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true,"can_edit_layouts":true}` | 현재 사용자의 수행 가능 작업 맵 |
+
+_업데이트할 내용이 없거나 템플릿 정보를 다시 읽지 못한 경우에는 리소스 대신 결과 요약(`success`, `from_version`, `to_version`, `message`)이 `data` 로 반환됩니다._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "템플릿 \"sirsoft-basic\"이(가) 1.0.1 버전으로 업데이트되었습니다.",
+    "data": {
+        "identifier": "sirsoft-basic",
+        "vendor": "sirsoft",
+        "name": "Basic",
+        "version": "1.0.1",
+        "type": "user",
+        "status": "active",
+        "description": "그누보드7 기본 사용자 템플릿",
+        "dependencies": {
+            "modules": [],
+            "plugins": []
+        },
+        "dependencies_met": true,
+        "update_available": false,
+        "update_source": "github",
+        "latest_version": "1.0.1",
+        "file_version": "1.0.1",
+        "github_url": "https://github.com/gnuboard/g7-template-basic",
+        "github_changelog_url": "https://github.com/gnuboard/g7-template-basic/blob/main/CHANGELOG.md",
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true,
+            "can_edit_layouts": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -95483,7 +96946,8 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 위반 또는 업데이트 실패 (미설치, 다운그레이드 차단, 다운로드 실패, 코어 버전 비호환 등 — `errors.template_name` 에 번역된 사유) |
+| 500 | Server Error | 업데이트 처리 중 예기치 못한 오류 |
 
 <!-- @generated:end -->
 
@@ -95554,20 +97018,27 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다. 본문은 요청한 정적 파일의 원본 바이트이며, 파일의 MIME 타입(`Content-Type`), `ETag`, 장기 캐싱 헤더(`Cache-Control` max-age 31536000)가 함께 반환됩니다. 실패 시에만 JSON 에러 봉투를 반환합니다._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/css; charset=UTF-8
+Cache-Control: public, max-age=31536000
+ETag: "9f2c1a4e8b7d3c5f"
+
+(정적 자산 파일의 원본 바이트)
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 허용되지 않은 파일 유형을 요청한 경우 (`허용되지 않은 파일 타입입니다.`) |
+| 404 | Not Found | 템플릿이 없거나 요청한 파일이 존재하지 않는 경우 |
+| 422 | Unprocessable Entity | 경로 파라미터가 보안 검증을 위반한 경우 (디렉토리 트래버설 등) |
+| 500 | Server Error | 파일 조회 중 알 수 없는 오류 (`알 수 없는 오류가 발생했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -95648,7 +97119,21 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+
+
+_이 엔드포인트는 `success`/`message`/`data` 봉투를 사용하지 않습니다. 본문은 템플릿 `components.json` 파일의 내용을 그대로 반환한 JSON 이며 1시간 캐싱 헤더가 붙습니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| $schema | string | `https://json-schema.org/draft/2020-12/schema` | components.json 이 따르는 JSON Schema URI |
+| templateId | string | `sirsoft-admin_basic` | 이 컴포넌트 정의가 속한 템플릿 식별자 |
+| version | string | `1.0.0` | 컴포넌트 정의 버전 |
+| components | object | `{"basic":[…],"composite":[…]}` | 컴포넌트 정의 묶음 (`basic`: HTML 래핑 기본 컴포넌트, `composite`: 집합 컴포넌트) |
+| components.basic[].name | string | `Button` | 컴포넌트 이름 (레이아웃 JSON 의 `name` 값) |
+| components.basic[].type | string | `basic` | 컴포넌트 종류 (`basic` \| `composite`) |
+| components.basic[].description | string | `HTML button element wrapper` | 컴포넌트 설명 |
+| components.basic[].path | string | `src/components/basic/Button.tsx` | 템플릿 내 소스 파일 경로 |
+| components.basic[].props | object | `{"variant":{"type":"string", …}}` | 지원 props 정의 맵 (각 항목: type, required, default, description) |
 
 **응답 예시**
 
@@ -95696,24 +97181,24 @@ _단건 응답: `data` 객체의 필드._
 | --- | --- | --- | --- |
 | identifier | string | `sirsoft-admin_basic` | 템플릿 고유 식별자 (vendor-name 형식, 예: sirsoft-admin_basic) |
 | vendor | string | `sirsoft` | 벤더/개발자명 (예: sirsoft) |
-| name | object | `{"ko":"Admin Basic","en":"Admin Basic"}` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
-| version | string | `1.0.4` | 템플릿 버전 (예: 1.0.0) |
-| license | string | `MIT` | <!-- TODO: 설명 --> |
-| description | object | `{"ko":"그누보드7 기본 관리자 템플릿","en":"Gnuboard7 default admin te…` | 설명 (다국어 필드는 로케일별 값 객체) |
+| name | object | `{"ko":"Admin Basic","en":"Admin Basic"}` | 템플릿 이름 (다국어 JSON) |
+| version | string | `1.0.0` | 템플릿 버전 (예: 1.0.0) |
+| license | string | `MIT` | 라이선스 식별자 (manifest license) |
+| description | object | `{"ko":"그누보드7 기본 관리자 템플릿","en":"Gnuboard7 default admin te…` | 템플릿 설명 (다국어 JSON) |
 | type | string | `admin` | 템플릿 타입 (admin: 관리자용, user: 사용자용) |
 | locales | array | `["ko","en"]` | 활성 로케일 코드 배열 |
 | author | object | `{"name":"sirsoft","email":"contact@sirsoft.com","url":"ht…` | 작성자 사용자 객체 (uuid/name — author 관계 파생) |
-| release_date | string | `2026-05-15` | <!-- TODO: 설명 --> |
-| g7_version | string | `>=7.0.6` | <!-- TODO: 설명 --> |
+| release_date | string | `2026-05-15` | 배포일 |
+| g7_version | string | `>=7.0.0` | 요구하는 코어 최소 버전 (manifest requires.g7_version) |
 | dependencies | object | `{"modules":[],"plugins":[]}` | 의존하는 확장 맵 (manifest 파생 — {modules, plugins}) |
 | assets | object | `{"css":["assets\/css\/main.css","assets\/css\/ui-system.c…` | 프론트엔드 에셋 매니페스트 (manifest 파생 — js/css 진입점·로딩 전략) |
-| components | object | `{"basic":["a","button","checkbox","div","form","h1","h2",…` | <!-- TODO: 설명 --> |
-| preview | object | `{"thumbnail":"preview\/thumbnail.png","screenshots":["pre…` | <!-- TODO: 설명 --> |
-| error_config | object | `{"layouts":{"401":"errors\/401","403":"errors\/403","404"…` | <!-- TODO: 설명 --> |
-| github_url | string | `https://github.com/gnuboard/g7-templa…` | GitHub 저장소 URL (manifest 파생) |
-| github_changelog_url | string | `https://github.com/gnuboard/g7-templa…` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
-| externals | array | `[{"id":"fontawesome","type":"style","url":"https:\/\/cdnj…` | <!-- TODO: 설명 --> |
-| cache_version | integer | `1785848038` | <!-- TODO: 설명 --> |
+| components | object | `{"basic":["a","button","checkbox","div","form","h1","h2",…` | 컴포넌트 트리 (레이아웃이 렌더할 컴포넌트 정의) |
+| preview | object | `{"thumbnail":"preview\/thumbnail.png","screenshots":["pre…` | 미리보기 정보 객체 |
+| error_config | object | `{"layouts":{"401":"errors\/401","403":"errors\/403","404"…` | 에러 표시 설정 객체 |
+| github_url | string | `https://github.com/gnuboard/g7-templa…` | GitHub 저장소 URL |
+| github_changelog_url | string | `https://github.com/gnuboard/g7-templa…` | GitHub 변경 내역 URL |
+| externals | array | `[{"id":"fontawesome","type":"style","url":"https:\/\/cdnj…` | 외부 의존 라이브러리 목록 (번들에서 제외되고 전역에서 해석) |
+| cache_version | integer | `1784000969` | 에셋 캐시 무효화 버전 (번들 URL 파일명에 포함) |
 
 **응답 예시**
 
@@ -187824,20 +189309,32 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `success`/`message`/`data` 봉투를 사용하지 않습니다. 본문은 템플릿 `lang/{locale}.json` 에 활성 모듈의 다국어 데이터를 병합한 JSON 을 그대로 반환하며(1시간 캐싱), 고정 필드 스키마가 없습니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| (번역 키) | string\|object | `{"common":{"save":"저장"}}` | 템플릿 + 활성 모듈이 선언한 번역 키와 번역문 (중첩 객체 허용, 키 집합은 템플릿/설치 모듈 구성에 따라 다름) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "common": {
+        "save": "저장",
+        "cancel": "취소"
+    },
+    "sirsoft-board": {
+        "write": "글쓰기"
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 템플릿이 없거나, 그 템플릿이 해당 로케일을 지원하지 않거나, 언어 파일이 없는 경우 |
+| 500 | Server Error | 언어 파일 JSON 파싱 실패 (`유효하지 않은 JSON 형식입니다.`) 또는 알 수 없는 오류 |
 
 <!-- @generated:end -->
 
@@ -187867,20 +189364,24 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다. 본문은 첨부 파일의 원본 바이트이며, 첨부의 MIME 타입(`Content-Type`), `ETag`, 캐싱 헤더(레이아웃 캐시 TTL — 기본 24시간)와 함께 인라인 스트림됩니다. 실패 시에만 JSON 에러 봉투를 반환합니다._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: image/png
+Cache-Control: public, max-age=86400
+ETag: "9f2c1a4e8b7d3c5f"
+
+(첨부 이미지 파일의 원본 바이트)
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | 첨부가 없거나, 그 첨부가 경로의 템플릿 소속이 아니거나, 스토리지에 실제 파일이 없는 경우 (`첨부 파일을 찾을 수 없습니다.`) |
 
 <!-- @generated:end -->
 
@@ -187914,7 +189415,7 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | version | string | `1.0.0` | 템플릿 버전 (예: 1.0.0) |
-| routes | array | `[{"path":"*\/admin","redirect":"\/admin\/dashboard","auth…` | <!-- TODO: 설명 --> |
+| routes | array | `[{"path":"*\/admin","redirect":"\/admin\/dashboard","auth…` | 라우트 정의 목록 |
 
 **응답 예시**
 

@@ -102,11 +102,27 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| alert_id | string | `compat_plugins_sirsoft-tosspayments` | dismiss 처리된 자동 비활성화 알림의 식별자 (`compat_{type}s_{identifier}` 형식). 재호환 알림(`recover_{type}s_{identifier}`)도 함께 dismiss 되지만 응답에는 포함되지 않음 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림을 닫았습니다.",
+    "data": {
+        "alert_id": "compat_plugins_sirsoft-tosspayments"
+    }
+}
+```
 
 **에러 응답**
 
@@ -145,11 +161,29 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| extension_type | string | `plugin` | 복구(재활성화)된 확장의 타입 (`module` \| `plugin` \| `template`) — 요청 path의 `{type}` 을 그대로 반환 |
+| identifier | string | `sirsoft-tosspayments` | 복구된 확장의 식별자 — 요청 path의 `{identifier}` 를 그대로 반환 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "확장이 다시 활성화되었습니다.",
+    "data": {
+        "extension_type": "plugin",
+        "identifier": "sirsoft-tosspayments"
+    }
+}
+```
 
 **에러 응답**
 
@@ -157,7 +191,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.activate`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 (`extensions.errors.not_found`) |
+| 422 | Unprocessable Entity | 재검증 결과 여전히 코어 버전이 요구 버전에 미달하는 경우 — 글로벌 핸들러가 `core_version_mismatch` 로 변환 |
 
 <!-- @generated:end -->
 

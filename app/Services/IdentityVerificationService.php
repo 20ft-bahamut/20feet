@@ -199,6 +199,9 @@ class IdentityVerificationService
             $publicPayload = $log->properties['public_payload'];
         }
 
+        // 시도 횟수(attempts / max_attempts) 는 노출하지 않는다.
+        // 이 엔드포인트는 권한 가드 없는 공개 폴링용이라 challenge id 만 알면 누구나 조회할 수 있고,
+        // 두 값을 함께 알면 남은 시도 횟수를 정확히 계산해 무차별 대입 시점을 노릴 수 있다.
         return [
             'id' => $log->id,
             'status' => $log->status->value,

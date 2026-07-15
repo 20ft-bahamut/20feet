@@ -51,7 +51,7 @@ class GdprAdminPolicyVersionController extends AdminBaseController
     {
         $paginator = $this->service->paginate($request->perPage());
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'data' => GdprPolicyVersionResource::collection($paginator->items()),
             'pagination' => [
                 'current_page' => $paginator->currentPage(),
@@ -101,7 +101,7 @@ class GdprAdminPolicyVersionController extends AdminBaseController
     {
         $current = $this->service->getCurrent(loadCreatedBy: true);
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'data' => $current !== null ? new GdprPolicyVersionResource($current) : null,
         ]);
     }
@@ -127,7 +127,7 @@ class GdprAdminPolicyVersionController extends AdminBaseController
             return ResponseHelper::error('sirsoft-gdpr::messages.settings.policy_version.not_found', 404);
         }
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'data' => new GdprPolicyVersionDetailResource($policyVersion),
         ]);
     }
