@@ -274,8 +274,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).toContain('border-l-4');
             expect(serialized).toContain('border-l-blue-500');
             expect(serialized).toContain('circle-info');
-            // 한 줄 + 중간 정렬
-            expect(serialized).toContain('flex items-center');
+            // 한 줄 + 중간 정렬 (시맨틱 flex-center 로 통일 — #399)
+            expect(serialized).toContain('flex-center');
             // 다크모드 가독성: 카드(gray-800)보다 한 단계 어두운 gray-900
             expect(serialized).toContain('dark:bg-gray-900');
 
@@ -298,8 +298,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).not.toContain('blocked_domains.preblocker_active');
             expect(serialized).not.toContain('blocked_domains.self_hosted_attr');
             expect(serialized).not.toContain('blocked_domains.static_html_limitation');
-            // 타이틀 강조 — 별도 badge 없이 제목 폰트를 text-base 로 키워 타이틀 느낌
-            expect(serialized).toContain('text-base');
+            // 타이틀 강조 — 시맨틱 text-error-strong 로 제목 강조 (#399 시맨틱 통일)
+            expect(serialized).toContain('text-error-strong');
             // 옛 badge 키는 lang 과 박스에서 모두 제거됨
             expect(serialized).not.toContain('blocked_domains.warnings_badge');
             // 기존 옛 항목 키 미사용
@@ -427,8 +427,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             const serialized = JSON.stringify(wrapper);
             // Input className 동적 변경 — 대괄호 표기법으로 errors 키 접근 (코어 _tab_general 패턴)
             expect(serialized).toContain(`_local.errors?.['${formField}']`);
-            expect(serialized).toContain('border-red-500');
-            expect(serialized).toContain('focus:ring-red-500');
+            // 에러 시 시맨틱 input-error 로 통일 (#399 시맨틱 통일 — 옛 border-red-500/focus:ring-red-500 원시 클래스 대체)
+            expect(serialized).toContain('input-error');
             // 필드 아래 에러 Span — if 가드 + 첫 메시지 text (코어 단순 패턴)
             expect(serialized).toContain(`_local.errors?.['${formField}']?.[0]`);
             // 에러 Span 시각 시맨틱 (form-error) — 텍스트 톤 + 줄바꿈을 한 결로 통일 (#399)

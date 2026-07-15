@@ -347,98 +347,165 @@
                                     "text": "$t:sirsoft-gdpr.mypage.privacy.no_consents"
                                 },
                                 {
+                                    "comment": "「모두 켜기」 일괄 동의 바 — 선택형(is_required=false) 중 꺼진(is_consented=false) 항목이 하나라도 있을 때만 노출. 필수는 대상 외. renew-all 이 아니라 신규/재동의 축이므로 grant 를 항목별로 반복 호출하는 대신, 서버 renew-all 은 '이미 활성 항목의 정책 갱신' 전용이라 여기서는 각 꺼진 선택형 항목을 grant 로 순차 켠다. 다만 레이아웃 반복 호출은 표현이 어렵기에, 배너의 '모두 동의' 와 동일하게 consent/cookie(intent 없음, 전체 true) 로 한 번에 처리.",
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "if": "{{(gdprMeConsents?.data?.consents ?? []).filter(c => c?.is_required !== true && c?.is_consented !== true).length > 0}}",
+                                    "props": { "className": "flex items-center justify-between gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800" },
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "props": { "className": "text-sm text-blue-800 dark:text-blue-200" },
+                                            "text": "$t:sirsoft-gdpr.mypage.privacy.enable_all_hint"
+                                        },
+                                        {
+                                            "type": "basic",
+                                            "name": "Button",
+                                            "props": {
+                                                "type": "button",
+                                                "disabled": "{{!!_local.enablingAll}}",
+                                                "className": "shrink-0 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                                            },
+                                            "actions": [
+                                                {
+                                                    "type": "click",
+                                                    "handler": "sequence",
+                                                    "actions": [
+                                                        { "handler": "setState", "params": { "target": "local", "enablingAll": true } },
+                                                        {
+                                                            "handler": "apiCall",
+                                                            "auth_required": true,
+                                                            "target": "/api/plugins/sirsoft-gdpr/consent/cookie",
+                                                            "params": {
+                                                                "method": "POST",
+                                                                "body": "{{{ source: 'mypage', consents: (gdprMeConsents?.data?.consents ?? []).reduce((acc, c) => (c?.is_required === true ? acc : { ...acc, [c.consent_key]: true }), {}) }}}"
+                                                            },
+                                                            "onSuccess": [
+                                                                { "handler": "setState", "params": { "target": "local", "enablingAll": null } },
+                                                                { "handler": "refetchDataSource", "params": { "dataSourceId": "gdprMeConsents" } },
+                                                                { "handler": "refetchDataSource", "params": { "dataSourceId": "gdprMyConsents" } },
+                                                                { "handler": "sirsoft-gdpr.syncConsent" },
+                                                                { "handler": "toast", "params": { "type": "success", "message": "$t:sirsoft-gdpr.mypage.privacy.enable_all_success" } }
+                                                            ],
+                                                            "onError": [
+                                                                { "handler": "setState", "params": { "target": "local", "enablingAll": null } },
+                                                                { "handler": "toast", "params": { "type": "error", "message": "{{error?.message ?? 'Error'}}" } }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            "children": [
+                                                { "type": "basic", "name": "Icon", "if": "{{!!_local.enablingAll}}", "props": { "name": "spinner", "size": "xs", "spin": true, "className": "mr-1" } },
+                                                { "type": "basic", "name": "Span", "text": "$t:sirsoft-gdpr.mypage.privacy.enable_all" }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "comment": "토글 리스트 (이슈 #430 재설계) — 업계 표준 CMP(OneTrust/Cookiebot) 패턴: 필수=잠긴 '항상 켜짐', 선택=on/off 스위치. 동의일 컬럼은 사용자 화면에서 제거(감사 로그/관리자 화면에만 존재). 스위치는 Checkbox/Toggle 컴포넌트 부재로 클릭 가능한 Div 로 구현 — 필수는 클릭 액션 없이 시각적 잠금.",
                                     "type": "basic",
                                     "name": "Div",
                                     "if": "{{(gdprMeConsents?.data?.consents ?? []).length > 0}}",
+                                    "props": { "className": "divide-y divide-gray-100 dark:divide-gray-700" },
+                                    "iteration": {
+                                        "source": "gdprMeConsents?.data?.consents ?? []",
+                                        "item_var": "consent",
+                                        "index_var": "consentIdx"
+                                    },
                                     "children": [
                                         {
                                             "type": "basic",
                                             "name": "Div",
-                                            "props": { "className": "text-tertiary grid grid-cols-12 gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 font-medium uppercase" },
-                                            "children": [
-                                                { "type": "basic", "name": "Div", "props": { "className": "col-span-6" }, "text": "$t:sirsoft-gdpr.mypage.privacy.col_consent_key" },
-                                                { "type": "basic", "name": "Div", "props": { "className": "col-span-2 text-center" }, "text": "$t:sirsoft-gdpr.mypage.privacy.col_consented" },
-                                                { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:sirsoft-gdpr.mypage.privacy.col_consented_at" },
-                                                { "type": "basic", "name": "Div", "props": { "className": "col-span-2 text-center" }, "text": "$t:sirsoft-gdpr.mypage.privacy.col_action" }
-                                            ]
-                                        },
-                                        {
-                                            "type": "basic",
-                                            "name": "Div",
-                                            "props": { "className": "divide-y divide-gray-100 dark:divide-gray-700" },
-                                            "iteration": {
-                                                "source": "gdprMeConsents?.data?.consents ?? []",
-                                                "item_var": "consent",
-                                                "index_var": "consentIdx"
-                                            },
+                                            "props": { "className": "flex items-center justify-between gap-4 px-4 py-3" },
                                             "children": [
                                                 {
                                                     "type": "basic",
                                                     "name": "Div",
-                                                    "props": { "className": "grid grid-cols-12 gap-2 px-4 py-2 items-center text-sm" },
+                                                    "comment": "라벨 + 사용자 친화 1줄 설명 (raw key 대신 카테고리 의미 노출).",
+                                                    "props": { "className": "min-w-0 flex-1" },
                                                     "children": [
                                                         {
                                                             "type": "basic",
                                                             "name": "Div",
-                                                            "comment": "라벨 + 사용자 친화 1줄 설명. 회원이 영문 식별자(cookie_analytics) 대신 카테고리 의미를 즉시 이해할 수 있도록 카탈로그 description (CookieCategoryService::getDescriptionForKey) 을 함께 노출.",
-                                                            "props": { "className": "col-span-6" },
+                                                            "props": { "className": "flex items-center gap-2" },
                                                             "children": [
                                                                 {
                                                                     "type": "basic",
                                                                     "name": "Span",
-                                                                    "props": { "className": "text-primary block font-medium" },
+                                                                    "props": { "className": "text-primary font-medium text-sm" },
                                                                     "text": "{{consent?.consent_label ?? consent?.consent_key ?? ''}}"
                                                                 },
                                                                 {
                                                                     "type": "basic",
                                                                     "name": "Span",
-                                                                    "if": "{{!!consent?.consent_description}}",
-                                                                    "props": { "className": "block text-tertiary mt-0.5 leading-relaxed" },
-                                                                    "text": "{{consent?.consent_description ?? ''}}"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "basic",
-                                                            "name": "Div",
-                                                            "props": { "className": "col-span-2 flex justify-center" },
-                                                            "children": [
-                                                                {
-                                                                    "type": "basic",
-                                                                    "name": "Span",
-                                                                    "props": { "className": "inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{consent?.is_consented ? 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}}" },
-                                                                    "text": "{{consent?.is_consented ? '$t:sirsoft-gdpr.mypage.privacy.consented' : '$t:sirsoft-gdpr.mypage.privacy.revoked'}}"
+                                                                    "if": "{{consent?.is_required === true}}",
+                                                                    "props": { "className": "inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400" },
+                                                                    "text": "$t:sirsoft-gdpr.mypage.privacy.required_label"
                                                                 }
                                                             ]
                                                         },
                                                         {
                                                             "type": "basic",
                                                             "name": "Span",
-                                                            "props": { "className": "text-secondary col-span-2 text-xs" },
-                                                            "text": "{{consent?.consented_at ?? '-'}}"
-                                                        },
+                                                            "if": "{{!!consent?.consent_description}}",
+                                                            "props": { "className": "block text-tertiary mt-0.5 text-xs leading-relaxed" },
+                                                            "text": "{{consent?.consent_description ?? ''}}"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Div",
+                                                    "props": { "className": "shrink-0 flex items-center gap-2" },
+                                                    "children": [
                                                         {
-                                                            "comment": "액션 컬럼 — Art.7(3) 대칭성 + ePrivacy Art.5(3) 동의 면제 패턴 4가지 분기:\n  1) is_required → 「필수」 회색 라벨 (철회/재동의 둘 다 무의미)\n  2) can_revoke (선택형 + 활성) → 「철회」 빨간 버튼\n  3) can_grant (선택형 + 비활성) → 「다시 동의」/「동의」 파란 버튼\n  4) 그 외 (이론상 발생 X, 안전망)\nServer Resource (`is_required` / `can_grant` / `can_revoke`) 메타가 SSoT 라 클라이언트는 단순 분기.",
+                                                            "comment": "필수 카테고리 — 잠긴 '항상 켜짐' 스위치. 클릭 액션 없음(철회 불가, ePrivacy Art.5(3) 면제). 파란 채움 + 오른쪽 knob + not-allowed 커서로 잠금 표현.",
                                                             "type": "basic",
                                                             "name": "Div",
-                                                            "props": { "className": "flex-center col-span-2 justify-center gap-2" },
+                                                            "if": "{{consent?.is_required === true}}",
+                                                            "props": { "className": "flex items-center gap-2" },
                                                             "children": [
                                                                 {
                                                                     "type": "basic",
                                                                     "name": "Span",
-                                                                    "if": "{{consent?.is_required === true}}",
-                                                                    "props": {
-                                                                        "className": "text-secondary inline-flex items-center px-2 py-0.5 text-xs italic"
-                                                                    },
-                                                                    "text": "$t:sirsoft-gdpr.mypage.privacy.required_label"
+                                                                    "props": { "className": "text-xs font-medium text-gray-500 dark:text-gray-400" },
+                                                                    "text": "$t:sirsoft-gdpr.mypage.privacy.always_on"
                                                                 },
                                                                 {
                                                                     "type": "basic",
+                                                                    "name": "Div",
+                                                                    "props": { "className": "relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600/60 dark:bg-blue-500/60 cursor-not-allowed" },
+                                                                    "children": [
+                                                                        { "type": "basic", "name": "Icon", "props": { "name": "lock", "size": "xs", "className": "absolute left-1.5 text-white/80" } },
+                                                                        { "type": "basic", "name": "Span", "props": { "className": "inline-block h-4 w-4 translate-x-6 rounded-full bg-white shadow transition-transform" } }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "comment": "선택형 카테고리 — on/off 스위치. 켜짐(is_consented=true)이면 녹색+revoke 확인 모달, 꺼짐이면 회색+grant 즉시 호출. grantingKey 로 해당 행만 처리 중 표시.",
+                                                            "type": "basic",
+                                                            "name": "Div",
+                                                            "if": "{{consent?.is_required !== true}}",
+                                                            "props": { "className": "flex items-center gap-2" },
+                                                            "children": [
+                                                                {
+                                                                    "type": "basic",
+                                                                    "name": "Span",
+                                                                    "props": { "className": "text-xs font-medium {{consent?.is_consented ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'}}" },
+                                                                    "text": "{{consent?.is_consented ? '$t:sirsoft-gdpr.mypage.privacy.toggle_on' : '$t:sirsoft-gdpr.mypage.privacy.toggle_off'}}"
+                                                                },
+                                                                {
+                                                                    "comment": "켜짐 상태 스위치 — 클릭 시 철회 확인 모달. 녹색 채움 + knob 오른쪽.",
+                                                                    "type": "basic",
                                                                     "name": "Button",
-                                                                    "if": "{{consent?.can_revoke === true}}",
+                                                                    "if": "{{consent?.is_consented === true}}",
                                                                     "props": {
                                                                         "type": "button",
-                                                                        "className": "px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700 font-medium transition-colors"
+                                                                        "aria-label": "{{consent?.consent_label ?? consent?.consent_key}}",
+                                                                        "className": "relative inline-flex h-6 w-11 items-center rounded-full bg-green-500 dark:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-1"
                                                                     },
                                                                     "actions": [
                                                                         {
@@ -446,7 +513,6 @@
                                                                             "handler": "sequence",
                                                                             "actions": [
                                                                                 {
-                                                                                    "comment": "모달은 별도 컨텍스트라 부모 _local 미해석 — _global 사용 필수. revokeTargetKey/Label/Description 3개를 동시 세팅하여 모달이 라벨 + 친화 설명을 표시할 수 있게 함 (raw key 노출은 사용자에게 무의미하므로 description 으로 대체)",
                                                                                     "handler": "setState",
                                                                                     "params": {
                                                                                         "target": "global",
@@ -460,18 +526,19 @@
                                                                         }
                                                                     ],
                                                                     "children": [
-                                                                        { "type": "basic", "name": "Span", "text": "$t:sirsoft-gdpr.mypage.privacy.revoke" }
+                                                                        { "type": "basic", "name": "Span", "props": { "className": "inline-block h-4 w-4 translate-x-6 rounded-full bg-white shadow transition-transform" } }
                                                                     ]
                                                                 },
                                                                 {
+                                                                    "comment": "꺼짐 상태 스위치 — 클릭 시 즉시 grant. 회색 채움 + knob 왼쪽. 정책 갱신 항목도 별도 색 분기 없이 grant 로 통합(정책 갱신도 결국 동의 표명, grant 는 항상 현재 정책 버전 기록).",
                                                                     "type": "basic",
                                                                     "name": "Button",
-                                                                    "if": "{{consent?.can_grant === true}}",
-                                                                    "comment": "3분기 (#21) — needs_renewal_this_item: 최신 정책으로 갱신 / consent_count>0: 다시 동의 / 그 외: 신규 동의. needs_renewal 분기는 다른 버튼 색 (amber) 으로 시각적 구분. grantingKey 비교로 클릭한 해당 행만 spinner 노출 + 다른 행 클릭은 자동 차단.",
+                                                                    "if": "{{consent?.is_consented !== true}}",
                                                                     "props": {
                                                                         "type": "button",
-                                                                        "disabled": "{{!!_local.grantingKey}}",
-                                                                        "className": "{{consent?.needs_renewal_this_item === true ? 'px-3 py-1 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center' : 'px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center'}}"
+                                                                        "aria-label": "{{consent?.consent_label ?? consent?.consent_key}}",
+                                                                        "disabled": "{{_local.grantingKey === consent?.consent_key}}",
+                                                                        "className": "relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 dark:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-wait"
                                                                     },
                                                                     "actions": [
                                                                         {
@@ -503,14 +570,7 @@
                                                                         }
                                                                     ],
                                                                     "children": [
-                                                                        { "type": "basic", "name": "Icon", "if": "{{_local.grantingKey === consent?.consent_key}}", "props": { "name": "spinner", "size": "xs", "spin": true, "className": "mr-1" } },
-                                                                        {
-                                                                            "type": "basic",
-                                                                            "name": "Span",
-                                                                            "if": "{{_local.grantingKey !== consent?.consent_key}}",
-                                                                            "text": "{{consent?.needs_renewal_this_item === true ? '$t:sirsoft-gdpr.mypage.privacy.btn_renew_this_item' : ((consent?.consent_count ?? 0) > 0 ? '$t:sirsoft-gdpr.mypage.privacy.grant_again' : '$t:sirsoft-gdpr.mypage.privacy.grant')}}"
-                                                                        },
-                                                                        { "type": "basic", "name": "Span", "if": "{{_local.grantingKey === consent?.consent_key}}", "text": "$t:sirsoft-gdpr.consent.granting" }
+                                                                        { "type": "basic", "name": "Span", "props": { "className": "inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow transition-transform" } }
                                                                     ]
                                                                 }
                                                             ]

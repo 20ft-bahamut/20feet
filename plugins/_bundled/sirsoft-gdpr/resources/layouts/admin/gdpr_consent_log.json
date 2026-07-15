@@ -215,7 +215,7 @@
                                                 "name": "Icon",
                                                 "props": {
                                                     "name": "fa-solid fa-arrows-rotate",
-                                                    "className": "w-5 h-5"
+                                                    "className": "text-xl"
                                                 }
                                             }
                                         ]
@@ -769,6 +769,53 @@
                                                                 "text": "$t:sirsoft-gdpr.admin.consent_log.action.revoked"
                                                             }
                                                         ]
+                                                    },
+                                                    {
+                                                        "comment": "거부 필터 (이슈 #430) — action=rejected 행만 조회. 백엔드 actions[] whereIn 이 rejected 를 자동 지원하므로 백엔드 무수정.",
+                                                        "type": "basic",
+                                                        "name": "Label",
+                                                        "props": {
+                                                            "className": "inline-clickable"
+                                                        },
+                                                        "children": [
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Input",
+                                                                "props": {
+                                                                    "type": "checkbox",
+                                                                    "className": "checkbox",
+                                                                    "checked": "{{(_local.filter.actions || []).includes('rejected')}}"
+                                                                },
+                                                                "actions": [
+                                                                    {
+                                                                        "type": "change",
+                                                                        "handler": "sequence",
+                                                                        "params": {
+                                                                            "actions": [
+                                                                                {
+                                                                                    "handler": "setState",
+                                                                                    "params": {
+                                                                                        "target": "local",
+                                                                                        "filter.actions": "{{$event.target.checked ? [...(_local.filter.actions || []).filter(a => a !== 'rejected'), 'rejected'] : (_local.filter.actions || []).filter(a => a !== 'rejected')}}"
+                                                                                    }
+                                                                                },
+                                                                                {
+                                                                                    "actionRef": "searchConsentLogs"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "basic",
+                                                                "name": "Span",
+                                                                "props": {
+                                                                    "className": "text-label"
+                                                                },
+                                                                "text": "$t:sirsoft-gdpr.admin.consent_log.action.rejected"
+                                                            }
+                                                        ]
                                                     }
                                                 ]
                                             }
@@ -1257,7 +1304,7 @@
                                             "type": "basic",
                                             "name": "Span",
                                             "props": {
-                                                "className": "{{row.action === 'granted' ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : (row.action === 'revoked' ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300')}}"
+                                                "className": "{{row.action === 'granted' ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : (row.action === 'rejected' ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300' : (row.action === 'revoked' ? 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'))}}"
                                             },
                                             "text": "{{$t('sirsoft-gdpr.admin.consent_log.action.' + (row.action ?? 'granted'))}}"
                                         }

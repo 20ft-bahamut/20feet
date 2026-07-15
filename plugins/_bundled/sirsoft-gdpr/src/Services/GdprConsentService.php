@@ -6,6 +6,7 @@ use App\Extension\HookManager;
 use App\Services\PluginSettingsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Plugins\Sirsoft\Gdpr\Enums\ConsentAction;
 use Plugins\Sirsoft\Gdpr\Models\GdprUserConsent;
 use Plugins\Sirsoft\Gdpr\Models\GdprUserConsentHistory;
 use Plugins\Sirsoft\Gdpr\Repositories\Contracts\GdprUserConsentHistoryRepositoryInterface;
@@ -73,6 +74,7 @@ class GdprConsentService
      * @param bool $value 동의 여부
      * @param string $source 변경 경로 (banner/preference_center/register/mypage/order/withdraw)
      * @param array|null $categories 카테고리 스냅샷 (배너 일괄 변경 시)
+     * @param bool $isRejection 명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
      * @return void
      */
     public function updateConsent(
@@ -82,29 +84,49 @@ class GdprConsentService
         bool $value,
         string $source,
         ?array $categories = null,
+        bool $isRejection = false,
     ): void {
         $policyVersion = $this->getCurrentPolicyVersion();
         $now = now();
 
+        // 항목별 거부 여부 — 값이 false 이면서 거부 신호가 온 경우만 거부.
+        // 필수 항목은 value=true 로 전달되므로 자동으로 거부 대상에서 제외된다.
+        $newRejected = $isRejection && ! $value;
+
         $consent = null;
 
-        if ($userId !== null) {
+        // 필수 카테고리는 "동의 축"에서 제외한다 (이슈 #430 후속 — 업계 표준 정합).
+        // 필수 쿠키는 ePrivacy Art.5(3) 면제로 동의 대상이 아니므로, "현재 상태"(status) 테이블에
+        // 동의/거부로 저장하지 않는다. 저장하면 "동의하지 않았는데 동의로 표시"되는 모순이 생긴다.
+        // 단, history(이력)에는 "이 시점에 배너에서 결정을 내렸다"는 사실을 남긴다 (GDPR Art.7(1) 입증).
+        // 배너 표시 조건(hasCurrentCookieConsent)은 선택형 status 행만 있어도 충족되고,
+        // 자동 차단 엔진(blocker)은 필수를 status 무관하게 항상 허용하므로 필수 status 부재가 안전하다.
+        $isRequiredCategory = $this->categoryService->isRequired($consentKey);
+
+        if ($userId !== null && ! $isRequiredCategory) {
             $existing = $this->statusRepository->findByUserAndKey($userId, $consentKey);
 
             // 동일 상태 중복 처리 방지 (이력 중복 INSERT 방지).
             // policy_version 동일 조건 추가 — 정책 bump 후 같은 값 재요청은 신정책 적용
             // (status.policy_version 갱신 + history INSERT) 으로 이어져야 needs_renewal 이 해소되고
             // GDPR Art.7(1) 입증 책임 (신정책 동의 기록) 도 충족됨.
+            // is_rejected 변화 조건 추가 (이슈 #430) — 미동의(false) 상태에서 거부 신호가 오면
+            // is_consented 는 그대로 false 라 기존 가드가 early-return 하여 is_rejected 저장이 누락됐다.
+            // 거부(rejected)와 일반 미동의(revoked)를 데이터로 구분하려면 이 조건이 필수.
             if ($existing
                 && (bool) $existing->is_consented === $value
+                && (bool) $existing->is_rejected === $newRejected
                 && (string) $existing->policy_version === $policyVersion) {
                 return;
             }
 
             $data = [
                 'is_consented' => $value,
+                'is_rejected' => $newRejected,
                 'consented_at' => $value ? $now : ($existing?->consented_at),
                 'revoked_at' => $value ? null : $now,
+                // 거부 시각은 거부일 때만 갱신, 재동의(value=true) 시 null 로 해제.
+                'rejected_at' => $newRejected ? $now : null,
                 'policy_version' => $policyVersion,
                 'last_source' => $source,
                 'consent_category' => $this->resolveCategory($consentKey),
@@ -120,23 +142,28 @@ class GdprConsentService
             $consent = $this->statusRepository->upsert($userId, $consentKey, $data);
         }
 
-        // 호출자가 매트릭스를 명시 전달하지 않은 경우 (마이페이지 grant/revoke 등 단건 변경),
-        // 변경 직후 시점의 회원 동의 매트릭스를 자동 구성하여 history 에 보존합니다.
-        // GDPR Art.7(1) 입증 책임 — 모든 동의 변경 시점에 카테고리 전체 의사를 immutable 기록.
-        $snapshotCategories = $categories ?? ($userId !== null ? $this->buildCategoriesSnapshotForUser($userId) : null);
+        // 필수 카테고리는 동의 축에서 제외되므로 history(동의 이력)에도 기록하지 않는다.
+        // 필수는 "동의/거부"라는 의사표시 대상이 아니라 항상 적용되는 항목이므로,
+        // "동의 부여/철회/거부" 이력 자체가 성립하지 않는다. 관리자 동의이력에도 필수 행은 남지 않는다.
+        if (! $isRequiredCategory) {
+            // 호출자가 매트릭스를 명시 전달하지 않은 경우 (마이페이지 grant/revoke 등 단건 변경),
+            // 변경 직후 시점의 회원 동의 매트릭스를 자동 구성하여 history 에 보존합니다.
+            // GDPR Art.7(1) 입증 책임 — 모든 동의 변경 시점에 카테고리 전체 의사를 immutable 기록.
+            $snapshotCategories = $categories ?? ($userId !== null ? $this->buildCategoriesSnapshotForUser($userId) : null);
 
-        // 회원·게스트 모두 history INSERT (불변 append-only)
-        $this->historyRepository->record([
-            'user_id' => $userId,
-            'session_id' => $sessionId,
-            'consent_key' => $consentKey,
-            'action' => $value ? 'granted' : 'revoked',
-            'source' => $source,
-            'policy_version' => $policyVersion,
-            'categories' => $snapshotCategories,
-            'ip_address' => request()->ip(),
-            'user_agent' => substr((string) request()->userAgent(), 0, 500),
-        ]);
+            // 회원·게스트 모두 history INSERT (불변 append-only)
+            $this->historyRepository->record([
+                'user_id' => $userId,
+                'session_id' => $sessionId,
+                'consent_key' => $consentKey,
+                'action' => ConsentAction::fromDecision($value, $isRejection)->value,
+                'source' => $source,
+                'policy_version' => $policyVersion,
+                'categories' => $snapshotCategories,
+                'ip_address' => request()->ip(),
+                'user_agent' => substr((string) request()->userAgent(), 0, 500),
+            ]);
+        }
 
         $hookName = $value
             ? self::PLUGIN_ID . '.consent.granted'
@@ -151,14 +178,15 @@ class GdprConsentService
      * @param string|null $sessionId 게스트 세션 ID
      * @param array<string, bool> $consents 동의 데이터 [key => bool]
      * @param string $source 변경 경로
+     * @param bool $isRejection 명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
      * @return void
      */
-    public function updateConsents(?int $userId, ?string $sessionId, array $consents, string $source): void
+    public function updateConsents(?int $userId, ?string $sessionId, array $consents, string $source, bool $isRejection = false): void
     {
         $categories = $consents;
 
         foreach ($consents as $consentKey => $value) {
-            $this->updateConsent($userId, $sessionId, $consentKey, (bool) $value, $source, $categories);
+            $this->updateConsent($userId, $sessionId, $consentKey, (bool) $value, $source, $categories, $isRejection);
         }
     }
 

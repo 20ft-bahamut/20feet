@@ -228,8 +228,59 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
             expect(text).toContain('!(gdprMyConsent?.data?.is_member === true && gdprMyConsent?.data?.needs_renewal === true)');
         });
 
-        it('"필수만 사용" 시 required 카테고리만 true (cookie_ prefix)', () => {
+        it('"동의하지 않고 계속하기"(거부) 시 required 카테고리만 true (cookie_ prefix)', () => {
+            // 이슈 #430 — 기존 '필수만 사용'(reject_all) 을 거부 버튼으로 대체. body 는 필수만 true 로 재활용.
             expect(text).toContain("['cookie_' + c.key]: c.required === true");
+        });
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects banner_reject_button_sends_intent_reject
+         */
+        it('거부 버튼은 POST body 에 intent:\'reject\' 신호를 실어 보낸다 (이슈 #430)', () => {
+            // 서버가 선택형 미동의 항목을 is_rejected=true 로 저장하도록 하는 명시적 거부 신호.
+            expect(text).toContain("intent: 'reject'");
+        });
+
+        it('거부 버튼 라벨은 banner.reject_continue, 기존 banner.reject_all 은 제거됨', () => {
+            expect(text).toContain('sirsoft-gdpr.banner.reject_continue');
+            expect(text).not.toContain('sirsoft-gdpr.banner.reject_all');
+        });
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects banner_reject_toast_uses_rejected_saved
+         */
+        it('거부 버튼 성공 토스트는 consent.rejected_saved 를 쓴다 (거부인데 "동의가 저장" 오표기 정정, 이슈 #430)', () => {
+            // 거부 버튼 apiCall 노드를 격리해 검증 — 배너 전체 text 에는 다른 버튼의 consent.granted 도 있으므로
+            // intent:'reject' 를 body 에 가진 apiCall 서브트리 안에서만 rejected_saved 를 확인한다.
+            const findRejectApiCall = (node: unknown): Record<string, unknown> | null => {
+                if (!node || typeof node !== 'object') return null;
+                const obj = node as Record<string, unknown>;
+                const body = (obj.params as { body?: string } | undefined)?.body;
+                if (obj.handler === 'apiCall' && typeof body === 'string' && body.includes("intent: 'reject'")) {
+                    return obj;
+                }
+                for (const value of Object.values(obj)) {
+                    if (Array.isArray(value)) {
+                        for (const item of value) {
+                            const found = findRejectApiCall(item);
+                            if (found) return found;
+                        }
+                    } else if (value && typeof value === 'object') {
+                        const found = findRejectApiCall(value);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const rejectApiCall = findRejectApiCall(banner);
+            expect(rejectApiCall).toBeTruthy();
+            const rejectSubtree = serializeForSearch(rejectApiCall);
+            expect(rejectSubtree).toContain('sirsoft-gdpr.consent.rejected_saved');
+            // 거부 버튼 서브트리에는 "동의가 저장"(consent.granted) 토스트가 남아있지 않아야 함
+            expect(rejectSubtree).not.toContain('$t:sirsoft-gdpr.consent.granted"');
         });
 
         it('POST body 키는 백엔드 검증 규칙(StoreCookieConsentRequest)과 일치 — consents + source 사용', () => {
@@ -283,9 +334,10 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
             // 회귀 가드: 피드백 — 단일 boolean 플래그면 모든 버튼이 "동의 중..." 으로 동시 변경되어
             // 어느 버튼을 클릭했는지 시각적으로 알 수 없음. 식별자 string 으로 변경하여 클릭한 버튼만
             // 스피너 + 라벨 변경, 다른 버튼은 disabled + 원래 라벨 유지.
-            // 4 action 식별자: accept_all / reject_all / save_selection / renew_consent
+            // 4 action 식별자: accept_all / reject / save_selection / renew_consent
+            // (이슈 #430 — reject_all 식별자를 reject 로 정리)
             expect(text).toContain('"gdprBannerSubmittingAction": "accept_all"');
-            expect(text).toContain('"gdprBannerSubmittingAction": "reject_all"');
+            expect(text).toContain('"gdprBannerSubmittingAction": "reject"');
             expect(text).toContain('"gdprBannerSubmittingAction": "save_selection"');
             expect(text).toContain('"gdprBannerSubmittingAction": "renew_consent"');
 
@@ -295,7 +347,7 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
 
             // 스피너 if 가드는 자기 식별자와 정확히 일치할 때만 노출
             expect(text).toContain("_global.gdprBannerSubmittingAction === 'accept_all'");
-            expect(text).toContain("_global.gdprBannerSubmittingAction === 'reject_all'");
+            expect(text).toContain("_global.gdprBannerSubmittingAction === 'reject'");
             expect(text).toContain("_global.gdprBannerSubmittingAction === 'save_selection'");
             expect(text).toContain("_global.gdprBannerSubmittingAction === 'renew_consent'");
 
@@ -307,6 +359,25 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
 
             // 옛 단일 boolean 플래그 패턴 회귀 차단
             expect(text).not.toContain('"gdprBannerSubmitting": true');
+        });
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects banner_button_order_reject_accept_preferences
+         */
+        it('버튼 순서 (이슈 #430): 거부 → 선택 동의 토글 → 모두 동의', () => {
+            // 제보자 예시/업계 관행 (거부 → 선택 → 전체) 순서.
+            // reject_continue(거부) → preferences(선택 동의 토글) → accept_all(모두 동의) 순으로 등장해야 한다.
+            const rejectIdx = text.indexOf('sirsoft-gdpr.banner.reject_continue');
+            const prefIdx = text.indexOf('sirsoft-gdpr.banner.preferences');
+            const acceptIdx = text.indexOf('sirsoft-gdpr.banner.accept_all');
+
+            expect(rejectIdx).toBeGreaterThanOrEqual(0);
+            expect(prefIdx).toBeGreaterThanOrEqual(0);
+            expect(acceptIdx).toBeGreaterThanOrEqual(0);
+
+            expect(rejectIdx).toBeLessThan(prefIdx);
+            expect(prefIdx).toBeLessThan(acceptIdx);
         });
     });
 

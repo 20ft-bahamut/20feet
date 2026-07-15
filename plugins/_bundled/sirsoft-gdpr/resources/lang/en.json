@@ -15,6 +15,7 @@
     "consent": {
         "granted": "Consent has been saved.",
         "granted_again": "Consent has been renewed.",
+        "rejected_saved": "Continuing without consent. Optional items will not be used.",
         "revoked": "Consent has been revoked.",
         "renew_all_success": "{renewed} active consent item(s) renewed to the new policy version.",
         "granting": "Granting...",
@@ -225,7 +226,8 @@
             },
             "action": {
                 "granted": "Granted",
-                "revoked": "Revoked"
+                "revoked": "Revoked",
+                "rejected": "Rejected"
             },
             "source": {
                 "banner": "Banner",
@@ -247,7 +249,7 @@
                 "categories_label": "Categories Snapshot",
                 "categories_hint": "The member's category-by-category choices at the time of consent. This record stays immutable even after the policy is updated.",
                 "snapshot_granted": "Granted",
-                "snapshot_revoked": "Revoked"
+                "snapshot_revoked": "Not Consented"
             }
         }
     },
@@ -265,9 +267,16 @@
             "col_action": "Action",
             "consented": "Consented",
             "revoked": "Revoked",
+            "rejected_label": "Rejected",
             "revoke": "Revoke",
             "grant": "Consent",
             "grant_again": "Consent Again",
+            "always_on": "Always On",
+            "toggle_on": "On",
+            "toggle_off": "Off",
+            "enable_all": "Enable All",
+            "enable_all_hint": "You have optional items turned off. Enable them all at once.",
+            "enable_all_success": "All optional items have been enabled.",
             "required_label": "Required",
             "required_hint": "This item is required for service operation and cannot be revoked.",
             "revoke_confirm_title": "Revoke Consent",
@@ -295,9 +304,9 @@
         "title": "Cookie Notice",
         "description": "This site uses cookies to improve user experience and for analytics. You can choose which cookies to allow.",
         "accept_all": "Accept All",
-        "reject_all": "Necessary Only",
-        "preferences": "Preferences",
-        "save": "Save Preferences",
+        "reject_continue": "Continue without consent",
+        "preferences": "Select Consent",
+        "save": "Save Selection",
         "policy_link": "Privacy Policy",
         "preferences_title": "Cookie Preferences",
         "preferences_description": "You can grant or revoke each category individually. Required categories cannot be turned off.",

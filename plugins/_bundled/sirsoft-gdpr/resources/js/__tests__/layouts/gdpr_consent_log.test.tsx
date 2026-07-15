@@ -120,10 +120,21 @@ describe('layouts/admin/gdpr_consent_log.json — #27 체크박스 즉시 적용
             checkboxes.forEach((cb, idx) => expectSequencePattern(cb, `consent_keys[${idx}]`));
         });
 
-        it('action 필터의 체크박스 3개 모두 옵션 C 패턴', () => {
+        it('action 필터의 체크박스 4개 모두 옵션 C 패턴 (이슈 #430 거부 추가)', () => {
             const checkboxes = findCheckboxesIn('action_filter');
-            expect(checkboxes.length, '체크박스 3개 (전체 / granted / revoked)').toBe(3);
+            // 전체 / granted / revoked / rejected — 이슈 #430 에서 거부(rejected) 필터 추가
+            expect(checkboxes.length, '체크박스 4개 (전체 / granted / revoked / rejected)').toBe(4);
             checkboxes.forEach((cb, idx) => expectSequencePattern(cb, `action[${idx}]`));
+        });
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects admin_log_filter_rejected_checkbox
+         */
+        it('action 필터에 거부(rejected) 체크박스가 존재한다 (이슈 #430)', () => {
+            const layoutJson = JSON.stringify(root);
+            expect(layoutJson).toContain("'rejected'");
+            expect(layoutJson).toContain('sirsoft-gdpr.admin.consent_log.action.rejected');
         });
 
         it('source 필터의 체크박스 4개 모두 옵션 C 패턴', () => {
@@ -262,6 +273,25 @@ describe('layouts/admin/gdpr_consent_log.json — #27 체크박스 즉시 적용
             // 동의 배지 클래스 자리는 "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" 형태로 등장
             expect(layoutJson).toContain('bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300');
             expect(layoutJson).not.toContain('dark:bg-green-900/40');
+        });
+    });
+
+    describe('action 배지 — 거부(rejected) 케이스 (이슈 #430)', () => {
+        const layoutJson = JSON.stringify(root);
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects admin_log_action_badge_rejected_amber
+         */
+        it('action 배지 className 분기에 rejected → amber 색이 존재한다', () => {
+            // granted=green / rejected=amber / revoked=red / 그 외=gray
+            expect(layoutJson).toContain("row.action === 'rejected'");
+            expect(layoutJson).toContain('bg-amber-100');
+        });
+
+        it('action 배지 텍스트는 동적으로 action 값에 따라 lang 키를 해석한다 (rejected 포함)', () => {
+            // {{$t('sirsoft-gdpr.admin.consent_log.action.' + (row.action ?? 'granted'))}}
+            expect(layoutJson).toContain('sirsoft-gdpr.admin.consent_log.action.');
         });
     });
 });

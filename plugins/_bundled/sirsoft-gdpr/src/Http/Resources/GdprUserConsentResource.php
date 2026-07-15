@@ -47,6 +47,9 @@ class GdprUserConsentResource extends BaseApiResource
             'consent_category' => $this->consent_category,
             'is_required' => $isRequired,
             'is_consented' => $isConsented,
+            // 이슈 #430 — 명시적 거부 상태. 마이페이지 배지 3분화(동의/철회/거부) 에 사용.
+            'is_rejected' => (bool) $this->is_rejected,
+            'rejected_at' => $this->formatDateTimeStringForUser($this->rejected_at),
             // Art.7(3) 대칭성 + ePrivacy Art.5(3) 동의 면제 패턴 — 필수 카테고리는 철회/재동의 불가, 선택형만 양방향.
             'can_revoke' => ! $isRequired && $isConsented,
             // 활성 동의 + 옛 버전 → 갱신 의도. 활성 동의 + 최신 버전 → 갱신 불요 (이미 최신).
