@@ -173,6 +173,57 @@ class StorageLinkHelperTest extends TestCase
     }
 
     /**
+     * 재생성된 링크의 소유자/그룹이 부모 public/ 디렉토리를 상속합니다 (#43 sudo 후속).
+     *
+     * sudo 로 실행된 종료 시점 복구가 `symlink()` 로 링크를 만들면 링크 소유자가 root:root 로
+     * 남아, 원래 앱 실행 유저 소유였던 링크의 소유권이 바뀌던 문제. 링크 생성 직후 부모
+     * 디렉토리의 owner/group 으로 `lchown`/`lchgrp` 보정하는지 검증한다.
+     *
+     * 실측 방법: uid 변경은 root 권한이 필요하므로, 부모 public/ 의 그룹을 프로세스의 보조
+     * 그룹 중 하나로 바꾼 뒤 링크를 재생성 → 링크 그룹이 부모 그룹을 상속하는지로 검증한다
+     * (sudo 상황에서 링크만 다른 소유로 남는 회귀와 동형). Windows / 보조 그룹 부재 시 skip.
+     */
+    #[Test]
+    public function 재생성된_링크는_부모_디렉토리의_소유권을_상속합니다(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows' || ! function_exists('lchgrp') || ! function_exists('posix_getgroups')) {
+            $this->markTestSkipped('링크 소유권 상속 검증은 POSIX(lchgrp/posix_getgroups) 환경 전용');
+        }
+
+        $this->skipIfNoSymlink();
+
+        $publicDir = $this->fakeBase.'/public';
+        File::ensureDirectoryExists($publicDir);
+        File::ensureDirectoryExists($this->fakeBase.'/storage/app/public');
+
+        // 프로세스가 chgrp 가능한 그룹 = 현재 그룹과 다른 보조 그룹을 찾는다.
+        $currentGid = posix_getgid();
+        $candidateGids = array_values(array_filter(posix_getgroups(), fn ($g) => $g !== $currentGid));
+        if ($candidateGids === []) {
+            $this->markTestSkipped('보조 그룹이 없어 소유권 상속 검증 불가');
+        }
+
+        // 부모 public/ 를 보조 그룹으로 변경 — 링크가 이 그룹을 상속해야 함.
+        $targetGid = $candidateGids[0];
+        if (! @chgrp($publicDir, $targetGid)) {
+            $this->markTestSkipped('부모 디렉토리 chgrp 실패 (권한 부족)');
+        }
+
+        // public/storage 의도적 미생성 → 신규 생성 경로가 링크를 만든다.
+        StorageLinkHelper::ensurePublicStorageLink();
+
+        $linkPath = $this->fakeBase.'/public/storage';
+        $this->assertTrue(is_link($linkPath), '링크가 생성되어야 한다');
+
+        $linkStat = lstat($linkPath);
+        $this->assertSame(
+            $targetGid,
+            $linkStat['gid'],
+            '재생성된 링크의 그룹은 부모 public/ 의 그룹을 상속해야 한다 (sudo 후 root 소유 잔존 차단, #43)',
+        );
+    }
+
+    /**
      * public/storage 부재 시 junction 폴백으로 재생성 (Windows — symlink 권한 불요).
      *
      * Windows 일반 사용자는 symlink 를 못 만들지만 junction(`mklink /J`)은 만들 수 있으므로,

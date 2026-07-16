@@ -117,6 +117,8 @@ class StorageLinkHelper
     protected static function createLink(string $target, string $link): bool
     {
         if (@symlink($target, $link)) {
+            static::inheritParentOwnership($link);
+
             return true;
         }
 
@@ -133,6 +135,39 @@ class StorageLinkHelper
         }
 
         return false;
+    }
+
+    /**
+     * 갓 생성한 링크의 소유자/그룹을 부모 디렉토리로부터 상속시킵니다.
+     *
+     * `symlink()` 는 소유권 지정 인자가 없어 실행 프로세스(sudo → root)의 소유로 링크를
+     * 만든다. 이 때문에 sudo 로 실행된 코어 업데이트가 종료 시점에 `public/storage` 를
+     * 재생성하면 링크가 root:root 로 남아, 원래 앱 실행 유저 소유였던 링크의 소유권이
+     * 바뀌던 문제(#43 후속)를 차단한다. 부모 `public/` 의 owner/group 을 기준으로 삼아
+     * 이 프로젝트의 "신규 항목은 부모 소유권 상속" 컨벤션(`FilePermissionHelper`)과 일치시킨다.
+     *
+     * `chown`/`chgrp` 은 심볼릭 링크의 target 을 따라가므로, 링크 *자체* 를 대상으로 하는
+     * `lchown`/`lchgrp` 을 사용한다. 비-POSIX(Windows) 또는 함수 부재/권한 부족 시 무해하게 skip.
+     *
+     * @param  string  $link  방금 생성한 링크 경로
+     */
+    protected static function inheritParentOwnership(string $link): void
+    {
+        // lchown/lchgrp 은 POSIX 전용 — Windows 및 함수 비활성 환경에서는 no-op.
+        if (! function_exists('lchown') || ! function_exists('lchgrp')) {
+            return;
+        }
+
+        $parent = dirname($link);
+        $owner = @fileowner($parent);
+        $group = @filegroup($parent);
+
+        if ($owner !== false) {
+            @lchown($link, $owner);
+        }
+        if ($group !== false) {
+            @lchgrp($link, $group);
+        }
     }
 
     /**
