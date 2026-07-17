@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.4] - 2026-07-17
+
+### Changed
+
+- 환경설정 > SEO 화면의 캐시 항목(SEO 캐시 활성화·캐시 유지 시간, Sitemap 캐시 유지 시간) 안내 문구 일본어 번역을 갱신했습니다 — 비워두면 고급 설정의 값을 따르고 값을 넣으면 그 값이 우선한다는 새 동작을 일본어 로케일에서도 올바르게 안내합니다.
+
 ## [1.0.3] - 2026-07-14
 
 ### Added

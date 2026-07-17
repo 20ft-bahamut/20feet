@@ -63,4 +63,10 @@ return [
         'bundle_build_promote_failed' => 'vendor-bundle ビルド結果を最終パスに反映できませんでした (:from → :to)',
     ],
     'concurrent_modification' => '別のユーザーが先に保存しました。(リソース: :resource、現在のバージョン: :current、送信されたバージョン: :expected)',
+    'seo' => [
+        'sitemap_write_failed' => 'Sitemapファイル記録に失敗しました: :path',
+        'sitemap_gzip_failed' => 'Sitemap子ファイル圧縮に失敗しました: :file',
+        'sitemap_temp_file_unreadable' => 'Sitemap一時ファイルを読み込めません: :file',
+        'sitemap_stat_group_column_unsupported' => 'サポートされていないグループ基準列です: :column',
+    ],
 ];

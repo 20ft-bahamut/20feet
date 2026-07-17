@@ -32,6 +32,7 @@ use App\Contracts\Repositories\PluginRepositoryInterface;
 use App\Contracts\Repositories\RoleRepositoryInterface;
 use App\Contracts\Repositories\ScheduleHistoryRepositoryInterface;
 use App\Contracts\Repositories\ScheduleRepositoryInterface;
+use App\Contracts\Repositories\SeoCacheStatRepositoryInterface;
 use App\Contracts\Repositories\SystemConfigRepositoryInterface;
 use App\Contracts\Repositories\TemplateCustomTranslationRepositoryInterface;
 use App\Contracts\Repositories\TemplateLayoutAttachmentRepositoryInterface;
@@ -79,6 +80,7 @@ use App\Repositories\PluginRepository;
 use App\Repositories\RoleRepository;
 use App\Repositories\ScheduleHistoryRepository;
 use App\Repositories\ScheduleRepository;
+use App\Repositories\SeoCacheStatRepository;
 use App\Repositories\SystemConfigRepository;
 use App\Repositories\TemplateCustomTranslationRepository;
 use App\Repositories\TemplateLayoutAttachmentRepository;
@@ -215,6 +217,9 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->bind(NotificationLogRepositoryInterface::class, NotificationLogRepository::class);
         $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
         $this->app->bind(NotificationTemplateRepositoryInterface::class, NotificationTemplateRepository::class);
+
+        // SEO Repository 바인딩
+        $this->app->bind(SeoCacheStatRepositoryInterface::class, SeoCacheStatRepository::class);
 
         // IdentityVerification Repository 바인딩
         $this->app->bind(IdentityVerificationLogRepositoryInterface::class, IdentityVerificationLogRepository::class);

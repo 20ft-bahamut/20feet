@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.5] - 2026-07-16
+
+### Added
+
+- 사이트맵 생성이 실패했을 때 표시되는 안내 문구 일본어 번역 추가 (`exceptions.seo.*`) — 사이트맵 파일을 저장하지 못하거나 압축에 실패한 경우의 안내가 일본어 로케일에서 자연스럽게 표시됩니다.
+
 ## [1.0.4] - 2026-07-16
 
 ### Added

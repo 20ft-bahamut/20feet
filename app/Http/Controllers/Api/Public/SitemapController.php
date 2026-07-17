@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Public;
 
 use App\Contracts\Extension\CacheInterface;
 use App\Http\Controllers\Controller;
+use App\Seo\SeoCacheSettings;
 use App\Seo\SitemapGenerator;
 use Illuminate\Http\Response;
 
@@ -22,6 +23,7 @@ class SitemapController extends Controller
      *
      * @param  SitemapGenerator  $generator  Sitemap 생성기
      * @param  CacheInterface  $cache  코어 캐시 드라이버
+     * @return Response Sitemap XML 응답
      */
     public function index(SitemapGenerator $generator, CacheInterface $cache): Response
     {
@@ -34,8 +36,8 @@ class SitemapController extends Controller
 
         if (! $xml) {
             $xml = $generator->generate();
-            $ttl = (int) g7_core_settings('cache.seo_sitemap_ttl', g7_core_settings('seo.sitemap_cache_ttl', 86400));
-            $cache->put('seo.sitemap', $xml, $ttl);
+            // 고급 탭(cache.seo_sitemap_ttl)이 메인, SEO 탭에 별도 지정이 있으면 그것이 우선 (D19)
+            $cache->put('seo.sitemap', $xml, SeoCacheSettings::sitemapCacheTtl());
         }
 
         return response($xml, 200, [

@@ -154,7 +154,7 @@ _단건 응답: `data` 객체의 필드._
 | --- | --- | --- | --- |
 | last_updated_at | string | `2026-07-08T03:14:49+00:00` | last updated 일시 |
 | size_bytes | integer | `25489` | 크기 (바이트) |
-| ttl | integer | `86400` | 캐시 유효 시간 (Time To Live, 초) |
+| ttl | integer | `86400` | 캐시 유효 시간 (Time To Live, 초). 고급 설정의 `cache.seo_sitemap_ttl` 이 기준값이며, SEO 설정 `seo.sitemap_cache_ttl` 에 값이 지정되어 있으면(null 이 아니면) 그 값이 우선합니다 |
 
 **응답 예시**
 

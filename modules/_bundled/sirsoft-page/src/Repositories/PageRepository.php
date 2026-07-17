@@ -73,6 +73,24 @@ class PageRepository implements PageRepositoryInterface
     }
 
     /**
+     * Sitemap 용으로 발행된 페이지를 스트리밍 조회합니다.
+     *
+     * lazyById 는 id 기준 키셋 페이징으로 청크를 순차 조회하므로,
+     * 결과셋 전체가 메모리(및 DB 드라이버 버퍼)에 적재되지 않습니다.
+     *
+     * @param  int  $chunkSize  청크 크기
+     * @return iterable<Page> 발행된 페이지 순회자 (id, slug, updated_at 만 조회)
+     */
+    public function streamPublishedForSitemap(int $chunkSize = 500): iterable
+    {
+        return Page::query()
+            ->where('published', true)
+            ->select(['id', 'slug', 'updated_at'])
+            ->orderBy('id')
+            ->lazyById($chunkSize);
+    }
+
+    /**
      * ID로 페이지를 조회하며, 없으면 예외를 발생시킵니다.
      *
      * @param  int  $id  페이지 ID
