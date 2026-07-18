@@ -12,8 +12,8 @@
 5. seo-config.json: 텍스트 추출(text_props), 속성 매핑(attr_map), 허용 속성(allowed_attrs), 컴포넌트→HTML 매핑 — 모두 템플릿 선언
 6. 훅 시스템: core.seo.filter_context/filter_og_data/filter_twitter_data/filter_structured_data/filter_meta/filter_view_data + 봇 감지 훅 core.seo.resolve_is_bot
 7. 도메인 ownership: 모듈/플러그인이 `seoOgDefaults`/`seoTwitterDefaults`/`seoStructuredData` 메서드로 자기 도메인 OG/Twitter/JSON-LD 를 owned (이커머스 Product, 게시판 Article 등)
-8. Sitemap: 비공개 디스크에 분할 커밋(sitemapindex + sitemap-{n}.xml) 후 스트리밍 서빙 — 요청 스레드 생성 없음, 미스 시 잡 디스패치 + stale/503
-9. Artisan: seo:warmup, seo:clear, seo:stats, seo:generate-sitemap
+8. Sitemap: 스트리밍 writer(유계 메모리)로 비공개 디스크에 분할 커밋(sitemapindex + sitemap-{n}.xml) 후 서빙 — 요청 스레드 생성 없음, 미스 시 잡 디스패치 + stale/503. 증분 저장소(sitemap_urls) + 재생성 모드(SitemapGenerationMode full/auto/incremental) + 진행상황(SitemapProgress, Reverb 실시간/OFF 폴링)
+9. Artisan: seo:warmup, seo:clear, seo:stats, seo:generate-sitemap(--rebuild/--mode)
 ```
 
 ## 아키텍처 개요
@@ -71,7 +71,14 @@ Request → web.php catch-all → SeoMiddleware (봇 감지)
 | SeoMetaResolver | 3계층 캐스케이드 메타 해석 |
 | SeoMiddleware | 미들웨어 (봇 감지 → 렌더링) |
 | SeoServiceProvider | DI 바인딩 |
-| SitemapGenerator | Sitemap 수집기 |
+| SitemapGenerator | Sitemap 수집기 (contributor 드레인 → writer 스트리밍) |
+| SitemapManager | Sitemap 재생성 오케스트레이션 (모드 분기 + 진행상황 + 훅) |
+| SitemapWriter | 자식파일당 in-memory 버퍼 flush + 분할 + atomic commit |
+| SitemapFileStore | 디스크 세트 읽기/서빙 (manifest·index·child 응답) |
+| SitemapXmlRenderer | XML escape/`<url>` 블록/hreflang 단일 출처 |
+| SitemapIndexer | 리소스→sitemap_urls index/deindex (리스너 경유) |
+| SitemapProgress | 진행상황 스토어 (phase 기반 + 방송) |
+| AbstractSitemapContributor | contributor 브리지 base (getUrls↔getUrlsLazy) |
 | SeoInvalidationRegistry | 무효화 규칙 레지스트리 |
 | SeoDeclarationCollector | 레이아웃 SEO 선언 수집 |
 | SeoCacheStatsService | 캐시 통계 집계 |
@@ -84,6 +91,8 @@ Request → web.php catch-all → SeoMiddleware (봇 감지)
 | /api/admin/seo/clear-cache | POST | api.admin.seo.clear-cache | 캐시 삭제 |
 | /api/admin/seo/warmup | POST | api.admin.seo.warmup | 워밍업 |
 | /api/admin/seo/cached-urls | GET | api.admin.seo.cached-urls | 캐시 URL 목록 |
+| /api/admin/seo/sitemap/regenerate | POST | api.admin.seo.sitemap.regenerate | Sitemap 전체 재생성 (큐 예약, mode=full) |
+| /api/admin/seo/sitemap/status | GET | api.admin.seo.sitemap.status | Sitemap 생성 진행상황 + realtime_enabled |
 
 ## SeoMiddleware 동작 규칙
 
@@ -578,16 +587,30 @@ class EcommerceModule extends AbstractModule
 
 **레이아웃 활성화 조건**: 모듈 declaration 이 호출되려면 레이아웃 `meta.seo.extensions` 에 `[{ "type": "module", "id": "sirsoft-ecommerce" }]` 선언 + `meta.seo.page_type` 명시 필요.
 
-### SitemapContributorInterface 구현
+### SitemapContributorInterface 구현 (지연 스트리밍 권장)
+
+대용량 도메인은 `AbstractSitemapContributor` 를 상속해 `getUrlsLazy()`(제너레이터)를 구현합니다. base 가 `getUrls()↔getUrlsLazy()` 를 양방향 브리지하므로 둘 중 하나만 구현하면 됩니다. 인터페이스 자체는 변경되지 않아 base 를 상속하지 않은 제3자 raw 구현체(`implements SitemapContributorInterface` + `getUrls()`)도 그대로 동작합니다.
 
 ```php
 // modules/_bundled/[module]/src/Seo/[Module]SitemapContributor.php
-class EcommerceSitemapContributor implements SitemapContributorInterface
+class EcommerceSitemapContributor extends AbstractSitemapContributor
 {
-    public function getUrls(): array { /* 상품/카테고리 URL 반환 */ }
     public function getIdentifier(): string { return 'sirsoft-ecommerce'; }
+
+    // 한 건씩 yield — 1.4M 배열을 메모리에 만들지 않음. 쿼리는 Repository 의
+    // stream*ForSitemap() 위임(lazyById, service-direct-data-access 규율).
+    // 리소스 단위 증분(SitemapIndexer) 매칭을 위해 resource_type/resource_id 를 함께 emit.
+    public function getUrlsLazy(): iterable
+    {
+        foreach ($this->products->streamVisibleForSitemap() as $p) {
+            yield ['loc' => url("/shop/{$p->id}"), 'lastmod' => $p->updated_at?->toW3cString(),
+                   'resource_type' => 'product', 'resource_id' => (string) $p->id];
+        }
+    }
 }
 ```
+
+`SitemapGenerator::drain()` 이 `instanceof AbstractSitemapContributor || method_exists($c, 'getUrlsLazy')` 로 capability 를 감지해 지연 경로를 우선합니다.
 
 ### ServiceProvider 등록
 
@@ -629,9 +652,16 @@ php artisan seo:warmup --layout=shop/show  # 특정 레이아웃만
 php artisan seo:clear               # 전체 SEO 캐시 삭제
 php artisan seo:clear --layout=home # 특정 레이아웃만
 php artisan seo:stats               # 캐시 통계 출력
-php artisan seo:generate-sitemap    # Sitemap 생성 (큐 디스패치)
+php artisan seo:generate-sitemap    # Sitemap 생성 (큐 디스패치, mode=auto)
 php artisan seo:generate-sitemap --sync  # Sitemap 동기 생성
+php artisan seo:generate-sitemap --rebuild            # 전체 재생성 (mode=full 상당)
+php artisan seo:generate-sitemap --mode=full|auto|incremental  # 재생성 모드 지정
 ```
+
+- `--mode=full`: 도메인 전량을 다시 읽어 `sitemap_urls` 를 전면 replace 후 파일 재작성(자식 균등 재분배).
+- `--mode=incremental`: 도메인 재쿼리 없이 `sitemap_urls` 스트림만으로 파일 재작성(리스너가 반영한 델타 그대로).
+- `--mode=auto`(기본): 저장소가 비어 있으면 full, 채워져 있으면 incremental.
+- `--rebuild` 은 `--mode=full` 의 별칭입니다.
 
 ## Sitemap 분할 생성과 서빙
 
@@ -661,7 +691,38 @@ sitemap/_tmp/              생성 중 임시 디렉토리 (커밋 시 정리)
 
 **분할 기준**: `sitemap_urls_per_file`(기본 50000) 또는 파일 크기 임계(`SitemapWriter::MAX_FILE_BYTES`, 45MB) 중 먼저 도달하는 쪽. 둘 다 sitemaps.org 프로토콜 제한(50,000 URL / 50MB)을 지키기 위한 것입니다.
 
-**관리자 수동 재생성**: `POST /api/admin/seo/sitemap/regenerate` 는 큐에 예약만 하고 즉시 응답합니다(`status: dispatched`). 완료 여부는 `sitemap_last_updated_at` 갱신으로 확인합니다.
+**관리자 수동 재생성**: `POST /api/admin/seo/sitemap/regenerate` 는 큐에 `mode=full` 로 예약만 하고 즉시 진행상황(`getStatus()`)을 응답합니다. 완료 여부는 진행상황(아래) 또는 `sitemap_last_updated_at` 갱신으로 확인합니다.
+
+## 증분 저장소 (sitemap_urls)
+
+리소스 단위 공개/비공개/삭제를 사이트맵에 반영하기 위해 URL 을 `sitemap_urls` 테이블에 지속합니다(주안점 1·3). 전체 재생성 없이 바뀐 리소스 행만 upsert/remove 합니다.
+
+- **테이블**: `resource_type`/`resource_id`/`loc`/`loc_hash`(=`sha256(loc)`)/`lastmod`/`changefreq`/`priority`/`contributor`/`is_visible`. unique 는 `(resource_type, resource_id, loc_hash)` — `loc string(2048)` utf8mb4 는 InnoDB 키 길이(3072 byte)를 초과하므로 ascii 64 해시로 identity 를 유지합니다(상세: docs/database-guide.md).
+- **Repository**: `SitemapUrlRepositoryInterface`(`upsertForResource`=delete-후-insert 멱등 / `removeForResource` / `streamVisible`(lazyById) / `countVisible` / `replaceAllForContributor`). `SeoServiceProvider` 가 singleton 바인딩.
+- **인덱서**: `SitemapIndexer::indexResource($type,$model,$entries)` / `deindexResource($type,$model)` — 리스너가 직접 모델/DB 를 만지지 않고 이 서비스를 경유합니다(`service-direct-data-access` 규율). 제3자 확장은 filter 훅 `sitemap.index.collect_for_resource` 로 리소스→entries 를 가공/추가할 수 있습니다(docs/extension/hooks.md).
+- **리스너**: 모듈 SEO 리스너가 `after_create/update/delete` 에서 공개상태를 판정해 index/deindex 하고 `GenerateSitemapJob::dispatch()`(유니크 락 디바운스)를 겁니다. 리소스 단위 증분에서 자식 파일 URL 수가 임계 미만으로 줄어드는 것(5000→4999)은 감안하며, 균등 재분배(리밸런싱)는 full 재생성 때만 합니다.
+
+## 재생성 모드 (SitemapGenerationMode)
+
+`App\Enums\SitemapGenerationMode`(Backed Enum: `full`/`auto`/`incremental`)가 재생성 정책을 캡슐화합니다. `resolve(int $visibleCount)` 가 `auto` 를 저장소 상태로 full/incremental 판정합니다.
+
+| 트리거 | 모드 | 동작 |
+|--------|------|------|
+| 관리자 수동 재생성 | 항상 `full` | 도메인 전량 → 테이블 replace → 파일 전량 재작성 |
+| 스케줄러 | `auto` | 테이블 비었으면 full, 아니면 incremental |
+| 리소스 변경(리스너) | 해당 리소스만 | 행 upsert/remove 후 잡 디스패치 |
+
+`Command → GenerateSitemapJob → SitemapManager::regenerate(SitemapGenerationMode)` 전 경로가 enum 시그니처를 공유합니다(잡 직렬화는 enum 프로퍼티 그대로).
+
+## 진행상황 가시화 (Reverb 실시간 / OFF 폴링)
+
+`SitemapProgress`(캐시 키 `seo.sitemap.progress`, TTL 3600)가 phase 기반 진행상황을 기록합니다: `queued → running(기여자별 phase + 누적 URL) → writing → completed/failed`. 사전 count 쿼리 없이 스트림 누적치를 표기합니다(1.4M 에서 count 자체가 부담).
+
+- **상태 API**: `GET /api/admin/seo/sitemap/status`(`core.settings.read`)가 `{last_updated_at, progress, realtime_enabled}` 를 반환합니다. `realtime_enabled = drivers.websocket_enabled 설정 && config('broadcasting.default') !== 'null'`(설정 SSoT + 실제 적용 config 양쪽 확인).
+- **방송**: `SitemapProgress` 가 `core.admin.seo.sitemap` 채널로 `sitemap.progress.updated` 를 방송합니다(payload 는 상태 API `data` 와 동형). Reverb OFF 면 `HookManager::broadcast` 가 자동 skip 하고 캐시만 기록되어 폴링 폴백이 성립합니다. 방송은 N URL(5000) 간격으로 스로틀합니다.
+- **채널 인증**: `routes/channels.php` 에 `core.admin.seo.sitemap` → `core.settings.read`(docs/backend/broadcasting.md).
+- **잡 실패**: `GenerateSitemapJob::failed()` 가 `SitemapProgress::fail()` 을 호출해 무한 running 을 방지합니다(TTL 만료 시 idle 복귀).
+- **프론트**: SEO 탭이 상태 API 초기 로드 후 `realtime_enabled` 로 분기합니다 — true 면 websocket 데이터소스(`target_source`)로 갱신, false 면 `startInterval`/`stopInterval` 로 3초 폴링(완료/실패 전이 시 중단).
 
 ## 설정값 (코어 seo.*)
 
@@ -677,6 +738,7 @@ sitemap/_tmp/              생성 중 임시 디렉토리 (커밋 시 정리)
 | sitemap_gzip | boolean | false | 자식 파일 gzip 압축. 인덱스 파일은 항상 비압축 |
 | sitemap_serve_stale_on_miss | boolean | true | 신선도 만료 시 기존 세트를 그대로 서빙(true) / 503 반환(false) |
 | sitemap_max_urls_per_contributor | integer | 0 | 수집기당 URL 상한 (0=무제한). 초과 시 경고 로그 + truncate |
+| sitemap_hreflang_enabled | boolean | true | 다국어 alternate(hreflang) 링크 출력 ON/OFF. 로케일 수가 `SitemapXmlRenderer::MAX_HREFLANG`(50) 초과 시 alternate 생략 |
 | sitemap_schedule | string | "daily" | 생성 주기 (hourly/daily/weekly) |
 | sitemap_schedule_time | string | "02:00" | 생성 시각 |
 | og_default_site_name | string | "" | og:site_name 기본값. 비면 `general.site_name` fallback |

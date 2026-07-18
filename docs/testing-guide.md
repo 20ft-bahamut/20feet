@@ -349,6 +349,42 @@ audit rule `test-scenario-coverage` 가 매니페스트 cross product 와 effect
 2. **Pairwise (all-pairs)** 전략 허용: 매니페스트에 `coverage_strategy: pairwise` 명시 시 모든 axis 쌍의 모든 조합만 커버 (n축 → O(n²) 케이스). 단순 분기형 axis(true/false) 가 많을 때 유효
 3. 그래도 폭발하면 **상위 axis 분리**: 매니페스트를 도메인별로 분할 (예: `order_payment_pg_toss_member.yaml`, `order_payment_pg_toss_guest.yaml`)
 
+### 대규모 시나리오 축(scale)
+
+큐/스케줄러/배치 생성처럼 데이터가 누적되면 붕괴할 수 있는 기능은 대용량(scale) 축을 매니페스트에 선언하고, 규모 의존 결함(유계 메모리·분할 정확성·전량 적재 회피 등)을 회귀 가드로 고정한다. 배경: 사이트맵 생성 잡이 1.4M 게시글을 전량 in-memory 적재해 반복 OOM 붕괴한 사례(#79).
+
+**스키마** (`scale` = block-array of flow objects — 내장 YAML fallback 파서가 flow 객체만 중첩 파싱하므로 `- { ... }` 형태):
+
+```yaml
+scale:
+  - { n: 1500000, dataset: posts+products, assert: [bounded_peak_memory, child_count_correct, no_full_table_load] }
+```
+
+- `n`: 데이터셋 규모(건수). 10만 이상이어야 scale 축의 의미가 있다.
+- `dataset`: 대용량 데이터셋 설명(선택).
+- `assert`: 이 규모에서 검증할 단언(snake_case). 실 대용량 DB 대신 합성 iterator·계측(예: `memory_get_peak_usage`, `DB::listen`, 방송 스로틀 카운트)으로 성질을 고정해도 된다.
+
+**테스트 마킹** — `effects` 처럼 테스트 docblock `@scale` 마킹으로 각 assert 를 커버:
+
+```php
+/**
+ * @scale n=1500000 asserts=bounded_peak_memory, child_count_correct
+ */
+public function test_large_volume_splits_and_keeps_memory_bounded(): void { ... }
+```
+
+TypeScript 테스트는 `// @scale ...` 라인 주석 동일 사용.
+
+**강제 룰 2종** (자동 차단):
+
+| 룰 | 대상 | 검출 |
+|----|------|------|
+| `scenario-scale-axis-required` | `tests/scenarios/**/*.yaml` | batch/generation 매니페스트(test_files 에 `/Jobs/`·`Generator` 또는 tags `[batch]`/`[generation]`)인데 scale 축 없음 / n<100000 / assert 미커버 |
+| `job-generator-needs-scale-test` | `app/Jobs/**`·`**/*Generator.php` | 소스 변경 시 그 클래스를 언급하고 scale 축을 가진 매니페스트가 없음 |
+
+- `*Command.php` 는 흔하고 볼륨 비의존이라 `job-generator-needs-scale-test` 대상에서 제외한다. 배치 커맨드는 매니페스트 `tags: [batch]` + `scenario-scale-axis-required` 로 커버한다.
+- 면제: 매니페스트 헤더 `# audit:allow scenario-scale-axis-required reason: ...` / 소스 헤더 `// audit:allow job-generator-needs-scale-test <사유>`.
+
 ### 작성 절차
 
 1. 영향 변수 카탈로그 식별

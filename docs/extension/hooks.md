@@ -157,7 +157,17 @@ core.seo.filter_view_data       # View 직전 ($viewData) — extraHeadTags / ex
 
 # SEO 봇 감지 훅 (Filter) — null 반환 시 라이브러리 평가로 fallthrough
 core.seo.resolve_is_bot
+
+# Sitemap 증분 인덱싱 훅 (Filter) — 리소스→sitemap 항목 가공/추가
+sitemap.index.collect_for_resource   # SitemapIndexer 가 리소스 index 시 발화 — applyFilters($entries, $type, $id, $contributor)
+
+# Sitemap 재생성 훅 (Action)
+core.seo.sitemap.before_regenerate       # 재생성 시작 직전
+core.seo.sitemap.after_regenerate        # 재생성 성공 후 ($meta)
+core.seo.sitemap.after_regenerate_failed # 재생성 실패 시 (['status'=>'failed', 'success'=>false, ...])
 ```
+
+> `sitemap.index.collect_for_resource` 는 제3자 확장이 리소스 하나에 대한 sitemap 항목을 추가/보정할 때 씁니다(filter — `'type' => 'filter'` 명시 필수). `core.seo.sitemap.after_regenerate_failed` 는 재생성 잡이 실패했을 때 확장이 알림/복구를 걸 수 있는 action 훅입니다.
 
 ---
 

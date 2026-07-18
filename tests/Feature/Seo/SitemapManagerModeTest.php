@@ -171,6 +171,8 @@ class SitemapManagerModeTest extends TestCase
 
     /**
      * incremental: 기여자 재쿼리 없이 저장소 스트림만으로 파일을 재작성한다.
+     *
+     * @scale n=1500000 asserts=no_full_table_load
      */
     public function test_incremental_mode_streams_store_without_domain_requery(): void
     {

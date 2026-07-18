@@ -392,6 +392,8 @@ class SitemapWriterTest extends TestCase
      * 대용량(120,001건) 생성 시 자식 수가 정확하고 메모리가 유계인지 확인합니다.
      *
      * 전체 in-memory 적재(회귀)라면 URL 수에 비례해 메모리가 증가합니다.
+     *
+     * @scale n=1500000 asserts=bounded_peak_memory, child_count_correct
      */
     public function test_large_volume_splits_and_keeps_memory_bounded(): void
     {

@@ -144,6 +144,8 @@ class SitemapProgressTest extends TestCase
 
     /**
      * 같은 단계에서 urls 만 증가하면 방송은 간격 스로틀되지만 캐시는 항상 기록된다.
+     *
+     * @scale n=1500000 asserts=progress_broadcast_throttled
      */
     public function test_phase_broadcast_is_throttled_but_cache_always_written(): void
     {
