@@ -62,6 +62,8 @@ class PageSitemapContributor extends AbstractSitemapContributor
                 'lastmod' => $page->updated_at?->toW3cString(),
                 'changefreq' => 'monthly',
                 'priority' => 0.5,
+                'resource_type' => 'page',
+                'resource_id' => (string) $page->id,
             ];
             $emitted++;
         }

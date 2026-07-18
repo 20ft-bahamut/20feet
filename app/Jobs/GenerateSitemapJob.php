@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\SitemapGenerationMode;
 use App\Seo\SitemapManager;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -45,6 +46,13 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
     public int $uniqueFor = 900;
 
     /**
+     * GenerateSitemapJob 생성자
+     *
+     * @param  SitemapGenerationMode  $mode  재생성 모드 — SitemapManager 로 전달
+     */
+    public function __construct(public SitemapGenerationMode $mode = SitemapGenerationMode::Auto) {}
+
+    /**
      * 유니크 락 식별자를 반환합니다.
      *
      * 봇 요청 캐시 미스마다 디스패치되어도 큐에는 한 건만 남도록 고정 키를 사용합니다.
@@ -75,7 +83,7 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
      */
     public function handle(SitemapManager $manager): void
     {
-        $result = $manager->regenerate();
+        $result = $manager->regenerate($this->mode);
 
         if (($result['status'] ?? null) === 'disabled') {
             Log::info('[SEO] Sitemap generation skipped (disabled)');

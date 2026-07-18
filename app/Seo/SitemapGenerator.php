@@ -77,6 +77,51 @@ class SitemapGenerator
     }
 
     /**
+     * 미리 수집된 URL 항목(사이트맵 저장소 스트림 등)을 writer 로 스트리밍하여 파일을 생성합니다.
+     *
+     * 정적 라우트를 먼저 기록하고, 이어서 전달된 항목을 한 건씩 writer 에 넘깁니다.
+     * 증분/전체 재생성 모두 이 경로로 파일을 작성하며, 항목의 출처(도메인 재쿼리 vs 테이블 스트림)는
+     * 호출자가 결정합니다.
+     *
+     * @param  SitemapWriter  $writer  분할 기록기
+     * @param  iterable<array{loc?: string, lastmod?: string, changefreq?: string, priority?: float}>  $entries  URL 항목 스트림
+     * @return array{generated_at: string, child_count: int, url_count: int, size_bytes: int, gzip: bool, children: array}
+     *                                                                                                                     커밋된 sitemap 메타데이터
+     */
+    public function generateToWriterFromEntries(SitemapWriter $writer, iterable $entries): array
+    {
+        $writer->open();
+
+        foreach ($this->collectStaticRoutes() as $entry) {
+            $writer->addUrl($entry);
+        }
+
+        foreach ($entries as $entry) {
+            $writer->addUrl($this->normalizeEntry($entry));
+        }
+
+        $writer->close();
+
+        return $writer->commit();
+    }
+
+    /**
+     * 한 기여자의 URL 항목을 절대 URL(loc)로 정규화하여 지연 스트리밍합니다.
+     *
+     * 전체 재생성 시 사이트맵 저장소에 적재할 항목의 단일 출처이며,
+     * 기여자가 emit 한 resource_type/resource_id 등 부가 키는 그대로 통과시킵니다.
+     *
+     * @param  SitemapContributorInterface  $contributor  Sitemap 기여자
+     * @return iterable<array<string, mixed>> 정규화된 URL 항목 순회자
+     */
+    public function streamContributorEntries(SitemapContributorInterface $contributor): iterable
+    {
+        foreach ($this->drain($contributor) as $entry) {
+            yield $this->normalizeEntry($entry);
+        }
+    }
+
+    /**
      * 기여자로부터 URL 항목을 순회 가능한 형태로 가져옵니다.
      *
      * 지연 스트리밍 capability(AbstractSitemapContributor 상속 또는 getUrlsLazy() 보유)를

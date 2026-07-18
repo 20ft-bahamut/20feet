@@ -5,6 +5,8 @@ namespace App\Seo;
 use App\Contracts\Extension\CacheInterface;
 use App\Contracts\Extension\StorageInterface;
 use App\Contracts\Repositories\ConfigRepositoryInterface;
+use App\Contracts\Repositories\SitemapUrlRepositoryInterface;
+use App\Enums\SitemapGenerationMode;
 use App\Extension\HookManager;
 use Illuminate\Support\Facades\Log;
 
@@ -33,15 +35,22 @@ class SitemapManager
         private CacheInterface $cache,
         private ConfigRepositoryInterface $configRepository,
         private StorageInterface $storage,
+        private SitemapUrlRepositoryInterface $repository,
     ) {}
 
     /**
      * Sitemap 을 즉시 생성하여 디스크에 커밋하고 last_updated_at 을 기록합니다.
      *
+     * 모드에 따라 사이트맵 저장소(sitemap_urls) 활용 방식이 달라집니다:
+     * - full: 각 기여자를 스트리밍해 저장소를 전량 대체한 뒤 저장소 → 파일 재작성.
+     * - incremental: 저장소의 현재 상태(리스너가 반영한 델타)를 그대로 파일로 재작성.
+     * - auto: 저장소가 비어 있으면 full, 아니면 incremental.
+     *
+     * @param  SitemapGenerationMode  $mode  재생성 모드
      * @return array{success: bool, status: string, message?: string, data?: array<string, mixed>}
      *                                                                                             status: 'updated' | 'disabled' | 'failed'
      */
-    public function regenerate(): array
+    public function regenerate(SitemapGenerationMode $mode = SitemapGenerationMode::Auto): array
     {
         $enabled = (bool) g7_core_settings('seo.sitemap_enabled', true);
         if (! $enabled) {
@@ -55,7 +64,16 @@ class SitemapManager
         HookManager::doAction('core.seo.sitemap.before_regenerate');
 
         try {
-            $meta = $this->generator->generateToWriter($this->makeWriter());
+            $effectiveMode = $mode->resolve($this->repository->countVisible());
+
+            if ($effectiveMode === SitemapGenerationMode::Full) {
+                $this->rebuildStore();
+            }
+
+            $meta = $this->generator->generateToWriterFromEntries(
+                $this->makeWriter(),
+                $this->streamStoreEntries(),
+            );
 
             // 고급 탭(cache.seo_sitemap_ttl)이 메인, SEO 탭에 별도 지정이 있으면 그것이 우선 (D19)
             $ttl = SeoCacheSettings::sitemapCacheTtl();
@@ -112,6 +130,45 @@ class SitemapManager
         return [
             'last_updated_at' => $lastUpdatedAt !== '' ? $lastUpdatedAt : null,
         ];
+    }
+
+    /**
+     * 각 기여자를 스트리밍하여 사이트맵 저장소를 전량 대체합니다(전체 재생성).
+     *
+     * 기여자별로 격리하여, 한 기여자가 실패해도 나머지 기여자의 재적재는 계속됩니다.
+     */
+    private function rebuildStore(): void
+    {
+        foreach ($this->generator->getContributors() as $contributor) {
+            try {
+                $this->repository->replaceAllForContributor(
+                    $contributor->getIdentifier(),
+                    $this->generator->streamContributorEntries($contributor),
+                );
+            } catch (\Throwable $e) {
+                Log::warning('[SEO] Sitemap 저장소 재적재 실패', [
+                    'contributor' => $contributor->getIdentifier(),
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * 사이트맵 저장소의 공개 URL 을 writer 항목 형태로 지연 스트리밍합니다.
+     *
+     * @return iterable<array{loc: string, lastmod: ?string, changefreq: ?string, priority: ?float}> writer 항목 순회자
+     */
+    private function streamStoreEntries(): iterable
+    {
+        foreach ($this->repository->streamVisible() as $row) {
+            yield [
+                'loc' => (string) $row->loc,
+                'lastmod' => $row->lastmod?->toW3cString(),
+                'changefreq' => $row->changefreq,
+                'priority' => $row->priority !== null ? (float) $row->priority : null,
+            ];
+        }
     }
 
     /**

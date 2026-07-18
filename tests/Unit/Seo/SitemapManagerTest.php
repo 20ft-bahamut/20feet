@@ -4,12 +4,14 @@ namespace Tests\Unit\Seo;
 
 use App\Contracts\Extension\CacheInterface;
 use App\Contracts\Repositories\ConfigRepositoryInterface;
+use App\Contracts\Repositories\SitemapUrlRepositoryInterface;
 use App\Extension\HookManager;
 use App\Extension\Storage\CoreStorageDriver;
 use App\Seo\Contracts\SitemapContributorInterface;
 use App\Seo\SitemapFileStore;
 use App\Seo\SitemapGenerator;
 use App\Seo\SitemapManager;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
@@ -31,6 +33,8 @@ use Tests\TestCase;
  */
 class SitemapManagerTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * 이 테스트가 등록·검증하는 sitemap 훅 목록
      */
@@ -128,6 +132,7 @@ class SitemapManagerTest extends TestCase
             $cache ?? Mockery::spy(CacheInterface::class),
             $config ?? Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
+            $this->app->make(SitemapUrlRepositoryInterface::class),
         );
     }
 
@@ -299,13 +304,14 @@ class SitemapManagerTest extends TestCase
 
         // 생성 도중 예외를 던지는 generator 로 실패를 강제한다.
         $generator = Mockery::mock(SitemapGenerator::class);
-        $generator->shouldReceive('generateToWriter')->andThrow(new \RuntimeException('디스크 장애'));
+        $generator->shouldReceive('generateToWriterFromEntries')->andThrow(new \RuntimeException('디스크 장애'));
 
         $manager = new SitemapManager(
             $generator,
             Mockery::spy(CacheInterface::class),
             Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
+            $this->incrementalRepository(),
         );
 
         $result = $manager->regenerate();
@@ -329,16 +335,34 @@ class SitemapManagerTest extends TestCase
         $cache->shouldNotReceive('forget');
 
         $generator = Mockery::mock(SitemapGenerator::class);
-        $generator->shouldReceive('generateToWriter')->andThrow(new \RuntimeException('장애'));
+        $generator->shouldReceive('generateToWriterFromEntries')->andThrow(new \RuntimeException('장애'));
 
         $manager = new SitemapManager(
             $generator,
             $cache,
             Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
+            $this->incrementalRepository(),
         );
 
         $this->assertFalse($manager->regenerate()['success']);
+    }
+
+    /**
+     * incremental 모드로 진입시키는(테이블이 비어있지 않은) mock 저장소를 만듭니다.
+     *
+     * countVisible()>0 → auto 가 incremental 로 해석되어 rebuildStore(전체 재적재)를 건너뛰고
+     * 곧바로 generateToWriterFromEntries 로 진입합니다(실패 경로 단순화).
+     *
+     * @return SitemapUrlRepositoryInterface mock 저장소
+     */
+    private function incrementalRepository(): SitemapUrlRepositoryInterface
+    {
+        $repository = Mockery::mock(SitemapUrlRepositoryInterface::class);
+        $repository->shouldReceive('countVisible')->andReturn(1);
+        $repository->shouldReceive('streamVisible')->andReturn([]);
+
+        return $repository;
     }
 
     /**
