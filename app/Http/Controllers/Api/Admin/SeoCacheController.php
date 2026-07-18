@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Api\Base\AdminBaseController;
 use App\Http\Requests\Admin\SeoCacheClearRequest;
+use App\Jobs\GenerateSitemapJob;
 use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Seo\SeoCacheStatsService;
 use App\Seo\SitemapManager;
@@ -54,7 +55,7 @@ class SeoCacheController extends AdminBaseController
      *
      * 레이아웃 또는 모듈 지정 시 해당 캐시만, 미지정 시 전체 캐시를 삭제합니다.
      *
-     * @param SeoCacheClearRequest $request 캐시 삭제 요청
+     * @param  SeoCacheClearRequest  $request  캐시 삭제 요청
      * @return JsonResponse 삭제 결과를 포함한 JSON 응답
      */
     public function clearCache(SeoCacheClearRequest $request): JsonResponse
@@ -97,28 +98,25 @@ class SeoCacheController extends AdminBaseController
     }
 
     /**
-     * Sitemap XML 을 즉시 재생성합니다.
+     * Sitemap XML 재생성을 큐에 예약합니다.
      *
-     * 큐 드라이버와 무관하게 동기 실행되며, 생성 완료 후 last_updated_at 을 갱신합니다.
+     * 대용량(수백만 URL) 사이트에서 요청 스레드 동기 생성은 메모리/타임아웃 붕괴를 일으키므로
+     * 큐 잡으로 위임합니다. 응답은 예약 시점의 상태이며, 실제 완료 시각은 이후 갱신됩니다.
      *
-     * @return JsonResponse 재생성 결과 JSON 응답
+     * @return JsonResponse 예약 결과 JSON 응답
      */
     public function regenerateSitemap(): JsonResponse
     {
-        $result = $this->sitemapManager->regenerate();
-
-        if ($result['success']) {
-            return $this->success('seo.sitemap_regenerated', $result['data'] ?? null);
+        if (! (bool) g7_core_settings('seo.sitemap_enabled', true)) {
+            return $this->error('seo.sitemap_disabled', 400);
         }
 
-        $messageKey = match ($result['status']) {
-            'disabled' => 'seo.sitemap_disabled',
-            default => 'seo.sitemap_regenerate_failed',
-        };
+        GenerateSitemapJob::dispatch();
 
-        $statusCode = $result['status'] === 'disabled' ? 400 : 500;
-
-        return $this->error($messageKey, $statusCode, $result['message'] ?? null);
+        return $this->success('seo.sitemap_regenerate_dispatched', [
+            'status' => 'dispatched',
+            ...$this->sitemapManager->getStatus(),
+        ]);
     }
 
     /**

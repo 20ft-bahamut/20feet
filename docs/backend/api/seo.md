@@ -152,9 +152,8 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| last_updated_at | string | `2026-07-08T03:14:49+00:00` | last updated 일시 |
-| size_bytes | integer | `25489` | 크기 (바이트) |
-| ttl | integer | `86400` | 캐시 유효 시간 (Time To Live, 초). 고급 설정의 `cache.seo_sitemap_ttl` 이 기준값이며, SEO 설정 `seo.sitemap_cache_ttl` 에 값이 지정되어 있으면(null 이 아니면) 그 값이 우선합니다 |
+| status | string | `dispatched` | 예약 상태. 재생성 잡이 큐에 등록되었음을 의미합니다 |
+| last_updated_at | string\|null | `2026-07-08T03:14:49+00:00` | **예약 시점 기준** 마지막 생성 일시. 이번 재생성의 결과가 아니라 직전 생성 시각이며, 잡 완료 후 갱신됩니다 (아직 한 번도 생성되지 않았으면 null) |
 
 **응답 예시**
 
@@ -165,11 +164,10 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "Sitemap 재생성이 완료되었습니다.",
+    "message": "Sitemap 재생성을 시작했습니다. 완료까지 시간이 걸릴 수 있습니다.",
     "data": {
-        "last_updated_at": "2026-07-08T03:14:49+00:00",
-        "size_bytes": 25489,
-        "ttl": 86400
+        "status": "dispatched",
+        "last_updated_at": "2026-07-08T03:14:49+00:00"
     }
 }
 ```
@@ -178,6 +176,7 @@ HTTP/1.1 200
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 400 | Bad Request | SEO 설정에서 sitemap 생성이 비활성(`seo.sitemap_enabled=false`)인 경우 (`seo.sitemap_disabled`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 
@@ -185,7 +184,11 @@ HTTP/1.1 200
 
 **설명**
 
-sitemap.xml 을 즉시 재생성합니다. SitemapManager 에 위임하며 큐 드라이버와 무관하게 동기(즉시) 실행되고, 완료 후 마지막 생성 시각을 갱신합니다. SEO 설정에서 sitemap 기능이 비활성인 경우 400(`seo.sitemap_disabled`), 생성 실패 시 500 을 반환합니다. 관리자가 콘텐츠 변경 후 검색엔진에 노출할 sitemap 을 스케줄 대기 없이 즉시 갱신할 때 사용합니다.
+sitemap.xml 재생성을 큐에 예약합니다. 응답은 예약 접수 결과이며 생성 완료를 의미하지 않습니다 — 실제 생성은 큐 워커가 `GenerateSitemapJob` 을 처리할 때 수행되고, 완료 후 마지막 생성 시각이 갱신됩니다.
+
+요청 스레드에서 동기 생성하지 않는 이유는 대용량(수백만 URL) 사이트에서 생성이 수 분~수십 분 걸려 관리자 요청이 메모리 초과/타임아웃으로 실패하기 때문입니다. 잡은 유니크 락(`seo-sitemap`)을 사용하므로 재생성을 연속으로 요청해도 동시에 여러 건이 실행되지 않고 한 건만 큐에 남습니다.
+
+생성 진행 상황은 이 응답으로 알 수 없습니다. 완료 여부는 `last_updated_at` 이 갱신되었는지로 확인합니다.
 
 
 ### GET /api/admin/seo/stats

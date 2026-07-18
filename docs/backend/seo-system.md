@@ -12,7 +12,8 @@
 5. seo-config.json: 텍스트 추출(text_props), 속성 매핑(attr_map), 허용 속성(allowed_attrs), 컴포넌트→HTML 매핑 — 모두 템플릿 선언
 6. 훅 시스템: core.seo.filter_context/filter_og_data/filter_twitter_data/filter_structured_data/filter_meta/filter_view_data + 봇 감지 훅 core.seo.resolve_is_bot
 7. 도메인 ownership: 모듈/플러그인이 `seoOgDefaults`/`seoTwitterDefaults`/`seoStructuredData` 메서드로 자기 도메인 OG/Twitter/JSON-LD 를 owned (이커머스 Product, 게시판 Article 등)
-7. Artisan: seo:warmup, seo:clear, seo:stats, seo:generate-sitemap
+8. Sitemap: 비공개 디스크에 분할 커밋(sitemapindex + sitemap-{n}.xml) 후 스트리밍 서빙 — 요청 스레드 생성 없음, 미스 시 잡 디스패치 + stale/503
+9. Artisan: seo:warmup, seo:clear, seo:stats, seo:generate-sitemap
 ```
 
 ## 아키텍처 개요
@@ -632,6 +633,36 @@ php artisan seo:generate-sitemap    # Sitemap 생성 (큐 디스패치)
 php artisan seo:generate-sitemap --sync  # Sitemap 동기 생성
 ```
 
+## Sitemap 분할 생성과 서빙
+
+Sitemap 은 비공개 디스크(StorageInterface, `cache` 카테고리)에 분할 파일로 커밋되고, 컨트롤러가 스트리밍으로 서빙합니다. `public/storage` 심볼릭 링크에 의존하지 않으며 자식 파일을 메모리에 적재하지 않습니다.
+
+**디스크 레이아웃** (SSoT: `SitemapFileStore` 상수):
+
+```text
+sitemap/manifest.json      커밋 마커 + 자식 목록 메타 (이 파일 존재 = 서빙 가능)
+sitemap/sitemap.xml        sitemapindex (항상 비압축)
+sitemap/sitemap-{n}.xml    자식 sitemap (gzip 시 .xml.gz)
+sitemap/_tmp/              생성 중 임시 디렉토리 (커밋 시 정리)
+```
+
+**라우트**: `/sitemap.xml`(인덱스) · `/sitemap-{n}.xml`, `/sitemap-{n}.xml.gz`(자식). 자식 경로는 `SitemapFileStore::childUrl()` 이 인덱스 `<loc>` 에 기록하는 값과 일치해야 합니다. gzip 여부는 manifest 가 결정하므로 두 경로를 같은 액션이 처리합니다.
+
+**서빙 시맨틱** (요청 스레드에서 생성하지 않음):
+
+| 상태 | 동작 |
+|------|------|
+| 메타 캐시 신선 + 세트 존재 | 디스크 세트 스트리밍 |
+| 메타 캐시 만료 | `GenerateSitemapJob` 디스패치 후 기존 세트 서빙 (`sitemap_serve_stale_on_miss=true`) |
+| 메타 캐시 만료 + stale 서빙 off | 잡 디스패치 후 503 + `Retry-After: 120` |
+| 세트 전무 (신규 설치) | 잡 디스패치 후 503 + `Retry-After: 120` |
+
+봇 요청 스레드에서 동기 생성하면 대용량(수백만 URL)에서 메모리 초과·타임아웃이 발생하므로 생성은 항상 큐가 담당합니다. 잡은 유니크 락(`seo-sitemap`)을 쓰므로 캐시 미스가 몰려도 동시에 여러 건이 실행되지 않습니다.
+
+**분할 기준**: `sitemap_urls_per_file`(기본 50000) 또는 파일 크기 임계(`SitemapWriter::MAX_FILE_BYTES`, 45MB) 중 먼저 도달하는 쪽. 둘 다 sitemaps.org 프로토콜 제한(50,000 URL / 50MB)을 지키기 위한 것입니다.
+
+**관리자 수동 재생성**: `POST /api/admin/seo/sitemap/regenerate` 는 큐에 예약만 하고 즉시 응답합니다(`status: dispatched`). 완료 여부는 `sitemap_last_updated_at` 갱신으로 확인합니다.
+
 ## 설정값 (코어 seo.*)
 
 | 키 | 타입 | 기본값 | 설명 |
@@ -641,7 +672,11 @@ php artisan seo:generate-sitemap --sync  # Sitemap 동기 생성
 | cache_enabled | boolean | true | SEO 캐시 ON/OFF |
 | cache_ttl | integer | 7200 | 캐시 TTL (초) |
 | sitemap_enabled | boolean | true | sitemap.xml 생성 ON/OFF |
-| sitemap_cache_ttl | integer | 86400 | Sitemap 캐시 TTL (초) |
+| sitemap_cache_ttl | integer\|null | null | Sitemap 캐시 TTL 오버라이드 (초). null=고급 탭 `cache.seo_sitemap_ttl` 을 따름 |
+| sitemap_urls_per_file | integer | 50000 | 자식 파일당 URL 수 (분할 기준). 1000~50000, 상한은 sitemaps.org 프로토콜 제한 |
+| sitemap_gzip | boolean | false | 자식 파일 gzip 압축. 인덱스 파일은 항상 비압축 |
+| sitemap_serve_stale_on_miss | boolean | true | 신선도 만료 시 기존 세트를 그대로 서빙(true) / 503 반환(false) |
+| sitemap_max_urls_per_contributor | integer | 0 | 수집기당 URL 상한 (0=무제한). 초과 시 경고 로그 + truncate |
 | sitemap_schedule | string | "daily" | 생성 주기 (hourly/daily/weekly) |
 | sitemap_schedule_time | string | "02:00" | 생성 시각 |
 | og_default_site_name | string | "" | og:site_name 기본값. 비면 `general.site_name` fallback |

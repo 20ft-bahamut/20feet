@@ -4,7 +4,9 @@ namespace Tests\Unit\Jobs;
 
 use App\Jobs\GenerateSitemapJob;
 use App\Seo\SitemapManager;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 use Tests\TestCase;
@@ -28,20 +30,71 @@ class GenerateSitemapJobTest extends TestCase
      */
     public function test_job_implements_should_queue(): void
     {
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
 
         $this->assertInstanceOf(ShouldQueue::class, $job);
     }
 
     /**
-     * tries=3, timeout=300 속성을 확인합니다.
+     * 대용량 생성을 견디는 큐 속성을 확인합니다.
      */
     public function test_job_has_correct_tries_and_timeout(): void
     {
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
 
         $this->assertSame(3, $job->tries);
-        $this->assertSame(300, $job->timeout);
+        $this->assertSame(1800, $job->timeout);
+        $this->assertSame(120, $job->backoff);
+    }
+
+    /**
+     * ShouldBeUnique 를 구현하여 동시 실행을 막는지 확인합니다.
+     *
+     * 봇 요청 캐시 미스마다 dispatch 되어도 큐에 한 건만 남아야 합니다.
+     */
+    public function test_job_implements_should_be_unique(): void
+    {
+        $job = new GenerateSitemapJob;
+
+        $this->assertInstanceOf(ShouldBeUnique::class, $job);
+    }
+
+    /**
+     * 유니크 락 키가 인스턴스와 무관하게 고정값인지 확인합니다.
+     *
+     * 인스턴스마다 키가 다르면 중복 디스패치가 그대로 통과합니다.
+     */
+    public function test_unique_id_is_stable_across_instances(): void
+    {
+        $this->assertSame('seo-sitemap', (new GenerateSitemapJob)->uniqueId());
+        $this->assertSame('seo-sitemap', (new GenerateSitemapJob)->uniqueId());
+    }
+
+    /**
+     * 유니크 락이 영구 고착되지 않도록 만료 시간이 설정되어 있는지 확인합니다.
+     */
+    public function test_unique_lock_expires(): void
+    {
+        $job = new GenerateSitemapJob;
+
+        $this->assertSame(900, $job->uniqueFor);
+    }
+
+    /**
+     * retryUntil 이 재시도 누적을 30분으로 제한하는지 확인합니다.
+     */
+    public function test_retry_until_limits_retry_window(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-07-17 10:00:00'));
+
+        $job = new GenerateSitemapJob;
+
+        $this->assertSame(
+            '2026-07-17 10:30:00',
+            Carbon::instance($job->retryUntil())->format('Y-m-d H:i:s')
+        );
+
+        Carbon::setTestNow();
     }
 
     /**
@@ -68,7 +121,7 @@ class GenerateSitemapJobTest extends TestCase
                 return $context['size'] === 1234 && $context['ttl'] === 86400;
             }));
 
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
         $job->handle($manager);
 
         $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
@@ -92,7 +145,7 @@ class GenerateSitemapJobTest extends TestCase
             ->once()
             ->with('[SEO] Sitemap generation skipped (disabled)');
 
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
         $job->handle($manager);
 
         $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());
@@ -115,7 +168,7 @@ class GenerateSitemapJobTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('contributor crashed');
 
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
         $job->handle($manager);
     }
 
@@ -132,7 +185,7 @@ class GenerateSitemapJobTest extends TestCase
                 return $context['error'] === 'Sitemap generation timeout';
             }));
 
-        $job = new GenerateSitemapJob();
+        $job = new GenerateSitemapJob;
         $job->failed($exception);
 
         $this->addToAssertionCount(Mockery::getContainer()->mockery_getExpectationCount());

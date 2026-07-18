@@ -1429,7 +1429,11 @@
       "sitemap_manual_update": "今すぐ生成",
       "sitemap_updating": "生成中...",
       "sitemap_update_success": "Sitemap 生成が完了しました。",
-      "sitemap_update_failed": "Sitemap 生成に失敗しました。"
+      "sitemap_update_failed": "Sitemap 生成に失敗しました。",
+      "sitemap_urls_per_file": "Sitemap ファイルあたりの URL 数",
+      "sitemap_urls_per_file_hint": "URL がこの数を超えると sitemap ファイルが複数に分割され、インデックスファイルが一緒に作成されます — 最小 1000 個、最大 50000 個（検索エンジン仕様上限）",
+      "sitemap_gzip": "Sitemap 圧縮（gzip）",
+      "sitemap_gzip_desc": "分割された sitemap ファイルを圧縮して送信量を削減します。インデックスファイルは圧縮しません。"
     },
     "security": {
       "title": "セキュリティ 設定",
@@ -1736,7 +1740,9 @@
       "geoip_manual_update": "今すぐ更新",
       "geoip_updating": "更新中...",
       "geoip_update_success": "GeoIP DBの更新が完了しました。",
-      "geoip_update_failed": "GeoIP DBの更新に失敗しました。"
+      "geoip_update_failed": "GeoIP DBの更新に失敗しました。",
+      "seo_sitemap_cache": "Sitemap キャッシュ",
+      "seo_sitemap_cache_desc": "sitemap.xml をキャッシュします。"
     },
     "notification_definitions": {
       "title": "通知設定",

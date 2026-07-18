@@ -48,7 +48,7 @@ class SitemapManager
             return [
                 'success' => false,
                 'status' => 'disabled',
-                'message' => 'Sitemap 생성이 비활성화되어 있습니다.',
+                'message' => __('seo.sitemap_disabled'),
             ];
         }
 
@@ -70,7 +70,7 @@ class SitemapManager
             $result = [
                 'success' => true,
                 'status' => 'updated',
-                'message' => 'Sitemap 생성이 완료되었습니다.',
+                'message' => __('seo.sitemap_regenerated'),
                 'data' => [
                     'last_updated_at' => $lastUpdatedAt,
                     'size_bytes' => $meta['size_bytes'],
@@ -91,7 +91,7 @@ class SitemapManager
             $result = [
                 'success' => false,
                 'status' => 'failed',
-                'message' => 'Sitemap 생성에 실패했습니다: '.$e->getMessage(),
+                'message' => __('seo.sitemap_generate_failed', ['error' => $e->getMessage()]),
             ];
 
             HookManager::doAction('core.seo.sitemap.after_regenerate_failed', $result);

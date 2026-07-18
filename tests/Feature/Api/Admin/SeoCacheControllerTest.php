@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Admin;
 
 use App\Enums\ExtensionOwnerType;
+use App\Jobs\GenerateSitemapJob;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SeoCacheStat;
@@ -10,7 +11,9 @@ use App\Models\User;
 use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Seo\SitemapManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
 use Mockery;
 use Tests\TestCase;
 
@@ -389,76 +392,72 @@ class SeoCacheControllerTest extends TestCase
     }
 
     /**
-     * 정상 재생성 시 200 + last_updated_at 데이터 반환
+     * 재생성 요청 시 200 + 예약 상태와 직전 생성 시각을 반환
      */
-    public function test_regenerate_sitemap_returns_200_with_data(): void
+    public function test_regenerate_sitemap_returns_200_with_dispatched_status(): void
     {
-        $mock = Mockery::mock(SitemapManager::class);
-        $mock->shouldReceive('regenerate')
-            ->once()
-            ->andReturn([
-                'success' => true,
-                'status' => 'updated',
-                'message' => 'Sitemap 생성이 완료되었습니다.',
-                'data' => [
-                    'last_updated_at' => '2026-04-29T10:00:00+00:00',
-                    'size_bytes' => 1234,
-                    'ttl' => 86400,
-                ],
-            ]);
-        $this->app->instance(SitemapManager::class, $mock);
+        Queue::fake();
+        Config::set('g7_settings.core.seo.sitemap_enabled', true);
+        Config::set('g7_settings.core.seo.sitemap_last_updated_at', '2026-04-29T10:00:00+00:00');
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/admin/seo/sitemap/regenerate');
 
         $response->assertStatus(200);
         $this->assertTrue($response->json('success'));
+        $this->assertSame('dispatched', $response->json('data.status'));
         $this->assertSame('2026-04-29T10:00:00+00:00', $response->json('data.last_updated_at'));
-        $this->assertSame(1234, $response->json('data.size_bytes'));
     }
 
     /**
-     * Sitemap 비활성 상태 시 400 반환
+     * 재생성 요청이 큐 잡을 1건만 디스패치하는지 확인
+     */
+    public function test_regenerate_sitemap_dispatches_job(): void
+    {
+        Queue::fake();
+        Config::set('g7_settings.core.seo.sitemap_enabled', true);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->postJson('/api/admin/seo/sitemap/regenerate')
+            ->assertStatus(200);
+
+        Queue::assertPushed(GenerateSitemapJob::class, 1);
+    }
+
+    /**
+     * 재생성 요청이 요청 스레드에서 동기 생성하지 않는지 확인
+     *
+     * 이 회귀가 무너지면 1.4M 규모에서 관리자 워커가 OOM 으로 죽습니다.
+     */
+    public function test_regenerate_sitemap_does_not_generate_inline(): void
+    {
+        Queue::fake();
+        Config::set('g7_settings.core.seo.sitemap_enabled', true);
+
+        $mock = Mockery::mock(SitemapManager::class);
+        $mock->shouldNotReceive('regenerate');
+        $mock->shouldReceive('getStatus')->andReturn(['last_updated_at' => null]);
+        $this->app->instance(SitemapManager::class, $mock);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->postJson('/api/admin/seo/sitemap/regenerate')
+            ->assertStatus(200);
+    }
+
+    /**
+     * Sitemap 비활성 상태 시 400 반환 + 잡 미디스패치
      */
     public function test_regenerate_sitemap_returns_400_when_disabled(): void
     {
-        $mock = Mockery::mock(SitemapManager::class);
-        $mock->shouldReceive('regenerate')
-            ->once()
-            ->andReturn([
-                'success' => false,
-                'status' => 'disabled',
-                'message' => 'Sitemap 생성이 비활성화되어 있습니다.',
-            ]);
-        $this->app->instance(SitemapManager::class, $mock);
+        Queue::fake();
+        Config::set('g7_settings.core.seo.sitemap_enabled', false);
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/admin/seo/sitemap/regenerate');
 
         $response->assertStatus(400);
         $this->assertFalse($response->json('success'));
-    }
-
-    /**
-     * 내부 실패 시 500 반환
-     */
-    public function test_regenerate_sitemap_returns_500_on_failure(): void
-    {
-        $mock = Mockery::mock(SitemapManager::class);
-        $mock->shouldReceive('regenerate')
-            ->once()
-            ->andReturn([
-                'success' => false,
-                'status' => 'failed',
-                'message' => 'Sitemap 생성에 실패했습니다: contributor crashed',
-            ]);
-        $this->app->instance(SitemapManager::class, $mock);
-
-        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
-            ->postJson('/api/admin/seo/sitemap/regenerate');
-
-        $response->assertStatus(500);
-        $this->assertFalse($response->json('success'));
+        Queue::assertNotPushed(GenerateSitemapJob::class);
     }
 
     protected function tearDown(): void

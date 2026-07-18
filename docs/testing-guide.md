@@ -14,12 +14,14 @@
 5. 테스트 실행 중 발견한 무관 에러도 같은 세션에서 함께 처리 (stale test 수정 or 로직 수정)
 6. 릴리스 전 composer test-smoke 통과 필수 (Installation 스위트)
 7. 백엔드: php artisan test --filter=TestName / _bundled 확장은 _bundled에서 직접 실행
+8. settings 디스크는 TestCase 가 전역 페이크 — 실제 설정 파일 오염 차단. 저장 직후 값 검증은 g7_core_settings() 말고 ConfigRepository::getCategory()
 ```
 
 ---
 
 ## 목차
 
+- [실제 환경 파일 보호 (settings 디스크 격리)](#실제-환경-파일-보호-settings-디스크-격리)
 - [기능 단위 시나리오 매트릭스](#기능-단위-시나리오-매트릭스)
 - [도메인별 테스트 전략 매트릭스](#도메인별-테스트-전략-매트릭스)
 - [Pre-release Smoke Suite](#pre-release-smoke-suite)
@@ -208,6 +210,41 @@ afterApplicationCreated()는 setUpTraits() 이후 실행되므로 마이그레�
 beforeRefreshingDatabase()는 RefreshDatabase 트레이트가 부모 클래스 메서드를 가리므로 사용 불가
 ✅ setUpTraits() 오버라이드가 유일하게 작동하는 훅 포인트
 ```
+
+---
+
+## 실제 환경 파일 보호 (settings 디스크 격리)
+
+`settings` 디스크의 root 는 `storage/app/settings` — 개발/운영이 실제로 사용하는 설정 파일 그 자체다. 설정 저장 경로를 타는 테스트(설정 API 호출, `ConfigRepository::saveCategory()`)는 이 파일을 그대로 덮어쓰며, `RefreshDatabase` 는 DB 만 되돌리므로 오염이 잔류한다.
+
+`Tests\TestCase` 가 앱 부팅 직후 `Storage::fake('settings')` 로 전역 격리한다. 테스트에서 별도 조치는 필요 없다.
+
+```text
+✅ 설정 저장 테스트 = 추가 조치 불필요 (TestCase 가 이미 격리)
+❌ Storage::fake('settings') 를 테스트마다 중복 호출 — 불필요
+❌ 격리를 우회해 storage/app/settings 를 직접 읽고/쓰기 — 실제 환경 오염
+```
+
+### 저장 직후 값 검증
+
+`g7_core_settings()` / `config('g7_settings.*')` 는 **부팅 시점에 적재된 값**이라 같은 프로세스에서 저장 직후에는 갱신되지 않는다. 저장 결과를 검증하려면 저장소를 직접 읽는다.
+
+```php
+// ❌ 저장했는데 부팅 시점 값이 나온다
+$this->assertSame(20000, g7_core_settings('seo.sitemap_urls_per_file'));
+
+// ✅ 저장소 실제 값 조회
+$seo = app(ConfigRepositoryInterface::class)->getCategory('seo');
+$this->assertSame(20000, $seo['sitemap_urls_per_file']);
+```
+
+### 배경 (회귀 사례)
+
+격리 도입 전에는 `Storage::fake('settings')` 를 쓰는 테스트가 1개뿐이라, 설정 저장 테스트를 돌릴 때마다 개발 환경의 실제 설정이 테스트 값으로 대체됐다. 실측 피해: `general.json` 의 사이트명이 `"Test"`, 언어가 `ja` 로 바뀌어 **개발 사이트 언어가 일본어로 전환**되어 있었고, SEO/캐시 TTL 도 테스트 값으로 덮여 운영자가 지정한 값이 사라졌다. 테스트는 계속 green 이라 조용히 누적됐다.
+
+회귀 가드: `tests/Feature/Settings/SettingsDiskIsolationTest.php` (격리 해제 시 FAIL).
+
+`Storage::fake()` 는 **해석된 디스크 인스턴스만 교체**하고 `config('filesystems.disks.settings.root')` 는 실경로로 남는다. 격리 여부를 판정할 때는 `Storage::disk('settings')->path('')` 를 봐야 한다.
 
 ---
 

@@ -563,7 +563,7 @@ class SettingsService
         // 각 카테고리에 속하는 원본 필드명 목록
         // (frontend_key → 원본 키 역변환 후의 키 기준)
         $categoryFieldMap = [
-            'cache' => ['enabled', 'layout_enabled', 'layout_ttl', 'stats_enabled', 'stats_ttl', 'seo_enabled', 'seo_ttl'],
+            'cache' => ['enabled', 'layout_enabled', 'layout_ttl', 'stats_enabled', 'stats_ttl', 'seo_enabled', 'seo_ttl', 'seo_sitemap_ttl'],
             'debug' => ['mode', 'sql_query_log', 'log_level'],
             'core_update' => ['github_url', 'github_token'],
             'geoip' => ['feature_enabled', 'license_key', 'auto_update_enabled', 'last_updated_at'],
