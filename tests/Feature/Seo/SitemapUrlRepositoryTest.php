@@ -157,6 +157,30 @@ class SitemapUrlRepositoryTest extends TestCase
     }
 
     /**
+     * replaceAllForContributor 는 삽입된 행 수를 반환한다 (진행상황 누적 URL 표기용).
+     *
+     * 청크 경계를 넘겨도 정확히 집계돼야 한다 (INSERT_CHUNK=1000 이므로 2건은 단일 청크지만
+     * 반환 계약 자체를 고정한다).
+     */
+    public function test_replace_all_for_contributor_returns_inserted_count(): void
+    {
+        $count = $this->repository->replaceAllForContributor('sirsoft-board', [
+            ['loc' => 'https://example.com/board/a', 'resource_type' => 'board', 'resource_id' => '1'],
+            ['loc' => 'https://example.com/board/a/1', 'resource_type' => 'board_post', 'resource_id' => '1'],
+            ['loc' => 'https://example.com/board/a/2', 'resource_type' => 'board_post', 'resource_id' => '2'],
+        ]);
+
+        $this->assertSame(3, $count);
+
+        // 재대체 시에도 새로 삽입된 건수를 반환 (기존 삭제분은 제외)
+        $recount = $this->repository->replaceAllForContributor('sirsoft-board', [
+            ['loc' => 'https://example.com/board/b', 'resource_type' => 'board', 'resource_id' => '2'],
+        ]);
+
+        $this->assertSame(1, $recount);
+    }
+
+    /**
      * 긴 loc(2000자) 도 loc_hash 로 안전 저장 및 식별된다 (MySQL 키 길이 회피).
      */
     public function test_long_loc_is_stored_via_hash_identity(): void

@@ -92,7 +92,7 @@ class SitemapUrlRepository implements SitemapUrlRepositoryInterface
     /**
      * {@inheritDoc}
      */
-    public function replaceAllForContributor(string $contributor, iterable $entries): void
+    public function replaceAllForContributor(string $contributor, iterable $entries): int
     {
         // 기여자 스코프 전량 제거 후 청크 삽입. 대용량(수백만) 삽입을 단일 트랜잭션으로
         // 감싸면 락/메모리 부담이 크므로, 삭제 후 청크별 삽입으로 유계 메모리를 유지합니다.
@@ -100,6 +100,7 @@ class SitemapUrlRepository implements SitemapUrlRepositoryInterface
 
         $now = now();
         $batch = [];
+        $inserted = 0;
         foreach ($entries as $entry) {
             $batch[] = $this->toRow(
                 (string) ($entry['resource_type'] ?? 'unknown'),
@@ -113,13 +114,17 @@ class SitemapUrlRepository implements SitemapUrlRepositoryInterface
 
             if (count($batch) >= self::INSERT_CHUNK) {
                 SitemapUrl::insert($batch);
+                $inserted += count($batch);
                 $batch = [];
             }
         }
 
         if ($batch !== []) {
             SitemapUrl::insert($batch);
+            $inserted += count($batch);
         }
+
+        return $inserted;
     }
 
     /**

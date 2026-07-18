@@ -78,11 +78,14 @@ test('#481 - hreflang 토글을 바꿔 저장하면 성공하고 재진입 시 �
 
   const toggle = page.locator(`${HREFLANG_ROW} input[type="checkbox"]`).first();
   await expect(toggle).toBeAttached({ timeout: 15_000 });
+  // 체크박스 input 은 sr-only(화면에서 숨김)이고 클릭 대상은 wrapper div(onClick) 이다.
+  // input 을 직접 클릭하면 toggle-switch-track 오버레이가 포인터 이벤트를 가로챈다.
+  const toggleSwitch = page.locator(`${HREFLANG_ROW} .toggle-switch-wrapper`).first();
 
   const wasChecked = await toggle.isChecked();
 
   // 토글을 반대 상태로 바꾼다
-  await toggle.click();
+  await toggleSwitch.click();
   await expect(page.locator('#save_button')).toBeEnabled({ timeout: 10_000 });
 
   const save = page.waitForResponse(
@@ -99,7 +102,7 @@ test('#481 - hreflang 토글을 바꿔 저장하면 성공하고 재진입 시 �
   await expect.poll(() => reloaded.isChecked(), { timeout: 15_000 }).toBe(!wasChecked);
 
   // 원상 복구 (E2E 는 실제 환경 설정을 건드린다)
-  await reloaded.click();
+  await page.locator(`${HREFLANG_ROW} .toggle-switch-wrapper`).first().click();
   const restore = page.waitForResponse(
     (r) => r.url().includes('/api/admin/settings') && r.request().method() === 'POST',
     { timeout: 20_000 }
@@ -197,8 +200,8 @@ test('#481 - 고급 탭 Sitemap 캐시 기준값 칸이 마운트되고 기본�
 });
 
 // @scenario tab=seo, permitted=yes
-// @effects regenerate_is_async
-test('#481 - "지금 생성" 클릭이 큐에 예약되고 즉시 응답한다', async ({ page }) => {
+// @effects regenerate_is_async, progress_visible
+test('#481 - "지금 생성" 클릭이 큐에 예약되고 진행상황이 화면에 표시된다', async ({ page }) => {
   const token = issueToken('core.settings.read', 'core.settings.update');
   await authenticatePage(page, token);
 
@@ -215,9 +218,39 @@ test('#481 - "지금 생성" 클릭이 큐에 예약되고 즉시 응답한다',
   const elapsed = Date.now() - startedAt;
 
   expect(response.status()).toBe(200);
-  expect((await response.json())?.data?.status).toBe('dispatched');
+  // 예약 즉시 진행상황이 'queued' 로 실려 온다 (동기 생성이 아니라 큐 예약)
+  expect((await response.json())?.data?.progress?.status).toBe('queued');
 
   // 동기 생성으로 되돌아가면 응답 시간이 데이터 규모에 비례해 늘어난다.
   // 절대 하한 대신 "예약 응답이라면 당연히 만족하는" 상한으로 회귀만 잡는다.
   expect(elapsed).toBeLessThan(10_000);
+
+  // 진행상황 블록이 화면에 나타나고 상태 배지가 미해석 키가 아닌 실제 문구로 렌더된다
+  const progressBlock = page.locator('#sitemap_progress_block');
+  await expect(progressBlock).toBeAttached({ timeout: 15_000 });
+  const progressText = (await progressBlock.innerText()).trim();
+  expect(progressText).not.toContain('$t:');
+  expect(progressText.length).toBeGreaterThan(0);
+});
+
+// @scenario tab=seo, permitted=yes
+// @effects status_endpoint
+test('#481 - SEO 탭 진입 시 sitemap 상태 API 가 진행상황/실시간 여부를 반환한다', async ({ page }) => {
+  const token = issueToken('core.settings.read', 'core.settings.update');
+  await authenticatePage(page, token);
+
+  const status = page.waitForResponse(
+    (r) => r.url().includes('/api/admin/seo/sitemap/status') && r.request().method() === 'GET',
+    { timeout: 20_000 }
+  );
+
+  await gotoSeoTab(page);
+
+  const res = await status;
+  expect(res.status()).toBe(200);
+  const body = await res.json();
+  // 상태 응답 스키마: 진행상황(progress) + 실시간 연결 가능 여부(realtime_enabled)
+  expect(body?.data).toHaveProperty('realtime_enabled');
+  expect(body?.data).toHaveProperty('progress');
+  expect(body?.data).toHaveProperty('last_updated_at');
 });

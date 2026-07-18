@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\SitemapGenerationMode;
 use App\Seo\SitemapManager;
+use App\Seo\SitemapProgress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -108,6 +109,9 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
      */
     public function failed(\Throwable $exception): void
     {
+        // 잡 최종 실패(재시도 소진/타임아웃) 시 진행상황을 'failed' 로 고정 — 무한 running 방지
+        app(SitemapProgress::class)->fail($exception->getMessage());
+
         Log::error('[SEO] Sitemap generation failed', [
             'error' => $exception->getMessage(),
         ]);

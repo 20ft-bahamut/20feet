@@ -3,7 +3,9 @@
 namespace Tests\Feature\Api\Admin;
 
 use App\Enums\ExtensionOwnerType;
+use App\Enums\SitemapGenerationMode;
 use App\Jobs\GenerateSitemapJob;
+use App\Seo\SitemapProgress;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SeoCacheStat;
@@ -392,27 +394,33 @@ class SeoCacheControllerTest extends TestCase
     }
 
     /**
-     * 재생성 요청 시 200 + 예약 상태와 직전 생성 시각을 반환
+     * 재생성 요청 시 200 + 진행상황(queued)과 직전 생성 시각을 반환
      */
-    public function test_regenerate_sitemap_returns_200_with_dispatched_status(): void
+    public function test_regenerate_sitemap_returns_200_with_queued_progress(): void
     {
         Queue::fake();
         Config::set('g7_settings.core.seo.sitemap_enabled', true);
         Config::set('g7_settings.core.seo.sitemap_last_updated_at', '2026-04-29T10:00:00+00:00');
+        // realtime_enabled 판정을 결정적으로: 웹소켓 OFF → false
+        Config::set('broadcasting.default', 'null');
 
         $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson('/api/admin/seo/sitemap/regenerate');
 
         $response->assertStatus(200);
         $this->assertTrue($response->json('success'));
-        $this->assertSame('dispatched', $response->json('data.status'));
+        $this->assertSame('queued', $response->json('data.progress.status'));
+        $this->assertSame('full', $response->json('data.progress.mode'));
         $this->assertSame('2026-04-29T10:00:00+00:00', $response->json('data.last_updated_at'));
+        $this->assertFalse($response->json('data.realtime_enabled'));
     }
 
     /**
-     * 재생성 요청이 큐 잡을 1건만 디스패치하는지 확인
+     * 재생성 요청이 큐 잡을 1건만, 항상 전체(Full) 모드로 디스패치하는지 확인
+     *
+     * 관리자 수동 재생성은 현 생성 상태와 무관하게 항상 전량 재생성입니다(D7).
      */
-    public function test_regenerate_sitemap_dispatches_job(): void
+    public function test_regenerate_sitemap_dispatches_full_mode_job(): void
     {
         Queue::fake();
         Config::set('g7_settings.core.seo.sitemap_enabled', true);
@@ -422,6 +430,10 @@ class SeoCacheControllerTest extends TestCase
             ->assertStatus(200);
 
         Queue::assertPushed(GenerateSitemapJob::class, 1);
+        Queue::assertPushed(
+            GenerateSitemapJob::class,
+            fn (GenerateSitemapJob $job) => $job->mode === SitemapGenerationMode::Full
+        );
     }
 
     /**
@@ -458,6 +470,87 @@ class SeoCacheControllerTest extends TestCase
         $response->assertStatus(400);
         $this->assertFalse($response->json('success'));
         Queue::assertNotPushed(GenerateSitemapJob::class);
+    }
+
+    // ========================================================================
+    // Sitemap 진행상황 조회 (sitemapStatus)
+    // ========================================================================
+
+    /**
+     * 인증 없이 sitemap 상태 조회 시 401 반환
+     */
+    public function test_sitemap_status_returns_401_without_authentication(): void
+    {
+        $response = $this->getJson('/api/admin/seo/sitemap/status');
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * read 권한만 있어도 sitemap 상태 조회 가능 (SEO 탭 읽기 권한)
+     */
+    public function test_sitemap_status_allows_read_permission(): void
+    {
+        $user = $this->createAdminUser(['core.settings.read']);
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withToken($token)->getJson('/api/admin/seo/sitemap/status');
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * 상태 조회 응답이 진행상황 + realtime_enabled 스키마를 포함
+     */
+    public function test_sitemap_status_returns_progress_and_realtime_flag(): void
+    {
+        // 진행상황을 미리 기록
+        app(SitemapProgress::class)->start(SitemapGenerationMode::Full->value);
+        // realtime_enabled 판정을 결정적으로: 웹소켓 OFF → false
+        Config::set('broadcasting.default', 'null');
+
+        $response = $this->withToken($this->token)->getJson('/api/admin/seo/sitemap/status');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'last_updated_at',
+                    'progress' => ['status', 'mode'],
+                    'realtime_enabled',
+                ],
+            ]);
+        $this->assertSame('queued', $response->json('data.progress.status'));
+        $this->assertFalse($response->json('data.realtime_enabled'));
+    }
+
+    /**
+     * 진행상황이 없으면 progress 는 null
+     */
+    public function test_sitemap_status_returns_null_progress_when_idle(): void
+    {
+        $response = $this->withToken($this->token)->getJson('/api/admin/seo/sitemap/status');
+
+        $response->assertStatus(200);
+        $this->assertNull($response->json('data.progress'));
+    }
+
+    /**
+     * 재생성 요청이 진행상황을 'queued' 로 즉시 기록 (큐 대기 중에도 UI 표시)
+     */
+    public function test_regenerate_sitemap_records_queued_progress(): void
+    {
+        Queue::fake();
+        Config::set('g7_settings.core.seo.sitemap_enabled', true);
+
+        $this->withHeader('Authorization', 'Bearer '.$this->token)
+            ->postJson('/api/admin/seo/sitemap/regenerate')
+            ->assertStatus(200);
+
+        $progress = app(SitemapProgress::class)->get();
+        $this->assertNotNull($progress);
+        $this->assertSame('queued', $progress['status']);
+        $this->assertSame('full', $progress['mode']);
     }
 
     protected function tearDown(): void

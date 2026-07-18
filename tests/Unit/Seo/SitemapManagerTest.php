@@ -133,6 +133,7 @@ class SitemapManagerTest extends TestCase
             $config ?? Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
             $this->app->make(SitemapUrlRepositoryInterface::class),
+            $this->app->make(\App\Seo\SitemapProgress::class),
         );
     }
 
@@ -312,6 +313,7 @@ class SitemapManagerTest extends TestCase
             Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
             $this->incrementalRepository(),
+            $this->app->make(\App\Seo\SitemapProgress::class),
         );
 
         $result = $manager->regenerate();
@@ -343,6 +345,7 @@ class SitemapManagerTest extends TestCase
             Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
             $this->incrementalRepository(),
+            $this->app->make(\App\Seo\SitemapProgress::class),
         );
 
         $this->assertFalse($manager->regenerate()['success']);

@@ -56,6 +56,7 @@ interface SitemapUrlRepositoryInterface
      *
      * @param  string  $contributor  기여자 식별자
      * @param  iterable<int, array{loc: string, resource_type?: string, resource_id?: mixed, lastmod?: mixed, changefreq?: ?string, priority?: ?float}>  $entries  URL 항목 스트림
+     * @return int 삽입된 행 수 (진행상황 누적 URL 표기용 — count 쿼리 없이 스트림 누적)
      */
-    public function replaceAllForContributor(string $contributor, iterable $entries): void;
+    public function replaceAllForContributor(string $contributor, iterable $entries): int;
 }

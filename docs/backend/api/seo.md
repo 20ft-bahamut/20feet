@@ -148,12 +148,13 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-_단건 응답: `data` 객체의 필드._
+_단건 응답: `data` 객체의 필드 — `GET /api/admin/seo/sitemap/status` 와 동일한 스키마입니다._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| status | string | `dispatched` | 예약 상태. 재생성 잡이 큐에 등록되었음을 의미합니다 |
 | last_updated_at | string\|null | `2026-07-08T03:14:49+00:00` | **예약 시점 기준** 마지막 생성 일시. 이번 재생성의 결과가 아니라 직전 생성 시각이며, 잡 완료 후 갱신됩니다 (아직 한 번도 생성되지 않았으면 null) |
+| progress | object\|null | `{"status":"queued","mode":"full",...}` | 재생성 진행상황. 예약 직후 `status=queued`, `mode=full` 로 즉시 기록됩니다. 필드 상세는 아래 상태 조회 API 참조 (진행 이력이 없으면 null) |
+| realtime_enabled | boolean | `false` | 실시간 연결(WebSocket) 가능 여부. true 면 프론트가 진행상황 채널을 구독하고, false 면 상태 API 를 주기적으로 폴링합니다 |
 
 **응답 예시**
 
@@ -166,8 +167,19 @@ HTTP/1.1 200
     "success": true,
     "message": "Sitemap 재생성을 시작했습니다. 완료까지 시간이 걸릴 수 있습니다.",
     "data": {
-        "status": "dispatched",
-        "last_updated_at": "2026-07-08T03:14:49+00:00"
+        "last_updated_at": "2026-07-08T03:14:49+00:00",
+        "progress": {
+            "status": "queued",
+            "mode": "full",
+            "started_at": "2026-07-08T05:20:00+00:00",
+            "finished_at": null,
+            "phase": null,
+            "urls": 0,
+            "url_count": null,
+            "child_count": null,
+            "message": null
+        },
+        "realtime_enabled": false
     }
 }
 ```
@@ -184,11 +196,92 @@ HTTP/1.1 200
 
 **설명**
 
-sitemap.xml 재생성을 큐에 예약합니다. 응답은 예약 접수 결과이며 생성 완료를 의미하지 않습니다 — 실제 생성은 큐 워커가 `GenerateSitemapJob` 을 처리할 때 수행되고, 완료 후 마지막 생성 시각이 갱신됩니다.
+sitemap.xml 재생성을 큐에 예약합니다. 관리자 수동 재생성은 현 생성 상태와 무관하게 **항상 전체(full) 재생성**입니다. 응답은 예약 접수 결과이며 생성 완료를 의미하지 않습니다 — 실제 생성은 큐 워커가 `GenerateSitemapJob` 을 처리할 때 수행되고, 완료 후 마지막 생성 시각이 갱신됩니다.
 
 요청 스레드에서 동기 생성하지 않는 이유는 대용량(수백만 URL) 사이트에서 생성이 수 분~수십 분 걸려 관리자 요청이 메모리 초과/타임아웃으로 실패하기 때문입니다. 잡은 유니크 락(`seo-sitemap`)을 사용하므로 재생성을 연속으로 요청해도 동시에 여러 건이 실행되지 않고 한 건만 큐에 남습니다.
 
-생성 진행 상황은 이 응답으로 알 수 없습니다. 완료 여부는 `last_updated_at` 이 갱신되었는지로 확인합니다.
+예약 직후 진행상황이 `queued` 로 기록되며, 이후 진행 단계는 `GET /api/admin/seo/sitemap/status` 로 조회합니다.
+
+### GET /api/admin/seo/sitemap/status
+<!-- @generated:start:api.admin.seo.sitemap.status -->
+- **라우트명**: `api.admin.seo.sitemap.status`
+- **컨트롤러**: `App\Http\Controllers\Api\Admin\SeoCacheController@sitemapStatus`
+- **인증/권한**: `auth:sanctum` + `permission:core.settings.read`
+
+**요청 파라미터**
+
+_요청 파라미터 없음._
+
+**요청 예시**
+
+```http
+GET /api/admin/seo/sitemap/status HTTP/1.1
+Host: api.example.com
+Accept: application/json
+Authorization: Bearer {YOUR_TOKEN}
+```
+
+**응답 필드** (`data` 내부)
+
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| last_updated_at | string\|null | `2026-07-08T03:14:49+00:00` | 마지막 생성 일시 (아직 한 번도 생성되지 않았으면 null) |
+| progress | object\|null | `{"status":"running",...}` | 재생성 진행상황. 진행 이력이 없으면 null |
+| progress.status | string | `running` | `queued`(예약) / `running`(기여자 처리 중) / `writing`(파일 작성 중) / `completed`(완료) / `failed`(실패) |
+| progress.mode | string\|null | `full` | 재생성 모드 (`full` / `auto` / `incremental`) |
+| progress.phase | string\|null | `sirsoft-board` | 현재 처리 중인 기여자 식별자 (running 단계에서만) |
+| progress.urls | integer | `12000` | 누적 처리 URL 수 |
+| progress.url_count | integer\|null | `5000` | 완료 시 총 URL 수 |
+| progress.child_count | integer\|null | `2` | 완료 시 분할 파일 수 |
+| progress.started_at | string\|null | `2026-07-08T05:20:00+00:00` | 예약 시각 |
+| progress.finished_at | string\|null | `2026-07-08T05:21:30+00:00` | 완료/실패 시각 |
+| progress.message | string\|null | `null` | 실패 시 오류 메시지 |
+| realtime_enabled | boolean | `false` | 실시간 연결(WebSocket) 가능 여부. true 면 프론트가 `core.admin.seo.sitemap` 채널을 구독하고, false 면 이 API 를 주기적으로 폴링합니다 |
+
+**응답 예시**
+
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "last_updated_at": "2026-07-08T03:14:49+00:00",
+        "progress": {
+            "status": "running",
+            "mode": "full",
+            "started_at": "2026-07-08T05:20:00+00:00",
+            "finished_at": null,
+            "phase": "sirsoft-board",
+            "urls": 12000,
+            "url_count": null,
+            "child_count": null,
+            "message": null
+        },
+        "realtime_enabled": false
+    }
+}
+```
+
+**에러 응답**
+
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+
+<!-- @generated:end -->
+
+**설명**
+
+Sitemap 재생성 진행상황과 실시간 연결 가능 여부를 조회합니다. SEO 탭 진입 시 초기 로드에 사용되며, `realtime_enabled` 가 false(웹소켓 미사용)일 때는 프론트가 진행 중(`queued`/`running`/`writing`) 동안 이 API 를 3초 간격으로 폴링합니다. 실시간 연결이 켜져 있으면 폴링 대신 `core.admin.seo.sitemap` 채널의 `sitemap.progress.updated` 이벤트로 즉시 갱신됩니다.
+
+진행상황은 캐시(TTL 3600초)에 저장되므로, 잡이 비정상 종료해도 시간이 지나면 만료됩니다. 잡 최종 실패 시에는 `progress.status=failed` 로 고정됩니다.
 
 
 ### GET /api/admin/seo/stats

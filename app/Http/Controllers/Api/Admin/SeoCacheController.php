@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\SitemapGenerationMode;
 use App\Http\Controllers\Api\Base\AdminBaseController;
 use App\Http\Requests\Admin\SeoCacheClearRequest;
 use App\Jobs\GenerateSitemapJob;
 use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Seo\SeoCacheStatsService;
 use App\Seo\SitemapManager;
+use App\Seo\SitemapProgress;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
@@ -21,7 +23,8 @@ class SeoCacheController extends AdminBaseController
     public function __construct(
         private SeoCacheStatsService $statsService,
         private SeoCacheManagerInterface $cacheManager,
-        private SitemapManager $sitemapManager
+        private SitemapManager $sitemapManager,
+        private SitemapProgress $sitemapProgress
     ) {
         parent::__construct();
     }
@@ -111,12 +114,25 @@ class SeoCacheController extends AdminBaseController
             return $this->error('seo.sitemap_disabled', 400);
         }
 
-        GenerateSitemapJob::dispatch();
+        // 관리자 수동 재생성은 항상 전체(Full) — 현 생성 상태와 무관하게 전량 재생성 (D7)
+        GenerateSitemapJob::dispatch(SitemapGenerationMode::Full);
 
-        return $this->success('seo.sitemap_regenerate_dispatched', [
-            'status' => 'dispatched',
-            ...$this->sitemapManager->getStatus(),
-        ]);
+        // 큐 대기 중에도 UI 가 'queued' 를 표시하도록 즉시 기록
+        $this->sitemapProgress->start(SitemapGenerationMode::Full->value);
+
+        return $this->success('seo.sitemap_regenerate_dispatched', $this->sitemapManager->getStatus());
+    }
+
+    /**
+     * Sitemap 재생성 진행상황과 실시간 연결 가능 여부를 조회합니다.
+     *
+     * SEO 탭 진입 시 초기 로드용이며, 폴링(Reverb OFF)일 때 주기적으로 재조회됩니다.
+     *
+     * @return JsonResponse 진행상황(progress) + last_updated_at + realtime_enabled 를 포함한 JSON 응답
+     */
+    public function sitemapStatus(): JsonResponse
+    {
+        return $this->success('messages.success', $this->sitemapManager->getStatus());
     }
 
     /**

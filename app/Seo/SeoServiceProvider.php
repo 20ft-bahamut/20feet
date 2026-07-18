@@ -35,6 +35,7 @@ class SeoServiceProvider extends ServiceProvider
         $this->app->singleton(SeoConfigMerger::class);
         $this->app->singleton(SitemapFileStore::class);
         $this->app->singleton(SitemapIndexer::class);
+        $this->app->singleton(SitemapProgress::class);
 
         // Sitemap 파일 입출력은 비공개 디스크(local = storage/app/private, serve=false)를 사용합니다.
         // public/storage 심볼릭 링크에 의존하지 않고 컨트롤러 스트리밍으로 서빙합니다.

@@ -1435,7 +1435,18 @@
       "sitemap_gzip": "Sitemap 圧縮（gzip）",
       "sitemap_gzip_desc": "分割された sitemap ファイルを圧縮して送信量を削減します。インデックスファイルは圧縮しません。",
       "sitemap_hreflang_enabled": "多言語代替リンク (hreflang)",
-      "sitemap_hreflang_enabled_desc": "多言語サイトでURLごとに各言語バージョンを指す hreflang 代替リンクを挿入します。オフにするとリンクを省略してサイトマップサイズを削減します。"
+      "sitemap_hreflang_enabled_desc": "多言語サイトでURLごとに各言語バージョンを指す hreflang 代替リンクを挿入します。オフにするとリンクを省略してサイトマップサイズを削減します。",
+      "sitemap_regenerating": "作成中…",
+      "sitemap_progress": "作成進行状況",
+      "sitemap_status_queued": "待機中",
+      "sitemap_status_running": "作成中",
+      "sitemap_status_writing": "ファイル作成中",
+      "sitemap_status_completed": "完了",
+      "sitemap_status_failed": "失敗",
+      "sitemap_progress_phase": "現在処理中: {{phase}}",
+      "sitemap_progress_urls": "累積URL: {{count}}個",
+      "sitemap_realtime_connected": "リアルタイムで接続されています。",
+      "sitemap_polling": "進行状況を定期的に確認しています。"
     },
     "security": {
       "title": "セキュリティ 設定",

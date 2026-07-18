@@ -97,6 +97,7 @@ class SitemapManagerModeTest extends TestCase
             Mockery::spy(ConfigRepositoryInterface::class),
             $this->storage,
             $this->repository,
+            $this->app->make(\App\Seo\SitemapProgress::class),
         );
     }
 

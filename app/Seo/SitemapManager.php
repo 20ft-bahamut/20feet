@@ -36,6 +36,7 @@ class SitemapManager
         private ConfigRepositoryInterface $configRepository,
         private StorageInterface $storage,
         private SitemapUrlRepositoryInterface $repository,
+        private SitemapProgress $progress,
     ) {}
 
     /**
@@ -70,6 +71,8 @@ class SitemapManager
                 $this->rebuildStore();
             }
 
+            $this->progress->writing($this->repository->countVisible());
+
             $meta = $this->generator->generateToWriterFromEntries(
                 $this->makeWriter(),
                 $this->streamStoreEntries(),
@@ -98,6 +101,8 @@ class SitemapManager
                 ],
             ];
 
+            $this->progress->complete($meta);
+
             HookManager::doAction('core.seo.sitemap.after_regenerate', $result);
 
             return $result;
@@ -105,6 +110,8 @@ class SitemapManager
             Log::error('[SEO] Sitemap regeneration failed', [
                 'error' => $e->getMessage(),
             ]);
+
+            $this->progress->fail($e->getMessage());
 
             $result = [
                 'success' => false,
@@ -119,9 +126,13 @@ class SitemapManager
     }
 
     /**
-     * 현재 sitemap 의 메타데이터를 반환합니다.
+     * 현재 sitemap 의 메타데이터와 진행상황을 반환합니다.
      *
-     * @return array{last_updated_at: ?string}
+     * realtime_enabled 는 설정 SSoT(drivers.websocket_enabled)와 실제 적용 config
+     * (broadcasting.default) 를 함께 확인해 판정합니다 — 프론트가 실시간(구독)/폴링을
+     * 분기하는 근거입니다.
+     *
+     * @return array{last_updated_at: ?string, progress: ?array<string, mixed>, realtime_enabled: bool}
      */
     public function getStatus(): array
     {
@@ -129,6 +140,9 @@ class SitemapManager
 
         return [
             'last_updated_at' => $lastUpdatedAt !== '' ? $lastUpdatedAt : null,
+            'progress' => $this->progress->get(),
+            'realtime_enabled' => (bool) g7_core_settings('drivers.websocket_enabled', false)
+                && config('broadcasting.default') !== 'null',
         ];
     }
 
@@ -139,9 +153,15 @@ class SitemapManager
      */
     private function rebuildStore(): void
     {
+        // 스트림 삽입 건수를 누적해 running 단계의 "누적 URL 수" 를 표기합니다(D4).
+        // countVisible() 같은 사전 count 쿼리 없이 삽입 결과만 합산하므로 1.4M 에서도 부담이 없습니다.
+        $total = 0;
         foreach ($this->generator->getContributors() as $contributor) {
             try {
-                $this->repository->replaceAllForContributor(
+                // 현재 기여자 진입 시점의 누적치(직전 기여자들까지)를 표시합니다.
+                $this->progress->phase($contributor->getIdentifier(), $total);
+
+                $total += $this->repository->replaceAllForContributor(
                     $contributor->getIdentifier(),
                     $this->generator->streamContributorEntries($contributor),
                 );
