@@ -210,20 +210,104 @@ class SitemapXmlRendererTest extends TestCase
     }
 
     /**
-     * urlBlock: hreflang alternate 가 현재 N² 구조임을 고정한다 (S3 ⑮ 회귀 기준선)
+     * urlBlock: hreflang 이 켜져 있으면 로케일별 <url> 마다 전체 alternate 집합을 넣는다
      *
-     * 현재 구현은 <url> 블록마다 모든 로케일의 alternate + x-default 를 넣는다.
-     * 즉 로케일 L 개면 L × (L + 1) 개의 xhtml:link 가 생성된다 — 이것이 S3 ⑮ 가
-     * 해소하려는 N² 팽창이다. S3 에서 이 수치가 바뀌면 의도된 변경이므로
-     * 이 테스트를 함께 갱신할 것.
+     * sitemaps.org 규격상 각 로케일 <url> 은 자기 자신을 포함한 모든 로케일의 alternate 와
+     * x-default 를 가져야 한다. 따라서 로케일 L 개면 L × (L + 1) 개의 xhtml:link 가 나온다
+     * (3 로케일 → 12). S3 ⑮ 는 이 alternate 집합을 base URL 당 한 번만 계산해 로케일별
+     * <url> 에 재사용하도록 바꿨다 — 계산 비용은 L² 에서 L 로 줄지만 정상 구성의 출력은 불변이다.
      */
-    public function test_url_block_currently_emits_quadratic_hreflang_links(): void
+    public function test_url_block_emits_full_hreflang_set_per_locale(): void
     {
         $xml = $this->multiLocale(['ko', 'en', 'ja'])->urlBlock(['loc' => 'https://example.test/a']);
 
         // 3 로케일 → 3 블록 × (3 alternate + 1 x-default) = 12
         $this->assertSame(12, substr_count($xml, 'xhtml:link'));
         $this->assertSame(3, substr_count($xml, 'hreflang="x-default"'));
+    }
+
+    /**
+     * urlBlock: 모든 로케일 <url> 의 alternate 집합이 동일하다 (재사용 검증)
+     *
+     * base URL 당 한 번 계산한 alternate 를 각 <url> 에 재사용하므로,
+     * 로케일별 <url> 에 들어가는 alternate 링크 목록은 완전히 같아야 한다.
+     */
+    public function test_url_block_reuses_identical_alternate_set_across_locales(): void
+    {
+        $xml = $this->multiLocale(['ko', 'en', 'ja'])->urlBlock(['loc' => 'https://example.test/a']);
+
+        // <url> 블록별로 alternate 링크 집합을 추출해 모두 동일한지 확인한다.
+        preg_match_all('/<url>(.*?)<\/url>/s', $xml, $blocks);
+        $this->assertCount(3, $blocks[1]);
+
+        $alternateSets = array_map(static function (string $block): array {
+            preg_match_all('/<xhtml:link[^>]*\/>/', $block, $links);
+
+            return $links[0];
+        }, $blocks[1]);
+
+        $this->assertSame($alternateSets[0], $alternateSets[1]);
+        $this->assertSame($alternateSets[0], $alternateSets[2]);
+        $this->assertCount(4, $alternateSets[0], '각 <url> 은 3 로케일 alternate + x-default = 4 개를 가져야 합니다.');
+    }
+
+    /**
+     * urlBlock: hreflang 을 끄면 로케일별 <url> 은 유지하되 alternate 를 생략한다
+     */
+    public function test_url_block_omits_hreflang_when_disabled(): void
+    {
+        $renderer = new SitemapXmlRenderer(['ko', 'en', 'ja'], 'ko', hreflangEnabled: false);
+
+        $xml = $renderer->urlBlock(['loc' => 'https://example.test/a']);
+
+        // 로케일별 <url> 은 그대로 3개
+        $this->assertSame(3, substr_count($xml, '<url>'));
+        $this->assertSame(3, $renderer->urlBlockCount());
+        // 로케일 URL 은 유지된다
+        $this->assertStringContainsString('<loc>https://example.test/a?locale=en</loc>', $xml);
+        // alternate 링크는 없다
+        $this->assertStringNotContainsString('xhtml:link', $xml);
+    }
+
+    /**
+     * urlsetHeader: hreflang 을 끄면 xhtml 네임스페이스를 선언하지 않는다 (미사용 방지)
+     */
+    public function test_urlset_header_omits_xhtml_namespace_when_hreflang_disabled(): void
+    {
+        $header = (new SitemapXmlRenderer(['ko', 'en'], 'ko', hreflangEnabled: false))->urlsetHeader();
+
+        $this->assertStringNotContainsString('xmlns:xhtml', $header);
+    }
+
+    /**
+     * urlBlock: 로케일 수가 상한을 초과하면 alternate 를 생략한다 (N² 팽창 방지)
+     */
+    public function test_url_block_omits_hreflang_when_locale_count_exceeds_cap(): void
+    {
+        $locales = array_map(static fn (int $i): string => 'l'.$i, range(1, 6));
+        $renderer = new SitemapXmlRenderer($locales, 'l1', maxHreflang: 5);
+
+        $xml = $renderer->urlBlock(['loc' => 'https://example.test/a']);
+
+        // 로케일별 <url> 은 그대로 6개 (상한은 alternate 방출만 막는다)
+        $this->assertSame(6, substr_count($xml, '<url>'));
+        $this->assertStringNotContainsString('xhtml:link', $xml);
+        // 헤더도 xhtml 네임스페이스를 선언하지 않는다
+        $this->assertStringNotContainsString('xmlns:xhtml', $renderer->urlsetHeader());
+    }
+
+    /**
+     * urlBlock: 상한 이하 로케일 수는 alternate 를 정상 방출한다 (경계값)
+     */
+    public function test_url_block_emits_hreflang_at_cap_boundary(): void
+    {
+        $locales = array_map(static fn (int $i): string => 'l'.$i, range(1, 5));
+        $renderer = new SitemapXmlRenderer($locales, 'l1', maxHreflang: 5);
+
+        $xml = $renderer->urlBlock(['loc' => 'https://example.test/a']);
+
+        // 5 로케일 → 5 × (5 + 1) = 30
+        $this->assertSame(30, substr_count($xml, 'xhtml:link'));
     }
 
     /**

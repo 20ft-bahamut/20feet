@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Seo;
 
+use App\Seo\AbstractSitemapContributor;
 use App\Seo\Contracts\SitemapContributorInterface;
 use App\Seo\SitemapGenerator;
 use App\Seo\SitemapWriter;
@@ -647,6 +648,66 @@ class SitemapGeneratorTest extends TestCase
         $this->generator->generateToWriter($writer);
 
         $this->assertContains(url('/ok'), array_column($writer->entries, 'loc'));
+    }
+
+    // ─── drain capability 감지 (지연 스트리밍) ─────────────
+
+    /**
+     * getUrlsLazy 를 가진 기여자는 지연 경로로 소진된다 (getUrls 미호출).
+     *
+     * getUrls() 를 호출하면 예외를 던지는 기여자를 사용해, generateToWriter 가
+     * 지연 경로(getUrlsLazy)만 탄다는 것을 증명한다.
+     */
+    public function test_generate_to_writer_uses_lazy_path_for_capable_contributor(): void
+    {
+        Log::shouldReceive('warning')->zeroOrMoreTimes();
+
+        $contributor = new class extends AbstractSitemapContributor
+        {
+            public function getIdentifier(): string
+            {
+                return 'lazy-capable';
+            }
+
+            public function getUrls(): array
+            {
+                throw new \LogicException('getUrls() 는 지연 경로에서 호출되면 안 됩니다.');
+            }
+
+            public function getUrlsLazy(): iterable
+            {
+                yield ['url' => '/lazy/1'];
+                yield ['url' => '/lazy/2'];
+            }
+        };
+
+        $this->generator->registerContributor($contributor);
+
+        $writer = new SpySitemapWriter;
+        $this->generator->generateToWriter($writer);
+
+        $locs = array_column($writer->entries, 'loc');
+        $this->assertContains(url('/lazy/1'), $locs);
+        $this->assertContains(url('/lazy/2'), $locs);
+    }
+
+    /**
+     * getUrlsLazy 가 없는 raw 기여자는 기존 getUrls() 경로로 소진된다 (하위호환).
+     */
+    public function test_generate_to_writer_uses_get_urls_for_raw_contributor(): void
+    {
+        Log::shouldReceive('warning')->zeroOrMoreTimes();
+
+        $contributor = Mockery::mock(SitemapContributorInterface::class);
+        $contributor->shouldReceive('getIdentifier')->andReturn('raw-module');
+        $contributor->shouldReceive('getUrls')->once()->andReturn([['url' => '/raw/1']]);
+
+        $this->generator->registerContributor($contributor);
+
+        $writer = new SpySitemapWriter;
+        $this->generator->generateToWriter($writer);
+
+        $this->assertContains(url('/raw/1'), array_column($writer->entries, 'loc'));
     }
 
     // ─── 헬퍼 메서드 ──────────────────────────────────────

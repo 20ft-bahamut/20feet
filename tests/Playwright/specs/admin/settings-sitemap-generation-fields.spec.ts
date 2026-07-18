@@ -18,6 +18,7 @@ import { test, expect, issueToken, authenticatePage } from '../../fixtures/auth'
 
 const URLS_PER_FILE = '#field_sitemap_urls_per_file';
 const GZIP_ROW = '#field_sitemap_gzip';
+const HREFLANG_ROW = '#field_sitemap_hreflang_enabled';
 const ADVANCED_SITEMAP_CACHE = '#cache_seo_sitemap';
 
 /** 관리자 환경설정 SEO 탭 진입 */
@@ -60,6 +61,51 @@ test('@smoke #481 - SEO 탭에 Sitemap 분할 기준/압축 칸이 번역문과 
   await expect(gzipRow).toBeAttached();
   expect((await gzipRow.innerText()).trim()).not.toContain('$t:');
   await expect(gzipRow.locator('input[type="checkbox"]').first()).toBeAttached();
+
+  const hreflangRow = page.locator(HREFLANG_ROW);
+  await expect(hreflangRow).toBeAttached();
+  expect((await hreflangRow.innerText()).trim()).not.toContain('$t:');
+  await expect(hreflangRow.locator('input[type="checkbox"]').first()).toBeAttached();
+});
+
+// @scenario tab=seo, permitted=yes
+// @effects fields_persisted
+test('#481 - hreflang 토글을 바꿔 저장하면 성공하고 재진입 시 유지된다', async ({ page }) => {
+  const token = issueToken('core.settings.read', 'core.settings.update');
+  await authenticatePage(page, token);
+
+  await gotoSeoTab(page);
+
+  const toggle = page.locator(`${HREFLANG_ROW} input[type="checkbox"]`).first();
+  await expect(toggle).toBeAttached({ timeout: 15_000 });
+
+  const wasChecked = await toggle.isChecked();
+
+  // 토글을 반대 상태로 바꾼다
+  await toggle.click();
+  await expect(page.locator('#save_button')).toBeEnabled({ timeout: 10_000 });
+
+  const save = page.waitForResponse(
+    (r) => r.url().includes('/api/admin/settings') && r.request().method() === 'POST',
+    { timeout: 20_000 }
+  );
+  await page.locator('#save_button').click();
+
+  // 신규 boolean 키가 검증 규칙에 없으면 422 로 떨어진다 (배관 누락 회귀 가드)
+  expect((await save).status()).toBe(200);
+
+  await gotoSeoTab(page);
+  const reloaded = page.locator(`${HREFLANG_ROW} input[type="checkbox"]`).first();
+  await expect.poll(() => reloaded.isChecked(), { timeout: 15_000 }).toBe(!wasChecked);
+
+  // 원상 복구 (E2E 는 실제 환경 설정을 건드린다)
+  await reloaded.click();
+  const restore = page.waitForResponse(
+    (r) => r.url().includes('/api/admin/settings') && r.request().method() === 'POST',
+    { timeout: 20_000 }
+  );
+  await page.locator('#save_button').click();
+  expect((await restore).status()).toBe(200);
 });
 
 // @scenario tab=seo, permitted=yes

@@ -225,6 +225,7 @@ class SaveSettingsRequest extends FormRequest
             'seo.sitemap_gzip' => ['nullable', 'boolean'],
             'seo.sitemap_serve_stale_on_miss' => ['nullable', 'boolean'],
             'seo.sitemap_max_urls_per_contributor' => ['nullable', 'integer', 'min:0'],
+            'seo.sitemap_hreflang_enabled' => ['nullable', 'boolean'],
             'seo.sitemap_schedule' => ['nullable', 'string', Rule::in(['hourly', 'daily', 'weekly'])],
             'seo.sitemap_schedule_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/'],
             'seo.generator_enabled' => ['nullable', 'boolean'],
@@ -620,6 +621,7 @@ class SaveSettingsRequest extends FormRequest
             'seo.sitemap_serve_stale_on_miss.boolean' => __('validation.settings.sitemap_serve_stale_on_miss_boolean'),
             'seo.sitemap_max_urls_per_contributor.integer' => __('validation.settings.sitemap_max_urls_per_contributor_integer'),
             'seo.sitemap_max_urls_per_contributor.min' => __('validation.settings.sitemap_max_urls_per_contributor_min'),
+            'seo.sitemap_hreflang_enabled.boolean' => __('validation.settings.sitemap_hreflang_enabled_boolean'),
             'seo.sitemap_schedule.in' => __('validation.settings.sitemap_schedule_invalid'),
             'seo.sitemap_schedule_time.regex' => __('validation.settings.sitemap_schedule_time_invalid'),
 

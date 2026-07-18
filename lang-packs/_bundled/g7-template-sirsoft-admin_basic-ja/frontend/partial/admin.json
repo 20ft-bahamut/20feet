@@ -1433,7 +1433,9 @@
       "sitemap_urls_per_file": "Sitemap ファイルあたりの URL 数",
       "sitemap_urls_per_file_hint": "URL がこの数を超えると sitemap ファイルが複数に分割され、インデックスファイルが一緒に作成されます — 最小 1000 個、最大 50000 個（検索エンジン仕様上限）",
       "sitemap_gzip": "Sitemap 圧縮（gzip）",
-      "sitemap_gzip_desc": "分割された sitemap ファイルを圧縮して送信量を削減します。インデックスファイルは圧縮しません。"
+      "sitemap_gzip_desc": "分割された sitemap ファイルを圧縮して送信量を削減します。インデックスファイルは圧縮しません。",
+      "sitemap_hreflang_enabled": "多言語代替リンク (hreflang)",
+      "sitemap_hreflang_enabled_desc": "多言語サイトでURLごとに各言語バージョンを指す hreflang 代替リンクを挿入します。オフにするとリンクを省略してサイトマップサイズを削減します。"
     },
     "security": {
       "title": "セキュリティ 設定",

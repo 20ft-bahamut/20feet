@@ -939,6 +939,7 @@ return [
         'identity_max_attempts_integer' => '最大試行回数は整数である必要があります。',
         'identity_max_attempts_min' => '最大試行回数は最小1回以上である必要があります。',
         'identity_max_attempts_max' => '最大試行回数は最大20回を超えることはできません。',
+        'sitemap_hreflang_enabled_boolean' => 'Sitemap 多言語代替リンク(hreflang) 設定は true または false 値である必要があります。',
     ],
     'identity_policy' => [
         'key_required' => 'ポリシーキーを入力してください。',

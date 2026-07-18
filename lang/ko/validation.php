@@ -910,6 +910,7 @@ return [
         'sitemap_serve_stale_on_miss_boolean' => '이전 Sitemap 제공 설정은 true 또는 false 값이어야 합니다.',
         'sitemap_max_urls_per_contributor_integer' => '수집기당 최대 URL 수는 정수여야 합니다.',
         'sitemap_max_urls_per_contributor_min' => '수집기당 최대 URL 수는 0 이상이어야 합니다.',
+        'sitemap_hreflang_enabled_boolean' => 'Sitemap 다국어 대체 링크(hreflang) 설정은 true 또는 false 값이어야 합니다.',
         'sitemap_schedule_invalid' => '유효한 Sitemap 생성 주기를 선택해주세요.',
         'sitemap_schedule_time_invalid' => 'Sitemap 생성 시각은 HH:mm 형식이어야 합니다.',
 

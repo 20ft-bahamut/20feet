@@ -965,6 +965,7 @@ return [
         'sitemap_serve_stale_on_miss_boolean' => 'Serving the previous sitemap setting must be true or false.',
         'sitemap_max_urls_per_contributor_integer' => 'Maximum URLs per contributor must be an integer.',
         'sitemap_max_urls_per_contributor_min' => 'Maximum URLs per contributor must be at least 0.',
+        'sitemap_hreflang_enabled_boolean' => 'The sitemap hreflang alternate links setting must be true or false.',
         'sitemap_schedule_invalid' => 'Please select a valid sitemap generation schedule.',
         'sitemap_schedule_time_invalid' => 'Sitemap generation time must be in HH:mm format.',
 

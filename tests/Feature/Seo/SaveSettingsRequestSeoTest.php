@@ -489,6 +489,30 @@ class SaveSettingsRequestSeoTest extends TestCase
             ->assertJsonValidationErrors(['seo.sitemap_gzip']);
     }
 
+    /**
+     * hreflang 사용 여부가 boolean 으로 저장되는지 확인
+     */
+    public function test_sitemap_hreflang_enabled_is_saved(): void
+    {
+        $this->postSeoSettings(['sitemap_hreflang_enabled' => false])->assertStatus(200);
+
+        $seo = $this->storedSettings('seo');
+        $this->assertFalse((bool) $seo['sitemap_hreflang_enabled']);
+    }
+
+    /**
+     * hreflang 사용 여부가 boolean 이 아니면 422 응답
+     */
+    public function test_sitemap_hreflang_enabled_non_boolean_fails_validation(): void
+    {
+        $response = $this->postSeoSettings([
+            'sitemap_hreflang_enabled' => 'maybe',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['seo.sitemap_hreflang_enabled']);
+    }
+
     // ========================================
     // 고급 탭 Sitemap 캐시 기준값 (D19 의 메인 값)
     // ========================================

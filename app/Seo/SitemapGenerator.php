@@ -79,11 +79,19 @@ class SitemapGenerator
     /**
      * 기여자로부터 URL 항목을 순회 가능한 형태로 가져옵니다.
      *
+     * 지연 스트리밍 capability(AbstractSitemapContributor 상속 또는 getUrlsLazy() 보유)를
+     * 감지해, 있으면 한 건씩 yield 되는 제너레이터를 사용합니다. 없으면 기존 getUrls()
+     * 배열을 그대로 순회합니다(제3자 raw 구현체 하위호환).
+     *
      * @param  SitemapContributorInterface  $contributor  Sitemap 기여자
      * @return iterable<array<string, mixed>> URL 항목 순회자
      */
     private function drain(SitemapContributorInterface $contributor): iterable
     {
+        if ($contributor instanceof AbstractSitemapContributor || method_exists($contributor, 'getUrlsLazy')) {
+            return $contributor->getUrlsLazy();
+        }
+
         return $contributor->getUrls();
     }
 
