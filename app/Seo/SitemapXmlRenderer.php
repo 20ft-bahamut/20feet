@@ -2,6 +2,7 @@
 
 namespace App\Seo;
 
+use App\Enums\SitemapChangeFreq;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -270,8 +271,10 @@ final class SitemapXmlRenderer
             $xml .= '    <lastmod>'.$this->escape((string) $entry['lastmod']).'</lastmod>'."\n";
         }
 
-        if (! empty($entry['changefreq'])) {
-            $xml .= '    <changefreq>'.$this->escape((string) $entry['changefreq']).'</changefreq>'."\n";
+        // changefreq 는 sitemaps.org 폐쇄 어휘 — Enum 으로 정규화해 비표준 값은 출력하지 않는다.
+        $changefreq = SitemapChangeFreq::normalize($entry['changefreq'] ?? null);
+        if ($changefreq !== null) {
+            $xml .= '    <changefreq>'.$changefreq.'</changefreq>'."\n";
         }
 
         if (isset($entry['priority'])) {

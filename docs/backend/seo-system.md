@@ -612,6 +612,10 @@ class EcommerceSitemapContributor extends AbstractSitemapContributor
 
 `SitemapGenerator::drain()` 이 `instanceof AbstractSitemapContributor || method_exists($c, 'getUrlsLazy')` 로 capability 를 감지해 지연 경로를 우선합니다.
 
+#### changefreq 는 `App\Enums\SitemapChangeFreq` (폐쇄 어휘)
+
+entry 의 `changefreq` 는 sitemaps.org 의 폐쇄 어휘(`always`/`hourly`/`daily`/`weekly`/`monthly`/`yearly`/`never`)로, `App\Enums\SitemapChangeFreq` 가 SSoT 입니다. 기여자·리스너·정적 URL 은 리터럴 문자열 대신 `SitemapChangeFreq::Weekly->value` 처럼 case 값을 사용해 오타를 작성 시점에 잡습니다. 규격에 없는 값은 저장 경계(`SitemapIndexer`)와 렌더 경계(`SitemapXmlRenderer`)에서 `SitemapChangeFreq::normalize()` 로 정규화되어 `null` 로 떨어지므로 사이트맵 XML 에 비표준 값이 출력되지 않습니다(대소문자·앞뒤 공백은 흡수). 제3자 raw 구현체가 임의 문자열을 emit 해도 이 두 경계에서 안전하게 걸러집니다.
+
 ### ServiceProvider 등록
 
 ```php

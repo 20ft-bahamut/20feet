@@ -3,6 +3,7 @@
 namespace App\Seo;
 
 use App\Contracts\Repositories\SitemapUrlRepositoryInterface;
+use App\Enums\SitemapChangeFreq;
 use App\Extension\HookManager;
 
 /**
@@ -63,7 +64,8 @@ class SitemapIndexer
             $normalized[] = [
                 'loc' => $loc,
                 'lastmod' => $entry['lastmod'] ?? null,
-                'changefreq' => $entry['changefreq'] ?? null,
+                // 폐쇄 어휘로 정규화 — 비표준 값이 sitemap_urls 에 저장되는 것을 차단.
+                'changefreq' => SitemapChangeFreq::normalize($entry['changefreq'] ?? null),
                 'priority' => $entry['priority'] ?? null,
                 'contributor' => $contributor,
             ];

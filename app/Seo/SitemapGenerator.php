@@ -2,6 +2,7 @@
 
 namespace App\Seo;
 
+use App\Enums\SitemapChangeFreq;
 use App\Extension\TemplateManager;
 use App\Seo\Contracts\SitemapContributorInterface;
 use App\Services\TemplateService;
@@ -290,7 +291,7 @@ class SitemapGenerator
 
                 $urls[] = [
                     'loc' => url($routePath),
-                    'changefreq' => 'weekly',
+                    'changefreq' => SitemapChangeFreq::Weekly->value,
                     'priority' => 0.5,
                 ];
             }

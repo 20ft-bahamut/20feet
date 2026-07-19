@@ -2,6 +2,7 @@
 
 namespace Modules\Sirsoft\Page\Seo;
 
+use App\Enums\SitemapChangeFreq;
 use App\Seo\AbstractSitemapContributor;
 use Illuminate\Support\Facades\Log;
 use Modules\Sirsoft\Page\Repositories\Contracts\PageRepositoryInterface;
@@ -60,7 +61,7 @@ class PageSitemapContributor extends AbstractSitemapContributor
             yield [
                 'url' => "/page/{$page->slug}",
                 'lastmod' => $page->updated_at?->toW3cString(),
-                'changefreq' => 'monthly',
+                'changefreq' => SitemapChangeFreq::Monthly->value,
                 'priority' => 0.5,
                 'resource_type' => 'page',
                 'resource_id' => (string) $page->id,

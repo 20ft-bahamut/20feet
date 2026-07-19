@@ -336,18 +336,45 @@ class SitemapXmlRendererTest extends TestCase
     }
 
     /**
-     * urlBlock: 메타 필드의 XML 특수문자도 이스케이프한다
+     * urlBlock: 자유 형식 메타 필드(lastmod)의 XML 특수문자를 이스케이프한다
+     *
+     * changefreq 는 폐쇄 어휘(SitemapChangeFreq)로 정규화되므로 특수문자가 유입될 수 없다
+     * (아래 test_url_block_omits_invalid_changefreq 로 별도 검증).
      */
     public function test_url_block_escapes_special_characters_in_meta_fields(): void
     {
         $xml = $this->singleLocale()->urlBlock([
             'loc' => 'https://example.test/a',
             'lastmod' => '2026 & later',
-            'changefreq' => 'da<ily',
         ]);
 
         $this->assertStringContainsString('<lastmod>2026 &amp; later</lastmod>', $xml);
-        $this->assertStringContainsString('<changefreq>da&lt;ily</changefreq>', $xml);
+    }
+
+    /**
+     * urlBlock: 폐쇄 어휘(sitemaps.org)에 없는 changefreq 는 태그를 생략한다 (비표준 값 유입 차단)
+     */
+    public function test_url_block_omits_invalid_changefreq(): void
+    {
+        $xml = $this->singleLocale()->urlBlock([
+            'loc' => 'https://example.test/a',
+            'changefreq' => 'biweekly',
+        ]);
+
+        $this->assertStringNotContainsString('<changefreq>', $xml);
+    }
+
+    /**
+     * urlBlock: changefreq 대소문자·공백을 정규화해 표준 소문자로 출력한다
+     */
+    public function test_url_block_normalizes_changefreq_casing(): void
+    {
+        $xml = $this->singleLocale()->urlBlock([
+            'loc' => 'https://example.test/a',
+            'changefreq' => '  WEEKLY ',
+        ]);
+
+        $this->assertStringContainsString('<changefreq>weekly</changefreq>', $xml);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Modules\Sirsoft\Page\Listeners;
 
 use App\Contracts\Extension\CacheInterface;
 use App\Contracts\Extension\HookListenerInterface;
+use App\Enums\SitemapChangeFreq;
 use App\Jobs\GenerateSitemapJob;
 use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Seo\SitemapIndexer;
@@ -137,7 +138,7 @@ class SeoPageCacheListener implements HookListenerInterface
                 $indexer->indexResource('page', $page->id, 'sirsoft-page', [[
                     'url' => "/page/{$page->slug}",
                     'lastmod' => $page->updated_at?->toW3cString(),
-                    'changefreq' => 'monthly',
+                    'changefreq' => SitemapChangeFreq::Monthly->value,
                     'priority' => 0.5,
                 ]]);
             } else {
