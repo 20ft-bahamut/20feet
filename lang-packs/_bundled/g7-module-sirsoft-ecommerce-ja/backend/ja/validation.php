@@ -845,7 +845,6 @@ return [
         'item_not_found' => 'カート商品が見つかりません。',
         'items_required' => 'カートに追加する商品を選択してください。',
         'items_min' => '最低1つ以上の商品を選択してください。',
-        'option_values_not_found' => '該当するオプション組み合わせが見つかりません。',
     ],
     'wishlist' => [
         'product_id_required' => '商品を選択してください。',
