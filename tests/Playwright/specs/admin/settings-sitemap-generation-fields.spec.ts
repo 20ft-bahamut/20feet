@@ -254,3 +254,44 @@ test('#481 - SEO 탭 진입 시 sitemap 상태 API 가 진행상황/실시간 �
   expect(body?.data).toHaveProperty('progress');
   expect(body?.data).toHaveProperty('last_updated_at');
 });
+
+// @scenario tab=seo, permitted=yes
+// @effects regenerate_is_async
+test('#481 - 재생성 후 실시간/폴링 모드에 맞게 진행상황이 갱신된다', async ({ page }) => {
+  const token = issueToken('core.settings.read', 'core.settings.update');
+  await authenticatePage(page, token);
+
+  // 상태(GET) 응답을 가로채 실시간 여부 판정 + 재조회 횟수 카운트 (앱의 인증 요청 기준)
+  let realtimeEnabled: boolean | null = null;
+  let statusGets = 0;
+  page.on('response', async (r) => {
+    if (r.url().includes('/api/admin/seo/sitemap/status') && r.request().method() === 'GET') {
+      statusGets += 1;
+      if (realtimeEnabled === null) {
+        try { realtimeEnabled = (await r.json())?.data?.realtime_enabled === true; } catch { /* ignore */ }
+      }
+    }
+  });
+
+  await gotoSeoTab(page);
+  await expect.poll(() => realtimeEnabled, { timeout: 20_000 }).not.toBeNull();
+
+  // 여기부터 재생성 이후의 폴링만 센다
+  statusGets = 0;
+  await page.locator('#sitemap_last_updated_block button').first().click();
+  await page.waitForResponse((r) => r.url().includes('/api/admin/seo/sitemap/regenerate'), { timeout: 20_000 });
+
+  const pollingMode = realtimeEnabled === false;
+
+  // 8초 관찰
+  await page.waitForTimeout(8_000);
+
+  if (pollingMode) {
+    // Reverb OFF: startInterval 폴링이 상태를 반복 재조회해야 한다.
+    // 회귀(폴링 미시작) 시 재생성 직후 refetch 1회로 멈춰 배지가 갱신되지 않는다.
+    expect(statusGets).toBeGreaterThanOrEqual(2);
+  } else {
+    // 실시간(WebSocket) 모드면 폴링하지 않는다 — 재생성 직후 refetch 수준
+    expect(statusGets).toBeLessThanOrEqual(2);
+  }
+});

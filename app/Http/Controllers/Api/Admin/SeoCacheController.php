@@ -12,6 +12,7 @@ use App\Seo\SitemapManager;
 use App\Seo\SitemapProgress;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * SEO 캐시 관리 컨트롤러
@@ -115,7 +116,8 @@ class SeoCacheController extends AdminBaseController
         }
 
         // 관리자 수동 재생성은 항상 전체(Full) — 현 생성 상태와 무관하게 전량 재생성 (D7)
-        GenerateSitemapJob::dispatch(SitemapGenerationMode::Full);
+        // 실행한 관리자 ID 를 함께 실어, 완료/실패 시 그 관리자에게만 알림이 발송되게 한다.
+        GenerateSitemapJob::dispatch(SitemapGenerationMode::Full, Auth::id());
 
         // 큐 대기 중에도 UI 가 'queued' 를 표시하도록 즉시 기록
         $this->sitemapProgress->start(SitemapGenerationMode::Full->value);

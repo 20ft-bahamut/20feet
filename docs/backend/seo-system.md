@@ -689,6 +689,10 @@ sitemap/_tmp/              생성 중 임시 디렉토리 (커밋 시 정리)
 
 봇 요청 스레드에서 동기 생성하면 대용량(수백만 URL)에서 메모리 초과·타임아웃이 발생하므로 생성은 항상 큐가 담당합니다. 잡은 유니크 락(`seo-sitemap`)을 쓰므로 캐시 미스가 몰려도 동시에 여러 건이 실행되지 않습니다.
 
+**전용 큐(`GenerateSitemapJob::QUEUE = 'sitemap'`)**: 사이트맵 생성 잡은 `sitemap` 전용 큐로 라우팅됩니다. 배포 시 이 큐 워커를 별도로 띄우되 **워커를 1개만** 배치해야 합니다(`php artisan queue:work --queue=sitemap` — supervisor 프로그램을 기본 큐와 분리해 등록). 이유: ①긴 생성 작업이 기본(`default`) 큐의 방송·알림을 막지 않아 진행상황이 실시간으로 흐르고, ②워커가 1개뿐이라 잡이 동시에 두 번 실행되지 않습니다(큐 `retry_after` 가 잡 실행보다 짧아도 단일 워커라 재예약 중복 실행이 발생하지 않음). `sitemap` 큐 워커가 없으면 재생성 잡이 처리되지 않으니 주의합니다.
+
+**완료/실패 알림**: 관리자 수동 재생성(위 API)은 실행한 관리자 ID 를 잡에 실어, 완료 시 `sitemap_regenerated`, **최종 실패(재시도 소진, `Job::failed()`) 시** `sitemap_regenerate_failed` 알림을 그 관리자에게 발송합니다(기본 채널: 앱 내 알림). 매 시도 실패마다 발화하는 `core.seo.sitemap.after_regenerate_failed` 훅이 아니라 최종 실패 시 1회만 발화하는 `core.seo.sitemap.regenerate_failed_final` 훅에 알림이 연결되어, 재시도 중 실패가 반복되거나 결국 성공해도 실패 알림이 중복/오발송되지 않습니다. 스케줄러·증분·봇 재생성은 실행 관리자가 없어 알림을 보내지 않습니다.
+
 **분할 기준**: `sitemap_urls_per_file`(기본 50000) 또는 파일 크기 임계(`SitemapWriter::MAX_FILE_BYTES`, 45MB) 중 먼저 도달하는 쪽. 둘 다 sitemaps.org 프로토콜 제한(50,000 URL / 50MB)을 지키기 위한 것입니다.
 
 **관리자 수동 재생성**: `POST /api/admin/seo/sitemap/regenerate` 는 큐에 `mode=full` 로 예약만 하고 즉시 진행상황(`getStatus()`)을 응답합니다. 완료 여부는 진행상황(아래) 또는 `sitemap_last_updated_at` 갱신으로 확인합니다.

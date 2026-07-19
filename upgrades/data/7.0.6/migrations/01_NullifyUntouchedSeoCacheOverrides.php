@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Upgrades\Data\V7_1_0\Migrations;
+namespace App\Upgrades\Data\V7_0_6\Migrations;
 
 use App\Extension\Upgrade\DataMigration;
 use App\Extension\UpgradeContext;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
  *   `g7_core_settings('cache.X', g7_core_settings('seo.Y', 기본값))` 형태로 cache 를
  *   **항상** 우선시켜 SEO 탭 입력이 조용히 무시되었다(운영자가 저장해도 무효).
  *
- * 7.1.0 의 새 의미:
+ * 7.0.6 의 새 의미:
  *   고급 탭 = 메인, SEO 탭에 **별도 지정이 있으면** 그것이 오버라이드.
  *   "별도 지정" 판정은 null 여부로 하므로 미설정 상태를 표현할 수 있어야 한다.
  *
@@ -86,10 +86,10 @@ final class NullifyUntouchedSeoCacheOverrides implements DataMigration
         } catch (\Throwable $e) {
             // 업그레이드 중단 금지 — 설정 정리 실패가 업그레이드 전체를 막지 않는다.
             $context->logger->warning(sprintf(
-                '[7.1.0] NullifyUntouchedSeoCacheOverrides 실패 (seo.json 보존, 계속 진행): %s',
+                '[7.0.6] NullifyUntouchedSeoCacheOverrides 실패 (seo.json 보존, 계속 진행): %s',
                 $e->getMessage(),
             ));
-            Log::warning('7.1.0 NullifyUntouchedSeoCacheOverrides 실패', [
+            Log::warning('7.0.6 NullifyUntouchedSeoCacheOverrides 실패', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -129,20 +129,20 @@ final class NullifyUntouchedSeoCacheOverrides implements DataMigration
 
         foreach ($kept as $key => $value) {
             $context->logger->info(sprintf(
-                '[7.1.0] seo.%s = %s 는 옛 기본값과 달라 오버라이드로 보존 — 이제부터 실제 적용됩니다',
+                '[7.0.6] seo.%s = %s 는 옛 기본값과 달라 오버라이드로 보존 — 이제부터 실제 적용됩니다',
                 $key,
                 var_export($value, true),
             ));
         }
 
         if ($cleared === []) {
-            $context->logger->info('[7.1.0] SEO 캐시 설정 — 비울 대상 없음 (이미 이행 완료이거나 전부 오버라이드)');
+            $context->logger->info('[7.0.6] SEO 캐시 설정 — 비울 대상 없음 (이미 이행 완료이거나 전부 오버라이드)');
 
             return;
         }
 
         $this->writeSeoSettings($settings);
-        $context->logger->info('[7.1.0] SEO 캐시 설정 — 미설정(null)으로 비운 키: '.implode(', ', $cleared));
+        $context->logger->info('[7.0.6] SEO 캐시 설정 — 미설정(null)으로 비운 키: '.implode(', ', $cleared));
     }
 
     /**
@@ -154,7 +154,7 @@ final class NullifyUntouchedSeoCacheOverrides implements DataMigration
     private function readSeoSettings(UpgradeContext $context): ?array
     {
         if (! Storage::disk('settings')->exists(self::SEO_SETTINGS_FILE)) {
-            $context->logger->info('[7.1.0] seo.json 부재 — 정리 대상 없음, skip');
+            $context->logger->info('[7.0.6] seo.json 부재 — 정리 대상 없음, skip');
 
             return null;
         }
@@ -163,7 +163,7 @@ final class NullifyUntouchedSeoCacheOverrides implements DataMigration
 
         if (! is_array($decoded)) {
             // 손상 파일을 덮어쓰지 않는다 (파괴 금지)
-            $context->logger->warning('[7.1.0] seo.json 파싱 실패 — 파일 보존하고 skip');
+            $context->logger->warning('[7.0.6] seo.json 파싱 실패 — 파일 보존하고 skip');
 
             return null;
         }

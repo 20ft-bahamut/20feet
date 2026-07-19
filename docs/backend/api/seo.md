@@ -202,6 +202,8 @@ sitemap.xml 재생성을 큐에 예약합니다. 관리자 수동 재생성은 �
 
 예약 직후 진행상황이 `queued` 로 기록되며, 이후 진행 단계는 `GET /api/admin/seo/sitemap/status` 로 조회합니다.
 
+이 엔드포인트로 접수된 **관리자 수동 재생성**은 실행한 관리자의 ID 를 잡에 실어, 생성 완료 시 `sitemap_regenerated`, 실패 시 `sitemap_regenerate_failed` 알림이 **그 관리자에게만** 발송됩니다(기본 채널: 앱 내 알림). 스케줄러·리소스 변경(증분)·봇 캐시 미스로 유발된 재생성은 실행 관리자가 없어 알림을 보내지 않습니다. 알림 정의는 `config/core.php` 의 `notification_definitions` 에 있으며 관리자 알림 설정에서 채널을 조정할 수 있습니다.
+
 ### GET /api/admin/seo/sitemap/status
 <!-- @generated:start:api.admin.seo.sitemap.status -->
 - **라우트명**: `api.admin.seo.sitemap.status`

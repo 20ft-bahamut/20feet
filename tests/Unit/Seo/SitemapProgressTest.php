@@ -121,10 +121,33 @@ class SitemapProgressTest extends TestCase
         $this->progress->start('full');
 
         Event::assertDispatched(GenericBroadcastEvent::class, function ($event) {
+            // payload 는 상태 API 봉투와 동형: 최상위 data 안에 progress/realtime_enabled
+            // (target_source 가 대상 소스를 통째 교체해도 `sitemap_status.data.*` 바인딩 유지)
             return $event->channel === 'core.admin.seo.sitemap'
                 && $event->eventName === 'sitemap.progress.updated'
-                && ($event->payload['realtime_enabled'] ?? null) === true
-                && ($event->payload['progress']['status'] ?? null) === 'queued';
+                && ($event->payload['data']['realtime_enabled'] ?? null) === true
+                && ($event->payload['data']['progress']['status'] ?? null) === 'queued'
+                && array_key_exists('last_updated_at', $event->payload['data']);
+        });
+    }
+
+    /**
+     * 완료 방송은 방금 커밋된 생성 시각을 data.last_updated_at 으로 실어 "마지막 생성"을 실시간 갱신한다.
+     */
+    public function test_complete_broadcast_carries_new_last_updated_at(): void
+    {
+        $this->enableReverb();
+        Event::fake([GenericBroadcastEvent::class]);
+
+        $this->progress->complete([
+            'url_count' => 720,
+            'child_count' => 1,
+            'generated_at' => '2026-07-19T00:00:00+00:00',
+        ]);
+
+        Event::assertDispatched(GenericBroadcastEvent::class, function ($event) {
+            return ($event->payload['data']['last_updated_at'] ?? null) === '2026-07-19T00:00:00+00:00'
+                && ($event->payload['data']['progress']['status'] ?? null) === 'completed';
         });
     }
 

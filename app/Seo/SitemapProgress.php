@@ -135,7 +135,8 @@ final class SitemapProgress
         $state['urls'] = $meta['url_count'] ?? ($state['urls'] ?? 0);
         $state['message'] = null;
 
-        $this->persist($state, broadcast: true);
+        // 완료 시점엔 방금 커밋된 새 생성 시각을 실어 "마지막 생성"이 실시간 갱신되게 한다.
+        $this->persist($state, broadcast: true, lastUpdatedAt: $meta['generated_at'] ?? null);
     }
 
     /**
@@ -189,22 +190,39 @@ final class SitemapProgress
     /**
      * 진행상황을 캐시에 기록하고, 필요 시 관리자 채널로 방송합니다.
      *
-     * 방송 payload 는 상태 API 응답의 `data` 형태(`progress` + `realtime_enabled`)와 동형입니다.
-     * websocket 데이터소스가 `target_source` 로 대상 소스를 통째로 교체하므로, 동형이어야
-     * 형제 필드(realtime_enabled)를 잃지 않고 UI 바인딩이 유지됩니다(D27).
+     * 방송 payload 는 상태 API 응답 봉투와 동형입니다 — 최상위 `data` 봉투 안에
+     * `progress`/`last_updated_at`/`realtime_enabled` 를 담습니다(대시보드 방송과 동일 규약).
+     * websocket 데이터소스가 `target_source` 로 대상 소스의 저장값을 통째 교체하므로, 봉투
+     * 형태여야 교체 후에도 템플릿의 `sitemap_status.data.*` 바인딩이 유지됩니다(D27).
      *
      * @param  array<string, mixed>  $state  진행상황 상태
      * @param  bool  $broadcast  방송 여부(스로틀 판정 결과)
+     * @param  string|null  $lastUpdatedAt  이 방송에 실을 마지막 생성 시각(완료 시 새 시각, 그 외 직전 값)
      */
-    private function persist(array $state, bool $broadcast): void
+    private function persist(array $state, bool $broadcast, ?string $lastUpdatedAt = null): void
     {
         $this->cache->put(self::KEY, $state, self::TTL);
 
-        if ($broadcast) {
-            HookManager::broadcast(self::CHANNEL, self::EVENT, [
-                'realtime_enabled' => true,
-                'progress' => $state,
-            ]);
+        if (! $broadcast) {
+            return;
         }
+
+        // 미지정(진행 중 단계)이면 직전 완료 시각(settings)을 싣는다. target_source 가 대상 소스
+        // data 를 통째 교체하므로 매 방송마다 형제 필드를 온전히 실어야 "마지막 생성"이 유지된다.
+        if ($lastUpdatedAt === null) {
+            $stored = (string) g7_core_settings('seo.sitemap_last_updated_at', '');
+            $lastUpdatedAt = $stored !== '' ? $stored : null;
+        }
+
+        // 방송 payload 는 상태 API 응답 봉투와 동형이어야 한다(대시보드 방송과 동일 규약).
+        // 최상위 data 봉투 안에 progress/last_updated_at/realtime_enabled 를 담아야
+        // target_source 교체 후에도 템플릿의 `sitemap_status.data.*` 바인딩이 유지된다.
+        HookManager::broadcast(self::CHANNEL, self::EVENT, [
+            'data' => [
+                'last_updated_at' => $lastUpdatedAt,
+                'progress' => $state,
+                'realtime_enabled' => true,
+            ],
+        ]);
     }
 }

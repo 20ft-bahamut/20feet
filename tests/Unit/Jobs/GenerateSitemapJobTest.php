@@ -48,6 +48,20 @@ class GenerateSitemapJobTest extends TestCase
     }
 
     /**
+     * 전용 'sitemap' 큐로 라우팅되는지 확인합니다.
+     *
+     * default 큐와 분리해, 긴 생성 작업이 방송/알림을 막지 않고(실시간 진행상황),
+     * 이 큐 워커 1개 제약으로 동시 중복 생성을 차단합니다.
+     */
+    public function test_job_routes_to_dedicated_sitemap_queue(): void
+    {
+        $job = new GenerateSitemapJob;
+
+        $this->assertSame('sitemap', GenerateSitemapJob::QUEUE);
+        $this->assertSame('sitemap', $job->queue);
+    }
+
+    /**
      * ShouldBeUnique 를 구현하여 동시 실행을 막는지 확인합니다.
      *
      * 봇 요청 캐시 미스마다 dispatch 되어도 큐에 한 건만 남아야 합니다.

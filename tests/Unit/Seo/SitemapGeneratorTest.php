@@ -42,6 +42,12 @@ class SitemapGeneratorTest extends TestCase
         Config::set('app.locale', 'ko');
         Config::set('app.supported_locales', ['ko']);
 
+        // hreflang alternate 방출을 기본값(true)으로 고정한다. SitemapXmlRenderer::fromConfig()
+        // 는 g7_core_settings('seo.sitemap_hreflang_enabled') 를 읽는데, 이 값은 부팅 시
+        // storage/app/settings/seo.json 으로 적재되며 settings 디스크 fake 의 영향을 받지 않는다.
+        // 실행 머신의 영속 설정에 다국어 hreflang 검증 결과가 좌우되지 않도록 명시 고정한다.
+        Config::set('g7_settings.core.seo.sitemap_hreflang_enabled', true);
+
         $this->routeResolver = Mockery::mock(TemplateRouteResolver::class);
         $this->templateService = Mockery::mock(TemplateService::class);
 

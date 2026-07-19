@@ -2,15 +2,15 @@
 
 namespace Tests\Unit\Upgrades;
 
-require_once __DIR__.'/../../../upgrades/data/7.1.0/migrations/01_NullifyUntouchedSeoCacheOverrides.php';
+require_once __DIR__.'/../../../upgrades/data/7.0.6/migrations/01_NullifyUntouchedSeoCacheOverrides.php';
 
 use App\Extension\UpgradeContext;
-use App\Upgrades\Data\V7_1_0\Migrations\NullifyUntouchedSeoCacheOverrides;
+use App\Upgrades\Data\V7_0_6\Migrations\NullifyUntouchedSeoCacheOverrides;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
- * 7.1.0 업그레이드 스텝 — SEO 캐시 오버라이드 이행 (결정 D19)
+ * 7.0.6 업그레이드 스텝 — SEO 캐시 오버라이드 이행 (결정 D19)
  *
  * 판정 규칙:
  *   옛 기본값과 같으면 "안 건드린 것" → null(미설정)로 비움
@@ -40,7 +40,7 @@ class NullifyUntouchedSeoCacheOverridesTest extends TestCase
      */
     private function context(): UpgradeContext
     {
-        return new UpgradeContext('7.0.5', '7.1.0', '7.1.0');
+        return new UpgradeContext('7.0.5', '7.0.6', '7.0.6');
     }
 
     /**

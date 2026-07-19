@@ -48,10 +48,12 @@ class SitemapManager
      * - auto: 저장소가 비어 있으면 full, 아니면 incremental.
      *
      * @param  SitemapGenerationMode  $mode  재생성 모드
+     * @param  int|null  $triggeredBy  이 재생성을 유발한 관리자 사용자 ID(관리자 수동 재생성만 지정, 스케줄러/증분/봇 = null).
+     *                                 완료/실패 훅에 함께 전달되어 알림 발송 대상(수동 실행자) 판정에 쓰입니다.
      * @return array{success: bool, status: string, message?: string, data?: array<string, mixed>}
      *                                                                                             status: 'updated' | 'disabled' | 'failed'
      */
-    public function regenerate(SitemapGenerationMode $mode = SitemapGenerationMode::Auto): array
+    public function regenerate(SitemapGenerationMode $mode = SitemapGenerationMode::Auto, ?int $triggeredBy = null): array
     {
         $enabled = (bool) g7_core_settings('seo.sitemap_enabled', true);
         if (! $enabled) {
@@ -103,7 +105,7 @@ class SitemapManager
 
             $this->progress->complete($meta);
 
-            HookManager::doAction('core.seo.sitemap.after_regenerate', $result);
+            HookManager::doAction('core.seo.sitemap.after_regenerate', $result, $triggeredBy);
 
             return $result;
         } catch (\Throwable $e) {
@@ -119,7 +121,7 @@ class SitemapManager
                 'message' => __('seo.sitemap_generate_failed', ['error' => $e->getMessage()]),
             ];
 
-            HookManager::doAction('core.seo.sitemap.after_regenerate_failed', $result);
+            HookManager::doAction('core.seo.sitemap.after_regenerate_failed', $result, $triggeredBy);
 
             return $result;
         }

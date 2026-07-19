@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\SitemapGenerationMode;
+use App\Extension\HookManager;
 use App\Seo\SitemapManager;
 use App\Seo\SitemapProgress;
 use Illuminate\Bus\Queueable;
@@ -25,6 +26,15 @@ use Illuminate\Support\Facades\Log;
 class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * @var string 전용 큐 이름 — 대용량·장시간 사이트맵 생성을 default 큐에서 분리한다.
+     *
+     * 이 큐에는 반드시 워커를 1개만 배치한다(동시 중복 생성 방지). 그러면
+     * 긴 생성 작업이 default 큐의 방송/알림을 막지 않아 진행상황이 실시간으로 흐르고,
+     * 워커가 1개뿐이라 잡이 동시에 두 번 실행되지 않는다.
+     */
+    public const QUEUE = 'sitemap';
 
     /**
      * @var int 최대 재시도 횟수
@@ -50,8 +60,15 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
      * GenerateSitemapJob 생성자
      *
      * @param  SitemapGenerationMode  $mode  재생성 모드 — SitemapManager 로 전달
+     * @param  int|null  $triggeredBy  관리자 수동 재생성을 실행한 사용자 ID(스케줄러/증분/봇 = null).
+     *                                 완료/실패 알림의 수신자(수동 실행자) 판정에 사용됩니다.
      */
-    public function __construct(public SitemapGenerationMode $mode = SitemapGenerationMode::Auto) {}
+    public function __construct(
+        public SitemapGenerationMode $mode = SitemapGenerationMode::Auto,
+        public ?int $triggeredBy = null,
+    ) {
+        $this->onQueue(self::QUEUE);
+    }
 
     /**
      * 유니크 락 식별자를 반환합니다.
@@ -84,7 +101,7 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
      */
     public function handle(SitemapManager $manager): void
     {
-        $result = $manager->regenerate($this->mode);
+        $result = $manager->regenerate($this->mode, $this->triggeredBy);
 
         if (($result['status'] ?? null) === 'disabled') {
             Log::info('[SEO] Sitemap generation skipped (disabled)');
@@ -111,6 +128,15 @@ class GenerateSitemapJob implements ShouldBeUnique, ShouldQueue
     {
         // 잡 최종 실패(재시도 소진/타임아웃) 시 진행상황을 'failed' 로 고정 — 무한 running 방지
         app(SitemapProgress::class)->fail($exception->getMessage());
+
+        // 최종 실패 전용 훅 — 매 시도마다 발화하는 core.seo.sitemap.after_regenerate_failed 와 달리
+        // 재시도가 모두 소진된 뒤 딱 한 번만 발화한다. 재시도 중 성공하면 발화하지 않으므로
+        // 실패 알림이 중복되거나(각 시도) 결국 성공했는데도 발송되는 일이 없다.
+        HookManager::doAction('core.seo.sitemap.regenerate_failed_final', [
+            'success' => false,
+            'status' => 'failed',
+            'message' => $exception->getMessage(),
+        ], $this->triggeredBy);
 
         Log::error('[SEO] Sitemap generation failed', [
             'error' => $exception->getMessage(),
