@@ -220,6 +220,12 @@ class SaveSettingsRequest extends FormRequest
             'seo.cache_ttl' => ['nullable', 'integer', 'min:60', 'max:86400'],
             'seo.sitemap_enabled' => ['nullable', 'boolean'],
             'seo.sitemap_cache_ttl' => ['nullable', 'integer', 'min:3600', 'max:604800'],
+            // 분할 기준. 상한 50000 은 sitemaps.org 프로토콜 제한이며 SitemapWriter 가 동일 값으로 클램프합니다.
+            'seo.sitemap_urls_per_file' => ['nullable', 'integer', 'min:1000', 'max:50000'],
+            'seo.sitemap_gzip' => ['nullable', 'boolean'],
+            'seo.sitemap_serve_stale_on_miss' => ['nullable', 'boolean'],
+            'seo.sitemap_max_urls_per_contributor' => ['nullable', 'integer', 'min:0'],
+            'seo.sitemap_hreflang_enabled' => ['nullable', 'boolean'],
             'seo.sitemap_schedule' => ['nullable', 'string', Rule::in(['hourly', 'daily', 'weekly'])],
             'seo.sitemap_schedule_time' => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/'],
             'seo.generator_enabled' => ['nullable', 'boolean'],
@@ -242,6 +248,9 @@ class SaveSettingsRequest extends FormRequest
             'advanced.stats_cache_ttl' => $this->getAdvancedTabCacheTtlRules($tab),
             'advanced.seo_cache_enabled' => $this->getTabRules($tab, 'advanced', 'boolean'),
             'advanced.seo_cache_ttl' => $this->getAdvancedTabCacheTtlRules($tab),
+            // 신규 설정이므로 미전송(기존 클라이언트)을 허용한다 — 미전송/미지정 시 코드 기본값 유지.
+            // 범위는 SEO 탭의 오버라이드 칸(seo.sitemap_cache_ttl)과 동일하게 맞춘다.
+            'advanced.seo_sitemap_cache_ttl' => ['nullable', 'integer', 'min:3600', 'max:604800'],
 
             // 디버그 설정 (advanced 탭)
             'advanced.debug_mode' => $this->getTabRules($tab, 'advanced', 'boolean'),
@@ -605,6 +614,14 @@ class SaveSettingsRequest extends FormRequest
             'seo.sitemap_cache_ttl.integer' => __('validation.settings.sitemap_cache_ttl_integer'),
             'seo.sitemap_cache_ttl.min' => __('validation.settings.sitemap_cache_ttl_min'),
             'seo.sitemap_cache_ttl.max' => __('validation.settings.sitemap_cache_ttl_max'),
+            'seo.sitemap_urls_per_file.integer' => __('validation.settings.sitemap_urls_per_file_integer'),
+            'seo.sitemap_urls_per_file.min' => __('validation.settings.sitemap_urls_per_file_min'),
+            'seo.sitemap_urls_per_file.max' => __('validation.settings.sitemap_urls_per_file_max'),
+            'seo.sitemap_gzip.boolean' => __('validation.settings.sitemap_gzip_boolean'),
+            'seo.sitemap_serve_stale_on_miss.boolean' => __('validation.settings.sitemap_serve_stale_on_miss_boolean'),
+            'seo.sitemap_max_urls_per_contributor.integer' => __('validation.settings.sitemap_max_urls_per_contributor_integer'),
+            'seo.sitemap_max_urls_per_contributor.min' => __('validation.settings.sitemap_max_urls_per_contributor_min'),
+            'seo.sitemap_hreflang_enabled.boolean' => __('validation.settings.sitemap_hreflang_enabled_boolean'),
             'seo.sitemap_schedule.in' => __('validation.settings.sitemap_schedule_invalid'),
             'seo.sitemap_schedule_time.regex' => __('validation.settings.sitemap_schedule_time_invalid'),
 
@@ -639,12 +656,15 @@ class SaveSettingsRequest extends FormRequest
             'advanced.stats_cache_ttl.integer' => __('validation.settings.stats_cache_ttl_integer'),
             'advanced.stats_cache_ttl.min' => __('validation.settings.stats_cache_ttl_min'),
             'advanced.stats_cache_ttl.max' => __('validation.settings.stats_cache_ttl_max'),
-            'advanced.seo_cache_enabled.required' => __('validation.settings.seo_cache_enabled_required'),
-            'advanced.seo_cache_enabled.boolean' => __('validation.settings.seo_cache_enabled_boolean'),
-            'advanced.seo_cache_ttl.required' => __('validation.settings.seo_cache_ttl_required'),
-            'advanced.seo_cache_ttl.integer' => __('validation.settings.seo_cache_ttl_integer'),
-            'advanced.seo_cache_ttl.min' => __('validation.settings.seo_cache_ttl_min'),
-            'advanced.seo_cache_ttl.max' => __('validation.settings.seo_cache_ttl_max'),
+            'advanced.seo_cache_enabled.required' => __('validation.settings.advanced_seo_cache_enabled_required'),
+            'advanced.seo_cache_enabled.boolean' => __('validation.settings.advanced_seo_cache_enabled_boolean'),
+            'advanced.seo_cache_ttl.required' => __('validation.settings.advanced_seo_cache_ttl_required'),
+            'advanced.seo_cache_ttl.integer' => __('validation.settings.advanced_seo_cache_ttl_integer'),
+            'advanced.seo_cache_ttl.min' => __('validation.settings.advanced_seo_cache_ttl_min'),
+            'advanced.seo_cache_ttl.max' => __('validation.settings.advanced_seo_cache_ttl_max'),
+            'advanced.seo_sitemap_cache_ttl.integer' => __('validation.settings.seo_sitemap_cache_ttl_integer'),
+            'advanced.seo_sitemap_cache_ttl.min' => __('validation.settings.seo_sitemap_cache_ttl_min'),
+            'advanced.seo_sitemap_cache_ttl.max' => __('validation.settings.seo_sitemap_cache_ttl_max'),
 
             // 디버그 설정
             'advanced.debug_mode.required' => __('validation.settings.debug_mode_required'),

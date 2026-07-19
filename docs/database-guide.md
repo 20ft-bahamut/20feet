@@ -204,6 +204,26 @@ php artisan migrate --pretend --path=database/migrations/2026_05_05_172526_add_l
 
 ---
 
+### 긴 문자열 컬럼의 unique — 해시 컬럼 패턴 (sitemap_urls 사례)
+
+utf8mb4(4 byte/char) 긴 문자열 컬럼을 unique 인덱스에 직접 넣으면 InnoDB 키 길이 제한(3072 byte)을 넘겨 마이그레이션이 실패한다. 예: `sitemap_urls` 의 identity 는 `(resource_type, resource_id, loc)` 인데 `loc string(2048)` 을 넣으면 `256+256+8192 = 8704 byte` 로 초과한다.
+
+해결: **identity 문자열의 고정 길이 해시 컬럼**을 두고 그것을 unique 에 넣는다.
+
+```php
+$table->string('loc', 2048);                 // 실제 값 (utf8mb4)
+$table->char('loc_hash', 64)->charset('ascii'); // sha256(loc) — ascii 64 byte
+$table->unique(['resource_type', 'resource_id', 'loc_hash']); // 64+256+256 = 576 byte
+```
+
+- 해시는 app 레벨(`hash('sha256', $loc)`)에서 계산한다 — raw SQL/DB 함수 비의존(다국어·DB 이식성 규율).
+- `loc` 는 실제 서빙/표시에 쓰고, `loc_hash` 는 오직 identity 매칭용이다.
+- upsert 는 delete-후-insert 로 멱등을 보장하고, 이 unique 가 중복 삽입(1062)을 차단한다.
+
+`sitemap_urls` 스키마: `resource_type(64,index)` · `resource_id(64,nullable)` · `loc(2048)` · `loc_hash(64,ascii)` · `lastmod` · `changefreq(16)` · `priority(2,1)` · `contributor(64,index)` · `is_visible(bool,index)` + `unique(resource_type, resource_id, loc_hash)` + `index(contributor, is_visible, id)`(리빌드 스트리밍 커서). 모든 컬럼 한국어 `->comment()`, `down()` 구현, `Schema::hasTable` 멱등 가드.
+
+---
+
 ### 모듈/플러그인 마이그레이션 down() 메서드
 
 ```

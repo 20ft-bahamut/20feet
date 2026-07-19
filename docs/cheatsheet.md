@@ -249,8 +249,10 @@ php artisan seo:warmup --layout=shop/show  # 특정 레이아웃만
 php artisan seo:clear               # 전체 SEO 캐시 삭제
 php artisan seo:clear --layout=home # 특정 레이아웃만
 php artisan seo:stats               # 캐시 통계 출력
-php artisan seo:generate-sitemap    # Sitemap 생성 (큐 디스패치)
-php artisan seo:generate-sitemap --sync  # Sitemap 동기 생성
+php artisan seo:generate-sitemap    # Sitemap 생성 (큐 디스패치, mode=auto)
+php artisan seo:generate-sitemap --sync     # Sitemap 동기 생성
+php artisan seo:generate-sitemap --rebuild  # 전체 재생성 (mode=full)
+php artisan seo:generate-sitemap --mode=full|auto|incremental  # 재생성 모드 지정
 ```
 
 ### API 문서 Artisan 커맨드

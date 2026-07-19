@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.5] - 2026-07-19
+
+### Removed
+
+- 더 이상 사용하지 않는 장바구니 옵션 조합 검증 문구의 일본어 번역을 정리했습니다.
+
 ## [1.0.4] - 2026-07-16
 
 ### Added

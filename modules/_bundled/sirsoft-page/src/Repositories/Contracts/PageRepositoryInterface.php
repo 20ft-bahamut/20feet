@@ -2,6 +2,8 @@
 
 namespace Modules\Sirsoft\Page\Repositories\Contracts;
 
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Sirsoft\Page\Models\Page;
 
@@ -36,12 +38,22 @@ interface PageRepositoryInterface
     public function findBySlug(string $slug): ?Page;
 
     /**
+     * Sitemap 용으로 발행된 페이지를 스트리밍 조회합니다.
+     *
+     * 전체 적재를 피하기 위해 id 기준으로 청크 단위 지연 조회합니다.
+     *
+     * @param  int  $chunkSize  청크 크기
+     * @return iterable<Page> 발행된 페이지 순회자 (id, slug, updated_at 만 조회)
+     */
+    public function streamPublishedForSitemap(int $chunkSize = 500): iterable;
+
+    /**
      * ID로 페이지를 조회하며, 없으면 예외를 발생시킵니다.
      *
      * @param  int  $id  페이지 ID
      * @return Page 페이지 모델
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     * @throws ModelNotFoundException
      */
     public function findOrFail(int $id): Page;
 
@@ -86,7 +98,7 @@ interface PageRepositoryInterface
      * @param  string  $orderBy  정렬 컬럼
      * @param  string  $direction  정렬 방향 (asc, desc)
      * @param  int  $limit  조회할 최대 항목 수
-     * @return array{total: int, items: \Illuminate\Database\Eloquent\Collection}
+     * @return array{total: int, items: Collection}
      */
     public function searchByKeyword(string $keyword, string $orderBy = 'created_at', string $direction = 'desc', int $limit = 10): array;
 

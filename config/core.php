@@ -586,6 +586,100 @@ return [
                 ],
             ],
         ],
+
+        // 사이트맵 재생성 완료 — 관리자 수동 재생성(SEO 탭 "지금 생성")에 한해, 실행한 관리자에게 발송.
+        // 스케줄러/증분/봇 재생성은 SeoNotificationDataListener 가 context.skip 으로 제외.
+        // 기본 활성 채널은 database(앱 내 알림)만. mail 템플릿은 존재하되 비활성(운영자가 필요 시 활성화).
+        'sitemap_regenerated' => [
+            'hook_prefix' => 'core.seo',
+            'name' => ['ko' => '사이트맵 재생성 완료', 'en' => 'Sitemap Regeneration Complete'],
+            'description' => ['ko' => '관리자가 수동으로 실행한 사이트맵 재생성이 완료되면 실행한 관리자에게 발송되는 알림', 'en' => 'Notification sent to the admin who manually triggered sitemap regeneration when it completes'],
+            'channels' => ['database'],
+            'hooks' => ['core.seo.sitemap.after_regenerate'],
+            'variables' => [
+                ['key' => 'app_name', 'description' => '사이트명'],
+                ['key' => 'url_count', 'description' => '생성된 총 URL 수'],
+                ['key' => 'child_count', 'description' => '생성된 사이트맵 파일 수'],
+                ['key' => 'action_url', 'description' => 'SEO 설정 페이지 URL'],
+                ['key' => 'site_url', 'description' => '사이트 URL'],
+            ],
+            'templates' => [
+                [
+                    'channel' => 'mail',
+                    'is_active' => false,
+                    'recipients' => [['type' => 'trigger_user']],
+                    'subject' => [
+                        'ko' => '[{app_name}] 사이트맵 재생성이 완료되었습니다',
+                        'en' => '[{app_name}] Sitemap Regeneration Complete',
+                    ],
+                    'body' => [
+                        'ko' => '<h1>사이트맵 재생성 완료</h1>'
+                            .'<p>요청하신 사이트맵 재생성이 완료되었습니다.</p>'
+                            .'<p>총 <strong>{url_count}</strong>개의 URL 이 <strong>{child_count}</strong>개의 파일로 생성되었습니다.</p>'
+                            .'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;"><tr><td align="center"><a href="{action_url}" style="display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;">SEO 설정 보기</a></td></tr></table>'
+                            .'<p>감사합니다,<br><a href="{site_url}">{app_name}</a></p>',
+                        'en' => '<h1>Sitemap Regeneration Complete</h1>'
+                            .'<p>The sitemap regeneration you requested has completed.</p>'
+                            .'<p>A total of <strong>{url_count}</strong> URLs were generated across <strong>{child_count}</strong> file(s).</p>'
+                            .'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;"><tr><td align="center"><a href="{action_url}" style="display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;">View SEO Settings</a></td></tr></table>'
+                            .'<p>Thank you,<br><a href="{site_url}">{app_name}</a></p>',
+                    ],
+                ],
+                [
+                    'channel' => 'database',
+                    'recipients' => [['type' => 'trigger_user']],
+                    'subject' => ['ko' => '사이트맵 재생성 완료', 'en' => 'Sitemap regeneration complete'],
+                    'body' => ['ko' => '요청하신 사이트맵 재생성이 완료되었습니다. 총 {url_count}개 URL, {child_count}개 파일이 생성되었습니다.', 'en' => 'Your sitemap regeneration is complete. {url_count} URLs across {child_count} file(s) were generated.'],
+                    'click_url' => '/admin/settings?tab=seo',
+                ],
+            ],
+        ],
+
+        // 사이트맵 재생성 실패 — 관리자 수동 재생성이 실패하면 실행한 관리자에게 발송.
+        'sitemap_regenerate_failed' => [
+            'hook_prefix' => 'core.seo',
+            'name' => ['ko' => '사이트맵 재생성 실패', 'en' => 'Sitemap Regeneration Failed'],
+            'description' => ['ko' => '관리자가 수동으로 실행한 사이트맵 재생성이 최종 실패(재시도 소진)하면 실행한 관리자에게 발송되는 알림', 'en' => 'Notification sent to the admin who manually triggered sitemap regeneration when it finally fails after retries'],
+            'channels' => ['database'],
+            // 재시도 소진 시 1회만 발화하는 최종 실패 훅에 구독 (매 시도 발화하는 after_regenerate_failed 아님)
+            'hooks' => ['core.seo.sitemap.regenerate_failed_final'],
+            'variables' => [
+                ['key' => 'app_name', 'description' => '사이트명'],
+                ['key' => 'error', 'description' => '실패 사유 메시지'],
+                ['key' => 'action_url', 'description' => 'SEO 설정 페이지 URL'],
+                ['key' => 'site_url', 'description' => '사이트 URL'],
+            ],
+            'templates' => [
+                [
+                    'channel' => 'mail',
+                    'is_active' => false,
+                    'recipients' => [['type' => 'trigger_user']],
+                    'subject' => [
+                        'ko' => '[{app_name}] 사이트맵 재생성이 실패했습니다',
+                        'en' => '[{app_name}] Sitemap Regeneration Failed',
+                    ],
+                    'body' => [
+                        'ko' => '<h1>사이트맵 재생성 실패</h1>'
+                            .'<p>요청하신 사이트맵 재생성이 실패했습니다.</p>'
+                            .'<p>오류: <strong>{error}</strong></p>'
+                            .'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;"><tr><td align="center"><a href="{action_url}" style="display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;">SEO 설정 보기</a></td></tr></table>'
+                            .'<p>감사합니다,<br><a href="{site_url}">{app_name}</a></p>',
+                        'en' => '<h1>Sitemap Regeneration Failed</h1>'
+                            .'<p>The sitemap regeneration you requested has failed.</p>'
+                            .'<p>Error: <strong>{error}</strong></p>'
+                            .'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;"><tr><td align="center"><a href="{action_url}" style="display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;">View SEO Settings</a></td></tr></table>'
+                            .'<p>Thank you,<br><a href="{site_url}">{app_name}</a></p>',
+                    ],
+                ],
+                [
+                    'channel' => 'database',
+                    'recipients' => [['type' => 'trigger_user']],
+                    'subject' => ['ko' => '사이트맵 재생성 실패', 'en' => 'Sitemap regeneration failed'],
+                    'body' => ['ko' => '요청하신 사이트맵 재생성이 실패했습니다. 오류: {error}', 'en' => 'Your sitemap regeneration failed. Error: {error}'],
+                    'click_url' => '/admin/settings?tab=seo',
+                ],
+            ],
+        ],
     ],
 
     /*

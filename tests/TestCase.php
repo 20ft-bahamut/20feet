@@ -6,6 +6,7 @@ use App\Extension\Testing\ExtensionTestAllowlist;
 use App\Listeners\Identity\EnforceIdentityPolicyListener;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -39,11 +40,17 @@ abstract class TestCase extends BaseTestCase
      * createApplication() 단계에서 모든 ServiceProvider 의 register()/boot() 가
      * 실행되므로, allowlist 는 그 이전(= parent::setUp() 호출 전)에 설정되어야
      * provider 자동 등록 가드가 올바른 시점에 적용됩니다.
+     *
+     * settings 디스크는 앱 부팅 직후 페이크로 대체합니다 (아래 fakeSettingsDisk).
      */
     protected function setUp(): void
     {
         // 앱 생성 전에 확장 allowlist 설정 (provider register 가드 적용 시점 보장)
         ExtensionTestAllowlist::set($this->resolveAllowedExtensions());
+
+        $this->afterApplicationCreated(function () {
+            $this->fakeSettingsDisk();
+        });
 
         if (! self::$staleConnectionsCleaned) {
             // Laravel 앱 부팅 전이므로 부트스트랩 후 콜백으로 등록
@@ -54,6 +61,26 @@ abstract class TestCase extends BaseTestCase
         }
 
         parent::setUp();
+    }
+
+    /**
+     * settings 디스크를 페이크로 대체하여 실제 설정 파일을 보호합니다.
+     *
+     * `settings` 디스크의 root 는 `storage/app/settings` 로, 개발/운영 환경이 실제로
+     * 사용하는 설정 파일 그 자체입니다. 페이크로 대체하지 않으면 설정 저장 경로를 타는
+     * 테스트(설정 API 호출, ConfigRepository::saveCategory 등)가 실제 설정을 덮어쓰고,
+     * RefreshDatabase 는 DB 만 되돌리므로 그 오염이 그대로 남습니다.
+     *
+     * 실제 피해 사례: 설정 저장 테스트가 `general.json` 의 사이트명/언어를 테스트 값으로
+     * 덮어써 개발 사이트 언어가 ja 로 바뀌어 있었고, SEO/캐시 TTL 도 테스트 값으로 대체됨.
+     *
+     * 설정 *읽기* 는 부팅 시 Config(`g7_settings.*`)로 이미 적재된 뒤이므로 이 페이크의
+     * 영향을 받지 않습니다. 저장소를 직접 읽어야 하는 테스트는 페이크 디스크에 직접
+     * 값을 넣고 검증합니다.
+     */
+    private function fakeSettingsDisk(): void
+    {
+        Storage::fake('settings');
     }
 
     /**
