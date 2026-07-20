@@ -92,6 +92,7 @@ use App\Services\DriverRegistryService;
 use App\Services\LayoutExtensionService;
 use App\Services\TemplateLayoutAttachmentService;
 use App\Services\UniqueIdService;
+use App\Support\PrivilegedDatabaseAccounts;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -338,9 +339,9 @@ class CoreServiceProvider extends ServiceProvider
             return;
         }
 
-        // DB 연결 유효성 검증 (root 사용자 접속 방지)
+        // DB 연결 유효성 검증 (최고권한 계정 접속 방지)
         if (! $this->isDatabaseConnectionValid()) {
-            Log::error('Database connection invalid: using root user or missing credentials. Skipping extension loading.');
+            Log::error('Database connection invalid: using a privileged database account or missing credentials. Skipping extension loading.');
 
             return;
         }
@@ -444,30 +445,20 @@ class CoreServiceProvider extends ServiceProvider
     /**
      * 데이터베이스 연결이 유효한지 검증합니다.
      *
-     * root 사용자로 접속하거나 비밀번호가 없는 경우를 감지하여
+     * DB 최고권한 계정으로 접속하거나 사용자명이 비어 있는 경우를 감지하여
      * 잘못된 설정으로 인한 접속 오류를 방지합니다.
+     * 계정 판정은 `PrivilegedDatabaseAccounts` 가 SSoT 입니다.
      *
      * @return bool 연결이 유효하면 true
      */
     protected function isDatabaseConnectionValid(): bool
     {
         try {
-            $config = DB::connection()->getConfig();
+            // read/write 분리 설정의 우선순위 규칙까지 PrivilegedDatabaseAccounts 가 소유한다.
+            // 호출처마다 규칙이 달라지면 같은 설정에 서로 다른 판정이 나온다.
+            $username = PrivilegedDatabaseAccounts::resolveUsername(DB::connection()->getConfig());
 
-            // read/write 분리 설정인 경우 read 설정 확인
-            $username = $config['username'] ?? null;
-
-            // read 설정이 배열로 있는 경우
-            if (isset($config['read']['username'])) {
-                $username = $config['read']['username'];
-            }
-
-            // root 사용자 또는 빈 username인 경우 무효
-            if (empty($username) || $username === 'root') {
-                return false;
-            }
-
-            return true;
+            return PrivilegedDatabaseAccounts::isUsable($username);
         } catch (\Throwable $e) {
             Log::error('Database configuration check failed: '.$e->getMessage());
 

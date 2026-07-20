@@ -52,6 +52,7 @@ return [
     'directory_permissions' => 'Directory Permissions',
     'disk_space' => 'Disk Space',
     'https' => 'HTTPS',
+    'opcache' => 'OPcache',
     'required' => 'Required',
     'enabled' => 'Enabled',
     'not_enabled' => 'Not Enabled',
@@ -171,6 +172,7 @@ return [
     'error_db_name_required' => 'Database name is required.',
     'error_db_username_required' => 'Database username is required.',
     'error_db_credentials_required' => 'Database name and username are required.',
+    'error_db_username_privileged' => 'For security reasons, G7 cannot be installed with the ":username" account. If a superuser account is compromised, the entire database is at risk. Please create a dedicated database user for G7, grant it only the privileges it needs, and enter that account instead.',
     'error_db_prefix_too_long' => 'Table prefix may be up to :max characters. (entered: :current) A long prefix makes some table index names exceed the database identifier limit.',
     'error_db_privileges_insufficient' => 'Insufficient database privileges.',
     'error_db_not_tested' => 'Please test the database connection first.',
@@ -232,6 +234,12 @@ return [
     // HTTPS Messages
     'https_enabled' => 'HTTPS is enabled (recommended)',
     'https_disabled' => 'HTTPS is disabled. We recommend using HTTPS for security.',
+
+    // OPcache Messages
+    'opcache_enabled' => 'OPcache is enabled (recommended)',
+    'opcache_disabled_short' => 'Disabled — pages load several times slower',
+    'opcache_disabled_warning' => 'OPcache is disabled. In this state, every single page view re-parses all of your site\'s PHP code from scratch. On identical hardware this can make responses several times slower, and the gap widens as traffic grows. You can continue the installation as-is, but if this server will be used in production we strongly recommend setting opcache.enable=1 in php.ini and restarting your web server.',
+    'opcache_unknown' => 'OPcache status could not be determined. Reading PHP settings is restricted on this server.',
 
     // API Response Messages
     'api_method_not_allowed' => 'Only POST requests are allowed.',
