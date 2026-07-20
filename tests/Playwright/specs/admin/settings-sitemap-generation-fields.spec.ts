@@ -295,3 +295,36 @@ test('#481 - 재생성 후 실시간/폴링 모드에 맞게 진행상황이 갱
     expect(statusGets).toBeLessThanOrEqual(2);
   }
 });
+
+// @scenario tab=seo, transition_overlay=wait_for
+// @effects sitemap_status_awaited_before_reveal
+test('#481 - SEO 탭 콘텐츠 노출 시점에 sitemap 상태가 이미 채워져 있다', async ({ page }) => {
+  const token = issueToken('core.settings.read', 'core.settings.update');
+  await authenticatePage(page, token);
+
+  // 상태 API 를 의도적으로 지연시켜, 전환 오버레이가 이 데이터소스를 기다리는지 드러낸다.
+  // wait_for 에 sitemap_status 가 빠져 있으면 오버레이가 먼저 걷히고 빈 상태로 노출된다.
+  let statusResolvedAt = 0;
+  await page.route('**/api/admin/seo/sitemap/status*', async (route) => {
+    await new Promise((r) => setTimeout(r, 1_500));
+    statusResolvedAt = Date.now();
+    await route.continue();
+  });
+
+  await page.goto('/admin/settings?tab=seo');
+  await page.waitForLoadState('domcontentloaded', { timeout: 30_000 });
+
+  // 진행상황 블록이 보이는 시점 = 오버레이가 걷힌 시점
+  const statusBlock = page.locator('#sitemap_last_updated_block');
+  await expect(statusBlock).toBeVisible({ timeout: 30_000 });
+  const revealedAt = Date.now();
+
+  // 상대 비교: 노출 시점이 상태 응답 이후여야 한다 (절대 임계값 사용 안 함)
+  expect(statusResolvedAt).toBeGreaterThan(0);
+  expect(revealedAt).toBeGreaterThanOrEqual(statusResolvedAt);
+
+  // 노출된 내용이 빈 껍데기가 아니어야 한다 (미해석 바인딩/빈 문자열 회귀 가드)
+  const text = (await statusBlock.innerText()).trim();
+  expect(text).not.toContain('$t:');
+  expect(text.length).toBeGreaterThan(0);
+});
