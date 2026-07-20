@@ -735,8 +735,14 @@
         const badgeText = isRequired ? lang('badge_required') : lang('badge_optional');
         const badgeClass = isRequired ? 'badge-required' : 'badge-optional';
 
+        // 상태를 아이콘에만 반영하면 통과/경고 카드가 같은 색으로 보여 경각심이 전달되지 않는다.
+        // 카드 자체에 수식자를 부여해 스캔만으로 문제 항목이 드러나게 한다.
+        const cardModifier = statusClass === 'status-warning'
+            ? ' requirement-card--warning'
+            : (statusClass === 'status-fail' ? ' requirement-card--fail' : '');
+
         return `
-            <div class="requirement-card">
+            <div class="requirement-card${cardModifier}">
                 <div class="requirement-card-header header-single">
                     <div class="header-left">
                         ${statusIcon}

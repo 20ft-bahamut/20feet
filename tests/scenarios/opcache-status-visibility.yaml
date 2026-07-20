@@ -53,6 +53,7 @@ effects:
   - admin_info_row_shows_enabled_disabled_unknown
   - admin_info_warning_shown_only_when_disabled
   - admin_info_warning_hidden_when_unknown
+  - opcache_warning_placed_at_tab_top
   - admin_info_defensive_against_missing_opcache_key
 
 # E2E axis: admin_info_row / admin_info_warning_block 는 레이아웃 JSON 변경을 수반하므로

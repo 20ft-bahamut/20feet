@@ -237,8 +237,8 @@ return [
 
     // OPcache 메시지
     'opcache_enabled' => 'OPcache가 활성화되어 있습니다. (권장)',
-    'opcache_disabled_short' => '비활성화됨 — 응답 속도 저하',
-    'opcache_disabled_warning' => 'OPcache가 비활성화되어 있습니다. 매 요청마다 PHP 코드를 다시 해석하므로 사이트 응답 속도가 눈에 띄게 느려집니다. php.ini에서 opcache.enable=1 설정을 권장합니다.',
+    'opcache_disabled_short' => '비활성화됨 — 페이지가 몇 배 느려집니다',
+    'opcache_disabled_warning' => 'OPcache가 비활성화되어 있습니다. 이 상태에서는 방문자가 페이지를 열 때마다 사이트의 모든 PHP 코드를 처음부터 다시 해석합니다. 같은 서버, 같은 사양에서도 응답 속도가 몇 배까지 느려지며 방문자가 많을수록 격차가 커집니다. 설치는 이대로 진행할 수 있지만, 운영에 사용할 서버라면 php.ini에서 opcache.enable=1 을 켠 뒤 웹서버를 재시작하시기를 강력히 권장합니다.',
     'opcache_unknown' => 'OPcache 상태를 확인할 수 없습니다. 서버에서 설정 조회가 제한되어 있습니다.',
 
     // API 응답 메시지

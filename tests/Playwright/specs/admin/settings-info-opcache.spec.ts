@@ -83,6 +83,37 @@ test('- OPcache 비활성이면 성능 저하 경고 블록이 표시된다', as
   expect(warningText.length).toBeGreaterThan(0);
 });
 
+// @scenario tab=info, opcache_enabled=false
+// @effects opcache_warning_placed_at_tab_top
+test('- 경고 블록이 정보 탭 최상단에 놓이고 아래 카드와 간격을 둔다', async ({ page }) => {
+  const token = issueToken('core.settings.read', 'core.settings.update');
+  await authenticatePage(page, token);
+
+  await stubOpcache(page, { loaded: true, enabled: false });
+  await gotoInfoTab(page);
+
+  const warning = page.locator(OPCACHE_WARNING);
+  await expect(warning).toBeVisible({ timeout: 20_000 });
+
+  // 경고는 카드 그리드보다 위에 있어야 한다. 그리드 안(세 번째 셀)에 들어가면
+  // 카드 사이에 끼어 배너로 읽히지 않는다 — 그 회귀를 좌표로 고정한다.
+  const grid = page.locator('#tab_content_info > .grid-2col-responsive').first();
+  await expect(grid).toBeVisible();
+
+  const warningBox = await warning.boundingBox();
+  const gridBox = await grid.boundingBox();
+  expect(warningBox).not.toBeNull();
+  expect(gridBox).not.toBeNull();
+  expect(warningBox!.y).toBeLessThan(gridBox!.y);
+
+  // 경고와 카드가 붙지 않아야 한다 (자산이 부여하는 하단 간격).
+  const gap = gridBox!.y - (warningBox!.y + warningBox!.height);
+  expect(gap).toBeGreaterThan(0);
+
+  // 경고가 그리드 셀이 아니라 탭의 직계 자식이어야 한다 (구조 단언)
+  await expect(page.locator('#tab_content_info > #opcache_warning')).toHaveCount(1);
+});
+
 // @scenario tab=info, opcache_enabled=true
 // @effects opcache_warning_conditional
 test('- OPcache 활성이면 경고 블록이 표시되지 않는다', async ({ page }) => {

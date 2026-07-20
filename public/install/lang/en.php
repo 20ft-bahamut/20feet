@@ -237,8 +237,8 @@ return [
 
     // OPcache Messages
     'opcache_enabled' => 'OPcache is enabled (recommended)',
-    'opcache_disabled_short' => 'Disabled — slower responses',
-    'opcache_disabled_warning' => 'OPcache is disabled. PHP code is re-parsed on every request, which noticeably slows down site response times. We recommend setting opcache.enable=1 in php.ini.',
+    'opcache_disabled_short' => 'Disabled — pages load several times slower',
+    'opcache_disabled_warning' => 'OPcache is disabled. In this state, every single page view re-parses all of your site\'s PHP code from scratch. On identical hardware this can make responses several times slower, and the gap widens as traffic grows. You can continue the installation as-is, but if this server will be used in production we strongly recommend setting opcache.enable=1 in php.ini and restarting your web server.',
     'opcache_unknown' => 'OPcache status could not be determined. Reading PHP settings is restricted on this server.',
 
     // API Response Messages
