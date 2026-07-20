@@ -69,6 +69,7 @@ class ValidationApi
             'directories' => $this->checkDirectoryPermissions(),
             'required_files' => $this->checkRequiredFiles(),
             'https' => $this->checkHttps(),
+            'opcache' => $this->checkOpcache(),
         ];
 
         // 모든 필수 요구사항 통과 여부
@@ -135,6 +136,15 @@ class ValidationApi
 
             if (empty($database) || empty($username)) {
                 throw new Exception(lang('error_db_credentials_required'));
+            }
+
+            // DB 최고권한 계정 차단 (Write/Read 공통).
+            // 최고권한 계정 자격증명이 유출되면 데이터베이스 전체가 위험해지므로
+            // 연결 시도 전에 막는다. 판정은 App\Support\PrivilegedDatabaseAccounts 가 SSoT.
+            if (\App\Support\PrivilegedDatabaseAccounts::isBlocked($username)) {
+                throw new Exception(
+                    lang('error_db_username_privileged', ['username' => $username])
+                );
             }
 
             // DB 테이블 접두사 길이 검증 (Write DB 입력에만 적용)
@@ -502,6 +512,35 @@ class ValidationApi
             'message' => $isHttps
                 ? lang('https_enabled')
                 : lang('https_disabled'),
+        ];
+    }
+
+    /**
+     * OPcache 활성화 여부 검증 (권장 사항 — 설치를 차단하지 않음)
+     *
+     * 확장 로드 여부만으로는 부족하다. `Zend OPcache` 가 로드돼 있어도
+     * `opcache.enable=0` 이면 실제로는 동작하지 않으므로 지시자까지 확인한다.
+     * 판정은 App\Support\OpcacheStatus 가 SSoT 이며, 코어 관리자 화면과 같은 답을 낸다.
+     *
+     * `enabled` 가 null 이면 "확인 불가"(ini_get 차단 환경)로, 경고도 차단도 하지 않는다.
+     */
+    private function checkOpcache(): array
+    {
+        $status = \App\Support\OpcacheStatus::probe();
+
+        if ($status['enabled'] === null) {
+            $message = lang('opcache_unknown');
+        } else {
+            $message = $status['enabled']
+                ? lang('opcache_enabled')
+                : lang('opcache_disabled_warning');
+        }
+
+        return [
+            'required' => false, // OPcache는 선택 사항 (성능 권장)
+            'loaded' => $status['loaded'],
+            'enabled' => $status['enabled'],
+            'message' => $message,
         ];
     }
 
@@ -1026,7 +1065,7 @@ class ValidationApi
             return false;
         }
 
-        // HTTPS는 선택 사항이므로 검증하지 않음
+        // HTTPS / OPcache 는 선택 사항이므로 검증하지 않음 (경고만 표시하고 설치는 진행)
 
         return true;
     }

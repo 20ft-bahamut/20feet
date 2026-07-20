@@ -8,6 +8,7 @@ use App\Contracts\Repositories\ConfigRepositoryInterface;
 use App\Extension\HookManager;
 use App\Http\Resources\AttachmentResource;
 use App\Support\ConfigCacheHelper;
+use App\Support\OpcacheStatus;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -844,6 +845,9 @@ class SettingsService
             'php_memory_limit' => $this->safeSystemProbe('php_memory_limit', fn () => ini_get('memory_limit'), __('common.unknown')),
             'max_execution_time' => $this->safeSystemProbe('max_execution_time', fn () => ini_get('max_execution_time').__('settings.seconds'), __('common.unknown')),
             'upload_max_filesize' => $this->safeSystemProbe('upload_max_filesize', fn () => ini_get('upload_max_filesize'), __('common.unknown')),
+            // 판정은 App\Support\OpcacheStatus 가 SSoT — 인스톨러 요구사항 화면과 같은 답을 낸다.
+            // enabled 가 null 이면 "확인 불가"(ini_get 차단 환경).
+            'opcache' => $this->safeSystemProbe('opcache', fn () => $this->getOpcacheStatus(), ['loaded' => false, 'enabled' => null]),
             'install_path' => base_path(),
             'config_path' => storage_path('app/settings'),
             'log_path' => storage_path('logs'),
@@ -852,6 +856,19 @@ class SettingsService
             'database_config' => $this->safeSystemProbe('database_config', fn () => $this->getDatabaseConfig(), ['has_read_write_split' => false, 'write' => [], 'read' => []]),
             'timezone' => config('app.timezone'),
         ];
+    }
+
+    /**
+     * OPcache 활성화 상태를 조회합니다.
+     *
+     * 판정은 App\Support\OpcacheStatus 가 SSoT 이며, 인스톨러 요구사항 화면과
+     * 같은 답을 냅니다. `enabled` 가 null 이면 ini_get 이 차단된 "확인 불가" 상태입니다.
+     *
+     * @return array{loaded: bool, enabled: bool|null} OPcache 상태
+     */
+    protected function getOpcacheStatus(): array
+    {
+        return OpcacheStatus::probe();
     }
 
     /**

@@ -1909,7 +1909,12 @@
       "update_guide_cmd": "$ sudo php artisan core:update",
       "manual_update_cmd": "$ sudo php artisan core:update --source=/path/to/extracted",
       "upgrade_guide_link_desc": "運用環境別の権限/ユーザーグループ別の詳細な手順はアップグレードガイドを参照してください。",
-      "upgrade_guide_link_label": "全体アップグレードガイドを表示"
+      "upgrade_guide_link_label": "全体アップグレードガイドを表示",
+      "opcache": "OPcache",
+      "opcache_enabled": "有効化",
+      "opcache_disabled": "無効化",
+      "opcache_unknown": "確認不可",
+      "opcache_disabled_warning": "OPcacheが無効化されています。毎回のリクエストごとにPHPコードが再解析されるため、サイトの応答速度が著しく低下します。php.iniでopcache.enable=1の設定をお勧めします。設定変更後、この画面に反映されるまで最大1時間かかる可能性があります。キャッシュクリアを実行すると即座に反映されます。"
     },
     "modals": {
       "password_confirm_title": "パスワード確認",

@@ -84,8 +84,12 @@ $dbReadHash = getDatabaseFieldHash($formData, 'db_read');
 
                     <div class="form-group">
                         <label class="form-label"><?= htmlspecialchars(lang('db_username')) ?> *</label>
-                        <input type="text" name="db_write_username" value="<?= htmlspecialchars($formData['db_write_username']) ?>"
-                               class="form-input" required>
+                        <input type="text" name="db_write_username" id="db_write_username"
+                               value="<?= htmlspecialchars($formData['db_write_username']) ?>"
+                               class="form-input" required
+                               aria-invalid="false"
+                               aria-describedby="db_write_username-error">
+                        <div id="db_write_username-error" class="field-error" role="alert"></div>
                     </div>
 
                     <div class="form-group">
@@ -137,8 +141,12 @@ $dbReadHash = getDatabaseFieldHash($formData, 'db_read');
 
                     <div class="form-group">
                         <label class="form-label"><?= htmlspecialchars(lang('db_username')) ?> *</label>
-                        <input type="text" name="db_read_username" value="<?= htmlspecialchars($formData['db_read_username']) ?>"
-                               class="form-input">
+                        <input type="text" name="db_read_username" id="db_read_username"
+                               value="<?= htmlspecialchars($formData['db_read_username']) ?>"
+                               class="form-input"
+                               aria-invalid="false"
+                               aria-describedby="db_read_username-error">
+                        <div id="db_read_username-error" class="field-error" role="alert"></div>
                     </div>
 
                     <div class="form-group">

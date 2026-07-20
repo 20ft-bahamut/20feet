@@ -443,6 +443,31 @@
             );
         }
 
+        // 9. OPcache 카드 (성능 권장, 필수 아님)
+        // failedRequirements.push() 를 하지 않는다 — 비활성이어도 설치는 진행된다.
+        if (data.opcache) {
+            let opcacheStatusClass, opcacheStatusText;
+            if (data.opcache.enabled === null) {
+                // ini_get 이 차단된 환경 — 확인 불가 (경고도 차단도 아님)
+                opcacheStatusClass = 'status-warning';
+                opcacheStatusText = lang('opcache_unknown');
+            } else if (data.opcache.enabled) {
+                opcacheStatusClass = 'status-pass';
+                opcacheStatusText = lang('enabled');
+            } else {
+                // 단순히 '비활성화됨' 만 보이면 경고의 실질(성능 저하)이 전달되지 않는다.
+                opcacheStatusClass = 'status-warning';
+                opcacheStatusText = lang('opcache_disabled_short');
+            }
+            html += renderSingleItemCard(
+                lang('opcache'),
+                opcacheStatusClass,
+                opcacheStatusText,
+                '',
+                false
+            );
+        }
+
         html += '</div>';
 
         // 필수 조건 미충족 시 에러 박스 표시
@@ -1388,6 +1413,39 @@
     }
 
     /**
+     * DB 최고권한 계정명 여부 판정
+     *
+     * 목록은 서버(App\Support\PrivilegedDatabaseAccounts::BLOCKED)에서 내려온 값을
+     * 그대로 쓴다. JS 에 목록을 중복 정의하면 서버와 어긋날 수 있다.
+     * 비교는 서버와 동일하게 소문자·트림 기준.
+     *
+     * @param {string} username 검사할 DB 사용자명
+     * @returns {boolean} 최고권한 계정이면 true
+     */
+    function isPrivilegedDbAccount(username) {
+        var blocked = window.INSTALLER_BLOCKED_DB_ACCOUNTS;
+
+        // 서버 목록이 없으면 클라이언트 판정을 포기한다 (서버 검증이 최종 방어선).
+        if (!Array.isArray(blocked)) {
+            return false;
+        }
+
+        return blocked.indexOf(String(username || '').trim().toLowerCase()) !== -1;
+    }
+
+    /**
+     * 최고권한 계정 차단 메시지를 생성한다.
+     *
+     * JS 의 lang() 은 서버 lang() 과 달리 치환을 지원하지 않으므로 호출부에서 수동 치환한다.
+     *
+     * @param {string} username 입력된 DB 사용자명
+     * @returns {string} 치환된 메시지
+     */
+    function privilegedDbAccountMessage(username) {
+        return getLangMessage('error_db_username_privileged').replace(':username', username);
+    }
+
+    /**
      * 필드 검증
      */
     function validateField(field) {
@@ -1436,6 +1494,14 @@
         if (fieldName === 'app_url' && !value) {
             showFieldError(field, getLangMessage('error_app_url_required'));
             return false;
+        }
+
+        // DB 사용자명 검증 — 최고권한 계정은 보안상 사용할 수 없다.
+        if ((fieldName === 'db_write_username' || fieldName === 'db_read_username') && value) {
+            if (isPrivilegedDbAccount(value)) {
+                showFieldError(field, privilegedDbAccountMessage(value));
+                return false;
+            }
         }
 
         // DB Prefix 검증 (선택 사항이지만, 입력 시 형식 검증)
@@ -1639,6 +1705,11 @@
         }
         if (!dbWriteUsername || !dbWriteUsername.value.trim()) {
             errors.push({ field: dbWriteUsername, message: lang('error_db_username_required') });
+        } else if (isPrivilegedDbAccount(dbWriteUsername.value)) {
+            errors.push({
+                field: dbWriteUsername,
+                message: privilegedDbAccountMessage(dbWriteUsername.value.trim()),
+            });
         }
 
         // Read DB 사용 시 Read DB 필드 확인
@@ -1656,6 +1727,11 @@
             }
             if (!dbReadUsername || !dbReadUsername.value.trim()) {
                 errors.push({ field: dbReadUsername, message: lang('error_db_username_required') });
+            } else if (isPrivilegedDbAccount(dbReadUsername.value)) {
+                errors.push({
+                    field: dbReadUsername,
+                    message: privilegedDbAccountMessage(dbReadUsername.value.trim()),
+                });
             }
         }
 

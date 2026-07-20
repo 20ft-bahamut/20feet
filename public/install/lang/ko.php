@@ -52,6 +52,7 @@ return [
     'directory_permissions' => '디렉토리 권한',
     'disk_space' => '디스크 공간',
     'https' => 'HTTPS',
+    'opcache' => 'OPcache',
     'required' => '필수',
     'enabled' => '활성화됨',
     'not_enabled' => '비활성화됨',
@@ -171,6 +172,7 @@ return [
     'error_db_name_required' => '데이터베이스 이름은 필수입니다.',
     'error_db_username_required' => '데이터베이스 사용자명을 입력해주세요.',
     'error_db_credentials_required' => '데이터베이스명과 사용자명은 필수입니다.',
+    'error_db_username_privileged' => '보안상 :username 계정으로는 설치할 수 없습니다. 최고 권한 계정이 유출되면 데이터베이스 전체가 위험해집니다. G7 전용 데이터베이스 사용자를 새로 만들어 필요한 권한만 부여한 뒤 입력해주세요.',
     'error_db_prefix_too_long' => '테이블 접두사는 최대 :max자까지 가능합니다. (입력: :current자) 접두사가 길면 일부 테이블의 인덱스명이 데이터베이스 한도를 초과합니다.',
     'error_db_privileges_insufficient' => '데이터베이스에 필요한 권한이 부족합니다.',
     'error_db_not_tested' => '데이터베이스 연결 테스트를 먼저 수행해주세요.',
@@ -232,6 +234,12 @@ return [
     // HTTPS 메시지
     'https_enabled' => 'HTTPS가 활성화되어 있습니다. (권장)',
     'https_disabled' => 'HTTPS가 비활성화되어 있습니다. 보안을 위해 HTTPS 사용을 권장합니다.',
+
+    // OPcache 메시지
+    'opcache_enabled' => 'OPcache가 활성화되어 있습니다. (권장)',
+    'opcache_disabled_short' => '비활성화됨 — 응답 속도 저하',
+    'opcache_disabled_warning' => 'OPcache가 비활성화되어 있습니다. 매 요청마다 PHP 코드를 다시 해석하므로 사이트 응답 속도가 눈에 띄게 느려집니다. php.ini에서 opcache.enable=1 설정을 권장합니다.',
+    'opcache_unknown' => 'OPcache 상태를 확인할 수 없습니다. 서버에서 설정 조회가 제한되어 있습니다.',
 
     // API 응답 메시지
     'api_method_not_allowed' => 'POST 요청만 허용됩니다.',

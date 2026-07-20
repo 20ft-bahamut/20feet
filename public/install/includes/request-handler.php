@@ -120,6 +120,32 @@ function handleStep2Post(): void
 }
 
 /**
+ * DB 사용자명을 검증해 에러 배열에 결과를 기록합니다.
+ *
+ * 빈 값(설정 누락)과 DB 최고권한 계정을 모두 거부합니다. 최고권한 계정 자격증명이
+ * 유출되면 데이터베이스 전체가 위험해지므로 설치 단계에서 차단합니다.
+ * 판정은 App\Support\PrivilegedDatabaseAccounts 가 SSoT 입니다.
+ *
+ * @param  string  $username  입력된 DB 사용자명
+ * @param  string  $field  에러 배열에 사용할 필드명 (db_write_username 등)
+ * @param  array  &$errors  에러 배열 (참조)
+ */
+function validateDbUsername(string $username, string $field, array &$errors): void
+{
+    $username = trim($username);
+
+    if ($username === '') {
+        $errors[$field] = lang('error_db_username_required');
+
+        return;
+    }
+
+    if (\App\Support\PrivilegedDatabaseAccounts::isBlocked($username)) {
+        $errors[$field] = lang('error_db_username_privileged', ['username' => $username]);
+    }
+}
+
+/**
  * Step 3 POST 처리 (데이터베이스 및 사이트 설정)
  *
  * @param  string  $currentLang  현재 언어
@@ -140,6 +166,7 @@ function handleStep3Post(string $currentLang, array &$formData, array &$errors):
     if (empty($formData['db_write_database'])) {
         $errors['db_write_database'] = lang('error_db_name_required');
     }
+    validateDbUsername($formData['db_write_username'] ?? '', 'db_write_username', $errors);
 
     // Read DB 검증 (사용하는 경우)
     if (! empty($formData['use_read_db'])) {
@@ -149,6 +176,7 @@ function handleStep3Post(string $currentLang, array &$formData, array &$errors):
         if (empty($formData['db_read_database'])) {
             $errors['db_read_database'] = lang('error_db_name_required');
         }
+        validateDbUsername($formData['db_read_username'] ?? '', 'db_read_username', $errors);
     }
 
     // 관리자 정보 검증
