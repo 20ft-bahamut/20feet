@@ -13,6 +13,7 @@
  */
 
 import { createLogger } from '../utils/Logger';
+import { suffixed } from '../support/assetUrl';
 
 const logger = createLogger('TranslationEngine');
 
@@ -221,19 +222,21 @@ export class TranslationEngine {
 
     try {
       // API 호출 (캐시 버전 쿼리 파라미터 추가, bustCache가 true면 타임스탬프도 추가)
-      let url = `${apiBaseUrl}/templates/${templateId}/lang/${locale}.json`;
-
-      // 쿼리 파라미터 구성
-      const queryParams: string[] = [];
-      if (this.cacheVersion > 0) {
-        queryParams.push(`v=${this.cacheVersion}`);
-      }
+      // 자산 URL 모드에 따라 `.json` 접미사가 붙거나 빠진다.
+      // 이 경로는 편집기 전용이 아니라 **모든 페이지가 타는 런타임 공통 경로**라,
+      // 여기만 확장자를 직접 조립하면 extensionless 환경에서 다국어가 통째로 404 가 되어
+      // 이슈 #486 의 원래 증상(화면이 온전히 뜨지 않음)이 다국어 계층에서 재현된다.
+      const extraParams: string[] = [];
       if (bustCache) {
-        queryParams.push(`_=${Date.now()}`);
+        extraParams.push(`_=${Date.now()}`);
       }
-      if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`;
-      }
+
+      const url = suffixed(
+        `${apiBaseUrl}/templates/${templateId}/lang/${locale}`,
+        'json',
+        this.cacheVersion > 0 ? this.cacheVersion : null,
+        extraParams.length > 0 ? extraParams.join('&') : undefined,
+      );
 
       const response = await fetch(url);
 

@@ -20,6 +20,10 @@ class AllowedTemplateFileType implements ValidationRule
         // Data
         'json',
 
+        // Source maps — dev 빌드 산출물의 소스맵 참조 대응.
+        // prod 빌드는 소스맵 참조를 포함하지 않는다.
+        'map',
+
         // Images
         'png', 'jpg', 'jpeg', 'svg', 'webp', 'gif',
 
@@ -32,26 +36,26 @@ class AllowedTemplateFileType implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             $fail(__('validation.template_path.must_be_string'));
+
             return;
         }
 
         $extension = strtolower(pathinfo($value, PATHINFO_EXTENSION));
 
-        if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
+        if (! in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
             $fail(__('validation.template_path.file_type_not_allowed', [
                 'extension' => $extension,
                 'allowed' => implode(', ', self::ALLOWED_EXTENSIONS),
             ]));
+
             return;
         }
     }
 
     /**
      * 허용된 확장자 목록 반환
-     *
-     * @return array
      */
     public static function getAllowedExtensions(): array
     {

@@ -20,6 +20,10 @@ class AllowedPluginFileType implements ValidationRule
         // Data
         'json',
 
+        // Source maps — dev 빌드의 `//# sourceMappingURL` 이 개별 에셋 서빙 URL 을
+        // 가리키므로 허용 필요. prod 는 ExtensionBundleService 가 참조 자체를 strip 한다.
+        'map',
+
         // Images
         'png', 'jpg', 'jpeg', 'svg', 'webp', 'gif', 'ico',
 

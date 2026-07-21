@@ -1,5 +1,6 @@
 import { AuthManager } from '../auth/AuthManager';
 import { createLogger } from '../utils/Logger';
+import { suffixed } from '../support/assetUrl';
 
 const logger = createLogger('Router');
 
@@ -107,10 +108,10 @@ export class Router {
    */
   async loadRoutes(cacheVersion?: number): Promise<void> {
     try {
-      const versionQuery = cacheVersion !== undefined && cacheVersion > 0
-        ? `?v=${cacheVersion}`
-        : '';
-      const response = await fetch(`/api/templates/${this.templateIdentifier}/routes.json${versionQuery}`);
+      const version = cacheVersion !== undefined && cacheVersion > 0 ? cacheVersion : null;
+      const response = await fetch(
+        suffixed(`/api/templates/${this.templateIdentifier}/routes`, 'json', version),
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to load routes: ${response.statusText}`);

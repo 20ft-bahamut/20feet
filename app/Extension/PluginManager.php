@@ -41,6 +41,7 @@ use App\Models\Template;
 use App\Providers\CoreServiceProvider;
 use App\Services\DriverRegistryService;
 use App\Services\LayoutExtensionService;
+use App\Support\AssetUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -1094,8 +1095,8 @@ class PluginManager implements PluginManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1190,8 +1191,8 @@ class PluginManager implements PluginManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1268,8 +1269,8 @@ class PluginManager implements PluginManagerInterface
 
             if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                 $assets = [
-                    'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                    'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                    'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                    'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                     'priority' => $loadingConfig['priority'] ?? 100,
                 ];
             }

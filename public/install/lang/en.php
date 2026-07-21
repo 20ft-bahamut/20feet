@@ -1,4 +1,5 @@
 <?php
+
 // /install/lang/en.php
 
 return [
@@ -424,7 +425,7 @@ return [
     'abort_rollback_success' => '[Aborted] Rollback completed: :message',
     'abort_rollback_failed' => '[Aborted] Rollback failed: :message (continuing)',
     'abort_no_rollback_needed' => '[Aborted] No rollback needed. (current_task is null or already completed)',
-    'abort_by_user' => "[Aborted] User aborted installation. (Current task: :task)",
+    'abort_by_user' => '[Aborted] User aborted installation. (Current task: :task)',
     'abort_installation_stopped' => 'Installation aborted.',
 
     // Worker Failed Task Rollback Messages
@@ -548,7 +549,7 @@ return [
     'validation_incomplete_title' => 'Please complete the following items:',
     'confirm_leave_page' => 'Settings have not been saved. Are you sure you want to leave this page?',
     'installation_in_progress_alert' => 'Installation is in progress. Do you want to go back to the settings page?',
-    'confirm_go_to_settings' => "Do you want to go back to the settings page?",
+    'confirm_go_to_settings' => 'Do you want to go back to the settings page?',
     'confirm_go_to_settings_simple' => "Do you want to go back to the settings page?\n\nInstallation state will be reset and all tasks will start from the beginning.\n\n⚠️ Database tables will NOT be deleted automatically.\nPlease clean up manually using phpMyAdmin if needed.",
     'confirm_go_to_settings_title' => 'Go to Settings Page',
     'confirm_go_to_settings_desc' => 'Installation state will be reset and all tasks will start from the beginning.\n\n⚠️ Database tables will NOT be deleted automatically. Please clean up manually using phpMyAdmin if needed.',
@@ -712,7 +713,7 @@ Firewalls or proxies may be blocking long-lived HTTP connections.',
     'deselect_all' => 'Deselect All',
 
     // install-worker.php i18n keys
-        'db_task_abort_detected_before_start' => '[DB Task] Abort detected before start - skipping task.',
+    'db_task_abort_detected_before_start' => '[DB Task] Abort detected before start - skipping task.',
     'db_task_failed_rollback_start' => '[DB Task] :task failed - starting rollback.',
     'db_task_abort_reason_connection' => 'Connection lost',
     'db_task_abort_reason_user' => 'User requested',
@@ -831,6 +832,15 @@ Firewalls or proxies may be blocking long-lived HTTP connections.',
     'core_update_settings' => 'Core Update Settings (Optional)',
     'core_update_pending_path' => 'Update Pending Directory Path',
     'core_update_pending_path_help' => 'Leave empty to use the default (storage/app/core_pending). Enter an absolute path or a path relative to the Gnuboard7 root to use a custom location.',
+
+    // 자산 URL 방식 (이슈 #486)
+    'asset_url_mode' => 'Asset file URL style',
+    'asset_url_mode_extension' => 'Use file extensions (recommended)',
+    'asset_url_mode_extensionless' => 'No file extensions',
+    'asset_url_mode_help' => 'Detected automatically from your server setup. Some servers intercept .js/.css/.json URLs and pages fail to load; choose no extensions in that case.',
+    'asset_url_mode_detected_extension' => 'Detected: file extensions work fine on this server.',
+    'asset_url_mode_detected_extensionless' => 'Detected: the server intercepts extension URLs, so no extensions was selected.',
+    'asset_url_mode_detected_unavailable' => 'Could not detect. If pages fail to load after installation, try switching to no extensions.',
     'core_update_github_url' => 'GitHub Repository URL',
     'core_update_github_url_help' => 'GitHub repository URL to check for core updates.',
     'core_update_github_token' => 'GitHub Access Token',
@@ -915,4 +925,3 @@ Firewalls or proxies may be blocking long-lived HTTP connections.',
     // Relative path alternative
     'or_relative_path' => 'Or from the G7 root directory:',
 ];
-?>

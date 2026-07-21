@@ -1554,10 +1554,93 @@
     /**
      * 실시간 검증 초기화
      */
+    /**
+     * 자산 URL 방식을 브라우저에서 판정해 hidden 필드에 채운다 (이슈 #486 §6·§7).
+     *
+     * 정적 최적화 블록(`location ~* \.(js|css|json)$`)은 정규식 location 이라 프리픽스
+     * location 보다 먼저 매칭되고, 그 안에 PHP 핸들러가 없으면 확장자 붙은 동적 응답이
+     * PHP 에 도달하지 못한 채 404 가 된다. 설치 시점에 판정해 두지 않으면 설치 직후
+     * 첫 화면부터 백지가 된다.
+     *
+     * 판정은 **쌍으로** 던진다. 단일 프로브는 "PHP 자체가 죽음" 과 구분되지 않는다.
+     *
+     *   probe.js 실패 + probe 성공 = 정적 블록 가로채기 확정 → extensionless
+     *   둘 다 성공                  = extension
+     *   둘 다 실패                  = PHP/라우팅 문제 (모드 문제 아님) → 판정 보류
+     *
+     * 성공 판정은 상태코드가 아니라 **본문의 매직 토큰**으로 한다. 상태코드만 보면
+     * "404 대신 200 + 에러 HTML" 이나 catch-all 200 페이지를 반환하는 설정에서
+     * 영원히 오판한다.
+     */
+    async function detectAssetUrlMode() {
+        const field = document.getElementById('asset_url_mode');
+        if (!field) return;
+
+        const TOKEN = 'G7_ASSET_PROBE_OK';
+        const base = (document.querySelector('[name="app_url"]')?.value || '').replace(/\/+$/, '');
+
+        /**
+         * 프로브 1건을 던져 매직 토큰 포함 여부를 반환한다.
+         */
+        const probe = async (path) => {
+            try {
+                const res = await fetch(`${base}${path}`, { cache: 'no-store', credentials: 'omit' });
+                if (!res.ok) return false;
+
+                // Content-Type 도 함께 본다 (L6). 토큰만 검사해도 200+HTML 오판은
+                // 걸러지지만, 계획서는 두 신호를 모두 요구한다.
+                const contentType = res.headers.get('content-type') || '';
+                if (!/javascript|ecmascript/i.test(contentType)) return false;
+
+                return (await res.text()).includes(TOKEN);
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const [withExt, withoutExt] = await Promise.all([
+            probe('/api/system/asset-probe.js'),
+            probe('/api/system/asset-probe'),
+        ]);
+
+        let detected = '';
+        if (withExt && withoutExt) {
+            detected = 'extension';
+        } else if (!withExt && withoutExt) {
+            detected = 'extensionless';
+        }
+        // 둘 다 실패 = 모드 문제가 아니다(PHP/라우팅 장애). 빈 값으로 두어 기본값을 따르게 한다.
+
+        field.value = detected;
+
+        // 수동 override — 감지 결과를 기본 선택으로 채우고 관리자가 바꿀 수 있게 한다.
+        // 프로브가 CSP/프록시 등으로 둘 다 실패하면 자동 판정이 불가하므로,
+        // 손댈 수단이 없으면 설치를 마친 뒤에야 문제를 알게 된다.
+        const select = document.getElementById('asset_url_mode_select');
+        const status = document.getElementById('asset_url_mode_status');
+        if (select) {
+            select.value = detected || 'extension';
+            select.addEventListener('change', function () {
+                field.value = this.value;
+            });
+            // 감지 실패 시에도 select 값이 hidden 에 반영되도록 초기 동기화
+            field.value = select.value;
+        }
+        if (status) {
+            status.textContent = status.getAttribute(
+                detected ? `data-msg-${detected}` : 'data-msg-unavailable'
+            ) || '';
+            status.classList.remove('hidden');
+        }
+    }
+
     function initRealTimeValidation() {
         // Step 3 (config-form)이 있는 경우에만 실행
         const configForm = document.getElementById('config-form');
         if (!configForm) return;
+
+        // 자산 URL 방식 자동 감지 (비차단 — 실패해도 설치 진행에 지장 없음)
+        detectAssetUrlMode();
 
         const fieldsToValidate = [
             'app_name',

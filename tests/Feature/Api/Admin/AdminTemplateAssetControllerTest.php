@@ -2,7 +2,10 @@
 
 namespace Tests\Feature\Api\Admin;
 
+use App\Contracts\Repositories\ModuleRepositoryInterface;
+use App\Enums\ExtensionStatus;
 use App\Http\Controllers\Api\Admin\AdminTemplateAssetController;
+use App\Models\Module;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\Template;
@@ -10,6 +13,7 @@ use App\Models\TemplateLayout;
 use App\Models\TemplateLayoutVersion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -223,17 +227,17 @@ class AdminTemplateAssetControllerTest extends TestCase
         // 모달 수집은 `getActiveModules()`(modules 테이블 status=active) 기준이므로
         // ecommerce 모듈을 활성 상태로 시드한다. requiredExtensions 는 마이그레이션 경로만
         // 등록하고 active 행을 만들지 않는다.
-        \App\Models\Module::query()->updateOrCreate(
+        Module::query()->updateOrCreate(
             ['identifier' => 'sirsoft-ecommerce'],
             [
                 'vendor' => 'sirsoft',
                 'name' => 'E-Commerce',
                 'version' => '1.0.0',
-                'status' => \App\Enums\ExtensionStatus::Active->value,
+                'status' => ExtensionStatus::Active->value,
             ]
         );
-        app(\App\Contracts\Repositories\ModuleRepositoryInterface::class); // 바인딩 보장
-        \Illuminate\Support\Facades\Cache::flush(); // 활성 식별자 캐시 무효화
+        app(ModuleRepositoryInterface::class); // 바인딩 보장
+        Cache::flush(); // 활성 식별자 캐시 무효화
 
         $response = $this->withHeaders([
             'Authorization' => "Bearer {$this->adminToken}",
@@ -430,7 +434,7 @@ class AdminTemplateAssetControllerTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer {$this->adminToken}",
             'Accept' => 'text/css',
-        ])->get('/api/admin/templates/sirsoft-basic/editor/components.css');
+        ])->get('/api/admin/templates/sirsoft-basic/editor/component-styles.css');
 
         $response->assertStatus(200);
         $this->assertStringContainsString('text/css', (string) $response->headers->get('Content-Type'));
@@ -467,7 +471,7 @@ class AdminTemplateAssetControllerTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => "Bearer {$token}",
             'Accept' => 'text/css',
-        ])->get('/api/admin/templates/sirsoft-basic/editor/components.css');
+        ])->get('/api/admin/templates/sirsoft-basic/editor/component-styles.css');
 
         $response->assertStatus(403);
     }
@@ -486,7 +490,7 @@ class AdminTemplateAssetControllerTest extends TestCase
         $response->assertStatus(200);
         $css = $response->json('data.css');
         if (! empty($css)) {
-            $this->assertStringContainsString('/editor/components.css', $css[0], 'CSS URL 은 편집기 전용 엔드포인트여야 한다');
+            $this->assertStringContainsString('/editor/component-styles.css', $css[0], 'CSS URL 은 편집기 전용 엔드포인트여야 한다');
         }
     }
 

@@ -29,6 +29,7 @@ import { webSocketManager } from './websocket/WebSocketManager';
 import { getModuleAssetLoader, parseModuleAssetsFromConfig, parsePluginAssetsFromConfig, parseBundleUrlsFromConfig } from './modules';
 import { SystemBannerManager } from './template-engine/SystemBannerManager';
 import { fetchWithRetry, installUnloadGuard, isDocumentUnloading } from './template-engine/networkResilience';
+import { suffixed } from './support/assetUrl';
 import { resetLocalInitTracking } from './template-engine/localInitSlot';
 /**
  * DevTools 추적 - G7DevToolsCore.getInstance() 직접 호출 대신 G7Core.devTools를 사용합니다.
@@ -472,7 +473,7 @@ export class TemplateApp {
                 // routes.json 로딩 (저장된 캐시 버전 사용)
                 // 네트워크 일시 실패(응답 없음)에만 재시도한다. HTTP 에러는 아래 체인이 종전대로 throw.
                 fetchWithRetry(
-                    `/api/templates/${this.config.templateId}/routes.json${storedCacheVersion > 0 ? `?v=${storedCacheVersion}` : ''}`,
+                    suffixed(`/api/templates/${this.config.templateId}/routes`, 'json', storedCacheVersion > 0 ? storedCacheVersion : null),
                     { label: 'routes.json' }
                 )
                     .then(response => {
@@ -494,7 +495,7 @@ export class TemplateApp {
                 // 사용자 정보 프리로드 (에러 발생 시 무시)
                 authManager.preloadAuth(this.config.templateType === 'admin' ? 'admin' : 'user'),
                 // 템플릿 config.json 로딩 (errorHandling 파싱)
-                fetch(`/api/templates/${this.config.templateId}/config.json`)
+                fetch(suffixed(`/api/templates/${this.config.templateId}/config`, 'json'))
                     .then(response => {
                         if (!response.ok) {
                             // config.json 로드 실패는 무시 (선택적)
@@ -532,7 +533,7 @@ export class TemplateApp {
                     logger.log('Cache version changed, reloading routes...');
                     // routes.json을 새 캐시 버전으로 다시 로드
                     const newRoutesData = await fetchWithRetry(
-                        `/api/templates/${this.config.templateId}/routes.json?v=${this.extensionCacheVersion}`,
+                        suffixed(`/api/templates/${this.config.templateId}/routes`, 'json', this.extensionCacheVersion),
                         { label: 'routes.json (reload)' }
                     )
                         .then(response => {
@@ -2807,7 +2808,7 @@ export class TemplateApp {
         let newVersion: number | undefined;
         try {
             const configResponse = await fetch(
-                `/api/templates/${this.config.templateId}/config.json?_=${Date.now()}`
+                suffixed(`/api/templates/${this.config.templateId}/config`, 'json', null, `_=${Date.now()}`)
             );
             if (configResponse.ok) {
                 const configResult = await configResponse.json();

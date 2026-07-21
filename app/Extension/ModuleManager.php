@@ -41,6 +41,7 @@ use App\Models\Plugin;
 use App\Models\Template;
 use App\Providers\CoreServiceProvider;
 use App\Services\LayoutExtensionService;
+use App\Support\AssetUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -1066,8 +1067,8 @@ class ModuleManager implements ModuleManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1156,8 +1157,8 @@ class ModuleManager implements ModuleManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1304,8 +1305,8 @@ class ModuleManager implements ModuleManagerInterface
 
             if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                 $assets = [
-                    'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                    'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                    'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                    'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                     'priority' => $loadingConfig['priority'] ?? 100,
                 ];
             }

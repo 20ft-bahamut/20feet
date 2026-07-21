@@ -1311,7 +1311,16 @@
       "default_language": "デフォルト言語",
       "select_language": "言語を選択してください",
       "timezone": "タイムゾーン",
-      "select_timezone": "タイムゾーンを選択してください"
+      "select_timezone": "タイムゾーンを選択してください",
+      "asset_url_mode": "アセットファイルアドレス方式",
+      "asset_url_mode_help": "サーバー設定に応じて自動的に選択されます。画面が正常に表示されている場合は変更しないでください。",
+      "asset_url_mode_extension": "拡張子を使用 (推奨)",
+      "asset_url_mode_extensionless": "拡張子を使用しない",
+      "asset_url_mode_detect": "自動検出",
+      "asset_url_mode_detecting": "アセットアドレス方式を検出中です...",
+      "asset_url_mode_detect_extension": "拡張子を使用できる環境です。",
+      "asset_url_mode_detect_extensionless": "サーバーが拡張子アドレスをインターセプトしています。拡張子未使用に変更してから保存してください。",
+      "asset_url_mode_detect_unavailable": "検出に失敗しました。サーバーが応答しないため、方式を判定できません。"
     },
     "mail": {
       "smtp_settings": "SMTP設定",

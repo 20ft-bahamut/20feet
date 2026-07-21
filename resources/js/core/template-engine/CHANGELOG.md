@@ -5,6 +5,25 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.54.0] - 2026-07-20
+
+### Added
+
+#### 자산 URL 이중 모드 — 정적 최적화 서버에서의 동작 보장
+
+- `support/assetUrl.ts`(신규) — 동적 엔드포인트 URL 생성을 한 곳으로 모았다. `getAssetUrlMode()` 가 `window.G7Config.assetUrlMode`(서버가 내려주는 초기값) → `G7Config.settings.general.asset_url_mode` → 기본값 `extension` 순으로 판정하고, `suffixed()` / `templateAsset()` / `moduleAsset()` / `pluginAsset()` / `extensionBundle()` / `layoutUrl()` / `layoutPreviewUrl()` 가 그 모드에 맞는 URL 을 만든다. 서버측 `App\Support\AssetUrl` 와 **동일 규칙**이며, 한쪽만 바꾸면 서버가 만든 URL 과 클라이언트가 만든 URL 이 어긋나 그 자산만 404 가 된다.
+- 배경: nginx 의 정규식 location(`location ~* \.(js|css|json)$`)은 프리픽스 location 보다 먼저 매칭되므로, 확장자 붙은 동적 엔드포인트는 `try_files ... /index.php` 폴백이 실행될 기회 없이 nginx 가 직접 파일시스템을 열려 시도해 404 가 된다. aaPanel/CyberPanel/Plesk 기본 템플릿에 들어있는 블록이다.
+- 확장자 없는 모드의 변환 규칙 — 고정 접미사는 제거(`routes.json` → `routes`), 번들은 접미사가 종류를 구분하므로 세그먼트로 강등(`bundle.js` → `bundle/js`), 와일드카드 자산은 경로가 곧 파일명이라 쿼리로 이동(`assets/{id}/js/a.js` → `assets/{id}?file=js/a.js`). 마지막 형태가 안전한 이유는 nginx 의 location 정규식이 쿼리스트링을 제외한 경로에만 매칭되기 때문이다.
+- `setAssetUrlMode()` 는 **단방향 1회**만 허용한다(`extension → extensionless`). 역방향을 허용하면 양쪽 형태가 모두 실패하는 상황(PHP 다운·WAF 차단)에서 무한 왕복이 된다. 서버 설정은 바꾸지 않는다 — 미인증 클라이언트가 전역 설정을 뒤집을 수 있으면 안 된다.
+- `restoreCachedMode()` 의 localStorage 캐시는 키에 `cache_version` 을 포함하고 24시간 TTL 을 둔다. 서버가 정상화된 뒤에도 클라이언트가 옛 모드에 영구 고착되지 않도록 하기 위함이다.
+
+### Changed
+
+#### 동적 엔드포인트 URL 생성부 14지점을 빌더 경유로 전환
+
+- `routing/Router.ts`, `TemplateApp.ts`(4), `ComponentRegistry.ts`, `ErrorPageHandler.ts`, `LayoutLoader.ts`(2), `layout-editor/LayoutEditorChrome.tsx`, `layout-editor/hooks/{useEditorTemplateAssets,useInlineEdit,useLayoutDocument,useExtensionDocument}.ts` — `routes.json`·`config.json`·`components.json`·레이아웃 JSON URL 을 모두 `suffixed()` 로 생성한다.
+- 기본 모드(`extension`)에서 생성 결과는 치환 이전과 **문자열까지 동일**하다. `suffixed()` 는 추가 쿼리를 `v` 보다 앞에 놓는데(`?with_source_meta=1&v=...`), 이는 편집기 문서 로드 호출부의 기존 순서를 보존하기 위한 것이다 — 쿼리 순서가 바뀌면 의미는 같아도 URL 문자열이 달라져 HTTP 캐시 키가 갈린다.
+
 ## [engine-v1.53.1] - 2026-07-12
 
 ### Fixed

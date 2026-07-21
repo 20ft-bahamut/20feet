@@ -1,4 +1,5 @@
 <?php
+
 // /install/lang/ko.php
 
 return [
@@ -424,7 +425,7 @@ return [
     'abort_rollback_success' => '[중단] 롤백 완료: :message',
     'abort_rollback_failed' => '[중단] 롤백 실패: :message (계속 진행)',
     'abort_no_rollback_needed' => '[중단] 롤백할 작업이 없습니다. (current_task가 null이거나 이미 완료됨)',
-    'abort_by_user' => "[중단] 사용자가 설치를 중단했습니다. (현재 작업: :task)",
+    'abort_by_user' => '[중단] 사용자가 설치를 중단했습니다. (현재 작업: :task)',
     'abort_installation_stopped' => '설치가 중단되었습니다.',
 
     // Worker 실패 시 롤백 관련 메시지
@@ -548,7 +549,7 @@ return [
     'validation_incomplete_title' => '다음 항목을 완료해주세요:',
     'confirm_leave_page' => '설정이 저장되지 않았습니다. 페이지를 나가시겠습니까?',
     'installation_in_progress_alert' => '설치가 진행 중입니다. 설정 페이지로 돌아가시겠습니까?',
-    'confirm_go_to_settings' => "설정 페이지로 이동하시겠습니까?",
+    'confirm_go_to_settings' => '설정 페이지로 이동하시겠습니까?',
     'confirm_go_to_settings_simple' => "설정 페이지로 이동하시겠습니까?\n\n설치 상태가 초기화되며, 모든 작업이 처음부터 다시 실행됩니다.\n\n⚠️ 데이터베이스에 생성된 테이블은 자동으로 삭제되지 않습니다.\n필요 시 phpMyAdmin 등을 통해 수동으로 정리해주세요.",
     'confirm_go_to_settings_title' => '설정 페이지로 이동',
     'confirm_go_to_settings_desc' => '설치 상태가 초기화되며, 모든 작업이 처음부터 다시 실행됩니다.\n\n⚠️ 데이터베이스에 생성된 테이블은 자동으로 삭제되지 않습니다. 필요 시 phpMyAdmin 등을 통해 수동으로 정리해주세요.',
@@ -712,7 +713,7 @@ ini_set(\'zlib.output_compression\', \'off\');
     'deselect_all' => '전체 해제',
 
     // install-worker.php 다국어 키
-        'db_task_abort_detected_before_start' => '[DB 작업] 시작 전 중단 상태 감지 - 작업을 건너뜁니다.',
+    'db_task_abort_detected_before_start' => '[DB 작업] 시작 전 중단 상태 감지 - 작업을 건너뜁니다.',
     'db_task_failed_rollback_start' => '[DB 작업] :task 실패 - 롤백을 시작합니다.',
     'db_task_abort_reason_connection' => '연결 끊김',
     'db_task_abort_reason_user' => '사용자 요청',
@@ -831,6 +832,15 @@ ini_set(\'zlib.output_compression\', \'off\');
     'core_update_settings' => '코어 업데이트 설정 (선택)',
     'core_update_pending_path' => '업데이트 대기 디렉토리 경로',
     'core_update_pending_path_help' => '비워두면 기본값(storage/app/core_pending)을 사용합니다. 외부 경로를 사용하려면 절대 경로 또는 그누보드7 루트 기준 상대 경로를 입력하세요.',
+
+    // 자산 URL 방식 (이슈 #486)
+    'asset_url_mode' => '자산 파일 주소 방식',
+    'asset_url_mode_extension' => '확장자 사용 (권장)',
+    'asset_url_mode_extensionless' => '확장자 미사용',
+    'asset_url_mode_help' => '서버 설정을 자동으로 감지해 선택합니다. 일부 서버는 .js/.css/.json 주소를 가로채 화면이 뜨지 않는데, 그 경우 확장자 미사용을 선택하세요.',
+    'asset_url_mode_detected_extension' => '감지 결과: 확장자를 사용할 수 있는 환경입니다.',
+    'asset_url_mode_detected_extensionless' => '감지 결과: 서버가 확장자 주소를 가로채고 있어 확장자 미사용을 선택했습니다.',
+    'asset_url_mode_detected_unavailable' => '감지하지 못했습니다. 설치 후 화면이 뜨지 않으면 확장자 미사용으로 바꿔 보세요.',
     'core_update_github_url' => 'GitHub 저장소 URL',
     'core_update_github_url_help' => '코어 업데이트를 확인할 GitHub 저장소 URL입니다.',
     'core_update_github_token' => 'GitHub 액세스 토큰',
@@ -915,4 +925,3 @@ ini_set(\'zlib.output_compression\', \'off\');
     // 상대경로 병기 안내
     'or_relative_path' => '또는 그누보드7 루트 디렉토리에서:',
 ];
-?>

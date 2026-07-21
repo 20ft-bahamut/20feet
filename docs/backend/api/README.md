@@ -105,6 +105,52 @@ Authorization: Bearer {YOUR_TOKEN}
 }
 ```
 
+### 자산 URL 이중 모드
+
+정적 파일 확장자(`.js` / `.css` / `.json`)로 끝나는 동적 엔드포인트는 **확장자 없는 형태를 함께 제공**합니다.
+아래 문서에 실린 URI 는 확장자 형태를 기준으로 표기하지만, 각 엔드포인트는 대응하는 확장자 없는 형태로도
+동일한 응답·동일한 권한 가드로 호출할 수 있습니다.
+
+이유는 서버 설정입니다. nginx/Apache 의 표준적 정적 최적화 블록은 URL 마지막 확장자로 분기하며,
+nginx 에서 정규식 location 은 프리픽스 location 보다 먼저 매칭되므로 `try_files ... /index.php` 폴백이
+실행될 기회가 없습니다. 그런 환경에서는 확장자 붙은 동적 응답이 PHP 에 도달하지 못하고 404 가 됩니다.
+
+```nginx
+location ~* \.(js|css|json)$ { expires max; access_log off; }
+```
+
+| 확장자 형태 | 확장자 없는 형태 | 변환 규칙 |
+| --- | --- | --- |
+| `/api/templates/{id}/routes.json` | `/api/templates/{id}/routes` | 접미사 제거 |
+| `/api/layouts/{tpl}/{layout}.json` | `/api/layouts/{tpl}/{layout}` | 접미사 제거 |
+| `/api/modules/bundle.js` | `/api/modules/bundle/js` | 접미사를 경로 세그먼트로 (js/css 구분이 필요) |
+| `/api/templates/assets/{id}/js/a.js` | `/api/templates/assets/{id}?file=js/a.js` | 파일 경로를 `file` 쿼리로 (경로가 곧 파일명이라 제거 불가) |
+
+`file` 쿼리 형태가 안전한 이유는 nginx 의 location 정규식이 쿼리스트링을 제외한 경로에만 매칭되기 때문입니다.
+확장자 없는 형태에도 경로 탈출 방어와 확장자 화이트리스트가 동일하게 적용됩니다.
+
+두 형태는 **모두 영구 유지**됩니다. 확장자 형태를 제거하면 URL 을 하드코딩한 서드파티 확장이 깨집니다.
+
+어느 형태를 쓸지는 서버 환경에 따라 결정되며, 다음 프로브 엔드포인트로 판정합니다.
+
+| 메서드 | URI | 인증/권한 | 설명 |
+| --- | --- | --- | --- |
+| GET | `/api/system/asset-probe.js` | 공개 (인증 불필요) | 확장자 형태 프로브 |
+| GET | `/api/system/asset-probe` | 공개 (인증 불필요) | 대조군 |
+
+두 URL 을 **브라우저에서** 쌍으로 요청합니다(서버측 loopback curl 은 vhost·프록시 체인을 우회해 오판합니다).
+응답은 `application/javascript` 이며 본문에 매직 토큰 `G7_ASSET_PROBE_OK` 를 담습니다. DB 에 접근하지 않고
+`Cache-Control: no-store` 로 캐시되지 않습니다.
+
+| `asset-probe.js` | `asset-probe` | 판정 |
+| --- | --- | --- |
+| 성공 | 성공 | 확장자 형태 사용 가능 |
+| 실패 | 성공 | 정적 블록 가로채기 확정 — 확장자 없는 형태 사용 |
+| 실패 | 실패 | 모드 문제가 아님 (PHP/라우팅 장애) |
+
+성공 판정은 상태코드가 아니라 **본문의 매직 토큰과 Content-Type** 으로 합니다. 상태코드만 보면
+"404 대신 200 + 에러 HTML" 이나 catch-all 200 페이지를 반환하는 설정에서 영원히 오판합니다.
+
 ## 코어 API 레퍼런스
 
 <!-- @generated:start:api-readme-index -->

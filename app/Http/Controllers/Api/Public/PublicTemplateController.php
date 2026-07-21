@@ -88,13 +88,16 @@ class PublicTemplateController extends PublicBaseController
     /**
      * 템플릿 정적 파일 서빙
      *
-     * @param  ServeTemplateAssetRequest  $request  요청 (FormRequest 검증)
+     * @param  ServeTemplateAssetRequest  $request  요청 (FormRequest 검증, 파일 경로 `path` 포함)
      * @param  string  $identifier  템플릿 식별자
-     * @param  string  $path  요청 경로
      * @return BinaryFileResponse|JsonResponse|Response 파일 응답 또는 에러
      */
-    public function serveAsset(ServeTemplateAssetRequest $request, string $identifier, string $path): BinaryFileResponse|JsonResponse|Response
+    public function serveAsset(ServeTemplateAssetRequest $request, string $identifier): BinaryFileResponse|JsonResponse|Response
     {
+        // 파일 경로는 FormRequest 에서 받는다 — 확장자 모드는 `{path}` 라우트 세그먼트,
+        // 확장자 없는 모드는 `?file=` 쿼리로 오며 prepareForValidation() 이 이를 흡수한다.
+        $path = (string) $request->validated('path');
+
         // FormRequest에서 이미 보안 검증 완료
         // API 사용량 기록
         $this->logApiUsage('templates.assets', ['identifier' => $identifier, 'path' => $path]);

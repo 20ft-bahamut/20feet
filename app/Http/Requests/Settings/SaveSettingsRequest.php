@@ -5,6 +5,7 @@ namespace App\Http\Requests\Settings;
 use App\Extension\HookManager;
 use App\Models\Attachment;
 use App\Search\Engines\DatabaseFulltextEngine;
+use App\Support\AssetUrl;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -174,6 +175,13 @@ class SaveSettingsRequest extends FormRequest
             'general.language' => $this->getTabRules($tab, 'general', [Rule::in(config('app.supported_locales', ['ko', 'en']))]),
             'general.currency' => ['nullable', 'string', 'max:10'],
             'general.maintenance_mode' => ['nullable', 'boolean'],
+            // 자산 URL 방식 — 정적 최적화 서버 대응 (이슈 #486).
+            // 임의 문자열이 들어오면 AssetUrl::mode() 가 기본값으로 폴백하지만,
+            // 저장 단계에서 막아 설정 파일에 뜻 모를 값이 남지 않게 한다.
+            'general.asset_url_mode' => ['nullable', 'string', Rule::in([
+                AssetUrl::MODE_EXTENSION,
+                AssetUrl::MODE_EXTENSIONLESS,
+            ])],
             'general.site_logo' => ['nullable', 'array'],
             'general.site_logo.*' => ['integer', Rule::exists(Attachment::class, 'id')],
 

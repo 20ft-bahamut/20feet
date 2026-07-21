@@ -1657,6 +1657,14 @@ if (! function_exists('createSettingsJsonSSE')) {
 
             $defaults['general']['language'] = getCurrentLanguage();
 
+            // 자산 URL 방식 (이슈 #486) — 설치 화면이 브라우저에서 프로브를 던져 판정한 결과.
+            // 정적 최적화 블록(`location ~* \.(js|css|json)$`)이 있는 서버는 확장자 붙은
+            // 동적 응답이 PHP 에 도달하지 못하므로 확장자 없는 형태로 설치를 마쳐야 한다.
+            // 미판정(구버전 설치 화면·프로브 실패)이면 defaults.json 의 기본값을 그대로 둔다.
+            if (in_array($config['asset_url_mode'] ?? null, ['extension', 'extensionless'], true)) {
+                $defaults['general']['asset_url_mode'] = $config['asset_url_mode'];
+            }
+
             foreach ($categories as $category) {
                 if (! isset($defaults[$category])) {
                     sendSSEEvent('log', ['message' => "  - {$category}.json skipped (no defaults)"]);
