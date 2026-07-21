@@ -841,6 +841,8 @@ ini_set(\'zlib.output_compression\', \'off\');
     'asset_url_mode_detected_extension' => '감지 결과: 확장자를 사용할 수 있는 환경입니다.',
     'asset_url_mode_detected_extensionless' => '감지 결과: 서버가 확장자 주소를 가로채고 있어 확장자 미사용을 선택했습니다.',
     'asset_url_mode_detected_unavailable' => '감지하지 못했습니다. 설치 후 화면이 뜨지 않으면 확장자 미사용으로 바꿔 보세요.',
+    'asset_url_mode_checking' => '확인 중…',
+    'asset_url_mode_unknown' => '확인 불가',
     'core_update_github_url' => 'GitHub 저장소 URL',
     'core_update_github_url_help' => '코어 업데이트를 확인할 GitHub 저장소 URL입니다.',
     'core_update_github_token' => 'GitHub 액세스 토큰',

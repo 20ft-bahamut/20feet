@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Admin;
 
+use App\Contracts\Extension\ModuleManagerInterface;
 use App\Contracts\Repositories\ModuleRepositoryInterface;
 use App\Enums\ExtensionStatus;
 use App\Http\Controllers\Api\Admin\AdminTemplateAssetController;
@@ -238,6 +239,15 @@ class AdminTemplateAssetControllerTest extends TestCase
         );
         app(ModuleRepositoryInterface::class); // 바인딩 보장
         Cache::flush(); // 활성 식별자 캐시 무효화
+
+        // 디스크 스캔을 명시적으로 수행한다.
+        //
+        // `getActiveModules()` 는 "디스크에서 로드된 모듈"(loadModules) 과 "DB 의 활성
+        // 식별자" 의 **교집합**이다. 부팅 시점에는 RefreshDatabase 로 modules 테이블이
+        // 비어 있어 디스크 스캔이 일어나지 않으므로, 위에서 행을 심어도 교집합이 공집합인
+        // 채로 남는다. 이 호출이 없으면 결과가 부팅 전 캐시 상태에 좌우돼
+        // (파일 캐시에 활성 식별자가 남아 있으면 통과, 비면 실패) 순서 의존 테스트가 된다.
+        app(ModuleManagerInterface::class)->loadModules();
 
         $response = $this->withHeaders([
             'Authorization' => "Bearer {$this->adminToken}",
