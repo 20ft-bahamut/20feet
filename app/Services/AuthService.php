@@ -196,6 +196,8 @@ class AuthService
             'nickname' => $data['nickname'] ?? null,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'mobile' => $data['mobile'] ?? null,
+            'phone' => $data['phone'] ?? null,
             'language' => $data['language'] ?? 'ko',
             'country' => $this->detectCountryFromAcceptLanguage(),
             'ip_address' => request()->ip(),

@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.2] - 2026-07-22
+
+### Added
+
+- 회원가입 화면의 휴대폰번호·전화번호 입력란 라벨·안내 문구(`auth.mobile`, `auth.phone`) 일본어 번역 추가 — 회원가입 시 연락처 입력란이 일본어 로케일에서 자연스럽게 표시됩니다.
+
 ## [1.0.1] - 2026-07-08
 
 ### Added
