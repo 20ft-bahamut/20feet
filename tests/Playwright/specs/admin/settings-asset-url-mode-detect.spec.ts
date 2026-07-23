@@ -41,6 +41,12 @@ test('#486 - 자동 감지 버튼이 관리자 다른 버튼과 동일한 btn �
   const button = page.locator(DETECT_BUTTON);
   await expect(button).toBeAttached();
 
+  // 에셋 서빙 방식은 언어/시간대와 무관한 인프라 설정이므로 지역화 카드가 아니라
+  // 전용 카드(#card_asset_serving)에 있어야 한다 — 배치 회귀 가드.
+  await expect(page.locator('#card_asset_serving')).toBeAttached();
+  await expect(page.locator(`#card_asset_serving ${FIELD}`)).toBeAttached();
+  await expect(page.locator(`#card_localization ${FIELD}`)).toHaveCount(0);
+
   // btn 베이스 클래스 누락이 이 이슈의 원인이었다 (평문처럼 보임) — 클래스 회귀 가드.
   await expect(button).toHaveClass(/\bbtn\b/);
   await expect(button).toHaveClass(/btn-secondary/);
