@@ -164,15 +164,23 @@ class GenericNotificationViaTest extends TestCase
     /**
      * NotificationChannelService::isChannelEnabledForExtension()의 응답을 mocking.
      *
+     * getAvailableChannels() 는 기본적으로 mail/database 만 반환하도록 mock 한다
+     * (비활성 확장 채널 제외 회귀 테스트가 available 목록을 재정의할 수 있도록).
+     *
      * @param  array<string, bool>  $channelMap
+     * @param  array<int, string>|null  $availableIds  available 채널 id 목록(미지정 시 mail/database)
      */
-    private function mockChannelEnabled(array $channelMap): void
+    private function mockChannelEnabled(array $channelMap, ?array $availableIds = null): void
     {
+        $availableIds ??= ['mail', 'database'];
+
         $mock = Mockery::mock(NotificationChannelService::class);
         $mock->shouldReceive('isChannelEnabledForExtension')
             ->andReturnUsing(function ($type, $identifier, $channel) use ($channelMap) {
                 return $channelMap[$channel] ?? true;
             });
+        $mock->shouldReceive('getAvailableChannels')
+            ->andReturn(array_map(static fn (string $id) => ['id' => $id], $availableIds));
         $this->app->instance(NotificationChannelService::class, $mock);
     }
 
@@ -298,6 +306,55 @@ class GenericNotificationViaTest extends TestCase
         $channels = $notification->via($this->user);
 
         $this->assertEmpty($channels);
+    }
+
+    /**
+     * 사용 가능한 채널 목록에 없는 채널(비활성 확장이 제공하던 채널)은 via() 가 제외한다.
+     *
+     * 회귀: 비즈뿌리오 등 확장이 비활성이면 그 확장의 채널(sms/alimtalk)이 getAvailableChannels()
+     * 에서 빠진다. 하지만 저장된 채널 설정·템플릿은 남아 있어, via() 가 available 목록을 확인하지
+     * 않으면 죽은 채널을 발송 후보로 넣고 "건너뜀" 로그까지 남긴다. available 목록에 없는 채널은
+     * 로그 없이 제외되어야 한다 (채널 지정 경로).
+     */
+    public function test_via_with_explicit_channel_excludes_channel_not_in_available_list(): void
+    {
+        // available = mail/database 만 (sms 는 비활성 확장이라 목록에 없음)
+        $this->mockChannelEnabled(['sms' => true], availableIds: ['mail', 'database']);
+
+        $notification = new GenericNotification(
+            type: 'test_via_check',
+            hookPrefix: 'core.test',
+            data: [],
+            extensionType: 'core',
+            extensionIdentifier: 'core',
+            channel: 'sms'
+        );
+        $channels = $notification->via($this->user);
+
+        $this->assertEmpty($channels, '사용 가능 목록에 없는 sms 는 발송 후보에서 빠져야 한다.');
+        // 로그도 남지 않아야 한다 (건너뜀 기록 X)
+        $this->assertDatabaseMissing('notification_logs', ['channel' => 'sms']);
+    }
+
+    /**
+     * 다채널 자동 결정 경로에서도 available 목록에 없는 채널은 로그 없이 제외된다.
+     */
+    public function test_via_multichannel_excludes_channel_not_in_available_list(): void
+    {
+        $this->createTemplate('mail');
+        $this->createTemplate('database');
+
+        // 정의 채널에 sms 를 포함시키되 available 목록에는 없게 한다
+        $this->definition->update(['channels' => ['mail', 'database', 'sms']]);
+        $this->mockChannelEnabled([], availableIds: ['mail', 'database']);
+
+        $notification = new GenericNotification('test_via_check', 'core.test');
+        $channels = $notification->via($this->user);
+
+        $this->assertNotContains('sms', $channels, '사용 가능 목록에 없는 sms 는 제외되어야 한다.');
+        $this->assertContains('mail', $channels);
+        $this->assertContains('database', $channels);
+        $this->assertDatabaseMissing('notification_logs', ['channel' => 'sms']);
     }
 
     /**
