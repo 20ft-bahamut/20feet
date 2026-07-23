@@ -834,12 +834,12 @@ ini_set(\'zlib.output_compression\', \'off\');
     'core_update_pending_path_help' => '비워두면 기본값(storage/app/core_pending)을 사용합니다. 외부 경로를 사용하려면 절대 경로 또는 그누보드7 루트 기준 상대 경로를 입력하세요.',
 
     // 자산 URL 방식 (이슈 #486)
-    'asset_url_mode' => '자산 파일 주소 방식',
+    'asset_url_mode' => '에셋 파일 서빙 방식',
     'asset_url_mode_extension' => '확장자 사용 (권장)',
     'asset_url_mode_extensionless' => '확장자 미사용',
-    'asset_url_mode_help' => '서버 설정을 자동으로 감지해 선택합니다. 일부 서버는 .js/.css/.json 주소를 가로채 화면이 뜨지 않는데, 그 경우 확장자 미사용을 선택하세요.',
+    'asset_url_mode_help' => '서버 설정을 자동으로 감지해 선택합니다. 정적 파일 최적화 규칙(nginx의 location ~* \\.(js|css|json|png|jpg|jpeg|gif|ico|svg|woff2?)$ 블록 등)이 확장자 주소를 가로채면 화면이 뜨지 않는데, 그 경우 확장자 미사용을 선택하세요.',
     'asset_url_mode_detected_extension' => '감지 결과: 확장자를 사용할 수 있는 환경입니다.',
-    'asset_url_mode_detected_extensionless' => '감지 결과: 서버가 확장자 주소를 가로채고 있어 확장자 미사용을 선택했습니다.',
+    'asset_url_mode_detected_extensionless' => '감지 결과: 정적 파일 최적화 규칙(nginx location ~* \\.(js|css|json|...)$ 블록 등)이 확장자 주소를 가로채고 있어 확장자 미사용을 선택했습니다.',
     'asset_url_mode_detected_unavailable' => '감지하지 못했습니다. 설치 후 화면이 뜨지 않으면 확장자 미사용으로 바꿔 보세요.',
     'asset_url_mode_checking' => '확인 중…',
     'asset_url_mode_unknown' => '확인 불가',

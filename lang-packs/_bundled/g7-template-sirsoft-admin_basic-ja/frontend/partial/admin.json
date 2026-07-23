@@ -140,7 +140,7 @@
       "subtitle": "最近送信された通知履歴",
       "empty": "送信された通知がありません"
     },
-    "asset_url_mode_drift_title": "アセットファイルアドレス方式がサーバー環境と異なります",
+    "asset_url_mode_drift_title": "アセットファイル配信方式がサーバー環境と異なります",
     "asset_url_mode_drift_description": "保存された方式では一部のアドレスがサーバーに遮断され、画面が表示されない可能性があります。訪問者画面はブラウザが自動的に補正しますが、検索エンジンボットには補正が適用されないため、環境設定で検出結果を保存してください。",
     "asset_url_mode_drift_action": "環境設定 > 一般で確認する"
   },
@@ -1315,14 +1315,14 @@
       "select_language": "言語を選択してください",
       "timezone": "タイムゾーン",
       "select_timezone": "タイムゾーンを選択してください",
-      "asset_url_mode": "アセットファイルアドレス方式",
+      "asset_url_mode": "アセットファイル配信方式",
       "asset_url_mode_help": "サーバー設定に応じて自動的に選択されます。画面が正常に表示されている場合は変更しないでください。",
       "asset_url_mode_extension": "拡張子を使用 (推奨)",
       "asset_url_mode_extensionless": "拡張子を使用しない",
       "asset_url_mode_detect": "自動検出",
-      "asset_url_mode_detecting": "アセットアドレス方式を検出中です...",
+      "asset_url_mode_detecting": "アセットファイル配信方式を検出中です...",
       "asset_url_mode_detect_extension": "拡張子を使用できる環境です。",
-      "asset_url_mode_detect_extensionless": "サーバーが拡張子アドレスをインターセプトしています。拡張子未使用に変更してから保存してください。",
+      "asset_url_mode_detect_extensionless": "静的ファイル最適化ルール(nginx の location ~* \\.(js|css|json|png|jpg|jpeg|gif|ico|svg|woff2?)$ ブロックなど)が拡張子アドレスをインターセプトしています。「拡張子を使用しない」に変更してから保存してください。",
       "asset_url_mode_detect_unavailable": "検出に失敗しました。サーバーが応答しないため、方式を判定できません。"
     },
     "mail": {
