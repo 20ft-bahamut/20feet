@@ -32,7 +32,7 @@
 | page | query | integer | 아니오 | min 1 | 조회할 페이지 번호 (1부터 시작) |
 | sort_order | query | string | 아니오 | `asc`, `desc` | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.filter_index_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.index_validation_rules`).
 
 **요청 예시**
 
@@ -215,7 +215,7 @@ HTTP/1.1 200
 | --- | --- | --- | --- | --- | --- |
 | ids | body | array | 예 | min 1, max 100 | 대상 리소스 식별자 배열 (대량 작업 대상) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.filter_batch_read_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.batch_read_validation_rules`).
 
 **요청 예시**
 
@@ -416,7 +416,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | page | query | integer | 아니오 | min 1 | 조회할 페이지 번호 (1부터 시작) |
 | sort_order | query | string | 아니오 | `asc`, `desc` | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.filter_index_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.index_validation_rules`).
 
 **요청 예시**
 
@@ -596,7 +596,7 @@ HTTP/1.1 200
 | --- | --- | --- | --- | --- | --- |
 | ids | body | array | 예 | min 1, max 100 | 대상 리소스 식별자 배열 (대량 작업 대상) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.filter_batch_read_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification.batch_read_validation_rules`).
 
 **요청 예시**
 

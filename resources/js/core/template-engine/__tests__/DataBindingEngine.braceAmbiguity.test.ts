@@ -17,11 +17,13 @@ describe('DataBindingEngine — {}}} 닫기 모호성 (단일 바인딩 내부 �
     expect(out.addressErrors).not.toBe('{{error.errors ?? {}}}');
   });
 
-  it('{{$error.errors ?? { _general: $error.message }}} 객체 리터럴 fallback 평가', () => {
+  it('{{error.errors ?? { _general: error.message }}} 객체 리터럴 fallback 평가', () => {
     const eng = new DataBindingEngine();
-    const ctx: any = { $error: { errors: undefined, message: '오류' } };
+    // 에러 컨텍스트 키는 `error` 다 (ActionDispatcher 가 onError/errorHandling 양쪽에서 이 키로 주입).
+    // `$error` 는 엔진이 채우지 않으므로 항상 undefined 가 된다.
+    const ctx: any = { error: { errors: undefined, message: '오류' } };
     const out: any = eng.resolveObject(
-      { optionErrors: '{{$error.errors ?? { _general: $error.message }}}' },
+      { optionErrors: '{{error.errors ?? { _general: error.message }}}' },
       ctx,
       {},
     );

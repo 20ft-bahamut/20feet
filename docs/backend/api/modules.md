@@ -1732,12 +1732,12 @@ HTTP/1.1 200
                     {
                         "name": "Added",
                         "items": [
-                            "클래임 사유 관리 시스템 — DB 기반 환불 사유 관리 (ClaimReason 모델, Repository, Service, Controller, FormRequest, Resource)",
+                            "클레임 사유 관리 시스템 — DB 기반 환불 사유 관리 (ClaimReason 모델, Repository, Service, Controller, FormRequest, Resource)",
                             "`ecommerce_claim_reasons` 테이블: type, code, name(다국어), fault_type, is_user_selectable, is_active, sort_order",
                             "Admin API 7개: 목록/생성/상세/수정/삭제/상태토글/활성목록 (`/admin/claim-reasons`)",
                             "User API 1개: 사용자 선택 가능 사유 목록 (`/user/claim-reasons`)",
                             "ClaimReasonFaultTypeEnum (customer/seller/carrier), ClaimReasonTypeEnum (refund)",
-                            "쇼핑몰 환경설정 > 클래임 탭 — 환불 사유 인라인 편집 UI (배송사 관리 패턴)",
+                            "쇼핑몰 환경설정 > 클레임 탭 — 환불 사유 인라인 편집 UI (배송사 관리 패턴)",
                             "테이블 뷰(PC) + 카드 뷰(모바일) 반응형 레이아웃",
                             "EcommerceSettingsController에 syncReasons() 연동",
                             "업그레이드 스크립트 (Upgrade_0_14_0) — 기존 CancelReasonTypeEnum 7개 값을 DB 시드 데이터로 마이그레이션"

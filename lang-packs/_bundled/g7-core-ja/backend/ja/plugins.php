@@ -104,6 +104,13 @@ return [
         'install_failed' => 'プラグイン インストールに失敗しました: :error',
     ],
     'validation' => [
+        'github_url_required' => 'GitHub URLは必須です。',
+        'github_url_invalid' => '有効なURL形式ではありません。',
+        'github_url_format' => 'GitHub リポジトリURL形式である必要があります。(例: https://github.com/owner/repo)',
+        'file_required' => 'インストールするファイルを選択してください。',
+        'file_invalid' => '有効なファイルではありません。',
+        'file_must_be_zip' => 'ZIP ファイルのみアップロードできます。',
+        'file_max_size' => 'ファイルサイズは :sizeMB を超えることができません。',
         'plugin_name_required' => 'プラグイン名は必須です。',
         'plugin_name_string' => 'プラグイン名は文字列である必要があります。',
         'plugin_name_max' => 'プラグイン名は最大 :max 文字までです。',

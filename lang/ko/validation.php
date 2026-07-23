@@ -565,6 +565,12 @@ return [
         'data_source_id_must_be_string' => 'data_sources[:index].id는 문자열이어야 합니다.',
     ],
 
+    // 알림 채널 검증 메시지
+    'notification_channel' => [
+        'invalid' => '알림 채널 식별자가 올바르지 않습니다.',
+        'unavailable' => "사용할 수 없는 알림 채널입니다: ':value'",
+    ],
+
     // 다국어 필드 검증 메시지
     'translatable' => [
         'must_be_array' => '다국어 필드는 배열이어야 합니다.',
@@ -577,24 +583,14 @@ return [
     ],
 
     // 템플릿 검증 메시지
-    'template' => [
-        'type' => [
-            'in' => 'type 파라미터는 user 또는 admin만 가능합니다.',
-        ],
-        'description' => [
-            'string' => '템플릿 설명은 문자열이어야 합니다.',
-            'max' => '템플릿 설명은 :max자를 초과할 수 없습니다.',
-        ],
-        'metadata' => [
-            'array' => 'metadata는 배열이어야 합니다.',
-        ],
-        'status' => [
-            'in' => 'status는 active 또는 inactive여야 합니다.',
-        ],
-    ],
 
     // 메뉴 검증 메시지
     'menu' => [
+        'roles' => [
+            'array' => '역할 목록은 배열이어야 합니다.',
+            'integer' => '역할 ID는 숫자여야 합니다.',
+            'exists' => '선택한 역할을 찾을 수 없습니다.',
+        ],
         'name' => [
             'required' => '메뉴 이름을 입력해주세요.',
         ],
@@ -734,8 +730,20 @@ return [
         'file_type_not_allowed' => '허용되지 않은 파일 타입입니다. 확장자: :extension (허용: :allowed)',
     ],
 
+    // 확장 식별자 검증 메시지 (ValidExtensionIdentifier Rule)
+    'extension_identifier' => [
+        'max' => '확장 식별자는 최대 255자까지 입력 가능합니다.',
+        'must_be_string' => '확장 식별자는 문자열이어야 합니다.',
+        'min_parts' => '확장 식별자는 vendor-name 형식이어야 합니다 (예: sirsoft-board).',
+        'empty_part' => '확장 식별자에 빈 부분이 있습니다. 하이픈이 연속되거나 양끝에 올 수 없습니다.',
+        'invalid_characters' => '확장 식별자는 영문 소문자, 숫자, 언더스코어(_)만 사용할 수 있습니다.',
+        'empty_word' => '확장 식별자에서 언더스코어가 연속되거나 양끝에 올 수 없습니다.',
+        'word_starts_with_digit' => '확장 식별자의 각 단어는 숫자로 시작할 수 없습니다.',
+    ],
+
     // 모듈 경로 검증 메시지
     'module_path' => [
+        'file_type_not_allowed' => '허용되지 않은 파일 타입입니다. 확장자: :extension (허용: :allowed)',
         'must_be_string' => '경로는 문자열이어야 합니다.',
         'traversal_detected' => '경로 트래버설이 감지되었습니다: :pattern',
         'absolute_path_not_allowed' => '절대 경로는 허용되지 않습니다.',
@@ -745,6 +753,7 @@ return [
 
     // 플러그인 경로 검증 메시지
     'plugin_path' => [
+        'file_type_not_allowed' => '허용되지 않은 파일 타입입니다. 확장자: :extension (허용: :allowed)',
         'must_be_string' => '경로는 문자열이어야 합니다.',
         'traversal_detected' => '경로 트래버설이 감지되었습니다: :pattern',
         'absolute_path_not_allowed' => '절대 경로는 허용되지 않습니다.',
@@ -1168,5 +1177,13 @@ return [
         'websocket_host' => '웹소켓 호스트',
         'websocket_port' => '웹소켓 포트',
         'websocket_scheme' => '웹소켓 프로토콜',
+        'layout' => '레이아웃',
+        'module' => '모듈',
+        'token' => '토큰',
+        'mailgun_domain' => 'Mailgun 도메인',
+        'mailgun_secret' => 'Mailgun 시크릿',
+        'ses_key' => 'SES 액세스 키',
+        'ses_secret' => 'SES 시크릿 키',
+        'ses_region' => 'SES 리전',
     ],
 ];

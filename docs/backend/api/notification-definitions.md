@@ -36,7 +36,7 @@
 | sort_by | query | string | 아니오 | `id`, `type`, `extension_type`, `is_active`, `created_at`, `updated_at` | 정렬 기준 필드명 |
 | sort_order | query | string | 아니오 | `asc`, `desc` | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_definition.filter_index_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_definition.index_validation_rules`).
 
 **요청 예시**
 
@@ -297,7 +297,7 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 등록된 알림 정의 목록을 페이지네이션으로 조회합니다. 인증(`auth:sanctum`)과 `core.settings.read` 권한이 필요합니다. `search`, `extension_type`, `extension_identifier`, `channel`, `is_active` 로 필터링하고 `sort_by`/`sort_order` 로 정렬하며, 확장이 `core.notification_definition.filter_index_rules` 훅으로 필터를 추가할 수 있습니다. 관리자 알림 정의 관리 목록 화면을 렌더링할 때 사용합니다.
+**설명** 등록된 알림 정의 목록을 페이지네이션으로 조회합니다. 인증(`auth:sanctum`)과 `core.settings.read` 권한이 필요합니다. `search`, `extension_type`, `extension_identifier`, `channel`, `is_active` 로 필터링하고 `sort_by`/`sort_order` 로 정렬하며, 확장이 `core.notification_definition.index_validation_rules` 훅으로 필터를 추가할 수 있습니다. 관리자 알림 정의 관리 목록 화면을 렌더링할 때 사용합니다.
 
 
 ### GET /api/admin/notification-definitions/{definition}
@@ -437,11 +437,11 @@ HTTP/1.1 200
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | definition | path | string | 예 | — | 대상 definition의 식별자 |
-| channels | body | array | 아니오 | min 1 | 활성 채널 목록 — 이 정의가 발송에 사용할 채널 배열 (각 원소 최대 50자, mail·database 등). 지정 시 최소 1개 필요 |
+| channels | body | array | 아니오 | min 1 | 활성 채널 목록 — 이 정의가 발송에 사용할 채널 배열 (각 원소 최대 50자, mail·database 등). 지정 시 최소 1개 필요. 허용 채널은 `config('notification.default_channels')` 에 `core.notification.filter_available_channels` 훅으로 확장이 추가한 채널을 더해 런타임에 결정된다. 목록에 없는 채널은 거부되지만, 해당 정의에 이미 저장되어 있던 채널은 통과한다(채널 제공 확장을 비활성화해도 기존 레코드 수정이 막히지 않도록) |
 | hooks | body | array | 아니오 | — | 트리거 훅 목록 — 이 알림을 발송시키는 훅 이름 배열 (각 원소 최대 255자, core.auth.after_register 등) |
 | is_active | body | boolean | 아니오 | — | 활성 여부 (true 활성 / false 비활성) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_definition.filter_update_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_definition.update_validation_rules`).
 
 **요청 예시**
 
@@ -482,7 +482,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 알림 정의의 활성 채널(`channels`), 트리거 훅(`hooks`), 활성 상태(`is_active`)를 수정합니다. 인증(`auth:sanctum`)과 `core.settings.update` 권한이 필요합니다. Service 계층에서 수정 후 템플릿을 다시 로드해 반환하며, 확장이 `core.notification_definition.filter_update_rules` 훅으로 추가 파라미터를 검증에 넣을 수 있습니다. 발송 채널 구성이나 훅 연결을 변경할 때 사용합니다.
+**설명** 알림 정의의 활성 채널(`channels`), 트리거 훅(`hooks`), 활성 상태(`is_active`)를 수정합니다. 인증(`auth:sanctum`)과 `core.settings.update` 권한이 필요합니다. Service 계층에서 수정 후 템플릿을 다시 로드해 반환하며, 확장이 `core.notification_definition.update_validation_rules` 훅으로 추가 파라미터를 검증에 넣을 수 있습니다. 발송 채널 구성이나 훅 연결을 변경할 때 사용합니다.
 
 
 ### POST /api/admin/notification-definitions/{definition}/reset

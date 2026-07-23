@@ -7,6 +7,7 @@ use App\Contracts\Repositories\ScheduleRepositoryInterface;
 use App\Enums\ScheduleResultStatus;
 use App\Enums\ScheduleTriggerType;
 use App\Enums\ScheduleType;
+use App\Exceptions\ScheduleExecutionException;
 use App\Extension\HookManager;
 use App\Models\Schedule;
 use App\Models\ScheduleHistory;
@@ -14,6 +15,7 @@ use App\Support\OutboundUrlValidator;
 use App\Support\ScheduleCommandValidator;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -254,14 +256,14 @@ class ScheduleService
      * @param  Schedule  $schedule  스케줄
      * @return array 실행 결과
      *
-     * @throws Exception 차단목록에 걸린 명령일 때
+     * @throws ScheduleExecutionException 차단목록에 걸린 명령일 때
      */
     private function executeArtisanCommand(Schedule $schedule): array
     {
         // 저장 시점 검증 도입 이전 데이터나 DB 직접 수정으로 들어온 값을 방어한다
         // (isUrlCallAllowed 와 동일 사유 — 실행 직전이 마지막 방어선).
         if (! ScheduleCommandValidator::isArtisanCommandAllowed($schedule->command)) {
-            throw new Exception(__('schedule.artisan_not_allowed'));
+            throw ScheduleExecutionException::artisanNotAllowed();
         }
 
         Artisan::call($schedule->command, [], new BufferedOutput);
@@ -278,7 +280,7 @@ class ScheduleService
      * @param  Schedule  $schedule  스케줄
      * @return array 실행 결과
      *
-     * @throws Exception 실행 실패 시
+     * @throws ScheduleExecutionException 차단목록에 걸렸거나 실행이 실패했을 때
      */
     private function executeShellCommand(Schedule $schedule): array
     {
@@ -287,7 +289,7 @@ class ScheduleService
         $arguments = ScheduleCommandValidator::tokenizeShellCommand($schedule->command);
 
         if ($arguments === null || ! ScheduleCommandValidator::isShellCommandAllowed($schedule->command)) {
-            throw new Exception(__('schedule.shell_not_allowed'));
+            throw ScheduleExecutionException::shellNotAllowed();
         }
 
         $timeout = $schedule->timeout ?? 60;
@@ -297,7 +299,7 @@ class ScheduleService
         $result = Process::timeout($timeout)->run($arguments);
 
         if ($result->failed()) {
-            throw new Exception($result->errorOutput() ?: __('schedule.shell_command_failed'), $result->exitCode());
+            throw ScheduleExecutionException::shellCommandFailed($result->errorOutput(), $result->exitCode());
         }
 
         return [
@@ -312,14 +314,14 @@ class ScheduleService
      * @param  Schedule  $schedule  스케줄
      * @return array 실행 결과
      *
-     * @throws Exception 호출 실패 시
+     * @throws ScheduleExecutionException 내부망 URL 이거나 호출이 실패했을 때
      */
     private function executeUrlCall(Schedule $schedule): array
     {
         // 저장된 URL 이 그대로 서버의 outbound 목적지가 되므로, 실행 직전에도 내부망 주소를 차단한다
         // (저장 시점 검증 도입 이전 데이터나 DB 직접 수정으로 들어온 값 방어).
         if (! $this->isUrlCallAllowed($schedule->command)) {
-            throw new Exception(__('schedule.url_not_public'));
+            throw ScheduleExecutionException::urlNotPublic();
         }
 
         $timeout = $schedule->timeout ?? 30;
@@ -327,7 +329,7 @@ class ScheduleService
         $response = Http::timeout($timeout)->get($schedule->command);
 
         if ($response->failed()) {
-            throw new Exception(__('schedule.http_request_failed', ['status' => $response->status()]), $response->status());
+            throw ScheduleExecutionException::httpRequestFailed($response->status());
         }
 
         return [

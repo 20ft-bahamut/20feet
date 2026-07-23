@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use App\Contracts\Notifications\ChannelReadinessCheckerInterface;
+use App\Contracts\Repositories\ConfigRepositoryInterface;
 use App\Extension\Testing\ExtensionTestAllowlist;
 use App\Listeners\Identity\EnforceIdentityPolicyListener;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -81,6 +83,30 @@ abstract class TestCase extends BaseTestCase
     private function fakeSettingsDisk(): void
     {
         Storage::fake('settings');
+    }
+
+    /**
+     * mail 채널을 발송 준비 완료 상태로 만듭니다.
+     *
+     * 테스트 환경의 mail 설정은 from_address 가 플레이스홀더(noreply@example.com)라
+     * ChannelReadinessService::checkMail() 이 not-ready 로 판정하고, GenericNotification::via()
+     * 가 mail 채널을 제외합니다. 즉 메일 발송을 단언하는 테스트는 이 헬퍼로 명시적으로
+     * "메일이 설정된 사이트" 를 만들어야 합니다.
+     *
+     * (설정 미비 시 발송하지 않는 것은 의도된 제품 동작이므로 기본값은 그대로 둡니다)
+     */
+    protected function enableMailChannelReadiness(): void
+    {
+        app(ConfigRepositoryInterface::class)->saveCategory('mail', [
+            'mailer' => 'smtp',
+            'host' => 'smtp.test.local',
+            'port' => 587,
+            'encryption' => 'tls',
+            'from_address' => 'test@g7.test',
+            'from_name' => 'G7 Test',
+        ]);
+
+        app(ChannelReadinessCheckerInterface::class)->check('mail');
     }
 
     /**
