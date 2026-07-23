@@ -1664,10 +1664,22 @@
             ? lang('asset_url_mode_extension')
             : (detected === 'extensionless' ? lang('asset_url_mode_extensionless') : lang('asset_url_mode_unknown'));
 
+        // 경고 상태(확장자 미사용 자동 선택 / 확인 불가)는 "왜 그런지" 를 설명 문구로
+        // 함께 보인다 — 짧은 라벨("확인 불가")만으로는 어떤 상황인지 알 수 없다.
+        // "확인 불가" 는 두 프로브가 모두 실패한 상태라 에셋 방식 문제가 아니라
+        // 앱 미응답·프록시·CSP 등 다른 원인일 수 있으므로 그 내용을 상세히 안내한다.
+        let note = '';
+        if (detected === 'extensionless') {
+            note = lang('asset_url_mode_detected_extensionless');
+        } else if (detected === '') {
+            note = lang('asset_url_mode_detected_unavailable');
+        }
+        const noteHtml = note ? `<p class="fix-guide-hint">${note}</p>` : '';
+
         // 카드 내부를 부분 수정하지 않고 통째로 다시 그린다 — 아이콘·수식자 클래스가
         // renderSingleItemCard 안에서 statusClass 로 함께 결정되므로, 밖에서 일부만
         // 건드리면 아이콘과 카드 색이 어긋난다.
-        slot.innerHTML = renderSingleItemCard(lang('asset_url_mode'), statusClass, label, '', false);
+        slot.innerHTML = renderSingleItemCard(lang('asset_url_mode'), statusClass, label, '', false) + noteHtml;
     }
 
     async function detectAssetUrlMode() {

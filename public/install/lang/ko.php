@@ -840,7 +840,7 @@ ini_set(\'zlib.output_compression\', \'off\');
     'asset_url_mode_help' => '서버 설정을 자동으로 감지해 선택합니다. 정적 파일 최적화 규칙(nginx의 location ~* \\.(js|css|json|png|jpg|jpeg|gif|ico|svg|woff2?)$ 블록 등)이 확장자 주소를 가로채면 화면이 뜨지 않는데, 그 경우 확장자 미사용을 선택하세요.',
     'asset_url_mode_detected_extension' => '감지 결과: 확장자를 사용할 수 있는 환경입니다.',
     'asset_url_mode_detected_extensionless' => '감지 결과: 정적 파일 최적화 규칙(nginx location ~* \\.(js|css|json|...)$ 블록 등)이 확장자 주소를 가로채고 있어 확장자 미사용을 선택했습니다.',
-    'asset_url_mode_detected_unavailable' => '감지하지 못했습니다. 설치 후 화면이 뜨지 않으면 확장자 미사용으로 바꿔 보세요.',
+    'asset_url_mode_detected_unavailable' => '확장자 있는 주소와 없는 주소 모두 응답하지 않아 서빙 방식을 감지하지 못했습니다. 에셋 방식 자체의 문제라기보다, 앱이 아직 이 주소에서 정상 응답하지 않거나(PHP·라우팅 설정) 프록시·보안 규칙(CSP 등)이 프로브 요청을 막고 있을 가능성이 큽니다. 이 항목은 설치를 막지 않으니 계속 진행할 수 있으며, 설치 후 화면이 비어 보이면 관리자 > 환경설정 > 일반에서 확장자 미사용으로 바꿔 보세요.',
     'asset_url_mode_checking' => '확인 중…',
     'asset_url_mode_unknown' => '확인 불가',
     'core_update_github_url' => 'GitHub 저장소 URL',
