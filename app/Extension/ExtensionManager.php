@@ -1183,7 +1183,7 @@ PHP;
             return $pharPath;
         }
 
-        throw new \RuntimeException(__('exceptions.extension.composer_binary_not_found'));
+        throw new \RuntimeException(__('exceptions.vendor.composer_binary_not_found'));
     }
 
     /**

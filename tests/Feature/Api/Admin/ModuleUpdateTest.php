@@ -3,11 +3,13 @@
 namespace Tests\Feature\Api\Admin;
 
 use App\Enums\ExtensionOwnerType;
+use App\Enums\PermissionType;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ModuleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
@@ -52,7 +54,7 @@ class ModuleUpdateTest extends TestCase
                     'description' => json_encode(['ko' => $permIdentifier.' 권한', 'en' => $permIdentifier.' Permission']),
                     'extension_type' => ExtensionOwnerType::Core,
                     'extension_identifier' => 'core',
-                    'type' => \App\Enums\PermissionType::Admin,
+                    'type' => PermissionType::Admin,
                 ]
             );
             $permissionIds[] = $permission->id;
@@ -229,7 +231,7 @@ class ModuleUpdateTest extends TestCase
     {
         $mockService = Mockery::mock(ModuleService::class);
         $mockService->shouldReceive('updateModule')
-            ->with('test-module', Mockery::any(), 'overwrite')
+            ->with('test-module', Mockery::any(), 'overwrite', false)
             ->once()
             ->andReturn([
                 'success' => true,
@@ -288,7 +290,7 @@ class ModuleUpdateTest extends TestCase
     {
         $mockService = Mockery::mock(ModuleService::class);
         $mockService->shouldReceive('updateModule')
-            ->with('test-module', Mockery::any(), 'overwrite')
+            ->with('test-module', Mockery::any(), 'overwrite', false)
             ->once()
             ->andReturn([
                 'success' => true,
@@ -332,7 +334,7 @@ class ModuleUpdateTest extends TestCase
     {
         $mockService = Mockery::mock(ModuleService::class);
         $mockService->shouldReceive('updateModule')
-            ->with('nonexistent-module', Mockery::any(), 'overwrite')
+            ->with('nonexistent-module', Mockery::any(), 'overwrite', false)
             ->once()
             ->andThrow(
                 ValidationException::withMessages([
@@ -353,7 +355,7 @@ class ModuleUpdateTest extends TestCase
     {
         $mockService = Mockery::mock(ModuleService::class);
         $mockService->shouldReceive('updateModule')
-            ->with('test-module', Mockery::any(), 'overwrite')
+            ->with('test-module', Mockery::any(), 'overwrite', false)
             ->once()
             ->andThrow(new \RuntimeException('Unexpected error'));
         $this->app->instance(ModuleService::class, $mockService);
@@ -389,7 +391,7 @@ class ModuleUpdateTest extends TestCase
     public function test_check_updates_route_name_exists(): void
     {
         $this->assertTrue(
-            \Illuminate\Support\Facades\Route::has('api.admin.modules.check-updates'),
+            Route::has('api.admin.modules.check-updates'),
             'Route api.admin.modules.check-updates should exist'
         );
     }
@@ -400,7 +402,7 @@ class ModuleUpdateTest extends TestCase
     public function test_update_route_name_exists(): void
     {
         $this->assertTrue(
-            \Illuminate\Support\Facades\Route::has('api.admin.modules.update'),
+            Route::has('api.admin.modules.update'),
             'Route api.admin.modules.update should exist'
         );
     }
@@ -416,7 +418,7 @@ class ModuleUpdateTest extends TestCase
     {
         $mockService = Mockery::mock(ModuleService::class);
         $mockService->shouldReceive('updateModule')
-            ->with('test-module', Mockery::any(), 'keep')
+            ->with('test-module', Mockery::any(), 'keep', false)
             ->once()
             ->andReturn([
                 'success' => true,
@@ -492,7 +494,7 @@ class ModuleUpdateTest extends TestCase
     public function test_check_modified_layouts_route_name_exists(): void
     {
         $this->assertTrue(
-            \Illuminate\Support\Facades\Route::has('api.admin.modules.check-modified-layouts'),
+            Route::has('api.admin.modules.check-modified-layouts'),
             'Route api.admin.modules.check-modified-layouts should exist'
         );
     }

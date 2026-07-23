@@ -10,7 +10,7 @@ class NotificationDefinitionIndexRequest extends FormRequest
     /**
      * 권한 확인 (미들웨어에서 처리).
      *
-     * @return bool
+     * @return bool 항상 true (권한은 라우트 permission 미들웨어가 담당)
      */
     public function authorize(): bool
     {
@@ -20,7 +20,7 @@ class NotificationDefinitionIndexRequest extends FormRequest
     /**
      * 검증 규칙을 반환합니다.
      *
-     * @return array
+     * @return array<string, mixed> 검증 규칙 배열
      */
     public function rules(): array
     {
@@ -36,7 +36,7 @@ class NotificationDefinitionIndexRequest extends FormRequest
         ];
 
         return HookManager::applyFilters(
-            'core.notification_definition.filter_index_rules',
+            'core.notification_definition.index_validation_rules',
             $rules
         );
     }
@@ -44,7 +44,7 @@ class NotificationDefinitionIndexRequest extends FormRequest
     /**
      * 검증 메시지를 반환합니다.
      *
-     * @return array
+     * @return array<string, string> 검증 오류 메시지 배열
      */
     public function messages(): array
     {

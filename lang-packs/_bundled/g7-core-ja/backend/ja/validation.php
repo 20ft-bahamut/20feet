@@ -520,6 +520,10 @@ return [
         'data_source_must_have_id' => 'data_sources[:index]に必須フィールド "id" が見つかりません。',
         'data_source_id_must_be_string' => 'data_sources[:index].id は文字列である必要があります。',
     ],
+    'notification_channel' => [
+        'invalid' => '通知チャネル識別子が正しくありません。',
+        'unavailable' => "利用できない通知チャネルです: ':value'",
+    ],
     'translatable' => [
         'must_be_array' => '多言語フィールドは配列である必要があります。',
         'unsupported_language' => 'サポートされていない言語コード: \':lang\'',
@@ -544,6 +548,11 @@ return [
         ],
     ],
     'menu' => [
+        'roles' => [
+            'array' => 'ロール一覧は配列である必要があります。',
+            'integer' => 'ロールIDは数値である必要があります。',
+            'exists' => '選択したロールが見つかりません。',
+        ],
         'name' => [
             'required' => 'メニュー名を入力してください。',
         ],
@@ -656,7 +665,18 @@ return [
         'outside_base_directory' => '基本ディレクトリ外のパスは許可されていません。',
         'file_type_not_allowed' => '許可されていないファイルタイプです。拡張子: :extension (許可: :allowed)',
     ],
+    'extension_identifier' => [
+        'max' => '拡張識別子は最大255文字まで入力できます。',
+        'must_be_string' => '拡張識別子は文字列である必要があります。',
+        'min_parts' => '拡張識別子は vendor-name 形式である必要があります（例: sirsoft-board）。',
+        'empty_part' => '拡張識別子に空の部分があります。ハイフンを連続させたり両端に置くことはできません。',
+        'invalid_characters' => '拡張識別子は英小文字・数字・アンダースコア（_）のみ使用できます。',
+        'empty_word' => '拡張識別子でアンダースコアを連続させたり両端に置くことはできません。',
+        'word_starts_with_digit' => '拡張識別子の各単語は数字で始めることはできません。',
+    ],
+
     'module_path' => [
+        'file_type_not_allowed' => '許可されていないファイルタイプです。拡張子: :extension（許可: :allowed）',
         'must_be_string' => 'パスは文字列である必要があります。',
         'traversal_detected' => 'パストトラバーサルが検出されました: :pattern',
         'absolute_path_not_allowed' => '絶対パスは許可されません。',
@@ -664,6 +684,7 @@ return [
         'outside_base_directory' => '基準ディレクトリ外へのアクセスは許可されません。',
     ],
     'plugin_path' => [
+        'file_type_not_allowed' => '許可されていないファイルタイプです。拡張子: :extension（許可: :allowed）',
         'must_be_string' => 'パスは文字列である必要があります。',
         'traversal_detected' => 'パストトラバーサルが検出されました: :pattern',
         'absolute_path_not_allowed' => '絶対パスは許可されません。',
@@ -973,6 +994,14 @@ return [
         'definition_already_exists' => '同一の(provider、scope_type、scope_value)定義が既に存在します。',
     ],
     'attributes' => [
+        'layout' => 'レイアウト',
+        'module' => 'モジュール',
+        'token' => 'トークン',
+        'mailgun_domain' => 'Mailgun ドメイン',
+        'mailgun_secret' => 'Mailgun シークレット',
+        'ses_key' => 'SES アクセスキー',
+        'ses_secret' => 'SES シークレットキー',
+        'ses_region' => 'SES リージョン',
         'ids' => 'ユーザーID一覧',
         'user_id' => 'ユーザーID',
         'status' => 'ステータス',

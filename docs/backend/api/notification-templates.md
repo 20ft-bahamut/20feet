@@ -28,7 +28,7 @@
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | definition_id | body | integer | 예 | — | definition 식별자 |
-| subject | body | array | 예 | — | 제목 |
+| subject | body | array | 아니오 | — | 다국어 제목. 컬럼이 nullable 이므로 미전송·`null` 이 허용된다(제목 개념이 없는 채널 대응). 전송하는 경우 로케일별 문자열 배열이어야 하며 각 값은 500자 이하 |
 | body | body | array | 예 | — | 본문 |
 | locale | body | string | 아니오 | max 10 | 로케일 코드 (표시 언어/지역) |
 
@@ -85,13 +85,13 @@ Content-Type: application/json
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | template | path | string | 예 | — | 대상 template의 식별자 |
-| subject | body | array | 예 | — | 제목 |
+| subject | body | array | 아니오 | — | 다국어 제목. 컬럼이 nullable 이므로 미전송·`null` 이 허용된다(제목 개념이 없는 채널 대응). 전송하는 경우 로케일별 문자열 배열이어야 하며 각 값은 500자 이하 |
 | body | body | array | 예 | — | 본문 |
 | click_url | body | string | 아니오 | max 500 | 알림 클릭 시 이동할 대상 URL (미설정 시 이동 없음) |
 | recipients | body | array | 아니오 | — | 수신자 규칙 목록. 각 원소는 type(trigger_user: 이벤트 유발 사용자, related_user: 연관 사용자, role: 역할 대상, specific_users: 지정 사용자), value(대상 식별값), relation(연관 사용자 관계명), exclude_trigger_user(유발 사용자 제외 여부)로 구성 |
 | is_active | body | boolean | 아니오 | — | 활성 여부 (true 활성 / false 비활성) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_template.filter_update_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_template.update_validation_rules`).
 
 **요청 예시**
 
@@ -136,7 +136,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 단일 채널 알림 템플릿의 다국어 제목(`subject`)·본문(`body`)과 클릭 URL, 수신자(`recipients`), 활성 상태를 수정합니다. 인증(`auth:sanctum`)과 `core.settings.update` 권한이 필요합니다. `template` 경로 파라미터로 대상을 지정하며, 확장이 `core.notification_template.filter_update_rules` 훅으로 추가 파라미터를 검증에 넣을 수 있습니다. 관리자가 특정 채널의 알림 문구를 편집해 저장할 때 사용합니다.
+**설명** 단일 채널 알림 템플릿의 다국어 제목(`subject`)·본문(`body`)과 클릭 URL, 수신자(`recipients`), 활성 상태를 수정합니다. 인증(`auth:sanctum`)과 `core.settings.update` 권한이 필요합니다. `template` 경로 파라미터로 대상을 지정하며, 확장이 `core.notification_template.update_validation_rules` 훅으로 추가 파라미터를 검증에 넣을 수 있습니다. 관리자가 특정 채널의 알림 문구를 편집해 저장할 때 사용합니다.
 
 
 ### POST /api/admin/notification-templates/{template}/reset

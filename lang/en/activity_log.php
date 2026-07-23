@@ -13,6 +13,10 @@ return [
         'ids_required' => 'Please select activity logs to delete.',
         'ids_min' => 'Please select at least one activity log to delete.',
         'id_not_found' => 'The selected activity log was not found.',
+        'log_type_invalid' => 'The selected log type is invalid.',
+        'date_range_invalid' => 'The end date must be the same as or after the start date.',
+        'per_page_min' => 'Items per page must be at least 1.',
+        'per_page_max' => 'Items per page must not exceed 100.',
     ],
 
     // Log type labels

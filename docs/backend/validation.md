@@ -518,6 +518,20 @@ class TestMailRequest extends FormRequest
 | `$this->input()` 사용 | 런타임 입력값으로 분기 (request body에서 직접 읽음) |
 | 메서드 추출 | 규칙이 3개 이상 분기되면 `getXxxRules()` 메서드로 분리 |
 | 기본값 제공 | `$this->input('mailer', 'smtp')` — 미전송 시 기본 드라이버 적용 |
+| Store/Update 정책 일치 | 같은 리소스의 Store 와 Update 는 동일 필드에 동일한 조건부 규칙을 적용한다. 한쪽에만 `exclude_if` 등이 있으면 다른 쪽에서만 저장이 막힌다 |
+| `sometimes` 는 부분 수정 지원 수단이 아니다 | 관리자 폼은 조회 응답 전체를 그대로 PUT 하므로 요청에는 항상 모든 키가 존재한다. 토글 OFF 상태의 종속 필드는 `sometimes` 가 아니라 `exclude_if` 로 검증에서 배제한다 |
+
+`exclude_if` 는 규칙 배열의 **첫 번째**에 둔다. 배제는 규칙 루프 도중 발동하며 이미 추가된 실패 메시지는 회수되지 않으므로, 앞선 규칙이 먼저 실패하면 배제되어도 오류가 남는다.
+
+```php
+// ❌ DON'T: 요청에 키가 항상 있으므로 sometimes 가 발동하지 않아 빈 값이 차단된다
+'allowed_extensions' => ['sometimes', 'array', 'min:1'],
+
+// ✅ DO: 토글이 꺼져 있으면 필드 자체를 검증에서 제외한다
+'allowed_extensions' => ['exclude_if:use_file_upload,false', 'sometimes', 'required', 'array', 'min:1'],
+```
+
+자동 차단: `formrequest-store-update-conditional-symmetry`(error), `formrequest-sometimes-array-min-inert`(warning).
 
 ---
 

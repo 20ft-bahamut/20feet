@@ -71,7 +71,7 @@ class ResourceFieldDescriber
         'creator' => '생성자 정보 객체 (uuid/name/email — creator 관계 파생)',
         'children' => '하위 항목 배열 (계층 트리 — children 관계 파생)',
         'parent' => '상위 항목 객체 (parent 관계 파생)',
-        'permissions' => '연결된 권한 목록 (id/identifier/name — 역할 경유 권한 관계 파생)',
+        'permissions' => '권한 목록 (각 원소 id/identifier/name — permissions 관계 또는 역할 경유 파생)',
         'recipient' => '수신자 사용자 객체 (uuid/name/email — recipientUser 관계 파생)',
         'sender' => '발신자 사용자 객체 (uuid/name/email — senderUser 관계 파생)',
         'author' => '작성자 사용자 객체 (uuid/name — author 관계 파생)',
@@ -106,10 +106,8 @@ class ResourceFieldDescriber
 
         // 감사/관계 공통 (도메인 무관하게 역할 고정 — 쓰기 응답에서 흔히 등장)
         'updated_by' => '최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null)',
-        'creator' => '생성자 정보 객체 (uuid/name/email — creator 관계 파생)',
         'user' => '대상 사용자 정보 객체 (uuid/name/email 등 — user 관계 파생)',
         'roles' => '보유 역할 목록 (각 원소 id/name/permissions — roles 관계 파생)',
-        'permissions' => '권한 목록 (각 원소 identifier/name — permissions 관계 파생)',
         'avatar' => '아바타 이미지 URL (미등록 시 null)',
 
         // 인증/토큰 (로그인/토큰 발급 응답)

@@ -38,7 +38,7 @@
 | sort_by | query | string | 아니오 | `id`, `channel`, `notification_type`, `status`, `sent_at`, `created_at` | 정렬 기준 필드명 |
 | sort_order | query | string | 아니오 | `asc`, `desc` | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_log.filter_index_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_log.index_validation_rules`).
 
 **요청 예시**
 
@@ -149,7 +149,7 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 알림 발송 이력을 페이지네이션으로 조회합니다. 인증(`auth:sanctum`)과 `core.notification-logs.read` 권한이 필요합니다. 발송자/수신자 ID, `search`, `channel`, `notification_type`, `extension_type`, `status` 로 필터링하고 `sort_by`/`sort_order` 로 정렬하며, 확장이 `core.notification_log.filter_index_rules` 훅으로 필터를 추가할 수 있습니다. 요청 사용자(`request->user()`)를 Service 에 전달해 열람 범위를 결정하며, 관리자 알림 발송 이력 화면을 렌더링할 때 사용합니다.
+**설명** 알림 발송 이력을 페이지네이션으로 조회합니다. 인증(`auth:sanctum`)과 `core.notification-logs.read` 권한이 필요합니다. 발송자/수신자 ID, `search`, `channel`, `notification_type`, `extension_type`, `status` 로 필터링하고 `sort_by`/`sort_order` 로 정렬하며, 확장이 `core.notification_log.index_validation_rules` 훅으로 필터를 추가할 수 있습니다. 요청 사용자(`request->user()`)를 Service 에 전달해 열람 범위를 결정하며, 관리자 알림 발송 이력 화면을 렌더링할 때 사용합니다.
 
 
 ### POST /api/admin/notification-logs/bulk-delete

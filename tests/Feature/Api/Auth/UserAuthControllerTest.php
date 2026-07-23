@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\Auth;
 
+use App\Listeners\NotificationHookListener;
 use App\Models\PasswordResetToken;
 use App\Models\Permission;
 use App\Models\Role;
@@ -23,6 +24,20 @@ class UserAuthControllerTest extends TestCase
     use RefreshDatabase;
 
     /**
+     * 테스트 환경 준비
+     *
+     * 이 클래스는 가입 환영/비밀번호 재설정 등 메일 발송을 단언하므로 mail 채널을
+     * 준비 완료 상태로 만든다. 기본 테스트 설정은 from_address 가 플레이스홀더라
+     * ChannelReadinessService 가 not-ready 로 판정해 mail 채널이 제외된다.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->enableMailChannelReadiness();
+    }
+
+    /**
      * 알림 시스템은 notification_definitions 시드 + 동적 훅 재등록 필요
      *
      * 부팅 시점에 DB 가 비어있어 registerDynamicHooks 가 실행되었지만 아무것도 등록하지 못했으므로
@@ -31,7 +46,7 @@ class UserAuthControllerTest extends TestCase
     private function seedNotificationDefinitions(): void
     {
         $this->artisan('db:seed', ['--class' => 'NotificationDefinitionSeeder']);
-        app(\App\Listeners\NotificationHookListener::class)->registerDynamicHooks();
+        app(NotificationHookListener::class)->registerDynamicHooks();
     }
 
     /**
@@ -854,7 +869,7 @@ class UserAuthControllerTest extends TestCase
         $user = User::factory()->create();
 
         // admin 역할 할당
-        $adminRole = \App\Models\Role::where('identifier', 'admin')->first();
+        $adminRole = Role::where('identifier', 'admin')->first();
         if ($adminRole) {
             $user->roles()->sync([$adminRole->id]);
         }

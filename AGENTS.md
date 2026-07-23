@@ -153,7 +153,7 @@
 | 코어 | [docs/backend/api/README.md](docs/backend/api/README.md) | 35 / 291 |
 
 
-### 확장 API 레퍼런스 (9개 확장, 자동 스캔)
+### 확장 API 레퍼런스 (11개 확장, 자동 스캔)
 
 > 각 확장이 소유하는 API 문서 목차. `php artisan api:docgen` 이 생성하며, 이 표는 `{modules,plugins}/_bundled/*/docs/api/README.md` 를 패턴 스캔해 자동 편입된다(확장명 하드코딩 없음).
 
@@ -167,6 +167,8 @@
 | `sirsoft-gdpr` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-gdpr/docs/api/README.md) | 4 / 15 |
 | `sirsoft-marketing` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-marketing/docs/api/README.md) | 2 / 2 |
 | `sirsoft-pay_kginicis` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-pay_kginicis/docs/api/README.md) | 5 / 22 |
+| `sirsoft-pay_nhnkcp` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-pay_nhnkcp/docs/api/README.md) | 0 / 0 |
+| `sirsoft-pay_nicepayments` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-pay_nicepayments/docs/api/README.md) | 0 / 0 |
 | `sirsoft-verification_kginicis` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-verification_kginicis/docs/api/README.md) | 1 / 1 |
 
 
@@ -261,6 +263,8 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | `w-3.5 h-3.5` | 14 | `text-sm` |
 | `w-4 h-4` | 16 | `text-base` |
 | `w-5 h-5` | 20 | `text-xl` |
+| `w-6 h-6` | 24 | `text-2xl` |
+| `w-12 h-12` | 48 | `text-5xl` |
 
 `size` prop 은 Font Awesome `fa-*` 클래스로 매핑되며 등가가 아니다 — `size="sm"` → `fa-sm` → `font-size: 0.875em`(상대값) + `line-height` 붕괴로 16px 이 12.25×0.88px 이 된다. 새 아이콘에는 써도 되지만, 기존 `w-N h-N` 의 치환용으로는 쓰지 않는다.
 
@@ -807,13 +811,17 @@ public function createProduct(array $data): Product
 | `*.json` (레이아웃만) | `{type}:update {id} --force` 실행 |
 | `*.tsx`, `*.ts` + `*.json` | `{type}:build` + `{type}:update {id} --force` |
 | `*.tsx`, `*.ts`만 | `{type}:build` + `{type}:update {id} --force` |
+| `lang-packs/_bundled/**` (번들 언어팩 콘텐츠/버전) | `language-pack:update {id} --force` (빌드 불필요) |
 
 ```bash
 # 확장 업데이트 (_bundled → 활성 반영)
 php artisan template:update sirsoft-admin_basic --force
 php artisan module:update sirsoft-ecommerce --force
 php artisan plugin:update sirsoft-payment --force
+php artisan language-pack:update g7-core-ja --force
 ```
+
+번들 언어팩도 `_bundled` 는 배포 원본일 뿐이다. 설치본(`lang-packs/{id}/`)을 갱신하지 않으면 새로 추가한 번역 키가 런타임에 존재하지 않아 해당 로케일이 조용히 기준 로케일로 폴백한다.
 
 ### 코어 3-번들 구조 + 공유 런타임 (engine-v1.51.0+)
 

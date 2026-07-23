@@ -212,7 +212,7 @@ HTTP/1.1 200
 | sort_by | query | string | 아니오 | — | 정렬 기준 필드명 |
 | sort_order | query | string | 아니오 | — | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.filter_index_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.index_validation_rules`).
 
 **요청 예시**
 
@@ -368,7 +368,7 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 본인인증 알림 메시지 정의(프로바이더별·목적별·정책별 메일/SMS 템플릿 묶음) 목록을 필터·검색하여 페이지네이션 조회합니다. `auth:sanctum` + `core.admin.identity.messages.read` 관리자 권한이 필요합니다. 확장이 `core.identity.message_definition.filter_index_rules` 필터 훅으로 추가 검색 파라미터를 등록할 수 있습니다. 응답 각 항목의 `user_overrides` 로 운영자가 시드 기본값에서 수정한 필드를, `templates` 로 채널별 하위 템플릿을 함께 내려 관리자 메시지 설정 화면을 구성할 때 사용합니다.
+**설명** 본인인증 알림 메시지 정의(프로바이더별·목적별·정책별 메일/SMS 템플릿 묶음) 목록을 필터·검색하여 페이지네이션 조회합니다. `auth:sanctum` + `core.admin.identity.messages.read` 관리자 권한이 필요합니다. 확장이 `core.identity.message_definition.index_validation_rules` 필터 훅으로 추가 검색 파라미터를 등록할 수 있습니다. 응답 각 항목의 `user_overrides` 로 운영자가 시드 기본값에서 수정한 필드를, `templates` 로 채널별 하위 템플릿을 함께 내려 관리자 메시지 설정 화면을 구성할 때 사용합니다.
 
 
 ### POST /api/admin/identity/messages/definitions
@@ -390,7 +390,7 @@ HTTP/1.1 200
 | variables | body | array | 아니오 | — | 템플릿 치환 변수 메타데이터 목록 (원소 key/description, key 는 영문 식별자) |
 | templates | body | array | 예 | min 1 | 채널별 하위 템플릿 배열 (최소 1개, 원소 channel/subject/body 다국어 배열) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.filter_store_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.store_validation_rules`).
 
 **요청 예시**
 
@@ -441,7 +441,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 운영자가 정책(policy) 매핑용 메시지 정의를 신규 생성합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `IdentityMessageDefinitionService::createAdminDefinition` 이 처리하며 `scope_type='policy'` + `scope_value` 가 admin policy.key 와 매칭되는 경우만 허용됩니다(FormRequest 검증). `channels`·`templates` 를 최소 1개 이상 포함해야 하며, 확장은 `core.identity.message_definition.filter_store_rules` 필터 훅으로 검증 규칙을 확장할 수 있습니다. 특정 인증 정책에 전용 메일/SMS 문구를 붙이고자 할 때 사용하며 성공 시 201 로 응답합니다.
+**설명** 운영자가 정책(policy) 매핑용 메시지 정의를 신규 생성합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `IdentityMessageDefinitionService::createAdminDefinition` 이 처리하며 `scope_type='policy'` + `scope_value` 가 admin policy.key 와 매칭되는 경우만 허용됩니다(FormRequest 검증). `channels`·`templates` 를 최소 1개 이상 포함해야 하며, 확장은 `core.identity.message_definition.store_validation_rules` 필터 훅으로 검증 규칙을 확장할 수 있습니다. 특정 인증 정책에 전용 메일/SMS 문구를 붙이고자 할 때 사용하며 성공 시 201 로 응답합니다.
 
 
 ### DELETE /api/admin/identity/messages/definitions/{definition}
@@ -652,7 +652,7 @@ HTTP/1.1 200
 | channels | body | array | 아니오 | min 1 | 지원 채널 목록 (최소 1개 — 이 정의가 발송할 채널 조정) |
 | is_active | body | boolean | 아니오 | — | 활성 여부 (true 활성 / false 비활성) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.filter_update_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_definition.update_validation_rules`).
 
 **요청 예시**
 
@@ -696,7 +696,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 메시지 정의의 편집 가능 속성(`name`, `description`, `channels`, `is_active`) 을 수정합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `IdentityMessageDefinitionService::updateDefinition` 이 처리하며 수정된 필드는 `user_overrides` 에 기록되어 시더 재실행 시에도 보존됩니다. 확장은 `core.identity.message_definition.filter_update_rules` 필터 훅으로 검증 규칙을 확장할 수 있습니다. 시드 정의의 표시명이나 활성 채널을 운영 상황에 맞게 조정할 때 사용합니다.
+**설명** 메시지 정의의 편집 가능 속성(`name`, `description`, `channels`, `is_active`) 을 수정합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `IdentityMessageDefinitionService::updateDefinition` 이 처리하며 수정된 필드는 `user_overrides` 에 기록되어 시더 재실행 시에도 보존됩니다. 확장은 `core.identity.message_definition.update_validation_rules` 필터 훅으로 검증 규칙을 확장할 수 있습니다. 시드 정의의 표시명이나 활성 채널을 운영 상황에 맞게 조정할 때 사용합니다.
 
 
 ### POST /api/admin/identity/messages/definitions/{definition}/reset
@@ -1045,7 +1045,7 @@ Content-Type: application/json
 | body | body | array | 예 | — | 본문 |
 | is_active | body | boolean | 아니오 | — | 활성 여부 (true 활성 / false 비활성) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_template.filter_update_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.message_template.update_validation_rules`).
 
 **요청 예시**
 
@@ -1086,7 +1086,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 개별 채널 메시지 템플릿의 제목(`subject`)·본문(`body`)·활성 여부(`is_active`) 를 수정합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `body` 는 필수이며 다국어 배열로 전달합니다. `IdentityMessageTemplateService::updateTemplate` 이 처리하고 확장은 `core.identity.message_template.filter_update_rules` 필터 훅으로 검증을 확장할 수 있습니다. 인증 메일/SMS 의 실제 발송 문구를 편집할 때 사용합니다.
+**설명** 개별 채널 메시지 템플릿의 제목(`subject`)·본문(`body`)·활성 여부(`is_active`) 를 수정합니다. `auth:sanctum` + `core.admin.identity.messages.update` 관리자 권한이 필요합니다. `body` 는 필수이며 다국어 배열로 전달합니다. `IdentityMessageTemplateService::updateTemplate` 이 처리하고 확장은 `core.identity.message_template.update_validation_rules` 필터 훅으로 검증을 확장할 수 있습니다. 인증 메일/SMS 의 실제 발송 문구를 편집할 때 사용합니다.
 
 
 ### POST /api/admin/identity/messages/templates/{template}/reset

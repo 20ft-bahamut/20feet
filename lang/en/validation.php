@@ -566,6 +566,12 @@ return [
         'data_source_id_must_be_string' => 'data_sources[:index].id must be a string.',
     ],
 
+    // Notification channel validation messages
+    'notification_channel' => [
+        'invalid' => 'The notification channel identifier is invalid.',
+        'unavailable' => "Unavailable notification channel: ':value'",
+    ],
+
     // Translatable field validation messages
     'translatable' => [
         'must_be_array' => 'Translatable field must be an array.',
@@ -577,25 +583,13 @@ return [
         'current_locale_required' => 'The :locale language value is required.',
     ],
 
-    // Template validation messages
-    'template' => [
-        'type' => [
-            'in' => 'The type parameter must be either user or admin.',
-        ],
-        'description' => [
-            'string' => 'The template description must be a string.',
-            'max' => 'The template description may not be greater than :max characters.',
-        ],
-        'metadata' => [
-            'array' => 'metadata must be an array.',
-        ],
-        'status' => [
-            'in' => 'status must be either active or inactive.',
-        ],
-    ],
-
     // Menu validation messages
     'menu' => [
+        'roles' => [
+            'array' => 'The roles must be an array.',
+            'integer' => 'Each role ID must be an integer.',
+            'exists' => 'The selected role could not be found.',
+        ],
         'name' => [
             'required' => 'Please enter a menu name.',
         ],
@@ -736,7 +730,19 @@ return [
     ],
 
     // Module path validation messages
+    // Extension identifier validation messages (ValidExtensionIdentifier Rule)
+    'extension_identifier' => [
+        'max' => 'The extension identifier must not exceed 255 characters.',
+        'must_be_string' => 'The extension identifier must be a string.',
+        'min_parts' => 'The extension identifier must be in vendor-name format (e.g., sirsoft-board).',
+        'empty_part' => 'The extension identifier has an empty part. Hyphens cannot be consecutive or at the edges.',
+        'invalid_characters' => 'The extension identifier may only contain lowercase letters, numbers, and underscores (_).',
+        'empty_word' => 'The extension identifier has consecutive or edge underscores.',
+        'word_starts_with_digit' => 'Each word in the extension identifier must not start with a digit.',
+    ],
+
     'module_path' => [
+        'file_type_not_allowed' => 'File type not allowed. Extension: :extension (Allowed: :allowed)',
         'must_be_string' => 'The path must be a string.',
         'traversal_detected' => 'Path traversal detected: :pattern',
         'absolute_path_not_allowed' => 'Absolute paths are not allowed.',
@@ -746,6 +752,7 @@ return [
 
     // Plugin path validation messages
     'plugin_path' => [
+        'file_type_not_allowed' => 'File type not allowed. Extension: :extension (Allowed: :allowed)',
         'must_be_string' => 'The path must be a string.',
         'traversal_detected' => 'Path traversal detected: :pattern',
         'absolute_path_not_allowed' => 'Absolute paths are not allowed.',
@@ -1177,5 +1184,13 @@ return [
         // Changelog fields
         'from_version' => 'start version',
         'to_version' => 'end version',
+        'layout' => 'layout',
+        'module' => 'module',
+        'token' => 'token',
+        'mailgun_domain' => 'Mailgun domain',
+        'mailgun_secret' => 'Mailgun secret',
+        'ses_key' => 'SES access key',
+        'ses_secret' => 'SES secret key',
+        'ses_region' => 'SES region',
     ],
 ];
