@@ -1,3 +1,4 @@
+// e2e:allow 테스트 전용 수정 — 프로브 판정 함수 추출 리팩토링 후 stale 앵커(detect→probe) 정정. 런타임 동작 무변경이며 대상 기능 E2E 는 tests/Playwright/specs/asset-url-mode.spec.ts 로 이미 커버됨.
 /**
  * 자산 URL 자가 복구 불변식 가드 — 이슈 #486 단위 D (§12 L1~L9).
  *
@@ -176,8 +177,8 @@ describe('자산 URL 자가 복구 불변식 (§12)', () => {
             );
             const source = readFileSync(installerPath, 'utf-8');
 
-            const start = source.indexOf('async function detectAssetUrlMode(');
-            expect(start, 'installer.js 에서 detectAssetUrlMode 를 찾지 못했다').toBeGreaterThan(-1);
+            const start = source.indexOf('async function probeAssetUrlMode(');
+            expect(start, 'installer.js 에서 probeAssetUrlMode 를 찾지 못했다').toBeGreaterThan(-1);
 
             // 주석은 제거하고 실행 코드만 본다 — 주석에 남은 "Content-Type" 문구가
             // 검사 삭제를 가려주면 가드가 무력해진다(실제로 겪은 오탐).
