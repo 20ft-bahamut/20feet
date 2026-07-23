@@ -12,6 +12,7 @@
 3. URL: /api/admin/*, /api/auth/*, /api/public/*
 4. 권한: permission: 또는 Middleware에서 체크
 5. REST 패턴: index, store, show, update, destroy
+6. .js/.css/.json/.map 로 끝나는 라우트 = dualSuffix/dualSuffixSegment/dualAsset 매크로 필수
 ```
 
 ---
@@ -100,6 +101,51 @@ GET /api/admin/modules/{identifier}/license     # 모듈 LICENSE 반환
 GET /api/admin/plugins/{identifier}/license     # 플러그인 LICENSE 반환
 GET /api/admin/templates/{identifier}/license   # 템플릿 LICENSE 반환
 ```
+
+### 정적 확장자로 끝나는 동적 엔드포인트
+
+`.js` / `.css` / `.json` / `.map` 으로 끝나는 라우트는 `Route::get()` 으로 단일 등록하지 않는다.
+`Route::dualSuffix()` / `dualSuffixSegment()` / `dualAsset()` 매크로로 **확장자 형태와 확장자 없는 형태를
+동시에** 등록한다. 코어 라우트와 확장 라우트 파일 모두에 적용된다.
+
+nginx/Apache 의 표준적 정적 최적화 블록은 URL 마지막 확장자로 분기하며, nginx 에서 정규식 location 은
+프리픽스 location 보다 먼저 매칭된다. 그래서 `try_files ... /index.php` 폴백이 실행될 기회 없이 nginx 가
+직접 파일시스템을 열려 시도해 404 가 된다. aaPanel / CyberPanel / Plesk 기본 템플릿에 들어있는 블록이라
+드물지 않으며, 그런 서버에서는 해당 엔드포인트가 통째로 죽는다.
+
+```nginx
+location ~* \.(js|css|json)$ { expires max; access_log off; }
+```
+
+```php
+// 잘못된 등록 — 확장자 없는 형태가 생기지 않는다
+Route::get('{identifier}/routes.json', [Ctrl::class, 'getRoutes'])->name('...');
+
+// 접미사 제거형 — routes.json + routes
+Route::dualSuffix('{identifier}/routes', 'json', [Ctrl::class, 'getRoutes'])
+    ->name('api.public.templates.routes');
+
+// 세그먼트 강등형 — 접미사가 종류를 구분해 제거 불가 (bundle.js + bundle/js)
+Route::dualSuffixSegment('bundle', 'js', [Ctrl::class, 'serveBundleJs'])
+    ->name('api.public.modules.bundle.js');
+
+// 쿼리 이동형 — 경로가 곧 파일명 (assets/{id}/js/a.js + assets/{id}?file=js/a.js)
+Route::dualAsset('assets/{identifier}', [Ctrl::class, 'serveAsset'])
+    ->name('api.public.templates.assets');
+```
+
+매크로가 반환하는 프록시는 `name()` 을 양쪽에 적용하며(확장자 없는 쪽은 `.extensionless` 접미사),
+`middleware()` 등 나머지 호출도 두 라우트에 함께 전달한다. 한쪽에만 걸리는 가드가 생기지 않는다.
+
+URL 을 만드는 쪽도 문자열로 직접 조립하지 않는다. 서버는 `App\Support\AssetUrl`, 프론트엔드는
+`resources/js/core/support/assetUrl.ts` 를 경유해야 현재 모드에 맞는 형태가 나온다. 두 구현은 동일 규칙을
+공유하므로 한쪽만 바꾸면 서버가 만든 URL 과 클라이언트가 만든 URL 이 어긋나 그 자산만 404 가 된다.
+
+자동 차단: audit 룰 `dynamic-route-static-extension` (error). 면제는 인라인 주석
+`// audit:allow dynamic-route-static-extension reason: ...`.
+
+두 형태는 모두 영구 유지한다 — 확장자 형태를 제거하면 URL 을 하드코딩한 서드파티 확장이 깨진다.
+엔드포인트별 변환 규칙 표와 프로브 판정 절차: [API 레퍼런스 진입점](./api/README.md) "자산 URL 이중 모드".
 
 ---
 

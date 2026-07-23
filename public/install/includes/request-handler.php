@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\PrivilegedDatabaseAccounts;
+
 /**
  * 그누보드7 웹 인스톨러 요청 처리 핸들러
  *
@@ -140,7 +142,7 @@ function validateDbUsername(string $username, string $field, array &$errors): vo
         return;
     }
 
-    if (\App\Support\PrivilegedDatabaseAccounts::isBlocked($username)) {
+    if (PrivilegedDatabaseAccounts::isBlocked($username)) {
         $errors[$field] = lang('error_db_username_privileged', ['username' => $username]);
     }
 }
@@ -204,6 +206,15 @@ function handleStep3Post(string $currentLang, array &$formData, array &$errors):
         $vendorMode = 'auto';
     }
     $formData['vendor_mode'] = $vendorMode;
+
+    // 자산 URL 방식 (이슈 #486) — Step 3 의 브라우저 프로브가 채운 hidden 필드.
+    // 정적 최적화 블록이 있는 서버는 확장자 붙은 동적 응답이 PHP 에 도달하지 못하므로
+    // 설치 시점에 확장자 없는 형태로 확정해야 첫 화면부터 정상 동작한다.
+    // 판정 불가(프로브 실패·JS 미실행)면 키를 비워 defaults.json 기본값을 따르게 한다.
+    $assetUrlMode = trim($formData['asset_url_mode'] ?? '');
+    $formData['asset_url_mode'] = in_array($assetUrlMode, ['extension', 'extensionless'], true)
+        ? $assetUrlMode
+        : '';
 
     // 코어 업데이트 _pending 경로 검증 (입력된 경우만)
     $corePendingPath = trim($formData['core_update_pending_path'] ?? '');

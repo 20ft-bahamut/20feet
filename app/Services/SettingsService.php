@@ -7,6 +7,7 @@ use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Contracts\Repositories\ConfigRepositoryInterface;
 use App\Extension\HookManager;
 use App\Http\Resources\AttachmentResource;
+use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Support\ConfigCacheHelper;
 use App\Support\OpcacheStatus;
 use Illuminate\Support\Facades\Artisan;
@@ -42,6 +43,27 @@ class SettingsService
     {
         $this->cache->forget('settings.system');
         ConfigCacheHelper::rebuild();
+    }
+
+    /**
+     * 자산 URL 방식 변경에 따라 SEO 프리렌더 캐시를 비웁니다.
+     *
+     * SEO 캐시에는 생성 시점의 자산 URL 이 문자열로 구워져 있어, 모드가 바뀌면
+     * 그 URL 들이 전부 어긋난다. 사람 방문자는 브라우저 자가 복구가 살리지만
+     * 검색엔진 봇은 JavaScript 를 실행하지 않으므로 캐시를 비워 재생성시켜야 한다.
+     *
+     * 캐시 삭제 실패가 설정 저장 자체를 되돌리지는 않는다 — 설정은 이미 저장됐고,
+     * 캐시는 TTL 만료나 `seo:clear` 로도 회복 가능한 부수 상태다.
+     */
+    private function clearSeoCacheForAssetUrlMode(): void
+    {
+        try {
+            app(SeoCacheManagerInterface::class)->clearAll();
+        } catch (\Throwable $e) {
+            Log::warning('자산 URL 방식 변경 후 SEO 캐시 삭제 실패 — seo:clear 로 수동 삭제 필요', [
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -476,11 +498,25 @@ class SettingsService
             $existingSettings = $this->configRepository->getCategory($tab);
             $mergedSettings = array_merge($existingSettings, $tabSettings);
 
+            // 자산 URL 방식이 바뀌는지 저장 **전에** 판정한다 (이슈 #486).
+            // 저장 후에는 이전 값을 알 수 없어 변경 여부를 판별할 수 없다.
+            $assetUrlModeChanged = $tab === 'general'
+                && array_key_exists('asset_url_mode', $tabSettings)
+                && ($existingSettings['asset_url_mode'] ?? null) !== $tabSettings['asset_url_mode'];
+
             // 해당 카테고리 설정 저장
             $result = $this->configRepository->saveCategory($tab, $mergedSettings);
 
             if ($result) {
                 $this->invalidateSettingsCache();
+
+                // SEO 프리렌더 캐시에는 생성 시점의 자산 URL 이 그대로 구워져 있다.
+                // 모드가 바뀌면 그 URL 들이 전부 어긋나는데, 봇은 JavaScript 를 실행하지
+                // 않아 브라우저 자가 복구가 닿지 않는다 → 캐시를 비워 재생성시킨다.
+                // CLI(`g7:asset-url-mode`)와 동일한 처리 (계획서 §알려진 한계).
+                if ($assetUrlModeChanged) {
+                    $this->clearSeoCacheForAssetUrlMode();
+                }
 
                 // drivers 탭은 queue/broadcasting/cache 등 long-running worker에 영향
                 // SettingsServiceProvider는 worker boot 시점에 한 번만 config 적용하므로

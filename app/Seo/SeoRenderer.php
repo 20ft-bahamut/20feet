@@ -12,6 +12,7 @@ use App\Services\LayoutService;
 use App\Services\PluginSettingsService;
 use App\Services\SettingsService;
 use App\Services\TemplateService;
+use App\Support\AssetUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
@@ -689,7 +690,7 @@ class SeoRenderer implements SeoRendererInterface
         foreach ($cssPaths as $cssPath) {
             // dist/ 접두사 제거 (서빙 경로에서는 dist가 자동 추가됨)
             $servePath = preg_replace('#^dist/#', '', $cssPath);
-            $urls[] = '/api/templates/assets/'.$templateIdentifier.'/'.$servePath;
+            $urls[] = AssetUrl::templateAsset($templateIdentifier, $servePath);
         }
 
         return $urls;

@@ -218,9 +218,14 @@ if (!defined('DELETE_INSTALLER_AFTER_COMPLETE')) {
 // 두 클래스는 프레임워크 의존성이 0 이라 이 방식이 성립하며, 인스톨러와 코어가
 // 서로 다른 판정을 내리는 것을 구조적으로 차단한다.
 // class_exists 가드: Laravel 부트가 선행된 테스트 환경에서 중복 로드 방지.
-if (!class_exists('App\\Support\\PrivilegedDatabaseAccounts', false)) {
+//
+// 오토로드를 **막지 않는다**(2번째 인자 생략). `false` 를 주면 오토로드 가능한
+// 클래스를 못 본 채 require 로 내려가는데, BASE_PATH 를 임시 디렉토리로 바꿔 두는
+// 인스톨러 단위 테스트에서는 그 경로에 app/Support 가 없어 fatal 이 된다.
+// 순수 인스톨러 실행 시에는 등록된 오토로더가 없어 false 를 반환하므로 require 가 그대로 돈다.
+if (!class_exists('App\\Support\\PrivilegedDatabaseAccounts')) {
     require_once BASE_PATH . '/app/Support/PrivilegedDatabaseAccounts.php';
 }
-if (!class_exists('App\\Support\\OpcacheStatus', false)) {
+if (!class_exists('App\\Support\\OpcacheStatus')) {
     require_once BASE_PATH . '/app/Support/OpcacheStatus.php';
 }

@@ -434,6 +434,8 @@ php artisan template:cache-clear          # 전체 번들 파일 정리 포함
 프로덕션은 version-in-path 디스크 캐시, 비프로덕션(dev/watch)은 캐시 없이 매 요청 concat(rebuild 즉시 반영). `_bundled` 수정 후에는 `{type}:update {id} --force` 로 활성 반영 후 version bump 로 번들이 재생성된다.
 
 > 개별 에셋 서빙 라우트(`/api/{type}/assets/...`, `*.map` 포함)는 소스맵·static 참조를 위해 존치한다.
+> 다만 `*.map` 의 **실제 서빙은 `local` 환경에서만** 허용된다 — 소스맵에는 원본 코드 전문이
+> 담기므로 운영에서는 확장자 화이트리스트가 차단한다. 상세: [template-security.md](template-security.md) "소스맵 (`map`) — 로컬 개발 환경 전용".
 
 ### 전송 압축 (gzip)
 

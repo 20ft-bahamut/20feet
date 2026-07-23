@@ -142,6 +142,10 @@
             document.getElementById('requirements-result').innerHTML = resultHtml;
             document.getElementById('navigation-buttons').classList.remove('hidden');
 
+            // 자산 URL 방식은 브라우저만 판정할 수 있어 카드 삽입 후 비동기로 채운다.
+            // await 하지 않는다 — 프로브가 늦거나 실패해도 요구사항 화면을 막지 않는다.
+            refreshAssetUrlModeCard();
+
             // 버튼 표시 제어
             const recheckBtn = document.getElementById('recheck-btn');
             const nextBtn = document.getElementById('next-btn');
@@ -466,6 +470,20 @@
                 '',
                 false
             );
+        }
+
+        // 10. 자산 URL 방식 카드 (안내 항목, 필수 아님)
+        // 서버는 판정할 수 없으므로(loopback 이 vhost·프록시를 우회) "확인 중" 으로 먼저
+        // 그리고 refreshAssetUrlModeCard() 가 브라우저 프로브 결과로 갱신한다.
+        // failedRequirements.push() 를 하지 않는다 — 어느 방식이든 정상 동작이다.
+        if (data.asset_url_mode) {
+            html += `<div id="asset-url-mode-card">${renderSingleItemCard(
+                lang('asset_url_mode'),
+                'status-warning',
+                lang('asset_url_mode_checking'),
+                '',
+                false
+            )}</div>`;
         }
 
         html += '</div>';
@@ -1554,10 +1572,153 @@
     /**
      * 실시간 검증 초기화
      */
+    /**
+     * 자산 URL 방식을 브라우저에서 판정한다 (이슈 #486 §6·§7).
+     *
+     * Step 2 요구사항 카드와 Step 3 설정 폼이 **같은 함수를 쓴다.** 판정 로직을 두 벌
+     * 두면 한쪽만 고쳐져 화면마다 다른 답을 내놓는다 (이 이슈에서 이미 URL 생성부가
+     * 그렇게 어긋났다).
+     *
+     * 정적 최적화 블록(`location ~* \.(js|css|json)$`)은 정규식 location 이라 프리픽스
+     * location 보다 먼저 매칭되고, 그 안에 PHP 핸들러가 없으면 확장자 붙은 동적 응답이
+     * PHP 에 도달하지 못한 채 404 가 된다. 설치 시점에 판정해 두지 않으면 설치 직후
+     * 첫 화면부터 백지가 된다.
+     *
+     * 판정은 **쌍으로** 던진다. 단일 프로브는 "PHP 자체가 죽음" 과 구분되지 않는다.
+     *
+     *   probe.js 실패 + probe 성공 = 정적 블록 가로채기 확정 → extensionless
+     *   둘 다 성공                  = extension
+     *   둘 다 실패                  = PHP/라우팅 문제 (모드 문제 아님) → 판정 보류
+     *
+     * 성공 판정은 상태코드가 아니라 **본문의 매직 토큰**으로 한다. 상태코드만 보면
+     * "404 대신 200 + 에러 HTML" 이나 catch-all 200 페이지를 반환하는 설정에서
+     * 영원히 오판한다.
+     */
+    async function probeAssetUrlMode(base) {
+        const TOKEN = 'G7_ASSET_PROBE_OK';
+        const root = (base || '').replace(/\/+$/, '');
+
+        /**
+         * 프로브 1건을 던져 매직 토큰 포함 여부를 반환한다.
+         */
+        const probe = async (path) => {
+            try {
+                const res = await fetch(`${root}${path}`, { cache: 'no-store', credentials: 'omit' });
+                if (!res.ok) return false;
+
+                // Content-Type 도 함께 본다 (L6). 토큰만 검사해도 200+HTML 오판은
+                // 걸러지지만, 계획서는 두 신호를 모두 요구한다.
+                const contentType = res.headers.get('content-type') || '';
+                if (!/javascript|ecmascript/i.test(contentType)) return false;
+
+                return (await res.text()).includes(TOKEN);
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const [withExt, withoutExt] = await Promise.all([
+            probe('/api/system/asset-probe.js'),
+            probe('/api/system/asset-probe'),
+        ]);
+
+        if (withExt && withoutExt) {
+            return 'extension';
+        }
+        if (!withExt && withoutExt) {
+            return 'extensionless';
+        }
+
+        // 둘 다 실패 = 모드 문제가 아니다(PHP/라우팅 장애). 빈 문자열로 판정 보류.
+        return '';
+    }
+
+    /**
+     * Laravel 앱 루트 경로를 반환한다 (`INSTALLER_BASE_URL` 은 항상 `/install` 로 끝난다).
+     *
+     * Step 2 에는 `app_url` 입력이 아직 없으므로 현재 origin 기준으로 조립한다.
+     */
+    function getAppRootUrl() {
+        const base = (window.INSTALLER_BASE_URL || '').replace(/\/install$/, '');
+
+        return `${window.location.origin}${base}`;
+    }
+
+    /**
+     * Step 2 요구사항 카드의 자산 URL 방식 항목을 프로브 결과로 갱신한다 (§7).
+     *
+     * 서버는 이 값을 판정할 수 없어(loopback 이 vhost·프록시를 우회) 카드가 먼저
+     * "확인 중" 으로 그려진 뒤 여기서 채워진다. 통과/실패 게이트가 아니라 안내 항목이라
+     * `failedRequirements` 에 넣지 않는다 — 어느 방식이든 정상 동작이다.
+     */
+    async function refreshAssetUrlModeCard() {
+        const slot = document.getElementById('asset-url-mode-card');
+        if (!slot) return;
+
+        const detected = await probeAssetUrlMode(getAppRootUrl());
+
+        // 확장자 미사용은 "서버가 확장자 주소를 가로채고 있다" 는 신호이므로 눈에 띄게 둔다.
+        // 판정 불가도 마찬가지 — 설치 후 백지 화면의 예고일 수 있다.
+        const statusClass = detected === 'extension' ? 'status-pass' : 'status-warning';
+        const label = detected === 'extension'
+            ? lang('asset_url_mode_extension')
+            : (detected === 'extensionless' ? lang('asset_url_mode_extensionless') : lang('asset_url_mode_unknown'));
+
+        // 경고 상태(확장자 미사용 자동 선택 / 확인 불가)는 "왜 그런지" 를 설명 문구로
+        // 함께 보인다 — 짧은 라벨("확인 불가")만으로는 어떤 상황인지 알 수 없다.
+        // "확인 불가" 는 두 프로브가 모두 실패한 상태라 에셋 방식 문제가 아니라
+        // 앱 미응답·프록시·CSP 등 다른 원인일 수 있으므로 그 내용을 상세히 안내한다.
+        let note = '';
+        if (detected === 'extensionless') {
+            note = lang('asset_url_mode_detected_extensionless');
+        } else if (detected === '') {
+            note = lang('asset_url_mode_detected_unavailable');
+        }
+        const noteHtml = note ? `<p class="fix-guide-hint">${note}</p>` : '';
+
+        // 카드 내부를 부분 수정하지 않고 통째로 다시 그린다 — 아이콘·수식자 클래스가
+        // renderSingleItemCard 안에서 statusClass 로 함께 결정되므로, 밖에서 일부만
+        // 건드리면 아이콘과 카드 색이 어긋난다.
+        slot.innerHTML = renderSingleItemCard(lang('asset_url_mode'), statusClass, label, '', false) + noteHtml;
+    }
+
+    async function detectAssetUrlMode() {
+        const field = document.getElementById('asset_url_mode');
+        if (!field) return;
+
+        const base = (document.querySelector('[name="app_url"]')?.value || '').replace(/\/+$/, '');
+        const detected = await probeAssetUrlMode(base);
+
+        field.value = detected;
+
+        // 수동 override — 감지 결과를 기본 선택으로 채우고 관리자가 바꿀 수 있게 한다.
+        // 프로브가 CSP/프록시 등으로 둘 다 실패하면 자동 판정이 불가하므로,
+        // 손댈 수단이 없으면 설치를 마친 뒤에야 문제를 알게 된다.
+        const select = document.getElementById('asset_url_mode_select');
+        const status = document.getElementById('asset_url_mode_status');
+        if (select) {
+            select.value = detected || 'extension';
+            select.addEventListener('change', function () {
+                field.value = this.value;
+            });
+            // 감지 실패 시에도 select 값이 hidden 에 반영되도록 초기 동기화
+            field.value = select.value;
+        }
+        if (status) {
+            status.textContent = status.getAttribute(
+                detected ? `data-msg-${detected}` : 'data-msg-unavailable'
+            ) || '';
+            status.classList.remove('hidden');
+        }
+    }
+
     function initRealTimeValidation() {
         // Step 3 (config-form)이 있는 경우에만 실행
         const configForm = document.getElementById('config-form');
         if (!configForm) return;
+
+        // 자산 URL 방식 자동 감지 (비차단 — 실패해도 설치 진행에 지장 없음)
+        detectAssetUrlMode();
 
         const fieldsToValidate = [
             'app_name',

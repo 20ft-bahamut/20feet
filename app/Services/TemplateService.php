@@ -1739,13 +1739,19 @@ class TemplateService
      */
     private function sanitizePath(string $path): string
     {
-        // ../ 및 ..\ 패턴 제거
-        $path = str_replace(['../', '..\\'], '', $path);
+        // ../ 및 ..\ 패턴 제거 — 결과가 안정될 때까지 반복한다.
+        //
+        // 1회성 치환이면 제거 자체가 새 패턴을 만들어낸다:
+        //   '....//' → 가운데 '../' 제거 → '../'  (탈출 시퀀스 복원)
+        // 현재는 FormRequest 의 realpath 검사가 앞단에서 막고 있으나,
+        // 방어 계층이 하나 무력한 상태로 두지 않는다.
+        do {
+            $previous = $path;
+            $path = str_replace(['../', '..\\'], '', $path);
+        } while ($path !== $previous);
 
         // 절대 경로 방지
-        $path = ltrim($path, '/\\');
-
-        return $path;
+        return ltrim($path, '/\\');
     }
 
     /**

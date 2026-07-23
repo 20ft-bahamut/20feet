@@ -301,6 +301,18 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | `AuthManager.updateConfig({ loginPath: '//evil.com/...' })` (protocol-relative) | `//` 시작 금지 (open redirect 방지) |
 | 401 에러 페이지(`errors/401.json`)에서 직접 로그인 리다이렉트 구현 | 코어 `TemplateApp.showRouteError` 가드에 위임 (자동 처리) |
 
+### 정적 확장자 라우트 / 자산 URL 생성
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| `Route::get('{id}/routes.json', ...)` (`.js`/`.css`/`.json`/`.map` 단일 등록) | `Route::dualSuffix('{id}/routes', 'json', ...)` — 확장자 형태 + 확장자 없는 형태 동시 등록 |
+| `Route::get('bundle.js', ...)` (접미사가 종류를 구분해 제거 불가) | `Route::dualSuffixSegment('bundle', 'js', ...)` (`bundle.js` + `bundle/js`) |
+| `Route::get('assets/{id}/{path}', ...)` (와일드카드 자산) | `Route::dualAsset('assets/{id}', ...)` (`.../{path}` + `?file=` 쿼리) |
+| 서버에서 `'/api/templates/assets/'.$id.'/'.$path` 문자열 조립 | `App\Support\AssetUrl::templateAsset($id, $path)` |
+| 프론트에서 `` `/api/templates/${id}/routes.json` `` 템플릿 리터럴 조립 | `resources/js/core/support/assetUrl.ts` 의 `suffixed()` / `templateAsset()` 등 |
+
+정규식 location 은 프리픽스 location 보다 먼저 매칭되므로, 정적 최적화 블록(`location ~* \.(js|css|json)$`)이 있는 서버에서는 확장자 붙은 동적 응답이 `try_files ... /index.php` 폴백 기회 없이 404 가 된다. 서버측 `AssetUrl` 과 프론트측 `assetUrl.ts` 는 동일 규칙을 공유하므로 한쪽만 바꾸면 그 자산만 404 가 된다. 상세: [routing.md](docs/backend/routing.md) "정적 확장자로 끝나는 동적 엔드포인트", [api/README.md](docs/backend/api/README.md) "자산 URL 이중 모드".
+
 ### Listener 데이터 접근
 
 | 금지 | 올바른 사용 |

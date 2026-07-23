@@ -41,6 +41,7 @@ use App\Models\Plugin;
 use App\Models\Template;
 use App\Providers\CoreServiceProvider;
 use App\Services\LayoutExtensionService;
+use App\Support\AssetUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -1066,8 +1067,8 @@ class ModuleManager implements ModuleManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1156,8 +1157,8 @@ class ModuleManager implements ModuleManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1304,8 +1305,8 @@ class ModuleManager implements ModuleManagerInterface
 
             if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                 $assets = [
-                    'js' => isset($builtPaths['js']) ? "/api/modules/assets/{$identifier}/".$builtPaths['js'] : null,
-                    'css' => isset($builtPaths['css']) ? "/api/modules/assets/{$identifier}/".$builtPaths['css'] : null,
+                    'js' => isset($builtPaths['js']) ? AssetUrl::moduleAsset($identifier, $builtPaths['js']) : null,
+                    'css' => isset($builtPaths['css']) ? AssetUrl::moduleAsset($identifier, $builtPaths['css']) : null,
                     'priority' => $loadingConfig['priority'] ?? 100,
                 ];
             }
@@ -1427,11 +1428,22 @@ class ModuleManager implements ModuleManagerInterface
             return null;
         }
 
-        try {
-            require_once $moduleFile;
+        $namespace = $this->convertDirectoryToNamespace($moduleName);
+        $moduleClass = "Modules\\{$namespace}\\Module";
 
-            $namespace = $this->convertDirectoryToNamespace($moduleName);
-            $moduleClass = "Modules\\{$namespace}\\Module";
+        try {
+            // 같은 모듈의 활성 디렉토리 사본이 이미 로드돼 있으면 `_bundled`/`_pending`
+            // 파일을 그대로 require 할 수 없다 — 같은 FQN 을 두 번 선언하게 되어
+            // "Cannot declare class ..., because the name is already in use" 로 죽는다.
+            // 이것은 Error 라 아래 catch(\Exception) 에 걸리지 않아 프로세스가 그대로 종료된다.
+            //
+            // 파일 내용을 임시 클래스명으로 eval 해 번들 쪽 메타데이터를 얻는다
+            // (loadModuleFromDirectory / getFreshModuleInstance 와 동일한 처리).
+            if (class_exists($moduleClass, false)) {
+                return $this->evalFreshModule($moduleFile, $moduleClass, dirname($moduleFile));
+            }
+
+            require_once $moduleFile;
 
             if (class_exists($moduleClass)) {
                 $module = new $moduleClass;
@@ -1439,7 +1451,7 @@ class ModuleManager implements ModuleManagerInterface
                     return $module;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::debug("Failed to load bundled module instance for {$moduleName}: ".$e->getMessage());
         }
 

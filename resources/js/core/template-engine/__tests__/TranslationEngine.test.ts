@@ -1,3 +1,4 @@
+// e2e:allow 테스트 전용 수정 — suffixed 헬퍼 일원화(#486)로 바뀐 쿼리 파라미터 순서를 순서 무관 단언으로 정정. 런타임 동작 무변경이며 대상 기능 E2E 는 tests/Playwright/specs/asset-url-mode.spec.ts 로 이미 커버됨.
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   TranslationEngine,
@@ -1211,9 +1212,13 @@ describe('TranslationEngine', () => {
 
       await engine.loadTranslations('template-1', 'ko', '/api', true);
 
-      // bustCache가 true이면 타임스탬프 쿼리 파라미터도 추가됨
+      // bustCache가 true이면 타임스탬프 쿼리 파라미터도 추가됨.
+      // 두 파라미터의 순서는 기능상 무의미하다 — #486 에서 URL 조립이 suffixed 헬퍼로
+      // 일원화되며 v=/_= 순서가 바뀌었다. 순서에 의존하지 말고 둘 다 존재하는지만 검증한다.
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringMatching(/\/api\/templates\/template-1\/lang\/ko\.json\?v=1735000000&_=\d+/)
+        expect.stringMatching(
+          /\/api\/templates\/template-1\/lang\/ko\.json\?(?=.*\bv=1735000000\b)(?=.*\b_=\d+\b)/
+        )
       );
     });
 

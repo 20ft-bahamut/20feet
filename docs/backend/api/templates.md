@@ -821,7 +821,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **설명** 데이터소스 websocket 후보용으로 등록된 브로드캐스트 채널/이벤트 카탈로그를 반환합니다(BroadcastCatalogService::collect). 편집기 전용 가드 하에서만 노출되며(admin 전역 broadcast 회피), `identifier`는 라우트 일관성용이고 카탈로그는 설치본 전역 기준입니다. `core.templates.layouts.edit` 권한이 필요합니다.
 
 
-### GET /api/admin/templates/{identifier}/editor/components.css
+### GET /api/admin/templates/{identifier}/editor/component-styles.css
 <!-- @generated:start:api.admin.templates.editor-css -->
 - **라우트명**: `api.admin.templates.editor-css`
 - **컨트롤러**: `App\Http\Controllers\Api\Admin\AdminTemplateAssetController@serveEditorCss`
@@ -836,7 +836,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/templates/{identifier}/editor/components.css HTTP/1.1
+GET /api/admin/templates/{identifier}/editor/component-styles.css HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -861,6 +861,8 @@ Authorization: Bearer {YOUR_TOKEN}
 <!-- @generated:end -->
 
 **설명** 레이아웃 편집기 프리뷰 전용 CSS를 서빙합니다. 편집기 진입 시에만 components.css의 다크 조상 셀렉터를 프리뷰 마커로 치환하고(editor-spec `darkMode.previewIsolation` 규칙), 필요 시 `@layer` 래퍼를 평탄화해 라이트/다크 프리뷰를 격리합니다. 변환 결과는 캐시 버전+파일 mtime 키로 캐시하며, CSS 부재 시 빈 응답으로 폴백합니다. `core.templates.layouts.edit` 권한이 필요합니다.
+
+URI 가 `editor/components.css` 가 아니라 `editor/component-styles.css` 인 이유는 [자산 URL 이중 모드](README.md#자산-url-이중-모드) 때문입니다. 확장자를 뗀 형태(`editor/components`)가 `editor/components.json` 의 확장자 없는 형태와 충돌하므로 CSS 쪽 URI 를 분리했습니다. 확장자 없는 형태는 `editor/component-styles` 입니다.
 
 
 ### GET /api/admin/templates/{identifier}/editor/components.json

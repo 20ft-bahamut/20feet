@@ -844,6 +844,10 @@ if (isset($_GET['ajax_action'])) {
                                     <span>SEO 캐시 삭제</span>
                                     <span class="text-[10px] opacity-60">(seo:clear)</span>
                                 </button>
+                                <button onclick="runCommand('g7:asset-url-mode')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>자산 URL 방식 확인</span>
+                                    <span class="text-[10px] opacity-60">(g7:asset-url-mode)</span>
+                                </button>
                                 <button onclick="runCommand('seo:stats')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors">
                                     <span>SEO 통계</span>
                                     <span class="text-[10px] opacity-60">(seo:stats)</span>

@@ -41,6 +41,7 @@ use App\Models\Template;
 use App\Providers\CoreServiceProvider;
 use App\Services\DriverRegistryService;
 use App\Services\LayoutExtensionService;
+use App\Support\AssetUrl;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -1094,8 +1095,8 @@ class PluginManager implements PluginManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1190,8 +1191,8 @@ class PluginManager implements PluginManagerInterface
 
                     if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                         $assets = [
-                            'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                            'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                            'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                            'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                             'priority' => $loadingConfig['priority'] ?? 100,
                         ];
                     }
@@ -1268,8 +1269,8 @@ class PluginManager implements PluginManagerInterface
 
             if (isset($builtPaths['js']) || isset($builtPaths['css'])) {
                 $assets = [
-                    'js' => isset($builtPaths['js']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['js'] : null,
-                    'css' => isset($builtPaths['css']) ? "/api/plugins/assets/{$identifier}/".$builtPaths['css'] : null,
+                    'js' => isset($builtPaths['js']) ? AssetUrl::pluginAsset($identifier, $builtPaths['js']) : null,
+                    'css' => isset($builtPaths['css']) ? AssetUrl::pluginAsset($identifier, $builtPaths['css']) : null,
                     'priority' => $loadingConfig['priority'] ?? 100,
                 ];
             }
@@ -1428,11 +1429,21 @@ class PluginManager implements PluginManagerInterface
             return null;
         }
 
-        try {
-            require_once $pluginFile;
+        $namespace = $this->convertDirectoryToNamespace($pluginName);
+        $pluginClass = "Plugins\\{$namespace}\\Plugin";
 
-            $namespace = $this->convertDirectoryToNamespace($pluginName);
-            $pluginClass = "Plugins\\{$namespace}\\Plugin";
+        try {
+            // 같은 플러그인의 활성 디렉토리 사본이 이미 로드돼 있으면 `_bundled`/`_pending`
+            // 파일을 그대로 require 할 수 없다 — 같은 FQN 을 두 번 선언하게 되어
+            // "Cannot declare class ..., because the name is already in use" 로 죽는다.
+            // 이것은 Error 라 아래 catch(\Exception) 에 걸리지 않아 프로세스가 그대로 종료된다.
+            //
+            // 파일 내용을 임시 클래스명으로 eval 해 번들 쪽 메타데이터를 얻는다.
+            if (class_exists($pluginClass, false)) {
+                return $this->evalFreshPlugin($pluginFile, $pluginClass, dirname($pluginFile));
+            }
+
+            require_once $pluginFile;
 
             if (class_exists($pluginClass)) {
                 $plugin = new $pluginClass;
@@ -1440,7 +1451,7 @@ class PluginManager implements PluginManagerInterface
                     return $plugin;
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::debug("Failed to load bundled plugin instance for {$pluginName}: ".$e->getMessage());
         }
 
