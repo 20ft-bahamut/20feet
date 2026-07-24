@@ -259,6 +259,8 @@ class PageService
      * @param  Page  $page  페이지 모델
      * @param  int  $versionId  복원할 버전 ID
      * @return Page 복원된 페이지 모델
+     *
+     * @throws ModelNotFoundException 버전이 해당 페이지에 속하지 않을 때
      */
     public function restoreVersion(Page $page, int $versionId): Page
     {
@@ -266,13 +268,10 @@ class PageService
             throw new AccessDeniedHttpException(__('auth.scope_denied'));
         }
 
-        $version = $this->pageVersionRepository->findOrFail($versionId);
-
-        if ($version->page_id !== $page->id) {
-            throw new \InvalidArgumentException(
-                __('sirsoft-page::messages.errors.version_belongs_to_different_page')
-            );
-        }
+        // 상위 페이지 스코프를 Repository where 절에 반영한다 (SSoT).
+        // 사후 비교로 처리하면 예외 타입이 컨트롤러 catch 사슬과 어긋나 500 이 되고,
+        // 같은 위반에 404 를 내는 조회(getVersion)와 계약이 갈린다.
+        $version = $this->pageVersionRepository->findForPage($page->id, $versionId);
 
         return DB::transaction(function () use ($page, $version) {
             $userId = Auth::id();
@@ -350,16 +349,17 @@ class PageService
     }
 
     /**
-     * 버전 ID로 페이지 버전을 조회합니다.
+     * 페이지에 속한 버전을 조회합니다.
      *
+     * @param  int  $pageId  페이지 ID
      * @param  int  $versionId  버전 ID
      * @return PageVersion 버전 모델
      *
      * @throws ModelNotFoundException
      */
-    public function getVersion(int $versionId): PageVersion
+    public function getVersion(int $pageId, int $versionId): PageVersion
     {
-        return $this->pageVersionRepository->findOrFail($versionId);
+        return $this->pageVersionRepository->findForPage($pageId, $versionId);
     }
 
     /**

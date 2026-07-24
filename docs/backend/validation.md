@@ -32,6 +32,8 @@
 - [사용자 입력 다국어 필드 정규화 (prepareForValidation)](#사용자-입력-다국어-필드-정규화-prepareforvalidation)
 - [동적 스키마 기반 FormRequest 패턴](#동적-스키마-기반-formrequest-패턴)
 - [exists/unique 검증 규칙](#existsunique-검증-규칙)
+- [계층 리소스 순환 참조](#계층-리소스-순환-참조)
+- [배열 항목의 상위 스코프](#배열-항목의-상위-스코프)
 - [Custom Rule 개발 체크리스트](#custom-rule-개발-체크리스트)
 
 ---
@@ -1023,6 +1025,66 @@ use Illuminate\Validation\Rule;
 // ✅ 동적 테이블 - 문자열 테이블명 허용 (Model::class 불가)
 Rule::exists("board_{$slug}_posts", 'id'),
 ```
+
+---
+
+## 계층 리소스 순환 참조
+
+`parent_id` 로 자기 자신을 참조하는 계층 리소스(메뉴, 카테고리 등)의 **수정·순서 변경**
+요청은 `Rule::exists` 만으로 부족하다. `exists` 는 행의 존재만 보장하므로 자기 자신이나
+자신의 자손을 부모로 지정해 사이클을 만들 수 있고, DB 의 FK 제약도 이를 막지 못한다.
+
+사이클이 생기면 `path`/`depth` 재계산 재귀가 종료되지 않아 요청이 스택 오버플로로 실패하고,
+사이클 노드는 루트에서 도달할 수 없어 트리에서 사라진다. 관리자 화면으로는 복구할 수 없다.
+
+```php
+// ❌ 존재만 확인 — 자기 자신/자손을 부모로 지정 가능
+'parent_id' => ['nullable', Rule::exists(Category::class, 'id')],
+
+// ✅ 자손 전체를 검사하는 Rule 부착
+'parent_id' => [
+    'nullable',
+    Rule::exists(Category::class, 'id'),
+    new NotCircularCategoryParent($categoryId),
+],
+```
+
+### 규율
+
+| 항목 | 규칙 |
+| --- | --- |
+| 적용 대상 | `Update*Request` / `Reorder*Request`. 생성 요청은 자기 자신이 아직 없어 순환이 불가하나, 두 엔드포인트의 규칙 구성을 같게 두면 검증 강도가 갈라지지 않는다 |
+| 검사 범위 | 자기 자신만이 아니라 **자손 전체**. 자기참조만 막는 규칙(`NotSelfParent`)은 `A → B → A` 를 통과시킨다 |
+| 동일 리소스 일관성 | 한 리소스의 모든 부모 변경 경로(수정 / 순서 변경 / 일괄 이동)가 같은 강도를 가져야 한다. 한 곳만 강화하면 나머지가 우회로가 된다 |
+| 자손 판정 구현 | `path` 머티리얼라이즈드 컬럼이 있으면 prefix 매칭(쿼리 1회). 없으면 `parent_id` 재귀 — 이때 방문 ID 집합으로 유한 종료를 보장한다 |
+| Service 2차 방어 | 검증을 우회하는 경로(시더 / 훅 / 기존 오염 데이터)를 위해 재귀 함수에 방문 ID 가드를 둔다. 무한 루프 대신 유한 실패 + 로그 |
+| 코어 Rule 재사용 | `App\Rules\NotCircularParent` 는 `App\Models\Menu` 하드코딩이다. 다른 모델에는 모듈 로컬 Rule 을 신설한다 (코어 시그니처 변경 = 확장 버전 제약 연쇄) |
+
+자동 차단: audit 룰 `parent-id-requires-cycle-rule` (error).
+
+---
+
+## 배열 항목의 상위 스코프
+
+요청 본문의 배열 항목이 하위 리소스 ID 를 담고, 라우트에 상위 리소스 ID 가 있다면
+`Rule::exists` 에 상위 스코프 `where` 절을 붙인다. 붙이지 않으면 A 의 경로로 B 의
+하위 리소스를 조작할 수 있다.
+
+```php
+// ❌ 전역 존재 확인 — 다른 주문의 옵션도 통과
+'items.*.option_id' => ['required', 'integer', Rule::exists(OrderOption::class, 'id')],
+
+// ✅ 경로의 상위 리소스로 스코프
+$orderId = $this->route('order')?->id;
+'items.*.option_id' => [
+    'required',
+    'integer',
+    Rule::exists(OrderOption::class, 'id')->where('order_id', $orderId),
+],
+```
+
+422 가 의미적으로 옳다 — 입력값이 이 요청 맥락에서 유효하지 않다는 뜻이기 때문이다.
+Service 에도 동일한 검증을 두어 FormRequest 를 우회한 내부/훅 호출을 막는다.
 
 ---
 
