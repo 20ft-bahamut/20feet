@@ -313,6 +313,20 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 
 정규식 location 은 프리픽스 location 보다 먼저 매칭되므로, 정적 최적화 블록(`location ~* \.(js|css|json)$`)이 있는 서버에서는 확장자 붙은 동적 응답이 `try_files ... /index.php` 폴백 기회 없이 404 가 된다. 서버측 `AssetUrl` 과 프론트측 `assetUrl.ts` 는 동일 규칙을 공유하므로 한쪽만 바꾸면 그 자산만 404 가 된다. 상세: [routing.md](docs/backend/routing.md) "정적 확장자로 끝나는 동적 엔드포인트", [api/README.md](docs/backend/api/README.md) "자산 URL 이중 모드".
 
+### 중첩 리소스 스코프 / 계층 무결성
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| 중첩 라우트의 상위 리소스 ID 를 받아만 두고 조회에 미반영 | Repository where 절에 상위 스코프 반영(SSoT) + Service 가 상위 ID 전달 → 교차 접근 시 404 |
+| `$request->except(...)` / `->all()` 결과를 Service 쓰기 메서드로 전달 | `$request->validated()` 기준 (FormRequest 미정의 필드가 `$fillable` 로 새는 것 차단) |
+| 요청 배열 항목의 `Rule::exists` 에 상위 스코프 미부착 | `Rule::exists(Model::class,'id')->where('order_id', $order->id)` → 422 |
+| 수정/순서변경 FormRequest 의 `parent_id` 에 `Rule::exists` 만 부착 | 자손 전체를 검사하는 순환 방지 Rule 부착 (자기참조만 막는 Rule 은 `A→B→A` 통과) |
+| 같은 리소스의 두 엔드포인트가 서로 다른 검증 강도 | 부모 변경 경로 전부 동일 강도 — 약한 쪽이 우회로가 된다 |
+| 설정값이 정하는 한계를 Service 에서 리터럴로 재클램프 | Service 는 계산만, 상한 검증은 Rule 단일 책임 (이중 클램프 시 깊이 제한이 통째로 무력화) |
+| 계층 재귀(path/depth 재계산)에 방문 ID 가드 없음 | 방문 집합으로 유한 종료 — 검증 우회 경로/오염 데이터에서도 무한 루프 금지 |
+
+> 상세: [validation.md "계층 리소스 순환 참조" / "배열 항목의 상위 스코프"](docs/backend/validation.md), [service-repository.md "중첩 리소스 스코프" / "설정 기반 한계값"](docs/backend/service-repository.md)
+
 ### Listener 데이터 접근
 
 | 금지 | 올바른 사용 |

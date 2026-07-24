@@ -51,12 +51,11 @@ class PluginSettingsController extends AdminBaseController
      */
     public function update(UpdatePluginSettingsRequest $request, string $identifier): JsonResponse
     {
-        // validated()가 빈 배열이면 all()에서 설정값을 가져옴
-        // (PluginManager에 등록되지 않은 플러그인의 경우)
+        // 검증을 통과한 필드만 저장한다. 과거에는 validated() 가 비면 all() 로 폴백했으나,
+        // 그 명분이던 "PluginManager 미등록 플러그인" 은 PluginSettingsService::save() 가
+        // 이미 false 로 차단하므로 도달할 수 없었고, 실제로는 설정 스키마 밖의 키가
+        // 그대로 설정 파일에 병합되는 경로로만 동작했다 (mass-assignment).
         $settings = $request->validated();
-        if (empty($settings)) {
-            $settings = $request->all();
-        }
 
         $result = $this->pluginSettingsService->save($identifier, $settings);
 

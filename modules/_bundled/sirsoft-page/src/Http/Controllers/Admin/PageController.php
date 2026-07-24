@@ -3,6 +3,7 @@
 namespace Modules\Sirsoft\Page\Http\Controllers\Admin;
 
 use App\Http\Controllers\Api\Base\AdminBaseController;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Modules\Sirsoft\Page\Http\Requests\BulkChangePageStatusRequest;
 use Modules\Sirsoft\Page\Http\Requests\ChangePageStatusRequest;
@@ -97,7 +98,7 @@ class PageController extends AdminBaseController
                 'sirsoft-page::messages.page.fetch_success',
                 new PageResource($page)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -124,7 +125,7 @@ class PageController extends AdminBaseController
                 'sirsoft-page::messages.page.update_success',
                 new PageResource($page)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -146,7 +147,7 @@ class PageController extends AdminBaseController
             $this->pageService->deletePage($page);
 
             return $this->success('sirsoft-page::messages.page.delete_success');
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -191,7 +192,7 @@ class PageController extends AdminBaseController
                 'sirsoft-page::messages.page.publish_success',
                 new PageResource($page)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -239,7 +240,7 @@ class PageController extends AdminBaseController
                 'sirsoft-page::messages.page.fetch_success',
                 PageVersionResource::collection($versions)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -259,14 +260,15 @@ class PageController extends AdminBaseController
     {
         try {
             $this->pageService->getPage($id);
-            $version = $this->pageService->getVersion($versionId);
+            // 경로의 페이지에 속한 버전만 조회 (교차 페이지 접근 차단)
+            $version = $this->pageService->getVersion($id, $versionId);
             $version->load('creator');
 
             return $this->successWithResource(
                 'sirsoft-page::messages.page.fetch_success',
                 new PageVersionResource($version)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);
@@ -293,7 +295,7 @@ class PageController extends AdminBaseController
                 'sirsoft-page::messages.page.restore_success',
                 new PageResource($page)
             );
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
+        } catch (ModelNotFoundException) {
             return $this->notFound('sirsoft-page::messages.page.not_found');
         } catch (AccessDeniedHttpException) {
             return $this->error('auth.scope_denied', 403);

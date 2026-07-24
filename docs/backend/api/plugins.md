@@ -954,7 +954,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 <!-- @generated:end -->
 
-**설명** 플러그인의 설정 값을 저장합니다. `core.plugins.update` 권한이 필요합니다. 검증된 값을 우선 사용하되, PluginManager 에 등록되지 않아 검증 규칙이 없는 플러그인의 경우 요청 본문 전체(`all()`)를 저장합니다. 저장 실패 시 500 을 반환하고, 성공 시 갱신된 설정 값을 함께 반환합니다.
+**설명** 플러그인의 설정 값을 저장합니다. `core.plugins.update` 권한이 필요합니다. 저장 대상은 검증을 통과한 값뿐이며, 검증 규칙은 해당 플러그인이 선언한 설정 스키마에서 생성됩니다. 스키마에 없는 필드를 요청에 포함해도 저장되지 않습니다. PluginManager 에 등록되지 않은 플러그인은 저장 자체가 수행되지 않아 500 을 반환합니다. 성공 시 갱신된 설정 값을 함께 반환합니다.
 
 
 ### GET /api/admin/plugins/{identifier}/settings/layout

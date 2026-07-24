@@ -795,7 +795,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 <!-- @generated:end -->
 
-**설명** 특정 버전의 상세 스냅샷을 조회합니다. `{page}` 는 페이지 ID, `{versionId}` 는 버전 ID 입니다. 해당 버전의 전체 본문(`content`)과 메타를 담은 `PageVersionResource` 를 반환하며, 복원 전 미리보기·버전 간 비교에 사용합니다. `{versionId}` 는 라우트-모델 바인딩이 아니어서 문서 생성 시 자동 실측에서 제외되며, 응답 shape 은 `versions.index` 항목과 동일합니다. 미존재 404, 스코프 밖 403.
+**설명** 특정 버전의 상세 스냅샷을 조회합니다. `{page}` 는 페이지 ID, `{versionId}` 는 버전 ID 입니다. 해당 버전의 전체 본문(`content`)과 메타를 담은 `PageVersionResource` 를 반환하며, 복원 전 미리보기·버전 간 비교에 사용합니다. `{versionId}` 는 라우트-모델 바인딩이 아니어서 문서 생성 시 자동 실측에서 제외되며, 응답 shape 은 `versions.index` 항목과 동일합니다. 미존재 404, 스코프 밖 403. `{versionId}`는 경로의 `{page}`에 속한 버전이어야 합니다 — 다른 페이지의 버전 ID를 지정하면 404를 반환합니다.
 
 
 ### POST /api/modules/sirsoft-page/admin/pages/{page}/versions/{versionId}/restore
@@ -838,7 +838,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 <!-- @generated:end -->
 
-**설명** 페이지를 특정 버전 시점으로 복원합니다. `{page}` 는 페이지 ID, `{versionId}` 는 복원 대상 버전 ID 입니다. `PageService::restoreVersion()` 이 그 버전의 내용을 현재 페이지에 반영하고(복원 자체도 새 버전으로 적재), 복원된 `PageResource` 를 반환합니다. 편집 화면 버전 이력 패널의 "이 버전으로 복원" 액션에 사용합니다. 미존재 404, 스코프 밖 403.
+**설명** 페이지를 특정 버전 시점으로 복원합니다. `{page}` 는 페이지 ID, `{versionId}` 는 복원 대상 버전 ID 입니다. `PageService::restoreVersion()` 이 그 버전의 내용을 현재 페이지에 반영하고(복원 자체도 새 버전으로 적재), 복원된 `PageResource` 를 반환합니다. 편집 화면 버전 이력 패널의 "이 버전으로 복원" 액션에 사용합니다. 미존재 404, 스코프 밖 403. `{versionId}`는 경로의 `{page}`에 속한 버전이어야 합니다 — 다른 페이지의 버전 ID를 지정하면 `versions.show` 와 동일하게 404를 반환합니다.
 
 
 ### GET /api/modules/sirsoft-page/pages/attachment/{hash}

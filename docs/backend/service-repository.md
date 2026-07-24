@@ -27,6 +27,8 @@
 - [Repository 클래스](#repository-클래스)
 - [다중 검색 필터 Trait](#다중-검색-필터-trait-hasmultiplesearchfilters)
 - [모듈에서 Repository 인터페이스 바인딩](#모듈에서-repository-인터페이스-바인딩)
+- [중첩 리소스 스코프](#중첩-리소스-스코프)
+- [설정 기반 한계값](#설정-기반-한계값)
 - [관련 문서](#관련-문서)
 
 ---
@@ -1063,6 +1065,62 @@ class ProductService
 | **ServiceProvider 바인딩** | 인터페이스-구현체 매핑은 ServiceProvider에서 수행 |
 | **테스트 용이성** | Mock 객체로 쉽게 대체 가능 |
 | **유연한 교체** | 바인딩만 변경하면 다른 구현체 사용 가능 |
+
+---
+
+## 중첩 리소스 스코프
+
+라우트에 상위 리소스 ID 가 있는 중첩 엔드포인트(`/posts/{postId}/comments/{id}`,
+`/products/{productId}/images/{imageId}` 등)에서는 **Repository 의 where 절이 스코프의
+SSoT** 다. 컨트롤러에서 조회 후 `if ($comment->post_id !== $postId)` 로 비교하는 방식은
+신규 호출처가 생기면 그대로 무력화된다.
+
+```php
+// ❌ 게시판 범위로만 조회 — 다른 게시글의 댓글도 잡힌다
+public function findOrFail(string $slug, int $id): Comment
+
+// ✅ 상위 스코프를 선택 파라미터로 받아 where 절에 반영
+public function findOrFail(string $slug, int $id, ?int $postId = null): Comment
+{
+    return Comment::query()
+        ->where('board_id', $board->id)
+        ->when($postId !== null, fn ($q) => $q->where('post_id', $postId))
+        ->findOrFail($id);
+}
+```
+
+### 규율
+
+| 항목 | 규칙 |
+| --- | --- |
+| 방어 위치 | Repository where 절 (SSoT) + Service 가 상위 ID 를 전달 |
+| 파라미터 형태 | **선택 파라미터**(`?int $postId = null`) — 필수화는 Interface breaking 이라 이 확장에 의존하는 확장을 전부 흔든다 |
+| 전달 누락 방지 | 컨트롤러가 라우트 파라미터를 실제로 소비하는지 audit 룰 `controller-unused-route-param` (warn) 이 감시 |
+| 응답 코드 | 조회 실패이므로 404. 요청 본문 배열 항목의 스코프 위반은 422 (validation.md "배열 항목의 상위 스코프") |
+| 공통 추상화 | 도입하지 않는다 — 모듈마다 상위 키와 조회 경로가 다르고(`board_id`+`post_id` / `product_id` / `page_id` / `order_id`), 코어 표면이 늘면 확장 버전 제약 동기화가 연쇄된다 |
+
+---
+
+## 설정 기반 한계값
+
+설정값으로 정해지는 한계(최대 깊이, 최대 개수 등)의 **검증 책임은 검증 계층 단일**이다.
+Service 에서 리터럴로 다시 클램프하지 않는다.
+
+```php
+// ❌ Service 재클램프 — 설정값이 10 이어도 5 를 넘지 못한다
+$data['depth'] = min(($parent->depth ?? 0) + 1, 5);
+
+// ✅ 계산만 하고, 상한 검증은 Rule 이 게시판 설정으로 판정
+$data['depth'] = ($parent->depth ?? 0) + 1;
+```
+
+이중 클램프는 두 가지를 동시에 망가뜨린다. 저장값이 설정과 무관하게 고정되고(계층 표시 붕괴),
+검증 계층의 `depth + 1 > max` 조건이 영원히 거짓이 되어 **깊이 제한 자체가 무력화**된다.
+값이 상한을 넘으면 조용히 깎지 말고 422 로 거절해야 한다.
+
+이 패턴은 리터럴과 설정 키를 잇는 의미 추론이 필요해 정적 검출이 어렵다
+(`coverage.json` 의 `service-hardcoded-limit-vs-settings` = `not-applicable`).
+코드 리뷰에서 리터럴 상한을 볼 때마다 "이 값을 정하는 설정이 따로 있는가" 를 확인한다.
 
 ---
 

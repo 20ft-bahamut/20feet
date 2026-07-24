@@ -31,6 +31,8 @@ return [
     'order_already_cancelled' => '既にキャンセルされた注文です。',
     'order_already_paid' => '既に決済が完了した注文です。',
     'order_option_not_found' => '注文オプションが見つかりません。',
+    'order_option_not_in_order' => 'この注文に属していない注文オプションです。',
+    'product_image_not_in_product' => 'この商品に属していない画像です。',
     'order_option_already_cancelled' => '既にキャンセルされた注文オプションです。',
     'order_option_already_confirmed' => '既に購入確定された注文オプションです。',
     'order_option_cannot_confirm' => '現在のステータスでは購入確定できません。',
