@@ -963,7 +963,9 @@
                                         "type": "click",
                                         "handler": "navigate",
                                         "params": {
-                                            "path": "{{route?.id ? '/admin/pages/' + route.id : '/admin/pages'}}"
+                                            "path": "{{route?.id ? '/admin/pages/' + route.id : '/admin/pages'}}",
+                                            "mergeQuery": true,
+                                            "query": {}
                                         }
                                     }
                                 ],
@@ -1058,7 +1060,9 @@
                                                             {
                                                                 "handler": "navigate",
                                                                 "params": {
-                                                                    "path": "/admin/pages/{{route?.id ?? response.data.id}}"
+                                                                    "path": "/admin/pages/{{route?.id ?? response.data.id}}",
+                                                                    "mergeQuery": true,
+                                                                    "query": {}
                                                                 }
                                                             }
                                                         ],

@@ -292,10 +292,12 @@ setState(selectedX) → apiCall(changelog)
 
 ### 자동 검증
 
-- `host-lang-change-requires-changelog` (warn) — 변경셋에 호스트 lang 파일이 있는데 그 호스트 CHANGELOG 가 없으면 경고
-- `lang-duplicate-array-key` (error) — 같은 레벨 중복 키 차단. 뒤 선언이 앞을 덮어 앞 블록 전용 키가 런타임에 소실되고 원문 키가 노출되는 것을 막는다. 정정은 항상 **두 블록 병합** (한쪽만 삭제하면 그쪽 키가 사라진다)
+정적 검사가 다음 두 가지를 본다.
 
-언어팩 패키지(`lang-packs/_bundled/**`)는 별도 룰(`lang-pack-*`)이 담당하므로 본 절의 대상이 아니다.
+- 변경셋에 호스트 lang 파일이 있는데 그 호스트 CHANGELOG 가 없으면 경고한다.
+- 같은 레벨의 중복 배열 키는 차단한다. 뒤 선언이 앞을 덮어 앞 블록 전용 키가 런타임에 소실되고 원문 키가 노출되기 때문이다. 정정은 항상 **두 블록 병합** — 한쪽만 삭제하면 그쪽 키가 사라진다.
+
+언어팩 패키지(`lang-packs/_bundled/**`)는 별도 검사가 담당하므로 본 절의 대상이 아니다.
 
 ---
 

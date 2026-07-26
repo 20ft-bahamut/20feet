@@ -2287,7 +2287,13 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
             };
 
             let resolvedValue;
-            if (isComplexExpression(effectivePath)) {
+            if (hasPipes(effectivePath)) {
+              // 파이프 표현식은 resolveBindings 로 위임 (파이프 체인 실행 포함).
+              // isComplexExpression 은 `|` 를 연산자로 보므로 그대로 두면
+              // `value | pipe` 가 JS 비트 OR 로 평가된다 — text 처리와 동일 분기.
+              // @since engine-v1.54.3
+              resolvedValue = bindingEngine.resolveBindings(`{{${effectivePath}}}`, extendedDataContext, bindingOptions, trackingInfo);
+            } else if (isComplexExpression(effectivePath)) {
               try {
                 resolvedValue = bindingEngine.evaluateExpression(effectivePath, extendedDataContext, trackingInfo);
               } catch (error) {
@@ -3951,6 +3957,10 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
               componentName: effectiveComponentDef.name,
               propName: 'blur_until_loaded',
             };
+            // blur_until_loaded 는 truthiness 게이트다. 파이프를 resolveBindings 로
+            // 위임하면 결과가 항상 문자열이 되어 "false"/"0" 도 truthy 가 되므로
+            // 여기서는 파이프 분기를 두지 않는다(블러가 영구히 켜지는 편이 더 나쁘다).
+            // 파이프는 값 서식용이므로 이 속성에 쓰이지 않는다.
             const result = bindingEngine.evaluateExpression(singleBindingPath, extendedDataContext, blurTrackingInfo);
             return Boolean(result);
           } catch (error) {

@@ -1095,7 +1095,7 @@ public function findOrFail(string $slug, int $id, ?int $postId = null): Comment
 | --- | --- |
 | 방어 위치 | Repository where 절 (SSoT) + Service 가 상위 ID 를 전달 |
 | 파라미터 형태 | **선택 파라미터**(`?int $postId = null`) — 필수화는 Interface breaking 이라 이 확장에 의존하는 확장을 전부 흔든다 |
-| 전달 누락 방지 | 컨트롤러가 라우트 파라미터를 실제로 소비하는지 audit 룰 `controller-unused-route-param` (warn) 이 감시 |
+| 전달 누락 방지 | 컨트롤러가 라우트 파라미터를 실제로 소비하는지 정적 검사가 감시 (경고) |
 | 응답 코드 | 조회 실패이므로 404. 요청 본문 배열 항목의 스코프 위반은 422 (validation.md "배열 항목의 상위 스코프") |
 | 공통 추상화 | 도입하지 않는다 — 모듈마다 상위 키와 조회 경로가 다르고(`board_id`+`post_id` / `product_id` / `page_id` / `order_id`), 코어 표면이 늘면 확장 버전 제약 동기화가 연쇄된다 |
 

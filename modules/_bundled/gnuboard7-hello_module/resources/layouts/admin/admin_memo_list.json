@@ -75,7 +75,9 @@
                                         "type": "click",
                                         "handler": "navigate",
                                         "params": {
-                                            "path": "/admin/memos/create"
+                                            "path": "/admin/memos/create",
+                                            "mergeQuery": true,
+                                            "query": {}
                                         }
                                     }
                                 ],

@@ -2745,10 +2745,14 @@ export class ActionDispatcher {
     let finalPath = target;
 
     // query 파라미터 처리
-    if (params.query) {
+    // mergeQuery: true 는 query 키 없이도 병합을 수행한다 (@since engine-v1.54.2).
+    // 이전에는 `if (params.query)` 게이트에 걸려 `mergeQuery: true` 만 적은 액션이 병합
+    // 자체를 건너뛰고 쿼리를 통째로 잃었다 — 작성자 관점에서 가장 자연스러운 형태가
+    // 정반대로 동작하던 함정이라 게이트를 넓힌다.
+    if (params.query || params.mergeQuery === true) {
       if (params.mergeQuery === true) {
         // mergeQuery가 true이면 기존 쿼리스트링과 병합
-        finalPath = this.buildMergedQueryPath(target, params.query);
+        finalPath = this.buildMergedQueryPath(target, params.query ?? {});
       } else {
         // mergeQuery가 false이거나 없으면 새 쿼리스트링으로 대체
         const queryString = new URLSearchParams();
@@ -3255,10 +3259,10 @@ export class ActionDispatcher {
   ): Promise<void> {
     let finalPath = target;
 
-    // query 파라미터 처리 (navigate와 동일 로직)
-    if (params.query) {
+    // query 파라미터 처리 (navigate와 동일 로직 — 게이트도 동일하게 유지, @since engine-v1.54.2)
+    if (params.query || params.mergeQuery === true) {
       if (params.mergeQuery === true) {
-        finalPath = this.buildMergedQueryPath(target, params.query);
+        finalPath = this.buildMergedQueryPath(target, params.query ?? {});
       } else {
         const queryString = new URLSearchParams();
         for (const [key, value] of Object.entries(params.query)) {

@@ -308,7 +308,7 @@ php artisan api:docgen --scope=core --dry-run
 같은 원리로 `is_default` / `status=active` 같은 승격·활성 플래그를 샘플에 붙이지 않는다. 샘플 레코드를
 만들기 전에 "이 조합이 전역 설정을 읽는 쿼리에 걸리는가" 를 확인한다.
 
-자동 차단: audit 룰 `apidoc-sample-no-global-active-language-pack` (severity: error).
+자동 차단: 정적 검사 대상 (위반 시 차단).
 
 ### 설명 백필 커맨드 (`api:docgen-backfill-*`)
 
@@ -338,12 +338,12 @@ php artisan api:docgen-backfill-fields
 - 트리거: `app/Http/Controllers/**`, `routes/api.php`, `app/Http/Requests/**`, `app/Http/Resources/**`
   (+ 확장 대응 경로) 편집.
 - 절차: 코드 변경 → `api:docgen --scope=...` 재실행 → `@generated` 블록 갱신 → 신규 TODO 서술 채움.
-- 검증: `api:docgen --check` 로 drift 0 확인. audit 룰 `api-doc-coverage` 가 변경셋에 대응 문서
-  동반 여부를 검사한다. severity 는 **대상별**로 부여된다 — 문서가 완비된 대상은 `error`(문서
-  미동반 변경 차단), 진행 중 대상은 `warn`. 코어(`docs/backend/api/`)는 2026-07-08 완료로
-  `error` 승격됨. 즉 코어 API 표면(`routes/api.php`·`app/Http/{Controllers,Requests,Resources}/**`)을
-  변경하면서 코어 API 문서를 함께 갱신하지 않으면 세션 종료 시 차단된다. 나머지 확장은 문서 완비
-  시 순차 승격된다(룰의 `ENFORCED_TARGETS`).
+- 검증: `api:docgen --check` 로 drift 0 확인. 정적 검사가 변경셋에 대응 문서
+  동반 여부를 검사한다. 강제 수준은 **대상별**로 다르다 — 문서가 완비된 대상은 차단, 진행 중
+  대상은 경고에 그친다. 코어(`docs/backend/api/`)는 2026-07-08 문서 완비로 차단 대상이 됐다.
+  즉 코어 API 표면(`routes/api.php`·`app/Http/{Controllers,Requests,Resources}/**`)을
+  변경하면서 코어 API 문서를 함께 갱신하지 않으면 그 변경은 통과하지 못한다. 나머지 확장은 문서
+  완비 시 순차로 차단 대상에 편입된다.
 
 ---
 

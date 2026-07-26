@@ -410,7 +410,7 @@ GET /api/plugins/bundle.css?v={version}
 
 ### 병합 규율
 
-| 규율 | 내용 | audit 룰 |
+| 규율 | 내용 | 정적 검사 |
 |------|------|---------|
 | priority 순서 | manifest `loading.priority` 오름차순만. 확장 이름 하드코딩 금지 | (선언형) |
 | `\n;\n` 구분자 | IIFE 사이는 `\n;\n`(JS)/`\n`(CSS). 미사용 시 ASI 붕괴 → 전체 파싱 에러 | `extension-bundle-concat-separator` |

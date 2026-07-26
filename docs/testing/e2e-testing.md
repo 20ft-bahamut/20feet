@@ -230,7 +230,7 @@ test('unauthenticated_401 × no_token', async ({ page }) => {
 });
 ```
 
-`audit-branch.cjs` 의 `test-scenario-coverage` 룰이 매니페스트 axes ↔ docblock 매칭을 자동 검증.
+정적 검사가 매니페스트 axes ↔ docblock 매칭을 자동 검증.
 
 ## §8. 회귀 테스트 4단계
 

@@ -10,6 +10,7 @@
  */
 
 import { DataBindingEngine, BindingContext } from '../DataBindingEngine';
+import { hasPipes } from '../PipeRegistry';
 import { createLogger } from '../../utils/Logger';
 
 const logger = createLogger('ConditionEvaluator');
@@ -241,6 +242,12 @@ export function evaluateStringCondition(
       const literalValue = resolveLiteral(singleBindingPath);
       if (literalValue !== undefined) {
         resolved = literalValue.value;
+      } else if (hasPipes(singleBindingPath)) {
+        // 파이프 표현식은 resolveBindings 로 위임 (파이프 체인 실행 포함).
+        // isComplexExpression 은 `|` 를 연산자로 보므로 그대로 두면
+        // `value | pipe` 가 JS 비트 OR 로 평가되어 조건이 잘못 판정된다.
+        // @since engine-v1.54.3
+        resolved = bindingEngine.resolveBindings(`{{${singleBindingPath}}}`, context, { skipCache: true });
       } else if (isComplexExpression(singleBindingPath)) {
         // Optional chaining(?.)이나 복잡한 표현식은 evaluateExpression 사용
         resolved = bindingEngine.evaluateExpression(singleBindingPath, context);

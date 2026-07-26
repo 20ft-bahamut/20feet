@@ -47,7 +47,7 @@ exclusions:
   - { widget: select, prop_value_kind: boolean, reason: "동일" }
   - { widget: toggle, prop_value_kind: string, reason: "불리언" }
   - { widget: toggle, prop_value_kind: array, reason: "동일" }
-  - { widget: binding_expression, prop_value_kind: string, reason: "binding 은 options-list 디그레이드 전용 — 다른 위젯은 정적값" }
+  - { prop_value_kind: binding_expression, widget: [icon-picker, text, i18n-text, select, toggle], reason: "binding 은 options-list 디그레이드 전용 — 다른 위젯은 정적값" }
   # 칸 종류별 진입 위젯/키화 정책 상호 배제
   - { expr_chip_target: prop_value_text, expr_chip_op: keyify_zero_for_value_target, expr_chip_value_shape: single_binding, reason: "값 전용 칸 + 데이터칩 = 키화 0 이 본질 — plain shape 에서 대표 검증(단일축 중복 배제)" }
   - { expr_chip_target: data_source_label_key, expr_chip_value_shape: settings_ref, reason: "label_key 는 다국어 라벨 키 — 설정참조 값은 비주류(데이터 칩/표현식만 대표 검증)" }
@@ -105,8 +105,8 @@ test_files:
 
 validation:
   note: |
- 단계 1-a 는 위젯/컨트롤 정의만으로 라이브 편집기에 속성 탭이 아직 등장하지 않는다
- (capability 부착이 단계 1-b/1-c). 라이브 E2E(추가→편집→사용자반영)는 1-b/1-c 의 spec 이
+    단계 1-a 는 위젯/컨트롤 정의만으로 라이브 편집기에 속성 탭이 아직 등장하지 않는다
+    (capability 부착이 단계 1-b/1-c). 라이브 E2E(추가→편집→사용자반영)는 1-b/1-c 의 spec 이
     작성하며, 본 매니페스트의 effects(capability_attachment_*, prop_edit_reflects_*)를 그
     spec 의 @scenario layout-editor-prop-controls / @effects 로 매칭한다.
   e2e_spec_pending: tests/Playwright/specs/layout-editor/property-edit-propcontrols.spec.ts  # 단계 1-b/1-c

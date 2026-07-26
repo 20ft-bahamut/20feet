@@ -141,7 +141,7 @@ URL 을 만드는 쪽도 문자열로 직접 조립하지 않는다. 서버는 `
 `resources/js/core/support/assetUrl.ts` 를 경유해야 현재 모드에 맞는 형태가 나온다. 두 구현은 동일 규칙을
 공유하므로 한쪽만 바꾸면 서버가 만든 URL 과 클라이언트가 만든 URL 이 어긋나 그 자산만 404 가 된다.
 
-자동 차단: audit 룰 `dynamic-route-static-extension` (error). 면제는 인라인 주석
+자동 차단: 정적 검사 대상 (위반 시 차단). 면제는 인라인 주석
 `// audit:allow dynamic-route-static-extension reason: ...`.
 
 두 형태는 모두 영구 유지한다 — 확장자 형태를 제거하면 URL 을 하드코딩한 서드파티 확장이 깨진다.

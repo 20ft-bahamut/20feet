@@ -5,6 +5,28 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.54.3] - 2026-07-25
+
+### Fixed
+
+#### DataGrid `cellChildren` 등 반복 렌더 컨텍스트에서 단일 바인딩의 파이프가 적용되지 않던 문제
+
+- `RenderHelpers.ts` `renderItemChildren` — 단일 바인딩 판정 후 파이프(`|`) 분기를 추가했다. 종전에는 `|` 가 복잡 표현식 문자로 분류되어 `evaluateExpression` 으로 라우팅되었고, JS 비트 OR 로 평가되어 인자 있는 파이프(`{{row.created_at | datetime('YYYY-MM-DD HH:mm')}}`)는 예외로 값이 사라지고, 인자 없는 파이프(`{{row.code | uppercase}}`)는 `0` 같은 조용한 오답이 되었다. 같은 표현식이 일반 컴포넌트의 `text` 에서는 정상 동작해 재현 위치를 특정하기 어려웠다. (#87 @glitter-gim 님께서 제보해주셨습니다.)
+- 적용 범위: DataGrid 의 `cellChildren`·카드 뷰, CardGrid 의 카드 children, `expandChildren`, `footerCells` 등 반복 렌더 경로 전체. 컴포넌트의 `text` 와 props 값 모두 동일하게 해석된다.
+- 같은 결함이 있던 나머지 단일 바인딩 경로도 함께 정렬했다 — `DynamicRenderer.tsx` 의 props 해석(예외가 나면 해당 prop 이 `undefined` 로 떨어짐), `DataBindingEngine.ts` `resolveObject`(예외가 밖으로 전파되어 그 컴포넌트의 props 해석 전체가 중단), `ConditionEvaluator.ts` `evaluateStringCondition` 과 `RenderHelpers.ts` `evaluateIfCondition`(`if` 조건 오판정).
+- `blur_until_loaded` 는 의도적으로 제외한다 — truthiness 게이트라 문자열 결과가 항상 참이 되어 블러가 영구히 켜질 수 있다. 값 서식용인 파이프를 쓰는 자리가 아니다.
+- 기존 동작 무영향: 파이프가 포함된 단일 바인딩에서만 경로가 바뀐다. 논리 OR(`||`)·따옴표 안의 `|`(다국어 파라미터 구분자)는 파이프로 인식하지 않으며, 파이프 없는 단일 바인딩은 종전대로 원본 타입을 유지한다.
+
+## [engine-v1.54.2] - 2026-07-24
+
+### Fixed
+
+#### `mergeQuery: true` 에 `query` 키가 없으면 병합이 통째로 건너뛰어지던 문제
+
+- `ActionDispatcher.ts` `handleNavigate` / `handleReplaceUrl` — 쿼리 처리 진입 조건을 `if (params.query)` 에서 `if (params.query || params.mergeQuery === true)` 로 넓히고, 병합 대상이 없으면 빈 객체를 넘긴다. 종전에는 `mergeQuery: true` 만 적고 `query` 를 생략한 액션이 조건문에 걸려 병합 자체를 수행하지 못했고, 그 결과 이동 후 URL 의 쿼리스트링이 **전부** 사라졌다. 작성자 관점에서 "현재 쿼리를 유지한다" 는 의도를 가장 자연스럽게 표현한 형태가 정반대로 동작하던 함정이다.
+- 두 핸들러의 게이트를 같은 형태로 유지한다 — 한쪽만 고치면 같은 params 를 써도 `navigate` 와 `replaceUrl` 의 결과가 갈린다.
+- 기존 동작 무영향: `mergeQuery: true` + `query` 생략 조합은 저장소 전체에 0건임을 정적 스캔으로 확인했다. `mergeQuery: false` + `query` 생략은 종전대로 쿼리를 붙이지 않는다.
+
 ## [engine-v1.54.1] - 2026-07-23
 
 ### Fixed
