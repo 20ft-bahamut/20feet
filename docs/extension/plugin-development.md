@@ -392,10 +392,10 @@ class FooPluginServiceProvider extends BasePluginServiceProvider
 
 ### 금지 사항
 
-- **글로벌 `CacheInterface` / `StorageInterface` 바인딩 재정의 금지** — `$this->app->singleton(CacheInterface::class, ...)` 또는 `app()->bind(StorageInterface::class, ...)` 는 코어/타 확장 도메인을 누수시킨다. audit 룰 `extension-no-global-cache-rebind` 가 자동 차단한다.
+- **글로벌 `CacheInterface` / `StorageInterface` 바인딩 재정의 금지** — `$this->app->singleton(CacheInterface::class, ...)` 또는 `app()->bind(StorageInterface::class, ...)` 는 코어/타 확장 도메인을 누수시킨다. 정적 검사가 자동 차단한다.
 - **인라인 contextual binding 복제 금지** — `$this->app->when([X::class])->needs(StorageInterface::class)->give(...)` 패턴을 직접 작성하지 말고 `$storageServices` 배열에 등록한다.
 - **Listener 의 동적 인스턴스 생성에서 `app(CacheInterface::class)` 직접 호출 금지** — `app()->makeWith(MyService::class, [...])` 로 컨테이너 해석에 위임해야 contextual binding 이 적용된다.
-- **HTTP Kernel 미들웨어 그룹 직접 조작 금지** — SP `boot()` 에서 `HttpKernel::append/prepend/pushMiddlewareToGroup()` / `aliasMiddleware()`, 또는 라우트 파일에서 자기 `Http\Middleware\` FQCN 을 `->middleware(Foo::class)` 로 부착하지 않는다. 대신 `Plugin::getMiddleware()` 로 미들웨어와 부착 대상(targets)을 선언하면 코어 self-gate 게이트가 요청 시점에 실행한다. audit 룰 `extension-middleware-declarative-registration` / `extension-route-middleware-alias-reference` 가 자동 차단한다. 상세: [docs/backend/middleware.md "확장 미들웨어 선언 (self-gate)"](../backend/middleware.md#확장-미들웨어-선언-self-gate).
+- **HTTP Kernel 미들웨어 그룹 직접 조작 금지** — SP `boot()` 에서 `HttpKernel::append/prepend/pushMiddlewareToGroup()` / `aliasMiddleware()`, 또는 라우트 파일에서 자기 `Http\Middleware\` FQCN 을 `->middleware(Foo::class)` 로 부착하지 않는다. 대신 `Plugin::getMiddleware()` 로 미들웨어와 부착 대상(targets)을 선언하면 코어 self-gate 게이트가 요청 시점에 실행한다. 정적 검사가 자동 차단한다. 상세: [docs/backend/middleware.md "확장 미들웨어 선언 (self-gate)"](../backend/middleware.md#확장-미들웨어-선언-self-gate).
 
 상세: [cache-driver.md `## 확장에서 cache 바인딩`](cache-driver.md)
 

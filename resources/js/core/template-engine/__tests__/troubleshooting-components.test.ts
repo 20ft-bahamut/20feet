@@ -13,6 +13,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Logger } from '../../utils/Logger';
 import { hasExplicitSetStateForField } from '../FormContext';
 import { responsiveManager } from '../ResponsiveManager';
+import { hasPipes } from '../PipeRegistry';
+import { DataBindingEngine } from '../DataBindingEngine';
 
 describe('트러블슈팅 회귀 테스트 - flex 압착(shrink)', () => {
   /**
@@ -1430,6 +1432,54 @@ describe('트러블슈팅 회귀 테스트 - 렌더링 구조', () => {
       expect(results.length).toBeLessThanOrEqual(3);
       // cancelled 플래그가 동작함을 확인
       expect(cancelled).toBe(true);
+    });
+  });
+});
+
+describe('트러블슈팅 회귀 테스트 - DataGrid cellChildren 파이프', () => {
+  /**
+   * 사례: cellChildren 단일 바인딩의 파이프가 적용되지 않아 셀이 비어 보임
+   *
+   * 단일 바인딩 판정 후 `|` 가 복잡 표현식 문자로 분류되어 evaluateExpression 으로
+   * 라우팅되면 JS 비트 OR 로 평가된다. 인자 있는 파이프는 예외(값 소실),
+   * 인자 없는 파이프는 조용한 오답이 된다. 라우팅 판정 자체를 고정한다.
+   *
+   * @see docs/frontend/troubleshooting-components-datagrid.md "DataGrid cellChildren 파이프 이슈"
+   * @see resources/js/core/template-engine/__tests__/renderItemChildren-pipe.test.ts (렌더 결과 검증)
+   */
+  describe('[사례 1] 파이프 판정이 복잡 표현식 판정보다 먼저 적용된다', () => {
+    it('파이프 표현식은 hasPipes 로 먼저 걸러진다 (인자 유무 무관)', () => {
+      expect(hasPipes("row.created_at | datetime('YYYY-MM-DD HH:mm')")).toBe(true);
+      expect(hasPipes('row.price | number')).toBe(true);
+      expect(hasPipes('row.code | uppercase | truncate(2)')).toBe(true);
+    });
+
+    it('논리 OR 와 따옴표 안의 | 는 파이프로 오인되지 않는다', () => {
+      expect(hasPipes("row.name || '-'")).toBe(false);
+      // 다국어 파라미터 구분자는 문자열 리터럴 내부이므로 파이프가 아니다
+      expect(hasPipes("row.flag ? '$t:common.badge|count=1' : ''")).toBe(false);
+    });
+
+    it('파이프를 evaluateExpression 으로 보내면 비트 OR 오답이 된다 (수정 전 동작 고정)', () => {
+      const engine = new DataBindingEngine();
+      // 인자 없는 파이프: 문자열이 0 으로 붕괴
+      expect(engine.evaluateExpression('row.code | uppercase', { row: { code: 'abc' } })).toBe(0);
+      // 인자 있는 파이프: 함수 호출 실패로 예외
+      expect(() =>
+        engine.evaluateExpression("row.created_at | datetime('YYYY-MM-DD')", {
+          row: { created_at: '2024-01-15T14:30:00' },
+        })
+      ).toThrow();
+    });
+
+    it('파이프 표현식은 resolveBindings 경로에서 서식이 적용된다', () => {
+      const engine = new DataBindingEngine();
+      expect(engine.resolveBindings('{{row.code | uppercase}}', { row: { code: 'abc' } })).toBe('ABC');
+      expect(
+        engine.resolveBindings("{{row.created_at | datetime('YYYY-MM-DD HH:mm')}}", {
+          row: { created_at: '2024-01-15T14:30:00' },
+        })
+      ).toBe('2024-01-15 14:30');
     });
   });
 });

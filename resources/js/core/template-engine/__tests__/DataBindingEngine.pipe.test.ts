@@ -190,6 +190,39 @@ describe('DataBindingEngine - Pipe Integration', () => {
     });
   });
 
+  describe('resolveObject 단일 바인딩과 파이프', () => {
+    // 회귀 배경: 단일 바인딩 판정 후 `|` 를 연산자로 보아 evaluateExpression 으로
+    // 라우팅되어, 인자 있는 파이프는 "datetime is not a function" 예외로 props
+    // 해석 전체가 중단되고 인자 없는 파이프는 비트 OR 로 오답이 되었다.
+    // @since engine-v1.54.3
+    it('인자 있는 파이프가 예외 없이 포맷된 값을 반환한다', () => {
+      const context = { post: { created_at: '2024-01-15T14:30:00' } };
+      const result = engine.resolveObject(
+        { title: "{{post.created_at | datetime('YYYY-MM-DD HH:mm')}}" },
+        context
+      );
+      expect(result.title).toBe('2024-01-15 14:30');
+    });
+
+    it('인자 없는 파이프가 비트 연산으로 오염되지 않는다', () => {
+      const context = { product: { price: 1234567 } };
+      const result = engine.resolveObject({ label: '{{product.price | number}}' }, context);
+      expect(result.label).toBe('1,234,567');
+    });
+
+    it('파이프가 없는 단일 바인딩은 원본 타입을 유지한다 (회귀 보호)', () => {
+      const context = { items: [1, 2, 3] };
+      const result = engine.resolveObject({ options: '{{items}}' }, context);
+      expect(result.options).toEqual([1, 2, 3]);
+    });
+
+    it('논리 OR(||) 표현식은 파이프로 오인되지 않는다 (회귀 보호)', () => {
+      const context = { product: { name: '' } };
+      const result = engine.resolveObject({ label: "{{product.name || '-'}}" }, context);
+      expect(result.label).toBe('-');
+    });
+  });
+
   describe('skipCache와 파이프', () => {
     it('skipCache: true로 매번 새로 평가', () => {
       let counter = 0;

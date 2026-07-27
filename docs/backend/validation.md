@@ -533,7 +533,7 @@ class TestMailRequest extends FormRequest
 'allowed_extensions' => ['exclude_if:use_file_upload,false', 'sometimes', 'required', 'array', 'min:1'],
 ```
 
-자동 차단: `formrequest-store-update-conditional-symmetry`(error), `formrequest-sometimes-array-min-inert`(warning).
+자동 차단: 정적 검사 대상. store/update 사이의 조건부 검증 비대칭은 차단되고, `sometimes` + `array` + `min` 조합이 무효화되는 형태는 경고로 보고된다.
 
 ---
 
@@ -1060,7 +1060,7 @@ Rule::exists("board_{$slug}_posts", 'id'),
 | Service 2차 방어 | 검증을 우회하는 경로(시더 / 훅 / 기존 오염 데이터)를 위해 재귀 함수에 방문 ID 가드를 둔다. 무한 루프 대신 유한 실패 + 로그 |
 | 코어 Rule 재사용 | `App\Rules\NotCircularParent` 는 `App\Models\Menu` 하드코딩이다. 다른 모델에는 모듈 로컬 Rule 을 신설한다 (코어 시그니처 변경 = 확장 버전 제약 연쇄) |
 
-자동 차단: audit 룰 `parent-id-requires-cycle-rule` (error).
+자동 차단: 정적 검사 대상 (위반 시 차단).
 
 ---
 
@@ -1153,7 +1153,7 @@ FormRequest 책임).
 
 ### 자동 검증
 
-audit 룰 `formrequest-direct-data-access` 가 FormRequest 내 DB facade / Model
+정적 검사가 FormRequest 내 DB facade / Model
 정적 호출 / 영속 메서드(`save`/`saveQuietly`/`forceDelete`) 직접 호출을 자동
 차단한다. `Rule::exists(Model::class, ...)` 같은 validation rule helper 는 면제.
 

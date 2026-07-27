@@ -111,7 +111,8 @@
                     "handler": "navigate",
                     "params": {
                       "path": "/admin/pages",
-                      "mergeQuery": false
+                      "mergeQuery": true,
+                      "query": {}
                     }
                   }
                 ],
@@ -139,7 +140,9 @@
                     "type": "click",
                     "handler": "navigate",
                     "params": {
-                      "path": "/admin/pages/create"
+                      "path": "/admin/pages/create",
+                      "mergeQuery": true,
+                      "query": {}
                     }
                   }
                 ],
@@ -828,13 +831,17 @@
                   "view": {
                     "handler": "navigate",
                     "params": {
-                      "path": "/admin/pages/{{$args[1].id}}"
+                      "path": "/admin/pages/{{$args[1].id}}",
+                      "mergeQuery": true,
+                      "query": {}
                     }
                   },
                   "edit": {
                     "handler": "navigate",
                     "params": {
-                      "path": "/admin/pages/{{$args[1].id}}/edit"
+                      "path": "/admin/pages/{{$args[1].id}}/edit",
+                      "mergeQuery": true,
+                      "query": {}
                     }
                   },
                   "delete": {
@@ -968,7 +975,7 @@
                           "params": {
                             "path": "/admin/pages",
                             "mergeQuery": true,
-                            "query": []
+                            "query": {}
                           }
                         },
                         {
@@ -1129,7 +1136,7 @@
                           "params": {
                             "path": "/admin/pages",
                             "mergeQuery": true,
-                            "query": []
+                            "query": {}
                           }
                         },
                         {

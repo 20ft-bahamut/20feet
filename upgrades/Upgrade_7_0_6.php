@@ -13,6 +13,9 @@ use App\Extension\AbstractUpgradeStep;
  *       01_NullifyUntouchedSeoCacheOverrides.php
  *         SEO 캐시 설정을 "미설정(null) = 고급 탭 값 사용" 의미로 이행 (결정 D19).
  *         옛 기본값 그대로인 키는 null 로 비우고, 다른 값이면 오버라이드로 보존한다.
+ *       02_ClearSeoPageCacheAfterRendererParityFix.php
+ *         봇용 페이지 캐시를 1회 전량 무효화한다. 7.0.6 이전 렌더러가 빈 본문으로
+ *         저장한 결과물이 캐시 수명 동안 계속 서빙되는 것을 막는다.
  *
  * 본 클래스는 `AbstractUpgradeStep` 의 default `run()` 에 위임 — 별도 override 없음.
  *

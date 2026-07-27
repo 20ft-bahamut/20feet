@@ -339,7 +339,7 @@ public function test_pg_payment_member_with_mileage_to_jeju(): void { ... }
 
 TypeScript 테스트는 `// @scenario` / `// @effects` 주석 동일 사용.
 
-audit rule `test-scenario-coverage` 가 매니페스트 cross product 와 effects 항목을 테스트 docblock 마킹과 대조하여 누락을 검출 (자동 차단).
+정적 검사가 매니페스트 cross product 와 effects 항목을 테스트 docblock 마킹과 대조하여 누락을 검출한다 (자동 차단).
 
 ### cross product 폭발 관리
 

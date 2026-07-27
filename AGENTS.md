@@ -221,6 +221,8 @@
 | `handler: "nav"` | `handler: "navigate"` |
 | `handler: "setLocalState"` | `handler: "setState"` + `target: "local"` |
 | `navigate` + `replace: true` (URL만 변경 시) | `handler: "replaceUrl"` |
+| `navigate` `params.path: "back"` (동작 키워드로 착각) | `handler: "navigateBack"` — path 는 주소로 해석되어 조용히 `/back` 으로 이동한다 |
+| `navigate` `params.url` / `href` / `to` 로 목적지 전달 | `params.path` (또는 액션 `target`) — 엔진은 이 둘만 읽는다. 다른 이름은 무시되어 목적지가 `undefined` 가 되고, 예외도 404 도 없이 버튼만 동작하지 않는다 |
 | apiCall `params.target` (params 내부) | `target` 은 액션 top-level. params 내부 위치 시 URL 미해석 |
 | apiCall `params.onSuccess` / `params.onError` (params 내부) | 액션 top-level. params 내부면 무시됨 |
 | `refetchDataSource` `params.id` | `params.dataSourceId` 사용 |
@@ -312,6 +314,30 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | 프론트에서 `` `/api/templates/${id}/routes.json` `` 템플릿 리터럴 조립 | `resources/js/core/support/assetUrl.ts` 의 `suffixed()` / `templateAsset()` 등 |
 
 정규식 location 은 프리픽스 location 보다 먼저 매칭되므로, 정적 최적화 블록(`location ~* \.(js|css|json)$`)이 있는 서버에서는 확장자 붙은 동적 응답이 `try_files ... /index.php` 폴백 기회 없이 404 가 된다. 서버측 `AssetUrl` 과 프론트측 `assetUrl.ts` 는 동일 규칙을 공유하므로 한쪽만 바꾸면 그 자산만 404 가 된다. 상세: [routing.md](docs/backend/routing.md) "정적 확장자로 끝나는 동적 엔드포인트", [api/README.md](docs/backend/api/README.md) "자산 URL 이중 모드".
+
+### 목록 컨텍스트 왕복 (list context round-trip)
+
+페이지네이션 목록 화면과 그에 딸린 상세·형제 상세·작성/수정 폼·확인 모달은 하나의 목록 클러스터다. 이 클러스터 안에서의 이동은 URL 목록 상태(`page`/`search`/`category`/`filters[*]`/정렬/`per_page`)를 손실 없이 보존해야 한다.
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| 클러스터 내 navigate 에 `mergeQuery` 누락 | `"params": { "path": "…", "mergeQuery": true, "query": {} }` |
+| 이전글/다음글 등 형제 상세 이동만 규약에서 누락 | 목록 진입 / 목록 복귀 / 형제 이동 / 폼 취소 / 삭제 후 복귀 전 leg 동일 적용 |
+| 현재 값을 그대로 다시 넘기는 키 열거 (`{"del": "{{query.del ?? ''}}"}`) | `mergeQuery` 가 이미 전부 나른다 — 열거는 중복이자 누락 위험 |
+| 덮어쓸 키만 남기지 않고 필터 키 전부 재열거 | 값을 바꿔야 하는 키만 남긴다 (페이지 되돌림은 `{"page": ""}`) |
+| 새로고침 버튼에 `mergeQuery: false` | 새로고침은 보던 목록을 다시 부르는 것 — 병합 유지 |
+| `mergeQuery` 를 표현식으로 분기 (`"{{cond}}"`) | boolean 리터럴 고정 — 분기마다 보존 여부가 갈리면 한쪽이 조용히 상태를 떨군다 |
+| `"path": "/board/{slug}/write?parent_id={{id}}"` (인라인 쿼리스트링) | 인라인 쿼리는 병합 시 버려진다 → `query` 객체로 옮긴다 |
+| `mergeQuery: true` + `query` 키 생략 | 의도를 드러내도록 `"query": {}` 를 함께 둔다 |
+| `"query": []` (배열 리터럴) | `"query": {}` — 동작은 같아 조용히 통과하지만, 나중에 덮어쓸 키를 넣으면 그 값이 버려진다 |
+| 목적지가 표현식이라 판정 불가한 이동을 무표시로 둠 (`"{{_global.shopBase}}/products"`) | 클러스터 내 이동이면 `mergeQuery: true`, 밖으로 나가는 이동이면 예외 주석으로 의도를 명시 |
+| 의도적 리셋(검색·필터 초기화 / 탭 전환 / 프리셋 적용)에 `mergeQuery: true` | 리셋은 병합하지 않는다 — 병합하면 초기화 버튼이 아무 일도 하지 않는다 |
+| 탭 전환(`onTabChange`)이나 겹치지 않는 다른 목록으로의 이동에 `mergeQuery: true` | 목록 정체성이 다르면 승계하지 않는다 — 남의 검색어·페이지가 얹혀 빈 화면이 열린다 |
+| 면제 주석은 "병합하지 않는다" 인데 코드는 `mergeQuery: true` | 주석과 코드를 일치시킨다 (주석은 사실이 아니라 선언일 뿐) |
+| 검색 실행·페이지 이동 액션에서 `query` 키를 비움 | 값을 바꾸는 액션은 그 값을 직접 넘긴다 (`{"page": "{{$args[0]}}"}`) — 병합만으로는 새 값이 전달되지 않는다 |
+| `path` 없이 `query` 만 바꾸는 액션에 `mergeQuery` 누락 (탭 전환 `{"tab": …}`, 항목 선택 `{"id": …, "mode": "view"}`) | `path` 생략은 "현재 주소에 작용" 이라 목록 화면 자신이 대상 — `mergeQuery: true` 없으면 지금 걸린 목록 상태가 통째로 날아간다 |
+
+의도적 리셋(검색 초기화 / 필터 초기화 / 탭 전환 / 프리셋 적용 / 다른 목록으로의 이동)은 예외다. 그 경우 액션 노드 `comment` 에 `audit:allow layout-list-context-navigate-merge-query <사유>` 를 남겨 의도를 코드에 기록한다. 상세: [actions-handlers-navigation.md "목록 컨텍스트 왕복 규약"](docs/frontend/actions-handlers-navigation.md)
 
 ### 중첩 리소스 스코프 / 계층 무결성
 

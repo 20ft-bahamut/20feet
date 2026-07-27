@@ -158,7 +158,9 @@
                                                     {
                                                         "handler": "navigate",
                                                         "params": {
-                                                            "path": "/admin/pages"
+                                                            "path": "/admin/pages",
+                                                            "mergeQuery": true,
+                                                            "query": {}
                                                         }
                                                     }
                                                 ],
@@ -655,7 +657,9 @@
                                         "type": "click",
                                         "handler": "navigate",
                                         "params": {
-                                            "path": "/admin/pages"
+                                            "path": "/admin/pages",
+                                            "mergeQuery": true,
+                                            "query": {}
                                         }
                                     }
                                 ],
@@ -691,7 +695,9 @@
                                         "type": "click",
                                         "handler": "navigate",
                                         "params": {
-                                            "path": "/admin/pages/{{route?.id}}/edit"
+                                            "path": "/admin/pages/{{route?.id}}/edit",
+                                            "mergeQuery": true,
+                                            "query": {}
                                         }
                                     }
                                 ],

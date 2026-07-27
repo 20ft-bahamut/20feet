@@ -976,10 +976,16 @@ export class DataBindingEngine {
 
           // 복잡 표현식(연산자 포함)은 evaluateExpression으로 라우팅
           // resolveBindings()와 동일한 isBaseExpression 판별 기준 사용
+          // 단, 파이프 표현식은 resolveBindings 로 위임한다 — `|` 를 연산자로 보아
+          // evaluateExpression 으로 보내면 `value | pipe` 가 JS 비트 OR 로 평가되어
+          // 인자 있는 파이프는 예외를 던지고(props 해석 전체가 중단), 인자 없는
+          // 파이프는 포맷이 적용되지 않은 오답이 된다. @since engine-v1.54.3
           const isBaseExpression = /[?:|&!+\-*/<>=()]/.test(effectivePath) || /\[['"]/.test(effectivePath);
-          const resolved = isBaseExpression
-            ? this.evaluateExpression(effectivePath, context, options)
-            : this.resolve(effectivePath, context, options);
+          const resolved = hasPipes(effectivePath)
+            ? this.resolveBindings(`{{${effectivePath}}}`, context, options)
+            : isBaseExpression
+              ? this.evaluateExpression(effectivePath, context, options)
+              : this.resolve(effectivePath, context, options);
           result[key] = isRawBinding && resolved != null ? wrapRawDeep(resolved) : resolved;
         } else {
           // 문자열 보간

@@ -69,7 +69,7 @@ lang/
 - `core.<영역>.*` — 향후 코어 UI 추가 시
 
 호스팅 템플릿/모듈/플러그인의 lang JSON 은 root 에 `core` 키를 정의하지 않는다.
-audit 룰 `core-frontend-i18n-location` 이 정적으로 차단한다.
+정적 검사가 차단한다.
 
 ### 런타임 병합 흐름
 

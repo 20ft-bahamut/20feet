@@ -15,6 +15,7 @@ import { responsiveManager } from '../ResponsiveManager';
 import { getActionDispatcher } from '../ActionDispatcher';
 import { createLogger } from '../../utils/Logger';
 import { RAW_PREFIX, RAW_MARKER_START, RAW_MARKER_END, RAW_PLACEHOLDER_MARKER, isRawWrapped, unwrapRaw, containsRawMarker, wrapRawDeep } from '../rawMarkers';
+import { hasPipes } from '../PipeRegistry';
 import type { G7DevToolsInterface } from '../G7CoreGlobals';
 import {
   evaluateConditionExpression,
@@ -438,6 +439,11 @@ export function evaluateIfCondition(
       const literal = LITERALS.get(singleBindingPath);
       if (literal !== undefined) {
         resolved = literal;
+      } else if (hasPipes(singleBindingPath)) {
+        // 파이프 표현식은 resolveBindings 로 위임 (파이프 체인 실행 포함).
+        // `|` 를 연산자로 보아 evaluateExpression 으로 보내면 JS 비트 OR 로
+        // 평가되어 조건이 잘못 판정된다. @since engine-v1.54.3
+        resolved = bindingEngine.resolveBindings(`{{${singleBindingPath}}}`, context, { skipCache: true });
       } else if (isComplexExpression(singleBindingPath)) {
         // Optional chaining(?.)이나 복잡한 표현식은 evaluateExpression 사용
         resolved = bindingEngine.evaluateExpression(singleBindingPath, context);
@@ -753,7 +759,17 @@ export function renderItemChildren(
         }
 
         let result;
-        if (isComplexExpression(effectivePath)) {
+        if (hasPipes(effectivePath)) {
+          // 파이프 표현식은 resolveBindings 로 위임 (파이프 체인 실행 포함)
+          // isComplexExpression 은 `|` 를 연산자로 보아 evaluateExpression 으로 보내는데,
+          // 그 경로에서는 `value | pipe` 가 JS 비트 OR 로 평가되어
+          // 인자 있는 파이프는 예외(값 소실), 인자 없는 파이프는 조용한 오답이 된다.
+          // DynamicRenderer 의 text 처리와 동일한 분기 순서를 유지한다.
+          // raw: 접두사는 아래 공통 분기(wrapRawDeep)가 담당하므로 여기서는 제거된
+          // effectivePath 만 넘긴다 — 원본 value 를 넘기면 raw 마커가 이중으로 감싸진다.
+          // @since engine-v1.54.3
+          result = bindingEngine.resolveBindings(`{{${effectivePath}}}`, context, { skipCache: true });
+        } else if (isComplexExpression(effectivePath)) {
           try {
             result = bindingEngine.evaluateExpression(effectivePath, context);
           } catch (error) {
