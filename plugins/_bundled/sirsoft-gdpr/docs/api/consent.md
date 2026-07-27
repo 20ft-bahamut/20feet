@@ -23,9 +23,13 @@
 - **컨트롤러**: `Plugins\Sirsoft\Gdpr\Http\Controllers\Public\GdprCookieConsentController@store`
 - **인증/권한**: `optional.sanctum` (선택적 인증: 회원/비회원 모두 접근)
 
-**요청 파라미터**
+**요청 파라미터** (Body)
 
-_요청 파라미터 없음._
+| 파라미터 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| consents | object | 예 | `{ "cookie_<카테고리키>": bool }` 형태의 동의 매트릭스. 최소 1개 이상. 필수 카테고리에 `false`를 보내면 거부됩니다(422) |
+| source | string | 예 | 변경 경로. `banner` / `preference_center` / `register` / `mypage` 중 하나 |
+| intent | string | 아니오 | 명시적 거부 신호. `reject` 만 허용합니다. 전송 시 선택형 미동의 항목(`false`)을 `is_rejected=true`로 저장하고 history `action=rejected`로 기록합니다. 미전송 시 미동의는 `revoked`로 기록됩니다(기존 동작). 배너의 "동의하지 않고 계속하기" 버튼이 전송합니다 |
 
 **요청 예시**
 
@@ -33,7 +37,18 @@ _요청 파라미터 없음._
 POST /api/plugins/sirsoft-gdpr/consent/cookie HTTP/1.1
 Host: api.example.com
 Accept: application/json
+Content-Type: application/json
 Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생략 가능)
+
+{
+    "consents": {
+        "cookie_necessary": true,
+        "cookie_analytics": false,
+        "cookie_marketing": false
+    },
+    "source": "banner",
+    "intent": "reject"
+}
 ```
 
 **응답 필드** (`data` 내부)
@@ -176,7 +191,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| histories | array | `[]` | 회원 본인의 동의 변경 이력 배열. 각 항목은 `consent_key`, `action`(granted/revoked), `source`, `policy_version`, `categories`, `created_at`로 구성되며 부여/철회 기록을 시간순으로 제공합니다 |
+| histories | array | `[]` | 회원 본인의 동의 변경 이력 배열. 각 항목은 `consent_key`, `action`(granted/revoked/rejected), `source`, `policy_version`, `categories`, `created_at`로 구성되며 부여/철회/거부 기록을 시간순으로 제공합니다. `rejected`는 배너에서 명시적으로 거부(동의하지 않고 계속하기)한 항목입니다 |
 
 **응답 예시**
 
@@ -233,7 +248,7 @@ _단건 응답: `data` 객체의 필드._
 | user_id | integer | `166` | user 식별자 (연관 리소스 참조) |
 | needs_renewal | boolean | `false` | 회원의 활성 동의 중 옛 정책 버전인 항목이 있어 재동의가 필요한지 여부. 마이페이지가 「전체 다시 동의」 안내를 노출할지 판단합니다 |
 | current_policy_version | string | `10` | 현재 발행된 최신 정책 버전 문자열. 각 동의 항목의 `policy_version`과 비교해 항목별 갱신 필요 여부를 계산하는 기준입니다 |
-| consents | array | `[{"id":null,"consent_key":"cookie_necessary","consent_lab…` | 카탈로그의 모든 쿠키 카테고리와 회원 status를 합친 동의 매트릭스. 항목마다 다국어 라벨(`consent_label`), 필수 여부(`is_required`), 현재 동의 상태(`is_consented`), 철회/재동의 가능 여부(`can_revoke`/`can_grant`), 항목별 갱신 필요(`needs_renewal_this_item`)를 담아 한 화면에서 철회·재동의·신규 동의를 처리하게 합니다 |
+| consents | array | `[{"id":null,"consent_key":"cookie_necessary","consent_lab…` | 카탈로그의 모든 쿠키 카테고리와 회원 status를 합친 동의 매트릭스. 항목마다 다국어 라벨(`consent_label`), 필수 여부(`is_required`), 현재 동의 상태(`is_consented`), 명시적 거부 여부(`is_rejected`)와 거부 일시(`rejected_at`), 철회/재동의 가능 여부(`can_revoke`/`can_grant`), 항목별 갱신 필요(`needs_renewal_this_item`)를 담아 한 화면에서 철회·재동의·신규 동의를 처리하게 합니다. `is_rejected=true`는 마이페이지에서 「거부」 배지로 표시됩니다. 각 항목은 마이페이지 표시용 상태 파생 필드도 함께 내려줍니다 — `status`(`required`/`consented`/`revoked`/`rejected`/`none`), 상태 배지 문구(`status_badge_label`, 다국어 — 필수=항상 적용 / 동의함 / 거부함 / 미설정), 동의한 항목의 표시 동사·날짜(`status_label`·`status_at_formatted` — 동의 상태(required·consented)만 '동의' + 동의일을 내려주고, 거부·철회·미설정은 둘 다 null) |
 
 **응답 예시**
 

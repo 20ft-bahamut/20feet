@@ -46,7 +46,7 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 | user_id | integer | `130` | user 식별자 (연관 리소스 참조) |
 | session_id | string | `c50916f6-58ee-42a6-a046-60a0c9ecfad2` | session 식별자 (연관 리소스 참조) |
 | consent_key | string | `cookie_marketing` | 변경된 동의 항목 키 (쿠키 카테고리 키). 어떤 동의 항목의 부여/철회가 기록된 행인지 나타냅니다 |
-| action | string | `revoked` | 이 이력 행의 변경 유형 (`granted`=동의 부여, `revoked`=철회, `acknowledged`=확인). Art.7(1) 입증 트레일의 행위 구분입니다 |
+| action | string | `revoked` | 이 이력 행의 변경 유형 (`granted`=동의 부여, `revoked`=철회, `rejected`=명시적 거부). `rejected`는 배너에서 "동의하지 않고 계속하기"로 선택형 카테고리를 거부한 행위이며 관리자 화면에 amber 배지로 표시됩니다. Art.7(1) 입증 트레일의 행위 구분입니다 |
 | source | string | `banner` | 동의 변경이 발생한 경로 (`banner`=쿠키 배너, `preference_center`=환경설정 센터, `mypage`=마이페이지, 그 외 `register`/`order`/`withdraw`) |
 | policy_version | string | `10` | 변경 시점의 정책 버전 문자열. 해당 동의가 어느 정책 버전 기준으로 표명되었는지 기록해 정책 갱신 후 재동의 판정과 감사에 사용됩니다 |
 | categories | object | `{"cookie_analytics":false,"cookie_marketing":false,"cooki…` | 변경 시점 전체 카테고리별 동의 여부 스냅샷 (키→boolean). MySQL JSON 컬럼이라 키가 알파벳 순으로 정규화 저장됩니다 |
@@ -89,6 +89,6 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 관리자 감사 화면에서 `gdpr_user_consent_histories` 테이블의 동의 로그를 페이지네이션으로 조회합니다. `auth:sanctum`과 `sirsoft-gdpr.privacy.view` 권한이 필요합니다. `email`, `session_id`, `consent_keys[]`, `actions[]`(granted|revoked), `sources[]`(banner|preference_center|mypage), `per_page`(1~100, 기본 20) 쿼리 필터를 지원합니다. DPO 감사 용도로 IP 주소와 User-Agent까지 노출되는 조회 전용 엔드포인트입니다.
+**설명** 관리자 감사 화면에서 `gdpr_user_consent_histories` 테이블의 동의 로그를 페이지네이션으로 조회합니다. `auth:sanctum`과 `sirsoft-gdpr.privacy.view` 권한이 필요합니다. `email`, `session_id`, `consent_keys[]`, `actions[]`(granted|revoked|rejected), `sources[]`(banner|preference_center|mypage), `per_page`(1~100, 기본 20) 쿼리 필터를 지원합니다. DPO 감사 용도로 IP 주소와 User-Agent까지 노출되는 조회 전용 엔드포인트입니다.
 
 

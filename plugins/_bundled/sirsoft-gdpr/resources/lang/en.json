@@ -15,6 +15,7 @@
     "consent": {
         "granted": "Consent has been saved.",
         "granted_again": "Consent has been renewed.",
+        "rejected_saved": "Continuing without consent. Optional items will not be used.",
         "revoked": "Consent has been revoked.",
         "renew_all_success": "{renewed} active consent item(s) renewed to the new policy version.",
         "granting": "Granting...",
@@ -225,7 +226,8 @@
             },
             "action": {
                 "granted": "Granted",
-                "revoked": "Revoked"
+                "revoked": "Revoked",
+                "rejected": "Rejected"
             },
             "source": {
                 "banner": "Banner",
@@ -247,7 +249,7 @@
                 "categories_label": "Categories Snapshot",
                 "categories_hint": "The member's category-by-category choices at the time of consent. This record stays immutable even after the policy is updated.",
                 "snapshot_granted": "Granted",
-                "snapshot_revoked": "Revoked"
+                "snapshot_revoked": "Not Consented"
             }
         }
     },
@@ -265,13 +267,22 @@
             "col_action": "Action",
             "consented": "Consented",
             "revoked": "Revoked",
+            "rejected_label": "Rejected",
             "revoke": "Revoke",
             "grant": "Consent",
             "grant_again": "Consent Again",
+            "label_suffix": "{label} cookies",
+            "locked_label": "Required",
+            "enable_all": "Consent to all",
+            "enable_all_hint": "You have optional items you haven't consented to. Consent to them all at once.",
+            "enable_all_success": "You have consented to all optional items.",
             "required_label": "Required",
             "required_hint": "This item is required for service operation and cannot be revoked.",
+            "grant_confirm_title": "Confirm Cookie Consent",
+            "grant_confirm_message": "Do you want to consent to this cookie? Once consented, this category's cookies will be used, and you can revoke it anytime.",
             "revoke_confirm_title": "Revoke Consent",
             "revoke_confirm_message": "Are you sure you want to revoke this consent? Revoking consent may limit features related to that category.",
+            "revoke_target_consented_at": "Consented · {date}",
             "no_consents": "No active consent items.",
             "needs_renewal": "The cookie policy has been updated. Please renew your consent.",
             "needs_renewal_with_version": "The cookie policy has been updated to version {version}. Please review the optional consent items.",
@@ -295,9 +306,9 @@
         "title": "Cookie Notice",
         "description": "This site uses cookies to improve user experience and for analytics. You can choose which cookies to allow.",
         "accept_all": "Accept All",
-        "reject_all": "Necessary Only",
-        "preferences": "Preferences",
-        "save": "Save Preferences",
+        "reject_continue": "Continue without consent",
+        "preferences": "Select Consent",
+        "save": "Save Selection",
         "policy_link": "Privacy Policy",
         "preferences_title": "Cookie Preferences",
         "preferences_description": "You can grant or revoke each category individually. Required categories cannot be turned off.",

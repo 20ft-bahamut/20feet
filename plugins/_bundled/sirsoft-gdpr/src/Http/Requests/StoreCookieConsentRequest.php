@@ -46,6 +46,9 @@ class StoreCookieConsentRequest extends FormRequest
             'consents' => ['required', 'array', 'min:1'],
             'consents.*' => ['required', 'boolean'],
             'source' => ['required', 'string', 'in:banner,preference_center,register,mypage'],
+            // 명시적 거부 신호 (이슈 #430). 배너 "동의하지 않고 계속하기" 버튼이 전송.
+            // 미전송(null) 시 일반 저장(기존 동작). 값은 'reject' 만 허용.
+            'intent' => ['sometimes', 'nullable', 'string', 'in:reject'],
         ];
     }
 

@@ -4,6 +4,16 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.1] - 2026-07-27
+
+### Added
+
+- 쿠키 거부 기능 및 마이페이지 「쿠키 동의 관리」 재설계에 따른 신규 문구(상태 배지, 동의·철회 확인 모달, 거부 안내 등) 일본어 번역 추가
+
+### Changed
+
+- 초기 토글 방식 설계에서 쓰였던 미사용 문구(항상 켜짐/켜짐/꺼짐) 번역 제거
+
 ## [1.0.0] - 2026-07-01
 
 ### Added

@@ -140,7 +140,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
          * 운영자가 카드에서 required 값을 변경하는 위젯/액션은 존재하지 않는다.
          */
         it('카테고리 카드 영역에 Toggle/setState(required) 위젯이 없다', () => {
-            const rows = findById(root, 'cookie_categories_rows');
+            const rows = findById(root, 'cookie_categories_rows_{{categoryIdx}}');
             const serialized = JSON.stringify(rows);
 
             expect(serialized).not.toContain('"name":"Toggle"');
@@ -149,7 +149,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('카테고리 카드 헤더에 「필수」/「선택」 배지가 required 값으로 분기 렌더된다', () => {
-            const rows = findById(root, 'cookie_categories_rows');
+            const rows = findById(root, 'cookie_categories_rows_{{categoryIdx}}');
             const serialized = JSON.stringify(rows);
 
             expect(serialized).toContain('category_required_badge');
@@ -167,7 +167,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
          */
         it('Phase 1: cookie_categories 영역에 functional 분기 (아이콘 + scope + tools) 존재', () => {
             // 실제 카테고리 카드는 cookie_categories_rows iteration 노드에 위치 (subsection 헤더 별개)
-            const rows = findById(root, 'cookie_categories_rows');
+            const rows = findById(root, 'cookie_categories_rows_{{categoryIdx}}');
             const serialized = JSON.stringify(rows);
 
             // 1. 카테고리 아이콘 분기 (fa-sliders / emerald 색상)
@@ -186,7 +186,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             // 법령 인용 (ePrivacy Art.5(3) / GDPR Art.6(1)(a) 등) 은 운영자 의사결정에 불필요하여
             // 펼치기 영역에서 제거되었다. 정책 버전 snapshot 에 카테고리 본문이 영속되므로
             // 감사 자료는 그쪽에서 확인 가능.
-            const rows = findById(root, 'cookie_categories_rows');
+            const rows = findById(root, 'cookie_categories_rows_{{categoryIdx}}');
             const serialized = JSON.stringify(rows);
 
             expect(serialized).not.toContain('cookie_categories.info.necessary.legal_basis');
@@ -197,7 +197,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('Phase 1: 도메인 차단 섹션의 카테고리 아이콘에 functional 분기 존재', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             const serialized = JSON.stringify(wrapper);
 
             // functional 카테고리 분기 (sliders 아이콘 + emerald 색상)
@@ -274,8 +274,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).toContain('border-l-4');
             expect(serialized).toContain('border-l-blue-500');
             expect(serialized).toContain('circle-info');
-            // 한 줄 + 중간 정렬
-            expect(serialized).toContain('flex items-center');
+            // 한 줄 + 중간 정렬 (시맨틱 flex-center 로 통일 — #399)
+            expect(serialized).toContain('flex-center');
             // 다크모드 가독성: 카드(gray-800)보다 한 단계 어두운 gray-900
             expect(serialized).toContain('dark:bg-gray-900');
 
@@ -298,8 +298,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).not.toContain('blocked_domains.preblocker_active');
             expect(serialized).not.toContain('blocked_domains.self_hosted_attr');
             expect(serialized).not.toContain('blocked_domains.static_html_limitation');
-            // 타이틀 강조 — 별도 badge 없이 제목 폰트를 text-base 로 키워 타이틀 느낌
-            expect(serialized).toContain('text-base');
+            // 타이틀 강조 — 시맨틱 text-error-strong 로 제목 강조 (#399 시맨틱 통일)
+            expect(serialized).toContain('text-error-strong');
             // 옛 badge 키는 lang 과 박스에서 모두 제거됨
             expect(serialized).not.toContain('blocked_domains.warnings_badge');
             // 기존 옛 항목 키 미사용
@@ -331,7 +331,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('blocked_domains_taginputs iteration 이 cookie_categories 에서 necessary 제외하고 렌더', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             expect(wrapper).toBeTruthy();
             expect(wrapper?.iteration?.source).toBe(
                 "(_local.form?.cookie_categories ?? []).filter(c => c?.key !== 'necessary')"
@@ -340,7 +340,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('TagInput 가 카테고리별 도메인 입력으로 사용되며 creatable=true 자유 입력 허용', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             const serialized = JSON.stringify(wrapper);
             // TagInput composite 사용
             expect(serialized).toContain('"name":"TagInput"');
@@ -353,7 +353,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('TagInput change 이벤트가 $event.target.value 에서 string 배열을 추출하여 form.blocked_domains 정적 키로 setState', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             const serialized = JSON.stringify(wrapper);
             // 정적 setState 키 — form.blocked_domains 만 사용 (CRITICAL 규정 준수)
             expect(serialized).toContain('"form.blocked_domains"');
@@ -368,7 +368,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('카탈로그 도메인 일괄 추가 링크 미존재 — 신규 설치 시 카탈로그가 이미 기본값으로 채워져 있고, 카탈로그 갱신 빈도 낮음. 운영자가 의도적으로 제외한 도메인이 재추가되는 위험 회피 (검토 #9)', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             const serialized = JSON.stringify(wrapper);
             // 일괄 추가 링크 라벨/툴팁 키 사용 금지 (lang 키 자체 제거됨)
             expect(serialized).not.toContain('blocked_domains.add_catalog_link');
@@ -392,7 +392,7 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
 
         it('422 검증 에러 시 카테고리 카드 외곽이 빨간 테두리로 강조 + 카드 내부에 첫 잘못된 도메인 에러 메시지 Span 노출 (검토 #10 옵션 B — 카테고리 내 어느 인덱스든 매칭)', () => {
-            const wrapper = findById(root, 'blocked_domains_taginputs');
+            const wrapper = findById(root, 'blocked_domains_taginputs_{{categoryIdx}}');
             const serialized = JSON.stringify(wrapper);
             // 카드 외곽 동적 className — 카테고리 내 *어느 인덱스든* 에러 키가 있으면 true (some)
             expect(serialized).toContain("Object.keys(_local.errors ?? {}).some(k => k.startsWith('blocked_domains.' + category.key + '.'))");
@@ -406,8 +406,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).toContain('"form.blocked_domains"');
         });
 
-        it('header_save_button onError 토스트가 422 응답의 첫 번째 검증 에러 메시지를 노출 + fallback 일반화 메시지 유지 (검토 #10 옵션 A 기반)', () => {
-            const saveBtn = findById(root, 'header_save_button');
+        it('footer_save_button onError 토스트가 422 응답의 첫 번째 검증 에러 메시지를 노출 + fallback 일반화 메시지 유지 (검토 #10 옵션 A 기반)', () => {
+            const saveBtn = findById(root, 'footer_save_button');
             const serialized = JSON.stringify(saveBtn);
             // 첫 번째 검증 에러 메시지 추출 표현식
             expect(serialized).toContain('Object.values(error.errors ?? {})[0]');
@@ -427,8 +427,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             const serialized = JSON.stringify(wrapper);
             // Input className 동적 변경 — 대괄호 표기법으로 errors 키 접근 (코어 _tab_general 패턴)
             expect(serialized).toContain(`_local.errors?.['${formField}']`);
-            expect(serialized).toContain('border-red-500');
-            expect(serialized).toContain('focus:ring-red-500');
+            // 에러 시 시맨틱 input-error 로 통일 (#399 시맨틱 통일 — 옛 border-red-500/focus:ring-red-500 원시 클래스 대체)
+            expect(serialized).toContain('input-error');
             // 필드 아래 에러 Span — if 가드 + 첫 메시지 text (코어 단순 패턴)
             expect(serialized).toContain(`_local.errors?.['${formField}']?.[0]`);
             // 에러 Span 시각 시맨틱 (form-error) — 텍스트 톤 + 줄바꿈을 한 결로 통일 (#399)
@@ -551,8 +551,8 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(Object.keys(params ?? {})).not.toContain('policyGuideOpen');
         });
 
-        it('상단 저장 sequence 는 단순 save_success 토스트만 노출 — published_version 분기 / 정책 버전 refetch 제거 (수동 발행 모델)', () => {
-            const btn = findById(root, 'header_save_button');
+        it('하단 저장 sequence 는 단순 save_success 토스트만 노출 — published_version 분기 / 정책 버전 refetch 제거 (수동 발행 모델)', () => {
+            const btn = findById(root, 'footer_save_button');
             const serialized = JSON.stringify(btn);
             // 옛 자동 발행 흐름의 분기 / refetch 제거 — 저장은 정책 버전을 발행하지 않으므로 분기 불필요
             expect(serialized).not.toContain('response?.data?.published_version');
