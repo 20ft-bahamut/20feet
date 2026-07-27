@@ -8,6 +8,7 @@
 
 ### Added
 
+- 언어팩 관리 목록의 "파일 없음" 배지와 다시 설치 버튼 문구 일본어 번역 추가 (`language_packs.badge.files_missing`, `language_packs.actions.reinstall`).
 - 일반 설정의 에셋 파일 서빙 방식 항목 문구 일본어 번역 추가 (`settings.general.asset_url_mode*`) — 항목 이름과 설명, 선택지, 자동 감지 결과(확장자를 가로채는 서버 규칙 안내 포함)가 일본어 로케일에서 자연스럽게 표시됩니다.
 - 대시보드의 에셋 파일 서빙 방식 불일치 안내 문구 일본어 번역 추가 (`dashboard.asset_url_mode_drift_*`) — 안내 제목과 설명, 환경설정 이동 문구가 일본어 로케일에서 자연스럽게 표시됩니다.
 

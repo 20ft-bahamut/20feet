@@ -94,7 +94,7 @@ class LanguagePackService
             ->values();
 
         $page = max(1, (int) ($filters['page'] ?? 1));
-        $items = $merged->forPage($page, $perPage)->values();
+        $items = $this->annotateFilesMissing($merged->forPage($page, $perPage)->values());
 
         return new LengthAwarePaginator(
             $items,
@@ -133,11 +133,13 @@ class LanguagePackService
         $uninstalledVirtual = $this->getUninstalledBundledPacks($filters)
             ->reject(fn (LanguagePack $pack) => isset($occupiedSlots[$this->slotKey($pack)]));
 
-        return $dbCollection
-            ->concat($builtInVirtual)
-            ->concat($uninstalledVirtual)
-            ->sortBy('locale')
-            ->values();
+        return $this->annotateFilesMissing(
+            $dbCollection
+                ->concat($builtInVirtual)
+                ->concat($uninstalledVirtual)
+                ->sortBy('locale')
+                ->values()
+        );
     }
 
     /**
@@ -162,6 +164,92 @@ class LanguagePackService
     private function slotKey(LanguagePack $pack): string
     {
         return $pack->scope.'|'.($pack->target_identifier ?? '').'|'.$pack->locale;
+    }
+
+    /**
+     * 각 팩에 드리프트 파생 플래그 `files_missing` 와 복구 가능 여부 `bundled_source_available` 를 부여합니다.
+     *
+     * `files_missing` 은 DB 에 active 로 기록됐으나 설치본 디렉토리가 실재하지 않는 행을 표면화하기 위한 것으로,
+     * 이 상태의 팩은 런타임에 오류 없이 base locale 로 조용히 폴백한다(이슈 #496 의 드리프트 증상).
+     *
+     * `bundled_source_available` 은 그 팩을 `lang-packs/_bundled/` 소스로 재설치해 복구할 수 있는지를 나타낸다.
+     * 설치 경로(source_type)가 아니라 **번들 소스의 실재 여부**로 판정하므로, github/url/zip 으로 설치된 팩이라도
+     * 동일 식별자의 번들 소스가 있으면 복구 대상이 된다 — 판정을 source_type 에 걸면 그 팩들은 드리프트가
+     * 보이기만 하고 복구 수단이 없는 상태로 남는다.
+     *
+     * @param  Collection<int, LanguagePack>  $packs  대상 컬렉션
+     * @return Collection<int, LanguagePack> 동일 컬렉션(플래그 부여됨)
+     */
+    private function annotateFilesMissing(Collection $packs): Collection
+    {
+        foreach ($packs as $pack) {
+            $pack->setAttribute('files_missing', $this->isInstalledButFilesMissing($pack));
+            $pack->setAttribute('bundled_source_available', $this->hasBundledSource($pack));
+        }
+
+        return $packs;
+    }
+
+    /**
+     * 팩과 동일한 식별자의 번들 소스(`lang-packs/_bundled/{identifier}`)가 실재하는지 확인합니다.
+     *
+     * @param  LanguagePack  $pack  판정 대상 팩
+     * @return bool 번들 소스가 있으면 true
+     */
+    private function hasBundledSource(LanguagePack $pack): bool
+    {
+        $identifier = (string) ($pack->getAttribute('bundled_identifier') ?? $pack->identifier);
+        if ($identifier === '') {
+            return false;
+        }
+
+        return File::isDirectory(base_path('lang-packs/_bundled/'.$identifier));
+    }
+
+    /**
+     * 설치본 파일이 부재(드리프트)해 번들 소스로 복구 가능한 설치 행을 반환합니다.
+     *
+     * `getUninstalledBundledPacks()` 는 슬롯이 점유된 팩을 후보에서 제외하므로 드리프트 행을 잡지 못합니다.
+     * 프로비저닝이 "수동 복구" 경로까지 겸하려면 이 집합이 함께 대상이 되어야 합니다.
+     *
+     * @param  array<string, mixed>  $filters  필터 (scope/locale/target_identifier/search/vendor)
+     * @return Collection<int, LanguagePack> 드리프트 설치 행 컬렉션
+     */
+    public function getDriftedInstalledPacks(array $filters = []): Collection
+    {
+        return $this->annotateFilesMissing(
+            $this->repository
+                ->getFilteredCollection($filters)
+                ->filter(fn (LanguagePack $pack) => $this->isInstalledButFilesMissing($pack))
+                ->filter(fn (LanguagePack $pack) => $this->hasBundledSource($pack))
+                ->values()
+        );
+    }
+
+    /**
+     * 팩이 "설치(active) 로 기록됐으나 설치본 파일이 부재" 한 드리프트 상태인지 판정합니다.
+     *
+     * 가상 행(built_in / uninstalled)은 실제 설치본이 아니므로 대상에서 제외합니다.
+     *
+     * @param  LanguagePack  $pack  판정 대상 팩
+     * @return bool 드리프트면 true
+     */
+    private function isInstalledButFilesMissing(LanguagePack $pack): bool
+    {
+        // 가상 행(exists=false: built_in/uninstalled)은 설치본 개념이 없으므로 제외
+        if (! $pack->exists) {
+            return false;
+        }
+
+        if ($pack->status !== LanguagePackStatus::Active->value) {
+            return false;
+        }
+
+        try {
+            return ! File::isDirectory($pack->resolveDirectory());
+        } catch (Throwable $e) {
+            return false;
+        }
     }
 
     /**
