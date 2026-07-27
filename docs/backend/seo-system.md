@@ -937,6 +937,21 @@ config에 없는 컴포넌트는 `<div>` fallback으로 렌더링됩니다.
 - 좌측이 배열/객체면 원본 타입 유지 (문자열 변환 없음)
 - 복합 표현식 (`&&`, `||` 포함) 시에는 일반 `evaluate()` 위임
 
+### ExpressionEvaluator — `||` / `&&` 논리 연산자
+
+일반 화면과 동일하게 **값을 반환**합니다. `true` / `false` 라는 글자로 바뀌지 않습니다.
+
+| 표현식 | 좌측 값 | 결과 |
+|--------|--------|------|
+| `{{query.q \|\| ''}}` | `"검색어"` | `"검색어"` |
+| `{{query.q \|\| ''}}` | 빈 값 | `""` |
+| `{{a \|\| b}}` | `a` 가 빈 값 | `b` 의 값 |
+| `{{a && b}}` | `a` 가 빈 값 | `a` 의 값 |
+| `{{a && b}}` | `a` 가 값 있음 | `b` 의 값 |
+
+- 빈 값 판정: `''`, `'false'`, `'0'`
+- 이 규칙은 데이터소스 엔드포인트 보간(`?q={{query?.q \|\| ''}}`)에서도 그대로 적용됩니다. 값 대신 `true` 가 들어가면 봇이 엉뚱한 목록을 받게 됩니다.
+
 ### ExpressionEvaluator — 삼항 연산자
 
 `condition ? trueExpr : falseExpr` 형태의 삼항 연산자를 지원합니다. JS 우선순위에 맞게 `||`/`&&`보다 먼저 분리됩니다.
@@ -1039,6 +1054,93 @@ config에 없는 컴포넌트는 `<div>` fallback으로 렌더링됩니다.
 - `default`: 매칭 없을 때 기본 클래스
 - 기존 `className`과 병합 가능
 
+### ComponentHtmlMapper — Extension Point props 해석
+
+레이아웃의 `extension_point` 노드를 확장이 교체(또는 추가)하면, 호스트가 선언한 `props` 가 주입 컴포넌트의 최상위 키 `extensionPointProps` 로 전달됩니다. 주입 컴포넌트는 `{{extensionPointProps.content}}` 형태로 그 값을 참조합니다.
+
+SEO 렌더링은 `renderComponent()` 진입 시점에 이 값을 해석해 데이터 컨텍스트의 `extensionPointProps` 에 넣습니다.
+
+- 해석 시점: `responsive` 병합·`if` 판정·`iteration` 전개보다 **먼저** — 조건식과 반복 소스도 이 값을 참조할 수 있어야 하기 때문입니다.
+- 적용 범위: 해당 노드와 **자손 전체**. 형제 노드에는 전달되지 않습니다.
+- 반복 내부: 반복 항목마다 재해석하지 않고 바깥 컨텍스트 기준으로 한 번만 해석한 뒤 상속합니다.
+- 값 해석: 문자열 표현식은 원본 타입을 유지한 채 해석됩니다(불리언·숫자·배열 보존). 중첩 객체는 재귀 해석합니다.
+
+`extensionPointCallbacks` 는 **의도적으로 해석하지 않습니다**. SEO 파이프라인에는 액션 실행기가 없고, 액션 정의 배열을 컨텍스트에 넣으면 HTML 에 직렬화 파편이 노출될 수 있습니다. 봇에게 보여야 할 내용을 콜백 경유로 만들지 마세요.
+
+미해석 시 증상: 확장이 교체한 본문 영역이 내용 없는 빈 요소(`<div></div>`)로 출력되고, 메타 태그에는 본문이 들어가 **메타와 화면 본문이 어긋납니다**.
+
+호스트가 넘기는 판정 값(예: `isHtml`)은 비교식으로 쓰이는 경우가 많습니다(`{{(post.data?.content_mode ?? 'text') === 'html'}}`). 비교·논리 연산의 결과는 참/거짓 값으로 해석되므로 주입 컴포넌트의 `{{extensionPointProps.isHtml ?? true}}` 같은 기본값 폴백이 의도대로 동작합니다.
+
+### 봇 화면의 HTML 정화
+
+사용자가 작성한 본문(게시글·답변글·페이지·상품 설명)은 **일반 화면과 같은 강도로 정화한 뒤** 봇 화면에 넣습니다. 정화를 생략하면 봇 화면에서만 저장된 스크립트가 살아남아, 주소에 봇 파라미터를 붙이는 것만으로 실행됩니다.
+
+판정 규칙은 일반 화면의 `HtmlContent` 컴포지트와 같습니다.
+
+| `isHtml` | 봇 화면 출력 | 일반 화면 |
+|---|---|---|
+| `false` | 전체 이스케이프 — 태그가 글자로 보입니다 | 동일 (평문 렌더링) |
+| `true` 또는 미지정 | 위험 요소를 제거한 뒤 HTML 로 출력 | 동일 (DOMPurify) |
+
+정화 규칙 (`app/Seo/HtmlSanitizer.php`)
+
+- 스크립트 실행·외부 콘텐츠 삽입·문서 구조 조작 태그는 제거합니다. 본문 텍스트를 품을 수 있는 태그는 요소만 벗기고 글자는 남깁니다.
+- `on*` 이벤트 핸들러 속성은 전부 제거합니다(목록에 없는 신규 이벤트 포함).
+- `href`/`src` 등 URL 속성은 허용 스킴만 남깁니다. `javascript:` 는 제어문자를 끼워 넣은 우회 형태까지 차단하고, `data:` 는 이미지 형식만 허용합니다.
+- 외부 링크에는 `rel="noopener noreferrer"` 를 보강합니다.
+- 파싱에 실패하면 정화되지 않은 HTML 을 내보내지 않고 전체를 이스케이프합니다.
+
+차단 목록의 기준은 일반 화면 컴포넌트의 DOMPurify 설정입니다(`templates/_bundled/sirsoft-basic/src/components/composite/HtmlContent.tsx`). **한쪽만 바꾸면 두 화면의 정화 강도가 어긋나므로 함께 갱신**하세요. 계약은 `tests/Unit/Seo/HtmlSanitizerTest.php` 와 `tests/Unit/Seo/ExtensionPointPropsRenderingTest.php` 가 잠급니다.
+
+`purifyConfig` prop(일반 화면의 DOMPurify 설정 오버라이드)은 봇 화면에서 해석하지 않습니다 — 기본 정화 규칙만 적용됩니다.
+
+### 데이터소스 화이트리스트
+
+봇 렌더링은 `meta.seo.data_sources` 에 적힌 id 만 미리 조회합니다. **화면이 쓰는 데이터소스는 빠짐없이 선언**하세요. 빠지면 그 값은 늘 비어 있고, 그 값을 조건으로 삼는 블록이 통째로 사라져 머리말과 꼬리말만 있는 화면이 색인됩니다.
+
+봇에게 의미가 없어 일부러 제외하는 경우(브라우저 저장값이 필요한 목록, 로그인 사용자 전용 데이터 등)는 `tests/Unit/Seo/SeoLayoutDataSourceDeclarationTest.php` 의 면제 목록에 사유와 함께 등록합니다. 그 테스트가 번들 템플릿 레이아웃을 전수 순회해 미선언 참조를 차단합니다.
+
+### SEO 렌더러 지원 노드 키 (SSoT)
+
+일반 화면(React)과 봇 화면(PHP)은 같은 레이아웃 JSON 을 각각 렌더합니다. 한쪽에만 기능을 추가하면 봇 화면에서 그 부분이 조용히 사라지므로, 지원 범위를 아래 표로 고정합니다. 이 표가 두 렌더러 지원 범위의 단일 기준(SSoT)입니다.
+
+"봇 화면 처리 위치" 는 파일 경로 + 메서드로 적습니다. 줄 번호는 리팩터링마다 어긋나 오히려 잘못된 근거가 되므로 넣지 않습니다 — 메서드명으로 찾으세요.
+
+| 노드 키 | 일반 화면 | 봇 화면 | 봇 화면 처리 위치 | 비고 |
+|---------|----------|--------|------------------|------|
+| `name` / `type` / `props` / `children` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::renderComponent` / `renderTag` / `renderChildren` | |
+| `text` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::resolveNodeText` | `children` 보다 우선 (양쪽 동일). 키가 있으면 값이 비어도 `children` 으로 폴백하지 않음. `true`/`false`/`null` 로 평가되면 아무것도 출력하지 않음 (JSX 시맨틱). 단, 자체 렌더링을 가진 집합 컴포넌트(아래 `render` 모드)에서는 컴포넌트 출력이 먼저다 — 일반 화면에서도 `Select` 는 `options` 로 스스로 그리고 `text` 를 쓰지 않는다 |
+| children 배열 내 문자열 | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::render` | 이스케이프만 하고 리터럴 출력 — 표현식·번역 미해석 (React 동일) |
+| `if` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::evaluateBooleanExpression` | 거짓 판정: `''`, `false`, `0`, `null`, `undefined` (대소문자·공백 무시) |
+| `condition` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::shouldRender` | `if` 의 별칭 |
+| `conditions` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::evaluateConditions` | 문자열 / `{and:[]}` / `{or:[]}` / `[{if:…}]` 체인. 빈 AND=참, 빈 OR=거짓. 어느 형식도 아니면 **렌더링**(양쪽 동일 — 숨기면 봇 화면에서만 사라짐) |
+| `iteration` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::renderIteration` | `item_var` / `index_var` 별칭 포함 |
+| `type: "iterator"` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::normalizeIteratorNode` | `data`/`itemName`/`indexName` → `iteration` 변환 |
+| `classMap` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::resolveClassMap` | |
+| `responsive` | 전체 브레이크포인트 | 데스크톱 폭만 | `app/Seo/ComponentHtmlMapper.php::applyResponsiveOverrides` / `matchingBreakpointKey` | 봇=데스크톱 고정. `props`/`if`/`text`/`children`/`iteration` 오버라이드 반영. 매칭 키가 여럿이면 **하나만** 적용 — 커스텀 범위 > 프리셋, 좁은 범위 > 넓은 범위 (양쪽 동일) |
+| `extensionPointProps` | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::injectExtensionPointContext` | 자손 상속 |
+| `default` (extension_point 호스트) | ✅ | ✅ | 렌더 전 단계에서 처리 | 확장이 꺼져 있을 때 쓰는 기본 children — 주입 단계에서 교체·전개되어 렌더러에는 남지 않음 |
+| `callbacks` (extension_point 호스트) | ✅ | ❌ (의도) | 미처리 | 주입 단계에서 `extensionPointCallbacks` 로 부착 — 봇 화면에는 액션 실행기가 없음 |
+| `computed` / `extends` / 파셜 | ✅ | ✅ | `app/Seo/SeoRenderer.php::resolveComputed` / `app/Services/LayoutService.php::getLayout` | 레이아웃 병합·설치 시점에 처리 |
+| `$t:` / `$t:defer:` | ✅ | ✅ | `app/Seo/ExpressionEvaluator.php::resolveTranslation` | 봇 화면은 지연 개념이 없어 동일 키로 해석 |
+| `actions` | ✅ | 링크만 | `app/Seo/ComponentHtmlMapper.php::extractLinkAction` | 페이지 이동/새 창 열기 액션만 `<a href>` 로 승격 |
+| `extensionPointCallbacks` | ✅ | ❌ (의도) | 미처리 | 액션 실행기 부재 |
+| `lifecycle` / `dataKey` / `trackChanges` | ✅ | ❌ (무해) | 미처리 | 입력·생명주기 전용 |
+| `slot` / `slotOrder` | ✅ | ❌ (무해) | `app/Services/LayoutService.php::replaceSlots` 에서 선처리 | 레이아웃 병합 단계에서 제거 |
+| `sortable` / `itemTemplate` / `expandChildren` / `component_layout` | ✅ | ❌ (무해) | 미처리 | 조작 후 노출되는 화면 |
+| `isolatedState` / `$parent` / `_isolated` | ✅ | ❌ (무해) | 미처리 | 격리·모달 부모 컨텍스트 |
+| `blur_until_loaded` / 노드 최상위 `style` | ✅ | ❌ (무해) | 미처리 | 표현 전용 |
+| 노드 최상위에 잘못 놓인 컴포넌트 prop (`size` 등) | ❌ | ❌ | 미처리 | 양쪽 모두 `props` 객체만 읽으므로 무시됨 — 값을 적용하려면 `props` 안으로 옮겨야 함 |
+| `props.isHtml` (콘텐츠 노드) | ✅ | ✅ | `app/Seo/ComponentHtmlMapper.php::renderRawMode` | 거짓이면 이스케이프, 참(기본)이면 정화 후 HTML — "봇 화면의 HTML 정화" 참조 |
+| `props.value` (폼 제어) | 속성 | 속성 | `app/Seo/ComponentHtmlMapper.php::resolveTextContent` | `select`/`option`/`input`/`textarea` 등에서는 글자로 승계하지 않음 — 선택 목록은 `options` 로 항목 라벨을 그림 |
+| `props.purifyConfig` | ✅ | ❌ (의도) | 미처리 | 봇 화면은 기본 정화 규칙만 적용 |
+| `modals` | ✅ | ❌ (무해) | `SeoRenderer` 가 `components` 만 렌더 | 봇 화면은 모달을 렌더하지 않음 |
+| 레이아웃 최상위 `state` / `initLocal` / `initGlobal` | ✅ | ✅ | `app/Seo/SeoRenderer.php::resolveInitStateBlock` / `resolveInitActionState` | `init_actions` 의 상태 설정(로컬/전역)도 반영 |
+
+이 표는 `tests/Unit/Seo/SeoNodeKeyParityTest.php` 의 분류 목록과 동기 유지합니다. 표를 바꾸면 그 테스트의 목록도 함께 바꿔야 합니다. 반대로 레이아웃에 새 노드 키가 등장하면 그 테스트가 실패하므로, 봇 화면에서 해석이 필요한지 판단한 뒤 양쪽을 갱신하세요.
+
+확장 포인트 쪽 서술은 [layout-extensions.md "Extension Point 데이터 전달"](../extension/layout-extensions.md), 레이아웃 작성자 관점 요약은 [layout-json.md](../frontend/layout-json.md) 를 참조하세요.
+
 ### DataSourceResolver — params 쿼리 파라미터 해석
 
 data_source 정의에 `params` 필드가 있으면 해당 값을 해석하여 API 호출 시 쿼리 파라미터로 전달합니다.
@@ -1081,9 +1183,9 @@ data_source 정의에 `params` 필드가 있으면 해당 값을 해석하여 AP
 
 | 타입 | 역할 | 설명 |
 |------|------|------|
-| `iterate` | 배열 데이터 순회 → 아이템별 HTML 생성 | `item_tag`, `item_attrs`, `item_content`, `badge_field` |
+| `iterate` | 배열 데이터 순회 → 아이템별 HTML 생성 | `item_tag`, `item_attrs`, `item_content`, `badge_field`. `item_attrs` 와 `item_content` 를 함께 선언하면 속성과 라벨을 모두 그립니다(`<option value="…">라벨</option>`) |
 | `format` | 포맷 문자열 `{key}` 플레이스홀더 치환 | `format`, `defaults` (component_map 엔트리에서 정의) |
-| `raw` | 원본 HTML/텍스트 그대로 출력 | `source` (이스케이프 없음) |
+| `raw` | 사용자 작성 콘텐츠 출력 | `source`. `isHtml` prop 판정에 따라 이스케이프 또는 정화 후 출력 — "봇 화면의 HTML 정화" 참조 |
 | `fields` | 객체 prop에서 필드 추출 → 개별 HTML 생성 | `fields` (컴포지트 컴포넌트 SEO 렌더링용) |
 | `pagination` | 페이지네이션 링크 생성 | `max_links` (기본 10), 현재 페이지 `<span>` + 나머지 `<a href="?page=N">` |
 
