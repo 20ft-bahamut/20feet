@@ -528,11 +528,14 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
             expect(text).toContain('sirsoft-gdpr.banner.storage_only_line|location=');
         });
 
-        it('푸터 라인은 시각적 무게 최소화 — 작은 보조 텍스트 시맨틱 + 상단 구분선', () => {
+        it('푸터 라인은 시각적 무게 최소화 — 작은 보조 텍스트 (공통 Tailwind 코어 클래스) + 상단 구분선', () => {
             // 동의 행위 자체에 시선이 가도록 운영 주체는 부드러운 보조 정보로 처리.
-            // 작은 회색 텍스트 톤은 표준 시맨틱(.text-tertiary)으로 통일 (#399).
+            // 이슈 #430 — 배너는 user 페이지에 렌더되므로 admin 전용 시맨틱(.text-tertiary)은 미해석.
+            // 동등한 공통 Tailwind 코어 클래스로 치환 (회귀 수정).
             const className = (footer?.props as { className?: string })?.className ?? '';
-            expect(className).toContain('text-tertiary');
+            expect(className).toContain('text-xs');
+            expect(className).toContain('text-gray-500');
+            expect(className).not.toContain('text-tertiary');
             expect(className).toContain('border-t');
         });
     });

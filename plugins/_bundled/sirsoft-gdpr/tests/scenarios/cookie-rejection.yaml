@@ -73,10 +73,11 @@ effects:
   - consent_action_from_decision_granted_revoked_rejected    # value/isRejection → granted/revoked/rejected 3분기
 
   # 화면 표기 (레이아웃 렌더링)
-  - mypage_required_shows_locked_always_on_toggle            # 마이페이지 필수 = 잠긴 '항상 켜짐' 토글 (액션/동의일 없음)
-  - mypage_optional_shows_on_off_toggle                      # 마이페이지 선택 = on/off 토글 (켜짐 녹색→철회, 꺼짐 회색→동의)
-  - mypage_no_consent_date_column_for_user                   # 사용자 화면에 동의일 컬럼 미노출 (감사/관리자 전용)
-  - mypage_enable_all_bar_when_optional_off                  # 꺼진 선택 항목 있을 때 '모두 켜기' 바 노출
+  - mypage_required_shows_locked_button                      # 마이페이지 필수 = 상태 배지 + 잠금 버튼 (액션 없음)
+  - mypage_optional_consented_shows_revoke_button            # 마이페이지 선택 동의함 = 철회 버튼 → 철회 확인 모달
+  - mypage_optional_unset_shows_grant_button                 # 마이페이지 선택 거부함/미설정 = 동의 버튼 → 동의 확인 모달
+  - mypage_status_date_line_consented_only                   # 동의한 항목만 날짜 줄 노출 (서버 status_at_formatted, 거부/미설정은 null)
+  - mypage_enable_all_bar_when_optional_off                  # 미동의 선택 항목 있을 때 '모두 동의' 바 노출
   - admin_log_action_badge_rejected_amber                    # 관리자 동의이력 rejected 배지(amber)
   - admin_log_filter_rejected_checkbox                       # 관리자 [거부] 필터 체크박스
   - banner_reject_button_sends_intent_reject                 # 배너 거부 버튼이 intent:'reject' 전송

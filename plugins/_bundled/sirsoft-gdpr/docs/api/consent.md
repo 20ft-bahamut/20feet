@@ -248,7 +248,7 @@ _단건 응답: `data` 객체의 필드._
 | user_id | integer | `166` | user 식별자 (연관 리소스 참조) |
 | needs_renewal | boolean | `false` | 회원의 활성 동의 중 옛 정책 버전인 항목이 있어 재동의가 필요한지 여부. 마이페이지가 「전체 다시 동의」 안내를 노출할지 판단합니다 |
 | current_policy_version | string | `10` | 현재 발행된 최신 정책 버전 문자열. 각 동의 항목의 `policy_version`과 비교해 항목별 갱신 필요 여부를 계산하는 기준입니다 |
-| consents | array | `[{"id":null,"consent_key":"cookie_necessary","consent_lab…` | 카탈로그의 모든 쿠키 카테고리와 회원 status를 합친 동의 매트릭스. 항목마다 다국어 라벨(`consent_label`), 필수 여부(`is_required`), 현재 동의 상태(`is_consented`), 명시적 거부 여부(`is_rejected`)와 거부 일시(`rejected_at`), 철회/재동의 가능 여부(`can_revoke`/`can_grant`), 항목별 갱신 필요(`needs_renewal_this_item`)를 담아 한 화면에서 철회·재동의·신규 동의를 처리하게 합니다. `is_rejected=true`는 마이페이지에서 「거부」 배지로 표시됩니다 |
+| consents | array | `[{"id":null,"consent_key":"cookie_necessary","consent_lab…` | 카탈로그의 모든 쿠키 카테고리와 회원 status를 합친 동의 매트릭스. 항목마다 다국어 라벨(`consent_label`), 필수 여부(`is_required`), 현재 동의 상태(`is_consented`), 명시적 거부 여부(`is_rejected`)와 거부 일시(`rejected_at`), 철회/재동의 가능 여부(`can_revoke`/`can_grant`), 항목별 갱신 필요(`needs_renewal_this_item`)를 담아 한 화면에서 철회·재동의·신규 동의를 처리하게 합니다. `is_rejected=true`는 마이페이지에서 「거부」 배지로 표시됩니다. 각 항목은 마이페이지 표시용 상태 파생 필드도 함께 내려줍니다 — `status`(`required`/`consented`/`revoked`/`rejected`/`none`), 상태 배지 문구(`status_badge_label`, 다국어 — 필수=항상 적용 / 동의함 / 거부함 / 미설정), 동의한 항목의 표시 동사·날짜(`status_label`·`status_at_formatted` — 동의 상태(required·consented)만 '동의' + 동의일을 내려주고, 거부·철회·미설정은 둘 다 null) |
 
 **응답 예시**
 

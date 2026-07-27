@@ -143,10 +143,13 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
             expect(text).toContain('sirsoft-gdpr.mypage.privacy.storage_only_meta|location=');
         });
 
-        it('시각적 무게 최소화 — 작은 보조 텍스트 시맨틱', () => {
-            // 작은 회색 텍스트 톤은 표준 시맨틱(.text-tertiary)으로 통일 (#399).
+        it('시각적 무게 최소화 — 작은 보조 텍스트 (공통 Tailwind 코어 클래스)', () => {
+            // 이슈 #430 — 이 카드는 user 페이지(sirsoft-basic)에 렌더되므로 admin 전용 시맨틱(.text-tertiary)은
+            // CSS 미해석. 동등한 공통 Tailwind 코어 클래스로 치환 (회귀 수정).
             const className = (meta?.props as { className?: string })?.className ?? '';
-            expect(className).toContain('text-tertiary');
+            expect(className).toContain('text-xs');
+            expect(className).toContain('text-gray-500');
+            expect(className).not.toContain('text-tertiary');
         });
     });
 
@@ -155,6 +158,21 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
             const modal = (root.modals ?? []).find((m) => m.id === 'revoke_confirm_modal');
             expect(modal).toBeTruthy();
             expect(modal?.name).toBe('Modal');
+        });
+
+        it('이슈 #430 — grant_confirm_modal(동의 확인 모달)이 modals 배열에 포함', () => {
+            const modal = (root.modals ?? []).find((m) => m.id === 'grant_confirm_modal');
+            expect(modal).toBeTruthy();
+            expect(modal?.name).toBe('Modal');
+            const text = serializeForSearch(modal);
+            // 동의 확인 문구 + grant API + 대상 _global.grantTargetKey
+            expect(text).toContain('mypage.privacy.grant_confirm_message');
+            expect(text).toContain('"target": "/api/plugins/sirsoft-gdpr/consent/grant"');
+            expect(text).toContain('_global.grantTargetKey');
+            // 확인 후 refetch + syncConsent + closeModal
+            expect(text).toContain('"dataSourceId": "gdprMeConsents"');
+            expect(text).toContain('"handler": "sirsoft-gdpr.syncConsent"');
+            expect(text).toContain('"handler": "closeModal"');
         });
 
         it('제거된 데이터 요청·자가 취소 모달은 존재하지 않는다', () => {
@@ -203,6 +221,8 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
             // raw key (cookie_functional 등) 대신 사용자 친화 description 을 모달에 표시하기 위해
             // 행 핸들러에서 consent_description 을 _global 에 세팅한다.
             expect(text).toContain('"revokeTargetDescription": "{{consent?.consent_description ?? \'\'}}"');
+            // 이슈 #430 — 철회 모달에서 마지막 동의일을 보여주기 위해 status_at_formatted 를 _global 로 전달.
+            expect(text).toContain('"revokeTargetDate": "{{consent?.status_at_formatted ?? \'\'}}"');
         });
 
         it('동의 항목 컬럼이 라벨 우선 표시 (consent_label fallback consent_key)', () => {
@@ -231,6 +251,13 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
             expect(text).toContain('_global.revokeTargetDescription');
             // 옛 raw key 표시 (font-mono break-all 클래스) 가 회귀하지 않음
             expect(text).not.toContain('font-mono break-all');
+        });
+
+        it('이슈 #430 — 모달에 철회 대상의 마지막 동의일 노출 (revokeTargetDate 있을 때만)', () => {
+            const text = serializeForSearch(modal);
+            // 사용자가 언제 동의한 것을 철회하는지 인지하도록 마지막 동의일을 표시.
+            expect(text).toContain('_global.revokeTargetDate');
+            expect(text).toContain('sirsoft-gdpr.mypage.privacy.revoke_target_consented_at|date=');
         });
 
         it('확인 버튼 → POST /consent/revoke + onSuccess 에 refetch + closeModal + toast', () => {
@@ -270,77 +297,102 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
 
         /**
          * @scenario entry=reject, subject=member, category=required
-         * @effects mypage_no_consent_date_column_for_user
+         * @effects mypage_status_date_line_per_row
          */
-        it('사용자 화면에 동의일 컬럼이 없다 (감사/관리자 전용) — col_consented_at / col_action 헤더 제거', () => {
-            // 재설계 회귀 가드: 표 헤더(col_consent_key/col_consented/col_consented_at/col_action) 전면 제거.
-            // 동의일은 GDPR 감사 로그·관리자 화면에만 존재하고 사용자 토글 화면엔 노출하지 않음.
+        it('옛 표 헤더 컬럼 방식은 미사용 (col_consented_at / col_action 헤더 없음)', () => {
+            // 회귀 가드: 재설계로 표 헤더(col_consent_key/col_consented/col_consented_at/col_action) 방식은 제거.
+            // 날짜는 컬럼이 아니라 각 행의 상태별 한 줄(status_at_formatted)로 노출한다.
             const text = serializeForSearch(section);
             expect(text).not.toContain('mypage.privacy.col_consented_at');
             expect(text).not.toContain('mypage.privacy.col_action');
-            // 행 단위 consented_at 바인딩도 사용자 화면에서 제거
-            expect(text).not.toContain('consent?.consented_at');
+        });
+
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects mypage_status_date_line_consented_only
+         */
+        it('이슈 #430 — 동의한 항목만 날짜 줄 노출 (서버가 동의 상태에만 status_at_formatted 제공)', () => {
+            // PO 결정(2026-07-20): 날짜는 "동의한 항목만". 거부·철회·미설정은 서버가 status_at_formatted 를
+            // null 로 내려주므로 날짜 줄이 렌더되지 않는다. 프론트는 status_label && status_at_formatted 가 둘 다
+            // 있을 때만 날짜 줄을 그린다.
+            const text = serializeForSearch(section);
+            expect(text).toContain('consent?.status_label');
+            expect(text).toContain('consent?.status_at_formatted');
+            // 날짜 줄은 둘 다 있을 때만 (거부/미설정은 null → 미노출)
+            expect(text).toContain('!!consent?.status_label && !!consent?.status_at_formatted');
         });
 
         /**
          * @scenario entry=reject, subject=member, category=required
-         * @effects mypage_required_shows_locked_always_on_toggle
+         * @effects mypage_required_shows_locked_button
          */
-        it('필수 카테고리 — 잠긴 「항상 켜짐」 토글 (액션 없음, lock 아이콘 + not-allowed)', () => {
+        it('필수 카테고리 — 상태 배지 + 잠금 버튼 (액션 없음, lock 아이콘 + not-allowed)', () => {
             const text = serializeForSearch(section);
             expect(text).toContain('consent?.is_required === true');
-            expect(text).toContain('mypage.privacy.always_on');
-            // 잠금 시각 표현: lock 아이콘 + not-allowed 커서
+            // 상태 배지는 서버 status_badge_label 사용
+            expect(text).toContain('consent?.status_badge_label');
+            // 잠금 버튼: lock 아이콘 + not-allowed + locked_label
             expect(text).toContain('"name": "lock"');
             expect(text).toContain('cursor-not-allowed');
-            // 필수 행에는 required_label 배지도 노출
+            expect(text).toContain('mypage.privacy.locked_label');
+            // 필수 행 라벨 옆 required_label 배지도 유지
             expect(text).toContain('mypage.privacy.required_label');
         });
 
         /**
          * @scenario entry=reject, subject=member, category=optional
-         * @effects mypage_optional_shows_on_off_toggle
+         * @effects mypage_optional_consented_shows_revoke_button
          */
-        it('선택형 켜짐(is_consented) — 녹색 토글 + 「켜짐」 라벨, 클릭 시 철회 확인 모달', () => {
+        it('선택형 동의함 — 철회 버튼, 클릭 시 철회 확인 모달 (즉시 철회 아님)', () => {
             const text = serializeForSearch(section);
-            expect(text).toContain('consent?.is_consented === true');
-            expect(text).toContain('mypage.privacy.toggle_on');
-            // 켜짐 토글은 녹색
-            expect(text).toContain('bg-green-500');
-            // 클릭 시 철회 확인 모달 오픈 (즉시 철회 아님 — 오조작 방지)
+            expect(text).toContain('consent?.is_required !== true && consent?.is_consented === true');
+            expect(text).toContain('mypage.privacy.revoke');
+            // 클릭 시 철회 확인 모달 오픈 + 대상 키를 global 로 세팅
             expect(text).toContain('"target": "revoke_confirm_modal"');
+            expect(text).toContain('"revokeTargetKey"');
         });
 
-        it('선택형 꺼짐(!is_consented) — 회색 토글 + 「꺼짐」 라벨, 클릭 시 즉시 grant', () => {
+        /**
+         * @scenario entry=reject, subject=member, category=optional
+         * @effects mypage_optional_unset_shows_grant_button
+         */
+        it('선택형 거부함/미설정 — 동의 버튼, 클릭 시 동의 확인 모달 (즉시 grant 아님)', () => {
             const text = serializeForSearch(section);
-            expect(text).toContain('consent?.is_consented !== true');
-            expect(text).toContain('mypage.privacy.toggle_off');
-            // 꺼짐 토글은 회색
-            expect(text).toContain('bg-gray-300');
-            // 클릭 시 POST /consent/grant
-            expect(text).toContain('"target": "/api/plugins/sirsoft-gdpr/consent/grant"');
+            expect(text).toContain('consent?.is_required !== true && consent?.is_consented !== true');
+            expect(text).toContain('mypage.privacy.grant');
+            // 토글 즉시 grant 가 아니라 동의 확인 모달 경유 (grant_confirm_modal)
+            expect(text).toContain('"target": "grant_confirm_modal"');
+            expect(text).toContain('grantTargetKey');
         });
 
-        it('grant onSuccess 에서 refetch + syncConsent + 토스트 호출', () => {
-            // 회귀 가드: 꺼짐→켜짐 시 interceptor functionalConsented 즉시 갱신 (동의 즉시성).
+        it('이슈 #430 (3안) — 상태 배지는 라벨 줄에, 날짜 줄은 날짜+동의 순서 (배지↔날짜 동의 중복 제거)', () => {
             const text = serializeForSearch(section);
-            expect(text).toContain('"dataSourceId": "gdprMeConsents"');
-            const matches = text.match(/"handler":\s*"sirsoft-gdpr\.syncConsent"/g) ?? [];
-            expect(matches.length).toBeGreaterThanOrEqual(1);
+            // 배지가 라벨 옆 flex-wrap 줄에 위치 (라벨 label_suffix 와 같은 컨테이너)
+            expect(text).toContain('items-center gap-2 flex-wrap');
+            expect(text).toContain('consent?.status_badge_label');
+            // 날짜 줄은 날짜가 먼저, 그 뒤에 동의 라벨 (동사 중복 회피 — 상태는 배지가 말함)
+            const idxDate = text.indexOf('status_at_formatted');
+            const idxLabelAfter = text.indexOf('status_label', idxDate);
+            expect(idxDate).toBeGreaterThan(-1);
+            expect(idxLabelAfter).toBeGreaterThan(idxDate);
         });
 
-        it('꺼짐 토글에 grantingKey 비교 disabled — 처리 중 중복 클릭 차단', () => {
+        it('「켜짐/꺼짐」 토글 표현 및 스위치 마크업이 부활하지 않는다 (회귀 가드)', () => {
+            // 토글 제거 회귀 가드: user 템플릿 w-11 safelist 붕괴 + '켜짐/꺼짐' 표현 어색함으로 버튼 전환.
             const text = serializeForSearch(section);
-            expect(text).toContain("_local.grantingKey === consent?.consent_key");
+            expect(text).not.toContain('mypage.privacy.toggle_on');
+            expect(text).not.toContain('mypage.privacy.toggle_off');
+            // 스위치 knob 마크업(translate-x-6 / translate-x-1 + rounded-full 스위치 트랙)이 없어야 함
+            expect(text).not.toContain('h-6 w-11');
         });
 
         /**
          * @scenario entry=reject, subject=member, category=optional
          * @effects mypage_enable_all_bar_when_optional_off
          */
-        it('꺼진 선택 항목이 있을 때만 「모두 켜기」 바 노출 + POST /consent/cookie 로 일괄 동의', () => {
+        it('동의 안 한 선택 항목이 있을 때만 「모두 동의」 바 노출 + POST /consent/cookie 로 일괄 동의', () => {
             const text = serializeForSearch(section);
-            // 노출 조건: 선택형(is_required !== true) 중 꺼진(is_consented !== true) 항목 존재
+            // 노출 조건: 선택형(is_required !== true) 중 미동의(is_consented !== true) 항목 존재
             expect(text).toContain("c?.is_required !== true && c?.is_consented !== true");
             expect(text).toContain('mypage.privacy.enable_all');
             expect(text).toContain('mypage.privacy.enable_all_hint');
@@ -350,12 +402,15 @@ describe('extensions/mypage_privacy_tab.json — 마이페이지 GDPR 동의 매
             expect(text).toContain('mypage.privacy.enable_all_success');
         });
 
-        it('제거된 표 배지/버튼 구조가 부활하지 않는다 (회귀 가드)', () => {
-            // 재설계로 상태 배지(bg-amber-100)·철회 빨간 버튼(bg-red-600 버튼)·can_grant/can_revoke 분기가
-            // 토글로 대체됨. can_grant/can_revoke 메타는 서버 Resource 에 남아있으나 레이아웃은 미참조.
+        it('grant/revoke onSuccess 에서 refetch + syncConsent 호출 (동의 즉시성)', () => {
+            // 회귀 가드: 동의/철회 시 interceptor 즉시 갱신 — 모달의 sequence onSuccess 에 syncConsent 존재.
+            const text = serializeForSearch(root);
+            const matches = text.match(/"handler":\s*"sirsoft-gdpr\.syncConsent"/g) ?? [];
+            expect(matches.length).toBeGreaterThanOrEqual(2);
+        });
+
+        it('제거된 amber 갱신 분기 / rejected_label 이 부활하지 않는다 (회귀 가드)', () => {
             const text = serializeForSearch(section);
-            expect(text).not.toContain('consent?.can_revoke === true');
-            expect(text).not.toContain('consent?.can_grant === true');
             expect(text).not.toContain('mypage.privacy.rejected_label');
             expect(text).not.toContain('needs_renewal_this_item');
         });

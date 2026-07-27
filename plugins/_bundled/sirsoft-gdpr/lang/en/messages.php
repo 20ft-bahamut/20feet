@@ -231,6 +231,20 @@ return [
             'consented' => 'Consented',
             'revoked' => 'Revoked',
             'rejected_label' => 'Rejected',
+            // Issue #430 — per-item status verb chosen by the Resource (status_label) from status.
+            'status' => [
+                'granted' => 'Consented',
+                'consented' => 'Consented',
+                'revoked' => 'Revoked',
+                'rejected' => 'Rejected',
+            ],
+            // Issue #430 (button redesign) — status badge text. Resource(status_badge_label).
+            'badge' => [
+                'required' => 'Always on',
+                'consented' => 'Consented',
+                'rejected' => 'Declined',
+                'unset' => 'Not set',
+            ],
             'revoke' => 'Revoke',
             'grant' => 'Consent',
             'grant_again' => 'Consent Again',
