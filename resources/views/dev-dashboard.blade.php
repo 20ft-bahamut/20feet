@@ -683,6 +683,10 @@ if (isset($_GET['ajax_action'])) {
                                         <span>목록 조회</span>
                                         <span class="text-[10px] opacity-60">(language-pack:list)</span>
                                     </button>
+                                    <button onclick="runCommand('language-pack:provision')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium rounded transition-colors">
+                                        <span>프로비저닝</span>
+                                        <span class="text-[10px] opacity-60">(provision)</span>
+                                    </button>
                                     <button onclick="runLanguagePackCommand('install')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors">
                                         <span>설치</span>
                                         <span class="text-[10px] opacity-60">(install)</span>

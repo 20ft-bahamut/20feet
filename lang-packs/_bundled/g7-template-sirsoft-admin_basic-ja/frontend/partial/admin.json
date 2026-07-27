@@ -398,11 +398,13 @@
       "detail": "詳細を表示",
       "cancel": "キャンセル",
       "close": "閉じる",
+      "reinstall": "再インストール",
       "preview_manifest": "マニフェストプレビュー"
     },
     "search_placeholder": "識別子/ベンダー/言語で検索",
     "badge": {
-      "update_available": "アップデート可能"
+      "update_available": "アップデート可能",
+      "files_missing": "ファイルなし"
     },
     "banner": {
       "scoped": "{{scope}} \"{{target}}\" の言語パックのみ表示しています。",

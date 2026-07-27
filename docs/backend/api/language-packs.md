@@ -77,6 +77,8 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 | github_changelog_url | null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
 | bundled_identifier | string | `g7-module-gnuboard7-hello_module-ja` | 대응하는 번들 확장 식별자 (번들 원본 매칭용) |
 | install_blocked_reason | string | `target_not_installed` | 설치가 차단된 사유 (차단 없으면 null) |
+| files_missing | boolean | `false` | 드리프트 여부 — active 로 기록됐으나 설치본 파일이 부재해 런타임에 조용히 ko 로 폴백하는 상태이면 true |
+| bundled_source_available | boolean | `false` | 번들 소스(`lang-packs/_bundled/{identifier}`)가 실재해 재설치로 복구 가능하면 true. 설치 경로(source_type)와 무관하게 소스 실재 여부로 판정 |
 | target_name | string | `게시판` | 대상 확장의 표시 이름 (scope+target_identifier 로 해석) |
 | installed_at | string | `2026-07-03 19:20:23` | installed 일시 |
 | activated_at | string | `2026-07-03 19:20:23` | activated 일시 |
@@ -123,6 +125,8 @@ HTTP/1.1 200
                 "github_changelog_url": null,
                 "bundled_identifier": null,
                 "install_blocked_reason": null,
+                "files_missing": false,
+                "bundled_source_available": false,
                 "target_name": null,
                 "installed_at": null,
                 "activated_at": null,
@@ -161,6 +165,8 @@ HTTP/1.1 200
                 "github_changelog_url": null,
                 "bundled_identifier": null,
                 "install_blocked_reason": null,
+                "files_missing": false,
+                "bundled_source_available": false,
                 "target_name": null,
                 "installed_at": "2026-07-05 10:41:24",
                 "activated_at": "2026-07-05 10:41:24",
