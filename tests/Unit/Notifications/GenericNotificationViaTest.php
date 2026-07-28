@@ -181,6 +181,8 @@ class GenericNotificationViaTest extends TestCase
             });
         $mock->shouldReceive('getAvailableChannels')
             ->andReturn(array_map(static fn (string $id) => ['id' => $id], $availableIds));
+        $mock->shouldReceive('isChannelAvailable')
+            ->andReturnUsing(fn (string $channel) => in_array($channel, $availableIds, true));
         $this->app->instance(NotificationChannelService::class, $mock);
     }
 

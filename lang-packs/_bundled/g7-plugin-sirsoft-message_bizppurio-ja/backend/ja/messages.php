@@ -57,6 +57,7 @@ return [
         'kakao_credentials_missing' => 'カカオ管理API 使用のためにアイディとAPI キーを先に設定してください。',
         'kakao_request_failed' => 'カカオ管理API リクエストに失敗しました。',
         'sender_key_missing' => 'アラートトーク発信プロフィールキーを先に設定してください。',
+        'template_not_sendable' => '送信可能(承認)ステータスではないテンプレートです。(コード: :code)',
     ],
     'send_skipped' => [
         'alimtalk_binding_missing' => 'アラートトークテンプレートが接続されていないため送信をスキップしました。(通知タイプ: :type)',

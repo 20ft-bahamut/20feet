@@ -67,11 +67,13 @@ class GenericNotification extends BaseNotification
         // 대상 채널이 지정된 경우 (template별 발송) — 게스트 게이트 + 확장 토글 + readiness 확인
         if ($this->channel !== null) {
             try {
+                $channelService = app(NotificationChannelService::class);
+
                 // 사용 가능한 채널 목록에 없는 채널은 발송 후보에서 제외한다 (로그도 남기지 않음).
                 // 채널을 제공하던 확장이 비활성/삭제되면 그 채널이 getAvailableChannels() 에서 빠지지만,
                 // 저장된 채널 설정·템플릿은 남아 있어 죽은 채널로 발송·"건너뜀" 로깅이 발생한다. 살아 있지
                 // 않은 채널은 "존재하지 않는 것"으로 취급해 조용히 제외한다(skipped 기록 대상 아님).
-                if (! $this->isChannelAvailable($this->channel)) {
+                if (! $channelService->isChannelAvailable($this->channel)) {
                     return [];
                 }
 
@@ -85,7 +87,6 @@ class GenericNotification extends BaseNotification
                 }
 
                 // 0단계: 확장 단위 채널 전역 활성 여부 확인
-                $channelService = app(NotificationChannelService::class);
                 if (! $channelService->isChannelEnabledForExtension(
                     $this->extensionType,
                     $this->extensionIdentifier,
@@ -136,7 +137,7 @@ class GenericNotification extends BaseNotification
             foreach ($channels as $channel) {
                 // 사용 가능한 채널 목록에 없는 채널(비활성/삭제된 확장이 제공하던 채널)은 로그 없이
                 // 조용히 제외한다 — 죽은 채널을 "건너뜀"으로 기록하지 않는다(채널 지정 경로와 동일 정책).
-                if (! $this->isChannelAvailable($channel)) {
+                if (! $channelService->isChannelAvailable($channel)) {
                     continue;
                 }
 
@@ -205,31 +206,6 @@ class GenericNotification extends BaseNotification
             ]);
 
             return $channels;
-        }
-    }
-
-    /**
-     * 채널이 현재 사용 가능한(살아 있는) 채널 목록에 있는지 확인합니다.
-     *
-     * getAvailableChannels() 는 코어 기본 채널(mail/database)과 활성 확장이 filter 훅으로 추가한
-     * 채널만 담는다. 확장이 비활성/삭제되면 그 채널이 이 목록에서 자동으로 빠지므로, 특정 확장
-     * 이름을 알지 못해도 "죽은 채널"을 판별할 수 있다. 조회 실패 시(부팅 초기 등) 안전측으로 true
-     * 를 반환해 기존 게이트(확장 토글·readiness)가 판정하도록 위임한다.
-     *
-     * @param  string  $channel  채널 식별자
-     * @return bool 사용 가능하면 true
-     */
-    private function isChannelAvailable(string $channel): bool
-    {
-        try {
-            $availableIds = array_column(
-                app(NotificationChannelService::class)->getAvailableChannels(),
-                'id'
-            );
-
-            return in_array($channel, $availableIds, true);
-        } catch (\Throwable $e) {
-            return true;
         }
     }
 
