@@ -755,6 +755,7 @@
                                                                                         "text": "v{{gdprPolicyVersionCurrent?.data?.data?.version ?? '?'}}"
                                                                                     },
                                                                                     {
+                                                                                        "id": "policy_version_current_snapshot_view_button",
                                                                                         "type": "basic",
                                                                                         "name": "Button",
                                                                                         "if": "{{gdprPolicyVersionCurrent?.data?.data?.version}}",

@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import layout from '../../../layouts/admin/plugin_settings.json';
 import publishModal from '../../../layouts/admin/partials/plugin_settings/_policy_version_publish_modal.json';
+import snapshotModal from '../../../layouts/admin/partials/_shared/_policy_version_snapshot_modal.json';
 import { findById, type AnyNode } from './helpers';
 
 describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / auto_blocking_policy)', () => {
@@ -696,5 +697,28 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(names).toContain('Label');
             expect(names.filter((n) => n === 'P')).toHaveLength(2);
         });
+    });
+});
+
+/**
+ * 이슈 #509 체크리스트 12번 회귀 테스트 — 정책 버전 snapshot 모달의 본문 페이지 링크가
+ * `/{{slug}}` 로 조합되어 페이지 모듈(sirsoft-page) 실제 URL 패턴 `/page/{slug}` 와
+ * 불일치, 클릭 시 404 발생하던 결함. 쿠키 배너의 '변경된 정책 본문 보기' 링크와
+ * 동일하게 `/page/{{slug}}` 로 조합되어야 한다.
+ */
+describe('admin/partials/_shared/_policy_version_snapshot_modal.json — 본문 페이지 링크', () => {
+    const layoutJson = JSON.stringify(snapshotModal);
+
+    it('본문 페이지 링크 href 가 /page/{{slug}} 형식으로 조합된다 (페이지 모듈 URL 패턴 일치)', () => {
+        expect(layoutJson).toContain('"href":"/page/{{gdprPolicyVersionSnapshot?.data?.data?.snapshot?.privacy_policy_slug ?? \'\'}}"');
+    });
+
+    it('href 에 /page/ 프리픽스 없이 슬러그만 조합하는 결함 패턴이 없다', () => {
+        expect(layoutJson).not.toContain('"href":"/{{gdprPolicyVersionSnapshot?.data?.data?.snapshot?.privacy_policy_slug}}"');
+    });
+
+    it('본문 페이지 링크는 새 탭(target=_blank) + noopener 로 연다', () => {
+        expect(layoutJson).toContain('"target":"_blank"');
+        expect(layoutJson).toContain('"rel":"noopener"');
     });
 });
