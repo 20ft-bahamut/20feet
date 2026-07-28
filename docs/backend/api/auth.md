@@ -1501,6 +1501,8 @@ HTTP/1.1 200
 | nickname | body | string | 아니오 | max 50 | 닉네임 |
 | email | body | string | 예 | max 255 | 이메일 주소 |
 | password | body | string | 예 | min 8 | 비밀번호 |
+| mobile | body | string | 아니오 | max 20, `숫자 - + ( ) 공백` | 휴대폰번호 (선택) |
+| phone | body | string | 아니오 | max 20, `숫자 - + ( ) 공백` | 전화번호 (선택) |
 | language | body | string | 아니오 | `ko`, `en`, `fr`, `ja` | 언어 코드 |
 | agree_terms | body | string | 아니오 | — | 이용약관 동의 (코어 필수 동의 — accepted 규칙, 미동의 시 가입 거부) |
 | agree_privacy | body | string | 아니오 | — | 개인정보 처리방침 동의 (코어 필수 동의 — accepted 규칙, 미동의 시 가입 거부) |

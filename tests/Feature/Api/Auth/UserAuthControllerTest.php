@@ -404,6 +404,76 @@ class UserAuthControllerTest extends TestCase
     }
 
     /**
+     * 회원가입 시 휴대폰/전화번호가 저장되는지 확인
+     */
+    public function test_register_stores_mobile_and_phone(): void
+    {
+        $response = $this->jsonRequest()->postJson('/api/auth/register', [
+            'name' => '테스트 사용자',
+            'email' => 'contact@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'mobile' => '010-1234-5678',
+            'phone' => '02-123-4567',
+            'agree_terms' => true,
+            'agree_privacy' => true,
+        ]);
+
+        $response->assertStatus(201);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'contact@example.com',
+            'mobile' => '010-1234-5678',
+            'phone' => '02-123-4567',
+        ]);
+    }
+
+    /**
+     * 휴대폰/전화번호는 선택 항목이므로 미입력 시에도 가입에 성공한다
+     */
+    public function test_register_mobile_and_phone_are_optional(): void
+    {
+        $response = $this->jsonRequest()->postJson('/api/auth/register', [
+            'name' => '테스트 사용자',
+            'email' => 'nocontact@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'agree_terms' => true,
+            'agree_privacy' => true,
+        ]);
+
+        $response->assertStatus(201);
+
+        $user = User::where('email', 'nocontact@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertNull($user->mobile);
+        $this->assertNull($user->phone);
+    }
+
+    /**
+     * 휴대폰번호 형식 위반 시 검증 실패(422)
+     */
+    public function test_register_validates_mobile_format(): void
+    {
+        $response = $this->jsonRequest()->postJson('/api/auth/register', [
+            'name' => '테스트 사용자',
+            'email' => 'badmobile@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'mobile' => '휴대폰없음',
+            'agree_terms' => true,
+            'agree_privacy' => true,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['mobile']);
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'badmobile@example.com',
+        ]);
+    }
+
+    /**
      * 회원가입 시 'user' 역할 자동 할당
      */
     public function test_register_assigns_user_role_automatically(): void

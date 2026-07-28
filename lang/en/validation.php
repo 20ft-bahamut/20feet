@@ -781,6 +781,14 @@ return [
         'nickname' => [
             'max' => 'Nickname may not be greater than :max characters.',
         ],
+        'mobile' => [
+            'max' => 'Mobile number may not be greater than :max characters.',
+            'regex' => 'Mobile number may only contain digits and -, +, (), spaces.',
+        ],
+        'phone' => [
+            'max' => 'Phone number may not be greater than :max characters.',
+            'regex' => 'Phone number may only contain digits and -, +, (), spaces.',
+        ],
         'agree_terms' => [
             'accepted' => 'You must agree to the Terms of Service.',
         ],
