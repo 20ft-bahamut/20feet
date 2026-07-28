@@ -592,11 +592,11 @@
                                                             "text": "{{consent?.consent_description ?? ''}}"
                                                         },
                                                         {
-                                                            "comment": "이슈 #430 (3안) — 라벨 아래 이력 줄: '날짜 + 동의'. 상태는 이미 라벨 옆 배지가 말하므로 여기선 시점만 강조. 서버가 동의한 항목만 status_label·status_at_formatted 를 채워 내려주므로(거부/미설정은 null) 둘 다 있을 때만 렌더.",
+                                                            "comment": "이슈 #430 (3안) + #509 16번 — 라벨 아래 이력 줄: '날짜 + 동의/철회'. 동의=초록, 철회=빨강으로 둘 다 강조해 균형을 맞춘다 (배지의 동의함=green-700/green-300, 관리자 「GDPR 동의 이력」의 revoked=red 관례와 동일 톤). 서버가 동의·철회 항목만 status_label·status_at_formatted 를 채워 내려주므로(거부/미설정은 null) 둘 다 있을 때만 렌더.",
                                                             "type": "basic",
                                                             "name": "Div",
                                                             "if": "{{!!consent?.status_label && !!consent?.status_at_formatted}}",
-                                                            "props": { "className": "mt-1.5 text-xs text-gray-400 dark:text-gray-500" },
+                                                            "props": { "className": "mt-1.5 text-xs font-medium {{consent?.status === 'revoked' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}}" },
                                                             "children": [
                                                                 { "type": "basic", "name": "Span", "text": "{{consent?.status_at_formatted ?? ''}}" },
                                                                 { "type": "basic", "name": "Span", "props": { "className": "ml-1" }, "text": "{{consent?.status_label ?? ''}}" }

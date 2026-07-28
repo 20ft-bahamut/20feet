@@ -53,15 +53,22 @@ class GdprUserConsentResource extends BaseApiResource
         } else {
             $status = 'none';
         }
-        // 표시 날짜/라벨은 "동의한 항목만" 노출한다 (PO 결정, 2026-07-20).
-        // 동의 상태(required·consented)만 동의일 + '동의' 라벨을 내려주고,
-        // 거부·철회·미선택은 status_label·status_at_formatted 를 null 로 두어 프론트가 날짜 줄을 렌더하지 않는다.
-        // (거부일·철회일은 사용자 화면 확인 가치가 낮고, 감사 로그·관리자 화면에서 확인 가능)
+        // 표시 날짜/라벨은 "동의한 항목" + "철회 이력이 있는 항목"만 노출한다 (PO 결정, 2026-07-20 / 이슈 #509 16번 갱신).
+        // 동의 상태(required·consented)는 동의일 + '동의' 라벨, 철회(revoked)는 철회일 + '철회' 라벨을 내려준다.
+        // 거부·신규 미선택은 status_label·status_at_formatted 를 null 로 두어 프론트가 날짜 줄을 렌더하지 않는다.
+        // (거부일은 사용자 화면 확인 가치가 낮고, 감사 로그·관리자 화면에서 확인 가능. 철회일은 유저 본인의
+        // 철회권 행사 시점 확인 필요성이 있어 노출 — 이슈 #509 16번)
         $isConsentState = $status === 'required' || $status === 'consented';
-        $statusRawDate = $isConsentState ? $this->consented_at : null;
-        $statusLabel = $isConsentState
-            ? __('sirsoft-gdpr::messages.mypage.privacy.status.granted')
-            : null;
+        $statusRawDate = match (true) {
+            $isConsentState => $this->consented_at,
+            $status === 'revoked' => $this->revoked_at,
+            default => null,
+        };
+        $statusLabel = match (true) {
+            $isConsentState => __('sirsoft-gdpr::messages.mypage.privacy.status.granted'),
+            $status === 'revoked' => __('sirsoft-gdpr::messages.mypage.privacy.status.revoked'),
+            default => null,
+        };
         // 이슈 #430 (버튼 재설계) — 상태 배지 문구. 토글 대신 배지+단일버튼 UI 에서
         // 오른쪽 배지에 노출한다. 철회 이력(revoked)과 신규 미선택(none)은 '미설정'으로 통합.
         $statusBadgeKey = match ($status) {
