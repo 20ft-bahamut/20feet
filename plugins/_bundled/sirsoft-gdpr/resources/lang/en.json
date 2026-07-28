@@ -88,7 +88,7 @@
             },
             "banner_enabled": {
                 "label": "Show Cookie Banner",
-                "hint": "When enabled, the cookie banner, pre-consent auto-blocking, and the MyPage consent management card are activated together."
+                "hint": "When enabled, the cookie banner and pre-consent auto-blocking are activated together. The MyPage consent management card is independent of this toggle and always shows for members with consent/withdrawal history."
             },
             "banner_position": {
                 "label": "Banner Position",

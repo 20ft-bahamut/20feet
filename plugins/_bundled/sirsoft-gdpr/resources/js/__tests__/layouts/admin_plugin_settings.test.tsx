@@ -1,3 +1,4 @@
+// e2e:allow 이슈 #509 4번 — banner_enabled 안내 문구/주석 정정만 (레이아웃 구조·핸들러·바인딩 변경 없음, 브라우저 관찰 가능한 동작 변화 없음). Vitest 회귀(위 hint 문자열 검증)로 충분.
 /**
  * GDPR 플러그인 환경설정 레이아웃 구조 검증
  *
@@ -15,6 +16,8 @@ import { describe, it, expect } from 'vitest';
 import layout from '../../../layouts/admin/plugin_settings.json';
 import publishModal from '../../../layouts/admin/partials/plugin_settings/_policy_version_publish_modal.json';
 import snapshotModal from '../../../layouts/admin/partials/_shared/_policy_version_snapshot_modal.json';
+import koLang from '../../../lang/ko.json';
+import enLang from '../../../lang/en.json';
 import { findById, type AnyNode } from './helpers';
 
 describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / auto_blocking_policy)', () => {
@@ -121,7 +124,55 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
         });
     });
 
+    /**
+     * 이슈 #509 체크리스트 4번 회귀 테스트 — 라벨/hint + 컨트롤(Input/Toggle/Select) 2단
+     * 배치 필드가 `section-heading-md`(텍스트 스타일 전용, grid 미정의) 를 컨테이너
+     * className 으로 사용해 col-span-* 자식이 무효화되고 컨트롤이 아래 줄로 밀려나던
+     * 결함. 코드베이스 표준은 `grid-3col-responsive`(grid grid-cols-1 lg:grid-cols-3
+     * gap-4 items-start) — field_privacy_policy_slug 가 원래 이 클래스를 올바르게
+     * 사용하고 있었다 (참조 패턴).
+     */
+    describe('필드 2단 배치 컨테이너 — grid-3col-responsive 사용 (section-heading-md 오용 회귀 가드)', () => {
+        it.each([
+            'field_legal_entity_name',
+            'field_data_storage_location',
+            'field_banner_enabled',
+            'field_banner_position',
+        ])('%s 컨테이너 className 이 grid-3col-responsive 를 포함한다', (fieldId) => {
+            const field = findById(root, fieldId);
+            const className = String((field?.props as { className?: string } | undefined)?.className ?? '');
+            expect(className).toContain('grid-3col-responsive');
+        });
+
+        it('section-heading-md 는 더 이상 필드 2단 배치 컨테이너로 오용되지 않는다 (텍스트 스타일 전용 클래스)', () => {
+            const layoutJson = JSON.stringify(root);
+            expect(layoutJson).not.toContain('"className":"section-heading-md"');
+        });
+    });
+
     describe('card_cookie_banner', () => {
+        /**
+         * 이슈 #509 체크리스트 4번 회귀 테스트 — banner_enabled 안내 문구가 "마이페이지 동의
+         * 관리 카드"까지 이 토글로 일괄 제어되는 것처럼 서술하던 결함. 실제로는 카드가
+         * banner_enabled 와 무관하게 동의/철회 이력 존재 여부로만 판정된다
+         * (mypage_privacy_tab.test.tsx "카드 표시 조건" 참조). 안내 문구를 실제 동작과
+         * 불일치시키지 않도록 ko/en 양쪽 hint 를 고정한다.
+         */
+        it('banner_enabled hint 는 마이페이지 카드가 이 토글과 무관하게 항상 노출됨을 명시한다 (ko/en)', () => {
+            const koHint = (koLang as { settings?: { fields?: { banner_enabled?: { hint?: string } } } }).settings
+                ?.fields?.banner_enabled?.hint ?? '';
+            const enHint = (enLang as { settings?: { fields?: { banner_enabled?: { hint?: string } } } }).settings
+                ?.fields?.banner_enabled?.hint ?? '';
+
+            expect(koHint).toContain('마이페이지');
+            expect(koHint).toContain('무관');
+            expect(koHint).not.toMatch(/마이페이지.*(함께|일괄).*(시작|활성)/);
+
+            expect(enHint).toContain('MyPage');
+            expect(enHint).toContain('independent');
+            expect(enHint).not.toMatch(/MyPage.*activated together/);
+        });
+
         it('banner_enabled (쿠키 배너 노출 단일 토글) / banner_position 포함. auto_blocking_enabled 별도 토글 제거됨', () => {
             const fields = findById(root, 'card_cookie_banner_fields');
             const serialized = JSON.stringify(fields);

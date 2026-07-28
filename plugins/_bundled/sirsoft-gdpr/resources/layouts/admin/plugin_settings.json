@@ -286,7 +286,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -350,7 +350,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -549,7 +549,7 @@
                                                 "name": "Div",
                                                 "comment": "v1.4.0: banner_display_mode Select → banner_enabled Toggle",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -600,7 +600,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -1578,7 +1578,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "if": "{{!_local.form?.banner_enabled}}",
-                                                "comment": "쿠키 배너 노출 (banner_enabled) OFF 시 안내 박스. ON 으로 전환하면 배너 + 자동 차단 + 마이페이지 카드가 일괄 활성됨",
+                                                "comment": "쿠키 배너 노출 (banner_enabled) OFF 시 안내 박스. ON 으로 전환하면 배너 + 자동 차단이 함께 활성됨 (마이페이지 카드는 이 토글과 무관, 항상 노출)",
                                                 "props": {
                                                     "className": "bg-blue-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-l-4 border-l-blue-500 dark:border-l-blue-400 rounded-lg p-4 flex-center gap-2"
                                                 },
