@@ -5,6 +5,7 @@ namespace Plugins\Sirsoft\Gdpr\Http\Controllers\Public;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Api\Base\PublicBaseController;
 use Illuminate\Http\JsonResponse;
+use Plugins\Sirsoft\Gdpr\Concerns\IssuesGuestSessionCookie;
 use Plugins\Sirsoft\Gdpr\Http\Requests\StoreCookieConsentRequest;
 use Plugins\Sirsoft\Gdpr\Services\GdprConsentService;
 
@@ -18,6 +19,8 @@ use Plugins\Sirsoft\Gdpr\Services\GdprConsentService;
  */
 class GdprCookieConsentController extends PublicBaseController
 {
+    use IssuesGuestSessionCookie;
+
     /**
      * GdprCookieConsentController 생성자
      *
@@ -120,17 +123,18 @@ class GdprCookieConsentController extends PublicBaseController
     /**
      * 게스트 세션 ID를 결정합니다.
      *
-     * 클라이언트가 쿠키 또는 헤더로 전달한 session_id가 있으면 사용,
-     * 없으면 Laravel session ID를 fallback으로 사용합니다.
+     * 클라이언트가 쿠키로 전달한 session_id는 서명을 검증한 뒤 신뢰합니다
+     * (위조된 값은 미식별 게스트로 취급). 쿠키가 없으면 Laravel session ID를
+     * fallback으로 사용합니다.
      *
      * @param \Illuminate\Http\Request $request 요청
      * @return string|null
      */
     private function resolveGuestSessionId($request): ?string
     {
-        $cookieValue = $request->cookie('gdpr_session');
-        if (is_string($cookieValue) && $cookieValue !== '') {
-            return substr($cookieValue, 0, 100);
+        $verified = $this->verifyGuestSessionId($request->cookie('gdpr_session'));
+        if ($verified !== null) {
+            return $verified;
         }
 
         try {
@@ -156,6 +160,7 @@ class GdprCookieConsentController extends PublicBaseController
      * 응답에 게스트 세션 쿠키 (gdpr_session) 를 첨부합니다.
      *
      * 1년 유효, path=/, SameSite=Lax. HTTPS 환경에서는 Secure 자동 적용.
+     * 쿠키 값은 HMAC 서명이 붙어 위변조 시 서버가 거부합니다.
      *
      * @param JsonResponse $response 응답
      * @param string $sessionId 발급된 세션 ID
@@ -165,7 +170,7 @@ class GdprCookieConsentController extends PublicBaseController
     {
         $response->cookie(
             'gdpr_session',
-            $sessionId,
+            $this->signGuestSessionId($sessionId),
             60 * 24 * 365,
             '/',
             null,

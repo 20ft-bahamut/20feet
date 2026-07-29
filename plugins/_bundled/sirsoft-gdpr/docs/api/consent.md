@@ -65,7 +65,7 @@ _대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있
 
 <!-- @generated:end -->
 
-**설명** 공개 쿠키 동의 배너에서 방문자가 선택한 카테고리별 동의를 저장합니다. `optional.sanctum` 라우트로 게스트와 회원 모두 호출할 수 있으며, 회원(sanctum 토큰 보유)이면 user_id 기준으로 status를 upsert하고 history를 남기고, 게스트면 session_id 기준으로 history를 기록합니다. 게스트가 처음 호출해 세션 식별자가 없으면 UUID 기반 `gdpr_session` 쿠키(1년, SameSite=Lax)를 응답에 발급해 첨부합니다. 동의 철회 시 실제 쿠키 파기는 이 엔드포인트가 아니라 클라이언트 정리기와 후속 응답의 CookieConsentMiddleware가 담당합니다.
+**설명** 공개 쿠키 동의 배너에서 방문자가 선택한 카테고리별 동의를 저장합니다. `optional.sanctum` 라우트로 게스트와 회원 모두 호출할 수 있으며, 회원(sanctum 토큰 보유)이면 user_id 기준으로 status를 upsert하고 history를 남기고, 게스트면 session_id 기준으로 history를 기록합니다. 게스트가 처음 호출해 세션 식별자가 없으면 UUID에 HMAC-SHA256 서명을 붙인(`{uuid}|{서명}`) `gdpr_session` 쿠키(1년, SameSite=Lax)를 응답에 발급해 첨부합니다 — 서명은 위조 방지 목적이며, 요청으로 들어온 값의 서명이 유효하지 않으면 신원 불명(새 게스트)으로 처리합니다. 동의 철회 시 실제 쿠키 파기는 이 엔드포인트가 아니라 클라이언트 정리기와 후속 응답의 CookieConsentMiddleware가 담당합니다.
 
 
 ### GET /api/plugins/sirsoft-gdpr/consent/cookie/status
