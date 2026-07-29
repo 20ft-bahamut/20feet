@@ -153,7 +153,7 @@
 | 코어 | [docs/backend/api/README.md](docs/backend/api/README.md) | 35 / 291 |
 
 
-### 확장 API 레퍼런스 (11개 확장, 자동 스캔)
+### 확장 API 레퍼런스 (12개 확장, 자동 스캔)
 
 > 각 확장이 소유하는 API 문서 목차. `php artisan api:docgen` 이 생성하며, 이 표는 `{modules,plugins}/_bundled/*/docs/api/README.md` 를 패턴 스캔해 자동 편입된다(확장명 하드코딩 없음).
 
@@ -170,6 +170,7 @@
 | `sirsoft-pay_nhnkcp` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-pay_nhnkcp/docs/api/README.md) | 0 / 0 |
 | `sirsoft-pay_nicepayments` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-pay_nicepayments/docs/api/README.md) | 0 / 0 |
 | `sirsoft-verification_kginicis` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-verification_kginicis/docs/api/README.md) | 1 / 1 |
+| `sirsoft-verification_nhnkcp` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-verification_nhnkcp/docs/api/README.md) | 1 / 1 |
 
 
 <!-- AUTO-GENERATED-END: docs-quick-reference -->
@@ -760,6 +761,8 @@ Controller → Request → Service → RepositoryInterface → Repository → Mo
 절대 금지: DB CASCADE에 의존한 삭제 → Service에서 명시적 삭제 (훅/파일/로깅 보장)
 절대 금지: 로케일 하드코딩 → config('app.supported_locales') 사용
 필수: 마이그레이션 한국어 comment 필수, down() 구현 필수
+필수: FK 컬럼의 ->comment() 는 ->constrained()/->references()/->on() 앞에 둔다 (뒤에 두면 comment 가 컬럼이 아닌 FK 정의에 부착되어 조용히 사라진다)
+필수: 소스 교정만으로는 기설치본이 낫지 않는다 — 마이그레이션은 재실행되지 않으므로 업그레이드 스텝 백필을 함께 작성
 주의: ResponseHelper::success($messageKey, $data) — 메시지가 첫 번째 인수
 ```
 
@@ -806,6 +809,7 @@ BaseApiController (최상위)
 필수: 확장 코드 변경 시 manifest 버전 업 (미변경 시 업데이트 감지 불가)
 필수: 버전 업 시 CHANGELOG.md 기록 — Keep a Changelog 표준 (미기록 시 버전 업 불가)
 필수: StorageInterface 사용 (Storage::disk() 직접 호출 금지)
+필수: ActionDispatcher 에 핸들러를 등록하는 확장은 재등록 진입점을 window 전역에 고정 이름으로 노출 — 모듈 window.__[Name].initModule, 플러그인 window.__[Name].initPlugin (미노출 시 로케일 전환 후 해당 확장 액션이 전부 무반응, 에러·토스트 없음). 진입점은 핸들러 재등록만 수행
 필수: 확장 미들웨어는 getMiddleware() 로 부착 대상(targets) 명시 선언 (self-gate) — SP Kernel 미들웨어 그룹 직접 조작·라우트 파일 자기 미들웨어 FQCN 부착 금지, 무규율 전역 개입 금지
 필수: 코어 레이아웃에 모듈 UI 주입은 layout_extensions만 사용
 필수: 모든 확장 작업은 Artisan 커맨드로 수행

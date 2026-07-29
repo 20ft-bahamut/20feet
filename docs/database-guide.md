@@ -126,6 +126,39 @@ return new class extends Migration
 };
 ```
 
+### 컬럼 comment 와 FK 체인 순서
+
+`->comment()` 는 `->constrained()` / `->references()` / `->on()` **앞**에 둔다. 뒤에 체인하면 comment 가 컬럼이 아니라 외래키 정의에 부착되어 DB 에 방출되지 않는다.
+
+```php
+// ✅ comment 가 컬럼에 부착된다
+$table->foreignId('user_id')
+    ->nullable()
+    ->comment('사용자 ID')
+    ->constrained('users')
+    ->nullOnDelete();
+
+// ❌ comment 가 사라진다 — COLUMN_COMMENT 가 빈 문자열로 생성된다
+$table->foreignId('user_id')
+    ->nullable()
+    ->constrained('users')
+    ->nullOnDelete()
+    ->comment('사용자 ID');
+```
+
+원인은 반환 타입 전이다. `ForeignIdColumnDefinition::constrained()` 는 `$this->references(...)->on(...)` 을 반환하며 이것은 `ColumnDefinition` 이 아니라 `ForeignKeyDefinition` 이다. `ForeignKeyDefinition` 은 `Fluent` 라서 `->comment()` 호출이 예외 없이 통과하지만, 그 값은 외래키 커맨드의 속성으로만 남고 MySQL grammar 의 `compileForeign` 은 comment 를 다루지 않는다. 그래서 **에러도 경고도 없이 조용히 사라진다.**
+
+```sql
+-- 잘못된 순서로 생성된 테이블의 실측 결과
+SELECT COLUMN_NAME, COLUMN_COMMENT FROM information_schema.COLUMNS ...
+g7_menus  name        [메뉴 이름 (다국어 JSON)]
+g7_menus  created_by  []          ← 소스에는 comment 가 적혀 있다
+```
+
+이미 `migrate` 를 마친 설치본은 마이그레이션을 다시 실행하지 않으므로, 소스를 교정해도 기존 DB 의 comment 는 비어 있는 채로 남는다. 소스 교정과 **업그레이드 스텝 백필**을 함께 수행한다. 백필은 comment 가 비어 있을 때만 채워 운영자가 직접 넣은 값을 보존하고, 자료형·NULL 허용·기본값을 현재 스키마에서 읽어 그대로 재적용해 설명 외에는 아무 것도 바꾸지 않는다.
+
+면제: `// audit:allow migration-fk-comment-order <사유>` 인라인 주석 (해당 구문에 부착)
+
 ### 마이그레이션 멱등성
 
 ```
