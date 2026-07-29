@@ -259,7 +259,7 @@
                                                 "type": "basic",
                                                 "name": "H3",
                                                 "props": {
-                                                    "className": "text-error-strong"
+                                                    "className": "section-heading-md"
                                                 },
                                                 "text": "$t:sirsoft-gdpr.settings.section.operator"
                                             },
@@ -502,7 +502,7 @@
                                                         "type": "basic",
                                                         "name": "H3",
                                                         "props": {
-                                                            "className": "text-error-strong"
+                                                            "className": "section-heading-md"
                                                         },
                                                         "text": "$t:sirsoft-gdpr.settings.section.cookie_banner"
                                                     },
@@ -1541,7 +1541,7 @@
                                                         "type": "basic",
                                                         "name": "H3",
                                                         "props": {
-                                                            "className": "text-error-strong"
+                                                            "className": "section-heading-md"
                                                         },
                                                         "text": "$t:sirsoft-gdpr.settings.section.auto_blocking"
                                                     },
@@ -1641,7 +1641,7 @@
                                                                         "type": "basic",
                                                                         "name": "H4",
                                                                         "props": {
-                                                                            "className": "text-error-strong"
+                                                                            "className": "text-sm font-medium text-gray-900 dark:text-white"
                                                                         },
                                                                         "text": "$t:sirsoft-gdpr.settings.fields.blocked_domains.warnings_title"
                                                                     }

@@ -144,9 +144,37 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(className).toContain('grid-3col-responsive');
         });
 
-        it('section-heading-md 는 더 이상 필드 2단 배치 컨테이너로 오용되지 않는다 (텍스트 스타일 전용 클래스)', () => {
-            const layoutJson = JSON.stringify(root);
-            expect(layoutJson).not.toContain('"className":"section-heading-md"');
+        it('section-heading-md 는 필드 2단 배치 컨테이너로 오용되지 않는다 (해당 4개 필드 컨테이너 한정 검증)', () => {
+            // 카드 제목(H3)은 section-heading-md 를 정당하게 사용하므로(카드 제목 색상
+            // 수정 회귀 가드 참조), 전체 레이아웃 문자열이 아니라 필드 컨테이너 4개만 검증한다.
+            for (const fieldId of ['field_legal_entity_name', 'field_data_storage_location', 'field_banner_enabled', 'field_banner_position']) {
+                const field = findById(root, fieldId);
+                const className = String((field?.props as { className?: string } | undefined)?.className ?? '');
+                expect(className).not.toBe('section-heading-md');
+            }
+        });
+    });
+
+    /**
+     * 카드 제목(H3) 색상 회귀 가드 — text-error-strong(에러/경고 전용 시맨틱, red 계열)이
+     * 일반 카드 제목에 오용되어 "운영 주체", "쿠키 동의 배너", "자동 차단 정책" 제목이 빨간색으로
+     * 표시되던 결함. 정상 카드 제목 색상은 section-heading-md(중립 톤).
+     */
+    describe('카드 제목 색상 — text-error-strong 오용 회귀 가드', () => {
+        it.each(['card_operator_header', 'card_cookie_banner_header', 'card_auto_blocking_policy_header'])(
+            '%s 의 H3 제목이 section-heading-md 를 사용한다 (에러 색상 아님)',
+            (headerId) => {
+                const header = findById(root, headerId);
+                const json = JSON.stringify(header);
+                expect(json).toContain('"className":"section-heading-md"');
+                expect(json).not.toContain('text-error-strong');
+            }
+        );
+
+        it('차단 도메인 안내 박스(정보 톤)의 소제목도 에러 색상을 사용하지 않는다', () => {
+            const box = findById(root, 'blocked_domains_warnings_box');
+            const json = JSON.stringify(box);
+            expect(json).not.toContain('text-error-strong');
         });
     });
 
@@ -350,8 +378,10 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(serialized).not.toContain('blocked_domains.preblocker_active');
             expect(serialized).not.toContain('blocked_domains.self_hosted_attr');
             expect(serialized).not.toContain('blocked_domains.static_html_limitation');
-            // 타이틀 강조 — 시맨틱 text-error-strong 로 제목 강조 (#399 시맨틱 통일)
-            expect(serialized).toContain('text-error-strong');
+            // 타이틀 — 안내 박스(정보 톤, circle-info)의 소제목이므로 에러 강조색이 아닌 중립 톤 사용
+            // (text-error-strong 은 에러/경고 전용 시맨틱이며 일반 안내 제목에 오용되던 결함을 바로잡음)
+            expect(serialized).not.toContain('text-error-strong');
+            expect(serialized).toContain('text-gray-900');
             // 옛 badge 키는 lang 과 박스에서 모두 제거됨
             expect(serialized).not.toContain('blocked_domains.warnings_badge');
             // 기존 옛 항목 키 미사용
