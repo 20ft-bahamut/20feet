@@ -3,24 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Contracts\UniqueIdServiceInterface;
 use App\Enums\MenuPermissionType;
 use App\Enums\PermissionType;
 use App\Enums\ScopeType;
 use App\Enums\UserStatus;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use App\Contracts\UniqueIdServiceInterface;
-use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements HasLocalePreference
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
 
     /** @var array<string, array> 활동 로그 추적 필드 */
@@ -31,7 +32,7 @@ class User extends Authenticatable implements HasLocalePreference
         'language' => ['label_key' => 'activity_log.fields.language', 'type' => 'text'],
         'timezone' => ['label_key' => 'activity_log.fields.timezone', 'type' => 'text'],
         'country' => ['label_key' => 'activity_log.fields.country', 'type' => 'text'],
-        'status' => ['label_key' => 'activity_log.fields.status', 'type' => 'enum', 'enum' => \App\Enums\UserStatus::class],
+        'status' => ['label_key' => 'activity_log.fields.status', 'type' => 'enum', 'enum' => UserStatus::class],
         'is_super' => ['label_key' => 'activity_log.fields.is_super', 'type' => 'boolean'],
         'homepage' => ['label_key' => 'activity_log.fields.homepage', 'type' => 'text'],
         'mobile' => ['label_key' => 'activity_log.fields.mobile', 'type' => 'text'],
@@ -108,6 +109,7 @@ class User extends Authenticatable implements HasLocalePreference
         'mobile_verified_at',
         'failed_login_attempts',
         'locked_until',
+        'locked_permanently',
         'last_failed_login_at',
     ];
 
@@ -140,6 +142,7 @@ class User extends Authenticatable implements HasLocalePreference
             'is_super' => 'boolean',
             'failed_login_attempts' => 'integer',
             'locked_until' => 'datetime',
+            'locked_permanently' => 'boolean',
             'last_failed_login_at' => 'datetime',
         ];
     }
@@ -196,7 +199,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * 사용자가 생성한 모듈들과의 관계를 정의합니다.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function modules()
     {
@@ -206,7 +209,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * 사용자가 생성한 플러그인들과의 관계를 정의합니다.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function plugins()
     {
@@ -388,8 +391,8 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * 슈퍼 관리자만 조회합니다.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  Builder  $query
+     * @return Builder
      */
     public function scopeSuperAdmins($query)
     {
@@ -445,7 +448,7 @@ class User extends Authenticatable implements HasLocalePreference
     /**
      * 사용자가 생성한 메뉴들과의 관계를 정의합니다.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function menus()
     {

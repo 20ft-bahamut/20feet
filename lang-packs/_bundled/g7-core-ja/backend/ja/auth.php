@@ -3,6 +3,9 @@
 return [
     'login_success' => 'ログインが成功しました。',
     'login_failed' => '認証に失敗しました。',
+    'two_factor_required' => '認証番号を送信しました。受け取った番号を入力してログインを完了してください。',
+    'two_factor_failed' => '認証番号が正しくないか、有効期限が過ぎています。',
+    'two_factor_invalid_challenge' => '認証リクエストが見つかりません。最初からログインし直してください。',
     'register_success' => '会員登録が成功しました。',
     'register_failed' => '会員登録に失敗しました。',
     'logout_success' => 'ログアウトが成功しました。',
@@ -32,8 +35,11 @@ return [
     'account_withdrawn' => '退会したアカウントです。',
     'account_pending_verification' => '本人認証が完了していないアカウントです。メール認証を完了してください。',
     'account_locked' => 'ログイン試行回数の超過によりアカウントがロックされました。:minutes分後に再度お試しください。',
+    'account_locked_permanently' => 'ログイン試行回数の超過によりアカウントがロックされました。管理者にお問い合わせください。',
+    'account_unlocked' => 'アカウントのロックを解除しました。',
     'reset_token_invalid' => '無効なパスワードリセットトークンです。',
     'reset_token_expired' => 'パスワードリセットトークンが有効期限切れです。再度リクエストしてください。',
     'password_reset_email_sent' => 'パスワードリセットメールが送信されました。',
     'email_send_failed' => 'メール送信に失敗しました。しばらく後に再度お試しください。',
+    'two_factor_delivery_failed' => '認証番号を送信できませんでした。管理者にお問い合わせください。',
 ];

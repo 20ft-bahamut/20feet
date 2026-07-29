@@ -853,6 +853,78 @@ HTTP/1.1 200
 지정한 사용자(경로 파라미터는 UUID 로 바인딩)를 삭제합니다. 슈퍼관리자 계정은 삭제할 수 없으며 시도 시 422(`exceptions.cannot_delete_super_admin`)를 반환한다. 그 외 삭제 실패 시에는 실패 상세 사유가 담긴 422 를, 나머지 오류는 500 을 반환한다. 삭제는 Service 계층에서 관련 데이터 정리와 훅을 거쳐 처리된다.
 
 
+### POST /api/admin/users/{user}/unlock
+
+- **라우트명**: `api.admin.users.unlock`
+- **컨트롤러**: `App\Http\Controllers\Api\Admin\UserController@unlock`
+- **인증/권한**: `auth:sanctum` + `permission:core.users.update`
+
+**요청 파라미터**
+
+| 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
+| --- | --- | --- | --- | --- | --- |
+| user | path | string | 예 | — | 대상 user 의 UUID |
+
+본문 파라미터는 없습니다.
+
+**요청 예시**
+
+```http
+POST /api/admin/users/a234c2b1-cde8-437f-b28b-23323be2b98d/unlock HTTP/1.1
+Host: api.example.com
+Accept: application/json
+Authorization: Bearer {YOUR_TOKEN}
+```
+
+**응답 필드** (`data` 내부)
+
+갱신된 사용자 리소스(`UserResource`)를 반환합니다. 관리자 응답에는 잠금 상태 필드가 포함됩니다.
+
+| 이름 | 타입 | 용도 |
+| --- | --- | --- |
+| is_locked | boolean | 현재 잠금 여부 (영구 잠금이거나 `locked_until` 이 미래) |
+| locked_permanently | boolean | 무기한 잠금 여부 |
+| locked_until | string\|null | 잠금 해제 예정 시각 (영구 잠금이면 null) |
+| failed_login_attempts | integer | 연속 로그인 실패 횟수 |
+
+**응답 예시**
+
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "계정 잠금이 해제되었습니다.",
+    "data": {
+        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+        "is_locked": false,
+        "locked_permanently": false,
+        "locked_until": null,
+        "failed_login_attempts": 0
+    }
+}
+```
+
+**에러 응답**
+
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.users.update`)이 없는 경우 |
+| 404 | Not Found | 해당 UUID 의 사용자가 없는 경우 |
+
+**설명**
+
+로그인 실패 누적으로 잠긴 계정의 잠금을 관리자가 수동으로 해제합니다. 로그인 시도 추적 값
+(`failed_login_attempts` / `locked_until` / `locked_permanently`)을 모두 초기화합니다.
+
+보안 환경설정의 잠금 시간(`security.login_lockout_time`)을 `0`(무한대)으로 두면 계정이 무기한
+잠기며, 이 경우 자동 해제도 성공 로그인도 불가능하므로 **이 엔드포인트가 유일한 복구 경로**입니다.
+해제는 활동 로그(`auth.account_unlocked`)에 기록됩니다.
+
+
 ### GET /api/admin/users/{user}
 <!-- @generated:start:api.admin.users.show -->
 - **라우트명**: `api.admin.users.show`

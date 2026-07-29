@@ -492,6 +492,11 @@ class AdminTemplateAssetControllerTest extends TestCase
      */
     public function test_editor_assets_css_points_to_editor_endpoint(): void
     {
+        // 자산 URL 의 확장자 표기는 사이트 설정(general.asset_url_mode)이 정한다.
+        // 이 테스트가 단언하는 것은 "편집기 전용 엔드포인트인가" 이므로, 설정을 명시해
+        // 개발 사이트가 어느 모드를 쓰든 결과가 달라지지 않게 고정한다.
+        config(['g7_settings.core.general.asset_url_mode' => 'extension']);
+
         $response = $this->withHeaders([
             'Authorization' => "Bearer {$this->adminToken}",
             'Accept' => 'application/json',

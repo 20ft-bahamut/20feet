@@ -20,6 +20,7 @@ return [
         'file_required' => 'ファイルを選択してください。',
         'file_invalid' => '有効なファイルではありません。',
         'file_max' => 'ファイルサイズは :maxMB を超えることができません。',
+        'file_extension_invalid' => '許可されていないファイル形式です。許可形式: :extensions',
         'files_required' => 'ファイルを選択してください。',
         'files_array' => 'ファイル形式が正しくありません。',
         'files_min' => '最低1つ以上のファイルを選択してください。',

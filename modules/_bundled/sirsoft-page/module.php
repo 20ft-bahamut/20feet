@@ -3,6 +3,7 @@
 namespace Modules\Sirsoft\Page;
 
 use App\Extension\AbstractModule;
+use Illuminate\Database\Seeder;
 use Modules\Sirsoft\Page\Database\Seeders\PageSeeder;
 use Modules\Sirsoft\Page\Listeners\ActivityLogDescriptionResolver;
 use Modules\Sirsoft\Page\Listeners\PageActivityLogListener;
@@ -110,7 +111,7 @@ class Module extends AbstractModule
     /**
      * 모듈 설치 시 실행할 시더 목록 반환
      *
-     * @return array<class-string<\Illuminate\Database\Seeder>>
+     * @return array<class-string<Seeder>>
      */
     public function getSeeders(): array
     {
@@ -139,7 +140,11 @@ class Module extends AbstractModule
      */
     public function getStorageDisk(): string
     {
-        return config('sirsoft-page.attachment.disk', 'modules');
+        // 스토리지 디스크는 모듈 환경설정으로 정할 수 없다 — 설정 파일 자체가 이 디스크에 저장되므로
+        // module_setting() 을 여기서 호출하면 설정 로드 → getStorage() → getStorageDisk() → 설정 로드
+        // 무한 재귀가 된다. 기존의 config('sirsoft-page.attachment.disk') 참조도 해당 config 파일이
+        // 존재하지 않아 항상 폴백만 반환했다. 디스크는 코어 filesystems 설정으로 관리한다.
+        return 'modules';
     }
 
     /**

@@ -256,7 +256,8 @@
         "last_login_at": "最後のログイン",
         "ip_address": "IP",
         "country_select": "国を選択",
-        "country_search": "国を検索..."
+        "country_search": "国を検索...",
+        "lock_status": "アカウントロック状態"
       },
       "verification": {
         "method": "本人確認方法",
@@ -338,7 +339,13 @@
         "profile_memo": "プロフィール/メモ",
         "activity_info": "アクティビティ情報",
         "consent_info": "同意履歴"
-      }
+      },
+      "unlock": "ロック解除",
+      "unlock_success": "アカウントのロックを解除しました。",
+      "lock_status": "アカウントロック状態",
+      "locked_permanently_value": "ロック中 (無期限 — 管理者による解除が必要)",
+      "locked_until_value": "ロック中 ({{until}} まで)",
+      "not_locked_value": "正常"
     },
     "bulk_status_change": "ステータス変更"
   },
@@ -1479,7 +1486,16 @@
       "regenerate_key": "キー 再生成",
       "app_key_warning": "キーを変更すると、既存の暗号化されたデータにアクセスできなくなる可能性があります。",
       "allow_internal_outbound_urls": "内部ネットワークアドレス呼び出し許可",
-      "allow_internal_outbound_urls_desc": "外部API連携·スケジュールURL呼び出しなどで、プライベートIPやlocalhostなどの内部アドレスを使用できるようにします。社内サーバーを呼び出す必要がある場合のみ有効にしてください。有効にするとサーバーが内部ネットワークにリクエストを送信できるようになるため、デフォルトは無効です。"
+      "allow_internal_outbound_urls_desc": "外部API連携·スケジュールURL呼び出しなどで、プライベートIPやlocalhostなどの内部アドレスを使用できるようにします。社内サーバーを呼び出す必要がある場合のみ有効にしてください。有効にするとサーバーが内部ネットワークにリクエストを送信できるようになるため、デフォルトは無効です。",
+      "password_min_length": "パスワードの最小文字数",
+      "password_min_length_hint": "会員登録・パスワード変更・再設定に適用されます。ログインには適用されません(既存のパスワードでログインできなくなるのを防ぐため)。",
+      "require_password_special_char": "特殊文字必須",
+      "require_password_special_char_label": "パスワードに特殊文字を必ず含める",
+      "require_password_special_char_hint": "有効にすると、新しく設定するパスワードに特殊文字が少なくとも1つ必要です。",
+      "two_factor_auth": "2段階認証",
+      "two_factor_auth_label": "ログイン時に認証番号をもう一度確認",
+      "two_factor_auth_hint": "有効にすると、パスワード確認後に登録メールへ認証番号を送信し、その番号を入力してログインが完了します。",
+      "ip_throttle_floor_hint": "IP単位のリクエスト制限はこの値の6倍で適用され、1分あたり最低30回は常に保証されます。"
     },
     "identity": {
       "sub_tabs": {

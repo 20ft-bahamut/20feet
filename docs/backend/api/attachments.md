@@ -35,6 +35,8 @@
 | source_identifier | body | string | 아니오 | max 255 | 출처 식별자 |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_validation_rules`).
+>
+> 업로드 가능한 확장자는 환경설정의 허용 형식 목록을 따르며, 확장은 `core.attachment.allowed_extensions` 필터로 목록을 조정할 수 있습니다 (허용 목록이 비어 있으면 확장자를 제한하지 않습니다).
 
 **요청 예시**
 
@@ -112,6 +114,8 @@ example-key
 | source_identifier | body | string | 아니오 | max 255 | 출처 식별자 |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_batch_validation_rules`).
+>
+> 업로드 가능한 확장자는 환경설정의 허용 형식 목록을 따르며, 확장은 `core.attachment.allowed_extensions` 필터로 목록을 조정할 수 있습니다 (허용 목록이 비어 있으면 확장자를 제한하지 않습니다).
 
 **요청 예시**
 

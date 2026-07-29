@@ -67,7 +67,7 @@ return [
         'deduct_exceeds_balance' => '差し引くマイレージが残高を超えています。',
         'below_min_use_amount' => '最小使用金額は:amountポイントです。',
         'invalid_use_unit' => 'マイレージは:unitポイント単位で使用できます。',
-        'exceeds_max_use' => '最大使用限度を超えました。',
+        'exceeds_max_use' => '最大使用限度を超えました。(使用可能な最大::amountポイント)',
         'use_exceeds_balance' => '保有ポイント(:amount点)を超えて使用することはできません。',
         'base_currency_rule_missing' => '基本通貨のマイレージ使用単位が設定されていないため、マイレージを使用できません。',
     ],

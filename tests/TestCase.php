@@ -5,7 +5,9 @@ namespace Tests;
 use App\Contracts\Notifications\ChannelReadinessCheckerInterface;
 use App\Contracts\Repositories\ConfigRepositoryInterface;
 use App\Extension\Testing\ExtensionTestAllowlist;
+use App\Helpers\PermissionHelper;
 use App\Listeners\Identity\EnforceIdentityPolicyListener;
+use App\Support\AssetUrl;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -52,6 +54,12 @@ abstract class TestCase extends BaseTestCase
 
         $this->afterApplicationCreated(function () {
             $this->fakeSettingsDisk();
+            $this->pinEnvironmentDependentSettings();
+
+            // 권한 스코프 캐시는 정적이라 프로세스 전체에 남는다 — 케이스마다 DB 는
+            // 초기화되는데 캐시만 남으면 앞 케이스의 권한 행 상태가 뒤로 새어,
+            // 스코프 검사가 조용히 건너뛰어진다 (개별 통과 / 스위트 실패).
+            PermissionHelper::clearPermissionScopeCache();
         });
 
         if (! self::$staleConnectionsCleaned) {
@@ -83,6 +91,24 @@ abstract class TestCase extends BaseTestCase
     private function fakeSettingsDisk(): void
     {
         Storage::fake('settings');
+    }
+
+    /**
+     * 개발 사이트 설정이 테스트 결과를 좌우하는 항목을 기본값으로 고정합니다.
+     *
+     * 설정 *읽기* 는 부팅 시 `g7_settings.*` Config 로 적재되므로 디스크 페이크보다 앞섭니다
+     * (fakeSettingsDisk 주석 참조). 즉 개발자가 자기 사이트에 어떤 값을 저장해 두었는지가
+     * 그대로 테스트에 흘러듭니다.
+     *
+     * `general.asset_url_mode` 가 그 예다. 개발 사이트를 확장자 없는 모드로 운영하면
+     * 기본 모드를 전제한 테스트(자산 URL 생성·blade 렌더)가 그 환경에서만 무더기로 깨진다.
+     * 실제로 이 환경에서 8건이 그렇게 실패했다.
+     *
+     * 다른 모드를 검증해야 하는 테스트는 `AssetUrl::forceMode()` 로 자기 전제를 명시한다.
+     */
+    private function pinEnvironmentDependentSettings(): void
+    {
+        config(['g7_settings.core.general.asset_url_mode' => AssetUrl::MODE_EXTENSION]);
     }
 
     /**

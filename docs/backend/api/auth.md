@@ -1432,7 +1432,65 @@ Content-Type: application/json
 
 **설명**
 
-일반 사용자 로그인(공개). 관리자 로그인과 달리 `isAdmin()` 검사가 없다. 성공 시 `data.token`(Sanctum Bearer) 과 `data.user` 를 반환하며 `message: auth.login_success`. 계정 잠금 시 `423 auth.account_locked` 를 잠금 해제까지 남은 정보와 함께 반환한다. 프론트 로그인 폼(`partials/auth/_register_form.json` 인접)에서 소비한다.
+일반 사용자 로그인(공개). 관리자 로그인과 달리 `isAdmin()` 검사가 없다. 성공 시 `data.token`(Sanctum Bearer) 과 `data.user` 를 반환하며 `message: auth.login_success`. 계정 잠금 시 `423 auth.account_locked` 를 잠금 해제까지 남은 정보(`errors.locked_until`, `errors.retry_after_seconds`)와 함께 반환한다. 보안 환경설정의 잠금 시간이 `0`(무한대)이면 무기한 잠금이 되어 `423 auth.account_locked_permanently` 와 함께 `errors.permanent=true`, `errors.locked_until=null`, `errors.retry_after_seconds=null` 을 반환하며 `Retry-After` 헤더도 붙지 않는다. 이 경우 해제 수단은 관리자 해제 API(`POST /api/admin/users/{user}/unlock`) 뿐이다. 프론트 로그인 폼(`partials/auth/_register_form.json` 인접)에서 소비한다.
+
+**2단계 인증이 켜져 있는 경우**: 보안 환경설정 `security.two_factor_auth` 가 켜져 있으면 비밀번호가 맞아도 **토큰을 발급하지 않는다**. 대신 `200` 과 함께 `message: auth.two_factor_required` 및 아래 필드를 반환하며, 클라이언트는 `POST /api/auth/login/two-factor` 로 코드를 확인해야 로그인이 완료된다.
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `two_factor_required` | boolean | 항상 `true` — 이 응답이 추가 확인 단계임을 나타낸다 |
+| `challenge_id` | string(uuid) | 확인 단계에 그대로 전달할 challenge 식별자 |
+| `provider_id` | string | 코드를 발송한 본인인증 프로바이더 |
+| `expires_at` | string(ISO8601)\|null | challenge 만료 시각 |
+
+이 응답에는 `data.token` 과 `data.user` 가 없다. 토큰 존재 여부로 로그인 완료를 판정하는 클라이언트는 그대로 동작한다.
+
+
+### POST /api/auth/login/two-factor
+
+- **라우트명**: `api.auth.login.two-factor`
+- **컨트롤러**: `App\Http\Controllers\Api\Auth\AuthController@verifyTwoFactor`
+- **인증/권한**: 공개 (인증 불필요 — 주체는 challenge 가 식별)
+
+**요청 파라미터**
+
+| 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
+| --- | --- | --- | --- | --- | --- |
+| challenge_id | body | uuid | 예 | — | 로그인 응답이 돌려준 challenge 식별자 |
+| code | body | string | 예 | 4~16자 | 사용자가 받은 인증 코드 |
+
+**요청 예시**
+
+```http
+POST /api/auth/login/two-factor HTTP/1.1
+Host: api.example.com
+Accept: application/json
+Content-Type: application/json
+```
+
+```json
+{
+    "challenge_id": "0f8c2b6e-1a2b-4c3d-9e8f-7a6b5c4d3e2f",
+    "code": "135790"
+}
+```
+
+**응답 필드** (`data` 내부)
+
+로그인 성공과 동일하다 — `token`(Sanctum Bearer) · `token_type` · `user`.
+
+**에러 응답**
+
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 401 | Unauthorized | 코드 불일치·만료·시도 횟수 초과, 또는 challenge 가 로그인 용도(`login`)가 아니거나 대상 사용자가 활성 상태가 아닌 경우 (`auth.two_factor_failed`) |
+| 422 | Unprocessable Entity | `challenge_id`/`code` 형식 위반 |
+
+**설명**
+
+비밀번호 단계가 돌려준 challenge 를 확인해 로그인을 완료한다. 로그인과 동일한 요청 제한(`throttle:auth-login`)이 걸려 코드 대입 시도도 함께 억제된다.
+
+challenge 의 `purpose` 가 `login` 인지 먼저 대조한다 — 대조하지 않으면 회원가입·비밀번호 재설정 등 다른 흐름에서 발급된 challenge 로 로그인할 수 있다. 코드 확인에 성공하기 전에는 어떤 경우에도 토큰이 발급되지 않는다.
 
 
 ### POST /api/auth/logout

@@ -3,6 +3,82 @@
 return [
     /*
     |--------------------------------------------------------------------------
+    | 환경설정 입력 한계값
+    |--------------------------------------------------------------------------
+    | 관리자 환경설정 화면의 숫자 입력 경계값(min/max)과 저장 검증 규칙이 공유하는 단일 출처.
+    |
+    | 화면과 규칙이 각자 리터럴을 들면 두 값이 조용히 갈라져 "화면이 허용한 값인데 저장에서
+    | 422" 또는 그 반대가 됩니다. 규칙(SaveSettingsRequest)은 이 값을 읽어 규칙 문자열을
+    | 만들고, 화면은 설정 응답의 `_meta.limits` 로 같은 값을 받아 바인딩합니다.
+    |
+    | 키 이름은 `{카테고리}_{필드}_{min|max}` 로, 설정 키(`upload.max_file_size`)와 1:1 대응합니다.
+    | 카테고리를 접두사로 두는 이유는 `seo.cache_ttl` 과 `advanced.seo_cache_ttl` 처럼 필드명이
+    | 겹치는 조합이 실제로 있기 때문입니다.
+    */
+    'settings_limits' => [
+        // 업로드
+        'upload_max_file_size_min' => 1,
+        'upload_max_file_size_max' => 1024,
+        'upload_image_max_width_min' => 100,
+        'upload_image_max_width_max' => 10000,
+        'upload_image_max_height_min' => 100,
+        'upload_image_max_height_max' => 10000,
+        'upload_image_quality_min' => 1,
+        'upload_image_quality_max' => 100,
+
+        // SEO
+        'seo_og_image_default_width_min' => 0,
+        'seo_og_image_default_width_max' => 8000,
+        'seo_og_image_default_height_min' => 0,
+        'seo_og_image_default_height_max' => 8000,
+        'seo_cache_ttl_min' => 60,
+        'seo_cache_ttl_max' => 86400,
+        'seo_sitemap_cache_ttl_min' => 3600,
+        'seo_sitemap_cache_ttl_max' => 604800,
+        'seo_sitemap_urls_per_file_min' => 1000,
+        'seo_sitemap_urls_per_file_max' => 50000,
+
+        // 보안
+        'security_password_min_length_min' => 6,
+        'security_password_min_length_max' => 64,
+        'security_auth_token_lifetime_min' => 0,
+        'security_auth_token_lifetime_max' => 3600,
+        'security_max_login_attempts_min' => 0,
+        'security_max_login_attempts_max' => 100,
+        'security_login_lockout_time_min' => 0,
+        'security_login_lockout_time_max' => 1440,
+
+        // 고급 (캐시 TTL)
+        'advanced_cache_ttl_min' => 0,
+        'advanced_cache_ttl_max' => 14400,
+        'advanced_seo_sitemap_cache_ttl_min' => 3600,
+        'advanced_seo_sitemap_cache_ttl_max' => 604800,
+
+        // 드라이버
+        'drivers_redis_port_min' => 1,
+        'drivers_redis_port_max' => 65535,
+        'drivers_redis_database_min' => 0,
+        'drivers_redis_database_max' => 15,
+        'drivers_memcached_port_min' => 1,
+        'drivers_memcached_port_max' => 65535,
+        'drivers_session_lifetime_min' => 1,
+        'drivers_session_lifetime_max' => 43200,
+        'drivers_websocket_port_min' => 1,
+        'drivers_websocket_port_max' => 65535,
+        'drivers_websocket_server_port_min' => 1,
+        'drivers_websocket_server_port_max' => 65535,
+        'drivers_log_days_min' => 1,
+        'drivers_log_days_max' => 365,
+
+        // 본인인증
+        'identity_challenge_ttl_minutes_min' => 1,
+        'identity_challenge_ttl_minutes_max' => 1440,
+        'identity_max_attempts_min' => 1,
+        'identity_max_attempts_max' => 20,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | 코어 권한 정의
     |--------------------------------------------------------------------------
     | RolePermissionSeeder 및 CoreUpdateService::syncCoreRolesAndPermissions()에서 사용
