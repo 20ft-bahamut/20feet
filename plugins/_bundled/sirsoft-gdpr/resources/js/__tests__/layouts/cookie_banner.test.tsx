@@ -142,6 +142,16 @@ describe('extensions/cookie_banner.json — 쿠키 동의 배너', () => {
                 expect(shown).toBe(true);
             });
 
+            it('회원이 닫은 뒤 로그아웃하면(게스트로 전환) 배너가 다시 뜬다', () => {
+                // currentUser 가 undefined 로 바뀌므로 식별자는 fallback 'guest' 로 평가된다.
+                // dismissedFor 는 이전 회원 uuid 로 남아있어 'guest' 와 불일치 → 재노출(안전측 동작).
+                const shown = evaluateBannerIf(
+                    { data: { has_consented: false } },
+                    { gdprBannerDismissedFor: 'user-uuid-1', currentUser: undefined }
+                );
+                expect(shown).toBe(true);
+            });
+
             it('서버가 이미 동의 완료(has_consented=true)로 응답하면 dismissedFor 값과 무관하게 배너를 띄우지 않는다', () => {
                 const shown = evaluateBannerIf(
                     { data: { has_consented: true } },

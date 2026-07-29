@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use Plugins\Sirsoft\Gdpr\Concerns\IssuesGuestSessionCookie;
+use Plugins\Sirsoft\Gdpr\Models\GdprUserConsentHistory;
 use Plugins\Sirsoft\Gdpr\Services\GdprConsentService;
 
 /**
@@ -32,11 +33,6 @@ use Plugins\Sirsoft\Gdpr\Services\GdprConsentService;
 class PlaywrightSeedGdprGuestLogin extends Command
 {
     use IssuesGuestSessionCookie;
-
-    /**
-     * 시나리오에서 로그인 폼에 실제로 입력할 고정 비밀번호.
-     */
-    private const MEMBER_PASSWORD = 'e2e-test-password-1234';
 
     protected $signature = 'playwright:seed-gdpr-guest-login
         {--json : 결과를 JSON 으로 출력}';
@@ -72,8 +68,10 @@ class PlaywrightSeedGdprGuestLogin extends Command
         // 배너 자체가 꺼져 있으면 재현이 불가능하므로 명시적으로 켠다.
         $pluginSettings->save('sirsoft-gdpr', ['banner_enabled' => true]);
 
-        // 게스트 세션: 서명된 쿠키 값을 발급하고, 동일 session_id 로 "모두 동의" 이력을 기록한다.
-        $guestSessionId = (string) Str::uuid();
+        // 게스트 세션: 고정 session_id 사용 — 재실행 시 기존 이력을 먼저 삭제해
+        // gdpr_user_consent_histories 가 무한히 누적되지 않도록 한다(멱등성 보장).
+        $guestSessionId = 'e2e-gdpr-guest-login-fixed-session';
+        GdprUserConsentHistory::where('session_id', $guestSessionId)->delete();
         $signedCookieValue = $this->signGuestSessionId($guestSessionId);
         $consentService->updateConsents(
             null,
@@ -82,17 +80,22 @@ class PlaywrightSeedGdprGuestLogin extends Command
             'banner'
         );
 
-        // 로그인 대상 회원: 동의 이력이 전혀 없는 신규 계정.
-        $email = 'e2e-gdpr-guest-login-'.uniqid().'@example.test';
+        // 로그인 대상 회원: 동의 이력이 전혀 없는 신규 계정. 고정 이메일 사용 — 재실행 시
+        // 기존 계정을 먼저 삭제해 계정이 무한히 누적되지 않도록 한다(멱등성 보장).
+        // 비밀번호는 실행마다 무작위 생성 — 고정값이 코드에 남아있으면 실수로 프로덕션 DB
+        // 에서 실행됐을 때 알려진 비밀번호로 로그인 가능한 계정이 남는다.
+        $email = 'e2e-gdpr-guest-login@example.test';
+        User::where('email', $email)->delete();
+        $plainPassword = Str::random(32);
         $member = User::factory()->create([
             'email' => $email,
-            'password' => bcrypt(self::MEMBER_PASSWORD),
+            'password' => bcrypt($plainPassword),
         ]);
 
         $result = [
             'guest_session_cookie_value' => $signedCookieValue,
             'member_email' => $member->email,
-            'member_password' => self::MEMBER_PASSWORD,
+            'member_password' => $plainPassword,
         ];
 
         if ($this->option('json')) {
