@@ -131,6 +131,15 @@ core.permission.update_validation_rules
 core.menu.store_validation_rules
 core.menu.update_validation_rules
 
+# 구 이름에서 표준 이름으로 옮긴 훅 (7.0.6) — 구 이름도 함께 발행되므로 기존 구독은 유지되나,
+# 새로 구독할 때는 표준 이름을 쓴다. 구 이름에 구독자가 있으면 로그에 1회 안내가 남는다.
+core.plugin_settings.update_validation_rules        # 구: core.plugin_settings.update_rules
+core.auth.validate_reset_token_validation_rules     # 구: core.auth.validate_reset_token_rules
+core.auth.verify_password_validation_rules          # 구: core.auth.verify_password_rules
+core.extension.changelog_validation_rules           # 구: core.extension.changelog_rules
+core.search.index_validation_rules                  # 구: core.search.validation_rules
+core.user.upload_avatar_validation_rules            # 구: core.user.upload_avatar_rules
+
 # Layout Extension 훅
 core.layout_extension.before_apply
 core.layout_extension.after_apply

@@ -106,19 +106,16 @@ class UpdatePluginSettingsRequest extends FormRequest
             $rules[$field] = $fieldRules;
         }
 
-        // audit:allow core-formrequest-hook-filter reason: 훅 이름이 표준(`{대상}.{동작}_validation_rules`)과
-        // 어긋난 상태로 이미 공개되어 있다(`core.plugin_settings.update_rules`). 같은 이탈이 코어에
-        // 6개 더 있으며(core.auth.validate_reset_token_rules / core.auth.verify_password_rules /
-        // core.extension.changelog_rules / core.layout.get_validation_messages /
-        // core.search.validation_rules / core.user.upload_avatar_rules), 이름을 바꾸면 이 훅을
-        // 구독 중인 제3자 확장이 조용히 동작을 멈춘다. 일괄 개명은 PO 판단 사항이라 여기서
-        // 단독으로 바꾸지 않는다.
+        // 표준 이름(`core.{대상}.{동작}_validation_rules`)으로 발행하되, 이미 공개돼 구독 중일 수 있는
+        // 구 이름(`core.plugin_settings.update_rules`)도 함께 발행한다 — 구 이름을 구독하는 제3자
+        // 확장이 조용히 멈추지 않도록 한다. 구 이름은 구독자가 있을 때만 1회 경고가 남는다.
         //
         // 3번째 인자로 이번 요청의 입력값을 함께 넘긴다. 확장이 "현재 입력한 모드에 따라
         // 다른 필드를 필수로 만드는" 조건부 규칙을 만들려면 입력값이 필요한데, 그것이 없어
         // 확장이 request() 를 직접 들여다보던 것을 없애기 위함이다.
         // 기존 2인자 구독자는 그대로 동작한다(초과 인자는 무시된다).
-        return HookManager::applyFilters(
+        return HookManager::applyFiltersWithLegacyName(
+            'core.plugin_settings.update_validation_rules',
             'core.plugin_settings.update_rules',
             $rules,
             $identifier,

@@ -31,7 +31,7 @@
 | from_version | query | string | 아니오 | — | 시작 버전 (범위 하한) |
 | to_version | query | string | 아니오 | — | 대상 버전 (범위 상한) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.extension.changelog_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.extension.changelog_validation_rules`).
 
 **요청 예시**
 
@@ -1586,7 +1586,7 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 코어의 버전별 변경사항(CHANGELOG)을 구조화된 배열로 조회합니다. `source`(active/bundled/github)로 어느 위치의 CHANGELOG를 읽을지, `from_version`/`to_version`으로 조회 범위를 지정합니다. `core.settings.read` 권한이 필요하며, 업데이트 안내 화면에서 새 버전에 무엇이 바뀌는지 보여줄 때 사용합니다. 확장은 `core.extension.changelog_rules` 훅으로 파라미터를 확장할 수 있습니다.
+**설명** 코어의 버전별 변경사항(CHANGELOG)을 구조화된 배열로 조회합니다. `source`(active/bundled/github)로 어느 위치의 CHANGELOG를 읽을지, `from_version`/`to_version`으로 조회 범위를 지정합니다. `core.settings.read` 권한이 필요하며, 업데이트 안내 화면에서 새 버전에 무엇이 바뀌는지 보여줄 때 사용합니다. 확장은 `core.extension.changelog_validation_rules` 훅으로 파라미터를 확장할 수 있습니다.
 
 
 ### POST /api/admin/core-update/check

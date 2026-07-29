@@ -29,7 +29,7 @@
 | --- | --- | --- | --- | --- | --- |
 | password | body | string | 예 | — | 비밀번호 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.auth.verify_password_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.auth.verify_password_validation_rules`).
 
 **요청 예시**
 

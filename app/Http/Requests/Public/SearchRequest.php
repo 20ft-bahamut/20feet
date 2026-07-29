@@ -15,6 +15,8 @@ class SearchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -39,7 +41,10 @@ class SearchRequest extends FormRequest
 
         // 모듈/플러그인이 validation rules를 동적으로 추가할 수 있도록 훅 제공
         // 예: sort의 in 규칙, board_slug 등 모듈별 파라미터
-        return HookManager::applyFilters('core.search.validation_rules', $rules, $this);
+        return HookManager::applyFiltersWithLegacyName(
+            'core.search.index_validation_rules',
+            'core.search.validation_rules',
+            $rules, $this);
     }
 
     /**

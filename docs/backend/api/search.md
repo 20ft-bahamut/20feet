@@ -32,10 +32,10 @@
 | sort | query | string | 아니오 | `relevance`, `latest`, `oldest`, `views`, `popular`, `price_asc`, `price_desc` | 정렬 기준 (필드명, `-` 접두 시 내림차순) |
 | page | query | integer | 아니오 | min 1 | 조회할 페이지 번호 (1부터 시작) |
 | per_page | query | integer | 아니오 | min 1, max 100 | 페이지당 항목 수 |
-| board_slug | query | string | 아니오 | max 100 | 검색 범위를 특정 게시판으로 한정 (게시판 모듈이 `core.search.validation_rules` 훅으로 추가하는 파라미터, 해당 slug의 게시판 글만 검색) |
+| board_slug | query | string | 아니오 | max 100 | 검색 범위를 특정 게시판으로 한정 (게시판 모듈이 `core.search.index_validation_rules` 훅으로 추가하는 파라미터, 해당 slug의 게시판 글만 검색) |
 | category_id | query | integer | 아니오 | — | category 식별자 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.search.validation_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.search.index_validation_rules`).
 
 **요청 예시**
 

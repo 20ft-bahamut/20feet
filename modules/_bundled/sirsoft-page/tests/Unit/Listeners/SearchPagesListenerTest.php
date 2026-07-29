@@ -49,7 +49,7 @@ class SearchPagesListenerTest extends ModuleTestCase
         $this->assertCount(3, $hooks);
         $this->assertArrayHasKey('core.search.results', $hooks);
         $this->assertArrayHasKey('core.search.build_response', $hooks);
-        $this->assertArrayHasKey('core.search.validation_rules', $hooks);
+        $this->assertArrayHasKey('core.search.index_validation_rules', $hooks);
     }
 
     /**
