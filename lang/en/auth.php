@@ -4,6 +4,10 @@ return [
     // Authentication related messages
     'login_success' => 'Login successful.',
     'login_failed' => 'Authentication failed.',
+    'two_factor_required' => 'A verification code has been sent. Enter it to finish signing in.',
+    'two_factor_failed' => 'The verification code is incorrect or has expired.',
+    'two_factor_invalid_challenge' => 'Verification request not found. Please sign in again.',
+    'two_factor_delivery_failed' => 'Could not send the verification code. Please contact the administrator.',
     'register_success' => 'Registration successful.',
     'register_failed' => 'Registration failed.',
     'logout_success' => 'Logout successful.',

@@ -4,6 +4,10 @@ return [
     // 인증 관련 메시지
     'login_success' => '로그인이 성공했습니다.',
     'login_failed' => '인증에 실패했습니다.',
+    'two_factor_required' => '인증번호를 보냈습니다. 받은 번호를 입력해 로그인을 완료해주세요.',
+    'two_factor_failed' => '인증번호가 올바르지 않거나 유효시간이 지났습니다.',
+    'two_factor_invalid_challenge' => '인증 요청을 찾을 수 없습니다. 처음부터 다시 로그인해주세요.',
+    'two_factor_delivery_failed' => '인증번호를 보내지 못했습니다. 관리자에게 문의해주세요.',
     'register_success' => '회원가입이 성공했습니다.',
     'register_failed' => '회원가입에 실패했습니다.',
     'logout_success' => '로그아웃이 성공했습니다.',

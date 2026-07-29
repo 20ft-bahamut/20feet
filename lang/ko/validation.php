@@ -763,6 +763,11 @@ return [
 
     // 인증 관련 검증 메시지
     'auth' => [
+        'two_factor' => [
+            'challenge_required' => '인증 요청 정보가 없습니다. 처음부터 다시 로그인해주세요.',
+            'challenge_invalid' => '인증 요청 정보가 올바르지 않습니다.',
+            'code_required' => '인증번호를 입력해주세요.',
+        ],
         'email' => [
             'required' => '이메일은 필수입니다.',
             'email' => '올바른 이메일 형식이 아닙니다.',
@@ -1230,6 +1235,7 @@ return [
         'login_lockout_time' => '로그인 차단 시간',
         'password_min_length' => '비밀번호 최소 길이',
         'require_password_special_char' => '비밀번호 특수문자 필수',
+        'two_factor_auth' => '2단계 인증',
         'allow_internal_outbound_urls' => '내부 네트워크 주소 호출 허용',
         // 고급 설정 (추가)
         'advanced_cache_enabled' => '캐시 사용',

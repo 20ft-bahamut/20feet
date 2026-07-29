@@ -251,6 +251,10 @@ Route::prefix('auth')->group(function () {
     // 로그인 라우트 (세션 생성 필요)
     Route::middleware(['throttle:auth-login', 'start.api.session'])->group(function () {
         Route::post('login', [UserAuthController::class, 'login'])->name('api.auth.login');
+        // 2단계 인증 확인 — 비밀번호 단계가 돌려준 challenge 로만 로그인이 완료된다.
+        // 로그인과 같은 제한을 적용해 코드 대입 시도를 함께 억제한다.
+        Route::post('login/two-factor', [UserAuthController::class, 'verifyTwoFactor'])
+            ->name('api.auth.login.two-factor');
     });
 
     // 공개 인증 라우트 (세션 불필요)

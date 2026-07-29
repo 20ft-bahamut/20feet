@@ -1492,6 +1492,9 @@
       "require_password_special_char": "特殊文字必須",
       "require_password_special_char_label": "パスワードに特殊文字を必ず含める",
       "require_password_special_char_hint": "有効にすると、新しく設定するパスワードに特殊文字が少なくとも1つ必要です。",
+      "two_factor_auth": "2段階認証",
+      "two_factor_auth_label": "ログイン時に認証番号をもう一度確認",
+      "two_factor_auth_hint": "有効にすると、パスワード確認後に登録メールへ認証番号を送信し、その番号を入力してログインが完了します。",
       "ip_throttle_floor_hint": "IP単位のリクエスト制限はこの値の6倍で適用され、1分あたり最低30回は常に保証されます。"
     },
     "identity": {

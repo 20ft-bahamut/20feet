@@ -762,6 +762,11 @@ return [
 
     // Auth validation messages
     'auth' => [
+        'two_factor' => [
+            'challenge_required' => 'Verification request is missing. Please sign in again.',
+            'challenge_invalid' => 'Verification request is not valid.',
+            'code_required' => 'Enter the verification code.',
+        ],
         'email' => [
             'required' => 'Email is required.',
             'email' => 'Please enter a valid email address.',
@@ -1237,6 +1242,7 @@ return [
         'login_lockout_time' => 'login lockout time',
         'password_min_length' => 'minimum password length',
         'require_password_special_char' => 'require special character in password',
+        'two_factor_auth' => 'two-factor authentication',
         'allow_internal_outbound_urls' => 'allow internal outbound URLs',
         // Advanced settings (additional)
         'advanced_cache_enabled' => 'cache',

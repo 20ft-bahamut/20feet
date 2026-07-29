@@ -277,6 +277,7 @@ class SaveSettingsRequest extends FormRequest
                 'max:'.config('core.settings_limits.security_password_min_length_max', 64),
             ],
             'security.require_password_special_char' => ['nullable', 'boolean'],
+            'security.two_factor_auth' => ['nullable', 'boolean'],
             // 신규 설정이므로 미전송(기존 클라이언트)을 허용한다 — 미전송 시 기본값 false 유지
             'security.allow_internal_outbound_urls' => ['nullable', 'boolean'],
 
@@ -876,6 +877,7 @@ class SaveSettingsRequest extends FormRequest
             'security.login_lockout_time' => __('validation.attributes.login_lockout_time'),
             'security.password_min_length' => __('validation.attributes.password_min_length'),
             'security.require_password_special_char' => __('validation.attributes.require_password_special_char'),
+            'security.two_factor_auth' => __('validation.attributes.two_factor_auth'),
             'security.allow_internal_outbound_urls' => __('validation.attributes.allow_internal_outbound_urls'),
             // advanced
             'advanced.cache_enabled' => __('validation.attributes.advanced_cache_enabled'),

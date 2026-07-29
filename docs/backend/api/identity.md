@@ -28,7 +28,7 @@
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | provider_id | query | string | 아니오 | max 64 | provider 식별자 |
-| purpose | query | string | 아니오 | max 64 | 인증 목적 필터 (signup/password_reset/self_update/sensitive_action 또는 모듈 정의 목적) |
+| purpose | query | string | 아니오 | max 64 | 인증 목적 필터 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
 | status | query | string | 아니오 | — | 상태 필터 (해당 상태의 항목만 조회) |
 | channel | query | string | 아니오 | max 16 | 전송 채널 필터 (email 등 — 해당 채널로 시도한 이력만) |
 | origin_type | query | string | 아니오 | — | 인증 트리거 출처 유형 필터 (route/hook/policy/middleware/api/custom/system — IdentityOriginType) |
@@ -66,7 +66,7 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 | --- | --- | --- | --- |
 | id | string | `e6ab6cd6-cdff-46cd-b4c2-b89dfda8745b` | 기본 키 (내부 식별자) |
 | provider_id | string | `inicis` | provider 식별자 (연관 리소스 참조) |
-| purpose | string | `sensitive_action` | 인증 목적 (signup/password_reset/self_update/sensitive_action 또는 모듈 정의 목적) |
+| purpose | string | `sensitive_action` | 인증 목적 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
 | channel | string | `ipin` | 인증에 사용된 전송 채널 (email 등 코어 채널 또는 모듈 provider 자체 식별자) |
 | user_id | integer | `130` | user 식별자 (연관 리소스 참조) |
 | target_hash | string | `d88d36166bbeffc41eb6994e390f4715280c1…` | 인증 대상 해시 (SHA256(email\|phone) — PII 원본 저장 회피) |
@@ -1806,7 +1806,7 @@ Content-Type: application/json
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| purpose | body | string | 예 | max 64 | 인증 목적 (signup/password_reset/self_update/sensitive_action 또는 모듈 정의 목적) |
+| purpose | body | string | 예 | max 64 | 인증 목적 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
 | target | body | array | 아니오 | — | 비로그인 게스트의 인증 대상 (target.email 또는 target.phone — 로그인 사용자는 본인으로 자동 설정) |
 | provider_id | body | string | 아니오 | max 64 | provider 식별자 |
 
@@ -1880,7 +1880,7 @@ _단건 응답: `data` 객체의 필드._
 | id | string | `00484973-8cd3-4a1d-85f2-78361feb6f0d` | 기본 키 (내부 식별자) |
 | status | string | `verified` | requested\|sent\|processing\|verified\|failed\|expired\|cancelled\|policy_violation_logged |
 | provider_id | string | `inicis` | 프로바이더 식별자 (예: g7:core.mail, kcp) |
-| purpose | string | `sensitive_action` | 인증 목적 (signup\|password_reset\|self_update\|sensitive_action\|*module-defined*) — 코어 4종은 App\Enums\IdentityVerificationPurpose enum, 모듈/플러그인은 declaredPurposes 레지스트리 |
+| purpose | string | `sensitive_action` | 인증 목적 (signup\|password_reset\|self_update\|sensitive_action\|login\|*module-defined*) — 코어 5종은 App\Enums\IdentityVerificationPurpose enum, 모듈/플러그인은 declaredPurposes 레지스트리 |
 | render_hint | string | `text_code` | 프론트 렌더 힌트 (text_code\|link\|external_redirect) |
 | expires_at | string | `2026-05-12T18:14:19+00:00` | expires 일시 |
 | attempts | integer | `3` | 시도 횟수 |
@@ -2132,7 +2132,7 @@ Accept: application/json
 | description | string | `신규 가입자의 이메일/전화번호 소유 확인.` | 설명 (다국어 필드는 로케일별 값 객체) |
 | default_provider | string | `g7:core.mail` | 이 목적에 매핑된 기본 프로바이더 ID (요청 시 provider_id 미지정이면 이 값 사용, 미설정 시 null) |
 | allowed_channels | array | `["mail","sms"]` | 이 목적에서 사용 가능한 전송 채널 목록 |
-| source_type | string | `core` | 목적 출처 (core: 코어 기본 4종 / module / plugin — 어느 확장이 선언했는지) |
+| source_type | string | `core` | 목적 출처 (core: 코어 기본 5종 / module / plugin — 어느 확장이 선언했는지) |
 | source_identifier | string | `core` | 출처 식별자 (목적을 선언한 확장의 identifier) |
 
 **응답 예시**
@@ -2195,6 +2195,18 @@ HTTP/1.1 200
             "source_identifier": "core"
         },
         {
+            "id": "login",
+            "label": "로그인 2단계 인증",
+            "description": "2단계 인증을 켰을 때 비밀번호 확인 뒤 한 단계를 더 요구.",
+            "default_provider": "g7:core.mail",
+            "allowed_channels": [
+                "mail",
+                "sms"
+            ],
+            "source_type": "core",
+            "source_identifier": "core"
+        },
+        {
             "id": "checkout_verification",
             "label": "결제 시 본인 확인",
             "description": "결제 진행 전 성인/본인 확인이 필요한 경우 사용됩니다.",
@@ -2217,6 +2229,6 @@ _대표 에러 없음 (공개 조회). 인증·권한 미요구 엔드포인트�
 
 <!-- @generated:end -->
 
-**설명** 등록된 인증 목적(purpose) 목록을 반환합니다. 공개 엔드포인트로 인증이 필요하지 않습니다. `IdentityVerificationManager::getAllPurposes()` 로 코어 기본 4종(signup/password_reset/self_update/sensitive_action) + 활성 모듈/플러그인의 `getIdentityPurposes()` 선언 + `core.identity.purposes` 필터 훅(서드파티 동적 확장) 을 병합하며, 각 항목의 label/description 은 i18n 키·다국어 배열·평문 세 형태를 현재 로케일 문자열로 정규화해 내려줍니다. 각 목적의 기본 프로바이더·허용 채널·출처(source_type/source_identifier) 를 함께 반환하므로, 인증 UI 가 목적별 선택지와 문구를 구성할 때 사용합니다.
+**설명** 등록된 인증 목적(purpose) 목록을 반환합니다. 공개 엔드포인트로 인증이 필요하지 않습니다. `IdentityVerificationManager::getAllPurposes()` 로 코어 기본 5종(signup/password_reset/self_update/sensitive_action/login) + 활성 모듈/플러그인의 `getIdentityPurposes()` 선언 + `core.identity.purposes` 필터 훅(서드파티 동적 확장) 을 병합하며, 각 항목의 label/description 은 i18n 키·다국어 배열·평문 세 형태를 현재 로케일 문자열로 정규화해 내려줍니다. 각 목적의 기본 프로바이더·허용 채널·출처(source_type/source_identifier) 를 함께 반환하므로, 인증 UI 가 목적별 선택지와 문구를 구성할 때 사용합니다.
 
 

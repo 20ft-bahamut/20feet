@@ -215,6 +215,35 @@ class IdentityVerificationService
     }
 
     /**
+     * 지정 purpose 로 검증을 마친 challenge 의 대상 사용자를 반환합니다.
+     *
+     * 로그인 2단계 인증처럼 **아직 인증되지 않은 주체**를 challenge 로만 식별해야 하는 흐름에서
+     * 사용합니다. `getStatus()` 는 challenge id 만 알면 누구나 조회할 수 있는 공개 폴링 경로라
+     * `user_id` 를 싣지 않으므로, 주체 해석은 이 메서드로 분리합니다.
+     *
+     * purpose 를 인자로 받아 대조하는 이유: 다른 용도(가입·비밀번호 재설정)로 발급된 challenge 를
+     * 들고 와 로그인하는 것을 막기 위함입니다.
+     *
+     * @param  string  $challengeId  Challenge UUID
+     * @param  string  $purpose  기대하는 purpose
+     * @return User|null 검증 완료된 대상 사용자 (조건 불일치 시 null)
+     */
+    public function resolveVerifiedUser(string $challengeId, string $purpose): ?User
+    {
+        $log = $this->logRepository->findById($challengeId);
+
+        if (! $log || $log->purpose !== $purpose || $log->verified_at === null) {
+            return null;
+        }
+
+        if ($log->user_id === null) {
+            return null;
+        }
+
+        return $this->userRepository->findById((int) $log->user_id);
+    }
+
+    /**
      * 외부 IDV provider 의 redirect 콜백을 처리합니다.
      *
      * `POST /api/identity/callback/{providerId}` 진입 후 컨트롤러가 호출합니다.

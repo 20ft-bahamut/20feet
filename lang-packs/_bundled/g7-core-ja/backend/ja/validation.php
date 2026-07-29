@@ -692,6 +692,11 @@ return [
         'outside_base_directory' => '基準ディレクトリ外へのアクセスは許可されません。',
     ],
     'auth' => [
+        'two_factor' => [
+            'challenge_required' => '認証リクエスト情報がありません。最初からログインし直してください。',
+            'challenge_invalid' => '認証リクエスト情報が正しくありません。',
+            'code_required' => '認証番号を入力してください。',
+        ],
         'email' => [
             'required' => 'メールアドレスは必須です。',
             'email' => '正しいメールアドレス形式ではありません。',
@@ -1108,6 +1113,7 @@ return [
         'login_lockout_time' => 'ログインブロック時間',
         'password_min_length' => 'パスワード最小長',
         'require_password_special_char' => 'パスワード特殊文字必須',
+        'two_factor_auth' => '2段階認証',
         'allow_internal_outbound_urls' => '内部ネットワークアドレス呼び出しの許可',
         'advanced_cache_enabled' => 'キャッシュの使用',
         'layout_cache_enabled' => 'レイアウトキャッシュの使用',

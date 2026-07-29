@@ -58,4 +58,23 @@ return [
         'jpg', 'jpeg', 'png', 'gif', 'webp',
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip',
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | 이미지 축소
+    |--------------------------------------------------------------------------
+    |
+    | 업로드된 이미지가 이 크기(픽셀)를 넘으면 비율을 유지한 채 축소한다.
+    | 관리자 환경설정의 `upload.image_max_width` / `image_max_height` / `image_quality`
+    | 가 저장되면 그 값으로 대체된다.
+    |
+    | null = 축소하지 않음. 기본값을 null 로 두는 이유는, 이 기능이 도입됐다는 이유만으로
+    | 기존 사이트의 업로드 이미지가 갑자기 줄어들지 않게 하기 위함이다.
+    |
+    | image_quality 는 1~100 이며 JPEG/WebP 에 그대로, PNG 에는 압축 레벨로 환산해 쓴다.
+    |
+    */
+    'image_max_width' => env('ATTACHMENT_IMAGE_MAX_WIDTH'),
+    'image_max_height' => env('ATTACHMENT_IMAGE_MAX_HEIGHT'),
+    'image_quality' => env('ATTACHMENT_IMAGE_QUALITY', 85),
 ];

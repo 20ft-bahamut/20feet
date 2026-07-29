@@ -667,5 +667,13 @@ class SettingsServiceProvider extends ServiceProvider
                 AllowedExtensions::normalize($uploadSettings['allowed_extensions'])
             );
         }
+
+        // 이미지 축소 한계값·품질 — 픽셀/퍼센트라 단위 변환이 없다.
+        // 미설정(빈 값)은 "축소하지 않음" 이므로 그대로 넘겨 ImageResizer 가 판정하게 둔다.
+        foreach (['image_max_width', 'image_max_height', 'image_quality'] as $key) {
+            if (isset($uploadSettings[$key]) && $uploadSettings[$key] !== '') {
+                Config::set("attachment.{$key}", (int) $uploadSettings[$key]);
+            }
+        }
     }
 }

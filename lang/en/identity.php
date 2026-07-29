@@ -65,6 +65,10 @@ return [
             'label' => 'Sensitive Action',
             'description' => 'Re-verify before sensitive actions such as account deletion or admin operations.',
         ],
+        'login' => [
+            'label' => 'Two-Factor Login',
+            'description' => 'Require one more step after the password when two-factor authentication is enabled.',
+        ],
     ],
 
     'channels' => [
