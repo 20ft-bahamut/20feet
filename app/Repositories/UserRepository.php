@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class UserRepository implements UserRepositoryInterface
 {
@@ -294,16 +295,22 @@ class UserRepository implements UserRepositoryInterface
     /**
      * 사용자의 계정을 지정된 분만큼 잠급니다.
      *
+     * `$minutes <= 0` 은 보안 환경설정의 "0 = 무한대" 규약에 따라 영구 잠금으로 처리합니다.
+     * 영구 잠금은 해제 시각이 없으므로 `locked_until` 을 NULL 로 두고
+     * `locked_permanently` 플래그로 상태를 표현합니다 (NULL 은 이미 "잠금 없음" 을 의미).
+     *
      * @param  User  $user  잠글 사용자
-     * @param  int  $minutes  잠금 유지 시간(분)
-     * @return Carbon 잠금 해제 시각
+     * @param  int  $minutes  잠금 유지 시간(분). 0 이하는 무기한
+     * @return Carbon|null 잠금 해제 시각 (영구 잠금은 null)
      */
-    public function lockAccount(User $user, int $minutes): Carbon
+    public function lockAccount(User $user, int $minutes): ?Carbon
     {
-        $lockedUntil = now()->addMinutes(max(1, $minutes));
+        $permanent = $minutes <= 0;
+        $lockedUntil = $permanent ? null : now()->addMinutes($minutes);
 
         $user->forceFill([
             'locked_until' => $lockedUntil,
+            'locked_permanently' => $permanent,
             'failed_login_attempts' => 0,
         ])->save();
 
@@ -321,15 +328,18 @@ class UserRepository implements UserRepositoryInterface
     {
         $needsReset = ($user->failed_login_attempts ?? 0) > 0
             || $user->locked_until !== null
+            || (bool) $user->locked_permanently
             || $user->last_failed_login_at !== null;
 
         if (! $needsReset) {
             return;
         }
 
+        // locked_permanently 를 빠뜨리면 성공 로그인·관리자 해제 후에도 영구 잠금이 잔존한다.
         $user->forceFill([
             'failed_login_attempts' => 0,
             'locked_until' => null,
+            'locked_permanently' => false,
             'last_failed_login_at' => null,
         ])->save();
     }
@@ -342,10 +352,74 @@ class UserRepository implements UserRepositoryInterface
      */
     public function isLocked(User $user): bool
     {
+        // 영구 잠금 판정이 먼저 — 해제 시각이 없으므로 NULL 체크에 먼저 걸리면 안 된다.
+        if ((bool) $user->locked_permanently) {
+            return true;
+        }
+
         if ($user->locked_until === null) {
             return false;
         }
 
         return $user->locked_until->isFuture();
+    }
+
+    /**
+     * UUID 로 사용자를 찾습니다.
+     *
+     * @param  string  $uuid  사용자 UUID
+     * @return User|null 찾은 사용자 모델 또는 null
+     */
+    public function findByUuid(string $uuid): ?User
+    {
+        return User::where('uuid', $uuid)->first();
+    }
+
+    /**
+     * UUID 목록에 해당하는 사용자의 정수 ID 배열을 반환합니다.
+     *
+     * @param  array  $uuids  사용자 UUID 배열
+     * @return array<int, int> 사용자 ID 배열
+     */
+    public function getIdsByUuids(array $uuids): array
+    {
+        if (empty($uuids)) {
+            return [];
+        }
+
+        return User::whereIn('uuid', $uuids)->pluck('id')->all();
+    }
+
+    /**
+     * 사용자 ID 목록의 지정 컬럼을 일괄 갱신합니다.
+     *
+     * @param  array  $ids  사용자 ID 배열
+     * @param  array  $data  갱신할 컬럼 값
+     * @return int 갱신된 행 수
+     */
+    public function updateManyByIds(array $ids, array $data): int
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return User::whereIn('id', $ids)->update($data);
+    }
+
+    /**
+     * 사용자 ID 목록의 인증 토큰을 모두 삭제합니다.
+     *
+     * @param  array  $ids  사용자 ID 배열
+     * @return int 삭제된 토큰 수
+     */
+    public function deleteTokensByUserIds(array $ids): int
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+
+        return PersonalAccessToken::where('tokenable_type', User::class)
+            ->whereIn('tokenable_id', $ids)
+            ->delete();
     }
 }

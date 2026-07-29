@@ -26,6 +26,7 @@ return [
         'type_invalid' => '配送業者タイプは国内(domestic)または国際(international)のみ可能です。',
     ],
     'list' => [
+        'per_page_max' => '一度に取得できる最大件数は:max件です。',
         'page' => [
             'integer' => 'ページ番号は数字である必要があります。',
             'min' => 'ページ番号は1以上である必要があります。',
@@ -218,6 +219,9 @@ return [
     'selling_price_lte_list' => '販売価格は定価より大きくすることはできません。',
     'option_selling_price_lte_list' => 'オプション販売価格は定価より大きくすることはできません。',
     'product' => [
+        'mileage_percent_max' => '定率のマイレージ付与率は100%を超えることはできません。',
+        'selling_price_lte_list' => '販売価格は定価より高くすることはできません。',
+        'price_min' => '価格は0より大きい必要があります。',
         'attributes' => [
             'name' => '商品名',
             'product_code' => '商品コード',
@@ -848,13 +852,14 @@ return [
         ],
     ],
     'cart' => [
+        'quantity_limit_exceeded' => 'カートには商品ごとに最大:limit個まで追加できます。(リクエスト: :attempted個)',
         'product_id_required' => '商品を選択してください。',
         'product_not_found' => '存在しない商品です。',
         'option_id_required' => 'オプションを選択してください。',
         'option_not_found' => '存在しないオプションです。',
         'quantity_required' => '数量を入力してください。',
         'quantity_min' => '数量は1個以上である必要があります。',
-        'quantity_max' => '数量は最大9,999個まで可能です。',
+        'quantity_max' => '数量は最大:max個まで可能です。',
         'ids_required' => '削除する商品を選択してください。',
         'ids_array' => '商品IDは配列形式である必要があります。',
         'ids_min' => '最低1つ以上の商品を選択してください。',

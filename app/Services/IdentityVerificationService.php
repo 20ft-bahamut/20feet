@@ -182,6 +182,7 @@ class IdentityVerificationService
      *
      * @param  string  $challengeId  Challenge UUID
      * @return array<string, mixed>|null 공개 상태 또는 null (없는 경우)
+     *
      * @since engine-v1.46.0
      */
     public function getStatus(string $challengeId): ?array
@@ -205,7 +206,9 @@ class IdentityVerificationService
             'purpose' => $log->purpose,
             'render_hint' => $log->render_hint,
             'expires_at' => optional($log->expires_at)->toIso8601String(),
-            'attempts' => (int) $log->attempts,
+            // 시도 횟수(attempts)는 공개 폴링 응답에 싣지 않는다 — challenge id 만 알면 누구나
+            // 조회할 수 있는 경로라, 남의 인증 시도가 몇 번 실패했는지가 그대로 드러난다.
+            // 화면의 '남은 시도 횟수' 는 모달이 자기 시도를 세어 표시하므로 영향이 없다.
             'max_attempts' => (int) $log->max_attempts,
             'public_payload' => $publicPayload,
         ];
@@ -222,6 +225,7 @@ class IdentityVerificationService
      * @param  array<string, mixed>  $input  provider 가 보낸 페이로드 (code/token/state 등)
      * @param  array<string, mixed>  $context  origin 정보 (origin_type=callback)
      * @return VerificationResult provider 의 검증 결과 (challenge mismatch 시 failure)
+     *
      * @since engine-v1.46.0
      */
     public function handleProviderCallback(string $providerId, string $challengeId, array $input, array $context = []): VerificationResult

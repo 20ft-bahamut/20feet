@@ -707,6 +707,8 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'check.user_status', 'admin'
         Route::get('{user}', [AdminUserController::class, 'show'])->middleware('permission:admin,core.users.read')->name('api.admin.users.show');
         Route::put('{user}', [AdminUserController::class, 'update'])->middleware('permission:admin,core.users.update')->name('api.admin.users.update');
         Route::delete('{user}', [AdminUserController::class, 'destroy'])->middleware('permission:admin,core.users.delete')->name('api.admin.users.destroy');
+        // 계정 잠금 해제 — 영구 잠금(무한대) 계정의 유일한 복구 경로
+        Route::post('{user}/unlock', [AdminUserController::class, 'unlock'])->middleware('permission:admin,core.users.update')->name('api.admin.users.unlock');
     });
 
     // 스케줄 관리

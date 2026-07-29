@@ -38,6 +38,7 @@ return [
         'logout' => '로그아웃',
         'login_failed' => '로그인 실패',
         'account_locked' => '계정 잠금',
+        'account_unlocked' => '계정 잠금 해제',
         'request' => '요청',
         'expired' => '만료',
         'verify' => '본인인증',
@@ -148,6 +149,8 @@ return [
         'auth_record_consents' => '이용약관 동의 기록',
         'auth_login_failed' => '로그인 실패 (:email)',
         'auth_account_locked' => '계정 잠금 (:attempts회 실패, :minutes분 차단)',
+        'auth_account_locked_permanently' => '계정 영구 잠금 (:attempts회 실패, 관리자 해제 필요)',
+        'auth_account_unlocked' => '계정 잠금 해제 (:email)',
 
         // 스케줄 관리
         'schedule_index' => '스케줄 목록 조회',

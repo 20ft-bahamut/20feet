@@ -7,6 +7,7 @@ use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Enums\AttachmentSourceType;
 use App\Extension\HookManager;
 use App\Models\Attachment;
+use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
@@ -58,8 +59,11 @@ class AttachmentService
         // 필터 훅 - 파일 데이터 변형 (압축, 리사이즈 등 확장 포인트)
         $file = HookManager::applyFilters('core.attachment.filter_upload_file', $file);
 
-        // 저장 경로 생성 (날짜별 디렉토리)
-        $storedFilename = Str::uuid().'.'.$file->getClientOriginalExtension();
+        // 저장 경로 생성 (날짜별 디렉토리).
+        // 확장자는 클라이언트가 보낸 파일명이 아니라 MIME 추론값을 우선 사용한다 —
+        // 파일명 확장자는 사용자가 임의로 바꿀 수 있어 저장 확장자의 근거가 될 수 없다.
+        $extension = strtolower($file->extension() ?: $file->getClientOriginalExtension());
+        $storedFilename = Str::uuid().($extension !== '' ? '.'.$extension : '');
         $datePath = date('Y/m/d');
         $path = "{$datePath}/{$storedFilename}";
 
@@ -217,7 +221,7 @@ class AttachmentService
      * 기능 레벨 권한 체크 (permission_hooks) - 다운로드 기능 자체에 대한 접근 권한
      *
      * @param  string  $hash  첨부파일 해시
-     * @param  \App\Models\User|null  $user  요청한 사용자 (null이면 비로그인)
+     * @param  User|null  $user  요청한 사용자 (null이면 비로그인)
      * @return StreamedResponse|null 다운로드 응답 또는 null
      *
      * @throws AuthorizationException 기능 레벨 권한이 없는 경우
@@ -263,7 +267,7 @@ class AttachmentService
      * 컨트롤러에서 fileResponse()로 캐싱 헤더와 함께 응답할 수 있습니다.
      *
      * @param  string  $hash  첨부파일 해시
-     * @param  \App\Models\User|null  $user  요청한 사용자 (null이면 비로그인)
+     * @param  User|null  $user  요청한 사용자 (null이면 비로그인)
      * @return array{path: string, mime_type: string, filename: string}|null 파일 정보 또는 null
      *
      * @throws AuthorizationException 기능 레벨 권한이 없는 경우

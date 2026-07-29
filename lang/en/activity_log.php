@@ -38,6 +38,7 @@ return [
         'logout' => 'Logout',
         'login_failed' => 'Login failed',
         'account_locked' => 'Account locked',
+        'account_unlocked' => 'Account unlocked',
         'request' => 'Request',
         'expired' => 'Expired',
         'verify' => 'Identity verified',
@@ -148,6 +149,8 @@ return [
         'auth_record_consents' => 'Consent recorded',
         'auth_login_failed' => 'Login failed (:email)',
         'auth_account_locked' => 'Account locked (:attempts attempts, :minutes min lockout)',
+        'auth_account_locked_permanently' => 'Account locked permanently (:attempts attempts, administrator unlock required)',
+        'auth_account_unlocked' => 'Account unlocked (:email)',
 
         // Schedule management
         'schedule_index' => 'Schedule list viewed',

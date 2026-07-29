@@ -30,6 +30,7 @@ use App\Extension\Helpers\GithubHelper;
 use App\Extension\Helpers\IdentityMessageSyncHelper;
 use App\Extension\Helpers\IdentityPolicySyncHelper;
 use App\Extension\Helpers\NotificationSyncHelper;
+use App\Extension\Testing\ExtensionTestAllowlist;
 use App\Extension\Vendor\Exceptions\VendorInstallException;
 use App\Extension\Vendor\VendorInstallContext;
 use App\Extension\Vendor\VendorInstallResult;
@@ -2993,6 +2994,13 @@ class ModuleManager implements ModuleManagerInterface
             return;
         }
 
+        // 테스트 allowlist 확인 — allowlist 밖 모듈은 ServiceProvider 가 등록되지 않으므로
+        // 리스너만 등록하면 훅 발화 시 Repository 바인딩이 없어 컨테이너 해석이 실패한다.
+        // (모듈 등록 행은 테스트 프로세스 간 DB 에 남을 수 있어 활성 판정만으로는 부족하다)
+        if (ExtensionTestAllowlist::isActive() && ! ExtensionTestAllowlist::isAllowed('module', $module->getIdentifier())) {
+            return;
+        }
+
         // 모듈 활성화 상태 확인 (비활성화된 모듈의 훅은 등록하지 않음)
         $activeIdentifiers = self::getActiveModuleIdentifiers();
         if (! in_array($module->getIdentifier(), $activeIdentifiers, true)) {
@@ -4545,6 +4553,11 @@ class ModuleManager implements ModuleManagerInterface
                 'status' => $previousStatus,
                 'updated_at' => now(),
             ]);
+
+            // 상태 캐시 무효화 (성공 경로와 동일) — updating 창에서 누군가 활성 목록을 읽었다면
+            // 그 목록에는 이 모듈이 빠져 있다. 여기서 비우지 않으면 상태를 되돌려 놓고도
+            // 캐시 TTL(기본 하루) 동안 이 모듈의 화면이 계속 404 로 남는다.
+            self::invalidateModuleStatusCache();
 
             throw new \RuntimeException(
                 __('modules.errors.update_failed', [

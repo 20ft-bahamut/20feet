@@ -4,6 +4,7 @@ namespace App\Http\Requests\Auth;
 
 use App\Extension\HookManager;
 use App\Models\User;
+use App\Rules\PasswordPolicy;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -31,7 +32,7 @@ class RegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:50',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)],
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'string', 'confirmed', PasswordPolicy::rule()],
             'mobile' => ['nullable', 'string', 'max:20', 'regex:/^[0-9\-\+\(\)\s]+$/'],
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9\-\+\(\)\s]+$/'],
             'language' => 'nullable|string|in:'.implode(',', config('app.supported_locales', ['ko', 'en'])),

@@ -99,7 +99,11 @@ class AuthService
         if ((bool) g7_core_settings('security.login_attempt_enabled', true)) {
             $candidate = $this->userRepository->findByEmail($email);
             if ($candidate !== null && $this->userRepository->isLocked($candidate)) {
-                $remaining = max(1, (int) ceil(now()->diffInSeconds($candidate->locked_until, false) / 60));
+                // 영구 잠금은 해제 시각이 없다 — diffInSeconds(null) 로 폭발하지 않도록 분기.
+                $remaining = $candidate->locked_until === null
+                    ? null
+                    : max(1, (int) ceil(now()->diffInSeconds($candidate->locked_until, false) / 60));
+
                 throw new AccountLockedException(
                     lockedUntil: $candidate->locked_until,
                     remainingMinutes: $remaining,

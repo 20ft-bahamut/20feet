@@ -27,7 +27,7 @@
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| file | body | file | 예 | max 10240 | 업로드 파일 |
+| file | body | file | 예 | max: 첨부 최대 용량 설정(MB→KB 환산, 기본 10MB) · mimetypes: 허용 형식 설정 | 업로드 파일 (용량·형식 모두 페이지 모듈 환경설정이 SSoT) |
 | page_id | body | integer | 아니오 | min 1 | page 식별자 |
 | collection | body | string | 아니오 | max 100 | 첨부 컬렉션 그룹명 (첨부를 용도별로 묶는 키, 미지정 시 default) |
 | temp_key | body | string | 아니오 | max 64 | 저장 전 임시 귀속 키. 아직 저장되지 않은 페이지의 첨부를 임시로 묶어 두고, 이후 페이지 저장 시 이 키로 확정 귀속합니다 (`page_id` 미지정 시 사용) |
@@ -79,7 +79,9 @@ Content-Disposition: form-data; name="temp_key"
 
 <!-- @generated:end -->
 
-**설명** 페이지 첨부파일을 업로드합니다(최대 10MB). `file`(필수)과 함께 이미 저장된 페이지에 귀속시키려면 `page_id`, 아직 저장 전이면 `temp_key`(임시 귀속 후 페이지 저장 시 `store`/`update` 의 `temp_key` 로 확정)를 보냅니다. `collection` 으로 첨부 그룹을 구분합니다. 응답은 FileUploader 컴포넌트 규약(`data.data`)에 맞춰 `PageAttachmentResource` 를 201 로 반환합니다. 권한은 `pages.create` 를 요구합니다.
+**설명** 페이지 첨부파일을 업로드합니다. `file`(필수)과 함께 이미 저장된 페이지에 귀속시키려면 `page_id`, 아직 저장 전이면 `temp_key`(임시 귀속 후 페이지 저장 시 `store`/`update` 의 `temp_key` 로 확정)를 보냅니다. `collection` 으로 첨부 그룹을 구분합니다. 응답은 FileUploader 컴포넌트 규약(`data.data`)에 맞춰 `PageAttachmentResource` 를 201 로 반환합니다. 권한은 `pages.create` 를 요구합니다.
+
+업로드 정책(최대 개수 · 최대 용량 · 허용 형식)은 모듈 환경설정 `attachment.*` 가 SSoT 입니다. 용량은 `attachment.max_size_mb`(MB), 형식은 `attachment.allowed_types`(MIME 목록)로 판정하며, 형식 목록을 비우면 형식을 제한하지 않습니다(설정 키 자체가 없으면 모듈 기본 목록으로 폴백). 개수는 `attachment.max_count` 를 기준으로 **직접 업로드 · 임시 업로드(`temp_key`) 연결 · 이미 연결된 첨부** 를 합산해 판정하며, 초과 시 `422`(`errors.code = attachment_limit_exceeded`)를 반환합니다. 이 판정은 업로드 엔드포인트뿐 아니라 페이지 생성·수정 저장 시점에도 동일하게 적용됩니다. `max_count` 가 0 이면 개수를 제한하지 않습니다.
 
 
 ### PATCH /api/modules/sirsoft-page/admin/attachments/reorder

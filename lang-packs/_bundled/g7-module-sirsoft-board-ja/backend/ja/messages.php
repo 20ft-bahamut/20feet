@@ -176,6 +176,7 @@ return [
         'table_creation_failed' => '掲示板テーブルの作成に失敗しました (:table)：:error',
         'category_in_use' => ':category カテゴリーは :count個の投稿で使用中です。',
         'board_not_found' => '掲示板が見つかりません。',
+        'attachment_limit_exceeded' => '添付ファイルは最大:limit個まで登録できます。(リクエスト: :attempted個)',
         'post_not_found' => '投稿が見つかりません。',
         'permission_denied' => '権限がありません。',
         'validation_failed' => '入力値が正しくありません。',
