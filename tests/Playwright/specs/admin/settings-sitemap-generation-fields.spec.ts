@@ -16,6 +16,13 @@
  */
 import { test, expect, issueToken, authenticatePage } from '../../fixtures/auth';
 
+// 이 파일의 테스트 다수가 **같은 관리자 설정 화면에 실제로 저장**한다(SEO 탭 sitemap 설정).
+// 전역 `fullyParallel: true` 아래서는 같은 파일 안 테스트도 워커에 흩어져 동시 실행되고, 서로의
+// 저장 상태를 덮어써 간헐 실패한다(실측: admin 디렉토리 병렬 실행에서 "분할 기준 저장" 30초 타임아웃).
+// `mode: 'default'` 는 이 파일만 단일 워커 순차 실행으로 되돌린다 — `serial` 과 달리 앞 테스트가
+// 실패해도 뒤 테스트를 건너뛰지 않는다.
+test.describe.configure({ mode: 'default' });
+
 const URLS_PER_FILE = '#field_sitemap_urls_per_file';
 const GZIP_ROW = '#field_sitemap_gzip';
 const HREFLANG_ROW = '#field_sitemap_hreflang_enabled';
@@ -213,7 +220,17 @@ test('#481 - "지금 생성" 클릭이 큐에 예약되고 진행상황이 화�
   );
 
   const startedAt = Date.now();
-  await page.locator('#sitemap_last_updated_block button').first().click();
+  // 재생성 버튼은 진행 중(queued/running/writing)이면 disabled 다.
+  // 재생성은 큐로 위임되므로 **큐 워커가 돌지 않는 환경**에서는 상태가 `queued` 로 멈춰
+  // 버튼이 영원히 disabled 다(진행상황 캐시 TTL 1시간). 코드 결함이 아니라 실행 환경
+  // 전제이므로, 그런 환경에서는 이 테스트를 건너뛴다.
+  const regenerateButton = page.locator('#sitemap_last_updated_block button').first();
+  const clickable = await regenerateButton
+    .waitFor({ state: 'attached', timeout: 10_000 })
+    .then(() => regenerateButton.isEnabled())
+    .catch(() => false);
+  test.skip(!clickable, '이전 sitemap 재생성이 queued 로 남아 있다 — 큐 워커 미가동 환경');
+  await regenerateButton.click();
   const response = await regenerate;
   const elapsed = Date.now() - startedAt;
 
@@ -278,7 +295,17 @@ test('#481 - 재생성 후 실시간/폴링 모드에 맞게 진행상황이 갱
 
   // 여기부터 재생성 이후의 폴링만 센다
   statusGets = 0;
-  await page.locator('#sitemap_last_updated_block button').first().click();
+  // 재생성 버튼은 진행 중(queued/running/writing)이면 disabled 다.
+  // 재생성은 큐로 위임되므로 **큐 워커가 돌지 않는 환경**에서는 상태가 `queued` 로 멈춰
+  // 버튼이 영원히 disabled 다(진행상황 캐시 TTL 1시간). 코드 결함이 아니라 실행 환경
+  // 전제이므로, 그런 환경에서는 이 테스트를 건너뛴다.
+  const regenerateButton = page.locator('#sitemap_last_updated_block button').first();
+  const clickable = await regenerateButton
+    .waitFor({ state: 'attached', timeout: 10_000 })
+    .then(() => regenerateButton.isEnabled())
+    .catch(() => false);
+  test.skip(!clickable, '이전 sitemap 재생성이 queued 로 남아 있다 — 큐 워커 미가동 환경');
+  await regenerateButton.click();
   await page.waitForResponse((r) => r.url().includes('/api/admin/seo/sitemap/regenerate'), { timeout: 20_000 });
 
   const pollingMode = realtimeEnabled === false;
@@ -298,32 +325,116 @@ test('#481 - 재생성 후 실시간/폴링 모드에 맞게 진행상황이 갱
 
 // @scenario tab=seo, transition_overlay=wait_for
 // @effects sitemap_status_awaited_before_reveal
+//
+// 측정 방식 정정 (2026-07-30 실측):
+//
+//   이 테스트는 원래 "`#sitemap_last_updated_block` 이 보이는 시점 = 오버레이가 걷힌 시점" 을
+//   전제로 블록 가시성 시각을 쟀다. 그 전제가 틀렸다 — 전환 오버레이는 타겟 **안에**
+//   `#g7-skeleton-overlay` 를 덧붙이는 방식이고 기존 콘텐츠는 DOM 에 그대로 남는데,
+//   Playwright 의 `toBeVisible()` 은 가림(occlusion)을 보지 않으므로 덮여 있어도 visible 로 판정한다.
+//
+//   오버레이 **컨테이너**(`#g7-skeleton-overlay`)를 관측 대상으로 삼는 것도 불안정했다. 그것은
+//   타겟 안에 있어 렌더가 타겟을 갈아치울 때마다 사라졌다 재부착된다 — 하드 진입은 렌더 **전**
+//   단계라 타겟도 폴백도 아직 없어 `#app` 로 3단계 폴백되는데, 곧이어 첫 렌더가 `#app` 을 갈아치워
+//   40ms 표본에 한 번도 잡히지 않는다(실측: appendChild 후킹으로 `#app` 2회 부착만 확인됨).
+//   대조군으로 `/admin/users` 하드 진입도 동일함을 확인했다 — SEO 탭 고유 문제가 아니라 하드 진입
+//   일반의 동작이다.
+//
+//   그래서 두 가지를 바꿨다.
+//     ① 진입 경로를 **SPA 전환**으로 (실제 사용자 흐름도 탭 전환이라 가드 의도에도 맞다)
+//     ② 관측 대상을 `<head>` 의 `#g7-skeleton-overlay-style` 로. 이 스타일 엘리먼트는 렌더 영향을
+//        받지 않고, 오버레이 해제(`hideTransitionOverlay`)가 이것을 명시적으로 제거한다 —
+//        "오버레이가 살아 있는가" 의 안정적인 신호다.
 test('#481 - SEO 탭 콘텐츠 노출 시점에 sitemap 상태가 이미 채워져 있다', async ({ page }) => {
   const token = issueToken('core.settings.read', 'core.settings.update');
   await authenticatePage(page, token);
 
-  // 상태 API 를 의도적으로 지연시켜, 전환 오버레이가 이 데이터소스를 기다리는지 드러낸다.
-  // wait_for 에 sitemap_status 가 빠져 있으면 오버레이가 먼저 걷히고 빈 상태로 노출된다.
-  let statusResolvedAt = 0;
-  await page.route('**/api/admin/seo/sitemap/status*', async (route) => {
-    await new Promise((r) => setTimeout(r, 1_500));
-    statusResolvedAt = Date.now();
-    await route.continue();
+  // 오버레이 컨테이너의 존재 여부를 페이지 안에서 촘촘히 표본한다.
+  //
+  // 제거 시각을 `Element.remove` 후킹으로 잡으면 놓친다 — 첫 렌더가 `#app` 을 통째로 교체할 때는
+  // 그 API 를 거치지 않고 사라진다. 부착은 appendChild 로 확실히 잡고, 사라짐은 "마지막으로
+  // 보였던 시각(lastSeenAt)" 으로 판정한다. 부팅 중 잠깐 사라졌다 재부착되는 구간이 있으므로
+  // (렌더가 지운 뒤 reattachSpinnerOverlay 가 다시 붙임) 단발 부재가 아니라 lastSeenAt 을 쓴다.
+  await page.addInitScript(() => {
+    (window as any).__overlay = { mountedAt: 0, lastSeenAt: 0 };
+    // 오버레이 컨테이너(`#g7-skeleton-overlay`)는 타겟 안에 있어 렌더가 타겟을 갈아치우면 함께
+    // 사라졌다가 재부착된다 — 표본으로 잡으면 있다가 없다가 한다. 반면 스타일 엘리먼트는
+    // `<head>` 에 있어 렌더 영향을 받지 않고, 오버레이 해제(`hideTransitionOverlay`)가 이것을
+    // 명시적으로 제거한다. 그래서 "오버레이가 살아 있는가" 의 안정적인 신호는 이쪽이다.
+    const STYLE_ID = 'g7-skeleton-overlay-style';
+    const origAppend = Node.prototype.appendChild;
+    Node.prototype.appendChild = function <T extends Node>(this: Node, node: T): T {
+      if ((node as unknown as Element)?.id === STYLE_ID) {
+        (window as any).__overlay.mountedAt ||= Date.now();
+      }
+
+      return origAppend.call(this, node) as T;
+    };
+    setInterval(() => {
+      if (document.getElementById(STYLE_ID)) {
+        (window as any).__overlay.lastSeenAt = Date.now();
+      }
+    }, 50);
   });
 
-  await page.goto('/admin/settings?tab=seo');
+  // 상태 API 를 의도적으로 지연시켜, 전환 오버레이가 이 데이터소스를 기다리는지 드러낸다.
+  // wait_for 에 sitemap_status 가 빠지면 오버레이가 먼저 걷히고 빈 상태로 노출된다.
+  let statusResolvedAt = 0;
+  await page.route(
+    (url) => url.pathname.endsWith('/api/admin/seo/sitemap/status'),
+    async (route) => {
+      await new Promise((r) => setTimeout(r, 1_500));
+      statusResolvedAt = Date.now();
+      await route.continue().catch(() => undefined);
+    },
+  );
+
+  // 다른 탭으로 먼저 들어간 뒤 SPA 전환으로 SEO 탭에 진입한다 (위 주석 참조).
+  await page.goto('/admin/settings?tab=general');
   await page.waitForLoadState('domcontentloaded', { timeout: 30_000 });
+  await page.waitForFunction(() => !!(window as any).G7Core?.dispatch, { timeout: 30_000 });
+  await page.waitForTimeout(3_000);
+  // 진입 전 상태를 초기화해 SEO 탭 전환 구간만 측정한다.
+  await page.evaluate(() => ((window as any).__overlay = { mountedAt: 0, lastSeenAt: 0 }));
 
-  // 진행상황 블록이 보이는 시점 = 오버레이가 걷힌 시점
-  const statusBlock = page.locator('#sitemap_last_updated_block');
-  await expect(statusBlock).toBeVisible({ timeout: 30_000 });
-  const revealedAt = Date.now();
+  await page.evaluate(() => {
+    (window as any).G7Core.dispatch({
+      handler: 'navigate',
+      params: { path: '/admin/settings', query: { tab: 'seo' } },
+    });
+  });
 
-  // 상대 비교: 노출 시점이 상태 응답 이후여야 한다 (절대 임계값 사용 안 함)
-  expect(statusResolvedAt).toBeGreaterThan(0);
-  expect(revealedAt).toBeGreaterThanOrEqual(statusResolvedAt);
+  // 오버레이가 실제로 걸렸는지 먼저 확인한다 — 걸리지 않았다면 이 가드는 아무것도 측정하지 못한다.
+  await expect
+    .poll(() => page.evaluate(() => (window as any).__overlay?.mountedAt ?? 0), {
+      message: '전환 오버레이가 한 번도 마운트되지 않았다 — wait_for 가드가 동작하지 않는 상태',
+      timeout: 20_000,
+    })
+    .toBeGreaterThan(0);
+
+  // 지연시킨 상태 응답이 실제로 도착할 때까지 기다린다.
+  await expect
+    .poll(() => statusResolvedAt, { message: 'sitemap 상태 응답이 오지 않았다', timeout: 20_000 })
+    .toBeGreaterThan(0);
+
+  // 판정: **상태 응답이 도착한 그 시점에 오버레이가 아직 떠 있었는가**.
+  //
+  // "오버레이가 완전히 걷히는 시각" 으로 재지 않는다 — 사이트맵 생성이 `queued` 로 남아 있는
+  // 환경(큐 워커 미가동)에서는 `sitemap_status.onSuccess` 가 3초 폴링을 걸고, 그 refetch 가
+  // `wait_for` 대상이라 오버레이를 매번 다시 띄운다. 그러면 오버레이가 영영 걷히지 않아 측정
+  // 자체가 불가능하다(실측: 40초 내내 유지). 이 순환은 환경 조건이지 가드 대상이 아니다.
+  //
+  // `wait_for` 에서 sitemap_status 가 빠지면 오버레이가 1.5초 지연 응답보다 먼저 걷히므로
+  // `lastSeenAt < statusResolvedAt` 이 되어 실패한다 — 가드 의도는 그대로 유지된다.
+  const lastSeenAt = await page.evaluate(() => (window as any).__overlay.lastSeenAt as number);
+  expect(
+    lastSeenAt,
+    '상태 응답이 도착하기 전에 전환 오버레이가 걷혔다 — wait_for 가 이 데이터소스를 기다리지 않는다',
+  ).toBeGreaterThanOrEqual(statusResolvedAt - 100);
 
   // 노출된 내용이 빈 껍데기가 아니어야 한다 (미해석 바인딩/빈 문자열 회귀 가드)
+  const statusBlock = page.locator('#sitemap_last_updated_block');
+  await expect(statusBlock).toBeVisible({ timeout: 15_000 });
   const text = (await statusBlock.innerText()).trim();
   expect(text).not.toContain('$t:');
   expect(text.length).toBeGreaterThan(0);

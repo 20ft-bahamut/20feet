@@ -35,14 +35,22 @@ async function stubOpcache(
   opcache: { loaded: boolean; enabled: boolean | null },
 ): Promise<void> {
   await page.route(SYSTEM_INFO_API, async (route) => {
-    const response = await route.fetch();
-    const body = await response.json();
+    try {
+      const response = await route.fetch();
+      const body = await response.json();
 
-    if (body?.data) {
-      body.data.opcache = opcache;
+      if (body?.data) {
+        body.data.opcache = opcache;
+      }
+
+      await route.fulfill({ response, json: body });
+    } catch {
+      // 테스트가 끝난 뒤 도착한 요청에서 `route.fetch()` 는 "Test ended" 로 거부된다.
+      // 이 콜백은 테스트가 await 하지 않으므로 그 거부가 **어느 테스트에도 속하지 않는 에러**가
+      // 되고, 워커가 중단되어 남은 테스트가 "did not run" 으로 집계된다(실측: 전수 실행에서
+      // 에러 2건 → 미실행 2건). 종료 직후 요청은 조용히 통과시킨다.
+      await route.continue().catch(() => undefined);
     }
-
-    await route.fulfill({ response, json: body });
   });
 }
 

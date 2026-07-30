@@ -38,6 +38,28 @@ class LayoutRepository implements LayoutRepositoryInterface
     }
 
     /**
+     * 특정 레이아웃을 영구 삭제 (템플릿 ID와 이름으로)
+     *
+     * @param  int  $templateId  템플릿 ID
+     * @param  string  $name  레이아웃 이름
+     * @return bool 삭제 여부 (대상 부재 시 false)
+     */
+    public function deleteByName(int $templateId, string $name): bool
+    {
+        $layout = TemplateLayout::where('template_id', $templateId)
+            ->where('name', $name)
+            ->first();
+
+        if (! $layout) {
+            return false;
+        }
+
+        $layout->forceDelete();
+
+        return true;
+    }
+
+    /**
      * ID로 레이아웃 조회
      *
      * @param  int  $id  레이아웃 ID

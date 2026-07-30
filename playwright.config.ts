@@ -62,6 +62,11 @@ function resolveBaseUrl(): string {
 
 export default defineConfig({
   testDir: './tests/Playwright/specs',
+  // 레이아웃 편집기 저장(PUT) spec 전용 시드 화면 설치/제거.
+  // 저장 spec 이 제품 화면(home/admin_dashboard)을 대상으로 하면 실행마다 편집 결과가
+  // 누적돼 개발 사이트가 오염된다 — 상세는 tests/Playwright/fixtures/seed-layout.ts.
+  globalSetup: './tests/Playwright/global-setup.ts',
+  globalTeardown: './tests/Playwright/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
