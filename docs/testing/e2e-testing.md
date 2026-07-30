@@ -6,6 +6,7 @@
 - 도구: Playwright 1.49+ (TypeScript, Vitest 와 동일 스택)
 - 인증: PlaywrightIssueToken artisan 커맨드가 Sanctum 토큰 발급 (CLI + G7_PLAYWRIGHT_BYPASS=1 + APP_DEBUG 3중 가드)
 - Base URL: PLAYWRIGHT_BASE_URL 환경변수 우선, .env APP_URL 차순위 (하드코딩 회피)
+- 로케일: 모든 config 에 use.locale = 'ko-KR' 고정 (미지정 시 Accept-Language 가 en-US 로 나가 화면이 영어로 렌더 → 한국어 단언 전멸)
 - 코어/확장 분리: 코어 = tests/Playwright/, 확장 = {확장 디렉토리}/tests/Playwright/
 - 데이터 생성: 데이터를 소유한 영역에 시드 커맨드 배치 (코어 ↔ 모듈 의존 역전 회피)
 - 외부 의존: mock-first 전략 (page.route() 로 결제창/외부 API 가로채기)
@@ -87,13 +88,28 @@ npm run test:e2e:ui                                 # UI 디버깅 모드
 
 base URL 은 코어 `.env` 의 `APP_URL` 에서 자동 해석된다 (`PLAYWRIGHT_BASE_URL` 로 덮어쓸 수 있다).
 
+### 로케일 고정 (`locale: 'ko-KR'`)
+
+코어와 확장의 모든 config 은 `use.locale` 을 `'ko-KR'` 로 고정한다. 생략하면 한국어 문구를 단언하는
+spec 이 전부 실패한다.
+
+엔진의 로케일 우선순위는 `localStorage.g7_locale` → 서버가 내려준 값 → `'ko'` 이고
+([TemplateApp.ts](../../resources/js/core/TemplateApp.ts) 생성자), 서버값은 `SetLocale` 미들웨어가
+**미로그인 요청에서 `Accept-Language` 헤더로** 결정한다. Playwright 의 `locale` 옵션이 그 헤더를
+만들므로, 지정하지 않으면 첫 페이지 로드가 `en-US` 로 나가 화면이 영어로 렌더되고 엔진이 그 값을
+`localStorage` 에 저장한다. 이후 인증해도 저장된 값이 최우선이라 세션 전체가 영어로 고정된다.
+
+`getByText('전체회원수')` 처럼 한국어만 단언하는 곳은 물론이고, `getByRole('button', { name: /저장/ })`
+같은 접근 가능한 이름 조회도 함께 깨진다.
+
 ### 실행 시 유의 (경험칙)
 
 | 항목 | 내용 |
 | --- | --- |
 | 산출물 위치 | 리포트·trace 는 **코어 루트**의 `test-results/{type}/{id}/`, `playwright-report/{type}/{id}/` 에 쌓인다. 확장 디렉토리 안에 쌓으면 Windows 에서 `{module\|template}:update` 의 디렉토리 이동이 열린 핸들에 걸려 실패한다 |
 | 레이아웃 수정 후 | 레이아웃 JSON 을 고쳤으면 `{type}:update {id} --force` **+ `template:cache-clear {템플릿}`** 까지 해야 브라우저에 반영된다. 레이아웃은 템플릿 캐시(`/api/layouts/{template}/...`)로 서빙되므로 `cache:clear` 만으로는 갱신되지 않는다 |
-| 공유 상태 | 같은 관리자 설정 화면을 건드리는 spec 이 병렬로 돌면 서로의 저장 상태를 덮어써 실패할 수 있다. 설정 저장을 수반하는 spec 은 `--workers=1` 로 확인한다 |
+| 공유 상태 | 같은 관리자 설정 화면을 건드리는 spec 이 병렬로 돌면 서로의 저장 상태를 덮어써 실패할 수 있다. 실행 옵션에 맡기지 않고 그 `describe` 에 `test.describe.configure({ mode: 'serial' })` 를 둔다 |
+| 워커 수 | 관리자 SPA 는 번들이 크고 레이아웃을 여러 번 받아온다. 개발 머신에서 2워커 이상이면 `page.waitForLoadState` 가 30초를 넘겨 **비결정적으로** 실패한다(실측: 같은 스위트가 회차마다 다른 5~7건 실패, 테스트당 8초 → 25초). 판정은 `--workers=1` 결과로 한다 |
 
 ## §4. 데이터 생성 위치 — 책임 분리 매트릭스
 
