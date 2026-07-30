@@ -49,10 +49,39 @@ class IssuesGuestSessionCookieTest extends PluginTestCase
         $subject = $this->subject();
         $signed = $subject->sign('11111111-2222-3333-4444-555555555555');
 
-        [, $signature] = explode('|', $signed, 2);
-        $tampered = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee|'.$signature;
+        [, $expiresTs, $signature] = explode('|', $signed, 3);
+        $tampered = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee|'.$expiresTs.'|'.$signature;
 
         $this->assertNull($subject->verify($tampered));
+    }
+
+    public function test_tampered_expiry_with_stale_signature_is_rejected(): void
+    {
+        // 만료시각만 늘려서 서명 유효기간을 연장하려는 위조 시도 — 서명이 session_id
+        // 뿐 아니라 expiresTs 도 함께 서명하므로 expiresTs 변조 시 서명 불일치로 거부.
+        $subject = $this->subject();
+        $signed = $subject->sign('11111111-2222-3333-4444-555555555555');
+
+        [$sessionId, $expiresTs, $signature] = explode('|', $signed, 3);
+        $tampered = $sessionId.'|'.((int) $expiresTs + 3600).'|'.$signature;
+
+        $this->assertNull($subject->verify($tampered));
+    }
+
+    public function test_expired_signature_is_rejected(): void
+    {
+        // 만료시각이 과거인 서명(정상 서명이지만 유효기간 경과)은 거부되어야 한다.
+        $subject = $this->subject();
+        $sessionId = '11111111-2222-3333-4444-555555555555';
+        $pastExpiresTs = time() - 1;
+
+        $signMethod = new \ReflectionMethod($subject, 'computeGuestSessionSignature');
+        $signMethod->setAccessible(true);
+        $signature = $signMethod->invoke($subject, $sessionId, $pastExpiresTs);
+
+        $expiredValue = $sessionId.'|'.$pastExpiresTs.'|'.$signature;
+
+        $this->assertNull($subject->verify($expiredValue));
     }
 
     public function test_arbitrary_unsigned_value_is_rejected(): void

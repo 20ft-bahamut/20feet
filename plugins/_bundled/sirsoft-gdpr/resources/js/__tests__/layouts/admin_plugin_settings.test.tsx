@@ -562,6 +562,25 @@ describe('admin/plugin_settings.json — 3 카드 (operator / cookie_banner / au
             expect(partials.some((p) => p.includes('_policy_version_history_modal'))).toBe(false);
         });
 
+        /**
+         * sequence handler 구조 회귀 가드 — actions 배열이 params 안에 잘못 중첩되어
+         * (CLAUDE.md 절대 금지 패턴) 있었던 결함. 엔진(ActionDispatcher.handleSequence)이
+         * 두 위치를 모두 인식하는 fallback을 갖고 있어 동작 자체는 정상이었지만, 정석
+         * 위치(actions가 액션 객체의 top-level)로 바로잡는다.
+         */
+        it('이력 토글 버튼의 sequence handler 는 actions 를 top-level 에 둔다 (params 중첩 금지)', () => {
+            const wrapper = findById(root, 'field_cookie_policy_version');
+            const json = JSON.stringify(wrapper);
+            // 정상 패턴: sequence handler 바로 뒤에 "actions" 가 이어짐 (params 를 거치지 않음)
+            expect(json).toMatch(/"handler":"sequence","actions":\[/);
+            // 금지 패턴: sequence handler 뒤에 params.actions 로 중첩된 형태가 없어야 한다
+            expect(json).not.toMatch(/"handler":"sequence","params":\{"actions":\[/);
+        });
+
+        it('이력 표 컨테이너에 policy_version_history_table id 가 부여되어 E2E 로 펼침 여부를 검증할 수 있다', () => {
+            expect(findById(root, 'policy_version_history_table')).toBeTruthy();
+        });
+
         it('정책 버전 발행 modal (publish modal) partial 이 modals 배열에 등록되어 있다 — 운영자 수동 발행 진입점', () => {
             const modals = (root as { modals?: Array<{ partial?: string }> }).modals ?? [];
             const partials = modals.map((m) => m.partial ?? '');

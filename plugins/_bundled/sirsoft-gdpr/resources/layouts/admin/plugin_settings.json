@@ -924,23 +924,21 @@
                                                                                     {
                                                                                         "type": "click",
                                                                                         "handler": "sequence",
-                                                                                        "params": {
-                                                                                            "actions": [
-                                                                                                {
-                                                                                                    "handler": "setState",
-                                                                                                    "params": {
-                                                                                                        "target": "local",
-                                                                                                        "policyHistoryOpen": "{{!_local.policyHistoryOpen}}"
-                                                                                                    }
-                                                                                                },
-                                                                                                {
-                                                                                                    "handler": "refetchDataSource",
-                                                                                                    "params": {
-                                                                                                        "dataSourceId": "gdprPolicyVersionHistory"
-                                                                                                    }
+                                                                                        "actions": [
+                                                                                            {
+                                                                                                "handler": "setState",
+                                                                                                "params": {
+                                                                                                    "target": "local",
+                                                                                                    "policyHistoryOpen": "{{!_local.policyHistoryOpen}}"
                                                                                                 }
-                                                                                            ]
-                                                                                        }
+                                                                                            },
+                                                                                            {
+                                                                                                "handler": "refetchDataSource",
+                                                                                                "params": {
+                                                                                                    "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                }
+                                                                                            }
+                                                                                        ]
                                                                                     }
                                                                                 ],
                                                                                 "children": [
@@ -964,6 +962,7 @@
                                                                 ]
                                                             },
                                                             {
+                                                                "id": "policy_version_history_table",
                                                                 "comment": "이력 표 — collapsible. _local.policyHistoryOpen 일 때만 노출. gdprPolicyVersionHistory 데이터소스 페이지네이션 표시.",
                                                                 "type": "basic",
                                                                 "name": "Div",
