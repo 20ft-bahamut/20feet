@@ -255,6 +255,17 @@ php artisan seo:generate-sitemap --rebuild  # 전체 재생성 (mode=full)
 php artisan seo:generate-sitemap --mode=full|auto|incremental  # 재생성 모드 지정
 ```
 
+### 성능 계측 Artisan 커맨드
+
+```bash
+# 깊은 OFFSET 목록 조회 비용 계측 (목록 컬럼 vs 키 컬럼 두 축). 상세: docs/backend/service-repository.md
+# 대량 합성 행을 시딩하므로 운영 데이터가 있는 환경에서 --seed/--fresh 를 쓰지 않는다.
+php artisan --env=testing g7:bench:pagination --list-profiles
+php artisan --env=testing g7:bench:pagination --table=board_posts --fresh --seed=200000
+php artisan --env=testing g7:bench:pagination --table=board_posts --offsets=0,20000,50000,199980 --runs=3 --explain
+php artisan --env=testing g7:bench:pagination --table=orders --json   # 기계 판독용
+```
+
 ### API 문서 Artisan 커맨드
 
 ```bash

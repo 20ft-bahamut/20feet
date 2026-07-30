@@ -7,7 +7,10 @@ use App\Helpers\PermissionHelper;
 use App\Helpers\TimezoneHelper;
 use App\Models\ActivityLog;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +20,25 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityLogRepository implements ActivityLogRepositoryInterface
 {
     use HasMultipleSearchFilters;
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
+
+    /**
+     * 활동 로그 목록 정렬 허용 컬럼
+     *
+     * 요청 값을 그대로 orderBy 에 넘기면 없는 컬럼으로 SQL 오류가 나거나 인덱스 없는 컬럼
+     * 정렬을 강제할 수 있다.
+     *
+     * @var array<int, string>
+     */
+    private const SORTABLE_COLUMNS = [
+        'id',
+        'created_at',
+        'action',
+        'log_type',
+        'user_id',
+    ];
+
     /**
      * 특정 모델의 활동 로그를 페이지네이션하여 조회합니다.
      *
@@ -26,8 +48,8 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
      */
     public function getPaginatedForModel(Model $model, array $filters = []): LengthAwarePaginator
     {
-        $sortOrder = $filters['sort_order'] ?? 'desc';
-        $query = ActivityLog::forModel($model)->orderBy('created_at', $sortOrder);
+        $sortOrder = $this->normalizeSortDirection($filters['sort_order'] ?? null);
+        $query = ActivityLog::forModel($model);
 
         if (isset($filters['action'])) {
             $query->action($filters['action']);
@@ -37,7 +59,13 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             $query->byUser($filters['user_id']);
         }
 
-        return $query->paginate($filters['per_page'] ?? 15);
+        // 컬럼을 좁히지 않는 이유는 getPaginated() 와 같다 — 리소스가 변경 내역을 그대로 노출한다
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: [['column' => 'created_at', 'direction' => $sortOrder]],
+            perPage: (int) ($filters['per_page'] ?? 15),
+        );
     }
 
     /**
@@ -48,7 +76,8 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
      */
     public function getPaginated(array $filters = []): LengthAwarePaginator
     {
-        $query = ActivityLog::query()->with('user:id,uuid,name,email');
+        // 관계는 지연 조인의 outer 에서만 로드한다 (inner 는 키 컬럼만 조회한다)
+        $query = ActivityLog::query();
 
         // 스코프 기반 권한 필터링 (self: 본인 로그만, role: 소유역할 로그, null: 전체)
         PermissionHelper::applyPermissionScope($query, 'core.activities.read');
@@ -92,11 +121,18 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             $query->where('created_at', '<=', TimezoneHelper::fromSiteDateTime($filters['date_to']));
         }
 
-        $sortBy = $filters['sort_by'] ?? 'created_at';
-        $sortOrder = $filters['sort_order'] ?? 'desc';
-        $query->orderBy($sortBy, $sortOrder);
+        $sort = $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at');
 
-        return $query->paginate($filters['per_page'] ?? 15);
+        // 목록 컬럼을 좁히지 않는 이유: 활동 로그 리소스는 변경 내역(mediumText `changes`)과
+        // 부가 정보(`properties`)까지 그대로 노출하므로 컬럼을 빼면 응답 계약이 바뀐다.
+        // 지연 조인만으로도 이 넓은 컬럼들을 읽는 행 수가 이번 페이지 분량으로 고정된다.
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: $sort,
+            perPage: (int) ($filters['per_page'] ?? 15),
+            relations: ['user:id,uuid,name,email'],
+        );
     }
 
     /**
@@ -105,10 +141,9 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
      * action/description 필드는 영어 키를 저장하므로,
      * 검색어가 번역된 라벨과 일치하는 원본 키도 함께 검색합니다.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query 쿼리 빌더
-     * @param string $search 검색어
-     * @param string $searchType 검색 유형 (all, action, description, ip_address)
-     * @return void
+     * @param  Builder  $query  쿼리 빌더
+     * @param  string  $search  검색어
+     * @param  string  $searchType  검색 유형 (all, action, description, ip_address)
      */
     private function applyBilingualSearch($query, string $search, string $searchType): void
     {
@@ -146,7 +181,7 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
     /**
      * 번역된 액션 라벨로 원본 action 값을 역추적합니다.
      *
-     * @param string $searchLower 소문자 검색어
+     * @param  string  $searchLower  소문자 검색어
      * @return array<string> 일치하는 action 값 목록
      */
     private function findActionsByTranslatedLabel(string $searchLower): array
@@ -179,7 +214,7 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
     /**
      * 번역된 설명 텍스트로 원본 description_key를 역추적합니다.
      *
-     * @param string $searchLower 소문자 검색어
+     * @param  string  $searchLower  소문자 검색어
      * @return array<string> 일치하는 description_key 목록
      */
     private function findDescriptionKeysByTranslatedText(string $searchLower): array
@@ -200,7 +235,7 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
     /**
      * 활동 로그를 삭제합니다.
      *
-     * @param int $id 삭제할 활동 로그 ID
+     * @param  int  $id  삭제할 활동 로그 ID
      * @return bool 삭제 성공 여부
      */
     public function delete(int $id): bool
@@ -211,7 +246,7 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
     /**
      * 여러 활동 로그를 일괄 삭제합니다.
      *
-     * @param array<int> $ids 삭제할 활동 로그 ID 목록
+     * @param  array<int>  $ids  삭제할 활동 로그 ID 목록
      * @return int 삭제된 건수
      */
     public function deleteMany(array $ids): int

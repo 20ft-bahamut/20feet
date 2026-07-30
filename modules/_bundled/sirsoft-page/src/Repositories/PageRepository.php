@@ -4,6 +4,8 @@ namespace Modules\Sirsoft\Page\Repositories;
 
 use App\Helpers\PermissionHelper;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
 use App\Search\Engines\DatabaseFulltextEngine;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,6 +22,11 @@ use Modules\Sirsoft\Page\Repositories\Contracts\PageRepositoryInterface;
 class PageRepository implements PageRepositoryInterface
 {
     use HasMultipleSearchFilters;
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
+
+    /** 허용 정렬 컬럼 (PageListRequest 와 동일 집합) */
+    private const SORTABLE_COLUMNS = ['created_at', 'published_at'];
 
     /**
      * 페이지 목록을 페이지네이션하여 조회합니다.
@@ -39,15 +46,22 @@ class PageRepository implements PageRepositoryInterface
         //  - slug : 슬러그만
         //  - all  : 제목 + 슬러그 (본문 content 은 검색 대상 아님 — UI '제목 또는 슬러그로 검색')
         // (Scout 콜백에 slug orWhere 를 넣으면 total 카운트가 부풀려지는 회귀가 있어 #225 에서 제거됨)
-        $query = Page::with(['creator', 'updater']);
+        $query = Page::query();
 
         // 권한 스코프 필터링
         PermissionHelper::applyPermissionScope($query, 'sirsoft-page.pages.read');
 
         $this->applyFilters($query, $filters);
-        $this->applySorting($query, $filters);
 
-        return $query->paginate($perPage);
+        // 지연 조인: 본문 content(longText)는 목록에 쓰이지 않는데도 OFFSET 이 훑는
+        // 모든 행에서 함께 읽힌다. inner 는 id 만 훑고 본문은 이번 페이지에서만 읽는다.
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: $this->resolveListSortSpec($filters),
+            perPage: $perPage,
+            relations: ['creator', 'updater'],
+        );
     }
 
     /**
@@ -170,6 +184,9 @@ class PageRepository implements PageRepositoryInterface
     {
         $results = $this->buildKeywordQuery($keyword)
             ->orderBy($orderBy, $direction)
+            // audit:allow repository-paginate-column-pruning reason: 통합검색 전용 진입점 —
+            // 유일한 호출자(SearchPagesListener)가 전체 탭은 limit=5, 페이지 탭은 limit=PHP_INT_MAX 로
+            // 1페이지에 결과를 받아가므로 OFFSET 이 발생하지 않는다
             ->paginate($limit);
 
         return [
@@ -224,14 +241,20 @@ class PageRepository implements PageRepositoryInterface
      */
     private function applySorting($query, array $filters): void
     {
-        $sortBy = $filters['sort_by'] ?? 'created_at';
-        $sortOrder = strtolower($filters['sort_order'] ?? 'desc');
-
-        if (! in_array($sortOrder, ['asc', 'desc'])) {
-            $sortOrder = 'desc';
+        foreach ($this->resolveListSortSpec($filters) as $sort) {
+            $query->orderBy($sort['column'], $sort['direction']);
         }
+    }
 
-        $query->orderBy($sortBy, $sortOrder);
+    /**
+     * 목록 정렬 스펙을 허용 컬럼 화이트리스트로 해석합니다.
+     *
+     * @param  array  $filters  필터 조건
+     * @return array<int, array{column: string, direction: string}> 정렬 스펙
+     */
+    private function resolveListSortSpec(array $filters): array
+    {
+        return $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at');
     }
 
     /**

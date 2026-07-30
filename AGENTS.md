@@ -192,7 +192,7 @@
 
 ### ① 코어 → 확장 동기화 (`requires.g7_version`)
 
-- 트리거: 코어 공개 확장 표면(`app/Extension/Abstract*`, `HookManager`, `ExtensionManager`, `ModuleManager`, `PluginManager`, `TemplateManager`, `app/Contracts/Extension/**`, `app/Extension/Helpers/**`, `app/Seo/Contracts/**`, `app/ActivityLog/**` 공개 API, 루트 `CHANGELOG.md` Added/Changed/Removed) 수정
+- 트리거: 코어 공개 확장 표면(`app/Extension/Abstract*`, `HookManager`, `ExtensionManager`, `ModuleManager`, `PluginManager`, `TemplateManager`, `app/Contracts/Extension/**`, `app/Extension/Helpers/**`, `app/Repositories/Concerns/**`, `app/Seo/Contracts/**`, `app/ActivityLog/**` 공개 API, 루트 `CHANGELOG.md` Added/Changed/Removed) 수정
 - 조치: 영향 받는 번들 확장의 `g7_version` 상향 + 각 확장 CHANGELOG 에 변경 기재
 
 ### ② 확장 → 확장 동기화 (`dependencies.{modules|plugins}`)
@@ -354,6 +354,20 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | 계층 재귀(path/depth 재계산)에 방문 ID 가드 없음 | 방문 집합으로 유한 종료 — 검증 우회 경로/오염 데이터에서도 무한 루프 금지 |
 
 > 상세: [validation.md "계층 리소스 순환 참조" / "배열 항목의 상위 스코프"](docs/backend/validation.md), [service-repository.md "중첩 리소스 스코프" / "설정 기반 한계값"](docs/backend/service-repository.md)
+
+### 목록 조회 컬럼 프루닝과 지연 조인
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| `->paginate($perPage)` / `->paginate($perPage, ['*'])` (컬럼 목록 미지정) | 목록이 실제로 쓰는 컬럼만 명시. 깊은 OFFSET 이 가능한 목록은 `PaginatesWithDeferredJoin` |
+| 요청 값에서 온 정렬 컬럼을 그대로 `orderBy` 에 전달 | `ResolvesSortSpec` 으로 닫힌 집합 해석 (방향만 검사하는 `in_array` 는 보호가 아니다) |
+| 지연 조인의 `$query` 에 미리 `orderBy`/`with`/`select` 적용 | 필터/where 만 적용해 넘기고, 정렬·관계·컬럼은 trait 인자로 전달 |
+| 목록 SELECT 에 `SUBSTRING(content, 1, N)` 을 두고 프루닝했다고 간주 | 오버플로 페이지 읽기가 그대로 발생 — 잘라내기는 outer(`$columns`)에서만 |
+| 그룹 쿼리(`groupBy`)의 총 건수를 `count()` 로 계산 | `getCountForPagination()` (서브쿼리로 감싸 그룹 수를 센다) |
+| raw SQL 안에 테이블명·별칭을 문자열로 조립 | 테이블명은 `(new Model)->getTable()`, 프리픽스는 `DB::getTablePrefix()`, 별칭은 빌더(`join($table.' as uc', …)`)가 만들게 |
+| `whereRaw('1 = 0')` / `where($c, DB::raw("({$sub->toSql()})"))` + `mergeBindings` | `whereIn($key, [])` / `where($c, '=', $sub)` (빌더가 바인딩까지 처리) |
+
+> 상세: [service-repository.md "목록 조회 컬럼 프루닝과 지연 조인" / "정렬 컬럼 화이트리스트" / "허용되는 Raw 쿼리"](docs/backend/service-repository.md)
 
 ### Listener 데이터 접근
 

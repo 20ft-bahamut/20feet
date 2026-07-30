@@ -6,6 +6,8 @@ use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Helpers\PermissionHelper;
 use App\Models\User;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -15,11 +17,18 @@ use Laravel\Sanctum\PersonalAccessToken;
 class UserRepository implements UserRepositoryInterface
 {
     use HasMultipleSearchFilters;
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
 
     /**
      * 검색 가능한 필드 목록
      */
     private const SEARCHABLE_FIELDS = ['name', 'email'];
+
+    /**
+     * 허용 정렬 컬럼 (UserListRequest 와 동일 집합)
+     */
+    private const SORTABLE_COLUMNS = ['created_at', 'name', 'email', 'last_login_at'];
 
     /**
      * 이메일로 사용자를 찾습니다.
@@ -100,21 +109,23 @@ class UserRepository implements UserRepositoryInterface
         // 권한 스코프 필터링
         PermissionHelper::applyPermissionScope($query, 'core.users.read');
 
-        // roles 관계 eager loading
-        $query->with('roles');
-
         // 검색 조건 적용
         $this->applyFilters($query, $filters);
 
-        // 정렬 적용
-        $sortBy = $filters['sort_by'] ?? 'created_at';
-        $sortOrder = $filters['sort_order'] ?? 'desc';
-        $query->orderBy($sortBy, $sortOrder);
+        // 정렬 적용 (허용 컬럼 화이트리스트로 해석)
+        $sort = $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at');
 
         // 페이지네이션 적용
         $perPage = $filters['per_page'] ?? 15;
 
-        return $query->paginate($perPage);
+        // 지연 조인: inner 는 id 만 훑고 roles eager loading 은 해당 페이지에만 적용된다
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: $sort,
+            perPage: $perPage,
+            relations: ['roles'],
+        );
     }
 
     /**

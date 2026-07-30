@@ -4,7 +4,10 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\IdentityVerificationLogRepositoryInterface;
 use App\Enums\IdentityVerificationStatus;
+use App\Models\IdentityPolicy;
 use App\Models\IdentityVerificationLog;
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 /**
@@ -14,6 +17,8 @@ use Illuminate\Support\Carbon;
  */
 class IdentityVerificationLogRepository implements IdentityVerificationLogRepositoryInterface
 {
+    use PaginatesWithDeferredJoin;
+
     /**
      * 검증 로그를 생성합니다.
      *
@@ -130,7 +135,7 @@ class IdentityVerificationLogRepository implements IdentityVerificationLogReposi
      *
      * @param  array  $filters  검색 필터
      * @param  int  $perPage  페이지당 항목 수
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator 페이지네이터
+     * @return LengthAwarePaginator 페이지네이터
      */
     public function search(array $filters, int $perPage = 20)
     {
@@ -158,7 +163,7 @@ class IdentityVerificationLogRepository implements IdentityVerificationLogReposi
         if (! empty($filters['source_type'])) {
             $query->whereIn('origin_policy_key', function ($q) use ($filters) {
                 $q->select('key')
-                    ->from('identity_policies')
+                    ->from((new IdentityPolicy)->getTable())
                     ->where('source_type', $filters['source_type']);
                 if (! empty($filters['source_identifier'])) {
                     $q->where('source_identifier', $filters['source_identifier']);
@@ -202,9 +207,15 @@ class IdentityVerificationLogRepository implements IdentityVerificationLogReposi
             ? $filters['sort_by']
             : 'created_at';
         $sortOrder = ($filters['sort_order'] ?? 'desc') === 'asc' ? 'asc' : 'desc';
-        $query->orderBy($sortBy, $sortOrder);
 
-        return $query->paginate($perPage);
+        // 본인인증 로그는 계속 쌓이는 이력이라 뒤쪽 페이지에서 OFFSET 비용이 커진다.
+        // 응답이 요청/응답 payload 를 그대로 노출하므로 컬럼은 좁히지 않고 지연 조인만 적용한다.
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: [['column' => $sortBy, 'direction' => $sortOrder]],
+            perPage: $perPage,
+        );
     }
 
     /**

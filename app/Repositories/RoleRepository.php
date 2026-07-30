@@ -218,6 +218,7 @@ class RoleRepository implements RoleRepositoryInterface
         $query->orderByRaw('CASE WHEN extension_type IS NOT NULL THEN 0 ELSE 1 END')
             ->orderBy('created_at', 'desc');
 
+        // audit:allow repository-paginate-column-pruning reason: 역할 정의 테이블 — 행 수가 운영상 고정(수십 건)이고 넓은 컬럼이 없다
         return $query->paginate($perPage);
     }
 

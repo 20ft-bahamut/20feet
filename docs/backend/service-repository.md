@@ -13,6 +13,7 @@
 4. 검증 로직은 FormRequest에서 (Service에 검증 금지)
 5. 다중 검색은 HasMultipleSearchFilters Trait 사용
 6. Service 에서 Model 직접 인스턴스화 금지 — Repository 의 build/factory 메서드 위임 (가상 모델 합성 포함)
+7. 목록 조회는 컬럼 목록 명시 + 깊은 OFFSET 이 가능한 목록은 PaginatesWithDeferredJoin Trait 사용
 ```
 
 ---
@@ -25,6 +26,7 @@
 - [트랜잭션 및 관계 삭제 패턴](#트랜잭션-및-관계-삭제-패턴)
 - [상태 변경 자동 처리](#상태-변경-자동-처리)
 - [Repository 클래스](#repository-클래스)
+- [목록 조회 컬럼 프루닝과 지연 조인](#목록-조회-컬럼-프루닝과-지연-조인)
 - [다중 검색 필터 Trait](#다중-검색-필터-trait-hasmultiplesearchfilters)
 - [모듈에서 Repository 인터페이스 바인딩](#모듈에서-repository-인터페이스-바인딩)
 - [중첩 리소스 스코프](#중첩-리소스-스코프)
@@ -708,6 +710,49 @@ $query->selectRaw('sales_status, COUNT(*) as count');
 $query->whereColumn('stock_quantity', '<=', 'safe_stock_quantity');
 ```
 
+##### Raw 안에 테이블명·별칭을 쓰지 않는다
+
+Raw 를 쓰더라도 **테이블명·별칭·프리픽스를 문자열로 조립하지 않는다.** 조립한 순간 프리픽스 처리를 사람이 떠안게 되고, 빌더가 만든 SQL 과 어긋나 조용히 깨진다.
+
+Laravel 은 별칭에도 프리픽스를 붙인다(`Grammar::wrapAliasedTable`). `join('board_comments as uc', ...)` 는 `g7_board_comments as g7_uc` 가 되므로 `where('uc.content', ...)` 도 `g7_uc.content` 로 맞아떨어진다. 별칭을 `DB::raw` 로 직접 만들면 그 별칭만 프리픽스가 빠져, 같은 별칭을 참조하는 빌더 조건이 전부 어긋난다.
+
+```php
+// ❌ DON'T: 별칭을 raw 로 만들고 프리픽스를 손으로 처리 — where('uc.content') 가 g7_uc 를 찾아 실패한다
+$prefix = DB::getTablePrefix();
+$query->join(DB::raw("{$prefix}board_comments AS uc"), function ($join) {
+    $join->on(DB::raw("{$prefix}board_posts.id"), '=', DB::raw('uc.post_id'));
+});
+
+// ✅ DO: 빌더가 별칭과 프리픽스를 함께 처리하게 둔다
+$query->join((new Comment)->getTable().' as uc', function ($join) use ($postsTable) {
+    $join->on("{$postsTable}.id", '=', 'uc.post_id');
+});
+```
+
+부득이 raw 안에 테이블명이 필요하면(예: `LEFT(...)`, `SUBSTRING(...)`) **모델에서 얻은 이름**과 **연결 설정에서 읽은 프리픽스**를 쓴다.
+
+```php
+// ❌ DON'T
+DB::raw("LEFT(`{$prefix}board_posts`.`content`, 300) as excerpt")
+
+// ✅ DO
+$postsTable = (new Post)->getTable();
+DB::raw('LEFT(`'.DB::getTablePrefix().$postsTable.'`.`content`, 300) as excerpt')
+```
+
+##### 빌더로 대체 가능한 raw 관용구
+
+| Raw | 빌더 대체 | 비고 |
+|---|---|---|
+| `whereRaw('1 = 0')` / `whereRaw('0 = 1')` | `whereIn($model->getKeyName(), [])` | 빈 `whereIn` 이 정확히 `0 = 1` 로 컴파일된다 |
+| `where($col, DB::raw("({$sub->toSql()})"))` + `mergeBindings` | `where($col, '=', $sub)` | 빌더를 값으로 넘기면 바인딩이 자동 병합된다 |
+| `addSelect(DB::raw("({$subSql}) as alias"))` | `addSelect(['alias' => $sub])` | 서브쿼리 select 는 빌더를 그대로 받는다 |
+| `whereRaw("... CASE ... IN (?,?)")` | 갈래별 `orWhere(fn ($q) => $q->where(...)->whereIn(...))` | 대상 종류에 따라 갈리는 조건은 갈래별 빌더 조건으로 |
+| 상관 서브쿼리 문자열 | `whereColumn()` 으로 외부 컬럼 참조 | 값 비교는 `where()` 로 바인딩 |
+| 조인 + `groupBy` 로 존재 판정 | `whereHas()` | 행 증폭이 없어 inner 스캔이 가벼워지고 그룹 COUNT 도 불필요 |
+
+집계 함수(`COUNT`/`SUM`/`COALESCE`)와 DB 고유 함수(`MATCH ... AGAINST`, `JSON_CONTAINS`, `LEFT`, `SUBSTRING`)는 빌더에 대응 표현이 없으므로 raw 로 남긴다. 이때도 **값은 바인딩**하고 테이블명은 넣지 않는다.
+
 ### 패턴
 
 ```php
@@ -785,6 +830,164 @@ public function getAll(): Collection
     return Product::with(['category', 'images'])->get();
 }
 ```
+
+---
+
+## 목록 조회 컬럼 프루닝과 지연 조인
+
+### 규칙
+
+- 목록 조회는 `paginate($perPage)` 처럼 컬럼 인자를 생략하지 않는다. 화면이 실제로 쓰는 컬럼만 명시한다 (인자를 생략하면 `select *` 로 폴백해 넓은 컬럼까지 전부 읽는다).
+- 행이 계속 늘어나는 테이블(게시글·주문·활동 로그·알림 발송 이력 등)의 목록은 `PaginatesWithDeferredJoin` Trait 을 사용한다.
+
+### 배경
+
+`OFFSET n` 은 건너뛸 n 건을 읽지 않고 넘기는 것이 아니라 **실제로 읽은 뒤 버린다.** 목록 SELECT 에 `text`/`longText`/JSON 컬럼이 포함돼 있으면 버릴 n 건의 넓은 컬럼까지 함께 읽힌다. 게다가 InnoDB 는 행에 다 담기지 않는 값을 오버플로 페이지에 따로 저장하므로, 앞부분만 필요해도 그 페이지를 읽는다.
+
+게시글 테이블 20만 행 기준 실측 (각 3회 중앙값, 첫 회 버림):
+
+```bash
+php artisan g7:bench:pagination --table=board_posts --seed=200000 --offsets=0,20000,50000,199980 --runs=3 --explain
+```
+
+| OFFSET | 목록 컬럼 | ID 만 조회 | 배수 |
+|---:|---:|---:|---:|
+| 0 | 4.1ms | 3.9ms | 1.0× |
+| 20,000 | 1,682.6ms | 139.8ms | 12.0× |
+| 50,000 | 1,623.8ms | 90.3ms | 18.0× |
+| 199,980 | 1,811.2ms | 93.9ms | 19.3× |
+
+같은 계측의 실행 계획을 보면 원인이 하나 더 드러난다. OFFSET 0 은 `(board_id, created_at)` 인덱스를 역방향으로 훑어 정렬 없이 끝나지만, OFFSET 이 커지면 옵티마이저가 소프트 삭제 단독 인덱스(`deleted_at`)로 갈아타면서 `filesort` 가 붙는다. 넓은 컬럼을 걷어내는 것과 정렬을 인덱스로 덮는 것은 함께 가야 한다.
+
+`SUBSTRING(content, 1, N)` 을 목록 컬럼에 두는 것도 프루닝이 아니다. 앞 N 바이트를 얻기 위해 오버플로 페이지를 그대로 읽는다.
+
+`SUBSTRING(content, 1, 200)` 을 목록 컬럼에 두는 것은 프루닝이 아니다. 앞 200바이트를 얻기 위해 오버플로 페이지를 그대로 읽기 때문이다. 잘라내기는 지연 조인의 outer 로 옮긴다.
+
+### 사용
+
+```php
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
+
+class OrderRepository implements OrderRepositoryInterface
+{
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
+
+    public function paginate(array $filters, int $perPage): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery();
+        $this->applyFilters($query, $filters);   // where 만 적용
+
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['id', 'order_number', 'status', 'total_amount', 'ordered_at'],
+            sort: $this->resolveSortSpec($filters, ['id', 'ordered_at', 'total_amount'], 'ordered_at'),
+            perPage: $perPage,
+            relations: ['user', 'items'],
+        );
+    }
+}
+```
+
+### 계약
+
+| 항목 | 규칙 |
+| ------ | ------ |
+| `$query` | 필터/where 만 적용한다. `orderBy`/`with`/`select` 는 Trait 이 담당한다 |
+| `whereHas` | 결과 집합을 결정하는 조건이므로 그대로 둔다. Trait 은 `with` 만 inner 에서 제거한다 |
+| 정렬 | 닫힌 집합이어야 한다. 인덱스 없는 임의 컬럼 정렬은 inner 도 전체 스캔하므로 개선 폭이 보장되지 않는다 |
+| 키 컬럼 | 정렬 스펙 끝에 자동으로 덧붙는다. 동률 행의 순서가 흔들려 페이지 경계에서 행이 중복·누락되는 것을 막는다 |
+
+`paginate` / `simplePaginate` / 캐시 total 주입은 인자로 구분한다 — inner 쿼리는 동일하고 COUNT 수행 여부와 반환 클래스만 달라진다.
+
+| 호출자 상황 | `$simple` | `$total` | 반환 |
+| ------ | ------ | ------ | ------ |
+| 일반 목록 | `false` | `null` | `LengthAwarePaginator` (COUNT 1회) |
+| COUNT 를 피하고 다음 페이지 유무만 필요 | `true` | — | `Paginator` |
+| 총 건수를 이미 캐시해 둠 | `false` | 캐시값 | `LengthAwarePaginator` (COUNT 없음) |
+
+정렬 순서 복원은 `whereIn` + 같은 정렬 스펙 재적용으로 한다. 키 컬럼이 정렬에 포함돼 전순서가 성립하므로 결과가 inner 순서와 동일하다. MySQL 전용 `FIELD()` 는 쓰지 않는다. outer 에 존재하지 않는 표현식(집계·조인 서브쿼리)으로 정렬해 재현이 불가능한 경우에만 `$preserveIdOrder = true` 로 표준 SQL `CASE WHEN` 경로를 쓴다.
+
+### 정렬 컬럼 화이트리스트
+
+요청 값을 그대로 `orderBy()` 에 넘기지 않는다. Laravel 이 컬럼명을 백틱으로 감싸므로 SQL 인젝션은 성립하지 않지만, (a) 없는 컬럼으로 인한 SQL 오류가 스키마 정보를 노출하고 (b) 인덱스 없는 넓은 컬럼 정렬을 강제해 DoS 표면이 된다.
+
+정렬 선택지가 4개 이하로 고정된 곳은 `match` 표현식으로 이미 닫혀 있으므로 그대로 두고, 요청 값이 동적 컬럼으로 흘러 들어가는 곳만 `ResolvesSortSpec` 을 쓴다.
+
+허용 컬럼 집합은 대응하는 FormRequest 의 `Rule::in(...)` 과 같은 값으로 맞추고, 그 사실을 상수 주석에 남긴다. 요청이 아닌 경로(콘솔 커맨드·내부 호출)로도 같은 Repository 메서드가 불릴 수 있으므로, 화이트리스트는 FormRequest 하나에만 두지 않고 쿼리를 만드는 자리에도 둔다.
+
+**게이트보다 좁게 두지 않는다.** 허용 값의 SSoT 는 요청을 실제로 거절하는 FormRequest 이고, Repository 상수는 그 아래에 깔리는 안전망이다. 상수가 게이트의 부분집합이면 **검증을 통과한 정렬이 조용히 기본값으로 되돌아간다** — 422 도 로그도 남지 않아 "정렬 버튼이 안 먹는다" 로만 관측된다. FormRequest 가 `HookManager::applyFilters` 로 확장에 열려 있는 목록은 확장이 정렬 컬럼을 늘릴 수 있으므로, 상수를 게이트보다 넓게 두는 편이 안전하다. 상수를 새로 만들거나 고칠 때는 대응 FormRequest 의 `in:` 값을 눈으로 대조하고, 컬럼명이 실재하는지 마이그레이션에서 확인한다.
+
+**방향 검증은 컬럼 검증이 아니다.** 다음은 정렬 방향만 닫아 두고 컬럼은 그대로 흘려보낸 형태이며, 사람이 읽어도 `in_array` 가 있어 안전해 보이지만 실제로는 무방비다.
+
+```php
+// ❌ $sortOrder 만 검사 — $sortBy 는 그대로 orderBy 로 들어간다
+$sortBy = $filters['sort_by'] ?? 'created_at';
+$sortOrder = strtolower($filters['sort_order'] ?? 'desc');
+
+if (! in_array($sortOrder, ['asc', 'desc'])) {
+    $sortOrder = 'desc';
+}
+
+$query->orderBy($sortBy, $sortOrder);
+```
+
+```php
+// ✅ 컬럼·방향을 한 번에 해석 (방향 정규화는 Trait 이 담당)
+foreach ($this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at') as $sort) {
+    $query->orderBy($sort['column'], $sort['direction']);
+}
+```
+
+`repository-sort-column-whitelist` 룰은 **정렬 컬럼 변수 자체를 인자로 받는** `in_array`/`match`/`array_key_exists` 또는 `resolveSortSpec` 만 화이트리스트로 인정한다.
+
+### 예외
+
+설정/정의성 테이블처럼 행 수가 고정이고 넓은 컬럼이 없으면 컬럼 목록 없이 페이지네이션해도 된다. 다만 그 판단 근거를 코드 옆에 남긴다.
+
+```php
+// audit:allow repository-paginate-column-pruning reason: 역할 정의 테이블 — 행 수 고정(<100), 넓은 컬럼 없음
+return $query->paginate($perPage);
+```
+
+면제 주석은 **위반 줄에 인접**해야 인식된다. 메서드 첫 줄에 두면 체인 중간의 `->paginate(...)` 줄과 사이에 코드가 끼어 인식되지 않는다.
+
+```php
+// ✅ 체인 안에서는 ->paginate 바로 위에 둔다
+return $this->model->newQuery()
+    ->where('user_id', $userId)
+    ->orderByDesc('created_at')
+    // audit:allow repository-paginate-column-pruning reason: 사용자 1명에 종속된 목록 — OFFSET 이 깊어질 수 없다
+    ->paginate($perPage);
+```
+
+면제 사유로 인정되는 판단 근거는 다음 세 가지다. 어느 것도 아니면 지연 조인으로 전환한다.
+
+| 근거 | 성립 조건 | 예 |
+|---|---|---|
+| 정의/템플릿 테이블 | 행 수가 운영자가 등록한 수에 묶이고 넓은 컬럼이 없다 | 게시판 정의, 배송정책, 상품 안내 템플릿 |
+| 부모 1건에 종속 | `where(부모FK)` 로 좁혀져 OFFSET 이 깊어질 수 없다 | 상품 1건의 문의, 사용자 1명의 찜 |
+| ID 집합으로 선한정 | `whereIn('id', $matchedIds)` 로 스캔 대상이 이미 묶였다 | FULLTEXT 매칭 후 조회하는 통합검색 |
+
+"부모 1건에 종속" 은 그 부모가 가질 수 있는 자식 수를 실제로 따져 본 뒤에만 쓴다. 대량 발급 쿠폰 1건의 발급 이력처럼 부모가 하나여도 수십만 행이 되는 경우는 이 근거가 성립하지 않는다.
+
+컨트롤러가 Service 에 목록 조회를 위임하는 형태(`$this->service->paginate(...)`)는 컬럼 선택 책임이 위임받은 Repository 에 있으므로 룰이 검사하지 않는다.
+
+### outer 의 `columns: ['*']` 는 위반이 아니다
+
+지연 조인의 목적인 **OFFSET 구간의 넓은 컬럼 읽기**는 inner 가 키 컬럼만 읽는 것으로 이미 사라진다. outer 가 읽는 행 수는 페이지 크기로 고정되므로 `columns: ['*']` 여도 뒤쪽 페이지의 비용 증가는 없다. 넓은 컬럼을 가진 테이블에서 목록 컬럼을 좁히는 것은 그 위에 얹는 추가 최적화이고, 화면이 실제로 쓰는 컬럼이 분명할 때 적용한다.
+
+다만 `columns:` 자체를 생략하면 outer 가 무엇을 읽는지 호출처에서 드러나지 않으므로 항상 명시한다. `DeferredJoinCallSiteContractTest` 가 호출처를 스캔해 `columns:`/`sort:` 명시 여부를 전수 검사한다.
+
+### 정적 검사 대상
+
+| 검출 대상 | 처리 |
+|---|---|
+| `->paginate($perPage)` / `->paginate($perPage, ['*'])` — 컬럼 목록 미지정 또는 전체 컬럼 | 차단 |
+| 요청 값에서 온 정렬 컬럼을 닫힌 집합 검증 없이 `orderBy` 에 전달 | 차단 |
+
+검사 범위는 `app/Repositories/**`, `modules|plugins/_bundled/**/Repositories/**` 와 컨트롤러 3계열이다. 미수정 파일까지 확인하려면 변경분이 아니라 저장소 전체를 대상으로 검사한다 — 변경 파일만 보는 방식으로는 이미 저장소에 있던 위반이 드러나지 않는다.
 
 ---
 

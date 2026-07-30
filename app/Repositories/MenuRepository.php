@@ -3,15 +3,24 @@
 namespace App\Repositories;
 
 use App\Contracts\Repositories\MenuRepositoryInterface;
-use App\Helpers\PermissionHelper;
 use App\Enums\ExtensionOwnerType;
+use App\Helpers\PermissionHelper;
 use App\Models\Menu;
+use App\Models\Module;
+use App\Models\Plugin;
 use App\Models\User;
+use App\Repositories\Concerns\ResolvesSortSpec;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class MenuRepository implements MenuRepositoryInterface
 {
+    use ResolvesSortSpec;
+
+    /** 허용 정렬 컬럼 (MenuListRequest 와 동일 집합) */
+    private const SORTABLE_COLUMNS = ['created_at', 'name', 'slug', 'order'];
+
     /**
      * 모든 메뉴를 조회합니다.
      *
@@ -37,6 +46,14 @@ class MenuRepository implements MenuRepositoryInterface
             ->get();
     }
 
+    /**
+     * 관리용 최상위 메뉴 목록을 조회합니다. (비활성 확장 메뉴 제외)
+     *
+     * @param  array  $activeModuleIdentifiers  활성 모듈 식별자 목록
+     * @param  array  $activePluginIdentifiers  활성 플러그인 식별자 목록
+     * @param  User|null  $user  접근 권한 판정 대상 사용자 (null 이면 역할 필터 미적용)
+     * @return Collection 최상위 메뉴 컬렉션 (자식 메뉴 포함)
+     */
     public function getTopLevelMenusForManagement(array $activeModuleIdentifiers = [], array $activePluginIdentifiers = [], ?User $user = null): Collection
     {
         $extensionFilter = function ($query) use ($activeModuleIdentifiers, $activePluginIdentifiers) {
@@ -67,13 +84,13 @@ class MenuRepository implements MenuRepositoryInterface
         }
 
         return $query->with(['creator', 'roles', 'children' => function ($query) use ($extensionFilter, $user) {
-                $query->where($extensionFilter);
-                if ($user) {
-                    $query->accessibleBy($user);
-                }
-                $query->with('roles')
-                    ->orderBy('order');
-            }])
+            $query->where($extensionFilter);
+            if ($user) {
+                $query->accessibleBy($user);
+            }
+            $query->with('roles')
+                ->orderBy('order');
+        }])
             ->orderBy('order')
             ->get();
     }
@@ -260,7 +277,7 @@ class MenuRepository implements MenuRepositoryInterface
                     $q->where('extension_type', ExtensionOwnerType::Module)
                         ->whereExists(function ($subQuery) {
                             $subQuery->select(DB::raw(1))
-                                ->from('modules')
+                                ->from((new Module)->getTable())
                                 ->whereColumn('modules.identifier', 'menus.extension_identifier')
                                 ->where('modules.status', 'active');
                         });
@@ -270,7 +287,7 @@ class MenuRepository implements MenuRepositoryInterface
                     $q->where('extension_type', ExtensionOwnerType::Plugin)
                         ->whereExists(function ($subQuery) {
                             $subQuery->select(DB::raw(1))
-                                ->from('plugins')
+                                ->from((new Plugin)->getTable())
                                 ->whereColumn('plugins.identifier', 'menus.extension_identifier')
                                 ->where('plugins.status', 'active');
                         });
@@ -359,6 +376,15 @@ class MenuRepository implements MenuRepositoryInterface
         return (int) Menu::where('parent_id', $parentId)->max('order');
     }
 
+    /**
+     * 필터 조건이 적용된 최상위 메뉴 목록을 조회합니다.
+     *
+     * @param  array  $filters  필터 조건 배열 (sort_by/sort_order/검색 필드)
+     * @param  array  $activeModuleIdentifiers  활성 모듈 식별자 목록
+     * @param  array  $activePluginIdentifiers  활성 플러그인 식별자 목록
+     * @param  User|null  $user  접근 권한 판정 대상 사용자 (null 이면 역할 필터 미적용)
+     * @return Collection 최상위 메뉴 컬렉션 (자식 메뉴 포함)
+     */
     public function getFilteredTopLevelMenus(array $filters, array $activeModuleIdentifiers = [], array $activePluginIdentifiers = [], ?User $user = null): Collection
     {
         $extensionFilter = function ($query) use ($activeModuleIdentifiers, $activePluginIdentifiers) {
@@ -418,10 +444,10 @@ class MenuRepository implements MenuRepositoryInterface
             }
         }
 
-        // 정렬
-        $sortBy = $filters['sort_by'] ?? 'order';
-        $sortOrder = $filters['sort_order'] ?? 'asc';
-        $query->orderBy($sortBy, $sortOrder);
+        // 정렬 (허용 컬럼 화이트리스트로 해석)
+        foreach ($this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'order', 'asc') as $sort) {
+            $query->orderBy($sort['column'], $sort['direction']);
+        }
 
         // 자식 메뉴도 동일한 조건 적용하여 로드
         return $query->with(['creator', 'roles', 'children' => function ($childQuery) use ($extensionFilter, $filters, $user) {
@@ -444,7 +470,7 @@ class MenuRepository implements MenuRepositoryInterface
     /**
      * 필터 연산자를 쿼리에 적용합니다.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query  쿼리 빌더
+     * @param  Builder  $query  쿼리 빌더
      * @param  string  $field  필드명
      * @param  string  $value  검색 값
      * @param  string  $operator  연산자 (like, eq, starts_with, ends_with)
