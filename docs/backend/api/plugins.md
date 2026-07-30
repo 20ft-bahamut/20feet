@@ -753,7 +753,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | from_version | query | string | 아니오 | — | 시작 버전 (범위 하한) |
 | to_version | query | string | 아니오 | — | 대상 버전 (범위 상한) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.extension.changelog_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.extension.changelog_validation_rules`).
 
 **요청 예시**
 
@@ -924,7 +924,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- | --- | --- | --- |
 | identifier | path | string | 예 | — | 대상 리소스의 식별자 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.plugin_settings.update_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.plugin_settings.update_validation_rules`).
 
 **요청 예시**
 

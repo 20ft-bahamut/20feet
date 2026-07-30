@@ -263,7 +263,49 @@ export function initModule(): void {
 
 // IIFE 빌드 시 즉시 실행
 initModule();
+
+// 코어 재초기화 시 재등록 진입점 노출 (아래 "코어 재초기화 시 핸들러 재등록" 참조)
+(window as any).__SirsoftEcommerce = {
+    identifier: MODULE_IDENTIFIER,
+    initModule,
+};
 ```
+
+### 코어 재초기화 시 핸들러 재등록
+
+로케일 전환처럼 `TemplateApp` 이 다시 초기화되는 시점에 ActionDispatcher 는 **새 인스턴스로 교체**된다.
+이때 앞서 등록해 둔 확장 핸들러는 전부 사라지므로, 코어가 각 확장에 재등록을 요청한다.
+요청 방식은 **window 전역 객체에서 약속된 이름의 함수를 찾아 호출**하는 것 하나뿐이다.
+
+| 확장 타입 | 전역 객체 | 재등록 진입점 |
+| --- | --- | --- |
+| 모듈 | `window.__[ModuleName]` | `initModule()` |
+| 플러그인 | `window.__[PluginName]` | `initPlugin()` |
+| 템플릿 | `window.G7TemplateHandlers` | 코어가 직접 재등록 (확장 작업 불필요) |
+
+```typescript
+// 플러그인 엔트리 파일 (index.ts)
+function initPlugin(): void {
+    registerHandlersWithRetry();   // 핸들러 재등록만 수행
+}
+
+initPlugin();
+
+(window as any).__SirsoftDaumPostcode = {
+    identifier: PLUGIN_IDENTIFIER,
+    initPlugin,
+};
+```
+
+이름은 고정이다. 전역 객체를 노출하지 않거나 진입점 이름이 다르면(`init`, `bootstrap`, `setup` 등)
+코어는 그 확장을 재등록 대상에서 조용히 건너뛴다. 그 결과는 다음과 같다:
+
+- 사용자가 언어를 한 번 바꾼 뒤부터 해당 확장의 모든 액션이 **무반응**이 된다
+- 핸들러가 없으므로 dispatch 는 그대로 무시된다 — 콘솔 에러도, 토스트도, 네트워크 요청도 없다
+- 새로고침하면 정상으로 돌아오므로 재현 조건을 모르면 원인 추적이 어렵다
+
+진입점은 **핸들러 재등록만** 수행한다. 최초 진입 1회로 충분한 작업(리다이렉트 복귀 처리,
+MutationObserver·인터셉터 설치, DOM 주입 등)은 넣지 않는다 — 재초기화마다 중복 실행된다.
 
 ### 핸들러 정의
 

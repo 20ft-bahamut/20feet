@@ -16,6 +16,10 @@ use App\Extension\AbstractUpgradeStep;
  *       02_ClearSeoPageCacheAfterRendererParityFix.php
  *         봇용 페이지 캐시를 1회 전량 무효화한다. 7.0.6 이전 렌더러가 빈 본문으로
  *         저장한 결과물이 캐시 수명 동안 계속 서빙되는 것을 막는다.
+ *       03_BackfillForeignKeyColumnComments.php
+ *         외래키 컬럼의 비어 있는 한국어 comment 를 채운다. `->comment()` 가
+ *         `->constrained()` 뒤에 체인되어 컬럼이 아닌 FK 정의에 부착되던 문제를
+ *         소스에서 교정했으나, 기설치본은 마이그레이션이 재실행되지 않아 남는다.
  *
  * 본 클래스는 `AbstractUpgradeStep` 의 default `run()` 에 위임 — 별도 override 없음.
  *

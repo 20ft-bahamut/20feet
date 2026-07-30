@@ -21,6 +21,10 @@ use Illuminate\Http\Response;
  *
  * @since 1.0.0-beta.1
  */
+// audit:allow api-doc-coverage reason: 이 컨트롤러는 인증창 결과를 부모 창으로 넘기는
+// web 브리지 페이지이며 API 표면이 아니다(docs/api 에 수록된 엔드포인트가 아님).
+// 이번 변경은 HTML <title>/lang 을 현재 로케일로 맞춘 것으로 요청·응답 계약이 그대로다
+// (api:docgen --check 결과 drift 없음).
 class InicisPopupBridgeController extends PublicBaseController
 {
     /**
@@ -62,13 +66,18 @@ class InicisPopupBridgeController extends PublicBaseController
      */
     protected function renderBridgeHtml(string $payloadJson): string
     {
+        // 즉시 닫히는 중계 페이지지만, 로딩이 지연되면 브라우저 탭 제목으로 노출된다.
+        // 문서 언어와 제목을 현재 로케일에 맞춘다.
+        $locale = e(app()->getLocale());
+        $title = e(__('sirsoft-verification_kginicis::messages.bridge_page_title'));
+
         return <<<HTML
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{$locale}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>본인인증 결과</title>
+    <title>{$title}</title>
 </head>
 <body>
 <script>

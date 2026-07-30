@@ -67,6 +67,24 @@
 - 지정 시: 해당 ID 의 DOM 요소에만 spinner mount. 요소 미발견 시 `transition_overlay.fallback_target` → `#app` 순으로 3단계 폴백
 - `replace: true` 아닌 일반 navigate(다른 path)는 `handleRouteChange` 경로로 가며 이 옵션은 효과 없음
 
+`replace: true` 는 이 옵션의 **전제 조건**이다. 같은 `params` 에 함께 두지 않으면 엔진이 값을
+읽지 않아 오버레이가 표시되지 않는다. 키를 잘못 적은 것도 아니고 값이 틀린 것도 아니라 경고·예외가
+전혀 남지 않으므로, 화면을 직접 보지 않으면 무효 상태를 알아차릴 수 없다. 검색·필터 변경처럼
+목록을 다시 그리는 이동에도 동일하게 적용된다.
+
+```json
+// ❌ 조용히 무시된다 — 오버레이가 뜨지 않는다
+{ "handler": "navigate", "params": { "path": "/admin/users", "mergeQuery": true,
+  "transition_overlay_target": "users_data_grid__body" } }
+
+// ✅ replace 를 함께 선언
+{ "handler": "navigate", "params": { "path": "/admin/users", "mergeQuery": true, "replace": true,
+  "transition_overlay_target": "users_data_grid__body" } }
+```
+
+정적 검사가 이 조합을 강제한다. 의도적으로 오버레이를 끄려면 키 자체를 지우고, 예외가 필요하면
+액션 노드 `comment` 에 `audit:allow layout-transition-overlay-target-requires-replace <사유>` 를 남긴다.
+
 **DataGrid body 영역 한정 spinner 컨벤션**:
 
 목록 페이지 페이지네이션 시 **pagination 영역은 제외하고 그리드 본문만** spinner 를 표시하려면 `transition_overlay_target` 에 DataGrid 의 `${id}__body` suffix 를 사용한다. DataGrid composite 컴포넌트는 root Div 에 `id` 를, 테이블/카드 목록을 감싸는 내부 wrapper Div 에 `${id}__body` 를 자동으로 부여한다 (pagination 은 body wrapper 밖의 형제).

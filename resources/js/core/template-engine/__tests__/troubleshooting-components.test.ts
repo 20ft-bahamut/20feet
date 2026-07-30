@@ -47,6 +47,40 @@ describe('트러블슈팅 회귀 테스트 - flex 압착(shrink)', () => {
       expect(responsiveManager.getMatchingKey(responsive, 1024)).toBeNull();
     });
 
+    /**
+     * 사례: 안내 문구는 "페이지로 이동" 인데 실제로는 팝업이 열림 (경계 폭 1px)
+     *
+     * 확장이 화면 폭으로 동작을 고를 때 엔진과 같은 값을 읽어야 문구와 동작이 일치한다.
+     * 엔진이 `window.innerWidth` 를 본다는 전제가 깨지면(예: matchMedia 로 교체) 규정을 따른
+     * 모든 확장이 경계 폭에서 동시에 어긋나므로, 그 전제를 여기서 고정한다.
+     *
+     * @see docs/frontend/troubleshooting-components-misc.md "확장 코드의 화면 폭 판정 관련 이슈"
+     * @see docs/frontend/responsive-layout.md "확장 코드에서 같은 경계를 판정할 때"
+     */
+    it('엔진은 window.innerWidth 로 현재 폭을 정한다 (matchMedia 아님)', () => {
+      vi.useFakeTimers();
+      const matchMedia = vi.fn(() => ({ matches: false }));
+      vi.stubGlobal('matchMedia', matchMedia);
+      const original = window.innerWidth;
+
+      try {
+        Object.defineProperty(window, 'innerWidth', { value: 1023, configurable: true });
+        // resize 를 태워 현재 폭을 다시 읽게 한다 (debounce 150ms)
+        window.dispatchEvent(new Event('resize'));
+        vi.advanceTimersByTime(200);
+
+        expect(responsiveManager.getWidth()).toBe(1023);
+        expect(responsiveManager.matches('portable')).toBe(true);
+        expect(matchMedia).not.toHaveBeenCalled();
+      } finally {
+        Object.defineProperty(window, 'innerWidth', { value: original, configurable: true });
+        window.dispatchEvent(new Event('resize'));
+        vi.advanceTimersByTime(200);
+        vi.unstubAllGlobals();
+        vi.useRealTimers();
+      }
+    });
+
     it('mobile 과 portable 이 함께 정의되면 좁은 범위(mobile)가 우선한다', () => {
       const responsive = {
         portable: { props: { className: 'portable-wins' } },

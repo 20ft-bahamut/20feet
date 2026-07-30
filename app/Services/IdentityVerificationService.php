@@ -174,11 +174,11 @@ class IdentityVerificationService
      * 비동기 검증 흐름(Stripe Identity / 토스인증 push / 외부 redirect 콜백 대기) 에서 클라이언트가
      * `GET /api/identity/challenges/{id}` 로 상태를 폴링할 때 사용합니다.
      *
-     * 반환 필드는 코드 본체·내부 metadata 를 제외한 공개 안전 필드만:
-     * - id / status / provider_id / purpose / render_hint / expires_at / attempts / max_attempts / public_payload
+     * 반환 필드는 코드 본체·내부 metadata·시도 횟수를 제외한 공개 안전 필드만:
+     * - id / status / provider_id / purpose / render_hint / expires_at / max_attempts / public_payload
      *
-     * attempts/max_attempts 는 프론트 풀페이지 (`auth/identity_challenge.json`) 가 "남은 시도 횟수" UI
-     * 카운트다운에 사용한다. URL 직접 진입(외부 redirect 콜백 후) 흐름에서도 정확한 한도 표시 보장.
+     * max_attempts 는 정책 상수라 노출해도 무방하며, 프론트 풀페이지 (`auth/identity_challenge.json`) 가
+     * 시도 한도 표시에 사용한다. 누적 시도 횟수(attempts)는 싣지 않는다 — 사유는 반환 지점 주석 참조.
      *
      * @param  string  $challengeId  Challenge UUID
      * @return array<string, mixed>|null 공개 상태 또는 null (없는 경우)
@@ -207,8 +207,9 @@ class IdentityVerificationService
             'render_hint' => $log->render_hint,
             'expires_at' => optional($log->expires_at)->toIso8601String(),
             // 시도 횟수(attempts)는 공개 폴링 응답에 싣지 않는다 — challenge id 만 알면 누구나
-            // 조회할 수 있는 경로라, 남의 인증 시도가 몇 번 실패했는지가 그대로 드러난다.
-            // 화면의 '남은 시도 횟수' 는 모달이 자기 시도를 세어 표시하므로 영향이 없다.
+            // 조회할 수 있는 경로라, 남의 인증 시도가 몇 번 실패했는지가 드러나고 잠금 직전까지
+            // 시도 횟수를 맞춰 보는 데도 쓰일 수 있다. 상한(max_attempts)은 정책 상수라 노출해도
+            // 무방하며, 화면의 '남은 시도 횟수' 는 모달이 자기 시도를 세어 표시하므로 영향이 없다.
             'max_attempts' => (int) $log->max_attempts,
             'public_payload' => $publicPayload,
         ];

@@ -1883,8 +1883,7 @@ _단건 응답: `data` 객체의 필드._
 | purpose | string | `sensitive_action` | 인증 목적 (signup\|password_reset\|self_update\|sensitive_action\|login\|*module-defined*) — 코어 5종은 App\Enums\IdentityVerificationPurpose enum, 모듈/플러그인은 declaredPurposes 레지스트리 |
 | render_hint | string | `text_code` | 프론트 렌더 힌트 (text_code\|link\|external_redirect) |
 | expires_at | string | `2026-05-12T18:14:19+00:00` | expires 일시 |
-| attempts | integer | `3` | 시도 횟수 |
-| max_attempts | integer | `5` | 허용 최대 시도 횟수 |
+| max_attempts | integer | `5` | 허용 최대 시도 횟수 (정책 상수). 누적 시도 횟수(attempts)는 잠금 직전까지 시도 횟수를 맞춰 보는 데 쓰일 수 있어 본 응답에 포함하지 않는다 |
 | public_payload | array | `[]` | 프론트 렌더에 필요한 공개 안전 페이로드 (민감 metadata 제외, 프로바이더별 UI 힌트 — 없으면 빈 배열) |
 
 **응답 예시**

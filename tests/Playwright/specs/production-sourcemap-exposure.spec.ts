@@ -18,9 +18,28 @@
  * 발생한다. 이 spec 은 그 회귀(주석/파일 불일치)도 함께 잡는다.
  */
 import { test, expect } from '@playwright/test';
+import { readFileSync, existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /** 소스맵 요청으로 간주할 URL 패턴 */
 const MAP_REQUEST = /\.map(\?|$)/;
+
+/**
+ * 대상 인스턴스의 `APP_ENV` 를 읽습니다 (코어 `.env`).
+ *
+ * playwright.config.ts 의 base URL 해석과 같은 방식이다 — 전용 엔드포인트에 의존하지 않는다.
+ *
+ * @returns APP_ENV 값 (판독 실패 시 null)
+ */
+function appEnv(): string | null {
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+  const envPath = resolve(root, '.env');
+  if (!existsSync(envPath)) return null;
+  const match = readFileSync(envPath, { encoding: 'utf-8' }).match(/^APP_ENV=(.*)$/m);
+
+  return match ? match[1].trim().replace(/^["']|["']$/g, '') : null;
+}
 
 test.describe('프로덕션 소스맵 노출 차단', () => {
   test('@smoke 사용자 페이지 로드 시 소스맵을 요청하지 않는다', async ({ page }) => {
@@ -94,7 +113,16 @@ test.describe('프로덕션 소스맵 노출 차단', () => {
     expect(parseErrors, `번들 실행 관련 콘솔 에러: ${parseErrors.join(' | ')}`).toHaveLength(0);
   });
 
+  // 이 테스트는 **프로덕션(비-local) 전제**다.
+  // `AllowedPluginFileType` / `AllowedModuleFileType` 은 `app()->environment('local')` 일 때만
+  // 허용 확장자에 `map` 을 덧붙인다 (로컬 dev 빌드 산출물 디버깅용, 의도된 분기). 따라서 로컬에서는
+  // 200 이 정상이며, 여기서 실패하면 결함이 아니라 환경 불일치다 — 그 환경에서는 건너뛴다.
   test('@smoke 확장 소스맵 에셋은 직접 요청해도 서빙되지 않는다', async ({ request }) => {
+    test.skip(
+      appEnv() === 'local',
+      'APP_ENV=local 은 소스맵 서빙을 의도적으로 허용한다 (프로덕션 전제 테스트)',
+    );
+
     // 디스크에 맵이 없더라도, 허용 확장자에서 제외됐으므로 200 이 나오면 안 된다.
     const targets = [
       '/api/modules/assets/sirsoft-ecommerce/dist/js/module.iife.js.map',

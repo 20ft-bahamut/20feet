@@ -27,6 +27,19 @@ interface LayoutRepositoryInterface
     public function findByName(int $templateId, string $name): ?TemplateLayout;
 
     /**
+     * 특정 레이아웃을 영구 삭제 (템플릿 ID와 이름으로)
+     *
+     * soft delete 가 아닌 `forceDelete` 다. 이름으로 재등록될 수 있는 레이아웃
+     * (파일 → DB 동기화 대상) 은 soft delete 잔여 행이 남으면 재등록이 충돌하므로
+     * 파일 기준 동기화 경로와 동일하게 영구 삭제한다.
+     *
+     * @param  int  $templateId  템플릿 ID
+     * @param  string  $name  레이아웃 이름
+     * @return bool 삭제 여부 (대상 부재 시 false)
+     */
+    public function deleteByName(int $templateId, string $name): bool;
+
+    /**
      * ID로 레이아웃 조회
      *
      * @param  int  $id  레이아웃 ID

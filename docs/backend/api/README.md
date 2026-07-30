@@ -201,7 +201,7 @@ location ~* \.(js|css|json)$ { expires max; access_log off; }
 > 각 확장이 자신의 API 문서를 소유합니다. 아래 표는 자동 생성됩니다.
 
 <!-- @generated:start:api-readme-extensions -->
-- **확장 수**: 10 · **엔드포인트 수**: 384
+- **확장 수**: 13 · **엔드포인트 수**: 385
 
 | 확장 | 유형 | API 문서 목차 | 문서/엔드포인트 |
 | --- | --- | --- | --- |
@@ -214,6 +214,9 @@ location ~* \.(js|css|json)$ { expires max; access_log off; }
 | `sirsoft-marketing` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-marketing/docs/api/README.md) | 2 / 2 |
 | `sirsoft-message_bizppurio` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-message_bizppurio/docs/api/README.md) | 6 / 12 |
 | `sirsoft-pay_kginicis` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-pay_kginicis/docs/api/README.md) | 5 / 22 |
+| `sirsoft-pay_nhnkcp` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-pay_nhnkcp/docs/api/README.md) | 0 / 0 |
+| `sirsoft-pay_nicepayments` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-pay_nicepayments/docs/api/README.md) | 0 / 0 |
 | `sirsoft-verification_kginicis` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-verification_kginicis/docs/api/README.md) | 1 / 1 |
+| `sirsoft-verification_nhnkcp` | 플러그인 | [docs/api/](../../../plugins/_bundled/sirsoft-verification_nhnkcp/docs/api/README.md) | 1 / 1 |
 
 <!-- @generated:end -->

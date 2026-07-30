@@ -67,7 +67,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- | --- | --- | --- |
 | avatar | body | image | 예 | max 2048 | 아바타 이미지 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.user.upload_avatar_rules`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.user.upload_avatar_validation_rules`).
 
 **요청 예시**
 
@@ -103,6 +103,6 @@ Content-Type: image/png
 
 <!-- @generated:end -->
 
-**설명** 현재 인증 사용자의 아바타 이미지를 업로드합니다. 기존 아바타가 있으면 먼저 삭제한 뒤 새 이미지를 `avatar` 컬렉션의 다형성 첨부파일로 등록하고, 업로드 활동을 로그로 기록합니다. `auth:sanctum` 인증만 필요하고 별도 권한은 없으며, 이미지는 최대 2048KB로 제한됩니다. 확장은 `core.user.upload_avatar_rules` 훅으로 검증 규칙을 추가할 수 있습니다.
+**설명** 현재 인증 사용자의 아바타 이미지를 업로드합니다. 기존 아바타가 있으면 먼저 삭제한 뒤 새 이미지를 `avatar` 컬렉션의 다형성 첨부파일로 등록하고, 업로드 활동을 로그로 기록합니다. `auth:sanctum` 인증만 필요하고 별도 권한은 없으며, 이미지는 최대 2048KB로 제한됩니다. 확장은 `core.user.upload_avatar_validation_rules` 훅으로 검증 규칙을 추가할 수 있습니다.
 
 

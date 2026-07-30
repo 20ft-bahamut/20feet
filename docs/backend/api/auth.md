@@ -2860,7 +2860,7 @@ HTTP/1.1 200
 | token | body | string | 예 | — | 인증/검증 토큰 |
 | email | body | email | 예 | — | 이메일 주소 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.auth.validate_reset_token_rules`, `core.auth.validate_reset_token_messages`).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.auth.validate_reset_token_validation_rules`, `core.auth.validate_reset_token_messages`).
 
 **요청 예시**
 

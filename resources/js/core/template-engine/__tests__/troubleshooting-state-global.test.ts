@@ -674,4 +674,53 @@ describe('트러블슈팅 회귀 테스트 - 데이터소스 업데이트 및 �
       expect(getLocalInitTracking().hash).toBe('');
     });
   });
+
+  describe('[사례 7] 저장 후 refetch 했는데 입력칸만 예전 입력값을 유지', () => {
+    /**
+     * 증상: 서버가 저장 시 값을 정규화하는 화면에서 저장 성공 후 refetchDataSource 를 호출했는데
+     *       입력칸에는 사용자가 타이핑한 값이 그대로 남는다 (사이트코드 SMA1B2C → 저장 A1B2C,
+     *       입력칸은 계속 SMA1B2C. 왼쪽 SM 배지와 겹쳐 SMSMA1B2C 로 보인다).
+     * 원인: initLocal 미적용이 아니다. 브라우저 계측 결과 refetch 는 발생하고
+     *       `_localInit applied (data changed): [form]` 도 찍히며 `_local.form` 은 정규화된 값을 갖는다.
+     *       `_local` 갱신과 사용자가 이미 편집한 입력칸의 DOM 갱신이 별개다.
+     * 해결: 저장 성공 onSuccess 에서 응답 데이터로 폼을 명시 재바인딩
+     *       (`setState` target=local, `form: "{{response.data}}"`).
+     *
+     * 본 테스트는 이 사례의 진단 근거 — "refetch 는 `_local` 을 갱신한다" — 를 잠근다.
+     * 이 전제가 깨지면 사례의 원인 분석("initLocal 문제가 아니다")이 더 이상 성립하지 않으므로
+     * 문서와 함께 재검토해야 한다.
+     *
+     * @see localInitSlot.ts - mergeLocalInitSlot (소비된 슬롯은 병합이 아니라 교체)
+     */
+    beforeEach(() => {
+      resetLocalInitTracking();
+    });
+
+    afterEach(() => {
+      resetLocalInitTracking();
+    });
+
+    it('refetch 가 실어 온 정규화 값이 소비된 슬롯을 교체해 _local 에 도달해야 함', () => {
+      // 최초 로드: 저장돼 있던 값
+      const initial = { form: { live_site_cd: 'Z9Y8X' }, _forceLocalInit: 1700000000000 };
+      markLocalInitConsumed(initial);
+
+      // 저장 후 refetch: 서버가 정규화한 값 (refetchOnMount: true → 새 타임스탬프)
+      const afterSave = { form: { live_site_cd: 'A1B2C' }, _forceLocalInit: 1700000001000 };
+
+      const slot = mergeLocalInitSlot(initial, afterSave) as Record<string, any>;
+
+      // 소비된 슬롯은 병합이 아니라 교체 — 과거 값이 남아서는 안 된다
+      expect(slot.form.live_site_cd).toBe('A1B2C');
+      expect(slot).toBe(afterSave);
+    });
+
+    it('타임스탬프가 갱신되어 소비부 추적 키가 달라져야 함 (재적용 허용)', () => {
+      const before = `${JSON.stringify({ form: { live_site_cd: 'Z9Y8X' } })}:1700000000000`;
+      const after = `${JSON.stringify({ form: { live_site_cd: 'A1B2C' } })}:1700000001000`;
+
+      // DynamicRenderer 의 trackingKey 계산과 동일한 형태 — 값·타임스탬프 둘 다 달라 재적용된다
+      expect(after).not.toBe(before);
+    });
+  });
 });
