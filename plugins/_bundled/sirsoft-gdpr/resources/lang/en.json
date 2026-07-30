@@ -88,7 +88,7 @@
             },
             "banner_enabled": {
                 "label": "Show Cookie Banner",
-                "hint": "When enabled, the cookie banner, pre-consent auto-blocking, and the MyPage consent management card are activated together."
+                "hint": "When enabled, the cookie banner and pre-consent auto-blocking are activated together. The MyPage consent management card is independent of this toggle and always shows for members with consent/withdrawal history."
             },
             "banner_position": {
                 "label": "Banner Position",
@@ -104,6 +104,7 @@
                 "warning_visual_break": "Be careful when classifying external font/stylesheet domains. Misclassification can break the page silently.",
                 "warning_policy_bump": "Bump the cookie policy version after changing the blocked domain list. This prevents existing consenters from being implicitly enrolled into newly added trackers.",
                 "warning_domain_format": "Domain format: example.com, *.example.com (wildcard) are supported. Names without dots (like localhost) and non-ASCII domains are not supported.",
+                "warning_scope_limit": "Auto-blocking only covers scripts registered by plugins/modules. External scripts inserted directly into the head area by admins (e.g. via Template External Scripts) are outside this protection — verify their load conditions separately.",
                 "tag_input_placeholder": "Type a domain and press Enter (e.g., google-analytics.com, *.hotjar.com)",
                 "tag_no_options": "No suggestions. Type to add.",
                 "category": {

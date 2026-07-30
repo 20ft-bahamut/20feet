@@ -259,7 +259,7 @@
                                                 "type": "basic",
                                                 "name": "H3",
                                                 "props": {
-                                                    "className": "text-error-strong"
+                                                    "className": "section-heading-md"
                                                 },
                                                 "text": "$t:sirsoft-gdpr.settings.section.operator"
                                             },
@@ -286,7 +286,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -350,7 +350,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -502,7 +502,7 @@
                                                         "type": "basic",
                                                         "name": "H3",
                                                         "props": {
-                                                            "className": "text-error-strong"
+                                                            "className": "section-heading-md"
                                                         },
                                                         "text": "$t:sirsoft-gdpr.settings.section.cookie_banner"
                                                     },
@@ -549,7 +549,7 @@
                                                 "name": "Div",
                                                 "comment": "v1.4.0: banner_display_mode Select → banner_enabled Toggle",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -600,7 +600,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "props": {
-                                                    "className": "section-heading-md"
+                                                    "className": "grid-3col-responsive"
                                                 },
                                                 "children": [
                                                     {
@@ -755,6 +755,7 @@
                                                                                         "text": "v{{gdprPolicyVersionCurrent?.data?.data?.version ?? '?'}}"
                                                                                     },
                                                                                     {
+                                                                                        "id": "policy_version_current_snapshot_view_button",
                                                                                         "type": "basic",
                                                                                         "name": "Button",
                                                                                         "if": "{{gdprPolicyVersionCurrent?.data?.data?.version}}",
@@ -923,23 +924,21 @@
                                                                                     {
                                                                                         "type": "click",
                                                                                         "handler": "sequence",
-                                                                                        "params": {
-                                                                                            "actions": [
-                                                                                                {
-                                                                                                    "handler": "setState",
-                                                                                                    "params": {
-                                                                                                        "target": "local",
-                                                                                                        "policyHistoryOpen": "{{!_local.policyHistoryOpen}}"
-                                                                                                    }
-                                                                                                },
-                                                                                                {
-                                                                                                    "handler": "refetchDataSource",
-                                                                                                    "params": {
-                                                                                                        "dataSourceId": "gdprPolicyVersionHistory"
-                                                                                                    }
+                                                                                        "actions": [
+                                                                                            {
+                                                                                                "handler": "setState",
+                                                                                                "params": {
+                                                                                                    "target": "local",
+                                                                                                    "policyHistoryOpen": "{{!_local.policyHistoryOpen}}"
                                                                                                 }
-                                                                                            ]
-                                                                                        }
+                                                                                            },
+                                                                                            {
+                                                                                                "handler": "refetchDataSource",
+                                                                                                "params": {
+                                                                                                    "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                }
+                                                                                            }
+                                                                                        ]
                                                                                     }
                                                                                 ],
                                                                                 "children": [
@@ -963,6 +962,7 @@
                                                                 ]
                                                             },
                                                             {
+                                                                "id": "policy_version_history_table",
                                                                 "comment": "이력 표 — collapsible. _local.policyHistoryOpen 일 때만 노출. gdprPolicyVersionHistory 데이터소스 페이지네이션 표시.",
                                                                 "type": "basic",
                                                                 "name": "Div",
@@ -1540,7 +1540,7 @@
                                                         "type": "basic",
                                                         "name": "H3",
                                                         "props": {
-                                                            "className": "text-error-strong"
+                                                            "className": "section-heading-md"
                                                         },
                                                         "text": "$t:sirsoft-gdpr.settings.section.auto_blocking"
                                                     },
@@ -1577,7 +1577,7 @@
                                                 "type": "basic",
                                                 "name": "Div",
                                                 "if": "{{!_local.form?.banner_enabled}}",
-                                                "comment": "쿠키 배너 노출 (banner_enabled) OFF 시 안내 박스. ON 으로 전환하면 배너 + 자동 차단 + 마이페이지 카드가 일괄 활성됨",
+                                                "comment": "쿠키 배너 노출 (banner_enabled) OFF 시 안내 박스. ON 으로 전환하면 배너 + 자동 차단이 함께 활성됨 (마이페이지 카드는 이 토글과 무관, 항상 노출)",
                                                 "props": {
                                                     "className": "bg-blue-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-l-4 border-l-blue-500 dark:border-l-blue-400 rounded-lg p-4 flex-center gap-2"
                                                 },
@@ -1640,7 +1640,7 @@
                                                                         "type": "basic",
                                                                         "name": "H4",
                                                                         "props": {
-                                                                            "className": "text-error-strong"
+                                                                            "className": "text-sm font-medium text-gray-900 dark:text-white"
                                                                         },
                                                                         "text": "$t:sirsoft-gdpr.settings.fields.blocked_domains.warnings_title"
                                                                     }
@@ -1667,6 +1667,11 @@
                                                                         "type": "basic",
                                                                         "name": "Li",
                                                                         "text": "$t:sirsoft-gdpr.settings.fields.blocked_domains.warning_domain_format"
+                                                                    },
+                                                                    {
+                                                                        "type": "basic",
+                                                                        "name": "Li",
+                                                                        "text": "$t:sirsoft-gdpr.settings.fields.blocked_domains.warning_scope_limit"
                                                                     }
                                                                 ]
                                                             }

@@ -78,7 +78,7 @@ return [
             ],
             'banner_enabled' => [
                 'label' => 'Show Cookie Banner',
-                'hint' => 'When enabled, the cookie consent banner, pre-consent auto-blocking, and the MyPage consent management card are activated together. (Auto-blocking is the enforcement mechanism for GDPR Art.6 "no processing before consent" and is unified into a single toggle to prevent operators from disabling it independently.)',
+                'hint' => 'When enabled, the cookie consent banner and pre-consent auto-blocking are activated together. (Auto-blocking is the enforcement mechanism for GDPR Art.6 "no processing before consent" and is unified into a single toggle to prevent operators from disabling it independently.) The MyPage consent management card is independent of this toggle and always shows for members with consent/withdrawal history.',
             ],
             'banner_position' => [
                 'label' => 'Banner Position',

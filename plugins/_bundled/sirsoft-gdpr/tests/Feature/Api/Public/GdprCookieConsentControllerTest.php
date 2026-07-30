@@ -153,11 +153,32 @@ class GdprCookieConsentControllerTest extends PluginTestCase
             '신규 게스트 session_id 는 UUID v4 형식이어야 함'
         );
 
-        // 응답에 gdpr_session 쿠키가 첨부되어야 함
+        // 응답에 gdpr_session 쿠키가 첨부되어야 함 — 값은 위조 방지를 위해 HMAC 서명이 붙어
+        // "{session_id}|{signature}" 형식이므로 session_id 는 접두 일치로 확인한다.
         $cookies = collect($response->headers->getCookies())
             ->firstWhere(fn ($c) => $c->getName() === 'gdpr_session');
         $this->assertNotNull($cookies, '게스트 신규 동의 시 gdpr_session 쿠키가 발급되어야 함');
-        $this->assertSame($sessionId, $cookies->getValue());
+        $this->assertStringStartsWith($sessionId.'|', (string) $cookies->getValue());
+    }
+
+    /**
+     * 회귀 가드: gdpr_session 쿠키 값을 임의로 조작해 보내면 서버가 그 값을 신뢰하지 않고
+     * 새로운(다른) session_id 로 취급해야 한다 — 서명 없는 값을 그대로 신뢰하던 결함 회귀 방지.
+     */
+    public function test_tampered_gdpr_session_cookie_is_not_trusted(): void
+    {
+        $this->mockSettings(['cookie_policy_version' => '1.0']);
+
+        $forgedSessionId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+
+        $response = $this->withCookie('gdpr_session', $forgedSessionId)
+            ->postJson('/api/plugins/sirsoft-gdpr/consent/cookie', [
+                'consents' => ['cookie_necessary' => true, 'cookie_analytics' => true],
+                'source' => 'banner',
+            ]);
+
+        $response->assertOk();
+        $this->assertNotSame($forgedSessionId, $response->json('data.session_id'), '서명 없는 위조 session_id 는 신뢰되면 안 됨');
     }
 
     public function test_guest_consent_persists_via_service_with_session_id(): void

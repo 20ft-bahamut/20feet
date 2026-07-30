@@ -84,9 +84,10 @@ class GdprUserConsentResourceTest extends PluginTestCase
         $this->assertSame(__('sirsoft-gdpr::messages.mypage.privacy.badge.rejected'), $result['status_badge_label']);
     }
 
-    public function test_revoked_optional_maps_to_revoked_status_with_no_date_label(): void
+    public function test_revoked_optional_maps_to_revoked_status_with_revoked_date_label(): void
     {
-        // 철회도 거부와 동일 — 동의 상태가 아니므로 날짜/라벨 미노출.
+        // 이슈 #509 16번 — 철회 이력이 있는 항목은 철회일 + '철회' 라벨을 노출한다
+        // (배지는 신규 미선택과 함께 '미설정'(unset) 유지 — 배지 통합과 날짜 줄 노출은 별개).
         $consent = new GdprUserConsent([
             'consent_key' => 'cookie_marketing',
             'is_consented' => false,
@@ -98,9 +99,8 @@ class GdprUserConsentResourceTest extends PluginTestCase
         $result = $this->toArray($consent);
 
         $this->assertSame('revoked', $result['status']);
-        $this->assertNull($result['status_label']);
-        $this->assertNull($result['status_at_formatted']);
-        // 철회는 신규 미선택과 함께 '미설정'(unset) 배지로 통합.
+        $this->assertSame(__('sirsoft-gdpr::messages.mypage.privacy.status.revoked'), $result['status_label']);
+        $this->assertNotNull($result['status_at_formatted']);
         $this->assertSame(__('sirsoft-gdpr::messages.mypage.privacy.badge.unset'), $result['status_badge_label']);
     }
 

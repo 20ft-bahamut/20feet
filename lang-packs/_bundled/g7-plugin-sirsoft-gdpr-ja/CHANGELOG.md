@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.2] - 2026-07-29
+
+### Added
+
+- 자동 차단 정책 카드에 보호 범위 한계 안내 문구(운영자가 직접 삽입한 외부 스크립트는 보호 범위 밖) 일본어 번역 추가
+
 ## [1.0.1] - 2026-07-27
 
 ### Added
