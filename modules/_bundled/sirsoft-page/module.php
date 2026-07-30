@@ -168,4 +168,35 @@ class Module extends AbstractModule
             ],
         ];
     }
+
+    /**
+     * 성능 계측 프로파일 정의 (`g7:bench`).
+     *
+     * 페이지 목록은 응답 계약상 본문까지 그대로 노출하므로 컬럼 프루닝이 불가합니다
+     * (`['*']`). 이 경우 계측의 비교축은 select * vs select id 이며, 그 배수가 지연 조인
+     * 적용의 기대 효과입니다.
+     *
+     * @return array<string, array<string, mixed>> 프로파일 키 → 정의
+     */
+    public function getBenchmarkProfiles(): array
+    {
+        return [
+            'pages' => [
+                'type' => 'list',
+                'label' => '페이지 목록',
+                'table' => 'pages',
+                'columns' => ['*'],
+                'order' => [['created_at', 'desc'], ['id', 'desc']],
+                // 페이지는 소프트 삭제 컬럼이 없다 — 실제 스키마 기준 선언
+                'soft_delete' => false,
+            ],
+            'pages_screen' => [
+                'type' => 'screen',
+                'label' => '관리자 페이지 목록 화면',
+                'route' => 'api.modules.sirsoft-page.admin.pages.index',
+                'query' => ['per_page' => 20],
+                'permissions' => ['sirsoft-page.pages.read'],
+            ],
+        ];
+    }
 }

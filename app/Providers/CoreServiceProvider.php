@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Benchmark\Axes\BatchAxisRunner;
+use App\Benchmark\Axes\ListAxisRunner;
+use App\Benchmark\Axes\ScreenAxisRunner;
+use App\Benchmark\Axes\WriteAxisRunner;
+use App\Console\Commands\BenchCommand;
 use App\Contracts\Extension\CacheInterface;
 use App\Contracts\Extension\ExtensionMiddlewareRegistryInterface;
 use App\Contracts\Extension\HookListenerInterface;
@@ -119,7 +124,28 @@ class CoreServiceProvider extends ServiceProvider
 
         $this->registerRepositoryBindings();
         $this->registerExtensionManagers();
+        $this->registerBenchmarkAxes();
         // ActivityLogManager 제거됨 — Monolog 채널(config/logging.php 'activity')로 대체
+    }
+
+    /**
+     * 성능 계측 축 실행기를 등록합니다.
+     *
+     * 축이 늘어날 때 `g7:bench` 커맨드를 고치지 않고 여기에 실행기만 추가하면 되도록
+     * 태그로 묶어 주입합니다. 실행기는 CLI 계측 시점에만 해석되므로 웹 요청 비용은 없습니다.
+     */
+    private function registerBenchmarkAxes(): void
+    {
+        $this->app->tag([
+            ListAxisRunner::class,
+            ScreenAxisRunner::class,
+            WriteAxisRunner::class,
+            BatchAxisRunner::class,
+        ], 'benchmark.axes');
+
+        $this->app->when(BenchCommand::class)
+            ->needs('$runners')
+            ->giveTagged('benchmark.axes');
     }
 
     /**

@@ -847,7 +847,7 @@ public function getAll(): Collection
 게시글 테이블 20만 행 기준 실측 (각 3회 중앙값, 첫 회 버림):
 
 ```bash
-php artisan g7:bench:pagination --table=board_posts --seed=200000 --offsets=0,20000,50000,199980 --runs=3 --explain
+php artisan g7:bench --profile=sirsoft-board/board_posts --seed=200000 --offsets=0,20000,50000,199980 --runs=3 --explain
 ```
 
 | OFFSET | 목록 컬럼 | ID 만 조회 | 배수 |
@@ -862,6 +862,8 @@ php artisan g7:bench:pagination --table=board_posts --seed=200000 --offsets=0,20
 `SUBSTRING(content, 1, N)` 을 목록 컬럼에 두는 것도 프루닝이 아니다. 앞 N 바이트를 얻기 위해 오버플로 페이지를 그대로 읽는다.
 
 `SUBSTRING(content, 1, 200)` 을 목록 컬럼에 두는 것은 프루닝이 아니다. 앞 200바이트를 얻기 위해 오버플로 페이지를 그대로 읽기 때문이다. 잘라내기는 지연 조인의 outer 로 옮긴다.
+
+계측 대상 프로파일 선언 방법과 나머지 3축(화면 응답·쓰기·배치)은 [benchmark.md](benchmark.md) 를 참조한다.
 
 ### 사용
 

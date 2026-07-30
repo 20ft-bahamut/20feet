@@ -6,7 +6,7 @@
 
 <!-- AUTO-GENERATED-START: docs-quick-reference -->
 
-### 백엔드 [backend/](docs/backend/) (32개)
+### 백엔드 [backend/](docs/backend/) (33개)
 
 | 문서 | 설명 | TL;DR 핵심 |
 |------|------|-----------|
@@ -16,6 +16,7 @@
 | [api-documentation.md](docs/backend/api-documentation.md) | API 레퍼런스 문서 규정 (API Documentation) | 모든 API 엔드포인트는 레퍼런스 문서 필수 — 메서드/URI/파라미터/응답 필드 + 요청·응답 예시 ... |
 | [api-resources.md](docs/backend/api-resources.md) | API 리소스 | Resource: BaseApiResource 상속 필수 / Collection: BaseApiColl... |
 | [authentication.md](docs/backend/authentication.md) | 인증 및 세션 처리 | Laravel Sanctum 토큰 전용 인증 (Bearer 토큰만 사용) |
+| [benchmark.md](docs/backend/benchmark.md) | 성능 계측 시스템 (Benchmark) | `g7:bench` 가 4축(list/screen/write/batch)을 잰다 — 계측 대상은 커맨드... |
 | [broadcasting.md](docs/backend/broadcasting.md) | Broadcasting (실시간 이벤트) | Laravel Reverb 사용 (WebSocket) |
 | [console-confirm.md](docs/backend/console-confirm.md) | 콘솔 yes/no 프롬프트 (ConsoleConfirm) | 콘솔 커맨드의 yes/no 프롬프트는 $this->unifiedConfirm() 사용 — Laravel... |
 | [controllers.md](docs/backend/controllers.md) | 컨트롤러 계층 구조 | AdminBaseController / AuthBaseController / PublicBaseCont... |
@@ -1054,6 +1055,7 @@ php artisan migrate:rollback
 | `lang/**` | [database-guide.md](docs/database-guide.md) (다국어 섹션) |
 | `routes/**` | [routing.md](docs/backend/routing.md) |
 | `app/Seo/**` | [seo-system.md](docs/backend/seo-system.md) |
+| `app/Benchmark/**`, `config/benchmark.php` | [benchmark.md](docs/backend/benchmark.md) |
 
 ---
 
@@ -1086,3 +1088,8 @@ php artisan migrate:rollback
 - **ResolvesActivityLogType**: `app/ActivityLog/Traits/ResolvesActivityLogType.php`
 - **ChangeDetector**: `app/ActivityLog/ChangeDetector.php`
 - **CoreActivityLogListener**: `app/Listeners/CoreActivityLogListener.php`
+- **BenchmarkProfileRegistry**: `app/Benchmark/BenchmarkProfileRegistry.php`
+- **성능 계측 DTO**: `app/Benchmark/DTO/{BenchmarkProfile,BenchmarkRunOptions,BenchmarkResult}.php`
+- **BenchmarkAxisRunner**: `app/Benchmark/Contracts/BenchmarkAxisRunner.php`
+- **성능 계측 축 실행기**: `app/Benchmark/Axes/{List,Screen,Write,Batch}AxisRunner.php`
+- **BenchmarkAxis**: `app/Enums/BenchmarkAxis.php`

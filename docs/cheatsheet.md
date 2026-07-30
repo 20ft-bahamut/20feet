@@ -258,12 +258,20 @@ php artisan seo:generate-sitemap --mode=full|auto|incremental  # 재생성 모�
 ### 성능 계측 Artisan 커맨드
 
 ```bash
-# 깊은 OFFSET 목록 조회 비용 계측 (목록 컬럼 vs 키 컬럼 두 축). 상세: docs/backend/service-repository.md
-# 대량 합성 행을 시딩하므로 운영 데이터가 있는 환경에서 --seed/--fresh 를 쓰지 않는다.
-php artisan --env=testing g7:bench:pagination --list-profiles
-php artisan --env=testing g7:bench:pagination --table=board_posts --fresh --seed=200000
-php artisan --env=testing g7:bench:pagination --table=board_posts --offsets=0,20000,50000,199980 --runs=3 --explain
-php artisan --env=testing g7:bench:pagination --table=orders --json   # 기계 판독용
+# 4축(목록/화면/쓰기/배치) 성능 계측. 계측 대상은 코어 config/benchmark.php + 확장 getBenchmarkProfiles() 선언.
+# 상세: docs/backend/benchmark.md
+php artisan g7:bench --list-profiles                       # 등록된 프로파일 목록
+php artisan g7:bench --profile=core/users_screen            # 화면 1장 응답 시간 + 쿼리 건수 + N+1 후보
+php artisan g7:bench --axis=list                           # 축 단위
+php artisan g7:bench --all --allow-write --report           # 전체 + 마크다운 리포트 (storage/app/benchmarks/)
+
+# 깊은 OFFSET 계측 — 대량 합성 행을 시딩하므로 운영 데이터가 있는 환경에서 --seed/--fresh 를 쓰지 않는다.
+php artisan --env=testing g7:bench --profile=sirsoft-board/board_posts --fresh --seed=200000
+php artisan --env=testing g7:bench --profile=sirsoft-board/board_posts --offsets=0,20000,50000,199980 --runs=3 --explain
+php artisan g7:bench --profile=sirsoft-ecommerce/orders --json   # 기계 판독용
+
+# 데이터를 변경하는 축(write/batch/비-GET screen)은 --allow-write 없이 거부된다.
+php artisan g7:bench --profile=sirsoft-ecommerce/order_create --allow-write
 ```
 
 ### API 문서 Artisan 커맨드
