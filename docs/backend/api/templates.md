@@ -1469,11 +1469,38 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| has_modified_layouts | boolean | 수정된 레이아웃 존재 여부 |
+| modified_count | integer | 수정된 레이아웃 수 |
+| modified_layouts | array | 수정된 레이아웃 목록 |
+| modified_layouts[].id | integer | 레이아웃 ID |
+| modified_layouts[].name | string | 레이아웃 이름 |
+| modified_layouts[].updated_at | string\|null | 최종 수정 일시 (`Y-m-d H:i:s`) |
+| modified_layouts[].size_diff | integer | 원본 대비 바이트 증감 (음수는 축소) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+  "success": true,
+  "message": "수정된 레이아웃 확인이 완료되었습니다.",
+  "data": {
+    "has_modified_layouts": true,
+    "modified_count": 1,
+    "modified_layouts": [
+      {
+        "id": 47,
+        "name": "sirsoft-board.admin_board_index",
+        "updated_at": "2026-07-31 09:20:05",
+        "size_diff": 28
+      }
+    ]
+  }
+}
+```
+
+집계 범위는 해당 템플릿이 **소유한** 레이아웃으로 한정됩니다. 같은 템플릿에 등록된 다른 확장의 레이아웃은 포함되지 않습니다.
 
 **에러 응답**
 
@@ -1481,7 +1508,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.templates.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 식별자의 템플릿이 설치되어 있지 않은 경우 (레이아웃 0건과 구분됨) |
 
 <!-- @generated:end -->
 
@@ -2523,7 +2550,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 설치된 템플릿을 최신 버전으로 업데이트합니다. `layout_strategy`(overwrite: 레이아웃 전면 교체 / keep: 사용자 수정 레이아웃 유지)로 레이아웃 처리 방식을 결정하며, `force`로 강제 진행할 수 있습니다(TemplateService::performVersionUpdate). `core.templates.install` 권한이 필요합니다.
+**설명** 설치된 템플릿을 최신 버전으로 업데이트합니다. `layout_strategy`(overwrite: 레이아웃 전면 교체 / keep: 사용자 수정 레이아웃 유지)로 레이아웃 처리 방식을 결정하며, `force`로 강제 진행할 수 있습니다(TemplateService::performVersionUpdate). `core.templates.install` 권한이 필요합니다. `keep` 을 지정하면 사용자가 수정한 레이아웃(원본 해시와 현재 내용이 다른 레이아웃)은 갱신 대상에서 제외되어 현재 내용이 그대로 유지되고, 나머지 레이아웃만 파일 기준으로 갱신됩니다. 성공 응답 메시지에는 대상 식별자와 적용된 버전이 채워집니다.
 
 
 ### GET /api/templates/assets/{identifier}/{path}

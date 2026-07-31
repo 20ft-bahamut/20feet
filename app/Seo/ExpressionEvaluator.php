@@ -24,6 +24,13 @@ class ExpressionEvaluator
      */
     private array $seoOverrides = [];
 
+    /**
+     * 번역 면제 바인딩 접두사 (`{{raw:expr}}`)
+     *
+     * 프론트엔드 `rawMarkers.ts` 의 RAW_PREFIX 와 동일해야 합니다.
+     */
+    private const RAW_PREFIX = 'raw:';
+
     public function __construct()
     {
         $this->pipeRegistry = new PipeRegistry;
@@ -86,6 +93,11 @@ class ExpressionEvaluator
         $trimmed = trim($expression);
         if ($this->isSingleBinding($trimmed)) {
             $expr = trim(substr($trimmed, 2, -2));
+
+            // raw: 접두사 제거 — 남겨 두면 콜론이 식의 일부로 파싱돼 평가가 실패한다.
+            if (str_starts_with($expr, self::RAW_PREFIX)) {
+                $expr = trim(substr($expr, strlen(self::RAW_PREFIX)));
+            }
 
             // 파이프 표현식: 원본 값을 파이프로 변환 후 반환
             if (PipeRegistry::hasPipes($expr)) {
@@ -281,9 +293,20 @@ class ExpressionEvaluator
             return $this->resolveTranslation($expression, $context);
         }
 
+        // raw: 접두사(번역 면제 바인딩)를 벗기고 후처리 대상에서 제외한다.
+        // React 는 `{{raw:expr}}` 의 접두사를 떼고 평가한 뒤 결과의 `$t:` 토큰을
+        // 번역하지 않는다(rawMarkers). 여기서 접두사를 그대로 두면 콜론이 식의
+        // 일부로 파싱되어 평가가 실패하고, 봇 화면에서만 값이 사라진다.
+        $rawExempt = false;
+
         // {{binding | pipe}} 패턴 치환 (파이프 표현식 지원)
-        $result = (string) preg_replace_callback('/\{\{(.+?)\}\}/', function ($matches) use ($context) {
+        $result = (string) preg_replace_callback('/\{\{(.+?)\}\}/', function ($matches) use ($context, &$rawExempt) {
             $expr = trim($matches[1]);
+
+            if (str_starts_with($expr, self::RAW_PREFIX)) {
+                $rawExempt = true;
+                $expr = trim(substr($expr, strlen(self::RAW_PREFIX)));
+            }
 
             // 파이프 분리: expr | pipe1 | pipe2(arg)
             if (PipeRegistry::hasPipes($expr)) {
@@ -304,7 +327,8 @@ class ExpressionEvaluator
         }, $expression);
 
         // 인라인 $t:key 토큰 해석 ({{}} 외부 텍스트 내 $t:key|param=value 패턴)
-        if (str_contains($result, '$t:')) {
+        // raw: 바인딩 결과는 번역 면제 — React 와 동일하게 토큰을 그대로 둔다.
+        if (! $rawExempt && str_contains($result, '$t:')) {
             $result = preg_replace_callback('/\$t:(?:defer:)?([\w.\-]+(?:\|[\w.\-]+=[\w.\-{}]+)*)/', function ($matches) use ($context) {
                 return $this->resolveTranslation('$t:'.$matches[1], $context);
             }, $result);

@@ -2606,13 +2606,24 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
           const singleBindingPath = extractSingleBinding(text);
 
           if (singleBindingPath !== null) {
+            // raw: 접두사 감지 — props 처리(위 renderProps)와 동일 규칙.
+            // 접두사를 벗기지 않으면 `raw:` 의 콜론이 식의 일부로 파싱되어
+            // evaluateExpression 이 `Unexpected token ':'` 로 던지고 텍스트가 통째로 사라진다.
+            // @since engine-v1.54.4
+            let isRawBinding = false;
+            let effectivePath = singleBindingPath;
+            if (singleBindingPath.startsWith(RAW_PREFIX)) {
+              isRawBinding = true;
+              effectivePath = singleBindingPath.slice(RAW_PREFIX.length);
+            }
+
             // 파이프가 있는 경우 resolveBindings 사용 (파이프 처리 포함)
-            if (hasPipes(singleBindingPath)) {
-              resolvedText = bindingEngine.resolveBindings(text, extendedDataContext, { skipCache: true }, textTrackingInfo);
-            } else if (isComplexExpression(singleBindingPath)) {
+            if (hasPipes(effectivePath)) {
+              resolvedText = bindingEngine.resolveBindings(`{{${effectivePath}}}`, extendedDataContext, { skipCache: true }, textTrackingInfo);
+            } else if (isComplexExpression(effectivePath)) {
               // 복잡한 표현식인 경우 evaluateExpression 사용
               try {
-                resolvedText = bindingEngine.evaluateExpression(singleBindingPath, extendedDataContext, textTrackingInfo);
+                resolvedText = bindingEngine.evaluateExpression(effectivePath, extendedDataContext, textTrackingInfo);
               } catch (error) {
                 logger.warn(
                   `text 표현식 평가 실패 (컴포넌트: ${effectiveComponentDef.id}):`,
@@ -2621,7 +2632,11 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
                 resolvedText = '';
               }
             } else {
-              resolvedText = bindingEngine.resolve(singleBindingPath, extendedDataContext, { skipCache: true }, textTrackingInfo);
+              resolvedText = bindingEngine.resolve(effectivePath, extendedDataContext, { skipCache: true }, textTrackingInfo);
+            }
+
+            if (isRawBinding && resolvedText != null) {
+              resolvedText = wrapRawDeep(resolvedText);
             }
           } else if (text.includes('{{')) {
             // 문자열 보간

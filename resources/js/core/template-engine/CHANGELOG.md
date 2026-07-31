@@ -5,6 +5,17 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.54.4] - 2026-07-31
+
+### Fixed
+
+#### 노드 `text` 키의 `{{raw:...}}` 바인딩이 평가되지 않고 텍스트가 통째로 사라지던 문제
+
+- `DynamicRenderer.tsx` `renderChildren` — 노드 레벨 `text` 키 처리에서 `raw:` 접두사를 벗기지 않은 채 표현식 평가로 넘겨, `raw:` 의 콜론이 식의 일부로 파싱되며 `Unexpected token ':'` 로 예외가 났다. props 값 해석(`renderProps`)과 반복 렌더(`RenderHelpers.renderItemChildren`)에는 이미 있던 접두사 처리가 이 경로에만 빠져 있었다.
+- 증상: 관리자 레이아웃 편집 화면의 파일 목록 등 `text: "{{raw:...}}"` 를 쓰는 자리에서 텍스트가 빈 값으로 렌더된다. 콘솔에는 경고만 남고 에러 화면이 뜨지 않아 조용한 실패로 관측된다(해당 화면 1회 진입에 174건).
+- 접두사 제거 후 파이프/복합식/단순 경로 분기를 동일하게 태우고, 결과는 `wrapRawDeep` 로 감싸 번역 면제를 유지한다 — 다른 두 경로와 같은 규칙이다.
+- 기존 동작 무영향: `raw:` 가 없는 `text` 는 종전 경로·결과 그대로다.
+
 ## [engine-v1.54.3] - 2026-07-25
 
 ### Fixed
