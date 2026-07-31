@@ -4491,7 +4491,11 @@ class ModuleManager implements ModuleManagerInterface
             $onProgress?->__invoke('layout', '레이아웃 갱신 중...');
             if ($previousStatus === ExtensionStatus::Active->value && $module) {
                 $preserveModified = ($layoutStrategy === 'keep');
-                $this->registerModuleLayouts($identifier);
+                // registerModuleLayouts() 를 여기서 호출하지 않는다 — 그 메서드는 전략을
+                // 모른 채 모든 레이아웃의 content 와 original_content_hash 를 파일 기준으로
+                // 덮어써서, 뒤따르는 refreshModuleLayouts($preserveModified) 가 비교할
+                // "사용자 수정본" 을 이미 지워버린다(= keep 전략이 항상 무효화).
+                // 신규 레이아웃 생성은 refreshModuleLayouts 의 created 분기가 담당한다.
                 $this->registerLayoutExtensions($module);
                 $this->refreshModuleLayouts($identifier, $preserveModified);
             }

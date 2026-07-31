@@ -728,7 +728,8 @@
       "modified_layouts_warning": "修正されたレイアウトが {{count}} 個あります。「すべて置き換え」を選択すると、修正内容が削除されます。",
       "no_modified_layouts": "修正されたレイアウトがありません。",
       "modified_layouts_list_title": "保持される修正レイアウト ({{count}}個)",
-      "modified_layouts_keep_notice": "上記のレイアウトはアップデート後も現在の内容が保持されます。"
+      "modified_layouts_keep_notice": "上記のレイアウトはアップデート後も現在の内容が保持されます。",
+      "modified_layouts_check_failed": "編集の確認ができませんでした。ネットワークの状態を確認してからもう一度試すか、安全に「編集を保持」を選択してください。"
     },
     "tabs": {
       "file_upload": "ファイル アップロード",
@@ -933,7 +934,8 @@
       "modified_layouts_warning": "編集されたレイアウトが{{count}}個あります。「すべて置換」を選択すると、編集内容が削除されます。",
       "no_modified_layouts": "編集されたレイアウトがありません。",
       "modified_layouts_list_title": "維持される編集レイアウト（{{count}}個）",
-      "modified_layouts_keep_notice": "上記のレイアウトはアップデート後も現在の内容が維持されます。"
+      "modified_layouts_keep_notice": "上記のレイアウトはアップデート後も現在の内容が維持されます。",
+      "modified_layouts_check_failed": "編集の確認ができませんでした。ネットワークの状態を確認してからもう一度試すか、安全に「編集を保持」を選択してください。"
     },
     "tabs": {
       "file_upload": "ファイルアップロード",
@@ -2172,7 +2174,8 @@
         "restore_note": "復元後は、必ず保存ボタンを押して変更内容を適用してください。",
         "lines": "行",
         "chars": "文字"
-      }
+      },
+      "modified_layouts_check_failed": "編集の確認ができませんでした。ネットワークの状態を確認してからもう一度試すか、安全に「編集を保持」を選択してください。"
     },
     "tabs_install": {
       "file_upload": "ファイルアップロード",

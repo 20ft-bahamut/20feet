@@ -8,6 +8,8 @@
 
 ### Added
 
+- 확장 업데이트 모달의 "수정 여부 확인 실패" 안내 문구 일본어 번역 추가 (`{modules,plugins,templates}.modals.modified_layouts_check_failed`) — 네트워크 오류로 수정 여부를 확인하지 못했을 때의 경고와 '수정 유지' 권장 안내가 일본어 로케일에서 자연스럽게 표시됩니다.
+- 공용 문구 3종 일본어 번역 추가 (`common.refresh`, `common.activate`, `common.skip`) — 게시판·상품 카테고리 목록의 새로고침 버튼과 언어팩 재활성화 안내에서 번역되지 않은 내부 문구가 보이던 문제가 해소됩니다.
 - 환경설정 > 보안의 2단계 인증 항목 문구 일본어 번역 추가 (`settings.security.two_factor_auth*`) — 항목 이름과 설명이 일본어 로케일에서 자연스럽게 표시됩니다.
 - 회원 상세의 계정 잠금 상태 표시와 잠금 해제 버튼 문구 일본어 번역 추가 (`users.detail.unlock*`, `users.detail.lock_status`) — 무기한 잠금·기한부 잠금·정상 상태 안내가 일본어 로케일에서 자연스럽게 표시됩니다.
 - 언어팩 관리 목록의 "파일 없음" 배지와 다시 설치 버튼 문구 일본어 번역 추가 (`language_packs.badge.files_missing`, `language_packs.actions.reinstall`).
