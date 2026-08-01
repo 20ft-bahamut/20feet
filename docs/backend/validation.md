@@ -14,6 +14,8 @@
 5. 훅 확장: HookManager::applyFilters()로 동적 규칙 추가
 6. 필수: Rule::exists(Model::class, 'col') 사용 (문자열 테이블명 사용 금지)
 7. 런타임 조건부 검증: 드라이버/모드별 분기 시 메서드 추출 패턴 사용
+8. Store/Update 조건부 규칙은 대칭 — 한쪽 누락 시 과잉 검증(수정 실패) 또는 검증 우회
+9. min/size 가 붙은 필드는 required_if 로 조건부화 불가 → exclude_if (조건 필드가 nullable 이면 exclude_unless)
 ```
 
 ---
@@ -26,6 +28,9 @@
 - [prepareForValidation() 데이터 전처리](#prepareforvalidation-데이터-전처리)
 - [훅 기반 동적 Validation Rules 확장](#훅-기반-동적-validation-rules-확장)
 - [런타임 조건부 Validation Rules (드라이버/모드별 분기)](#런타임-조건부-validation-rules-드라이버모드별-분기)
+  - [조건부 Validation 원칙](#조건부-validation-원칙)
+  - [`exclude_if` vs `exclude_unless` — 조건 필드가 nullable 일 때](#exclude_if-vs-exclude_unless--조건-필드가-nullable-일-때)
+  - [조건 필드가 요청에 없을 때 — 저장값 주입](#조건-필드가-요청에-없을-때--저장값-주입)
 - [권한 체크 방식](#권한-체크-방식)
 - [Custom Rule 검증 메시지 다국어 처리](#custom-rule-검증-메시지-다국어-처리)
 - [다국어 필드 검증 규칙](#다국어-필드-검증-규칙)
@@ -34,6 +39,7 @@
 - [exists/unique 검증 규칙](#existsunique-검증-규칙)
 - [계층 리소스 순환 참조](#계층-리소스-순환-참조)
 - [배열 항목의 상위 스코프](#배열-항목의-상위-스코프)
+- [관대한 기존 동작을 규칙으로 승격하지 않는다](#관대한-기존-동작을-규칙으로-승격하지-않는다)
 - [Custom Rule 개발 체크리스트](#custom-rule-개발-체크리스트)
 
 ---
@@ -1148,6 +1154,61 @@ $orderId = $this->route('order')?->id;
 
 422 가 의미적으로 옳다 — 입력값이 이 요청 맥락에서 유효하지 않다는 뜻이기 때문이다.
 Service 에도 동일한 검증을 두어 FormRequest 를 우회한 내부/훅 호출을 막는다.
+
+---
+
+## 관대한 기존 동작을 규칙으로 승격하지 않는다
+
+컨트롤러가 base `Request` 를 주입받던 코드를 FormRequest 로 옮길 때, 그 컨트롤러가 하던 일이
+**거부**였는지 **수용**이었는지 먼저 읽는다. 수용하던 동작(클램핑·폴백·별칭 매핑)을 `rules()` 로
+올리면 200 이던 응답이 422 가 된다. 위반을 없애는 것이 목적이지 계약을 바꾸는 것이 아니다.
+
+```php
+// 원본 컨트롤러 — 상한 초과를 거부하지 않고 상한까지 반환한다
+$limit = min((int) $request->input('limit', 20), 50);
+
+// ❌ 규칙으로 승격 — `?limit=100` 이 200 → 422 (기존 링크·북마크가 깨진다)
+public function rules(): array
+{
+    return ['limit' => ['nullable', 'integer', 'max:50']];
+}
+
+// ✅ 규칙은 타입만 닫고, 상한은 접근자가 클램프한다
+public function rules(): array
+{
+    return ['limit' => ['nullable', 'integer', 'min:0']];
+}
+
+public function limit(): int
+{
+    return min((int) $this->validated('limit', 20), self::MAX_LIMIT);
+}
+```
+
+같은 원칙이 어휘에도 적용된다. 저장소가 미지원 값을 기본 분기로 처리해 왔다면 `Rule::in` 으로
+막는 순간 그 값을 담은 URL 이 전부 깨진다. 어휘를 닫아야 할 별도 이유(예: 요청 값이 캐시 키에
+그대로 들어가 키 공간이 무한히 늘어남)가 있어도, **접근자가 닫힌 집합만 반환**하게 하면 응답
+계약을 건드리지 않고 목적을 달성한다.
+
+```php
+// ✅ 응답은 종전과 동일(미지원 값 → year), 캐시 키만 정규화된다
+public function period(): string
+{
+    $period = $this->validated('period');
+
+    if ($period === null || $period === '') {
+        return self::DEFAULT_PERIOD;
+    }
+
+    return in_array((string) $period, self::RESOLVED_PERIODS, true) ? (string) $period : 'year';
+}
+```
+
+`Rule::in` 승격이 적절한 경우는 **입력원이 화면 컨트롤 하나뿐**일 때다 — 관리자 DataGrid 의 필터
+select 처럼 사용자가 URL 을 손으로 만들 일이 없는 면. 판정 기준은 "북마크 가능한 공개 경로인가".
+
+기존 테스트가 이 전환에서 RED 가 되면 그 테스트가 무엇을 고정하고 있는지 먼저 읽는다. 리팩토링에서
+테스트가 깨질 때의 기본 해석은 "테스트가 낡았다" 가 아니라 "계약을 바꿨다" 이다.
 
 ---
 

@@ -138,6 +138,9 @@ return [
                     'snapshot_action' => '본문',
                 ],
             ],
+            'history_page_summary' => '총 :total건 · :current / :last 페이지',
+            'history_prev' => '이전',
+            'history_next' => '다음',
             'snapshot_view_short' => '보기',
             'material_modal' => [
                 'title' => '정책 버전 발행 + 재동의 트리거',
@@ -195,7 +198,9 @@ return [
             'source' => [
                 'banner' => '배너',
                 'preference_center' => '환경설정',
+                'register' => '회원가입',
                 'mypage' => '마이페이지',
+                'mypage_renew_all' => '마이페이지 일괄 재동의',
             ],
             'col' => [
                 'created_at' => '시점',

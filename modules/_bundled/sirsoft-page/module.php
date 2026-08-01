@@ -189,6 +189,9 @@ class Module extends AbstractModule
                 'order' => [['created_at', 'desc'], ['id', 'desc']],
                 // 페이지는 소프트 삭제 컬럼이 없다 — 실제 스키마 기준 선언
                 'soft_delete' => false,
+                'index_exempt' => '페이지는 사이트 구조를 구성하는 정의성 데이터라 운영자가 손으로 만드는 수만큼만 늘어난다(수십~수백). '
+                    .'깊은 OFFSET 이 성립하지 않아 정렬 색인의 이득보다 쓰기 비용이 크다. '
+                    .'행 수가 수천을 넘기 시작하면 (created_at, id) 색인을 추가할 것.',
             ],
             'pages_screen' => [
                 'type' => 'screen',

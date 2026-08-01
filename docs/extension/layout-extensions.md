@@ -75,9 +75,9 @@ injection 또는 modals/data_sources/scripts/init_actions 보유, EP: 병합할 
 필수: Layout Extension 시스템을 통한 동적 UI 주입
 필수: 모듈 비활성화 시 관련 UI 자동 숨김
 ✅ 필수: 확장 컴포넌트에 ExtensionBadge 표시 (관리자 UI)
-필수: 플러그인은 완전한 레이아웃 등록 불가 → 확장 지점(layout_extensions)만 사용
-   (예외: settings.json 환경설정 레이아웃은 registerPluginLayouts()로 등록)
-필수: 모듈만 완전한 레이아웃 등록 가능 (admin/user 모두)
+필수: 플러그인이 자기 화면을 가질 때 라우트는 plugins/{identifier}/ 네임스페이스 안에 선언
+   (다른 확장이 소유한 경로를 선언하면 설치 순서에 따라 화면이 조용히 바뀐다)
+필수: 다른 확장의 화면에 UI 를 끼워 넣을 때는 확장 지점(layout_extensions) 사용
 ```
 
 ---

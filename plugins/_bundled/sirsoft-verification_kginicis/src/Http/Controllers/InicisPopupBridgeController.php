@@ -3,8 +3,8 @@
 namespace Plugins\Sirsoft\VerificationKginicis\Http\Controllers;
 
 use App\Http\Controllers\Api\Base\PublicBaseController;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Plugins\Sirsoft\VerificationKginicis\Http\Requests\InicisPopupBridgeRequest;
 
 /**
  * 이니시스 매뉴얼 STEP4 결과 전달 페이지 — 데스크톱 팝업 / 모바일 redirect 분기.
@@ -30,16 +30,15 @@ class InicisPopupBridgeController extends PublicBaseController
     /**
      * Bridge 페이지를 렌더링한다.
      *
-     * @param  Request  $request  callback 컨트롤러가 전달한 query (verification_token / challenge_id / identity_error)
+     * @param  InicisPopupBridgeRequest  $request  callback 컨트롤러가 전달한 query (verification_token / challenge_id / identity_error)
      * @return Response
      */
-    public function show(Request $request): Response
+    public function show(InicisPopupBridgeRequest $request): Response
     {
-        $payloadJson = json_encode([
-            'verification_token' => (string) $request->query('verification_token', ''),
-            'challenge_id' => (string) $request->query('challenge_id', ''),
-            'identity_error' => (string) $request->query('identity_error', ''),
-        ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+        $payloadJson = json_encode(
+            $request->bridgePayload(),
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE
+        );
 
         return $this->htmlResponse($this->renderBridgeHtml($payloadJson));
     }

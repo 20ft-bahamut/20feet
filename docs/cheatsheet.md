@@ -108,6 +108,31 @@ vendor/bin/pint --dirty
 
 ---
 
+## 목록 조회 (컬럼 프루닝 · 지연 조인)
+
+```php
+// 계속 쌓이는 목록 = 지연 조인. 정렬 컬럼이 요청 값이면 닫힌 집합으로 해석.
+use App\Repositories\Concerns\{PaginatesWithDeferredJoin, ResolvesSortSpec};
+
+return $this->paginateWithDeferredJoin(
+    query: $query,                                   // 필터/where 만. orderBy·with·select 금지
+    columns: self::LIST_COLUMNS,                     // ['*'] 도 위반 아님
+    sort: $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at'),
+    perPage: $perPage,
+    relations: ['user'],                             // 관계는 반드시 이 인자로 (with() 는 지워진다)
+);
+```
+
+| 함정 | 결과 |
+| ------ | ------ |
+| `$query->with()` 만 하고 `relations:` 생략 | 관계가 조용히 사라짐 — 예외·오류 없음 |
+| `SUBSTRING(content,1,N)` 을 inner 에 둠 | 오버플로 페이지 읽기 그대로 발생 (프루닝 아님) |
+| 정렬을 비고유 컬럼으로만 끝냄 | 페이지 경계에서 행 중복·누락 (trait 이 PK 자동 append) |
+
+상세: [service-repository.md](backend/service-repository.md#목록-조회-컬럼-프루닝과-지연-조인)
+
+---
+
 ## 마이그레이션
 
 ```bash

@@ -33,6 +33,7 @@ class NotificationLogRepository implements NotificationLogRepositoryInterface
         'channel',
         'notification_type',
         'recipient_name',
+        'subject',
     ];
 
     /**

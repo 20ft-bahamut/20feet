@@ -2685,9 +2685,11 @@ class TemplateManager implements TemplateManagerInterface
         $templateRecords = $this->templateRepository->getAllKeyedByIdentifier();
         $details = [];
         $updatedCount = 0;
+        $checkedCount = 0;
 
         foreach ($templateRecords as $identifier => $record) {
             $result = $this->checkTemplateUpdate($identifier);
+            $checkedCount++;
 
             $updateData = [
                 'update_available' => $result['update_available'],
@@ -2711,6 +2713,7 @@ class TemplateManager implements TemplateManagerInterface
                 $updatedCount++;
                 $details[] = [
                     'identifier' => $identifier,
+                    'update_available' => true,
                     'current_version' => $result['current_version'],
                     'latest_version' => $result['latest_version'],
                     'update_source' => $result['update_source'],
@@ -2720,6 +2723,7 @@ class TemplateManager implements TemplateManagerInterface
 
         return [
             'updated_count' => $updatedCount,
+            'checked_count' => $checkedCount,
             'details' => $details,
         ];
     }

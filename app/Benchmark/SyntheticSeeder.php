@@ -32,16 +32,18 @@ class SyntheticSeeder
      * @param  int  $count  시딩 건수
      * @param  array<string, mixed>  $overrides  컬럼별 고정값 (실제 조회 조건과 맞추기 위한 지정)
      * @param  \Closure|null  $onProgress  진행 콜백 (int $inserted, int $total)
+     * @param  array<int, string>  $requiredColumns  nullable 이어도 반드시 채울 컬럼 (계측이 정렬 기준으로 삼는 컬럼)
      */
-    public function seed(string $table, int $count, array $overrides = [], ?\Closure $onProgress = null): void
+    public function seed(string $table, int $count, array $overrides = [], ?\Closure $onProgress = null, array $requiredColumns = []): void
     {
         $fillable = $this->fillableColumns($table);
+        $required = $this->requiredColumnDefinitions($table, $requiredColumns, $fillable);
 
         $chunk = [];
         $inserted = 0;
 
         for ($i = 1; $i <= $count; $i++) {
-            $chunk[] = $this->synthesizeRow($table, $fillable, $overrides, $i);
+            $chunk[] = $this->synthesizeRow($table, array_merge($fillable, $required), $overrides, $i);
 
             if (count($chunk) >= self::CHUNK_SIZE) {
                 $this->insert($table, $chunk);
@@ -92,6 +94,48 @@ class SyntheticSeeder
                 && ! $column['nullable']
                 && ($column['default'] === null)
         ));
+    }
+
+    /**
+     * 계측이 정렬 기준으로 삼는 컬럼의 정의를 반환합니다.
+     *
+     * `fillableColumns()` 는 "NOT NULL + 기본값 없음" 만 남기므로, Laravel 기본 `timestamps()`
+     * 처럼 nullable 로 선언된 `created_at` 계열은 여기서 빠진다. 그런데 목록 프로파일 대부분이
+     * `created_at` 으로 정렬하므로, 그대로 두면 합성 행이 전부 NULL 동률이 되어 계측이
+     * 정렬 인덱스가 아니라 tie-break 경로를 재게 된다.
+     *
+     * @param  string  $table  대상 테이블
+     * @param  array<int, string>  $names  반드시 채울 컬럼명 목록
+     * @param  array<int, array<string, mixed>>  $already  이미 채우기로 한 컬럼 목록
+     * @return array<int, array<string, mixed>> 추가로 채울 컬럼 정의 목록
+     */
+    private function requiredColumnDefinitions(string $table, array $names, array $already): array
+    {
+        if ($names === []) {
+            return [];
+        }
+
+        $covered = array_column($already, 'name');
+        $columns = collect(Schema::getColumns($table))->keyBy('name');
+
+        $extra = [];
+
+        foreach (array_unique($names) as $name) {
+            if (in_array($name, $covered, true) || ! $columns->has($name)) {
+                continue;
+            }
+
+            $column = $columns->get($name);
+
+            // auto increment 키는 DB 가 채운다
+            if ($column['auto_increment'] ?? false) {
+                continue;
+            }
+
+            $extra[] = $column;
+        }
+
+        return $extra;
     }
 
     /**

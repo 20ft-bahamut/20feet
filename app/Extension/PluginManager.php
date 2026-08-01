@@ -4153,9 +4153,11 @@ class PluginManager implements PluginManagerInterface
         $pluginRecords = $this->pluginRepository->getAllKeyedByIdentifier();
         $details = [];
         $updatedCount = 0;
+        $checkedCount = 0;
 
         foreach ($pluginRecords as $identifier => $record) {
             $result = $this->checkPluginUpdate($identifier);
+            $checkedCount++;
 
             // DB 갱신
             $updateData = [
@@ -4179,6 +4181,7 @@ class PluginManager implements PluginManagerInterface
                 $updatedCount++;
                 $details[] = [
                     'identifier' => $identifier,
+                    'update_available' => true,
                     'current_version' => $result['current_version'],
                     'latest_version' => $result['latest_version'],
                     'update_source' => $result['update_source'],
@@ -4188,6 +4191,7 @@ class PluginManager implements PluginManagerInterface
 
         return [
             'updated_count' => $updatedCount,
+            'checked_count' => $checkedCount,
             'details' => $details,
         ];
     }

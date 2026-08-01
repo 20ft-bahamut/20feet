@@ -67,6 +67,7 @@ effects:
   # ── 호출 계약 (P1) ──
   - every_call_site_declares_columns
   - every_call_site_declares_non_empty_sort
+  - call_sites_pass_relations_as_argument
   # ── 정렬 화이트리스트 (P0) ──
   - sort_column_resolved_from_closed_set
   - unknown_sort_column_falls_back_to_default

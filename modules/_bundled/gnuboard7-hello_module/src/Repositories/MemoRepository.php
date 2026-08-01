@@ -22,6 +22,8 @@ class MemoRepository implements MemoRepositoryInterface
     {
         return Memo::query()
             ->orderByDesc('created_at')
+            // 전순서 보장 — created_at 동률에서 페이지 경계가 흔들리지 않도록 기본키를 덧붙인다
+            ->orderByDesc('id')
             // audit:allow repository-paginate-column-pruning reason: 학습용 샘플 확장의 메모 테이블 —
             // 넓은 컬럼(text/JSON)이 없고, 지연 조인을 넣으면 샘플 코드의 학습 목적이 흐려진다
             ->paginate($perPage);

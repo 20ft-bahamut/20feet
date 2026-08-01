@@ -138,6 +138,9 @@ return [
                     'snapshot_action' => 'Snapshot',
                 ],
             ],
+            'history_page_summary' => ':total total · page :current / :last',
+            'history_prev' => 'Previous',
+            'history_next' => 'Next',
             'snapshot_view_short' => 'View',
             'material_modal' => [
                 'title' => 'Publish new policy version + trigger re-consent',
@@ -195,7 +198,9 @@ return [
             'source' => [
                 'banner' => 'Banner',
                 'preference_center' => 'Preferences',
+                'register' => 'Sign-up',
                 'mypage' => 'MyPage',
+                'mypage_renew_all' => 'MyPage bulk re-consent',
             ],
             'col' => [
                 'created_at' => 'Time',

@@ -27,6 +27,7 @@
 - [상태 변경 자동 처리](#상태-변경-자동-처리)
 - [Repository 클래스](#repository-클래스)
 - [목록 조회 컬럼 프루닝과 지연 조인](#목록-조회-컬럼-프루닝과-지연-조인)
+- [페이지네이션 정렬의 전순서 보장](#페이지네이션-정렬의-전순서-보장)
 - [다중 검색 필터 Trait](#다중-검색-필터-trait-hasmultiplesearchfilters)
 - [모듈에서 Repository 인터페이스 바인딩](#모듈에서-repository-인터페이스-바인딩)
 - [중첩 리소스 스코프](#중첩-리소스-스코프)
@@ -859,9 +860,7 @@ php artisan g7:bench --profile=sirsoft-board/board_posts --seed=200000 --offsets
 
 같은 계측의 실행 계획을 보면 원인이 하나 더 드러난다. OFFSET 0 은 `(board_id, created_at)` 인덱스를 역방향으로 훑어 정렬 없이 끝나지만, OFFSET 이 커지면 옵티마이저가 소프트 삭제 단독 인덱스(`deleted_at`)로 갈아타면서 `filesort` 가 붙는다. 넓은 컬럼을 걷어내는 것과 정렬을 인덱스로 덮는 것은 함께 가야 한다.
 
-`SUBSTRING(content, 1, N)` 을 목록 컬럼에 두는 것도 프루닝이 아니다. 앞 N 바이트를 얻기 위해 오버플로 페이지를 그대로 읽는다.
-
-`SUBSTRING(content, 1, 200)` 을 목록 컬럼에 두는 것은 프루닝이 아니다. 앞 200바이트를 얻기 위해 오버플로 페이지를 그대로 읽기 때문이다. 잘라내기는 지연 조인의 outer 로 옮긴다.
+`SUBSTRING(content, 1, N)` 을 목록 컬럼에 두는 것은 프루닝이 아니다. 앞 N 바이트를 얻기 위해 오버플로 페이지를 그대로 읽기 때문이다. 잘라내기는 지연 조인의 outer 로 옮긴다.
 
 계측 대상 프로파일 선언 방법과 나머지 3축(화면 응답·쓰기·배치)은 [benchmark.md](benchmark.md) 를 참조한다.
 
@@ -897,9 +896,12 @@ class OrderRepository implements OrderRepositoryInterface
 | 항목 | 규칙 |
 | ------ | ------ |
 | `$query` | 필터/where 만 적용한다. `orderBy`/`with`/`select` 는 Trait 이 담당한다 |
-| `whereHas` | 결과 집합을 결정하는 조건이므로 그대로 둔다. Trait 은 `with` 만 inner 에서 제거한다 |
+| `whereHas` | 결과 집합을 결정하는 조건이므로 그대로 둔다. Trait 이 지우는 것은 `with`(eager load) 뿐이다 |
+| 관계 | **반드시 `relations:` 인자로 넘긴다.** Trait 은 inner 뿐 아니라 **outer 에서도** `setEagerLoads([])` 로 eager load 를 지우므로, `$query->with()` 만 하고 인자를 생략하면 관계가 로드되지 않는다 |
 | 정렬 | 닫힌 집합이어야 한다. 인덱스 없는 임의 컬럼 정렬은 inner 도 전체 스캔하므로 개선 폭이 보장되지 않는다 |
 | 키 컬럼 | 정렬 스펙 끝에 자동으로 덧붙는다. 동률 행의 순서가 흔들려 페이지 경계에서 행이 중복·누락되는 것을 막는다 |
+
+관계 계약을 어겨도 예외나 쿼리 오류는 나지 않는다. 응답에서 관계 필드만 사라지므로, 그 필드를 단언하지 않는 테스트는 전부 통과한다. 실제로 스케줄 실행 이력의 실행자(`triggered_by`)가 이 형태로 유실됐다. `DeferredJoinCallSiteContractTest` 가 호출처를 스캔해 이 조합을 차단한다.
 
 `paginate` / `simplePaginate` / 캐시 total 주입은 인자로 구분한다 — inner 쿼리는 동일하고 COUNT 수행 여부와 반환 클래스만 달라진다.
 
@@ -944,6 +946,137 @@ foreach ($this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at') 
 
 `repository-sort-column-whitelist` 룰은 **정렬 컬럼 변수 자체를 인자로 받는** `in_array`/`match`/`array_key_exists` 또는 `resolveSortSpec` 만 화이트리스트로 인정한다.
 
+### 화면 정렬 옵션은 게이트의 부분집합이어야 한다
+
+앞 절의 불변식(게이트 ⊆ 저장소)은 백엔드 두 계층 사이의 관계다. 그 위에 하나가 더 있다.
+
+```text
+화면 정렬 옵션 ⊆ FormRequest 게이트 ⊆ Repository 화이트리스트
+```
+
+레이아웃의 정렬 셀렉트가 게이트에 없는 컬럼을 제공하면 그 옵션을 고르는 순간 **422 가 나고 목록은 직전 결과 그대로 남는다.** 셀렉트 라벨만 새 값으로 바뀌므로 운영자는 정렬이 적용됐다고 읽는다. 토스트도 뜨지 않는다(목록 데이터소스의 오류 경로라 화면에 노출되지 않는다).
+
+정렬 옵션을 추가할 때는 세 곳을 함께 본다.
+
+1. 레이아웃의 `options[].value` (`{col}_{asc|desc}` 형태로 `sort_by` 를 만든다)
+2. FormRequest 의 `sort_by` `in:` / `Rule::in`
+3. Repository 의 `SORTABLE_COLUMNS` (원 테이블 컬럼) 또는 `RELATED_SORTABLE_COLUMNS` (관계 테이블 컬럼)
+
+정렬 기준 컬럼이 **원 테이블에 없으면** 다음 절의 관계 정렬을 쓴다. 화면에서 옵션을 지우는 것은 마지막 수단이다 — 운영자가 쓰던 기능이 사라진다.
+
+`layout-sort-option-gate-parity` 룰이 레이아웃 정렬 옵션과 게이트를 정적으로 대조한다.
+
+### 분류값 필터의 허용 어휘도 같은 불변식을 따른다
+
+정렬에서 성립하는 포함관계는 **분류값 필터**(출처·유형·상태 등)에서도 그대로 성립한다. 다만 어긋나는 방향이 반대다 — 정렬은 화면이 게이트보다 넓어서 422 가 나고, 필터는 화면이 **좁아서** 아무 오류 없이 일부 행이 사라진다.
+
+```text
+화면 필터 옵션 = 라벨 키 = 실제 기록 어휘   (부분집합이 아니라 일치여야 한다)
+```
+
+빠진 값으로 기록된 행에는 두 가지가 동시에 일어난다.
+
+| 어긋난 지점 | 증상 | 화면에 오류가 나는가 |
+|---|---|---|
+| 화면 필터 옵션에 그 값이 없음 | 그 값의 행은 **어떤 필터 조합으로도 도달 불가** — "전체" 로만 스쳐 지나간다 | 아니다 |
+| 라벨 키가 없음 | 목록 셀에 `vendor-plugin.admin.x.source.그값` 원시 키 문자열이 노출 | 아니다 |
+
+그래서 어휘는 **Enum 하나에서 파생**시킨다. FormRequest 의 `in:` 문자열, 리스너·서비스의 기록 리터럴, 레이아웃 체크박스, lang 파일에 같은 목록을 네 번 적으면 한 곳만 늘어난 순간 위 두 증상이 조용히 생긴다.
+
+```php
+enum ConsentSource: string
+{
+    case Banner = 'banner';
+    case Register = 'register';           // 리스너가 기록하는 값도 반드시 여기에
+    case MypageRenewAll = 'mypage_renew_all';  // 서버 자체 기록 경로도 마찬가지
+
+    /** 공개 요청으로 지정 가능한 값 — 서버 자체 기록 경로는 제외 */
+    public static function requestSelectableValues(): array { /* ... */ }
+}
+```
+
+라벨은 **백엔드와 프론트 두 표면 모두**에 정의한다. 관리자 화면의 `$t:` 는 `resources/lang/{locale}.json` 에서 해석되므로 `lang/{locale}/messages.php` 만 채우면 화면에는 여전히 원시 키가 남는다. 치환 문법도 다르다 — 백엔드는 `:name`, 프론트 엔진(`TranslationEngine.replaceParams`)은 `{name}` / `{{name}}` 만 치환한다.
+
+어느 enum 이 어느 화면의 어휘인지는 의미 추론이 필요해 정적 검출이 어렵다(`coverage.json` 의 `filter-vocabulary-enum-parity` = `manual-only`). 확장별로 정합 테스트를 둔다 — 예: `ConsentSourceVocabularyParityTest` (기록 리터럴 ⊆ enum / 화면 옵션 = enum / ko·en × 백엔드·프론트 라벨 전수).
+
+### 목록에 `last_page > 1` 이면 화면에도 페이저가 있어야 한다
+
+응답이 페이지네이션인데 화면이 1페이지만 렌더하고 페이지 이동 컨트롤을 두지 않으면, 나머지 페이지는 **어떤 조작으로도 도달할 수 없다.** 총건수 표시까지 없으면 잘렸다는 사실 자체가 화면에 나타나지 않아 "이력이 그것뿐" 으로 읽힌다(감사 이력·정책 버전처럼 입증 책임이 있는 목록에서는 특히 위험하다).
+
+데이터가 얕은 개발 환경에서는 `last_page` 가 늘 1 이라 이 결함이 드러나지 않는다. 페이지네이션 응답을 소비하는 화면을 만들 때는 `per_page` 를 줄이거나 행을 늘려 **2페이지 이상인 상태를 한 번은 눈으로 확인**한다.
+
+### 관계 테이블 컬럼 기준 정렬 (`SortsByRelatedColumn`)
+
+정렬 기준이 원 테이블이 아니라 관계 테이블에 있는 경우가 있다. 주문 목록의 "발송일" 이 그렇다 — `shipped_at` 은 주문이 아니라 배송 테이블에 있고, 한 주문에 배송 행이 여러 건일 수 있다.
+
+이때 **조인으로 해결하지 않는다.** 두 가지가 함께 깨진다.
+
+| 방식 | 무엇이 깨지는가 |
+|---|---|
+| `join` + `groupBy` | 1:N 조인이 원 행을 부풀린다 → 총 건수가 늘고 페이지 경계가 어긋난다 |
+| `leftJoin` 만 | 자식이 여러 건인 부모가 목록에 중복 노출된다 |
+| `join` (INNER) | 자식이 없는 부모(미발송 주문)가 목록에서 사라진다 |
+| inner 쿼리에 집계 | 건너뛸 행 전체에 집계가 돌아 OFFSET 이 깊어질수록 비용이 누적된다 — 지연 조인을 넣은 이유가 사라진다 |
+
+**상관 서브쿼리 정렬**을 쓴다. 원 행 수를 바꾸지 않으므로 총 건수·페이지 경계가 그대로 유지되고, 자식이 없는 행도 남는다(값이 `NULL` 로 정렬될 뿐이다).
+
+```php
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
+use App\Repositories\Concerns\SortsByRelatedColumn;
+
+class OrderRepository implements OrderRepositoryInterface
+{
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
+    use SortsByRelatedColumn;
+
+    /** 원 테이블 컬럼 */
+    private const SORTABLE_COLUMNS = ['ordered_at', 'paid_at', 'total_amount'];
+
+    /** 관계 테이블 컬럼 — `(외래키, 정렬컬럼)` 복합 인덱스가 전제 */
+    private const RELATED_SORTABLE_COLUMNS = [
+        'shipped_at' => [
+            'model' => OrderShipping::class,
+            'foreign_key' => 'order_id',
+            'column' => 'shipped_at',
+        ],
+    ];
+
+    public function getListWithFilters(array $filters, int $perPage): LengthAwarePaginator
+    {
+        // ... 필터/where 적용 ...
+
+        $sort = $this->resolveSortSpecWithRelated(
+            $filters,
+            self::SORTABLE_COLUMNS,
+            self::RELATED_SORTABLE_COLUMNS,
+            $this->model,
+            'ordered_at',
+        );
+
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: self::LIST_COLUMNS,
+            sort: $sort,
+            perPage: $perPage,
+        );
+    }
+}
+```
+
+**집계 함수를 인자로 받지 않는 이유.** 서브쿼리를 정렬 방향과 같은 방향으로 정렬해 한 건만 취하면, `desc` 는 자연히 최댓값(가장 늦은 발송), `asc` 는 최솟값(가장 이른 발송)이 된다. 운영자가 "최근 발송순" 을 골랐을 때 기대하는 값과 일치하고, `MAX()`/`MIN()` 을 따로 지정하다 방향과 어긋나는 실수가 생기지 않는다.
+
+**복합 인덱스는 선택이 아니다.** 서브쿼리는 목록 행마다 한 번씩 실행되므로 `(외래키, 정렬컬럼)` 인덱스가 없으면 행 수만큼 관계 테이블을 스캔한다. 외래키 단일 인덱스만 있으면 정렬 컬럼이 인덱스에 없어 매번 행을 읽어 정렬한다. 관계 정렬을 추가하는 변경에는 **인덱스 마이그레이션을 함께 넣는다.**
+
+```php
+$table->index(['order_id', 'shipped_at'], 'ecommerce_order_shippings_order_id_shipped_at_index');
+```
+
+정렬 스펙의 `column` 은 문자열 외에 `Builder`/`Expression` 도 올 수 있다. `PaginatesWithDeferredJoin` 이 이를 그대로 받아 inner/outer 양쪽에 적용한다 — 서브쿼리가 원 행의 키에 상관되므로 어느 쪽에 적용해도 같은 순서가 나오고, outer 에서는 이번 페이지 건수만큼만 실행된다. 키 컬럼은 전순서 보장을 위해 항상 마지막에 덧붙는다.
+
+**게이트에도 함께 올린다.** `RELATED_SORTABLE_COLUMNS` 의 키는 FormRequest 의 `sort_by` 허용 목록에 들어가야 한다. `SortWhitelistGateParityTest` 가 두 상수를 합쳐 게이트 ⊆ 저장소 불변식을 검사한다.
+
 ### 예외
 
 설정/정의성 테이블처럼 행 수가 고정이고 넓은 컬럼이 없으면 컬럼 목록 없이 페이지네이션해도 된다. 다만 그 판단 근거를 코드 옆에 남긴다.
@@ -982,12 +1115,73 @@ return $this->model->newQuery()
 
 다만 `columns:` 자체를 생략하면 outer 가 무엇을 읽는지 호출처에서 드러나지 않으므로 항상 명시한다. `DeferredJoinCallSiteContractTest` 가 호출처를 스캔해 `columns:`/`sort:` 명시 여부를 전수 검사한다.
 
+### 페이지네이션 정렬의 전순서 보장
+
+페이지네이션 목록의 정렬은 **고유 키로 닫는다**. 정렬이 비고유 컬럼만으로 끝나면 동률 구간의
+행 순서가 페이지마다 달라질 수 있고(SQL 표준은 동률의 순서를 보장하지 않는다), 그 결과
+**인접 페이지가 같은 행을 중복 노출하면서 다른 행은 어느 페이지에도 나오지 않는다.**
+
+```php
+// ❌ created_at 동률 구간에서 페이지 경계가 흔들린다
+$query->orderBy('created_at', 'desc')->paginate($perPage);
+
+// ✅ 정렬 마지막에 기본키를 덧붙여 전순서를 만든다
+$query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate($perPage);
+```
+
+`ResolvesSortSpec` / `PaginatesWithDeferredJoin` 를 경유하는 목록은 트레이트가 키 컬럼을 자동으로
+덧붙이므로 이 규율을 이미 만족한다. 손으로 `orderBy` 를 조립한 뒤 `paginate()` 하는 지점만
+위험하다.
+
+동률은 드문 일이 아니다 — 시더·일괄 등록·대량 마이그레이션은 여러 행에 같은 `created_at` 을
+남긴다(#492 실측: `roles.created_at` 한 타임스탬프에 최대 10행, 110건 목록에서 고유 키 109개).
+
+판정은 눈으로 하지 않는다. 전 페이지를 순회해 키를 모으고 **합집합 크기 = 총건수**, 인접 페이지
+교집합 = ∅ 를 확인한다.
+
+### 필요한 색인은 선언에서 도출한다
+
+지연 조인은 inner 가 키 컬럼만 읽게 만들지만, 그 inner 가 **인덱스 순서 그대로** 끝나야 깊은 OFFSET 이 싸진다. 정렬을 덮는 색인이 없으면 inner 도 filesort 로 전체를 훑으므로 개선 폭이 사라진다. 즉 지연 조인과 색인은 함께 가야 하며, 한쪽만 해두면 화면에서는 "여전히 뒤로 갈수록 느리다" 로만 드러난다.
+
+어떤 색인이 필요한지는 계측 프로파일 선언에 이미 들어 있다. `filters` · `order` · `soft_delete` 를 이으면 그대로 레시피가 된다:
+
+```text
+(등치 필터 컬럼들 → soft_delete 면 deleted_at → 정렬 컬럼들 → 기본키)
+```
+
+`App\Benchmark\ListIndexAdvisor` 가 이 도출을 담당하고, `ListIndexCoverageTest` 가 전 목록을 검사한다. **새 목록이 프로파일을 선언하면 필요한 색인이 자동으로 검사 대상이 되므로**, 색인 설계를 테이블마다 손으로 반복하지 않아도 된다.
+
+| 판정 | 뜻 | 처방 |
+| ------ | ------ | ------ |
+| `satisfied` | 도출한 선행 컬럼을 그대로 덮는 색인이 있다 | — |
+| `tiebreak_missing` | 색인이 정렬 컬럼에서 끝나 동률 구간에 filesort 가 남는다 | 기존 색인 끝에 기본키를 덧붙여 **교체** (좌측 프리픽스라 남기면 쓰기 비용만 늘어난다) |
+| `missing` | 정렬을 덮는 색인이 없다 | 도출한 순서대로 색인 신설 |
+
+주의할 점 둘.
+
+- **등치가 아닌 필터는 선행 컬럼이 될 수 없다.** `in` / `not in` / 범위 조건은 그 지점에서 등치 사슬을 끊으므로 뒤따르는 정렬 컬럼을 인덱스 순서로 쓸 수 없다. 이 판정을 틀리면 "색인이 있는데도 filesort" 라는, 눈으로는 구분되지 않는 상태를 정상으로 보고하게 된다.
+- **UNIQUE 색인은 기본키를 덧붙일 필요가 없다.** 값이 중복되지 않아 그 컬럼만으로 이미 전순서다.
+
+색인이 불필요한 목록(행 수가 고정이거나 상한이 작은 정의성 데이터)은 프로파일에 사유와 함께 면제를 선언한다. 사유 없는 면제를 받지 않는 이유는, 면제가 쌓이면 검사 자체가 무의미해지는데 사유가 없으면 그 판단이 여전히 옳은지 나중에 확인할 방법이 없기 때문이다.
+
+```php
+'index_exempt' => '페이지는 사이트 구조를 구성하는 정의성 데이터라 ... 수천을 넘기 시작하면 (created_at, id) 색인을 추가할 것.',
+```
+
+모듈/플러그인 프로파일은 **그 확장의 테스트 스위트에서** 검사한다. 확장 테이블은 그 스위트에서만 마이그레이션되므로 코어 스위트에 몰면 테이블이 없어 건너뛰고 초록인 채 미검사가 된다. 같은 이유로 "테이블이 없으면 skip" 도 하지 않고 실패로 보고한다.
+
 ### 정적 검사 대상
 
 | 검출 대상 | 처리 |
 |---|---|
 | `->paginate($perPage)` / `->paginate($perPage, ['*'])` — 컬럼 목록 미지정 또는 전체 컬럼 | 차단 |
-| 요청 값에서 온 정렬 컬럼을 닫힌 집합 검증 없이 `orderBy` 에 전달 | 차단 |
+| 페이지네이션 정렬이 비고유 컬럼으로만 끝남 (기본키 타이브레이크 부재) | 차단 |
+| 그룹 쿼리의 총 건수를 `count()` 로 계산 (`getCountForPagination()` 필요) | 차단 |
+| 요청 값에서 온 정렬 컬럼을 닫힌 집합 검증 없이 `orderBy` 에 전달 | 경고 |
+
+검사 범위는 `app/Repositories/**`, `modules|plugins/_bundled/**/Repositories/**` 와 컨트롤러 3계열이다. 미수정 파일까지 확인하려면 변경분이 아니라 저장소 전체를 대상으로 검사한다 — 변경 파일만 보는 방식으로는 이미 저장소에 있던 위반이 드러나지 않는다.
+
+호출 계약 중 `relations:` 항목은 정적 룰이 아니라 테스트(`DeferredJoinCallSiteContractTest`)가 검사한다. 쿼리에 `with()` 를 붙이고 `relations:` 를 넘기지 않으면 관계가 조용히 사라지는데, 이 실패는 예외도 쿼리 오류도 내지 않아 관계 필드를 단언하지 않는 HTTP 테스트는 전부 통과한다.
 
 검사 범위는 `app/Repositories/**`, `modules|plugins/_bundled/**/Repositories/**` 와 컨트롤러 3계열이다. 미수정 파일까지 확인하려면 변경분이 아니라 저장소 전체를 대상으로 검사한다 — 변경 파일만 보는 방식으로는 이미 저장소에 있던 위반이 드러나지 않는다.
 

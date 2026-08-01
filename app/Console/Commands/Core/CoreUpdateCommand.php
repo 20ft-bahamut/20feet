@@ -34,7 +34,8 @@ class CoreUpdateCommand extends Command
         {--local : 로컬 코드베이스를 업데이트 소스로 사용 (GitHub 스킵)}
         {--source= : 수동 업데이트용 소스 디렉토리 경로 (GitHub 다운로드 대신 지정 디렉토리 사용)}
         {--zip= : 수동 업데이트용 ZIP 파일 경로 (GitHub 다운로드 대신 지정 ZIP 추출 사용)}
-        {--vendor-mode=auto : vendor 설치 모드 (auto|composer|bundled)}';
+        {--vendor-mode=auto : vendor 설치 모드 (auto|composer|bundled)}
+        {--rebuild-search-index : 번들 확장 일괄 업데이트 후 색인이 누락된 검색 인덱스를 재생성 (인덱스가 잠기거나 재색인됩니다 — 운영 중에는 유지보수 시간에 수행하세요)}';
 
     protected $description = '그누보드7 코어를 최신 버전으로 업데이트합니다';
 

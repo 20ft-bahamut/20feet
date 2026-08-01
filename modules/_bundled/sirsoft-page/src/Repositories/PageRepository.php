@@ -184,6 +184,8 @@ class PageRepository implements PageRepositoryInterface
     {
         $results = $this->buildKeywordQuery($keyword)
             ->orderBy($orderBy, $direction)
+            // 전순서 보장 — 정렬 컬럼이 비고유라 페이지 경계가 흔들릴 수 있다
+            ->orderBy('id', $direction === 'asc' ? 'asc' : 'desc')
             // audit:allow repository-paginate-column-pruning reason: 통합검색 전용 진입점 —
             // 유일한 호출자(SearchPagesListener)가 전체 탭은 limit=5, 페이지 탭은 limit=PHP_INT_MAX 로
             // 1페이지에 결과를 받아가므로 OFFSET 이 발생하지 않는다
@@ -227,7 +229,24 @@ class PageRepository implements PageRepositoryInterface
         return Page::query()
             ->published()
             ->where(function ($q) use ($keyword) {
-                DatabaseFulltextEngine::whereFulltext($q, 'title', $keyword, 'and');
+                // 제목은 다국어 JSON 컬럼이라 FULLTEXT 에 의존하지 않고 로케일별 JSON 경로로 찾는다
+                // (메뉴 목록과 동일한 관례).
+                //
+                // 실측 배경 (#492 D-25): 운영 DB 에서 `MATCH(title)` 이 **어떤 키워드로도** 0 을
+                // 반환했다 — `이용약관`(제목 전체) · `약관`(부분) · `Terms` · `Service` 전부 0 인데
+                // 같은 행을 `LIKE` 로는 찾는다. 인덱스는 `WITH PARSER ngram` 으로 존재하고
+                // `ngram_token_size=2` 인데도 그렇다. 즉 이 컬럼의 FT 인덱스가 실제 행을 담고
+                // 있지 않다. 다국어 제목은 짧은 낱말이라 부분 일치가 기대 동작이므로,
+                // FT 인덱스 상태에 의존하지 않는 로케일 경로 LIKE 로 검색 계약을 고정한다.
+                // (본문은 길이가 있어 FULLTEXT 가 유효하므로 그대로 둔다.)
+                $first = true;
+                foreach ($this->translatableLocales() as $locale) {
+                    $method = $first ? 'where' : 'orWhere';
+                    $q->{$method}('title->'.$locale, 'like', '%'.$keyword.'%');
+                    $first = false;
+                }
+
+                // 본문은 순수 텍스트/HTML 이라 FULLTEXT 가 유효하다.
                 DatabaseFulltextEngine::whereFulltext($q, 'content', $keyword, 'or');
                 $q->orWhere('slug', 'like', '%'.$keyword.'%');
             });
@@ -330,5 +349,20 @@ class PageRepository implements PageRepositoryInterface
         }
 
         return $filters;
+    }
+
+    /**
+     * 다국어 JSON 필드에 저장될 수 있는 로케일 목록을 반환합니다.
+     *
+     * 번역 파일이 없어도 데이터는 저장될 수 있으므로 UI 표시 언어(`supported_locales`)보다 넓은
+     * `translatable_locales` 를 기준으로 한다 (MenuRepository 와 동일 관례).
+     *
+     * @return list<string> 로케일 목록
+     */
+    private function translatableLocales(): array
+    {
+        $locales = config('app.translatable_locales', config('app.supported_locales', []));
+
+        return empty($locales) ? [app()->getLocale()] : array_values($locales);
     }
 }

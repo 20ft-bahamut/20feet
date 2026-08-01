@@ -8,8 +8,9 @@
  *
  * 계획서의 브라우저 확인 항목을 화면별로 잠근다:
  *   (1) 목록이 렌더된다 (관계/컬럼 프루닝으로 화면이 비지 않는다)
- *   (2) 마지막 페이지에서 "다음" 이 비활성이다 (총 건수 계산 정합)
- *   (3) 콘솔/페이지 에러가 없다
+ *   (2) 공지가 1페이지에만 노출된다 (게시글 목록 한정 — 공지 병합이 outer 로 옮겨졌는지)
+ *   (3) 마지막 페이지에서 "다음" 이 비활성이다 (총 건수 계산 정합)
+ *   (4) 콘솔/페이지 에러가 없다
  *
  * 데이터 의존 스킵: 목록이 한 페이지 분량이면 페이지네이션 컨트롤이 없으므로 (2)를 건너뛴다.
  * 스킵 사유는 실행 로그에 남는다 — 조용한 통과가 아니다.
@@ -142,6 +143,20 @@ async function isNextDisabled(page: Page): Promise<boolean> {
   return (await next.getAttribute('aria-disabled')) === 'true';
 }
 
+/**
+ * 현재 페이지의 공지 행 수를 셉니다.
+ *
+ * 게시글 목록은 공지 행에 `bg-blue-50` 배경 클래스를 붙인다
+ * (admin_board_posts_index.json 의 rowClassName — 일반/답글 행과 구분되는 유일한 DOM 신호).
+ * 다크 모드에서도 Tailwind 가 두 클래스를 함께 내보내므로 이 클래스는 항상 존재한다.
+ *
+ * @param page 대상 페이지
+ * @returns 공지 행 수
+ */
+async function countNoticeRows(page: Page): Promise<number> {
+  return page.locator('tr[class*="bg-blue-50"]').count();
+}
+
 test.describe('목록 페이지네이션 (지연 조인)', () => {
   for (const screen of LIST_SCREENS) {
     // @scenario case=deep_offset_list_browser
@@ -167,6 +182,62 @@ test.describe('목록 페이지네이션 (지연 조인)', () => {
 
       expect(errors, `페이지 에러: ${errors.join(' | ')}`).toHaveLength(0);
     });
+
+    // 공지 병합은 게시글 목록에만 있는 개념이라 그 화면에서만 검사한다.
+    // 지연 조인은 inner 가 키 컬럼만 읽으므로, 공지 병합이 outer 로 옮겨가지 않았다면
+    // 2페이지 이후에도 공지가 다시 붙거나 1페이지에서 사라진다.
+    if (screen.name === '게시판 게시글 목록') {
+      // @scenario case=deep_offset_list_browser
+      // @effects notices_appear_only_on_first_page
+      test(`${screen.name} — 공지가 1페이지에만 노출된다`, async ({ page }) => {
+        await authenticatePage(page, issueToken(...screen.permissions));
+        await gotoAdmin(page, screen.path);
+
+        if (/\/admin\/login/.test(page.url())) {
+          test.skip(true, `${screen.name} 접근 불가 — 확장 미설치 또는 권한 미부여`);
+
+          return;
+        }
+
+        if (! (await waitForListRows(page))) {
+          test.skip(true, `${screen.name} 목록 행 없음 — 데이터 미존재`);
+
+          return;
+        }
+
+        const firstPageNotices = await countNoticeRows(page);
+
+        const next = nextPageControl(page);
+        const hasNext = await next
+          .waitFor({ state: 'attached', timeout: 15_000 })
+          .then(() => true)
+          .catch(() => false);
+
+        if (! hasNext || (await isNextDisabled(page))) {
+          test.skip(true, `${screen.name} 2페이지 없음 — 데이터가 한 페이지 분량`);
+
+          return;
+        }
+
+        await next.click();
+        await waitForListRows(page);
+
+        const secondPageNotices = await countNoticeRows(page);
+
+        // 1페이지에 공지가 하나도 없으면 이 화면의 데이터로는 판정할 수 없다.
+        // 조용히 통과시키지 않고 사유를 남기고 건너뛴다.
+        if (firstPageNotices === 0) {
+          test.skip(true, `${screen.name} 공지 행 없음 — 공지 병합을 판정할 데이터 미존재`);
+
+          return;
+        }
+
+        expect(
+          secondPageNotices,
+          `2페이지에 공지 ${secondPageNotices}건이 다시 노출됐다 (1페이지 ${firstPageNotices}건)`,
+        ).toBe(0);
+      });
+    }
 
     // @scenario case=deep_offset_list_browser
     // @effects simple_mode_reports_last_page_without_next

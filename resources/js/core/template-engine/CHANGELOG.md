@@ -5,6 +5,27 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.54.6] - 2026-08-01
+
+### Fixed
+
+#### 통신이 끊겼을 때 내부 식별 문구가 사용자에게 노출되던 문제
+
+- `template-engine/ActionDispatcher.ts` — 액션 실패 문구 결정을 `resolveActionFailureMessage()` 로 분리하고, **응답 자체가 없었던 실패**(`TypeError: Failed to fetch` / `AbortError`)에는 다국어 안내(`$t:core.errors.network_request_failed`)를 쓴다. 종전에는 서버 메시지가 없으므로 내부 식별 문구인 `Failed to execute action: apiCall` 이 그대로 토스트에 떴다 — 운영자가 무슨 일이 일어났는지 알 수 없고 다국어도 적용되지 않았다.
+- 우선순위는 (1) 서버 메시지 → (2) 네트워크 안내 → (3) 기존 문구다. `ActionError` 가 이미 들고 있던 고유 메시지(예: 미등록 핸들러 안내)는 그대로 보존한다.
+- `{{error.message}}` 가 상태에 실려 텍스트로 렌더되는 경로가 있어 `$t:` 키를 디스패처에서 미리 번역한다(키 문자열 노출 방지).
+- 코어 다국어 키 `core.errors.network_request_failed` 추가 (ko/en + ja 번들).
+
+## [engine-v1.54.5] - 2026-07-31
+
+### Fixed
+
+#### 데이터소스 `initLocal` 동기화가 라우트 진입 시드를 되돌리던 문제
+
+- `template-engine/DynamicRenderer.tsx` — `_localInit` 을 전역 `_local`(저장소 B)에 동기화할 때, 병합 base 를 렌더 시점 스냅샷(`dataContext._global._local`)이 아니라 **쓰기 시점의 canonical 상태**(함수형 업데이트의 `prev._local`)로 바꿨다. `setGlobalState` 는 `{ _local: X }` 를 얕게 펼쳐 저장소를 통째로 교체하는데, 이 effect 는 렌더 커밋 뒤에 실행되므로 그 사이에 `init_actions` 가 URL query 로 시드한 값이 스냅샷 기반 교체에 통째로 되돌아갔다.
+- 증상: 목록 화면에서 필터를 적용하고 상세로 들어갔다가 브라우저 뒤로가기로 복귀하면 URL·목록·총건수는 필터가 걸린 상태인데 **필터 컨트롤만 기본값**으로 표시됐다. 그 상태에서 다른 조건을 바꿔 검색하면 기존 필터가 조용히 사라진다. `initLocal` 데이터소스의 응답 시점과 시드 시점의 경합이라 같은 화면에서도 재현이 들쭉날쭉했다.
+- `TemplateApp.ts` — `dataContext._globalSetState` 가 함수형 업데이트를 그대로 위임하도록 시그니처를 넓혔다(`setGlobalState` 는 이미 함수형을 지원).
+- `_merge: "replace"` 계약(기존 base 무시)과 `_local` 이외 전역 키 보존은 종전과 동일하다.
 ## [engine-v1.54.4] - 2026-07-31
 
 ### Fixed

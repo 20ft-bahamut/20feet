@@ -30,7 +30,9 @@ class NotificationRepository implements NotificationRepositoryInterface
         // audit:allow repository-paginate-column-pruning reason: 사용자 1명에 종속된 알림함 —
         // $user->notifications() 로 이미 좁혀지고, 목록이 표시하는 본문 자체가 data(JSON) 라
         // 걷어낼 넓은 컬럼이 없다
-        return $query->orderBy('created_at', 'desc')->paginate($perPage);
+        // 정렬 마지막의 기본키는 전순서 보장용이다 — created_at 동률에서 페이지 경계가
+        // 흔들려 인접 페이지가 같은 알림을 중복 노출하고 다른 알림을 누락하는 것을 막는다.
+        return $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->paginate($perPage);
     }
 
     /**

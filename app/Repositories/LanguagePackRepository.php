@@ -195,7 +195,9 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
         return $query
             ->orderBy('scope')
             ->orderBy('target_identifier')
-            ->orderBy('locale');
+            ->orderBy('locale')
+            // 전순서 보장 — 위 세 컬럼 조합이 유니크하더라도 정렬 계약을 키로 닫아 둔다
+            ->orderBy('id');
     }
 
     /**

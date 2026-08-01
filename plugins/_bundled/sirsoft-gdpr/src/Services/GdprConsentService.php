@@ -7,6 +7,7 @@ use App\Services\PluginSettingsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Plugins\Sirsoft\Gdpr\Enums\ConsentAction;
+use Plugins\Sirsoft\Gdpr\Enums\ConsentSource;
 use Plugins\Sirsoft\Gdpr\Models\GdprUserConsent;
 use Plugins\Sirsoft\Gdpr\Models\GdprUserConsentHistory;
 use Plugins\Sirsoft\Gdpr\Repositories\Contracts\GdprUserConsentHistoryRepositoryInterface;
@@ -28,11 +29,11 @@ class GdprConsentService
     /**
      * GdprConsentService 생성자
      *
-     * @param GdprUserConsentRepositoryInterface $statusRepository 동의 상태 Repository
-     * @param GdprUserConsentHistoryRepositoryInterface $historyRepository 동의 이력 Repository
-     * @param PluginSettingsService $pluginSettings 플러그인 설정 서비스
-     * @param CookieCategoryService $categoryService 쿠키 카테고리 카탈로그 서비스
-     * @param GdprPolicyVersionService|null $policyVersionService 정책 버전 서비스 — null 인 경우 lazy resolve (테스트 호환성)
+     * @param  GdprUserConsentRepositoryInterface  $statusRepository  동의 상태 Repository
+     * @param  GdprUserConsentHistoryRepositoryInterface  $historyRepository  동의 이력 Repository
+     * @param  PluginSettingsService  $pluginSettings  플러그인 설정 서비스
+     * @param  CookieCategoryService  $categoryService  쿠키 카테고리 카탈로그 서비스
+     * @param  GdprPolicyVersionService|null  $policyVersionService  정책 버전 서비스 — null 인 경우 lazy resolve (테스트 호환성)
      */
     public function __construct(
         private readonly GdprUserConsentRepositoryInterface $statusRepository,
@@ -68,13 +69,13 @@ class GdprConsentService
      * 게스트: history만 INSERT (status 미사용).
      * 동일 상태 재요청은 noop으로 처리하여 중복 이력 방지.
      *
-     * @param int|null $userId 회원 ID (게스트면 NULL)
-     * @param string|null $sessionId 게스트 세션 ID (회원이면 NULL)
-     * @param string $consentKey 동의 항목 키
-     * @param bool $value 동의 여부
-     * @param string $source 변경 경로 (banner/preference_center/register/mypage/order/withdraw)
-     * @param array|null $categories 카테고리 스냅샷 (배너 일괄 변경 시)
-     * @param bool $isRejection 명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
+     * @param  int|null  $userId  회원 ID (게스트면 NULL)
+     * @param  string|null  $sessionId  게스트 세션 ID (회원이면 NULL)
+     * @param  string  $consentKey  동의 항목 키
+     * @param  bool  $value  동의 여부
+     * @param  string  $source  변경 경로 (허용 어휘는 ConsentSource enum — banner/preference_center/register/mypage/mypage_renew_all)
+     * @param  array|null  $categories  카테고리 스냅샷 (배너 일괄 변경 시)
+     * @param  bool  $isRejection  명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
      * @return void
      */
     public function updateConsent(
@@ -136,8 +137,8 @@ class GdprConsentService
                 $data['consent_count'] = ($existing?->consent_count ?? 0) + 1;
             }
 
-            HookManager::doAction(self::PLUGIN_ID . '.consent.before_update', $userId, $consentKey, $data);
-            $data = HookManager::applyFilters(self::PLUGIN_ID . '.consent.filter_update_data', $data, $userId, $consentKey);
+            HookManager::doAction(self::PLUGIN_ID.'.consent.before_update', $userId, $consentKey, $data);
+            $data = HookManager::applyFilters(self::PLUGIN_ID.'.consent.filter_update_data', $data, $userId, $consentKey);
 
             $consent = $this->statusRepository->upsert($userId, $consentKey, $data);
         }
@@ -166,19 +167,19 @@ class GdprConsentService
         }
 
         $hookName = $value
-            ? self::PLUGIN_ID . '.consent.granted'
-            : self::PLUGIN_ID . '.consent.revoked';
+            ? self::PLUGIN_ID.'.consent.granted'
+            : self::PLUGIN_ID.'.consent.revoked';
         HookManager::doAction($hookName, $consent, $source);
     }
 
     /**
      * 여러 동의 항목을 일괄 업데이트합니다.
      *
-     * @param int|null $userId 회원 ID
-     * @param string|null $sessionId 게스트 세션 ID
-     * @param array<string, bool> $consents 동의 데이터 [key => bool]
-     * @param string $source 변경 경로
-     * @param bool $isRejection 명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
+     * @param  int|null  $userId  회원 ID
+     * @param  string|null  $sessionId  게스트 세션 ID
+     * @param  array<string, bool>  $consents  동의 데이터 [key => bool]
+     * @param  string  $source  변경 경로
+     * @param  bool  $isRejection  명시적 거부 신호 (이슈 #430). 선택형 미동의 항목을 is_rejected=true 로 저장.
      * @return void
      */
     public function updateConsents(?int $userId, ?string $sessionId, array $consents, string $source, bool $isRejection = false): void
@@ -195,7 +196,7 @@ class GdprConsentService
      *
      * 로그인 후 클라이언트 동기화에 사용됩니다.
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return Collection<int, GdprUserConsent>
      */
     public function getActiveConsents(int $userId): Collection
@@ -215,7 +216,7 @@ class GdprConsentService
      *    (consent_count=0, is_consented=false)
      *  - 카탈로그에 없는 status row (예: 운영자가 카테고리 삭제) → 결과에서 제외 (UI 노출 부적합)
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return Collection<int, GdprUserConsent>
      */
     public function getMyConsentMatrix(int $userId): Collection
@@ -230,7 +231,7 @@ class GdprConsentService
                 continue;
             }
 
-            $consentKey = 'cookie_' . $bareKey;
+            $consentKey = 'cookie_'.$bareKey;
 
             if ($statusByKey->has($consentKey)) {
                 $rows->push($statusByKey->get($consentKey));
@@ -251,7 +252,7 @@ class GdprConsentService
     /**
      * 회원의 모든 동의 상태를 반환합니다 (활성·철회 포함).
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return Collection<int, GdprUserConsent>
      */
     public function getAllConsents(int $userId): Collection
@@ -262,7 +263,7 @@ class GdprConsentService
     /**
      * 회원의 동의 이력을 반환합니다.
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return Collection<int, GdprUserConsentHistory>
      */
     public function getHistories(int $userId): Collection
@@ -273,7 +274,7 @@ class GdprConsentService
     /**
      * 게스트 세션의 동의 이력을 반환합니다.
      *
-     * @param string $sessionId 게스트 세션 ID
+     * @param  string  $sessionId  게스트 세션 ID
      * @return Collection<int, GdprUserConsentHistory>
      */
     public function getGuestHistories(string $sessionId): Collection
@@ -287,7 +288,7 @@ class GdprConsentService
      * status 테이블의 is_consented=true 행을 false로 UPDATE +
      * 각 항목별 history에 source=withdraw로 revoked 행 INSERT.
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return void
      */
     public function revokeAllOnWithdraw(int $userId): void
@@ -306,7 +307,7 @@ class GdprConsentService
      * history 테이블은 user_id·ip_address·user_agent를 NULL로 익명화하여
      * 감사 추적용 행을 보존합니다 (GDPR Art.17 + Art.7(1) 양립).
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return void
      */
     public function purgeOnUserDelete(int $userId): void
@@ -320,7 +321,7 @@ class GdprConsentService
      *
      * 회원의 가장 최근 동의가 현재 정책 버전과 다르면 재동의 트리거 대상.
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return bool 재동의 필요 여부
      */
     public function needsRenewal(int $userId): bool
@@ -362,7 +363,7 @@ class GdprConsentService
      *  - 활성 + 옛 버전 → policy_version = current, last_source = 'mypage_renew_all'
      *  - 각 갱신 행마다 history append (action=granted, source=mypage_renew_all) — Art.7(1) 입증 트레일
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return int 갱신된 동의 행 수
      */
     public function renewAllForCurrentPolicy(int $userId): int
@@ -392,13 +393,13 @@ class GdprConsentService
             $data = [
                 'is_consented' => true,
                 'policy_version' => $current,
-                'last_source' => 'mypage_renew_all',
+                'last_source' => ConsentSource::MypageRenewAll->value,
                 'consent_category' => $this->resolveCategory($consentKey),
                 'consent_count' => (int) $consent->consent_count + 1,
             ];
 
-            HookManager::doAction(self::PLUGIN_ID . '.consent.before_update', $userId, $consentKey, $data);
-            $data = HookManager::applyFilters(self::PLUGIN_ID . '.consent.filter_update_data', $data, $userId, $consentKey);
+            HookManager::doAction(self::PLUGIN_ID.'.consent.before_update', $userId, $consentKey, $data);
+            $data = HookManager::applyFilters(self::PLUGIN_ID.'.consent.filter_update_data', $data, $userId, $consentKey);
 
             $updated = $this->statusRepository->upsert($userId, $consentKey, $data);
 
@@ -407,14 +408,14 @@ class GdprConsentService
                 'session_id' => null,
                 'consent_key' => $consentKey,
                 'action' => 'granted',
-                'source' => 'mypage_renew_all',
+                'source' => ConsentSource::MypageRenewAll->value,
                 'policy_version' => $current,
                 'categories' => $this->buildCategoriesSnapshotForUser($userId),
                 'ip_address' => request()->ip(),
                 'user_agent' => substr((string) request()->userAgent(), 0, 500),
             ]);
 
-            HookManager::doAction(self::PLUGIN_ID . '.consent.granted', $updated, 'mypage_renew_all');
+            HookManager::doAction(self::PLUGIN_ID.'.consent.granted', $updated, ConsentSource::MypageRenewAll->value);
 
             $renewed++;
         }
@@ -429,8 +430,8 @@ class GdprConsentService
      * 회원: status 테이블에서 cookie_ 접두사 동의 중 정책 버전 일치하는 항목이 1개 이상이면 동의 완료.
      * 게스트: history 의 가장 최근 항목 중 정책 버전 일치하는 cookie_ 접두사 동의가 1개 이상이면 동의 완료.
      *
-     * @param int|null $userId 회원 ID (게스트면 NULL)
-     * @param string|null $sessionId 게스트 세션 ID (회원이면 NULL)
+     * @param  int|null  $userId  회원 ID (게스트면 NULL)
+     * @param  string|null  $sessionId  게스트 세션 ID (회원이면 NULL)
      * @return bool 현재 정책 버전으로 동의 완료 여부
      */
     public function hasCurrentCookieConsent(?int $userId, ?string $sessionId): bool
@@ -474,8 +475,8 @@ class GdprConsentService
      * 회원: status 테이블에서 cookie_ 접두사 1건 이상 → true
      * 게스트: history 테이블에서 session_id + cookie_ 접두사 1건 이상 → true
      *
-     * @param int|null $userId 회원 ID (게스트면 NULL)
-     * @param string|null $sessionId 게스트 세션 ID (회원이면 NULL)
+     * @param  int|null  $userId  회원 ID (게스트면 NULL)
+     * @param  string|null  $sessionId  게스트 세션 ID (회원이면 NULL)
      * @return bool 동의 이력 존재 여부
      */
     public function hasAnyConsentHistory(?int $userId, ?string $sessionId): bool
@@ -515,8 +516,8 @@ class GdprConsentService
      * 회원: status 테이블의 cookie_ 접두사 + 정책 버전 일치 행을 카테고리별로 매핑.
      * 게스트: history 의 정책 버전 일치 cookie_ 접두사 항목 중 가장 최근 action 을 사용.
      *
-     * @param int|null $userId 회원 ID (게스트면 NULL)
-     * @param string|null $sessionId 게스트 세션 ID (회원이면 NULL)
+     * @param  int|null  $userId  회원 ID (게스트면 NULL)
+     * @param  string|null  $sessionId  게스트 세션 ID (회원이면 NULL)
      * @return array<string, bool> 카테고리 키 → 동의 여부 (예: ['necessary' => true, 'analytics' => false])
      */
     public function getCurrentCookieConsents(?int $userId, ?string $sessionId): array
@@ -571,7 +572,7 @@ class GdprConsentService
     /**
      * consent_key로부터 category 분류를 추정합니다.
      *
-     * @param string $consentKey 동의 항목 키
+     * @param  string  $consentKey  동의 항목 키
      * @return string|null
      */
     private function resolveCategory(string $consentKey): ?string
@@ -592,7 +593,7 @@ class GdprConsentService
      *
      * 동의 row 가 한 건도 없는 회원은 null 반환 — history.categories null 과 동일 의미.
      *
-     * @param int $userId 회원 ID
+     * @param  int  $userId  회원 ID
      * @return array<string, bool>|null 카테고리 키 → 동의 여부 매트릭스
      */
     private function buildCategoriesSnapshotForUser(int $userId): ?array

@@ -92,12 +92,20 @@ class SortableColumnsGateContractTest extends TestCase
                 $path = str_replace('\\', '/', $file->getPathname());
                 $relative = ltrim(str_replace(str_replace('\\', '/', $root), '', $path), '/');
 
-                // 트레이트 본체와 테스트 코드는 호출처가 아니다
-                if (str_contains($relative, '/tests/') || str_contains($relative, 'Concerns/ResolvesSortSpec.php')) {
+                // 트레이트 본체와 테스트 코드는 호출처가 아니다.
+                // 파일명을 하나씩 나열하면 트레이트가 늘 때마다 목록이 낡으므로 디렉토리로 제외한다
+                // (`Repositories/Concerns/` 는 정렬·페이지네이션 트레이트 본체 자리다).
+                if (str_contains($relative, '/tests/') || str_contains($relative, 'Repositories/Concerns/')) {
                     continue;
                 }
 
-                if (str_contains((string) file_get_contents($path), '$this->resolveSortSpec(')) {
+                $content = (string) file_get_contents($path);
+
+                // 관계 정렬 변형(`resolveSortSpecWithRelated`)만 쓰는 저장소도 호출처다.
+                // `resolveSortSpec(` 만 찾으면 뒤에 `WithRelated` 가 붙은 호출을 놓쳐, 그 저장소는
+                // 게이트 대조 자체에 도달하지 못한 채 조용히 통과한다.
+                if (str_contains($content, '$this->resolveSortSpec(')
+                    || str_contains($content, '$this->resolveSortSpecWithRelated(')) {
                     $found[] = $relative;
                 }
             }
@@ -138,27 +146,58 @@ class SortableColumnsGateContractTest extends TestCase
     {
         $columns = [];
 
-        // resolveSortSpec 의 두 번째 인자 — self::CONST 또는 인라인 배열
+        // resolveSortSpec 의 두 번째 인자 — self::CONST 또는 인라인 배열.
+        // `resolveSortSpec\(` 는 `(` 를 요구하므로 `resolveSortSpecWithRelated(` 와 겹치지 않는다.
         preg_match_all('/resolveSortSpec\(\s*\$\w+\s*,\s*(self::(\w+)|\[[^\]]*\])/s', $content, $matches, PREG_SET_ORDER);
 
         foreach ($matches as $match) {
-            $literal = $match[1];
+            $columns = array_merge($columns, $this->literalColumns($content, $match[1], $match[2] ?? '', false));
+        }
 
-            if (str_starts_with($literal, 'self::')) {
-                $constName = $match[2];
+        // 관계 정렬 변형 — 두 번째(자기 테이블 컬럼) + 세 번째(관계 컬럼 맵) 인자를 모두 읽는다.
+        // 세 번째를 빼면 관계 정렬로만 허용된 컬럼이 "저장소에 없음" 으로 오판된다.
+        preg_match_all(
+            '/resolveSortSpecWithRelated\(\s*\$\w+\s*,\s*(self::(\w+)|\[[^\]]*\])\s*,\s*(self::(\w+)|\[.*?\])\s*,/s',
+            $content,
+            $relatedMatches,
+            PREG_SET_ORDER
+        );
 
-                if (! preg_match('/const\s+'.preg_quote($constName, '/').'\s*=\s*\[(.*?)\];/s', $content, $constMatch)) {
-                    continue;
-                }
-
-                $literal = $constMatch[1];
-            }
-
-            preg_match_all("/'([a-zA-Z0-9_]+)'/", $literal, $columnMatches);
-            $columns = array_merge($columns, $columnMatches[1]);
+        foreach ($relatedMatches as $match) {
+            $columns = array_merge($columns, $this->literalColumns($content, $match[1], $match[2] ?? '', false));
+            // 관계 맵은 `'정렬키' => [model/foreign_key/column]` 구조라 최상위 키만 정렬키다
+            $columns = array_merge($columns, $this->literalColumns($content, $match[3], $match[4] ?? '', true));
         }
 
         return array_values(array_unique($columns));
+    }
+
+    /**
+     * 인자 리터럴(상수 참조 포함)에서 컬럼명을 추출합니다.
+     *
+     * @param  string  $content  파일 내용 (상수 본문 조회용)
+     * @param  string  $literal  인자 리터럴 (`self::CONST` 또는 인라인 배열)
+     * @param  string  $constName  상수명 (`self::` 형태일 때)
+     * @param  bool  $keysOnly  true 면 `'키' => [...]` 의 최상위 키만 취함
+     * @return array<int, string> 추출된 컬럼명
+     */
+    private function literalColumns(string $content, string $literal, string $constName, bool $keysOnly): array
+    {
+        if (str_starts_with($literal, 'self::')) {
+            if (! preg_match('/const\s+'.preg_quote($constName, '/').'\s*=\s*\[(.*?)\];/s', $content, $constMatch)) {
+                return [];
+            }
+
+            $literal = $constMatch[1];
+        }
+
+        // 최상위 키만 — 중첩 배열의 내부 키/값(model, foreign_key, column …)을 정렬 허용 컬럼으로
+        // 오인하면 저장소 허용 목록이 실제보다 넓어져 게이트 대조가 거짓 통과한다.
+        $pattern = $keysOnly ? "/'([a-zA-Z0-9_]+)'\s*=>\s*\[/" : "/'([a-zA-Z0-9_]+)'/";
+
+        preg_match_all($pattern, $literal, $columnMatches);
+
+        return $columnMatches[1];
     }
 
     /**

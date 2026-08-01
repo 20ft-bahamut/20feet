@@ -29,8 +29,43 @@ import { evaluateConditionBranches } from './helpers/ConditionEvaluator';
 import { triggerModalParentUpdate } from './ParentContextProvider';
 import type { GlobalHeaderRule } from './LayoutLoader';
 import { IdentityGuardInterceptor } from '../identity/IdentityGuardInterceptor';
+import { isAbortError, isNetworkFailure } from './networkResilience';
 
 const logger = createLogger('ActionDispatcher');
+
+/**
+ * 액션 실패 시 화면에 띄울 문구를 결정합니다.
+ *
+ * 우선순위는 (1) 서버가 준 메시지 → (2) 네트워크 실패 안내 → (3) 내부 식별 문구다.
+ *
+ * 네트워크 실패(`TypeError: Failed to fetch`)와 요청 취소(AbortError)는 **응답 자체가 없어**
+ * 서버 메시지가 존재하지 않는다. 그때 내부 식별 문구(`Failed to execute action: apiCall`)를
+ * 그대로 토스트에 띄우면 운영자는 무슨 일이 일어났는지 알 수 없고 다국어도 적용되지 않는다.
+ *
+ * @param originalError 원래 발생한 에러
+ * @param handler 실패한 핸들러명
+ * @param serverMessage 서버 응답이 준 메시지 (없으면 undefined)
+ * @param fallbackMessage 위 둘이 없을 때 쓸 문구 (기본: 내부 식별 문구).
+ *                        `ActionError` 가 이미 고유 메시지를 들고 있으면 그것을 넘겨 보존한다.
+ * @return string 화면에 띄울 문구 ($t: 구문이면 호출부가 번역한다)
+ * @since engine-v1.54.6
+ */
+export function resolveActionFailureMessage(
+    originalError: unknown,
+    handler: string,
+    serverMessage?: string,
+    fallbackMessage?: string
+): string {
+    if (serverMessage) {
+        return serverMessage;
+    }
+
+    if (isNetworkFailure(originalError) || isAbortError(originalError)) {
+        return '$t:core.errors.network_request_failed';
+    }
+
+    return fallbackMessage || `Failed to execute action: ${handler}`;
+}
 
 /**
  * 프리뷰 모드에서 억제되는 핸들러 목록
@@ -2607,8 +2642,23 @@ export class ActionDispatcher {
       const errorStatus = (actionError.originalError as any)?.status || apiResponse.status || 500;
 
       // 에러 컨텍스트 생성 (ErrorHandlingResolver와 호환)
-      // API 응답의 message를 우선 사용하고, 없으면 ActionError 메시지 사용
-      const errorMessage = responseData.message || actionError.message;
+      // API 응답의 message를 우선 사용하고, 응답이 아예 없었던 네트워크 실패에는
+      // 내부 식별 문구 대신 다국어 안내를 쓴다 (engine-v1.54.6)
+      let errorMessage = resolveActionFailureMessage(
+        actionError.originalError ?? error,
+        action.handler,
+        responseData.message,
+        actionError.message
+      );
+
+      // 상태에 실려 텍스트로 그대로 렌더되는 경로(`{{error.message}}` → `_global.*Error`)가 있으므로
+      // 여기서 번역해 둔다. 키 문자열이 화면에 노출되면 안 된다.
+      if (this.translationEngine && this.translationContext && errorMessage.startsWith('$t:')) {
+        errorMessage = this.translationEngine.resolveTranslations(
+          errorMessage,
+          this.translationContext
+        );
+      }
       const errorContextData: ErrorContext = {
         status: errorStatus,
         message: errorMessage,

@@ -14,14 +14,20 @@ use Tests\TestCase;
  * 검사하는 계약 (PaginatesWithDeferredJoin docblock 의 "호출 계약"):
  *   - `columns:` 를 명시할 것 — 생략하면 outer 가 무엇을 읽는지 호출처에서 드러나지 않는다
  *   - `sort:` 를 명시하고 비우지 말 것 — 정렬이 비면 키 컬럼만 남아 화면 정렬이 사라진다
+ *   - 넘기는 `$query` 에 관계를 미리 붙이지 말 것 — 트레이트가 inner 뿐 아니라 outer 에서도
+ *     `setEagerLoads([])` 로 지우므로, `relations:` 없이 `with()` 만 하면 관계가 조용히 사라진다
  *
  * `columns: ['*']` 자체는 위반이 아니다. 지연 조인의 목적인 **OFFSET 구간의 넓은 컬럼 읽기**는
  * inner 가 키 컬럼만 읽는 것으로 이미 제거되고, outer 가 읽는 행 수는 페이지 크기로 고정된다.
  * 넓은 컬럼을 가진 테이블에서 컬럼을 좁히는 것은 그 위에 얹는 추가 최적화다.
  *
+ * 관계 계약을 손으로 나열하지 않고 메서드 본문을 스캔해 판정하는 이유: 이 위반은 예외도
+ * 쿼리 오류도 내지 않고 **응답에서 관계 필드만 사라진다**. HTTP 테스트가 그 필드를 단언하지
+ * 않으면 전부 초록으로 통과한다(실제로 스케줄 실행 이력의 `triggered_by` 가 이렇게 유실됐다).
+ *
  * @scenario case=deferred_join_call_site_contract
  *
- * @effects call_sites_declare_columns, call_sites_declare_sort
+ * @effects call_sites_declare_columns, call_sites_declare_sort, call_sites_pass_relations_as_argument
  */
 class DeferredJoinCallSiteContractTest extends TestCase
 {
@@ -119,6 +125,80 @@ class DeferredJoinCallSiteContractTest extends TestCase
         }
 
         return $sites;
+    }
+
+    /**
+     * 호출처를 그 호출을 감싸는 메서드 본문과 함께 돌려줍니다.
+     *
+     * 본문에서 호출 인자 텍스트는 제거한다 — `relations:` 값이나 `outerUsing:` 클로저 안의
+     * `with()` 는 정상 사용이므로 검사 대상이 아니다.
+     *
+     * @return array<string, array{0: string, 1: int, 2: string, 3: string}> [파일, 줄번호, 인자, 인자 제외 메서드 본문]
+     */
+    public static function callSiteWithMethodBodyProvider(): array
+    {
+        $root = dirname(__DIR__, 4);
+        $cases = [];
+
+        foreach (self::callSiteProvider() as $key => [$relative, $line, $args]) {
+            $content = file_get_contents($root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative));
+            $body = self::enclosingMethodBody($content, $line);
+
+            // 호출 인자 텍스트 제거 — 그 안의 with() 는 트레이트가 outer 에 적용하는 정상 경로다
+            $cases[$key] = [$relative, $line, $args, str_replace($args, '', $body)];
+        }
+
+        return $cases;
+    }
+
+    /**
+     * 지정한 줄을 감싸는 메서드 본문을 돌려줍니다.
+     *
+     * @param  string  $content  파일 내용
+     * @param  int  $line  호출이 위치한 줄번호
+     * @return string 메서드 본문 (찾지 못하면 빈 문자열)
+     */
+    private static function enclosingMethodBody(string $content, int $line): string
+    {
+        $offset = 0;
+        $lines = explode("\n", $content);
+        $target = 0;
+
+        for ($i = 0; $i < $line - 1; $i++) {
+            $target += strlen($lines[$i]) + 1;
+        }
+
+        preg_match_all('/^\s{4}(?:public|protected|private)\s+function\s+\w+/m', $content, $m, PREG_OFFSET_CAPTURE);
+        $starts = array_map(fn ($x) => $x[1], $m[0]);
+        $starts[] = strlen($content);
+
+        for ($i = 0; $i < count($starts) - 1; $i++) {
+            if ($starts[$i] <= $target && $target < $starts[$i + 1]) {
+                return substr($content, $starts[$i], $starts[$i + 1] - $starts[$i]);
+            }
+            $offset = $starts[$i];
+        }
+
+        return '';
+    }
+
+    #[DataProvider('callSiteWithMethodBodyProvider')]
+    public function test_call_site_passes_relations_as_argument(string $file, int $line, string $args, string $body): void
+    {
+        $appliesEagerLoad = preg_match('/(->|::)\s*with(Count)?\s*\(/', $body) === 1;
+
+        if (! $appliesEagerLoad) {
+            $this->addToAssertionCount(1);
+
+            return;
+        }
+
+        $this->assertMatchesRegularExpression(
+            '/\b(relations|withCount)\s*:/',
+            $args,
+            "{$file}:{$line} — 쿼리에 with()/withCount() 를 붙였는데 relations:/withCount: 인자가 없다. "
+            .'트레이트가 outer 에서도 eager load 를 지우므로 관계가 조용히 사라진다 (예외도 오류도 나지 않는다).'
+        );
     }
 
     #[DataProvider('callSiteProvider')]

@@ -45,10 +45,10 @@
         "title": "GDPR 설정",
         "description": "쿠키 동의 배너와 마이페이지 동의 관리 카드의 동작을 운영자가 제어합니다.",
         "section": {
-            "operator": "운영 주체 \/ 개인정보처리방침",
+            "operator": "운영 주체 / 개인정보처리방침",
             "operator_desc": "쿠키 배너·정책 페이지에 표시될 운영 주체, 데이터 저장 위치, 정책 페이지 슬러그를 등록합니다.",
             "cookie_banner": "쿠키 동의 배너",
-            "cookie_banner_desc": "방문자에게 표시되는 쿠키 동의 배너의 노출\/위치\/카테고리\/정책 버전을 한 곳에서 설정합니다.",
+            "cookie_banner_desc": "방문자에게 표시되는 쿠키 동의 배너의 노출/위치/카테고리/정책 버전을 한 곳에서 설정합니다.",
             "cookie_banner_settings": "배너 표시 설정",
             "cookie_categories": "쿠키 카테고리",
             "cookie_policy_version": "쿠키 정책 버전",
@@ -77,14 +77,14 @@
                 "placeholder": "예: privacy-policy"
             },
             "legal_entity_name": {
-                "label": "법인명 \/ 운영 주체",
+                "label": "법인명 / 운영 주체",
                 "hint": "쿠키 배너와 마이페이지에 표시되는 사이트 운영 주체 이름입니다.",
                 "placeholder": "예: (주)회사명"
             },
             "data_storage_location": {
                 "label": "데이터 저장 위치",
                 "hint": "사용자에게 안내할 데이터 저장 국가를 입력하세요. 예: \"대한민국\", \"미국 (AWS)\". IP 주소, 클라우드 리전 코드(예: ap-northeast-2), 데이터센터 주소는 보안상 입력하지 마세요.",
-                "placeholder": "예: 대한민국 (자체 데이터센터) \/ 미국 (AWS)"
+                "placeholder": "예: 대한민국 (자체 데이터센터) / 미국 (AWS)"
             },
             "banner_enabled": {
                 "label": "쿠키 배너 노출",
@@ -201,13 +201,16 @@
                 "open_policy_page": "본문 페이지 열기",
                 "no_policy_slug": "등록된 정책 본문 페이지가 없습니다."
             },
-            "not_found": "해당 정책 버전을 찾을 수 없습니다."
+            "not_found": "해당 정책 버전을 찾을 수 없습니다.",
+            "history_page_summary": "총 {total}건 · {current} / {last} 페이지",
+            "history_prev": "이전",
+            "history_next": "다음"
         }
     },
     "admin": {
         "consent_log": {
             "title": "GDPR 동의 이력",
-            "description": "회원·게스트의 동의\/철회 변경 이력을 조회합니다. IP·User-Agent 등 감사 정보가 함께 노출됩니다.",
+            "description": "회원·게스트의 동의/철회 변경 이력을 조회합니다. IP·User-Agent 등 감사 정보가 함께 노출됩니다.",
             "refresh": "새로고침",
             "empty": "조회된 동의 이력이 없습니다.",
             "clear_filters": "필터 초기화",
@@ -233,7 +236,9 @@
             "source": {
                 "banner": "배너",
                 "preference_center": "환경설정",
-                "mypage": "마이페이지"
+                "mypage": "마이페이지",
+                "register": "회원가입",
+                "mypage_renew_all": "마이페이지 일괄 재동의"
             },
             "col": {
                 "created_at": "시점",
@@ -259,7 +264,7 @@
             "title": "쿠키 동의 관리",
             "description": "사이트가 사용 중인 쿠키 항목에 대한 동의를 변경하거나 철회할 수 있습니다.",
             "section_consents": "내 동의 현황",
-            "section_consents_hint": "동의\/철회 시점에 따라 즉시 반영됩니다. 필수 항목은 철회할 수 없습니다.",
+            "section_consents_hint": "동의/철회 시점에 따라 즉시 반영됩니다. 필수 항목은 철회할 수 없습니다.",
             "col_consent_key": "동의 항목",
             "col_consented": "상태",
             "col_consented_at": "동의일",
@@ -312,7 +317,7 @@
         "save": "선택 저장",
         "policy_link": "개인정보처리방침",
         "preferences_title": "쿠키 환경설정",
-        "preferences_description": "카테고리별 쿠키 사용을 개별 동의\/철회할 수 있습니다. 필수 카테고리는 끌 수 없습니다.",
+        "preferences_description": "카테고리별 쿠키 사용을 개별 동의/철회할 수 있습니다. 필수 카테고리는 끌 수 없습니다.",
         "category_required_badge": "필수",
         "view_policy_label": "변경된 정책 본문 보기",
         "operator_and_storage_line": "본 사이트는 {entity}이(가) 운영하며, 데이터는 {location}에 저장됩니다",

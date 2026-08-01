@@ -7,6 +7,7 @@ use App\Extension\Vendor\VendorMode;
 use App\Http\Controllers\Api\Base\AdminBaseController;
 use App\Http\Controllers\Concerns\InjectsExtensionLanguagePacks;
 use App\Http\Controllers\Concerns\OrchestratesCascadeInstall;
+use App\Http\Controllers\Concerns\RebuildsSearchIndexOnDemand;
 use App\Http\Requests\Extension\ChangelogRequest;
 use App\Http\Requests\Module\ActivateModuleRequest;
 use App\Http\Requests\Module\DeactivateModuleRequest;
@@ -38,6 +39,7 @@ class ModuleController extends AdminBaseController
 {
     use InjectsExtensionLanguagePacks;
     use OrchestratesCascadeInstall;
+    use RebuildsSearchIndexOnDemand;
 
     public function __construct(
         private ModuleService $moduleService,
@@ -531,25 +533,36 @@ class ModuleController extends AdminBaseController
             $force = (bool) ($validated['force'] ?? false);
             $result = $this->moduleService->updateModule($moduleName, $vendorMode, $layoutStrategy, $force);
 
+            // 검색 인덱스 재생성은 운영자가 체크했을 때만 수행한다 — 인덱스 잠금·재색인 비용이
+            // 있어 운영 중인 사이트에서 업데이트만으로 발생해서는 안 된다.
+            $searchIndex = $this->rebuildSearchIndexIfRequested(
+                (bool) ($validated['rebuild_search_index'] ?? false)
+            );
+
             $moduleInfo = $result['module_info'] ?? null;
 
             // 메시지 치환 파라미터를 반드시 전달한다 — 누락 시 ":module"/":version"
             // 플레이스홀더가 그대로 사용자에게 노출된다.
             $messageParams = [
                 'module' => $moduleName,
-                'version' => $result['to_version'] ?? ($moduleInfo['version'] ?? ''),
+                'version' => (string) ($result['to_version'] ?? data_get($moduleInfo, 'version') ?? ''),
             ];
 
             if ($moduleInfo) {
                 return $this->successWithResource(
                     'modules.update_success',
-                    new ModuleResource($moduleInfo),
+                    (new ModuleResource($moduleInfo))->additional(['search_index' => $searchIndex]),
                     200,
                     $messageParams
                 );
             }
 
-            return $this->success('modules.update_success', $result, 200, $messageParams);
+            return $this->success(
+                'modules.update_success',
+                $result + ['search_index' => $searchIndex],
+                200,
+                $messageParams
+            );
         } catch (ValidationException $e) {
             // Service/Manager에서 이미 번역된 메시지를 errors에 포함하므로
             // 첫 번째 에러를 top-level message로 직접 사용 (이중 래핑 방지)

@@ -6,6 +6,7 @@ use App\Contracts\Repositories\ScheduleHistoryRepositoryInterface;
 use App\Models\ScheduleHistory;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -68,7 +69,11 @@ class ScheduleHistoryRepository implements ScheduleHistoryRepositoryInterface
      */
     public function getPaginatedByScheduleId(int $scheduleId, array $filters = []): LengthAwarePaginator
     {
-        $query = ScheduleHistory::with('triggeredBy')
+        // 관계는 쿼리에 미리 붙이지 않는다 — 지연 조인 트레이트가 inner/outer 양쪽에서
+        // setEagerLoads([]) 로 지우므로, 여기서 with() 하면 outer 에서도 사라져
+        // ScheduleHistoryResource 의 whenLoaded('triggeredBy') 가 항상 비게 된다.
+        // 로드는 relations: 인자로 넘긴다.
+        $query = ScheduleHistory::query()
             ->where('schedule_id', $scheduleId);
 
         // 상태 필터
@@ -81,13 +86,15 @@ class ScheduleHistoryRepository implements ScheduleHistoryRepositoryInterface
             $query->where('trigger_type', $filters['trigger_type']);
         }
 
-        // 날짜 필터
+        // 기간 필터 — whereDate 는 컬럼에 DATE() 를 씌워 인덱스를 못 쓰게 만든다.
+        // 같은 결과를 내는 범위 조건으로 바꿔 started_at 인덱스를 살린다
+        // (종료일은 그날 23:59:59.999999 까지 포함해야 whereDate 와 동일한 경계를 갖는다).
         if (! empty($filters['started_from'])) {
-            $query->whereDate('started_at', '>=', $filters['started_from']);
+            $query->where('started_at', '>=', Carbon::parse($filters['started_from'])->startOfDay());
         }
 
         if (! empty($filters['started_to'])) {
-            $query->whereDate('started_at', '<=', $filters['started_to']);
+            $query->where('started_at', '<=', Carbon::parse($filters['started_to'])->endOfDay());
         }
 
         // 정렬 — 요청 값은 허용 목록으로만 해석한다.
@@ -108,6 +115,7 @@ class ScheduleHistoryRepository implements ScheduleHistoryRepositoryInterface
             columns: ['*'],
             sort: $sort,
             perPage: $perPage,
+            relations: ['triggeredBy'],
         );
     }
 

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\IdentityVerificationLogRepositoryInterface;
 use App\Enums\IdentityVerificationStatus;
+use App\Helpers\TimezoneHelper;
 use App\Models\IdentityPolicy;
 use App\Models\IdentityVerificationLog;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
@@ -195,12 +196,15 @@ class IdentityVerificationLogRepository implements IdentityVerificationLogReposi
             }
         }
 
+        // 기간 필터는 사이트 타임존 기준으로 해석한다 — created_at 은 UTC 로 저장되고
+        // 화면은 사이트 타임존으로 보여주므로, 입력 문자열을 그대로 비교하면 하루가 어긋난다.
+        // 종료값은 시각 없이 날짜만 오는 경우(`<input type="date">`) 그날 끝까지 포함한다.
         if (! empty($filters['date_from'])) {
-            $query->where('created_at', '>=', $filters['date_from']);
+            $query->where('created_at', '>=', TimezoneHelper::fromSiteDateTime($filters['date_from']));
         }
 
         if (! empty($filters['date_to'])) {
-            $query->where('created_at', '<=', $filters['date_to']);
+            $query->where('created_at', '<=', TimezoneHelper::fromSiteRangeEnd($filters['date_to']));
         }
 
         $sortBy = in_array($filters['sort_by'] ?? null, ['created_at', 'attempts'], true)

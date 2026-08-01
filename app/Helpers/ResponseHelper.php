@@ -335,6 +335,12 @@ class ResponseHelper
     /**
      * JSON Resource를 사용한 성공 응답을 생성합니다.
      *
+     * `$resource->additional([...])` 로 실은 부가 데이터는 응답 최상위에 함께 나갑니다.
+     * `JsonResource::resolve()` 는 리소스 본문만 돌려주므로, 그것만 쓰면 호출자가 실은
+     * 부가 데이터가 조용히 사라집니다 — 예를 들어 확장 업데이트 응답의 `search_index`
+     * (색인 누락 안내)가 사라지면 검색이 0건을 돌려주는 사실을 운영자가 알 방법이 없습니다.
+     * `success`/`message`/`data` 키는 부가 데이터로 덮어쓰지 않습니다.
+     *
      * @param  string  $messageKey  멤시지 키 (기본값: 'messages.success')
      * @param  JsonResource|ResourceCollection|null  $resource  JSON 리소스
      * @param  int  $statusCode  HTTP 상태 코드 (기본값: 200)
@@ -351,11 +357,19 @@ class ResponseHelper
     ): JsonResponse {
         $data = $resource ? $resource->resolve() : null;
 
-        return response()->json([
+        $payload = [
             'success' => true,
             'message' => self::trans($messageKey, $messageParams, $domain),
             'data' => $data,
-        ], $statusCode, [], self::JSON_ENCODE_OPTIONS);
+        ];
+
+        $additional = $resource instanceof JsonResource ? (array) $resource->additional : [];
+
+        if ($additional !== []) {
+            $payload += array_diff_key($additional, $payload);
+        }
+
+        return response()->json($payload, $statusCode, [], self::JSON_ENCODE_OPTIONS);
     }
 
     /**

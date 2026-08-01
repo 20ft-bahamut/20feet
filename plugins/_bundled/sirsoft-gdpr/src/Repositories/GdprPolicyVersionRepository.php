@@ -20,6 +20,8 @@ class GdprPolicyVersionRepository implements GdprPolicyVersionRepositoryInterfac
     {
         return GdprPolicyVersion::query()
             ->orderByDesc('version')
+            // 전순서 보장 — version 이 유니크하더라도 정렬 계약을 키로 닫아 둔다
+            ->orderByDesc('id')
             ->first();
     }
 
@@ -62,6 +64,8 @@ class GdprPolicyVersionRepository implements GdprPolicyVersionRepositoryInterfac
         return GdprPolicyVersion::query()
             ->with('createdBy')
             ->orderByDesc('version')
+            // 전순서 보장 — version 이 유니크하더라도 정렬 계약을 키로 닫아 둔다
+            ->orderByDesc('id')
             // audit:allow repository-paginate-column-pruning reason: 발행 이력은 정책 변경 시에만
             // 늘어나는 정의성 테이블이라 깊은 OFFSET 이 성립하지 않는다. 넓은 컬럼(snapshot JSON)은
             // 아래 컬럼 목록에서 제외했고, 본문은 상세 조회(getByVersion)에서만 읽는다.

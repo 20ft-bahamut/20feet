@@ -38,10 +38,11 @@
             "id": "gdprPolicyVersionHistory",
             "label_key": "$t:sirsoft-gdpr.editor.data_source.gdprPolicyVersionHistory",
             "type": "api",
-            "endpoint": "/api/plugins/sirsoft-gdpr/admin/policy-versions",
+            "endpoint": "/api/plugins/sirsoft-gdpr/admin/policy-versions?page={{_local.policyHistoryPage ?? 1}}",
             "method": "GET",
             "auto_fetch": false,
-            "auth_required": true
+            "auth_required": true,
+            "comment": "정책 버전 이력 — 페이지는 _local.policyHistoryPage 로 관리하고 페이저가 setState + refetchDataSource 로 이동시킨다."
         },
         {
             "comment": "정책 버전 단건 snapshot — _global.viewingPolicyVersion 정수를 endpoint path 에 보간. v배지/이력 행 클릭 시 setState global.viewingPolicyVersion → openModal policy_version_snapshot_modal 시퀀스에서 자동 fetch.",
@@ -63,7 +64,8 @@
                 "isSaving": false,
                 "hasChanges": false,
                 "errors": null,
-                "policyHistoryOpen": false
+                "policyHistoryOpen": false,
+                "policyHistoryPage": 1
             }
         }
     ],
@@ -929,7 +931,8 @@
                                                                                                 "handler": "setState",
                                                                                                 "params": {
                                                                                                     "target": "local",
-                                                                                                    "policyHistoryOpen": "{{!_local.policyHistoryOpen}}"
+                                                                                                    "policyHistoryOpen": "{{!_local.policyHistoryOpen}}",
+                                                                                                    "policyHistoryPage": 1
                                                                                                 }
                                                                                             },
                                                                                             {
@@ -1165,6 +1168,103 @@
                                                                                                         ]
                                                                                                     }
                                                                                                 ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "id": "policy_version_history_pager",
+                                                                        "comment": "이력 페이저 — 총건수/현재 페이지를 함께 표시한다. 없으면 최신 20건만 보이고 나머지가 조용히 잘린다.",
+                                                                        "type": "basic",
+                                                                        "name": "Div",
+                                                                        "if": "{{(gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1) > 1}}",
+                                                                        "props": {
+                                                                            "className": "flex items-center justify-between gap-3 pt-3 mt-3 border-t border-gray-200 dark:border-gray-700"
+                                                                        },
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "basic",
+                                                                                "name": "Span",
+                                                                                "props": {
+                                                                                    "className": "text-label-subtle text-sm"
+                                                                                },
+                                                                                "text": "$t:sirsoft-gdpr.settings.policy_version.history_page_summary|current={{gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1}}|last={{gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1}}|total={{gdprPolicyVersionHistory?.data?.pagination?.total ?? 0}}"
+                                                                            },
+                                                                            {
+                                                                                "type": "basic",
+                                                                                "name": "Div",
+                                                                                "props": {
+                                                                                    "className": "flex items-center gap-2"
+                                                                                },
+                                                                                "children": [
+                                                                                    {
+                                                                                        "id": "policy_history_prev",
+                                                                                        "type": "basic",
+                                                                                        "name": "Button",
+                                                                                        "props": {
+                                                                                            "type": "button",
+                                                                                            "className": "btn btn-sm btn-neutral",
+                                                                                            "disabled": "{{(gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1) <= 1}}"
+                                                                                        },
+                                                                                        "text": "$t:sirsoft-gdpr.settings.policy_version.history_prev",
+                                                                                        "actions": [
+                                                                                            {
+                                                                                                "type": "click",
+                                                                                                "handler": "sequence",
+                                                                                                "params": {
+                                                                                                    "actions": [
+                                                                                                        {
+                                                                                                            "handler": "setState",
+                                                                                                            "params": {
+                                                                                                                "target": "local",
+                                                                                                                "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (-1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                                            }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "handler": "refetchDataSource",
+                                                                                                            "params": {
+                                                                                                                "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                            }
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "id": "policy_history_next",
+                                                                                        "type": "basic",
+                                                                                        "name": "Button",
+                                                                                        "props": {
+                                                                                            "type": "button",
+                                                                                            "className": "btn btn-sm btn-neutral",
+                                                                                            "disabled": "{{(gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1) >= (gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                        },
+                                                                                        "text": "$t:sirsoft-gdpr.settings.policy_version.history_next",
+                                                                                        "actions": [
+                                                                                            {
+                                                                                                "type": "click",
+                                                                                                "handler": "sequence",
+                                                                                                "params": {
+                                                                                                    "actions": [
+                                                                                                        {
+                                                                                                            "handler": "setState",
+                                                                                                            "params": {
+                                                                                                                "target": "local",
+                                                                                                                "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                                            }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            "handler": "refetchDataSource",
+                                                                                                            "params": {
+                                                                                                                "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                            }
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
                                                                                             }
                                                                                         ]
                                                                                     }

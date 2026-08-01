@@ -22,6 +22,13 @@ class MenuRepository implements MenuRepositoryInterface
     private const SORTABLE_COLUMNS = ['created_at', 'name', 'slug', 'order'];
 
     /**
+     * 다국어 JSON 컬럼 목록 (검색·정렬 시 로케일 경로로 풀어야 하는 컬럼)
+     *
+     * @var array<int, string>
+     */
+    private const TRANSLATABLE_COLUMNS = ['name'];
+
+    /**
      * 모든 메뉴를 조회합니다.
      *
      * @return Collection 메뉴 컬렉션 (관계 데이터 포함)
@@ -434,19 +441,19 @@ class MenuRepository implements MenuRepositoryInterface
                     $query->where(function ($q) use ($searchableFields, $value, $operator) {
                         foreach ($searchableFields as $searchField) {
                             $q->orWhere(function ($subQ) use ($searchField, $value, $operator) {
-                                $this->applyFilterOperator($subQ, $searchField, $value, $operator);
+                                $this->applySearchableField($subQ, $searchField, $value, $operator);
                             });
                         }
                     });
                 } elseif (in_array($field, $searchableFields)) {
-                    $this->applyFilterOperator($query, $field, $value, $operator);
+                    $this->applySearchableField($query, $field, $value, $operator);
                 }
             }
         }
 
         // 정렬 (허용 컬럼 화이트리스트로 해석)
         foreach ($this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'order', 'asc') as $sort) {
-            $query->orderBy($sort['column'], $sort['direction']);
+            $query->orderBy($this->qualifySortColumn($sort['column']), $sort['direction']);
         }
 
         // 자식 메뉴도 동일한 조건 적용하여 로드
@@ -475,6 +482,69 @@ class MenuRepository implements MenuRepositoryInterface
      * @param  string  $value  검색 값
      * @param  string  $operator  연산자 (like, eq, starts_with, ends_with)
      */
+    /**
+     * 검색 대상 필드에 조건을 적용합니다. (다국어 JSON 컬럼 인지)
+     *
+     * `name` 은 다국어 JSON 컬럼이다. JSON 은 유니코드 이스케이프(`\uXXXX`)로 저장되므로
+     * 컬럼 전체에 LIKE 를 걸면 한글·일본어 검색어가 **절대 매칭되지 않는다**
+     * (저장된 바이트는 `{"ko":"대시보드"}` 이다).
+     * 지원 로케일별 JSON 경로(`name->ko`)로 나눠 검색한다 — 저장소 공통 관례다.
+     *
+     * @param  Builder  $query  쿼리 빌더
+     * @param  string  $field  필드명
+     * @param  string  $value  검색 값
+     * @param  string  $operator  연산자 (like, eq, starts_with, ends_with)
+     */
+    private function applySearchableField($query, string $field, string $value, string $operator): void
+    {
+        if (! in_array($field, self::TRANSLATABLE_COLUMNS, true)) {
+            $this->applyFilterOperator($query, $field, $value, $operator);
+
+            return;
+        }
+
+        $query->where(function ($q) use ($field, $value, $operator) {
+            foreach ($this->translatableLocales() as $locale) {
+                $q->orWhere(function ($subQ) use ($field, $locale, $value, $operator) {
+                    $this->applyFilterOperator($subQ, "{$field}->{$locale}", $value, $operator);
+                });
+            }
+        });
+    }
+
+    /**
+     * 정렬 컬럼이 다국어 JSON 컬럼이면 현재 로케일 경로로 바꿉니다.
+     *
+     * JSON 원문으로 정렬하면 `{"ko":"\uXXXX...` 문자열 순서가 되어 사람이 읽는 순서와
+     * 무관해진다. 화면에 보이는 값(현재 로케일)으로 정렬해야 목록 순서가 납득 가능해진다.
+     *
+     * @param  string  $column  정렬 컬럼
+     * @return string 실제 정렬에 쓸 컬럼 표현
+     */
+    private function qualifySortColumn(string $column): string
+    {
+        if (! in_array($column, self::TRANSLATABLE_COLUMNS, true)) {
+            return $column;
+        }
+
+        return $column.'->'.app()->getLocale();
+    }
+
+    /**
+     * 다국어 필드가 값을 가질 수 있는 로케일 목록을 반환합니다.
+     *
+     * 다국어 JSON 필드의 언어 집합은 `translatable_locales` 다 — 번역 파일이 없어도
+     * 데이터는 저장될 수 있으므로 UI 표시 언어(`supported_locales`)보다 넓다.
+     *
+     * @return array<int, string> 로케일 코드 목록
+     */
+    private function translatableLocales(): array
+    {
+        $locales = config('app.translatable_locales', config('app.supported_locales', []));
+
+        return empty($locales) ? [app()->getLocale()] : array_values($locales);
+    }
+
     private function applyFilterOperator($query, string $field, string $value, string $operator): void
     {
         switch ($operator) {

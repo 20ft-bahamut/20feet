@@ -3,8 +3,10 @@
 namespace App\Repositories\Concerns;
 
 use Closure;
+use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Collection;
@@ -27,7 +29,10 @@ use Illuminate\Support\Collection;
  *
  * 호출 계약:
  *   - `$query` 에는 **필터/where 만** 적용한다 (`orderBy`/`with`/`select` 미적용)
- *   - `whereHas` 는 결과 집합을 결정하므로 그대로 둔다 — `with` 만 inner 에서 제거된다
+ *   - `whereHas` 는 결과 집합을 결정하므로 그대로 둔다 — 제거되는 것은 `with`(eager load) 뿐이다
+ *   - 관계는 **반드시 `$relations` 인자로** 넘긴다. `setEagerLoads([])` 는 inner 뿐 아니라
+ *     **outer 에도** 적용되므로, `$query->with()` 만 하고 인자를 생략하면 관계가 로드되지 않는다.
+ *     이 실패는 예외도 쿼리 오류도 내지 않고 응답에서 관계 필드만 사라진다
  *   - 정렬은 닫힌 집합이어야 한다 (ResolvesSortSpec 참조). 인덱스 없는 컬럼 정렬은 inner 도
  *     전체 스캔하므로 개선 폭이 보장되지 않는다
  *   - 키 컬럼은 정렬 마지막에 자동으로 덧붙는다 (동률 시 페이지 경계가 흔들리는 것을 방지)
@@ -180,8 +185,12 @@ trait PaginatesWithDeferredJoin
     /**
      * 정렬 스펙을 쿼리에 적용합니다.
      *
+     * 컬럼이 상관 서브쿼리(Builder)면 `orderBy()` 가 서브 select 로 전개한다. 서브쿼리는
+     * 원 행의 키에 상관되므로 inner/outer 어느 쪽에 적용해도 같은 순서를 만든다 —
+     * outer 에서는 이번 페이지 건수만큼만 실행된다.
+     *
      * @param  Builder  $query  대상 쿼리
-     * @param  array<int, array{column: string, direction: string}>  $sort  정렬 스펙
+     * @param  array<int, array{column: string|Builder|Expression, direction: string}>  $sort  정렬 스펙
      */
     private function applySortSpec(Builder $query, array $sort): void
     {
@@ -196,9 +205,13 @@ trait PaginatesWithDeferredJoin
      * 정렬 컬럼에 중복이 많으면(상태/조회수/평점 등) 동률 행의 순서가 실행마다 달라져 페이지
      * 경계에서 행이 중복되거나 누락된다. inner 와 outer 가 같은 순서를 갖도록 하는 전제이기도 하다.
      *
-     * @param  array<int, array{column: string, direction: string}>  $sort  정렬 스펙
+     * 정렬 컬럼은 문자열 외에 **상관 서브쿼리(Builder)** 나 Expression 도 올 수 있다
+     * (관계 테이블 컬럼 기준 정렬 — `SortsByRelatedColumn`). 이 경우 키 컬럼일 수 없으므로
+     * 전순서 보장을 위해 키 컬럼이 항상 덧붙는다.
+     *
+     * @param  array<int, array{column: string|Builder|Expression, direction: string}>  $sort  정렬 스펙
      * @param  string  $keyName  키 컬럼명
-     * @return array<int, array{column: string, direction: string}> 키 컬럼이 보장된 정렬 스펙
+     * @return array<int, array{column: string|Builder|Expression, direction: string}> 키 컬럼이 보장된 정렬 스펙
      */
     private function normalizeSortSpecForKey(array $sort, string $keyName): array
     {
@@ -207,7 +220,7 @@ trait PaginatesWithDeferredJoin
         foreach ($sort as $spec) {
             $column = $spec['column'] ?? null;
 
-            if (! is_string($column) || $column === '') {
+            if (is_string($column) ? $column === '' : ! ($column instanceof Builder || $column instanceof QueryBuilder || $column instanceof Expression)) {
                 continue;
             }
 
@@ -219,6 +232,10 @@ trait PaginatesWithDeferredJoin
 
         foreach ($normalized as $spec) {
             // 이미 키 컬럼으로 정렬한다면 그것으로 전순서가 성립한다
+            if (! is_string($spec['column'])) {
+                continue;
+            }
+
             if ($spec['column'] === $keyName || str_ends_with($spec['column'], '.'.$keyName)) {
                 return $normalized;
             }

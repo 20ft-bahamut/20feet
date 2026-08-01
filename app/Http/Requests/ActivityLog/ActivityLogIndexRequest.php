@@ -4,6 +4,7 @@ namespace App\Http\Requests\ActivityLog;
 
 use App\Enums\ActivityLogType;
 use App\Extension\HookManager;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -33,7 +34,7 @@ class ActivityLogIndexRequest extends FormRequest
             'log_type' => ['nullable', 'array'],
             'log_type.*' => ['string', Rule::in(ActivityLogType::values())],
             'action' => ['nullable', 'string', 'max:100'],
-            'user_id' => ['nullable', 'integer', Rule::exists('users', 'id')],
+            'user_id' => ['nullable', 'integer', Rule::exists(User::class, 'id')],
             'loggable_type' => ['nullable', 'string', 'max:255'],
             'search' => ['nullable', 'string', 'max:255'],
             'search_type' => ['nullable', 'string', Rule::in(['all', 'action', 'description', 'ip_address'])],
@@ -41,6 +42,9 @@ class ActivityLogIndexRequest extends FormRequest
             'date_from' => ['nullable', 'date'],
             'date_to' => ['nullable', 'date', 'after_or_equal:date_from'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
+            // 게이트는 화면이 제공하는 정렬만 연다. ActivityLogRepository::SORTABLE_COLUMNS 는
+            // 이보다 넓게(id·user_id 포함) 두어, 확장이 이 규칙을 훅으로 넓혔을 때 저장소가
+            // 조용히 기본 정렬로 되돌리지 않도록 한다 (service-repository.md "정렬 컬럼 화이트리스트").
             'sort_by' => ['nullable', 'string', Rule::in(['created_at', 'action', 'log_type'])],
             'sort_order' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
         ];

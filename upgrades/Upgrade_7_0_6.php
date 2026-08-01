@@ -20,6 +20,18 @@ use App\Extension\AbstractUpgradeStep;
  *         외래키 컬럼의 비어 있는 한국어 comment 를 채운다. `->comment()` 가
  *         `->constrained()` 뒤에 체인되어 컬럼이 아닌 FK 정의에 부착되던 문제를
  *         소스에서 교정했으나, 기설치본은 마이그레이션이 재실행되지 않아 남는다.
+ *       04_AddNotificationLogSortIndexes.php
+ *         알림 발송 이력의 수신자명·제목 정렬 인덱스를 추가한다. 마이그레이션만으로는
+ *         신규 설치에만 반영되므로 기존 사이트에 동일 인덱스를 적용한다.
+ *         발송 이력이 많으면 ALTER TABLE 이 수 분 걸리며 그동안 해당 테이블 쓰기가 대기한다.
+ *       05_AddTiebreakToCoreListIndexes.php
+ *         코어 목록 인덱스에 고유 키 tiebreak 를 더한다. 정렬이 비고유 컬럼만으로
+ *         끝나면 동률 구간의 페이지 경계가 흔들려 같은 행이 중복 노출된다.
+ *         위 04 와 같은 이유로 ALTER TABLE 이 오래 걸릴 수 있어 마지막에 실행한다.
+ *
+ * 실행 순서는 파일명 정렬(`sort()`)을 따른다. 부작용이 없고 빠른 스텝(01~03)을 앞에 두고,
+ * 테이블 락을 오래 잡는 인덱스 추가(04~05)를 뒤에 배치했다 — 인덱스 스텝이 지연·실패해도
+ * 앞선 교정은 이미 적용된 상태가 된다.
  *
  * 본 클래스는 `AbstractUpgradeStep` 의 default `run()` 에 위임 — 별도 override 없음.
  *

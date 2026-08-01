@@ -5,7 +5,7 @@ namespace Plugins\Sirsoft\Gdpr\Http\Controllers\Admin;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Api\Base\AdminBaseController;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Plugins\Sirsoft\Gdpr\Http\Requests\IndexPolicyVersionRequest;
 use Plugins\Sirsoft\Gdpr\Http\Requests\PublishPolicyVersionRequest;
 use Plugins\Sirsoft\Gdpr\Http\Resources\GdprPolicyVersionDetailResource;
 use Plugins\Sirsoft\Gdpr\Http\Resources\GdprPolicyVersionResource;
@@ -28,8 +28,8 @@ class GdprAdminPolicyVersionController extends AdminBaseController
     /**
      * GdprAdminPolicyVersionController 생성자
      *
-     * @param GdprPolicyVersionService $service 정책 버전 서비스
-     * @param GdprSettingsService $settingsService 현재 settings snapshot 캡처용
+     * @param  GdprPolicyVersionService  $service  정책 버전 서비스
+     * @param  GdprSettingsService  $settingsService  현재 settings snapshot 캡처용
      */
     public function __construct(
         private readonly GdprPolicyVersionService $service,
@@ -44,14 +44,12 @@ class GdprAdminPolicyVersionController extends AdminBaseController
      * 쿼리 파라미터:
      * - per_page: 페이지 크기 (1~100, 기본 20)
      *
-     * @param Request $request HTTP 요청
+     * @param  IndexPolicyVersionRequest  $request  HTTP 요청
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(IndexPolicyVersionRequest $request): JsonResponse
     {
-        $perPage = max(1, min(100, (int) $request->query('per_page', 20)));
-
-        $paginator = $this->service->paginate($perPage);
+        $paginator = $this->service->paginate($request->perPage());
 
         return ResponseHelper::success('messages.success', [
             'data' => GdprPolicyVersionResource::collection($paginator->items()),
@@ -77,7 +75,7 @@ class GdprAdminPolicyVersionController extends AdminBaseController
      * 호출 시 현재 settings snapshot 을 자동 캡처하여 새 정책 버전 발행
      * (settings 자체는 변경되지 않음 — 발행만 수행).
      *
-     * @param PublishPolicyVersionRequest $request memo 필수 검증
+     * @param  PublishPolicyVersionRequest  $request  memo 필수 검증
      * @return JsonResponse
      */
     public function store(PublishPolicyVersionRequest $request): JsonResponse
@@ -118,7 +116,7 @@ class GdprAdminPolicyVersionController extends AdminBaseController
      *
      * 권한: sirsoft-gdpr.privacy.view (라우트 미들웨어에서 검증).
      *
-     * @param int $version 조회할 정책 버전 정수 (URL path param)
+     * @param  int  $version  조회할 정책 버전 정수 (URL path param)
      * @return JsonResponse 200 + detail / 404 (버전 부재)
      */
     public function show(int $version): JsonResponse

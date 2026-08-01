@@ -71,18 +71,21 @@ class ListAxisRunner implements BenchmarkAxisRunner
             $notify("비움: {$table}");
         }
 
+        $columns = $this->existingColumns($table, (array) $profile->option('columns', ['*']));
+        $order = $this->existingOrder($table, (array) $profile->option('order', [['id', 'desc']]));
+
         if ($options->seed > 0) {
             $notify("시딩: {$table} ".number_format($options->seed).' 건');
             $this->seeder->seed(
                 $table,
                 $options->seed,
                 (array) $profile->option('seed_overrides', []),
-                fn (int $inserted, int $total) => $notify(sprintf('  시딩 %s / %s', number_format($inserted), number_format($total)))
+                fn (int $inserted, int $total) => $notify(sprintf('  시딩 %s / %s', number_format($inserted), number_format($total))),
+                // 정렬 기준 컬럼은 nullable 이어도 채운다 — 비워두면 합성 행이 전부 동률이 되어
+                // 계측이 정렬 인덱스가 아니라 tie-break 경로를 잰다.
+                array_column($order, 0),
             );
         }
-
-        $columns = $this->existingColumns($table, (array) $profile->option('columns', ['*']));
-        $order = $this->existingOrder($table, (array) $profile->option('order', [['id', 'desc']]));
 
         $rows = [];
         $notes = [];

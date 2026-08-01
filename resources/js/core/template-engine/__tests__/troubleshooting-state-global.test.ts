@@ -721,6 +721,55 @@ describe('트러블슈팅 회귀 테스트 - 데이터소스 업데이트 및 �
 
       // DynamicRenderer 의 trackingKey 계산과 동일한 형태 — 값·타임스탬프 둘 다 달라 재적용된다
       expect(after).not.toBe(before);
+  describe('[사례 8] initLocal 동기화가 init_actions 의 query 시드를 되돌림 (engine-v1.54.5)', () => {
+    /**
+     * 증상: 목록에서 필터 적용 → 상세 진입 → 뒤로가기 복귀 시 URL·목록은 필터 상태인데
+     *       필터 컨트롤만 기본값으로 표시된다 (#492 D-20).
+     * 원인: _localInit → 전역 _local 동기화가 **렌더 시점 스냅샷**을 병합 base 로 썼고,
+     *       setGlobalState 는 `{ _local: X }` 를 얕게 펼쳐 저장소를 통째로 교체한다.
+     *       effect 는 렌더 커밋 뒤에 실행되므로 그 사이의 init_actions query 시드가 되돌아갔다.
+     * 해결: 함수형 업데이트로 **쓰기 시점 prev._local** 을 base 로 병합.
+     *
+     * 렌더 통합 검증은 DynamicRenderer.localInitGlobalSync.test.tsx 가 담당한다.
+     */
+    const applySync = (
+      store: Record<string, any>,
+      snapshotBase: Record<string, any>,
+      initData: Record<string, any>,
+      useCanonicalBase: boolean
+    ) => {
+      const base = useCanonicalBase ? store._local || {} : snapshotBase;
+      // setGlobalState 의 얕은 펼침 계약 — `_local` 은 통째로 교체된다
+      return { ...store, _local: { ...base, ...initData, hasChanges: false } };
+    };
+
+    it('스냅샷 base 는 시드를 되돌린다 (수정 전 동작)', () => {
+      const store = { _local: { filter: { issueStatus: 'issuing' }, sortBy: 'name_asc' } };
+      const staleSnapshot = { filter: { issueStatus: 'all' }, sortBy: 'created_at_desc' };
+
+      const next = applySync(store, staleSnapshot, { rows: [1] }, false);
+
+      expect(next._local.filter.issueStatus).toBe('all');
+      expect(next._local.sortBy).toBe('created_at_desc');
+    });
+
+    it('canonical base 는 시드를 보존한다 (수정 후 동작)', () => {
+      const store = { _local: { filter: { issueStatus: 'issuing' }, sortBy: 'name_asc' } };
+      const staleSnapshot = { filter: { issueStatus: 'all' }, sortBy: 'created_at_desc' };
+
+      const next = applySync(store, staleSnapshot, { rows: [1] }, true);
+
+      expect(next._local.filter.issueStatus).toBe('issuing');
+      expect(next._local.sortBy).toBe('name_asc');
+      expect(next._local.rows).toEqual([1]);
+    });
+
+    it('_local 이외의 전역 키는 동기화로 소실되지 않아야 함', () => {
+      const store = { _local: { filter: { issueStatus: 'issuing' } }, cartKey: 'ck-1' };
+
+      const next = applySync(store, {}, { rows: [] }, true);
+
+      expect(next.cartKey).toBe('ck-1');
     });
   });
 });
