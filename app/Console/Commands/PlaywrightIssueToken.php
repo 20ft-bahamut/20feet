@@ -38,6 +38,7 @@ class PlaywrightIssueToken extends Command
 {
     protected $signature = 'playwright:issue-token
         {--permissions=* : 부여할 권한 식별자 (예: core.templates.layouts.edit). 다중 지정 가능}
+        {--no-admin-role : admin 역할을 부여하지 않고 지정한 권한만 가진 계정을 만든다 (권한 분기 검증용)}
         {--gc-hours=6 : 이 시간(시)보다 오래된 playwright 테스트 유저/역할을 발급 전 정리. 0 이면 정리 안 함}';
 
     protected $description = 'Playwright E2E 용 Sanctum 토큰 발급 (CLI + G7_PLAYWRIGHT_BYPASS 3중 가드)';
@@ -76,7 +77,9 @@ class PlaywrightIssueToken extends Command
 
         $permissions = $this->option('permissions') ?: [];
 
-        $user = $this->makeAdminUser($permissions);
+        // --no-admin-role: 지정한 권한만 가진 계정을 만든다.
+        // 기본값(플래그 없음)은 종전대로 admin 역할을 함께 부여한다 — 기존 spec 무영향.
+        $user = $this->makeAdminUser($permissions, ! $this->option('no-admin-role'));
         $token = $user->createToken('playwright-'.uniqid())->plainTextToken;
 
         $this->line($token);
@@ -139,9 +142,18 @@ class PlaywrightIssueToken extends Command
      * 1. User factory 로 신규 유저 생성
      * 2. 권한 식별자별로 Permission 행 보장 (firstOrCreate)
      * 3. uniqid 접미사로 격리된 test role 생성 + 권한 sync
-     * 4. admin role 보장 (firstOrCreate) + 유저-역할 부여
+     * 4. (withAdminRole 일 때만) admin role 보장 (firstOrCreate) + 유저-역할 부여
+     *
+     * `withAdminRole = false` 는 **권한 분기(읽기 전용 등) 검증 전용**이다. 기본값 true 는
+     * admin 역할을 함께 붙이므로, 요청한 권한만 가진 세션을 만들 수 없다 —
+     * admin 역할이 사이트의 전체 권한을 보유하기 때문에 `--permissions` 로 좁혀도
+     * 화면은 항상 최대 권한으로 렌더된다(실측: admin 역할 권한 263건).
+     *
+     * @param  array<int, string>  $permissions  부여할 권한 식별자 목록
+     * @param  bool  $withAdminRole  admin 역할 동반 부여 여부
+     * @return User 생성된 유저
      */
-    private function makeAdminUser(array $permissions): User
+    private function makeAdminUser(array $permissions, bool $withAdminRole = true): User
     {
         $user = User::factory()->create();
 
@@ -171,23 +183,28 @@ class PlaywrightIssueToken extends Command
             'is_active' => true,
         ]);
 
-        $adminRole = Role::firstOrCreate(
-            ['identifier' => 'admin'],
-            [
-                'name' => ['ko' => '관리자', 'en' => 'Admin'],
-                'description' => ['ko' => '시스템 관리자', 'en' => 'System Admin'],
-                'extension_type' => ExtensionOwnerType::Core,
-                'extension_identifier' => 'core',
-                'type' => 'admin',
-                'is_active' => true,
-            ]
-        );
-
         if (! empty($permissionIds)) {
             $testRole->permissions()->sync($permissionIds);
         }
 
-        $user->roles()->attach($adminRole->id, ['assigned_at' => now(), 'assigned_by' => null]);
+        if ($withAdminRole) {
+            $adminRole = Role::firstOrCreate(
+                ['identifier' => 'admin'],
+                [
+                    'name' => ['ko' => '관리자', 'en' => 'Admin'],
+                    'description' => ['ko' => '시스템 관리자', 'en' => 'System Admin'],
+                    'extension_type' => ExtensionOwnerType::Core,
+                    'extension_identifier' => 'core',
+                    'type' => 'admin',
+                    'is_active' => true,
+                ]
+            );
+
+            $user->roles()->attach($adminRole->id, ['assigned_at' => now(), 'assigned_by' => null]);
+        }
+
+        // test role 은 항상 부여한다 — GC(pruneStaleTestArtifacts)가 이 역할로 테스트 계정을
+        // 식별하므로, 빠지면 --no-admin-role 로 만든 계정이 영구 잔존한다.
         $user->roles()->attach($testRole->id, ['assigned_at' => now(), 'assigned_by' => null]);
 
         return $user->fresh();

@@ -29,7 +29,7 @@ import { hasPipes } from './PipeRegistry';
 import { RAW_PREFIX, RAW_MARKER_START, RAW_MARKER_END, RAW_PLACEHOLDER_MARKER, isRawWrapped, unwrapRaw, containsRawMarker, wrapRawDeep } from './rawMarkers';
 import type { ConditionsProperty } from './helpers/ConditionEvaluator';
 import { useTransitionState } from './TransitionContext';
-import { getLocalInitTracking, markLocalInitConsumed } from './localInitSlot';
+import { getLocalInitTracking, markLocalInitConsumed, resolveLocalInitAction } from './localInitSlot';
 import { useResponsive } from './ResponsiveContext';
 import { createLogger } from '../utils/Logger';
 import { shallowObjectEqual } from '../hooks/useControllableState';
@@ -222,21 +222,31 @@ export const deepMergeState = (
  * localDynamicState에 남은 stale 값이 deepMergeState에서 우선 적용되는 것을 방지합니다.
  * 객체 키는 재귀적으로 처리하고, 배열/원시값은 해당 키를 삭제합니다.
  *
+ * 제거된 것이 하나도 없으면 **원본 참조를 그대로 반환**합니다 (@since engine-v1.54.8).
+ * 호출부가 참조 비교로 "실제 제거 여부" 를 판정하기 때문입니다 — 내용이 같은데 사본을
+ * 새로 만들면 그 판정이 거짓 양성이 되어 불필요한 상태 갱신·캐시 무효화가 상시 발생합니다.
+ * 제거가 일어난 경우에도 변경이 없는 형제 가지는 참조를 보존합니다.
+ *
  * @param target localDynamicState (제거 대상)
  * @param keysToRemove setLocal이 업데이트한 키 구조
- * @returns 해당 키가 제거된 새 객체
+ * @returns 해당 키가 제거된 새 객체 (제거가 없으면 target 원본 참조)
  */
 export const removeMatchingLeafKeys = (
   target: Record<string, any>,
   keysToRemove: Record<string, any>
 ): Record<string, any> => {
-  const result: Record<string, any> = { ...target };
+  let result: Record<string, any> | null = null;
+  const ensureCopy = (): Record<string, any> => {
+    if (result === null) result = { ...target };
+
+    return result;
+  };
 
   for (const key of Object.keys(keysToRemove)) {
-    if (!(key in result)) continue;
+    if (!(key in target)) continue;
 
     const removeValue = keysToRemove[key];
-    const targetValue = result[key];
+    const targetValue = target[key];
 
     if (
       removeValue !== null &&
@@ -248,18 +258,21 @@ export const removeMatchingLeafKeys = (
     ) {
       // 양쪽 모두 객체: 재귀적으로 처리
       const cleaned = removeMatchingLeafKeys(targetValue, removeValue);
+      // 하위에서 제거된 것이 없으면(참조 동일) 이 가지는 손대지 않는다.
+      if (cleaned === targetValue) continue;
+
       if (Object.keys(cleaned).length === 0) {
-        delete result[key];
+        delete ensureCopy()[key];
       } else {
-        result[key] = cleaned;
+        ensureCopy()[key] = cleaned;
       }
     } else {
       // 리프 값 또는 배열: 해당 키 삭제
-      delete result[key];
+      delete ensureCopy()[key];
     }
   }
 
-  return result;
+  return result ?? target;
 };
 
 /**
@@ -1249,6 +1262,12 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
     // API 데이터를 덮어쓰는 것을 방지 (플러그인 onMount setLocal 경합 해소)
     const lastProcessedInitRef = useRef<any>(null);
 
+    // @since engine-v1.54.7: 이 인스턴스가 마지막으로 처리한 _localInit 추적 키
+    // 전역 추적(__g7LocalInitTracking)은 "payload 를 처음 관측했는가"만 판정하는데,
+    // 리셋 대상인 localDynamicState(저장소 A)는 인스턴스별이다. 전역 1회 소비만으로 끝내면
+    // 나머지 루트 렌더러의 저장소 A 에 stale leaf 가 영구 잔존한다 → resolveLocalInitAction 참조
+    const localInitHandledKeyRef = useRef<string | null>(null);
+
     // 최신 _local 상태를 참조하는 ref (expandChildren 상태 동기화용)
     // useCallback으로 캐싱된 componentContext에서도 최신 상태에 접근 가능하도록 함
     const latestLocalStateRef = useRef<Record<string, any>>({});
@@ -1324,10 +1343,20 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
         // 추적 키는 데이터 해시 + 타임스탬프 (컴포넌트 ID 제외)
         // refetchOnMount 시 _forceLocalInit 타임스탬프가 변경되면 재적용됨
         const trackingKey = `${currentHash}:${_forceLocalInit || 'no-force'}`;
-        const isNewData = tracking.hash !== trackingKey;
-        const shouldApply = isNewData;
+
+        // @since engine-v1.54.7: 적용 판정을 전역 해시 단독에서 (전역 해시 + 인스턴스 기록) 으로 확장
+        // - apply: 아무도 적용하지 않은 payload → 종전과 동일 (저장소 A + B + 캐시 무효화)
+        // - prune: 다른 인스턴스가 이미 적용 → 이 인스턴스의 저장소 A 에서 payload 키 공간만 제거
+        // - skip : 이 인스턴스가 이미 처리 → 무동작
+        const localInitAction = resolveLocalInitAction({
+          globalTrackedKey: tracking.hash,
+          instanceHandledKey: localInitHandledKeyRef.current,
+          trackingKey,
+        });
+        const shouldApply = localInitAction === 'apply';
 
         if (shouldApply) {
+          localInitHandledKeyRef.current = trackingKey;
           // 전역 추적 업데이트
           tracking.hash = trackingKey;
           tracking.timestamp = _forceLocalInit;
@@ -1399,6 +1428,40 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
           bindingEngine.invalidateCacheByKeys(['_local']);
 
           logger.log('_localInit applied (data changed):', Object.keys(localInitData));
+        } else if (localInitAction === 'prune') {
+          // @since engine-v1.54.7
+          // 다른 인스턴스가 이 payload 를 이미 적용했다. 저장소 B(globalState._local)는 갱신되어
+          // 있으나, 이 인스턴스의 저장소 A(localDynamicState)에는 자동바인딩이 남긴 stale leaf 가
+          // 그대로다. 병합은 A 우선(`deepMergeState(dataContext._local, dynamicState)`)이므로
+          // 그대로 두면 신선한 B 를 stale A 가 덮는다 — 화면만 옛 값이 되는 조용한 결함.
+          //
+          // 값을 다시 쓰지 않고 payload 키 공간만 제거한다. 재적용을 택하면 늦게 마운트된
+          // 인스턴스가 소비된 과거 payload 를 B 에 되쓰면서 그 사이의 사용자 편집을 되돌린다
+          // (localInitSlot.ts 의 `consumed → 교체` 규칙이 막고 있는 회귀).
+          localInitHandledKeyRef.current = trackingKey;
+
+          const { _merge: _pruneMergeMode, ...pruneKeys } = localInitData as Record<string, any>;
+
+          // 상태 갱신은 updater 로 넘긴다 (@since engine-v1.54.8) — 같은 commit 에서
+          // useLayoutEffect 가 큐에 넣은 제거가 아직 반영되기 전일 수 있으므로,
+          // 커밋 시점 스냅샷을 직접 쓰면 그 제거를 되살릴 수 있다.
+          // removeMatchingLeafKeys 는 제거할 것이 없으면 원본 참조를 그대로 돌려주므로,
+          // no-op 일 때 React 가 바로 bail out 한다 (불필요한 리렌더 없음).
+          setLocalDynamicState(prev => removeMatchingLeafKeys(prev, pruneKeys));
+
+          // 캐시 무효화 여부는 커밋된 현재 값 기준으로 동기 판정한다 — updater 안에서
+          // 플래그를 세우면 StrictMode 이중 호출과 배치 지연 때문에 신뢰할 수 없다.
+          // 헬퍼가 no-op 시 원본 참조를 반환하므로 참조 비교가 곧 "실제 제거 여부" 다.
+          // (내용 비교나 얕은 비교로 판정하면 중첩 경로에서 사본이 새로 생겨 거짓 양성이 된다.)
+          const didPrune = removeMatchingLeafKeys(localDynamicState, pruneKeys) !== localDynamicState;
+
+          if (didPrune) {
+            // 병합 결과가 바뀌므로 _local 경로 캐시를 무효화한다. 단순 경로 바인딩
+            // (`{{_local.form.x}}` 등)은 캐시 대상이라, 무효화하지 않으면 제거 후에도
+            // 캐시된 옛 값이 반환되어 화면이 갱신되지 않는다 (troubleshooting-cache 사례 8·9).
+            bindingEngine.invalidateCacheByKeys(['_local']);
+            logger.log('_localInit pruned (applied by another renderer):', Object.keys(pruneKeys));
+          }
         }
 
         // engine-v1.41.0: _localInit 처리 완료 후 ref 갱신
