@@ -36,6 +36,7 @@
 | [api-documentation.md](api-documentation.md) | API 레퍼런스 문서 규정 (API Documentation) | 모든 API 엔드포인트는 레퍼런스 문서 필수 — 메서드/URI/파라미터/응답 필드 +... |
 | [api-resources.md](api-resources.md) | API 리소스 | Resource: BaseApiResource 상속 필수 / Collection: B... |
 | [authentication.md](authentication.md) | 인증 및 세션 처리 | Laravel Sanctum 토큰 전용 인증 (Bearer 토큰만 사용) |
+| [benchmark.md](benchmark.md) | 성능 계측 시스템 (Benchmark) | `g7:bench` 가 4축(list/screen/write/batch)을 잰다 — ... |
 | [broadcasting.md](broadcasting.md) | Broadcasting (실시간 이벤트) | Laravel Reverb 사용 (WebSocket) |
 | [console-confirm.md](console-confirm.md) | 콘솔 yes/no 프롬프트 (ConsoleConfirm) | 콘솔 커맨드의 yes/no 프롬프트는 $this->unifiedConfirm() 사용... |
 | [controllers.md](controllers.md) | 컨트롤러 계층 구조 | AdminBaseController / AuthBaseController / Publ... |

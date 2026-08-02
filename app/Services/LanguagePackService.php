@@ -256,9 +256,10 @@ class LanguagePackService
      * 코어/번들 확장의 `lang/{ko,en}/` 디렉토리를 자동 스캔하여 가상 보호 LanguagePack
      * 인스턴스 컬렉션을 반환합니다 (요구사항 #1, #2).
      *
-     * 스캔 대상:
+     * 스캔 대상 — **런타임이 실제로 로드하는 경로**와 같아야 한다. 어긋나면 관리자 화면이
+     * "내장 번역" 으로 보여주는 것과 화면에 나오는 문구의 출처가 달라진다.
      *  - 코어: lang/{ko,en}/
-     *  - 번들 모듈: modules/_bundled/{id}/resources/lang/{ko,en}/
+     *  - 번들 모듈: modules/_bundled/{id}/src/lang/{ko,en}/ (TranslationServiceProvider 기준)
      *  - 번들 플러그인: plugins/_bundled/{id}/lang/{ko,en}/
      *  - 번들 템플릿: templates/_bundled/{id}/lang/{ko,en}.json
      *
@@ -288,11 +289,11 @@ class LanguagePackService
                 }
             }
 
-            // 번들 모듈
+            // 번들 모듈 (런타임 등록 경로 = src/lang)
             $packs = $packs->concat($this->scanBundledExtensionLang(
                 bundledRoot: 'modules/_bundled',
                 scope: LanguagePackScope::Module->value,
-                langSubpath: 'resources/lang/'.$locale,
+                langSubpath: 'src/lang/'.$locale,
                 locale: $locale,
                 filters: $filters,
             ));

@@ -35,7 +35,7 @@
 | extension_type | query | string | 아니오 | `core`, `module`, `plugin` | 확장 유형 (core/module/plugin/template) |
 | status | query | string | 아니오 | — | 상태 필터 (해당 상태의 항목만 조회) |
 | per_page | query | integer | 아니오 | min 1, max 100 | 페이지당 항목 수 |
-| sort_by | query | string | 아니오 | `id`, `channel`, `notification_type`, `status`, `sent_at`, `created_at` | 정렬 기준 필드명 |
+| sort_by | query | string | 아니오 | `id`, `channel`, `notification_type`, `status`, `sent_at`, `created_at`, `recipient_name`, `subject` | 정렬 기준 필드명 (`recipient_name`·`subject` 는 관리자 화면의 "수신자명순"·"제목순" 정렬에 대응) |
 | sort_order | query | string | 아니오 | `asc`, `desc` | 정렬 방향 (asc 오름차순 / desc 내림차순) |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.notification_log.index_validation_rules`).

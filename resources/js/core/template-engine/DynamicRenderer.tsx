@@ -1371,16 +1371,26 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
           // 전역 상태도 함께 업데이트 (컴포넌트 로컬 상태와 전역 상태 동기화)
           // G7Core.state.get()._local에서도 데이터를 조회할 수 있도록 함
           if (dataContext._globalSetState) {
-            const currentGlobalLocal = (dataContext._global as any)?._local || {};
-            let globalLocalUpdate: Record<string, any>;
-            if (mergeStrategy === 'replace') {
-              globalLocalUpdate = { ...initDataWithoutMeta, hasChanges: false };
-            } else if (mergeStrategy === 'deep') {
-              globalLocalUpdate = deepMergeState(currentGlobalLocal, { ...initDataWithoutMeta, hasChanges: false });
-            } else {
-              globalLocalUpdate = { ...currentGlobalLocal, ...initDataWithoutMeta, hasChanges: false };
-            }
-            dataContext._globalSetState({ _local: globalLocalUpdate });
+            // @since engine-v1.54.5: 병합 base 는 렌더 시점 스냅샷(dataContext._global._local)이 아니라
+            // **쓰기 시점의 canonical _local(prev._local)** 이어야 한다.
+            //
+            // setGlobalState 는 updates 를 얕게 펼치므로 `{ _local: X }` 는 저장소 B 를 통째로 교체한다.
+            // 이 effect 는 마운트 후(렌더 커밋 뒤)에 실행되는데, 그 사이에 init_actions 가 URL query 로
+            // _local 을 시드해 두었다면(목록 화면의 필터·정렬 컨트롤) 렌더 시점 스냅샷을 base 로 쓴 교체가
+            // 그 시드를 통째로 되돌린다 — 뒤로가기 복귀 시 URL·목록은 필터가 걸린 상태인데 필터 컨트롤만
+            // 기본값으로 표시되는 결함(#492 D-20). 함수형 업데이트로 prev 를 읽어 그 역전을 제거한다.
+            dataContext._globalSetState((prev: Record<string, any>) => {
+              const currentGlobalLocal = (prev as any)?._local || {};
+              let globalLocalUpdate: Record<string, any>;
+              if (mergeStrategy === 'replace') {
+                globalLocalUpdate = { ...initDataWithoutMeta, hasChanges: false };
+              } else if (mergeStrategy === 'deep') {
+                globalLocalUpdate = deepMergeState(currentGlobalLocal, { ...initDataWithoutMeta, hasChanges: false });
+              } else {
+                globalLocalUpdate = { ...currentGlobalLocal, ...initDataWithoutMeta, hasChanges: false };
+              }
+              return { ...prev, _local: globalLocalUpdate };
+            });
           }
 
           // _localInit 데이터가 변경되면 DataBindingEngine 캐시 무효화

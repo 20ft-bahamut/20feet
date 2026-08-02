@@ -279,8 +279,6 @@ return [
         'select_items_message' => '商品を選択してください',
         'checkout' => '注文する',
         'continue_shopping' => 'ショッピングを続ける',
-        'updated' => 'カートが修正されました。',
-        'removed' => 'カートから削除されました。',
         'reorder_added' => '過去の注文の商品をカートに追加しました。',
         'reorder_failed' => '再注文に失敗しました。',
         'reorder_option_not_found' => '商品オプションはもう存在しません。',
@@ -319,9 +317,6 @@ return [
         'invalid_target' => '当該商品には適用できないクーポンです。',
         'already_used' => '既に使用されたクーポンです。',
         'not_found' => 'クーポンが見つかりません。',
-        'applied' => 'クーポンが適用されました。',
-        'removed' => 'クーポンが解除されました。',
-        'invalid' => '無効なクーポンです。',
         'per_user_limit_exceeded' => 'このクーポンの使用可能回数を超過しました。',
     ],
     'mileage' => [
@@ -1102,6 +1097,7 @@ return [
         'reply_deleted' => '回答が削除されました。',
         'reply_delete_failed' => '回答の削除に失敗しました。',
         'reply_not_found' => '回答が見つかりません。',
+        'operation_failed_reason' => ':reason',
     ],
     'address' => [
         'created' => '配送先が追加されました。',
@@ -1121,15 +1117,8 @@ return [
         'name_duplicate' => '同じ名前の配送先が既に存在します。上書きしますか？',
         'auto_saved_label' => '新しい配送先',
     ],
-    'product' => [
-        'not_found' => '商品が見つかりません。',
-        'not_available' => '現在、購入できない商品です。',
-        'option_not_found' => '商品オプションが見つかりません。',
-    ],
+    'product' => [],
     'payment' => [
-        'method_not_supported' => 'サポートされていない決済方法です。',
-        'dbank_account_required' => '銀行振込の口座を選択してください。',
-        'depositor_name_required' => '振込人名を入力してください。',
         'provider_not_found' => '決済プロバイダーが見つかりません。',
         'client_config_success' => '決済クライアント設定を取得しました。',
     ],

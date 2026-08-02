@@ -1208,6 +1208,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | layout_strategy | body | string | 아니오 | `overwrite`, `keep` | 레이아웃 처리 전략 (overwrite: 새 버전으로 교체, keep: 사용자 수정본 유지) |
 | vendor_mode | body | string | 아니오 | `auto`, `composer`, `bundled` | 벤더 설치 모드 (auto/composer/bundled) |
 | force | body | boolean | 아니오 | — | 강제 실행 여부 (안전 확인/선행 검사 우회) |
+| rebuild_search_index | body | boolean | 아니오 | — | 업데이트 후 색인이 누락된 검색 인덱스를 재생성할지 여부 (기본 false). 재생성 중에는 대상 인덱스가 잠기거나 재색인되므로 운영 중인 사이트에서는 접속이 적은 시간에 별도로 수행하는 것을 권장 |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.plugin.perform_update_validation_rules`).
 
@@ -1223,7 +1224,8 @@ Content-Type: application/json
 {
     "layout_strategy": "overwrite",
     "vendor_mode": "auto",
-    "force": true
+    "force": true,
+    "rebuild_search_index": false
 }
 ```
 
@@ -1246,7 +1248,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** 특정 플러그인을 최신 버전으로 업데이트합니다. `core.plugins.install` 권한이 필요합니다. `layout_strategy` 로 레이아웃 처리 방식을(overwrite: 새 버전으로 교체, keep: 사용자 수정본 유지) 지정하며, `vendor_mode` 로 Composer 의존성 처리 방식을 선택합니다. 버전 제약·호환성 문제로 막힐 경우 `force: true` 로 강제 진행할 수 있습니다. `keep` 을 지정하면 사용자가 수정한 레이아웃(원본 해시와 현재 내용이 다른 레이아웃)은 갱신 대상에서 제외되어 현재 내용이 그대로 유지되고, 나머지 레이아웃만 파일 기준으로 갱신됩니다. 성공 응답 메시지에는 대상 식별자와 적용된 버전이 채워집니다.
+**설명** 특정 플러그인을 최신 버전으로 업데이트합니다. `core.plugins.install` 권한이 필요합니다. `layout_strategy` 로 레이아웃 처리 방식을(overwrite: 새 버전으로 교체, keep: 사용자 수정본 유지) 지정하며, `vendor_mode` 로 Composer 의존성 처리 방식을 선택합니다. 버전 제약·호환성 문제로 막힐 경우 `force: true` 로 강제 진행할 수 있습니다. `keep` 을 지정하면 사용자가 수정한 레이아웃(원본 해시와 현재 내용이 다른 레이아웃)은 갱신 대상에서 제외되어 현재 내용이 그대로 유지되고, 나머지 레이아웃만 파일 기준으로 갱신됩니다. 성공 응답 메시지에는 대상 식별자와 적용된 버전이 채워집니다. `rebuild_search_index: true` 를 함께 보내면 업데이트 후 색인이 누락된 검색 인덱스를 재생성합니다 — 인덱스 잠금·재색인 비용이 있어 기본은 수행하지 않으며, 보내지 않아도 응답의 `search_index` 에 현재 누락 여부가 담깁니다.
 
 
 ### GET /api/plugins/assets/{identifier}/{path}

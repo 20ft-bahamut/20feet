@@ -3971,9 +3971,11 @@ class ModuleManager implements ModuleManagerInterface
         $moduleRecords = $this->moduleRepository->getAllKeyedByIdentifier();
         $details = [];
         $updatedCount = 0;
+        $checkedCount = 0;
 
         foreach ($moduleRecords as $identifier => $record) {
             $result = $this->checkModuleUpdate($identifier);
+            $checkedCount++;
 
             // DB 갱신
             $updateData = [
@@ -3997,6 +3999,7 @@ class ModuleManager implements ModuleManagerInterface
                 $updatedCount++;
                 $details[] = [
                     'identifier' => $identifier,
+                    'update_available' => true,
                     'current_version' => $result['current_version'],
                     'latest_version' => $result['latest_version'],
                     'update_source' => $result['update_source'],
@@ -4006,6 +4009,7 @@ class ModuleManager implements ModuleManagerInterface
 
         return [
             'updated_count' => $updatedCount,
+            'checked_count' => $checkedCount,
             'details' => $details,
         ];
     }

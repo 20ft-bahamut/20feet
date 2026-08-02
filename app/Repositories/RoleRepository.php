@@ -215,9 +215,14 @@ class RoleRepository implements RoleRepositoryInterface
         }
 
         // 정렬 (코어/확장 소유 역할 먼저, 그 다음 사용자 생성 역할)
+        // 정렬 마지막의 기본키는 전순서 보장용이다. 시더가 일괄 생성한 역할은 created_at 이
+        // 한 타임스탬프에 몰려 있어(실측: 한 값에 최대 10행) 키가 없으면 동률 구간의 순서가
+        // 페이지마다 달라지고, 인접 페이지가 같은 역할을 중복 노출하면서 다른 역할을 누락한다.
         $query->orderByRaw('CASE WHEN extension_type IS NOT NULL THEN 0 ELSE 1 END')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
+        // audit:allow repository-paginate-column-pruning reason: 역할 정의 테이블 — 행 수가 운영상 고정(수십 건)이고 넓은 컬럼이 없다
         return $query->paginate($perPage);
     }
 

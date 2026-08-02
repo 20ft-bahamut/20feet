@@ -1128,7 +1128,10 @@ export class TemplateApp {
                 route: { ...(route.params || {}), path: route.path },
                 query: queryObject,
                 _global: { ...this.globalState },  // 나중에 갱신됨
-                _globalSetState: (updates: Partial<GlobalState>) => this.setGlobalState(updates),  // Form dataKey="_global.xxx" 지원
+                // Form dataKey="_global.xxx" 지원.
+                // @since engine-v1.54.5: 함수형 업데이트도 그대로 위임한다 — 소비부(DynamicRenderer 의
+                // _localInit 동기화)가 렌더 시점 스냅샷 대신 쓰기 시점 prev 를 base 로 쓰기 위함.
+                _globalSetState: (updates: Partial<GlobalState> | ((prev: GlobalState) => GlobalState)) => this.setGlobalState(updates),
                 _dataSourceErrors: Object.keys(dataSourceErrors).length > 0 ? dataSourceErrors : undefined,
                 // initLocal 옵션으로 초기화할 로컬 상태 (DynamicRenderer에서 처리)
                 _localInit: Object.keys(localInit).length > 0 ? localInit : undefined,

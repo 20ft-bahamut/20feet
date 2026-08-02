@@ -811,10 +811,13 @@
                 "params": {
                   "path": "/admin/pages",
                   "mergeQuery": true,
+                  "replace": true,
                   "query": {
                     "sort_by": "{{$args[0]}}",
-                    "sort_order": "{{$args[1]}}"
-                  }
+                    "sort_order": "{{$args[1]}}",
+                    "page": 1
+                  },
+                  "transition_overlay_target": "pages_data_grid__body"
                 }
               },
               {

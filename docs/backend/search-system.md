@@ -11,8 +11,9 @@
 1. Laravel Scout + DatabaseFulltextEngine: MySQL FULLTEXT + ngram 기반 검색 (기본 드라이버)
 2. FulltextSearchable 인터페이스: searchableColumns() + searchableWeights() 구현 필수
 3. LIKE fallback 자동 적용: FULLTEXT 미지원 DBMS(SQLite, PostgreSQL)에서 자동 전환
-4. 확장 포인트: core.search.engine_drivers 필터 훅으로 Meilisearch 등 커스텀 엔진 등록 가능
-5. AsUnicodeJson 캐스트: JSON 컬럼 FULLTEXT 검색 시 한글 \uXXXX 이스케이프 방지 필수
+4. 확장 포인트: core.search.engine_drivers(엔진) + core.search.index_maintainers(인덱스 점검) 필터 훅
+5. 인덱스 재생성은 언제나 선택 사항 — 자동 트리거 없음 (테이블 잠금·전체 재색인 비용)
+6. AsUnicodeJson 캐스트: JSON 컬럼 FULLTEXT 검색 시 한글 \uXXXX 이스케이프 방지 필수
 ```
 
 ---
@@ -56,6 +57,10 @@ DatabaseFulltextEngine
 | `app/Providers/ScoutServiceProvider.php` | 엔진 등록 + 필터 훅 처리 |
 | `app/Casts/AsUnicodeJson.php` | FULLTEXT ngram용 UTF-8 JSON 캐스트 |
 | `config/scout.php` | Scout 설정 (드라이버, 큐, 소프트삭제 등) |
+| `app/Search/Contracts/SearchIndexMaintainer.php` | 인덱스 점검·재생성 계약 (엔진 중립) |
+| `app/Search/SearchIndexMaintenanceManager.php` | 활성 드라이버의 점검기 해석 + 재생성 진입점 |
+| `app/Search/Engines/Maintenance/FulltextIndexMaintainer.php` | mysql-fulltext 드라이버의 점검기 구현 |
+| `app/Console/Commands/Search/SearchIndexCommand.php` | `search:index` 점검·재생성 커맨드 |
 
 **설계 원칙**:
 
@@ -223,6 +228,120 @@ $this->app->resolving(EngineManager::class, function (EngineManager $manager) us
         $manager->extend($name, fn () => $this->app->make($engineClass));
     }
 });
+```
+
+### core.search.index_maintainers 필터 훅
+
+검색 엔진은 "인덱스가 있는데 내용이 색인되어 있지 않은" 상태가 될 수 있습니다. 이때 검색은
+**오류 없이 0건**을 돌려주므로 예외도 로그도 남지 않고, 운영자는 "원래 검색이 안 되는 줄" 알고
+지나갑니다. `SearchIndexMaintainer` 계약이 그 상태를 점검·복구하는 방법을 엔진마다 정의합니다.
+
+인덱스의 실체가 엔진마다 다르므로(FULLTEXT = 테이블에 붙은 인덱스, Meilisearch/Elasticsearch =
+외부 서버의 인덱스) 코어는 판정 방법을 알지 못한 채 계약만 호출하고, 등급(`SearchIndexStatus`)만
+보고 재생성 대상을 고릅니다.
+
+```php
+use App\Extension\HookManager;
+use App\Search\SearchIndexMaintenanceManager;
+
+HookManager::addFilter(SearchIndexMaintenanceManager::MAINTAINERS_FILTER, function (array $maintainers) {
+    $maintainers['meilisearch'] = MeilisearchIndexMaintainer::class;
+
+    return $maintainers;
+});
+```
+
+구현할 메서드
+
+| 메서드 | 반환 | 설명 |
+|--------|------|------|
+| `driver()` | `string` | 담당 Scout 드라이버명 (`config('scout.driver')` 와 대조) |
+| `isAvailable()` | `bool` | 현재 환경에서 점검 가능 여부 (미지원 DBMS·서버 미연결 등) |
+| `unavailableReason()` | `?string` | 점검 불가 사유. **"점검 대상 0" 과 "점검할 수 없었음" 은 구분되어야 한다** |
+| `inspect(array $filters)` | `SearchIndexHealth[]` | 인덱스별 판정. 엔진별 세부는 `details`, 재생성에 필요한 자기 정보는 `context` 에 담는다 |
+| `rebuild(SearchIndexHealth $health)` | `void` | 재생성 (`context` 를 그대로 되돌려받는다) |
+
+판정 등급 (`App\Enums\SearchIndexStatus`)
+
+| 등급 | 뜻 | 재생성 대상 |
+|------|-----|:---:|
+| `healthy` | 색인된 내용으로 검색이 성립 | — |
+| `degraded` | 일부만 성립. 토크나이저 특성(불용어 등)일 수 있다 | ✕ |
+| `stale` | 검색이 성립하지 않음 | ✅ |
+| `skipped` | 표본·연결 부재로 판정 불가 (사유 기재) | — |
+
+유지보수기를 등록하지 않은 엔진은 점검 대상에서 빠질 뿐 **검색은 그대로 동작**합니다. 화면·커맨드는
+그 경우 "이 엔진은 점검을 제공하지 않는다" 를 명시합니다.
+
+### 재생성은 언제나 선택 사항이다
+
+재생성 비용은 엔진에 따라 테이블 잠금(FULLTEXT)이나 전체 재색인(외부 엔진)입니다. **운영 중인
+사이트에서 확장을 업데이트했다는 이유만으로 그 비용이 발생해서는 안 되므로**, 재생성은 어떤 자동
+트리거에도 연결하지 않고 운영자가 명시적으로 선택했을 때만 수행합니다.
+
+| 경로 | 선택 방법 | 기본값 |
+|------|----------|:---:|
+| `search:index --repair` | 옵션 + 확인 프롬프트 | 점검만 |
+| `module:update` / `plugin:update` / `module:install` / `plugin:install` | `--rebuild-search-index` | 미수행 |
+| `core:update` (번들 확장 일괄 업데이트 단계) | 대화형 확인 또는 `--rebuild-search-index` | 미수행 |
+| 관리자 화면 확장 업데이트 모달 | 「업데이트 후 색인이 누락된 검색 인덱스를 재생성」 체크박스 | 미체크 |
+
+선택하지 않아도 **누락 사실은 안내**합니다 — 알려주지 않으면 운영자가 알 방법이 없기 때문입니다.
+
+`--force`(무인 실행)에서는 묻지도 재생성하지도 않습니다. 무인 실행이 대용량 테이블을 잠그는 일이
+없어야 합니다.
+
+### 선택은 그 창에서만 유효하다 — 화면 상태를 이월하지 않는다
+
+재생성 체크는 **모달을 열 때마다 해제된 상태**로 시작해야 합니다. 체크 상태를 전역 상태에 남겨 두면
+한 번 체크한 운영자가 다음 확장을 업데이트할 때 **아무것도 누르지 않았는데 재생성이 다시 수행**됩니다.
+서버의 옵인 가드(요청에 실린 값만 신뢰)는 정상 동작하므로 HTTP 레벨 테스트로는 드러나지 않습니다 —
+화면이 이미 체크된 값을 보내기 때문입니다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+| --- | --- |
+| 모달을 여는 `setState` 시드에 재생성 키를 빼 둠 | 시드와 제출 후 초기화 **양쪽**에 `<x>RebuildSearchIndex: false` |
+| 제출 성공 후 다른 상태만 되돌리고 재생성 체크는 그대로 둠 | `onSuccess` 초기화 목록에 재생성 키 포함 |
+| 모듈·플러그인이 같은 전역 키를 공유 | 면마다 별도 키 (한쪽 체크가 다른 쪽으로 전이되면 안 됨) |
+
+정적 고정: `templates/_bundled/sirsoft-admin_basic/__tests__/layouts/admin-extension-update-rebuild-optin.test.tsx`
+종단 고정: `tests/Playwright/specs/admin/extension-update-search-index-optin.spec.ts`
+
+### 점검 결과는 반드시 호출자에게 도달해야 한다
+
+색인이 비면 검색은 **오류 없이 0건**을 돌려줍니다. 운영자가 알 수 있는 유일한 통로가 응답에 실린
+`search_index` 페이로드이므로, 그 페이로드가 중간에서 사라지면 점검 기능 자체가 무의미해집니다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+| --- | --- |
+| 응답 헬퍼가 `JsonResource::resolve()` 만 호출 (부가 데이터 유실) | `ResponseHelper::successWithResource` 가 `additional()` 을 응답 최상위에 병합 |
+| 재생성 여부만 알리고 잔존 여부는 생략 | `rebuilt` / `stale`·`stale_count` (미수행) 또는 `repaired`·`failed`·`remaining` (수행) |
+| 재생성 성공을 곧 복구로 간주 | **`remaining` 은 재생성 후 재점검 결과** — "재생성했다" 와 "복구됐다" 를 구분 |
+
+### 점검의 비-0 종료는 "실패" 가 아니다
+
+`search:index` 는 색인 누락이 남아 있으면 종료 코드 1 을 돌려줍니다. 점검 자체는 정상 수행된 것이며,
+이는 CI 에서 이상을 감지하기 위한 신호입니다. 실행 결과를 화면에 표시하는 도구(개발 도구 대시보드 등)가
+이를 「실행 실패」로 적으면 운영자는 도구가 고장난 것으로 읽고 **정작 발견된 색인 누락을 놓칩니다**.
+종료 코드와 출력을 그대로 보여 주고, 실패로 단정하지 않습니다.
+
+### mysql-fulltext 의 판정 방법 — 자기 매칭(self-match)
+
+기본 드라이버의 유지보수기는 표본 행을 뽑아 **그 행 자신의 내용에서 만든 검색어로 그 행을 찾을 수
+있는지** 봅니다. 특정 키워드를 사람이 골라 넣지 않으므로 어떤 테이블·언어에도 그대로 적용됩니다.
+
+토큰은 행마다 여러 개 만들고, **한 행이 어떤 토큰으로도 자신을 찾지 못할 때만** 실패로 셉니다.
+하나만 쓰면 토크나이저 특성을 색인 누락으로 오판합니다 — 예를 들어 ngram(`ngram_token_size=2`)은
+`Basic` 을 `Ba/as/si/ic` 로 쪼개는데 그중 `as` 가 기본 불용어라 구문 검색이 깨집니다.
+
+대상은 하드코딩하지 않고 `INFORMATION_SCHEMA` 에서 전수 수집하므로, 확장이 나중에 추가하는
+FULLTEXT 인덱스도 커맨드 수정 없이 포함됩니다.
+
+```bash
+php artisan search:index                        # 활성 엔진의 인덱스 점검 (읽기 전용)
+php artisan search:index --repair               # 색인 누락 인덱스 재생성
+php artisan search:index --filter=table=pages   # 엔진별 필터 (FULLTEXT: table, index, samples)
+php artisan search:index --json                 # 기계 판독용 출력
 ```
 
 ---

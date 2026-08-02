@@ -14,6 +14,8 @@
 5. 훅 확장: HookManager::applyFilters()로 동적 규칙 추가
 6. 필수: Rule::exists(Model::class, 'col') 사용 (문자열 테이블명 사용 금지)
 7. 런타임 조건부 검증: 드라이버/모드별 분기 시 메서드 추출 패턴 사용
+8. Store/Update 조건부 규칙은 대칭 — 한쪽 누락 시 과잉 검증(수정 실패) 또는 검증 우회
+9. min/size 가 붙은 필드는 required_if 로 조건부화 불가 → exclude_if (조건 필드가 nullable 이면 exclude_unless)
 ```
 
 ---
@@ -26,6 +28,9 @@
 - [prepareForValidation() 데이터 전처리](#prepareforvalidation-데이터-전처리)
 - [훅 기반 동적 Validation Rules 확장](#훅-기반-동적-validation-rules-확장)
 - [런타임 조건부 Validation Rules (드라이버/모드별 분기)](#런타임-조건부-validation-rules-드라이버모드별-분기)
+  - [조건부 Validation 원칙](#조건부-validation-원칙)
+  - [`exclude_if` vs `exclude_unless` — 조건 필드가 nullable 일 때](#exclude_if-vs-exclude_unless--조건-필드가-nullable-일-때)
+  - [조건 필드가 요청에 없을 때 — 저장값 주입](#조건-필드가-요청에-없을-때--저장값-주입)
 - [권한 체크 방식](#권한-체크-방식)
 - [Custom Rule 검증 메시지 다국어 처리](#custom-rule-검증-메시지-다국어-처리)
 - [다국어 필드 검증 규칙](#다국어-필드-검증-규칙)
@@ -34,6 +39,7 @@
 - [exists/unique 검증 규칙](#existsunique-검증-규칙)
 - [계층 리소스 순환 참조](#계층-리소스-순환-참조)
 - [배열 항목의 상위 스코프](#배열-항목의-상위-스코프)
+- [관대한 기존 동작을 규칙으로 승격하지 않는다](#관대한-기존-동작을-규칙으로-승격하지-않는다)
 - [Custom Rule 개발 체크리스트](#custom-rule-개발-체크리스트)
 
 ---
@@ -522,6 +528,7 @@ class TestMailRequest extends FormRequest
 | 기본값 제공 | `$this->input('mailer', 'smtp')` — 미전송 시 기본 드라이버 적용 |
 | Store/Update 정책 일치 | 같은 리소스의 Store 와 Update 는 동일 필드에 동일한 조건부 규칙을 적용한다. 한쪽에만 `exclude_if` 등이 있으면 다른 쪽에서만 저장이 막힌다 |
 | `sometimes` 는 부분 수정 지원 수단이 아니다 | 관리자 폼은 조회 응답 전체를 그대로 PUT 하므로 요청에는 항상 모든 키가 존재한다. 토글 OFF 상태의 종속 필드는 `sometimes` 가 아니라 `exclude_if` 로 검증에서 배제한다 |
+| 상호 필수 조합은 결과 상태로 판정 | `required_with`/`required_without` 는 "상대 필드 부재" 자체가 발화 조건이라 부분 수정 요청과 상충한다. Update 에서는 페이로드 단독이 아니라 "기존 레코드 + 페이로드" 결과 상태를 기준으로 판정한다 |
 
 `exclude_if` 는 규칙 배열의 **첫 번째**에 둔다. 배제는 규칙 루프 도중 발동하며 이미 추가된 실패 메시지는 회수되지 않으므로, 앞선 규칙이 먼저 실패하면 배제되어도 오류가 남는다.
 
@@ -532,6 +539,68 @@ class TestMailRequest extends FormRequest
 // ✅ DO: 토글이 꺼져 있으면 필드 자체를 검증에서 제외한다
 'allowed_extensions' => ['exclude_if:use_file_upload,false', 'sometimes', 'required', 'array', 'min:1'],
 ```
+
+조건부 규칙의 종류에 따라 Update 로 옮기는 방식이 달라진다.
+
+| Store 규칙 | Update 에 옮기는 방식 |
+| ------ | ------ |
+| `required_if:other,value` | 그대로 복사한다. 조건 필드가 요청에 없으면 발화하지 않아 부분 수정과 충돌하지 않는다 |
+| `exclude_if` / `exclude_unless` | 그대로 복사한다. 조건 필드가 요청에 없으면 배제가 동작하지 않으므로(`ValidatesAttributes::validateExcludeIf`), 부분 수정 경로가 있으면 `prepareForValidation()` 에서 기존 레코드 값을 주입해 판정 기준을 세운다 |
+| `required_with` / `required_without` | 그대로 복사하면 안 된다. 상대 필드가 요청에 없다는 사실만으로 발화하므로, 그 조합과 무관한 필드 하나만 바꾸는 요청이 전부 422 가 된다 |
+
+`required_with`/`required_without` 는 "요청에 무엇이 실려 왔는지"가 아니라 "저장 후 레코드가 유효한지"를 묻는 규칙이다. 따라서 Update 에서는 요청에 없는 필드를 저장된 값으로 메운 뒤 판정한다. 이때 폼 제출 키와 저장 컬럼명이 다르면(예: 해외 주소를 `intl_city` 로 제출하고 `city` 컬럼에 저장) 메우는 쪽에서 그 매핑을 반영해야 한다 — 매핑을 빠뜨리면 저장된 값이 있는데도 빈 값으로 보여 정상 수정 경로가 막힌다.
+
+```php
+// ❌ DON'T: Store 규칙을 그대로 복사 — 기본 배송지 토글만 바꾸는 요청이 422
+'zipcode' => 'required_without:intl_postal_code|nullable|string|max:10',
+
+// ✅ DO: 결과 상태(기존 레코드 + 페이로드) 기준으로 withValidator() 에서 판정
+$validator->after(function (Validator $validator) {
+    $existing = app(UserAddressRepositoryInterface::class)->findByUserIdAndId($userId, $addressId);
+    $effective = array_key_exists('zipcode', $payload) ? $payload['zipcode'] : $existing?->zipcode;
+    // ... 국가별 필수 조합 판정 후 $validator->errors()->add(...)
+});
+```
+
+이 방식은 `formrequest-store-update-conditional-symmetry` 룰의 토큰 비교로는 "누락"으로 보이므로, 해당 필드에 `// audit:allow formrequest-store-update-conditional-symmetry reason: ...` 로 판정 위치를 남긴다.
+
+### `exclude_if` vs `exclude_unless` — 조건 필드가 nullable 일 때
+
+`exclude_if:other,false` 의 값 비교는 strict 다. 조건 필드가 `nullable|boolean` 이라 `null` 이 올 수 있으면 `null !== false` 라 매칭되지 않아 배제가 일어나지 않는다. "true 가 아니면 제외" 를 뜻하는 `exclude_unless:other,true` 는 `null`/`false`/미전송을 모두 포괄한다.
+
+```php
+// 조건 필드가 boolean 고정 — false 가 확실히 온다
+'allowed_extensions' => ['exclude_if:use_file_upload,false', 'sometimes', 'required', 'array', 'min:1'],
+
+// 조건 필드가 nullable — null 이 올 수 있다
+'basic_defaults.allowed_extensions' => ['exclude_unless:basic_defaults.use_file_upload,true', 'sometimes', 'required', 'array', 'min:1'],
+```
+
+**중첩 배열의 조건 필드는 dot notation 으로 쓴다.** `exclude_unless:use_file_upload,true` 처럼 최상위 키만 적으면 요청 데이터에 그 키가 없어 조건이 성립하지 않고, 배제가 조용히 동작하지 않는다. 검증 대상 필드가 `basic_defaults.allowed_extensions` 라면 조건 필드도 `basic_defaults.use_file_upload` 여야 한다.
+
+### 조건 필드가 요청에 없을 때 — 저장값 주입
+
+`exclude_if`/`exclude_unless` 는 **조건 필드가 데이터에 없으면 배제하지 않는다**(`ValidatesAttributes::validateExcludeIf`). 부분 수정 경로가 있는 Update 요청은 종속 필드만 전송되고 조건 토글은 빠질 수 있으므로, `prepareForValidation()` 에서 기존 레코드의 값을 주입해 판정 기준을 세운다.
+
+```php
+protected function prepareForValidation(): void
+{
+    $data = $this->all();
+
+    // 종속 필드가 왔는데 조건 토글이 없으면 저장값으로 판정 기준을 세운다
+    if (array_key_exists('allowed_extensions', $data) && ! array_key_exists('use_file_upload', $data)) {
+        $board = $this->route('board');
+
+        if ($board !== null && isset($board->use_file_upload)) {
+            $data['use_file_upload'] = (bool) $board->use_file_upload;
+        }
+    }
+
+    $this->merge($data);
+}
+```
+
+주입 조건에 **종속 필드가 실제로 전송되었는지**를 반드시 포함한다. 무조건 주입하면 사용자가 보내지도 않은 토글이 검증 대상으로 올라와, 그 필드와 무관한 부분 수정이 조건부 규칙의 영향을 받는다.
 
 자동 차단: 정적 검사 대상. store/update 사이의 조건부 검증 비대칭은 차단되고, `sometimes` + `array` + `min` 조합이 무효화되는 형태는 경고로 보고된다.
 
@@ -1085,6 +1154,61 @@ $orderId = $this->route('order')?->id;
 
 422 가 의미적으로 옳다 — 입력값이 이 요청 맥락에서 유효하지 않다는 뜻이기 때문이다.
 Service 에도 동일한 검증을 두어 FormRequest 를 우회한 내부/훅 호출을 막는다.
+
+---
+
+## 관대한 기존 동작을 규칙으로 승격하지 않는다
+
+컨트롤러가 base `Request` 를 주입받던 코드를 FormRequest 로 옮길 때, 그 컨트롤러가 하던 일이
+**거부**였는지 **수용**이었는지 먼저 읽는다. 수용하던 동작(클램핑·폴백·별칭 매핑)을 `rules()` 로
+올리면 200 이던 응답이 422 가 된다. 위반을 없애는 것이 목적이지 계약을 바꾸는 것이 아니다.
+
+```php
+// 원본 컨트롤러 — 상한 초과를 거부하지 않고 상한까지 반환한다
+$limit = min((int) $request->input('limit', 20), 50);
+
+// ❌ 규칙으로 승격 — `?limit=100` 이 200 → 422 (기존 링크·북마크가 깨진다)
+public function rules(): array
+{
+    return ['limit' => ['nullable', 'integer', 'max:50']];
+}
+
+// ✅ 규칙은 타입만 닫고, 상한은 접근자가 클램프한다
+public function rules(): array
+{
+    return ['limit' => ['nullable', 'integer', 'min:0']];
+}
+
+public function limit(): int
+{
+    return min((int) $this->validated('limit', 20), self::MAX_LIMIT);
+}
+```
+
+같은 원칙이 어휘에도 적용된다. 저장소가 미지원 값을 기본 분기로 처리해 왔다면 `Rule::in` 으로
+막는 순간 그 값을 담은 URL 이 전부 깨진다. 어휘를 닫아야 할 별도 이유(예: 요청 값이 캐시 키에
+그대로 들어가 키 공간이 무한히 늘어남)가 있어도, **접근자가 닫힌 집합만 반환**하게 하면 응답
+계약을 건드리지 않고 목적을 달성한다.
+
+```php
+// ✅ 응답은 종전과 동일(미지원 값 → year), 캐시 키만 정규화된다
+public function period(): string
+{
+    $period = $this->validated('period');
+
+    if ($period === null || $period === '') {
+        return self::DEFAULT_PERIOD;
+    }
+
+    return in_array((string) $period, self::RESOLVED_PERIODS, true) ? (string) $period : 'year';
+}
+```
+
+`Rule::in` 승격이 적절한 경우는 **입력원이 화면 컨트롤 하나뿐**일 때다 — 관리자 DataGrid 의 필터
+select 처럼 사용자가 URL 을 손으로 만들 일이 없는 면. 판정 기준은 "북마크 가능한 공개 경로인가".
+
+기존 테스트가 이 전환에서 RED 가 되면 그 테스트가 무엇을 고정하고 있는지 먼저 읽는다. 리팩토링에서
+테스트가 깨질 때의 기본 해석은 "테스트가 낡았다" 가 아니라 "계약을 바꿨다" 이다.
 
 ---
 

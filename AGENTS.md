@@ -6,7 +6,7 @@
 
 <!-- AUTO-GENERATED-START: docs-quick-reference -->
 
-### 백엔드 [backend/](docs/backend/) (32개)
+### 백엔드 [backend/](docs/backend/) (33개)
 
 | 문서 | 설명 | TL;DR 핵심 |
 |------|------|-----------|
@@ -16,6 +16,7 @@
 | [api-documentation.md](docs/backend/api-documentation.md) | API 레퍼런스 문서 규정 (API Documentation) | 모든 API 엔드포인트는 레퍼런스 문서 필수 — 메서드/URI/파라미터/응답 필드 + 요청·응답 예시 ... |
 | [api-resources.md](docs/backend/api-resources.md) | API 리소스 | Resource: BaseApiResource 상속 필수 / Collection: BaseApiColl... |
 | [authentication.md](docs/backend/authentication.md) | 인증 및 세션 처리 | Laravel Sanctum 토큰 전용 인증 (Bearer 토큰만 사용) |
+| [benchmark.md](docs/backend/benchmark.md) | 성능 계측 시스템 (Benchmark) | `g7:bench` 가 4축(list/screen/write/batch)을 잰다 — 계측 대상은 커맨드... |
 | [broadcasting.md](docs/backend/broadcasting.md) | Broadcasting (실시간 이벤트) | Laravel Reverb 사용 (WebSocket) |
 | [console-confirm.md](docs/backend/console-confirm.md) | 콘솔 yes/no 프롬프트 (ConsoleConfirm) | 콘솔 커맨드의 yes/no 프롬프트는 $this->unifiedConfirm() 사용 — Laravel... |
 | [controllers.md](docs/backend/controllers.md) | 컨트롤러 계층 구조 | AdminBaseController / AuthBaseController / PublicBaseCont... |
@@ -114,7 +115,7 @@
 | [module-assets.md](docs/extension/module-assets.md) | 모듈 프론트엔드 에셋 시스템 | module.json에 에셋 매니페스트 정의 (js, css, loading strategy) |
 | [module-basics.md](docs/extension/module-basics.md) | 모듈 개발 기초 | 디렉토리: vendor-module (예: sirsoft-ecommerce) |
 | [module-commands.md](docs/extension/module-commands.md) | 모듈 Artisan 커맨드 | 목록: php artisan module:list |
-| [module-i18n.md](docs/extension/module-i18n.md) | 모듈 다국어 시스템 | 백엔드: /lang/{locale}/*.php → __('vendor-module::key') |
+| [module-i18n.md](docs/extension/module-i18n.md) | 모듈 다국어 시스템 | 백엔드: /src/lang/{locale}/*.php → __('vendor-module::key') ... |
 | [module-identity-settings.md](docs/extension/module-identity-settings.md) | 모듈/플러그인 본인인증(IDV) 설정 통합 가이드 | 정책/목적/메시지: module.php::getIdentity{Policies,Purposes,Mess... |
 | [module-layouts.md](docs/extension/module-layouts.md) | 모듈 레이아웃 시스템 | 위치: modules/_bundled/vendor-module/resources/layouts/admi... |
 | [module-routing.md](docs/extension/module-routing.md) | 모듈 라우트 규칙 | URL prefix 자동: /api/modules/[vendor-module]/... |
@@ -159,7 +160,7 @@
 
 | 확장 | 유형 | API 문서 목차 | 문서/엔드포인트 |
 |------|------|--------------|----------------|
-| `gnuboard7-hello_module` | 모듈 | [docs/api/](modules/_bundled/gnuboard7-hello_module/docs/api/README.md) | 1 / 2 |
+| `gnuboard7-hello_module` | 모듈 | [docs/api/](modules/_bundled/gnuboard7-hello_module/docs/api/README.md) | 1 / 7 |
 | `sirsoft-board` | 모듈 | [docs/api/](modules/_bundled/sirsoft-board/docs/api/README.md) | 10 / 80 |
 | `sirsoft-ecommerce` | 모듈 | [docs/api/](modules/_bundled/sirsoft-ecommerce/docs/api/README.md) | 33 / 231 |
 | `sirsoft-page` | 모듈 | [docs/api/](modules/_bundled/sirsoft-page/docs/api/README.md) | 2 / 17 |
@@ -192,7 +193,7 @@
 
 ### ① 코어 → 확장 동기화 (`requires.g7_version`)
 
-- 트리거: 코어 공개 확장 표면(`app/Extension/Abstract*`, `HookManager`, `ExtensionManager`, `ModuleManager`, `PluginManager`, `TemplateManager`, `app/Contracts/Extension/**`, `app/Extension/Helpers/**`, `app/Seo/Contracts/**`, `app/ActivityLog/**` 공개 API, 루트 `CHANGELOG.md` Added/Changed/Removed) 수정
+- 트리거: 코어 공개 확장 표면(`app/Extension/Abstract*`, `HookManager`, `ExtensionManager`, `ModuleManager`, `PluginManager`, `TemplateManager`, `app/Contracts/Extension/**`, `app/Extension/Helpers/**`, `app/Repositories/Concerns/**`, `app/Seo/Contracts/**`, `app/ActivityLog/**` 공개 API, 루트 `CHANGELOG.md` Added/Changed/Removed) 수정
 - 조치: 영향 받는 번들 확장의 `g7_version` 상향 + 각 확장 CHANGELOG 에 변경 기재
 
 ### ② 확장 → 확장 동기화 (`dependencies.{modules|plugins}`)
@@ -354,6 +355,44 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | 계층 재귀(path/depth 재계산)에 방문 ID 가드 없음 | 방문 집합으로 유한 종료 — 검증 우회 경로/오염 데이터에서도 무한 루프 금지 |
 
 > 상세: [validation.md "계층 리소스 순환 참조" / "배열 항목의 상위 스코프"](docs/backend/validation.md), [service-repository.md "중첩 리소스 스코프" / "설정 기반 한계값"](docs/backend/service-repository.md)
+
+### 목록 조회 컬럼 프루닝과 지연 조인
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| `->paginate($perPage)` / `->paginate($perPage, ['*'])` (컬럼 목록 미지정) | 목록이 실제로 쓰는 컬럼만 명시. 깊은 OFFSET 이 가능한 목록은 `PaginatesWithDeferredJoin` |
+| 요청 값에서 온 정렬 컬럼을 그대로 `orderBy` 에 전달 | `ResolvesSortSpec` 으로 닫힌 집합 해석 (방향만 검사하는 `in_array` 는 보호가 아니다) |
+| 지연 조인의 `$query` 에 미리 `orderBy`/`with`/`select` 적용 | 필터/where 만 적용해 넘기고, 정렬·관계·컬럼은 trait 인자로 전달 |
+| 쿼리에 `with()` 만 하고 `relations:` 인자 생략 | 관계는 `relations:` 로 전달 — trait 이 inner 뿐 아니라 **outer 에서도** eager load 를 지우므로 관계가 조용히 사라진다 (예외·쿼리 오류 없이 응답에서 필드만 없어져 관계를 단언하지 않는 테스트는 전부 통과) |
+| 목록 SELECT 에 `SUBSTRING(content, 1, N)` 을 두고 프루닝했다고 간주 | 오버플로 페이지 읽기가 그대로 발생 — 잘라내기는 outer(`$columns`)에서만 |
+| 그룹 쿼리(`groupBy`)의 총 건수를 `count()` 로 계산 | `getCountForPagination()` (서브쿼리로 감싸 그룹 수를 센다) |
+| raw SQL 안에 테이블명·별칭을 문자열로 조립 | 테이블명은 `(new Model)->getTable()`, 프리픽스는 `DB::getTablePrefix()`, 별칭은 빌더(`join($table.' as uc', …)`)가 만들게 |
+| `whereRaw('1 = 0')` / `where($c, DB::raw("({$sub->toSql()})"))` + `mergeBindings` | `whereIn($key, [])` / `where($c, '=', $sub)` (빌더가 바인딩까지 처리) |
+| 화면 정렬 셀렉트에 게이트가 모르는 컬럼을 넣기 | `화면 옵션 ⊆ FormRequest 게이트 ⊆ Repository 화이트리스트` — 어긋나면 422 후 직전 목록이 남아 정렬된 것처럼 보인다 |
+| 분류값 필터의 허용 어휘를 화면·게이트·기록 지점에 각각 리터럴로 적기 | 어휘는 Enum 단일 출처에서 파생 — `화면 필터 옵션 = 라벨 키 = 실제 기록 어휘`. 부분집합이 되면 빠진 값으로 기록된 행이 어떤 필터 조합으로도 도달 불가하고, 라벨 키가 없는 값은 목록 셀에 원시 키 문자열로 노출된다 |
+| 목록 응답이 `last_page > 1` 인데 화면에 페이저·총건수가 없음 | 페이지 이동 컨트롤과 총건수를 함께 노출 — 없으면 1페이지 밖 행이 조용히 잘리고, 잘렸다는 사실조차 화면에 나타나지 않는다 |
+| 쿼리 파라미터 불리언에 `boolean` 규칙만 부착 | `prepareForValidation()` 으로 `"true"`/`"false"` 정규화 (쿼리는 문자열로 도착 — 화면이 그 형태로 보내면 목록 전체가 422). 단, 해석 불가한 값은 건드리지 말 것 |
+| 같은 화면의 개수 배지와 그 배지가 여는 목록이 서로 다른 엔드포인트 | 배지 계산과 목록 조회는 같은 스코프의 같은 데이터소스에서 |
+| 관계 테이블 컬럼 정렬을 `join`+`groupBy` 로 구현 | `SortsByRelatedColumn` 의 상관 서브쿼리 (1:N 조인은 원 행을 부풀려 총 건수·페이지 경계를 깨고, INNER 는 자식 없는 행을 지운다) |
+| 관계 정렬을 넣고 인덱스는 그대로 | `(외래키, 정렬컬럼)` 복합 인덱스 마이그레이션 동반 (서브쿼리가 행마다 실행된다) |
+| 페이지네이션 정렬을 비고유 컬럼(`created_at` 등)으로만 끝내기 | 정렬 마지막에 기본키를 덧붙여 전순서 보장 (동률 구간에서 인접 페이지가 같은 행을 중복 노출하고 다른 행을 누락한다) |
+
+> 상세: [service-repository.md "목록 조회 컬럼 프루닝과 지연 조인" / "정렬 컬럼 화이트리스트" / "화면 정렬 옵션은 게이트의 부분집합이어야 한다" / "관계 테이블 컬럼 기준 정렬" / "허용되는 Raw 쿼리"](docs/backend/service-repository.md)
+
+### 검색 인덱스 재생성(리인덱싱)
+
+| ❌ 금지 | ✅ 올바른 사용 |
+|--------|---------------|
+| 재생성을 자동 트리거(마이그레이션 종료·확장 업데이트 완료 등)에 연결 | 운영자가 **명시적으로 선택**했을 때만 수행. 인덱스 잠금·전체 재색인 비용이 운영 중 사이트를 멈춘다 |
+| 재생성 체크 상태를 전역에 남겨 다음 모달 진입에 이월 | 모달 진입 시드와 제출 후 초기화 **양쪽**에서 해제. 이월되면 운영자가 아무것도 누르지 않았는데 재생성이 수행되고, 서버 옵인 가드는 정상이라 HTTP 테스트로는 드러나지 않는다 |
+| 모듈·플러그인 모달이 같은 전역 키 공유 | 면마다 별도 키 (한쪽 체크가 다른 쪽으로 전이 금지) |
+| 응답 헬퍼가 `JsonResource::resolve()` 만 호출해 `additional()` 유실 | 부가 데이터를 응답 최상위에 병합 — 색인 누락은 오류 없이 "검색 0건" 으로만 나타나므로 응답 페이로드가 유일한 통로다 |
+| 재생성 수행을 곧 복구로 간주 | `remaining` 은 **재생성 후 재점검** 결과 — "재생성했다" 와 "복구됐다" 를 구분해 보고 |
+| 점검 커맨드의 비-0 종료를 "실행 실패" 로 표시 | 이상 발견 신호다. 종료 코드와 출력을 그대로 노출 |
+| 특정 엔진(FULLTEXT) 전용으로 점검·재생성 구현 | `SearchIndexMaintainer` 계약 + `core.search.index_maintainers` 훅 |
+| "점검 대상 0" 과 "점검 불가" 를 같은 문구로 보고 | 구분 보고 — 뭉뚱그리면 "인덱스가 다 정상" 으로 읽힌다 |
+
+> 상세: [search-system.md](docs/backend/search-system.md)
 
 ### Listener 데이터 접근
 
@@ -1040,6 +1079,7 @@ php artisan migrate:rollback
 | `lang/**` | [database-guide.md](docs/database-guide.md) (다국어 섹션) |
 | `routes/**` | [routing.md](docs/backend/routing.md) |
 | `app/Seo/**` | [seo-system.md](docs/backend/seo-system.md) |
+| `app/Benchmark/**`, `config/benchmark.php` | [benchmark.md](docs/backend/benchmark.md) |
 
 ---
 
@@ -1072,3 +1112,8 @@ php artisan migrate:rollback
 - **ResolvesActivityLogType**: `app/ActivityLog/Traits/ResolvesActivityLogType.php`
 - **ChangeDetector**: `app/ActivityLog/ChangeDetector.php`
 - **CoreActivityLogListener**: `app/Listeners/CoreActivityLogListener.php`
+- **BenchmarkProfileRegistry**: `app/Benchmark/BenchmarkProfileRegistry.php`
+- **성능 계측 DTO**: `app/Benchmark/DTO/{BenchmarkProfile,BenchmarkRunOptions,BenchmarkResult}.php`
+- **BenchmarkAxisRunner**: `app/Benchmark/Contracts/BenchmarkAxisRunner.php`
+- **성능 계측 축 실행기**: `app/Benchmark/Axes/{List,Screen,Write,Batch}AxisRunner.php`
+- **BenchmarkAxis**: `app/Enums/BenchmarkAxis.php`

@@ -4,6 +4,8 @@ namespace Modules\Sirsoft\Page\Repositories;
 
 use App\Helpers\PermissionHelper;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
+use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Repositories\Concerns\ResolvesSortSpec;
 use App\Search\Engines\DatabaseFulltextEngine;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,6 +22,11 @@ use Modules\Sirsoft\Page\Repositories\Contracts\PageRepositoryInterface;
 class PageRepository implements PageRepositoryInterface
 {
     use HasMultipleSearchFilters;
+    use PaginatesWithDeferredJoin;
+    use ResolvesSortSpec;
+
+    /** 허용 정렬 컬럼 (PageListRequest 와 동일 집합) */
+    private const SORTABLE_COLUMNS = ['created_at', 'published_at'];
 
     /**
      * 페이지 목록을 페이지네이션하여 조회합니다.
@@ -39,15 +46,22 @@ class PageRepository implements PageRepositoryInterface
         //  - slug : 슬러그만
         //  - all  : 제목 + 슬러그 (본문 content 은 검색 대상 아님 — UI '제목 또는 슬러그로 검색')
         // (Scout 콜백에 slug orWhere 를 넣으면 total 카운트가 부풀려지는 회귀가 있어 #225 에서 제거됨)
-        $query = Page::with(['creator', 'updater']);
+        $query = Page::query();
 
         // 권한 스코프 필터링
         PermissionHelper::applyPermissionScope($query, 'sirsoft-page.pages.read');
 
         $this->applyFilters($query, $filters);
-        $this->applySorting($query, $filters);
 
-        return $query->paginate($perPage);
+        // 지연 조인: 본문 content(longText)는 목록에 쓰이지 않는데도 OFFSET 이 훑는
+        // 모든 행에서 함께 읽힌다. inner 는 id 만 훑고 본문은 이번 페이지에서만 읽는다.
+        return $this->paginateWithDeferredJoin(
+            query: $query,
+            columns: ['*'],
+            sort: $this->resolveListSortSpec($filters),
+            perPage: $perPage,
+            relations: ['creator', 'updater'],
+        );
     }
 
     /**
@@ -170,6 +184,11 @@ class PageRepository implements PageRepositoryInterface
     {
         $results = $this->buildKeywordQuery($keyword)
             ->orderBy($orderBy, $direction)
+            // 전순서 보장 — 정렬 컬럼이 비고유라 페이지 경계가 흔들릴 수 있다
+            ->orderBy('id', $direction === 'asc' ? 'asc' : 'desc')
+            // audit:allow repository-paginate-column-pruning reason: 통합검색 전용 진입점 —
+            // 유일한 호출자(SearchPagesListener)가 전체 탭은 limit=5, 페이지 탭은 limit=PHP_INT_MAX 로
+            // 1페이지에 결과를 받아가므로 OFFSET 이 발생하지 않는다
             ->paginate($limit);
 
         return [
@@ -210,7 +229,24 @@ class PageRepository implements PageRepositoryInterface
         return Page::query()
             ->published()
             ->where(function ($q) use ($keyword) {
-                DatabaseFulltextEngine::whereFulltext($q, 'title', $keyword, 'and');
+                // 제목은 다국어 JSON 컬럼이라 FULLTEXT 에 의존하지 않고 로케일별 JSON 경로로 찾는다
+                // (메뉴 목록과 동일한 관례).
+                //
+                // 실측 배경 (#492 D-25): 운영 DB 에서 `MATCH(title)` 이 **어떤 키워드로도** 0 을
+                // 반환했다 — `이용약관`(제목 전체) · `약관`(부분) · `Terms` · `Service` 전부 0 인데
+                // 같은 행을 `LIKE` 로는 찾는다. 인덱스는 `WITH PARSER ngram` 으로 존재하고
+                // `ngram_token_size=2` 인데도 그렇다. 즉 이 컬럼의 FT 인덱스가 실제 행을 담고
+                // 있지 않다. 다국어 제목은 짧은 낱말이라 부분 일치가 기대 동작이므로,
+                // FT 인덱스 상태에 의존하지 않는 로케일 경로 LIKE 로 검색 계약을 고정한다.
+                // (본문은 길이가 있어 FULLTEXT 가 유효하므로 그대로 둔다.)
+                $first = true;
+                foreach ($this->translatableLocales() as $locale) {
+                    $method = $first ? 'where' : 'orWhere';
+                    $q->{$method}('title->'.$locale, 'like', '%'.$keyword.'%');
+                    $first = false;
+                }
+
+                // 본문은 순수 텍스트/HTML 이라 FULLTEXT 가 유효하다.
                 DatabaseFulltextEngine::whereFulltext($q, 'content', $keyword, 'or');
                 $q->orWhere('slug', 'like', '%'.$keyword.'%');
             });
@@ -224,14 +260,20 @@ class PageRepository implements PageRepositoryInterface
      */
     private function applySorting($query, array $filters): void
     {
-        $sortBy = $filters['sort_by'] ?? 'created_at';
-        $sortOrder = strtolower($filters['sort_order'] ?? 'desc');
-
-        if (! in_array($sortOrder, ['asc', 'desc'])) {
-            $sortOrder = 'desc';
+        foreach ($this->resolveListSortSpec($filters) as $sort) {
+            $query->orderBy($sort['column'], $sort['direction']);
         }
+    }
 
-        $query->orderBy($sortBy, $sortOrder);
+    /**
+     * 목록 정렬 스펙을 허용 컬럼 화이트리스트로 해석합니다.
+     *
+     * @param  array  $filters  필터 조건
+     * @return array<int, array{column: string, direction: string}> 정렬 스펙
+     */
+    private function resolveListSortSpec(array $filters): array
+    {
+        return $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at');
     }
 
     /**
@@ -307,5 +349,20 @@ class PageRepository implements PageRepositoryInterface
         }
 
         return $filters;
+    }
+
+    /**
+     * 다국어 JSON 필드에 저장될 수 있는 로케일 목록을 반환합니다.
+     *
+     * 번역 파일이 없어도 데이터는 저장될 수 있으므로 UI 표시 언어(`supported_locales`)보다 넓은
+     * `translatable_locales` 를 기준으로 한다 (MenuRepository 와 동일 관례).
+     *
+     * @return list<string> 로케일 목록
+     */
+    private function translatableLocales(): array
+    {
+        $locales = config('app.translatable_locales', config('app.supported_locales', []));
+
+        return empty($locales) ? [app()->getLocale()] : array_values($locales);
     }
 }

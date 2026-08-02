@@ -4,11 +4,25 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\IdentityMessageDefinitionRepositoryInterface;
 use App\Models\IdentityMessageDefinition;
+use App\Repositories\Concerns\ResolvesSortSpec;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class IdentityMessageDefinitionRepository implements IdentityMessageDefinitionRepositoryInterface
 {
+    use ResolvesSortSpec;
+
+    /** 허용 정렬 컬럼 (AdminIdentityMessageDefinitionIndexRequest 와 동일 집합) */
+    private const SORTABLE_COLUMNS = [
+        'id',
+        'provider_id',
+        'scope_type',
+        'scope_value',
+        'is_active',
+        'created_at',
+        'updated_at',
+    ];
+
     /**
      * ID로 메시지 정의 조회.
      *
@@ -180,10 +194,11 @@ class IdentityMessageDefinitionRepository implements IdentityMessageDefinitionRe
             });
         }
 
-        $sortBy = $filters['sort_by'] ?? 'id';
-        $sortOrder = $filters['sort_order'] ?? 'asc';
-        $query->orderBy($sortBy, $sortOrder);
+        foreach ($this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'id', 'asc') as $sort) {
+            $query->orderBy($sort['column'], $sort['direction']);
+        }
 
+        // audit:allow repository-paginate-column-pruning reason: 본인인증 메시지 정의 테이블 — 정의 수가 고정이고 넓은 컬럼이 없다
         return $query->paginate($perPage);
     }
 }

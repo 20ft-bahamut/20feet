@@ -241,6 +241,7 @@ class Plugin implements PluginInterface
 | `getDependencies()` | `[]` | 의존하는 모듈/플러그인 목록 |
 | `getHookListeners()` | `[]` | 훅 리스너 클래스 목록 |
 | `getMiddleware()` | `[]` | 확장 미들웨어 선언 (self-gate targets) — `{class, groups, timing?, targets}` ([middleware.md](../backend/middleware.md)) |
+| `getBenchmarkProfiles()` | `[]` | 성능 계측 대상 선언 (`g7:bench` 가 수집) — 목록/화면/쓰기/배치 4축 ([benchmark.md](../backend/benchmark.md)) |
 | `upgrades()` | `[]` | 업그레이드 스텝 (`upgrades/` 디렉토리 자동 발견). **`g7_version >= 7.0.0-beta.5` 인 플러그인은 신규 step 이 `AbstractUpgradeStep` 상속 의무** ([upgrade-step-guide §13](upgrade-step-guide.md)) — 미상속 시 `PluginManager::runUpgradeSteps` 가 `RuntimeException` throw |
 
 > **동적 식별자 보존 규칙**: `Permission::updateOrCreate()` / `Role::firstOrCreate()` 등으로 런타임에 생성한 엔티티는 업데이트 시 `cleanupStalePluginEntries` 에 의해 "정적 정의에 없는 고아 레코드" 로 판정되어 삭제될 위험이 있습니다. 이를 방지하려면 동적 식별자 목록을 위 3개 훅에서 반환하세요 — 정적 정의 + 동적 식별자가 병합된 expected 목록을 기준으로 판정되어 보존됩니다. 상세는 [extension-update-system.md](extension-update-system.md) 참조.
@@ -1039,19 +1040,25 @@ $response = Http::withToken($token)
 // 변경 시에만 캐시 갱신
 ```
 
-#### 6. 레이아웃 제한 (Layout Restriction)
+#### 6. 레이아웃 소유와 라우트 네임스페이스 (Layout Ownership)
 
-플러그인은 모듈과 달리 완전한 레이아웃을 등록할 수 없습니다.
+플러그인도 자기 화면(완전한 레이아웃)을 가질 수 있습니다. 다만 그 화면의 라우트는
+플러그인 네임스페이스 안에 선언해야 합니다.
 
 ```text
-필수: 페이지 레이아웃은 모듈만 등록 가능 (플러그인은 layout_extensions만 사용)
-허용: admin/plugin_settings.json (환경설정 UI) — 유일한 완전 레이아웃
-✅ 필수: 설정 외 UI 확장은 layout_extensions(확장 지점/Overlay)로만 가능
+필수: 플러그인이 소유하는 화면의 라우트는 plugins/{identifier}/ 아래에 선언
+   예) "*/admin/plugins/sirsoft-gdpr/consent-log"
+필수: 다른 확장이 소유한 화면에 UI 를 끼워 넣을 때는 layout_extensions(확장 지점/Overlay) 사용
 ```
+
+라우트 네임스페이스를 지키지 않으면, 같은 경로를 소유한 모듈/템플릿과 어느 쪽이 이기는지가
+설치 순서에 좌우됩니다. 화면이 조용히 다른 것으로 바뀌고, 어느 확장 때문인지 화면만 봐서는
+알 수 없습니다. 정적 검사가 이 위반을 차단합니다.
 
 | 방식 | 모듈 | 플러그인 |
 |------|------|---------|
-| 임의 페이지 레이아웃 (admin/user) | 가능 | 금지 |
+| 자기 네임스페이스 화면 (`plugins/{id}/...`) | 해당 없음 | 가능 |
+| 임의 경로 페이지 레이아웃 (`admin/users` 등) | 가능 | 금지 (경로 침범) |
 | admin/plugin_settings.json (환경설정) | 가능 | 가능 |
 | layout_extensions (확장 지점) | 가능 | 가능 |
 

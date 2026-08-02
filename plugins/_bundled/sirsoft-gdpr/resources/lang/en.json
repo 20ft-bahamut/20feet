@@ -45,7 +45,7 @@
         "title": "GDPR Settings",
         "description": "Operators control the cookie consent banner and the MyPage privacy card.",
         "section": {
-            "operator": "Operator \/ Privacy Policy",
+            "operator": "Operator / Privacy Policy",
             "operator_desc": "Register the operator name, data storage location, and privacy policy page slug shown in the cookie banner and policy page.",
             "cookie_banner": "Cookie Consent Banner",
             "cookie_banner_desc": "Configure visibility, position, categories, and policy version of the cookie consent banner — all in one place.",
@@ -77,14 +77,14 @@
                 "placeholder": "e.g., privacy-policy"
             },
             "legal_entity_name": {
-                "label": "Legal Entity \/ Operator Name",
+                "label": "Legal Entity / Operator Name",
                 "hint": "The operator name shown in the cookie banner and MyPage.",
                 "placeholder": "e.g., Acme Corp."
             },
             "data_storage_location": {
                 "label": "Data Storage Location",
                 "hint": "Country where user data is stored, shown to users. e.g., \"United States (AWS)\", \"Germany\". Do not enter IP addresses, cloud region codes (e.g., ap-northeast-2), or datacenter addresses — these are security-sensitive.",
-                "placeholder": "e.g., Korea (self-hosted IDC) \/ United States (AWS)"
+                "placeholder": "e.g., Korea (self-hosted IDC) / United States (AWS)"
             },
             "banner_enabled": {
                 "label": "Show Cookie Banner",
@@ -201,7 +201,10 @@
                 "open_policy_page": "Open policy page",
                 "no_policy_slug": "No privacy policy page registered."
             },
-            "not_found": "Policy version not found."
+            "not_found": "Policy version not found.",
+            "history_page_summary": "{total} total · page {current} / {last}",
+            "history_prev": "Previous",
+            "history_next": "Next"
         }
     },
     "admin": {
@@ -233,7 +236,9 @@
             "source": {
                 "banner": "Banner",
                 "preference_center": "Preferences",
-                "mypage": "MyPage"
+                "mypage": "MyPage",
+                "register": "Sign-up",
+                "mypage_renew_all": "MyPage bulk re-consent"
             },
             "col": {
                 "created_at": "Time",

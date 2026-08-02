@@ -105,3 +105,46 @@ Authorization: Bearer {YOUR_TOKEN}
 ```
 
 
+
+---
+
+## PG 연동 web 엔드포인트 (docgen 수집 범위 밖)
+
+아래 두 경로는 `src/routes/web.php` 에 선언된 브라우저 왕복 경로라 `api:docgen` 의 라우트 수집
+대상(`/api/plugins/...`)에 포함되지 않는다. JSON API 가 아니므로 응답 필드 표 대신 요청 계약과
+분기 동작만 기재한다.
+
+### POST /plugin/inicis/callback
+
+- **라우트명**: `plugin.verification_kginicis.callback`
+- **호출자**: KG이니시스 (매뉴얼 STEP2 — 외부 form POST)
+- **미들웨어**: `web` (CSRF 검증은 `ValidateCsrfToken` 제외 — 외부 호출이라 토큰이 없다)
+- **FormRequest**: `InicisCallbackRequest` — **검증 규칙 없음(의도된 결정)**
+
+이니시스는 매뉴얼에 명시되지 않은 필드를 가맹점 설정·인증 수단에 따라 함께 보낸다. 요청
+파라미터를 화이트리스트로 닫으면 정상 콜백이 422 로 거부되어 인증이 끊기므로, 이 엔드포인트는
+본문을 그대로 통과시키고 의미 검증(서명 대조·거래 매칭·challenge 해석)은 전적으로
+`InicisCallbackResolver` 가 담당한다. 빈 규칙의 FormRequest 를 두는 이유는 "검증하지 않는다" 가
+누락이 아니라 결정임을 코드에 남기기 위해서다.
+
+**응답**: 항상 `302` — `/plugin/inicis/popup-bridge` 로 결과 query 를 붙여 redirect 한다.
+
+### GET /plugin/inicis/popup-bridge
+
+- **라우트명**: `plugin.verification_kginicis.popup-bridge`
+- **호출자**: 사용자 브라우저 (callback 이 redirect)
+- **FormRequest**: `InicisPopupBridgeRequest`
+
+**요청 파라미터**
+
+| 이름 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| verification_token | string | 아니오 | 인증 성공 시 코어가 발급한 검증 토큰 |
+| challenge_id | string | 아니오 | 인증 시도 식별자 |
+| identity_error | string | 아니오 | 인증 실패 사유 키 |
+
+길이 상한을 두지 않는다 — 토큰 길이는 코어 발급 정책에 종속되므로, 여기서 상한을 정하면 정책이
+바뀔 때 사용자가 팝업 안에서 오류 화면을 보게 된다.
+
+**응답**: `200 text/html` — 데스크톱(`window.opener` 존재)은 부모창에 `postMessage` 후 창을 닫고,
+모바일은 `sessionStorage` 의 redirectStash 를 복원해 원래 페이지로 이동한다.

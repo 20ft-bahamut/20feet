@@ -140,6 +140,9 @@ return [
                     'snapshot_action' => '本文',
                 ],
             ],
+            'history_page_summary' => '全 :total 件 · :current / :last ページ',
+            'history_prev' => '前へ',
+            'history_next' => '次へ',
             'snapshot_view_short' => '表示',
             'material_modal' => [
                 'title' => 'ポリシーバージョン公開 + 再同意トリガー',
@@ -197,7 +200,9 @@ return [
             'source' => [
                 'banner' => 'バナー',
                 'preference_center' => '環境設定',
+                'register' => '会員登録',
                 'mypage' => 'マイページ',
+                'mypage_renew_all' => 'マイページ一括再同意',
             ],
             'col' => [
                 'created_at' => '時点',
