@@ -311,6 +311,7 @@ return [
         'not_downloadable' => 'ダウンロードできないクーポンです。',
         'quantity_exhausted' => 'クーポン数量が尽きました。',
         'issue_period_expired' => 'クーポン発行期間が終了しました。',
+        'validity_not_configured' => 'クーポンの有効期間が設定されていないため発行できません。管理者にお問い合わせください。',
         'expired' => '有効期限切れのクーポンです。',
         'min_amount_not_met' => '最小注文金額の条件を満たしていません。',
         'not_combinable' => '他のクーポンと併用できないクーポンです。',

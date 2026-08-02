@@ -549,7 +549,8 @@ class AuthService
         }
 
         // 4. 만료 시간 체크
-        $expireMinutes = config('auth.passwords.users.expire', 60);
+        // Carbon 날짜 연산은 strict 타입 경계라 설정이 문자열이면 TypeError 가 난다 → 정수 보장
+        $expireMinutes = (int) config('auth.passwords.users.expire', 60);
         if ($record->created_at->addMinutes($expireMinutes)->isPast()) {
             $record->delete();
 
@@ -598,7 +599,8 @@ class AuthService
         }
 
         // 만료 시간 체크 (기본 60분)
-        $expireMinutes = config('auth.passwords.users.expire', 60);
+        // Carbon 날짜 연산은 strict 타입 경계라 설정이 문자열이면 TypeError 가 난다 → 정수 보장
+        $expireMinutes = (int) config('auth.passwords.users.expire', 60);
 
         if ($record->created_at->addMinutes($expireMinutes)->isPast()) {
             // 만료된 토큰 삭제

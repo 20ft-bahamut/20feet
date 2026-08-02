@@ -117,7 +117,7 @@ spec 이 전부 실패한다.
 
 | 데이터 종류 | 책임 영역 | 위치 | 호출 |
 |---|---|---|---|
-| 코어 권한/역할/유저/Sanctum 토큰 | 코어 | `app/Console/Commands/PlaywrightIssueToken.php` | `php artisan playwright:issue-token --permissions=core.xxx` |
+| 코어 권한/역할/유저/Sanctum 토큰 | 코어 | `app/Console/Commands/PlaywrightIssueToken.php` | `php artisan playwright:issue-token --permissions=core.xxx` (권한 경계 검증은 `--no-admin-role` 추가 — §5.1) |
 | 편집기 저장 spec 대상 시드 화면 | 코어 | `app/Console/Commands/PlaywrightSeedLayout.php` | `php artisan playwright:seed-layout [--remove]` (globalSetup/globalTeardown 자동 호출) |
 | 모듈 권한 (`sirsoft-ecommerce.*`) | 모듈 | 코어 커맨드의 `--permissions=` 임의 식별자 | 동일 (Permission::firstOrCreate 자동 생성) |
 | 모듈 도메인 데이터 (상품/주문) | 모듈 | `modules/_bundled/{id}/src/Console/Commands/PlaywrightSeed{id}.php` | `php artisan playwright:seed-{id}` |
@@ -222,6 +222,28 @@ export const test = base.extend<AuthFixtures>({
   readOnlyToken: async ({}, use) => use(issueToken('core.templates.read')),
 });
 ```
+
+#### 권한 경계를 검증할 때는 `issueScopedToken`
+
+`issueToken` 은 커맨드 기본 동작대로 사이트의 `admin` 역할을 함께 부여한다. `admin` 역할은 전체
+권한을 보유하므로, `--permissions` 로 권한을 좁혀 넘겨도 **화면은 항상 최대 권한으로 렌더된다**.
+읽기 전용 분기·권한 미보유 분기처럼 권한 경계 자체를 검증하려면 `issueScopedToken` 을 쓴다 —
+`--no-admin-role` 을 붙여 지정한 권한만 가진 계정을 만든다.
+
+```typescript
+// ❌ 읽기 전용 분기를 만들 수 없다 — admin 역할이 update 권한까지 함께 부여된다
+await authenticatePage(page, issueToken('sirsoft-ecommerce.settings.read'));
+await expect(page.locator('input[name="..."]')).toBeDisabled();   // 실패: enabled
+
+// ✅ 지정한 권한만 가진 계정
+await authenticatePage(page, issueScopedToken('sirsoft-ecommerce.settings.read'));
+await expect(page.locator('input[name="..."]')).toBeDisabled();   // 통과
+```
+
+권한을 좁힌 계정은 코어 메뉴·알림 데이터소스에도 접근하지 못해 콘솔에 403 이 남을 수 있다.
+그 화면 자체의 검증과 무관한 잡음이므로, 콘솔 에러 0 을 단언하는 테스트에는 이 토큰을 쓰지 않는다.
+권한 밖 탭·라우트로 이동하면 403 에러 페이지로 전환되므로, 왕복 시나리오는 그 권한으로 접근
+가능한 대상만 경유해야 한다.
 
 ### 5.2 확장 fixture — 권한 + 시드 분리
 
