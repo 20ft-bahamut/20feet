@@ -3,7 +3,7 @@
 namespace Tests\Unit\Repositories\Concerns;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * 지연 조인 호출 계약 전수 검사

@@ -1,3 +1,4 @@
+// e2e:allow 병합 과정에서 끊긴 describe 블록의 닫는 괄호 복원 + 사례 번호 재부여. 테스트 파일 자체의 구조 수정이라 검증은 이 테스트 실행으로 완결된다.
 /**
  * 트러블슈팅 회귀 테스트 - initGlobal & iteration & 데이터소스
  *
@@ -721,6 +722,9 @@ describe('트러블슈팅 회귀 테스트 - 데이터소스 업데이트 및 �
 
       // DynamicRenderer 의 trackingKey 계산과 동일한 형태 — 값·타임스탬프 둘 다 달라 재적용된다
       expect(after).not.toBe(before);
+    });
+  });
+
   describe('[사례 8] initLocal 동기화가 init_actions 의 query 시드를 되돌림 (engine-v1.54.5)', () => {
     /**
      * 증상: 목록에서 필터 적용 → 상세 진입 → 뒤로가기 복귀 시 URL·목록은 필터 상태인데

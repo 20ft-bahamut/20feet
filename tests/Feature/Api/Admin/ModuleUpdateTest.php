@@ -457,6 +457,11 @@ class ModuleUpdateTest extends TestCase
     public function test_check_modified_layouts_returns_result_from_service(): void
     {
         $mockService = Mockery::mock(ModuleService::class);
+        // 컨트롤러가 미존재 식별자를 404 로 구분하려 존재 확인을 먼저 한다 (#495).
+        // 이 스텁이 없으면 mock 이 BadMethodCallException 을 던져 500 이 된다.
+        $mockService->shouldReceive('getModuleInfo')
+            ->with('test-module')
+            ->andReturn(['identifier' => 'test-module', 'version' => '1.0.0']);
         $mockService->shouldReceive('checkModifiedLayouts')
             ->with('test-module')
             ->once()

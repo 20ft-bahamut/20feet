@@ -3,7 +3,7 @@
 namespace Tests\Unit\Repositories\Concerns;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * 정렬 허용 컬럼 ↔ 검증 게이트 정합 전수 검사

@@ -1,14 +1,15 @@
 {
     "version": "1.0.0",
+    "meta": {
+        "_e2e_allow": "e2e:allow sequence 액션을 params.actions 에서 top-level actions 로 정규화한 구조 통일. 엔진이 두 형태를 모두 해석하므로(ActionDispatcher: action.actions || params.actions) 동작 변화 없음. 규약 준수는 레이아웃 회귀테스트(admin_plugin_settings.test.tsx)가 검사.",
+        "title": "$t:sirsoft-gdpr.settings.title",
+        "description": "$t:sirsoft-gdpr.settings.description"
+    },
     "layout_name": "plugin_settings",
     "permissions": [
         "core.plugins.update"
     ],
     "extends": "_admin_base",
-    "meta": {
-        "title": "$t:sirsoft-gdpr.settings.title",
-        "description": "$t:sirsoft-gdpr.settings.description"
-    },
     "data_sources": [
         {
             "id": "gdprSettings",
@@ -1214,23 +1215,21 @@
                                                                                             {
                                                                                                 "type": "click",
                                                                                                 "handler": "sequence",
-                                                                                                "params": {
-                                                                                                    "actions": [
-                                                                                                        {
-                                                                                                            "handler": "setState",
-                                                                                                            "params": {
-                                                                                                                "target": "local",
-                                                                                                                "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (-1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            "handler": "refetchDataSource",
-                                                                                                            "params": {
-                                                                                                                "dataSourceId": "gdprPolicyVersionHistory"
-                                                                                                            }
+                                                                                                "actions": [
+                                                                                                    {
+                                                                                                        "handler": "setState",
+                                                                                                        "params": {
+                                                                                                            "target": "local",
+                                                                                                            "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (-1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
                                                                                                         }
-                                                                                                    ]
-                                                                                                }
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "handler": "refetchDataSource",
+                                                                                                        "params": {
+                                                                                                            "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -1248,23 +1247,21 @@
                                                                                             {
                                                                                                 "type": "click",
                                                                                                 "handler": "sequence",
-                                                                                                "params": {
-                                                                                                    "actions": [
-                                                                                                        {
-                                                                                                            "handler": "setState",
-                                                                                                            "params": {
-                                                                                                                "target": "local",
-                                                                                                                "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            "handler": "refetchDataSource",
-                                                                                                            "params": {
-                                                                                                                "dataSourceId": "gdprPolicyVersionHistory"
-                                                                                                            }
+                                                                                                "actions": [
+                                                                                                    {
+                                                                                                        "handler": "setState",
+                                                                                                        "params": {
+                                                                                                            "target": "local",
+                                                                                                            "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
                                                                                                         }
-                                                                                                    ]
-                                                                                                }
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "handler": "refetchDataSource",
+                                                                                                        "params": {
+                                                                                                            "dataSourceId": "gdprPolicyVersionHistory"
+                                                                                                        }
+                                                                                                    }
+                                                                                                ]
                                                                                             }
                                                                                         ]
                                                                                     }

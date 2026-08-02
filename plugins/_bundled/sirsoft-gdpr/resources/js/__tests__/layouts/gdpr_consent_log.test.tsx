@@ -1,3 +1,4 @@
+// e2e:allow source 필터 허용 어휘가 ConsentSource enum 5종으로 넓어진 것에 기대값을 맞춘 변경. 테스트 파일 자체 수정이라 검증은 이 테스트 실행으로 완결된다.
 /**
  * 동의 이력 관리자 레이아웃 (gdpr_consent_log)
  *
@@ -137,9 +138,14 @@ describe('layouts/admin/gdpr_consent_log.json — #27 체크박스 즉시 적용
             expect(layoutJson).toContain('sirsoft-gdpr.admin.consent_log.action.rejected');
         });
 
-        it('source 필터의 체크박스 4개 모두 옵션 C 패턴', () => {
+        it('source 필터의 체크박스 6개 모두 옵션 C 패턴', () => {
             const checkboxes = findCheckboxesIn('source_filter');
-            expect(checkboxes.length, '체크박스 4개 (전체 / banner / preference_center / mypage)').toBe(4);
+            // 허용 어휘의 SSoT 는 ConsentSource enum 5종 — 화면 필터가 그 부분집합이면
+            // 일부 이력이 어떤 필터로도 도달 불가해진다 (#492).
+            expect(
+                checkboxes.length,
+                '체크박스 6개 (전체 / banner / preference_center / register / mypage / mypage_renew_all)'
+            ).toBe(6);
             checkboxes.forEach((cb, idx) => expectSequencePattern(cb, `source[${idx}]`));
         });
     });
