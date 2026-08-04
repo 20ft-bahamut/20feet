@@ -877,6 +877,8 @@ ini_set(\'zlib.output_compression\', \'off\');
     'error_php_path_empty' => 'PHP 바이너리 경로가 비어있습니다.',
     'error_php_path_not_exists' => '파일이 존재하지 않습니다: :path',
     'error_php_exec_failed' => 'PHP 실행 실패: :path',
+    'error_php_binary_path_not_allowed' => '사용할 수 없는 PHP 경로 형식입니다 (:path). 실행 파일의 절대경로만 입력하세요 — 옵션(- 로 시작), 상대경로, .. 는 쓸 수 없습니다.',
+    'error_composer_binary_path_not_allowed' => '사용할 수 없는 Composer 경로 형식입니다 (:path). composer 실행 파일 또는 .phar 의 절대경로만 입력하세요. 멀티 PHP 환경은 "PHP절대경로 composer절대경로" 형식으로 입력할 수 있습니다.',
     'error_php_version_too_low' => ':path — PHP :version (최소 :min 필요)',
     'error_php_version_parse_failed' => 'PHP 버전을 파싱할 수 없습니다.',
     'error_php_cli_not_verified' => 'PHP CLI 경로가 확인되지 않았습니다. "버전 확인" 버튼을 클릭해주세요.',

@@ -16,6 +16,7 @@ use App\Extension\Traits\ClearsTemplateCaches;
 use App\Models\LanguagePack;
 use App\Services\LanguagePack\LanguagePackBaseLocales;
 use App\Services\LanguagePack\LanguagePackManifestValidator;
+use App\Services\LanguagePack\LanguagePackPhpArrayValidator;
 use App\Services\LanguagePack\LanguagePackRegistry;
 use App\Support\OutboundUrlValidator;
 use Illuminate\Http\UploadedFile;
@@ -875,34 +876,37 @@ class LanguagePackService
             File::deleteDirectory($extractPath);
         }
 
-        $pack = DB::transaction(function () use ($existing, $manifest, $sourceType, $sourceUrl, $autoActivate, $installedBy) {
+        // 재설치(update path) 시 자기 자신을 슬롯 충돌로 오인하지 않도록 $existing->id 를 제외.
+        // 이전엔 재설치 시 자기가 active 였더라도 $shouldActivate 가 false 가 되어
+        // status 가 active → installed 로 강등 → 의존하는 확장 언어팩이 'core_locale_missing'
+        // 으로 차단되는 회귀가 발생.
+        $shouldActivate = $autoActivate
+            && ! $this->repository->findActiveForSlot(
+                $manifest['scope'],
+                $manifest['target_identifier'] ?? null,
+                $manifest['locale'],
+                $existing?->id
+            );
+
+        $pack = DB::transaction(function () use ($existing, $manifest, $sourceType, $sourceUrl, $installedBy) {
             $data = $this->buildPackData($manifest, $sourceType, $sourceUrl, $installedBy);
 
-            // 재설치(update path) 시 자기 자신을 슬롯 충돌로 오인하지 않도록 $existing->id 를 제외.
-            // 이전엔 재설치 시 자기가 active 였더라도 $shouldActivate 가 false 가 되어
-            // status 가 active → installed 로 강등 → 의존하는 확장 언어팩이 'core_locale_missing'
-            // 으로 차단되는 회귀가 발생.
-            $shouldActivate = $autoActivate
-                && ! $this->repository->findActiveForSlot(
-                    $manifest['scope'],
-                    $manifest['target_identifier'] ?? null,
-                    $manifest['locale'],
-                    $existing?->id
-                );
+            // 설치 트랜잭션은 항상 installed 로만 기록한다. 활성화는 아래에서 activate() 를
+            // 경유해야 의존성 검사·대상 확장 존재 확인·슬롯 충돌 검사가 반드시 수행되고,
+            // activated 훅도 한 곳에서만 발화한다.
+            //
+            // 이 규칙의 부수 효과로, 이미 active 인 팩을 auto_activate 없이 덮어쓰면
+            // active → installed 로 강등된다. 겉보기엔 버그지만 의도된 안전장치다 —
+            // 활성 팩만 require 경로에 배선되므로, 방금 외부에서 반입된 내용이
+            // 활성화 권한자의 동의 없이 그 자리를 이어받는 일이 없어야 한다.
+            // (설치 권한만 가진 사용자가 활성 팩을 덮어쓰는 방식으로 활성화 권한 게이트를
+            //  우회하는 경로를 닫는다. 정상 운영자는 auto_activate 로 활성 상태를 유지하며,
+            //  그 플래그는 RequiresActivationPermission 이 지킨다.)
+            $data['status'] = LanguagePackStatus::Installed->value;
 
-            $data['status'] = $shouldActivate
-                ? LanguagePackStatus::Active->value
-                : LanguagePackStatus::Installed->value;
-
-            if ($shouldActivate) {
-                $data['activated_at'] = now();
-            }
-
-            $pack = $existing
+            return $existing
                 ? $this->repository->update($existing, $data)
                 : $this->repository->create($data);
-
-            return $pack;
         });
 
         // 캐시 전 계층 무효화 (registry + translator + template-lang)
@@ -913,8 +917,9 @@ class LanguagePackService
             $pack
         );
 
-        if ($pack->status === LanguagePackStatus::Active->value) {
-            HookManager::doAction('core.language_packs.activated', $pack);
+        if ($shouldActivate) {
+            // activate() 내부에서 상태 기록·캐시 무효화·activated 훅 발화를 모두 담당한다.
+            $pack = $this->activate($pack, false);
         }
 
         return $pack;
@@ -1145,7 +1150,20 @@ class LanguagePackService
     }
 
     /**
-     * 보안 규칙 검사 — backend/ 외의 PHP 파일 차단, eval/include 패턴 차단.
+     * 보안 규칙 검사 — 허용된 파일 형식·위치·내용만 통과시킵니다.
+     *
+     * 언어팩의 PHP 파일은 활성화되면 `LanguagePackTranslator` 가 `require` 하므로 그 내용이
+     * 그대로 실행된다. 과거에는 위험 함수 11개를 정규식으로 나열해 막았으나 목록에 없는
+     * 함수(`file_put_contents` `fopen` `call_user_func` `assert` 백틱 등)로 전부 우회됐다.
+     * 따라서 판정을 뒤집어, 아래 네 가지를 모두 만족하는 것만 통과시킨다.
+     *
+     *  1. 확장자 화이트리스트 — `.json` / `.php` / `.md` (대소문자 무관)
+     *  2. PHP 파일 위치 강제 — `backend/{manifest locale}/{group}.php` 또는 `backend/{group}.php`
+     *  3. 심볼릭 링크 거부 — 패키지 밖 파일을 끌어들이는 통로 차단
+     *  4. PHP 내용은 "번역 배열만" (LanguagePackPhpArrayValidator 문법 검사)
+     *
+     * 번들 여부와 무관하게 같은 경로로 검사한다 — 예외를 두면 "동봉된 것으로 위장하면 통과"
+     * 라는 틈이 생기고, 앞으로 언어팩을 만들 때 기준이 둘로 갈린다.
      *
      * @param  string  $packageRoot  패키지 루트 디렉토리
      * @param  array<string, mixed>  $manifest  manifest 데이터
@@ -1154,39 +1172,109 @@ class LanguagePackService
      */
     private function assertSecurityRules(string $packageRoot, array $manifest): void
     {
-        $finder = function (string $directory) use (&$finder) {
-            if (! File::isDirectory($directory)) {
-                return [];
+        $locale = (string) ($manifest['locale'] ?? '');
+
+        // `backend/{locale}/{group}.php` 와 평면형 `backend/{group}.php` 만 허용.
+        $phpLocationPattern = '#^backend/(?:'.preg_quote($locale, '#').'/)?[A-Za-z0-9_-]+\.php$#';
+
+        foreach ($this->collectPackageEntries($packageRoot) as $relative => $absolute) {
+            if (is_link($absolute)) {
+                throw new LanguagePackOperationException('language_packs.errors.symlink_not_allowed', [
+                    'file' => $relative,
+                ]);
             }
-            $files = [];
-            foreach (File::allFiles($directory) as $file) {
-                $files[] = $file->getRealPath();
-            }
 
-            return $files;
-        };
-
-        $allFiles = $finder($packageRoot);
-        $backendDir = realpath($packageRoot.DIRECTORY_SEPARATOR.'backend') ?: null;
-
-        foreach ($allFiles as $absolute) {
-            if (! str_ends_with($absolute, '.php')) {
+            if (is_dir($absolute)) {
                 continue;
             }
 
-            if (! $backendDir || ! str_starts_with($absolute, $backendDir)) {
-                throw new LanguagePackOperationException('language_packs.errors.php_outside_backend', [
-                    'file' => str_replace($packageRoot, '', $absolute),
-                ]);
+            $extension = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
+
+            if ($extension === 'php') {
+                if ($locale === '' || preg_match($phpLocationPattern, $relative) !== 1) {
+                    throw new LanguagePackOperationException('language_packs.errors.php_outside_backend', [
+                        'file' => $relative,
+                    ]);
+                }
+
+                $violation = LanguagePackPhpArrayValidator::inspectFile($absolute);
+
+                if ($violation !== null) {
+                    throw new LanguagePackOperationException('language_packs.errors.php_file_not_literal_array', [
+                        'file' => $relative,
+                        'line' => $violation['line'],
+                    ]);
+                }
+
+                continue;
             }
 
-            $contents = File::get($absolute);
-            if (preg_match('/\b(eval|include|include_once|require|require_once|exec|shell_exec|passthru|system|popen|proc_open)\s*\(/i', $contents)) {
-                throw new LanguagePackOperationException('language_packs.errors.unsafe_php_pattern', [
-                    'file' => str_replace($packageRoot, '', $absolute),
+            // 압축 도구가 끼워 넣는 OS 메타데이터는 형식 검사에서 제외한다.
+            // PHP 는 위 분기에서 이미 위치 규칙에 걸리므로 이 예외로 새는 실행 경로가 없다.
+            if ($this->isOsMetadataEntry($relative)) {
+                continue;
+            }
+
+            if (! in_array($extension, ['json', 'md'], true)) {
+                throw new LanguagePackOperationException('language_packs.errors.unsupported_file_type', [
+                    'file' => $relative,
+                    'extension' => $extension === '' ? '(none)' : $extension,
                 ]);
             }
         }
+    }
+
+    /**
+     * 패키지 안의 모든 엔트리(디렉토리 포함)를 상대경로 ⇒ 절대경로로 수집합니다.
+     *
+     * 심볼릭 링크를 따라 들어가지 않는다 — 링크는 호출부가 거부 대상으로 판정하며,
+     * 따라 들어가면 순환 링크로 무한 재귀에 빠질 수 있다.
+     *
+     * @param  string  $packageRoot  패키지 루트 디렉토리
+     * @param  string  $prefix  현재 상대경로 접두사
+     * @return array<string, string> 상대경로(슬래시 구분) ⇒ 절대경로
+     */
+    private function collectPackageEntries(string $packageRoot, string $prefix = ''): array
+    {
+        $base = $prefix === '' ? $packageRoot : $packageRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
+
+        if (! is_dir($base)) {
+            return [];
+        }
+
+        $entries = [];
+
+        foreach (scandir($base) ?: [] as $name) {
+            if ($name === '.' || $name === '..') {
+                continue;
+            }
+
+            $relative = $prefix === '' ? $name : $prefix.'/'.$name;
+            $absolute = $base.DIRECTORY_SEPARATOR.$name;
+
+            $entries[$relative] = $absolute;
+
+            if (is_dir($absolute) && ! is_link($absolute)) {
+                $entries += $this->collectPackageEntries($packageRoot, $relative);
+            }
+        }
+
+        return $entries;
+    }
+
+    /**
+     * 압축 도구가 생성하는 OS 메타데이터 엔트리인지 판정합니다.
+     *
+     * @param  string  $relative  패키지 루트 기준 상대경로
+     * @return bool 메타데이터면 true
+     */
+    private function isOsMetadataEntry(string $relative): bool
+    {
+        if (str_starts_with($relative, '__MACOSX/') || $relative === '__MACOSX') {
+            return true;
+        }
+
+        return in_array(basename($relative), ['.DS_Store', 'Thumbs.db', '.gitkeep', '.gitignore'], true);
     }
 
     /**

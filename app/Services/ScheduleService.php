@@ -239,8 +239,13 @@ class ScheduleService
                 'next_run_at' => $schedule->next_run_at,
             ]);
 
+            // 거부 사유는 error 레벨 한 줄만 보는 알림 파이프라인에서도 보여야 한다 —
+            // 별도 warning 로그에만 남기면 그 경로에서는 "왜 막혔는지" 가 유실된다.
             Log::error('Schedule execution failed', [
                 'schedule_id' => $schedule->id,
+                'type' => $schedule->type->value,
+                'command' => $schedule->command,
+                'reason' => $e instanceof ScheduleExecutionException ? $e->reasonCode : null,
                 'error' => $e->getMessage(),
             ]);
 
@@ -262,11 +267,23 @@ class ScheduleService
     {
         // 저장 시점 검증 도입 이전 데이터나 DB 직접 수정으로 들어온 값을 방어한다
         // (isUrlCallAllowed 와 동일 사유 — 실행 직전이 마지막 방어선).
-        if (! ScheduleCommandValidator::isArtisanCommandAllowed($schedule->command)) {
-            throw ScheduleExecutionException::artisanNotAllowed();
+        $verdict = ScheduleCommandValidator::inspectArtisanCommand($schedule->command);
+
+        if (! $verdict['allowed']) {
+            // 업그레이드 점검 스텝을 두지 않으므로, 거부 사유는 이 로그가 유일한 운영 진단 통로다.
+            Log::warning('Schedule artisan command rejected', [
+                'schedule_id' => $schedule->id,
+                'command' => $schedule->command,
+                'reason' => $verdict['reason'],
+            ]);
+
+            throw ScheduleExecutionException::artisanNotAllowed($verdict['reason']);
         }
 
-        Artisan::call($schedule->command, [], new BufferedOutput);
+        // 문자열이 아닌 (명령명, 인자배열) 로 넘겨 StringInput 재파싱을 경유하지 않는다 —
+        // parameters 가 비어 있으면 Laravel 이 문자열 전체를 다시 파싱해
+        // 검증한 이름과 다른 명령이 실행될 수 있다.
+        Artisan::call($verdict['name'], $verdict['parameters'], new BufferedOutput);
 
         return [
             'output' => Artisan::output(),

@@ -480,6 +480,10 @@ return [
     'schedule_command' => [
         'shell_not_allowed' => '許可されていないシェルコマンドです。サーバーに登録された実行ファイルのみ使用でき、パイプ（|）·セミコロン（;）などの特殊文字は使用できません。',
         'artisan_denied' => 'この Artisan コマンドはセキュリティ上の理由からスケジュール実行できません。',
+        'artisan_not_allowlisted' => 'スケジュール実行が許可された Artisan コマンドではありません。キャッシュ削除·キュー処理などのメンテナンスコマンドのみ登録できます。',
+        'artisan_malformed' => 'Artisan コマンドの形式が正しくありません。引用符·バックスラッシュ·短縮オプション（-v）は使用できず、"コマンド名 --オプション[=値]" の形式のみ登録できます。',
+        'artisan_option_denied' => 'この Artisan コマンドに許可されていないオプションが含まれています。',
+        'artisan_argument_denied' => 'この Artisan コマンドには追加の引数を付けることができません。',
     ],
     'component' => [
         'template_id_required' => 'コンポーネント検証には template_id が必要です。',

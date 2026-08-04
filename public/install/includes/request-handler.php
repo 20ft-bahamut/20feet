@@ -195,10 +195,30 @@ function handleStep3Post(string $currentLang, array &$formData, array &$errors):
         $errors['admin_password_confirm'] = lang('error_password_mismatch');
     }
 
-    // PHP CLI / Composer 경로 처리
+    // PHP CLI / Composer 경로 처리 — 저장 시점에 허용 형태를 강제한다.
+    // 이 값들은 설치 워커에서 실제 명령의 실행 바이너리가 되므로, 형태 위반 값이
+    // 애초에 .env / 설치 상태에 기록되지 않게 여기서 막는다.
+    require_once __DIR__.'/binary-path-policy.php';
+
     $phpBinary = trim($formData['php_binary'] ?? 'php');
-    $formData['php_binary'] = $phpBinary !== '' ? $phpBinary : 'php';
-    $formData['composer_binary'] = trim($formData['composer_binary'] ?? '');
+    $phpBinary = $phpBinary !== '' ? $phpBinary : 'php';
+    if ($phpBinary !== 'php' && ! installer_binary_path_shape_ok($phpBinary)) {
+        $errors['php_binary'] = lang('error_php_binary_path_not_allowed', ['path' => $phpBinary]);
+    }
+    $formData['php_binary'] = $phpBinary;
+
+    $composerBinary = trim($formData['composer_binary'] ?? '');
+    if ($composerBinary !== '' && $composerBinary !== 'composer') {
+        // 단일 토큰이면 Composer 자리 규칙, 공백 분리 입력이면 (PHP, Composer) 쌍 해석.
+        $allowed = str_contains($composerBinary, ' ')
+            ? installer_resolve_php_composer_pair($composerBinary) !== null
+            : installer_is_composer_binary_path($composerBinary);
+
+        if (! $allowed) {
+            $errors['composer_binary'] = lang('error_composer_binary_path_not_allowed', ['path' => $composerBinary]);
+        }
+    }
+    $formData['composer_binary'] = $composerBinary;
 
     // Vendor 설치 모드 처리 (auto|composer|bundled)
     $vendorMode = trim($formData['vendor_mode'] ?? 'auto');

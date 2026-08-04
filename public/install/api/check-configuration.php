@@ -13,6 +13,10 @@ use App\Support\PrivilegedDatabaseAccounts;
  * - POST ?action=test-db      : 데이터베이스 연결 테스트
  */
 
+// 실행 바이너리 경로 허용 형태 정책 — 인스톨러 API 와 설치 워커가 같은 규칙을 공유한다.
+// 한쪽만 고치면 다른 쪽이 우회로가 되므로 의존성 없는 공용 파일로 두고 양쪽에서 로드한다.
+require_once __DIR__.'/../includes/binary-path-policy.php';
+
 /**
  * 검증 API 클래스
  */
@@ -874,11 +878,7 @@ class ValidationApi
      */
     private function isInstallerSafePathArg(string $path): bool
     {
-        if ($path === '') {
-            return false;
-        }
-
-        return ! preg_match('/[\s;`$|<>"\'&\x00-\x1F]/', $path);
+        return installer_binary_path_shape_ok($path);
     }
 
     /**
@@ -892,21 +892,7 @@ class ValidationApi
      */
     private function splitPhpComposerTokens(string $path): ?array
     {
-        if (! str_contains($path, ' ')) {
-            return null;
-        }
-
-        $tokens = preg_split('/\s+/', trim($path), 2);
-        if (! is_array($tokens) || count($tokens) !== 2) {
-            return null;
-        }
-
-        [$php, $composer] = $tokens;
-        if ($php === '' || $composer === '') {
-            return null;
-        }
-
-        return ['php' => $php, 'composer' => $composer];
+        return installer_resolve_php_composer_pair($path);
     }
 
     /**
@@ -921,11 +907,12 @@ class ValidationApi
             return ['valid' => false, 'version' => null, 'message' => lang('error_php_path_empty')];
         }
 
-        // 'php' 기본값이 아니면 셸 메타문자 차단. 파일 존재/실행 가능 검사는
-        // open_basedir 같은 PHP 런타임 제약 환경의 false negative 를 피하기 위해
-        // 생략하고, exec 결과로 최종 판정한다.
-        if ($path !== 'php' && ! $this->isInstallerSafePathArg($path)) {
-            return ['valid' => false, 'version' => null, 'message' => lang('error_php_exec_failed', ['path' => $path])];
+        // 'php' 기본값이 아니면 실행 경로 형태 규칙을 적용한다(이름은 제한하지 않는다 —
+        // 이 자리는 인자가 `--version` 으로 고정되어 있고 설치 환경마다 이름이 다르다).
+        // 파일 존재/실행 가능 검사는 open_basedir 같은 PHP 런타임 제약 환경의
+        // false negative 를 피하기 위해 생략하고, exec 결과로 최종 판정한다.
+        if ($path !== 'php' && ! installer_binary_path_shape_ok($path)) {
+            return ['valid' => false, 'version' => null, 'message' => lang('error_php_binary_path_not_allowed', ['path' => $path])];
         }
 
         $command = escapeshellarg($path).' --version 2>&1';
@@ -974,15 +961,13 @@ class ValidationApi
         // 두 토큰으로 분해 후 각 토큰별 메타문자 차단 + 각각 escapeshellarg 적용한다.
         // 옛 raw shell 전달(escape 없는 분기) 은 복원하지 않음.
         if ($effectivePath !== 'composer' && str_contains($effectivePath, ' ')) {
+            // 자리별 규칙(PHP 자리=형태만, Composer 자리=이름 형태까지)은 공용 정책이 담당한다.
             $tokens = $this->splitPhpComposerTokens($effectivePath);
-            if ($tokens === null
-                || ! $this->isInstallerSafePathArg($tokens['php'])
-                || ! $this->isInstallerSafePathArg($tokens['composer'])
-            ) {
+            if ($tokens === null) {
                 return [
                     'valid' => false,
                     'version' => null,
-                    'message' => lang('error_composer_exec_failed', ['path' => $effectivePath]),
+                    'message' => lang('error_composer_binary_path_not_allowed', ['path' => $effectivePath]),
                 ];
             }
 
@@ -1011,24 +996,24 @@ class ValidationApi
             return ['valid' => false, 'version' => null, 'message' => lang('error_composer_version_parse_failed')];
         }
 
-        // 단일 토큰 — 시스템 기본('composer') 가 아니면 셸 메타문자 차단.
+        // 단일 토큰 — 시스템 기본('composer') 가 아니면 Composer 자리 규칙을 적용한다.
         // 파일 존재/실행 가능 검사는 open_basedir 환경의 false negative 회피를 위해 생략.
-        if ($effectivePath !== 'composer' && ! $this->isInstallerSafePathArg($effectivePath)) {
+        if ($effectivePath !== 'composer' && ! installer_is_composer_binary_path($effectivePath)) {
             return [
                 'valid' => false,
                 'version' => null,
-                'message' => lang('error_composer_exec_failed', ['path' => $effectivePath]),
+                'message' => lang('error_composer_binary_path_not_allowed', ['path' => $effectivePath]),
             ];
         }
 
         // .phar 파일이면 PHP 바이너리와 결합
-        if (str_ends_with($effectivePath, '.phar')) {
-            // phpPath 도 동일한 가드 — 'php' 기본값이 아니면 메타문자 없는 단일 토큰이어야 함
-            if ($phpPath !== 'php' && ! $this->isInstallerSafePathArg($phpPath)) {
+        if (str_ends_with(strtolower($effectivePath), '.phar')) {
+            // phpPath 는 실행 파일 자리 — 이름은 제한하지 않고 형태 규칙만 적용한다.
+            if ($phpPath !== 'php' && ! installer_binary_path_shape_ok($phpPath)) {
                 return [
                     'valid' => false,
                     'version' => null,
-                    'message' => lang('error_php_exec_failed', ['path' => $phpPath]),
+                    'message' => lang('error_php_binary_path_not_allowed', ['path' => $phpPath]),
                 ];
             }
             $command = escapeshellarg($phpPath).' '.escapeshellarg($effectivePath).' --version 2>&1';

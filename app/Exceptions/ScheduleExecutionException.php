@@ -13,13 +13,26 @@ use Exception;
 class ScheduleExecutionException extends Exception
 {
     /**
+     * 거부 사유 코드 (`ScheduleCommandValidator::ARTISAN_REASON_*`).
+     *
+     * 관리자에게 보이는 메시지는 사유와 무관하게 동일하지만, 운영 진단 로그에는
+     * 어느 규칙에 걸렸는지가 남아야 한다 — 업그레이드 점검 스텝을 두지 않기로 했으므로
+     * 실행 이력과 로그가 유일한 통로다.
+     */
+    public ?string $reasonCode = null;
+
+    /**
      * 허용되지 않은 Artisan 명령
      *
+     * @param  string|null  $reasonCode  거부 사유 코드 (`ScheduleCommandValidator::ARTISAN_REASON_*`)
      * @return self 생성된 예외
      */
-    public static function artisanNotAllowed(): self
+    public static function artisanNotAllowed(?string $reasonCode = null): self
     {
-        return new self(__('schedule.artisan_not_allowed'));
+        $exception = new self(__('schedule.artisan_not_allowed'));
+        $exception->reasonCode = $reasonCode;
+
+        return $exception;
     }
 
     /**

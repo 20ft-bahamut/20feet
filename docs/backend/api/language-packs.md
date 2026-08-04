@@ -319,7 +319,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | identifier | body | string | 예 | max 200 | 대상 확장/리소스의 식별자 |
-| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부 |
+| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부. 이 값을 참으로 보내려면 `core.language_packs.manage` 권한이 함께 필요하며, 없으면 이 항목만 422 로 거부됩니다 — 네 설치 경로(파일·URL·GitHub·번들) 모두 동일한 경계를 적용합니다. 관리자 화면의 번들 재설치는 활성화 권한이 없는 운영자에게 이 값을 보내지 않으므로 재설치 자체는 그대로 진행되며, 다만 대상 언어팩이 `installed` 로 내려가 다시 켜려면 관리 권한이 필요합니다 |
 
 **요청 예시**
 
@@ -354,7 +354,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** `lang-packs/_bundled/{identifier}` 디렉토리의 번들 소스에서 언어팩을 설치(또는 재설치)합니다. `core.language_packs.install` 권한이 필요합니다. `auto_activate` 가 true면 설치 후 곧바로 활성화합니다. 코어/확장에 선탑재된 번들 언어팩을 DB에 등록할 때 사용합니다.
+**설명** `lang-packs/_bundled/{identifier}` 디렉토리의 번들 소스에서 언어팩을 설치(또는 재설치)합니다. `core.language_packs.install` 권한이 필요합니다. 파일 형식·PHP 내용 제약은 ZIP 업로드와 동일합니다. `auto_activate` 가 true면 설치 후 곧바로 활성화하며, 이때는 `core.language_packs.manage` 권한이 함께 필요합니다. 활성 언어팩을 재설치하면서 이 값을 보내지 않으면 대상이 `installed` 로 내려갑니다 — 설치 트랜잭션이 항상 `installed` 로만 기록하고 활성화는 별도 단계로 분리되어 있기 때문입니다. 코어/확장에 선탑재된 번들 언어팩을 DB에 등록할 때 사용합니다.
 
 
 ### POST /api/admin/language-packs/install-from-file
@@ -368,7 +368,7 @@ Content-Type: application/json
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | file | body | file | 예 | max 10240 | 업로드 파일 |
-| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부 |
+| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부. 외부 소스(파일·URL·GitHub)에서 설치할 때 이 값을 참으로 보내려면 `core.language_packs.manage` 권한이 함께 필요하며, 없으면 이 항목만 422 로 거부됩니다 — 항목을 빼면 설치는 그대로 진행되고 상태는 `installed` 로 남습니다. 설치(install)와 활성화(manage)를 별도 권한으로 두는 정책을 따르기 위함입니다 |
 
 **요청 예시**
 
@@ -409,7 +409,7 @@ Content-Disposition: form-data; name="auto_activate"
 
 <!-- @generated:end -->
 
-**설명** 업로드된 ZIP 파일에서 언어팩을 설치합니다. `core.language_packs.install` 권한이 필요합니다. manifest 검증에 실패하면 422로 응답하며, `auto_activate` 가 true면 설치 후 즉시 활성화합니다. 관리자가 로컬 ZIP 파일을 직접 업로드해 언어팩을 추가하는 화면에 사용합니다.
+**설명** 업로드된 ZIP 파일에서 언어팩을 설치합니다. `core.language_packs.install` 권한이 필요합니다. manifest 검증에 실패하면 422로 응답합니다. 패키지에 담을 수 있는 파일은 `.json`/`.php`/`.md` 뿐이며, PHP 파일은 `backend/{언어코드}/{그룹}.php` 위치에 번역 배열만 담고 있어야 합니다 — 그 밖의 코드(함수 호출·변수·닫는 태그 뒤 코드 등)가 있으면 위반 줄 번호와 함께 거부됩니다. 심볼릭 링크도 거부됩니다. `auto_activate` 가 true면 설치 후 즉시 활성화하며, 이때는 `core.language_packs.manage` 권한이 함께 필요합니다. 관리자가 로컬 ZIP 파일을 직접 업로드해 언어팩을 추가하는 화면에 사용합니다.
 
 
 ### POST /api/admin/language-packs/install-from-github
@@ -423,7 +423,7 @@ Content-Disposition: form-data; name="auto_activate"
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | github_url | body | string | 예 | — | GitHub 저장소 URL |
-| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부 |
+| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부. 외부 소스(파일·URL·GitHub)에서 설치할 때 이 값을 참으로 보내려면 `core.language_packs.manage` 권한이 함께 필요하며, 없으면 이 항목만 422 로 거부됩니다 — 항목을 빼면 설치는 그대로 진행되고 상태는 `installed` 로 남습니다. 설치(install)와 활성화(manage)를 별도 권한으로 두는 정책을 따르기 위함입니다 |
 
 **요청 예시**
 
@@ -458,7 +458,7 @@ Content-Type: application/json
 
 <!-- @generated:end -->
 
-**설명** GitHub 저장소 URL에서 언어팩을 다운로드해 설치합니다. `core.language_packs.install` 권한이 필요합니다. 외부 GitHub 호출을 동반하며 manifest 검증 실패 시 422로 응답합니다. `auto_activate` 가 true면 설치 후 즉시 활성화합니다. GitHub로 배포되는 언어팩을 URL 만으로 설치할 때 사용하며, 이후 check-updates/update 로 갱신을 추적할 수 있습니다.
+**설명** GitHub 저장소 URL에서 언어팩을 다운로드해 설치합니다. `core.language_packs.install` 권한이 필요합니다. 외부 GitHub 호출을 동반하며 manifest 검증 실패 시 422로 응답합니다. 파일 형식·PHP 내용 제약은 ZIP 업로드와 동일합니다. `auto_activate` 가 true면 설치 후 즉시 활성화하며, 이때는 `core.language_packs.manage` 권한이 함께 필요합니다. GitHub로 배포되는 언어팩을 URL 만으로 설치할 때 사용하며, 이후 check-updates/update 로 갱신을 추적할 수 있습니다.
 
 
 ### POST /api/admin/language-packs/install-from-url
@@ -473,7 +473,7 @@ Content-Type: application/json
 | --- | --- | --- | --- | --- | --- |
 | url | body | string | 예 | max 500 | 언어팩 ZIP 다운로드 URL. `https` 만 허용하며, 내부 네트워크 주소(사설 IP·루프백·`localhost`·`*.internal` 등)와 userinfo(`https://a@b/`) 위장 주소는 422 로 거부됩니다 — 서버가 대신 내려받는 요청이므로 내부망 접근을 막기 위함(SSRF). 원격 코드를 가져오는 경로라 `security.allow_internal_outbound_urls` 설정을 켜도 내부 주소는 계속 차단됩니다 |
 | checksum | body | string | 아니오 | — | 무결성 검증 체크섬 (SHA-256) |
-| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부 |
+| auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부. 외부 소스(파일·URL·GitHub)에서 설치할 때 이 값을 참으로 보내려면 `core.language_packs.manage` 권한이 함께 필요하며, 없으면 이 항목만 422 로 거부됩니다 — 항목을 빼면 설치는 그대로 진행되고 상태는 `installed` 로 남습니다. 설치(install)와 활성화(manage)를 별도 권한으로 두는 정책을 따르기 위함입니다 |
 
 **요청 예시**
 

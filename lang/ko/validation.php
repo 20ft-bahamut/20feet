@@ -513,6 +513,10 @@ return [
     'schedule_command' => [
         'shell_not_allowed' => '허용되지 않은 쉘 명령입니다. 서버에 등록된 실행 파일만 사용할 수 있으며, 파이프(|)·세미콜론(;) 등 특수문자는 쓸 수 없습니다.',
         'artisan_denied' => '이 Artisan 명령은 보안상 스케줄로 실행할 수 없습니다.',
+        'artisan_not_allowlisted' => '예약 실행이 허용된 Artisan 명령이 아닙니다. 캐시 정리·큐 처리 등 유지보수 명령만 등록할 수 있습니다.',
+        'artisan_malformed' => 'Artisan 명령 형식이 올바르지 않습니다. 따옴표·역슬래시·단축 옵션(-v)은 쓸 수 없고 "명령명 --옵션[=값]" 형태만 등록할 수 있습니다.',
+        'artisan_option_denied' => '이 Artisan 명령에 허용되지 않은 옵션이 포함되어 있습니다.',
+        'artisan_argument_denied' => '이 Artisan 명령에는 추가 인자를 붙일 수 없습니다.',
     ],
 
     // 컴포넌트 존재 여부 검증 메시지
