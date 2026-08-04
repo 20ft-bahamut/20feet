@@ -1181,7 +1181,7 @@
                                                                         "comment": "이력 페이저 — 총건수/현재 페이지를 함께 표시한다. 없으면 최신 20건만 보이고 나머지가 조용히 잘린다.",
                                                                         "type": "basic",
                                                                         "name": "Div",
-                                                                        "if": "{{(gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1) > 1}}",
+                                                                        "if": "{{((gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 0) > 1) || (gdprPolicyVersionHistory?.data?.pagination?.has_more_pages === true) || ((gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1) > 1)}}",
                                                                         "props": {
                                                                             "className": "flex items-center justify-between gap-3 pt-3 mt-3 border-t border-gray-200 dark:border-gray-700"
                                                                         },
@@ -1192,7 +1192,7 @@
                                                                                 "props": {
                                                                                     "className": "text-label-subtle text-sm"
                                                                                 },
-                                                                                "text": "$t:sirsoft-gdpr.settings.policy_version.history_page_summary|current={{gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1}}|last={{gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1}}|total={{gdprPolicyVersionHistory?.data?.pagination?.total ?? 0}}"
+                                                                                "text": "$t:sirsoft-gdpr.settings.policy_version.history_page_summary|current={{gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1}}|last={{gdprPolicyVersionHistory?.data?.pagination?.last_page ?? '-'}}|total={{gdprPolicyVersionHistory?.data?.pagination?.total ?? 0}}"
                                                                             },
                                                                             {
                                                                                 "type": "basic",
@@ -1220,7 +1220,7 @@
                                                                                                         "handler": "setState",
                                                                                                         "params": {
                                                                                                             "target": "local",
-                                                                                                            "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (-1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                                            "policyHistoryPage": "{{gdprPolicyVersionHistory?.data?.pagination?.last_page ? Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (-1)), gdprPolicyVersionHistory?.data?.pagination?.last_page) : Math.max(1, (_local.policyHistoryPage ?? 1) + (-1))}}"
                                                                                                         }
                                                                                                     },
                                                                                                     {
@@ -1240,7 +1240,7 @@
                                                                                         "props": {
                                                                                             "type": "button",
                                                                                             "className": "btn btn-sm btn-neutral",
-                                                                                            "disabled": "{{(gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1) >= (gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                            "disabled": "{{gdprPolicyVersionHistory?.data?.pagination?.last_page ? ((gdprPolicyVersionHistory?.data?.pagination?.current_page ?? 1) >= gdprPolicyVersionHistory?.data?.pagination?.last_page) : (gdprPolicyVersionHistory?.data?.pagination?.has_more_pages !== true)}}"
                                                                                         },
                                                                                         "text": "$t:sirsoft-gdpr.settings.policy_version.history_next",
                                                                                         "actions": [
@@ -1252,7 +1252,7 @@
                                                                                                         "handler": "setState",
                                                                                                         "params": {
                                                                                                             "target": "local",
-                                                                                                            "policyHistoryPage": "{{Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (1)), gdprPolicyVersionHistory?.data?.pagination?.last_page ?? 1)}}"
+                                                                                                            "policyHistoryPage": "{{gdprPolicyVersionHistory?.data?.pagination?.last_page ? Math.min(Math.max(1, (_local.policyHistoryPage ?? 1) + (1)), gdprPolicyVersionHistory?.data?.pagination?.last_page) : Math.max(1, (_local.policyHistoryPage ?? 1) + (1))}}"
                                                                                                         }
                                                                                                     },
                                                                                                     {
