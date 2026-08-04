@@ -5,6 +5,13 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.56.4] - 2026-08-04
+
+### Fixed
+
+- 반복 렌더 경로(`renderItemChildren`)가 리터럴 단일 바인딩(`{{true}}` / `{{false}}` / `{{null}}` / `{{undefined}}`)을 경로로 탐색해 값이 `undefined` 가 됐다. 판정 통일(engine-v1.55.0)에서 리터럴을 `BindingShape` 한 곳으로 모았지만 이 경로만 `hasPipes → isComplexExpression → 경로 탐색` 3분기를 직접 갈라 리터럴을 몰랐고, 그 결과 같은 `{{true}}` 가 조건 자리에서는 `true`, 목록 셀·카드 등 반복 렌더 prop 자리에서는 `undefined` 로 갈렸다 — 통일이 없애려던 비대칭이 이 지점에만 남아 있었다. 형태 판정을 `resolveSingleBindingValue` 에 위임해 다른 경로와 같은 규칙을 쓴다.
+- 저장소 레이아웃의 리터럴 단일 바인딩 60건은 전부 `if`/`condition` 자리라 화면 표시에는 변화가 없다. 브라우저 실측으로 발견했고(배포 번들의 `G7Core.renderItemChildren` 직접 호출), 같은 지점이 빈 바인딩(`{{}}`)도 몰라 경로 탐색으로 보내던 것을 함께 봉인했다.
+
 ## [engine-v1.56.3] - 2026-08-02
 
 ### Fixed

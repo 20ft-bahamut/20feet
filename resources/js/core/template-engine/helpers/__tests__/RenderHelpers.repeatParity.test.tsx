@@ -307,4 +307,38 @@ describe('renderItemChildren — 반복 렌더 경로 기능 격차', () => {
     expect(JSON.parse(screen.getByTestId('probe').getAttribute('data-json')!)).toBe(42);
     view.unmount();
   });
+
+  /**
+   * 리터럴 단일 바인딩 (engine-v1.56.4)
+   *
+   * 판정 통일(engine-v1.55.0)에서 리터럴을 `BindingShape` 한 곳으로 모았지만, 이 경로만
+   * `hasPipes → isComplexExpression → 경로 탐색` 3분기를 직접 갈라 리터럴을 몰랐다.
+   * 그래서 `{{true}}` 가 조건 자리에서는 `true`, 반복 렌더 prop 자리에서는 `undefined` 로
+   * 갈렸다 — 통일이 없애려던 바로 그 비대칭이 이 경로에만 남아 있었다.
+   */
+  it.each([
+    ['{{true}}', true],
+    ['{{false}}', false],
+    ['{{null}}', null],
+  ])('리터럴 %s 이 prop 자리에서 경로 탐색으로 새지 않는다', (expr, expected) => {
+    const view = renderItems(
+      [{ id: 'p', type: 'basic', name: 'Probe', props: { value: expr } }],
+      { row: { id: 1 } },
+    );
+
+    expect(JSON.parse(screen.getByTestId('probe').getAttribute('data-json')!)).toBe(expected);
+    view.unmount();
+  });
+
+  it('리터럴과 같은 이름의 컨텍스트 경로보다 리터럴이 우선한다', () => {
+    // `true` 라는 이름의 컨텍스트 키가 있어도 `{{true}}` 는 리터럴이다 —
+    // 조건 평가 경로와 같은 규칙.
+    const view = renderItems(
+      [{ id: 'p', type: 'basic', name: 'Probe', props: { value: '{{true}}' } }],
+      { true: '경로값', row: { id: 1 } },
+    );
+
+    expect(JSON.parse(screen.getByTestId('probe').getAttribute('data-json')!)).toBe(true);
+    view.unmount();
+  });
 });

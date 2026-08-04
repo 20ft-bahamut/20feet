@@ -110,6 +110,39 @@ test.describe('렌더 경로 간 바인딩 해석 대칭', () => {
     expect(String(value)).not.toContain('{{');
   });
 
+  // @scenario binding_literal_symmetry
+  // @effects same_expression_same_value_across_paths
+  test('리터럴이 반복 렌더와 조건 판정에서 같은 값을 본다', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const g7 = (window as any).G7Core;
+      const Span = function Span() { return null; };
+      const context = { row: { id: 1 } };
+      const viaRepeat = (expr: string) =>
+        (g7.renderItemChildren(
+          [{ type: 'basic', name: 'Span', props: { title: expr } }],
+          context,
+          { Span },
+          'e2e-literal',
+        ) as any[])[0]?.props?.title;
+
+      return {
+        repeatTrue: viaRepeat('{{true}}'),
+        repeatFalse: viaRepeat('{{false}}'),
+        repeatNull: viaRepeat('{{null}}'),
+        condTrue: g7.evaluateCondition('{{true}}', context),
+        condFalse: g7.evaluateCondition('{{false}}', context),
+      };
+    });
+
+    // 수정 전: 반복 렌더 경로만 리터럴을 몰라 경로 탐색으로 새어 전부 undefined 였다.
+    // 조건 경로는 리터럴을 알았으므로 같은 작성이 자리에 따라 갈렸다.
+    expect(result.repeatTrue).toBe(true);
+    expect(result.repeatFalse).toBe(false);
+    expect(result.repeatNull).toBeNull();
+    expect(result.repeatTrue).toBe(result.condTrue);
+    expect(result.repeatFalse).toBe(result.condFalse);
+  });
+
   // @scenario binding_empty_expression
   // @effects same_expression_same_value_across_paths
   test('빈 바인딩이 컨텍스트 객체 전체를 노출하지 않는다', async ({ page }) => {

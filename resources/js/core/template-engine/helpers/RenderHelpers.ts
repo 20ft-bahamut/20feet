@@ -1,3 +1,7 @@
+// audit:allow seo-renderer-parity-sync 이번 변경은 노드 키·컨텍스트 처리 추가가 아니라
+// 리터럴 판정을 BindingShape 로 위임한 것이다. 봇(SEO) 측 ExpressionEvaluator 는
+// 이미 'true'/'false'/'null' 을 리터럴로 해석하고 있었으므로(app/Seo/ExpressionEvaluator.php),
+// 이 수정은 React 경로를 봇 경로에 맞춘 것이며 패리티를 좁힌다. 봇 측 대응 변경 없음.
 /**
  * 렌더링 관련 헬퍼 함수 모듈
  *
@@ -762,34 +766,34 @@ export function renderItemChildren(
           effectivePath = singleBindingPath.slice(RAW_PREFIX.length);
         }
 
-        let result;
-        if (hasPipes(effectivePath)) {
-          // 파이프 표현식은 evaluatePipeExpression 으로 평가한다.
-          // isComplexExpression 은 `|` 를 연산자로 보아 evaluateExpression 으로 보내는데,
-          // 그 경로에서는 `value | pipe` 가 JS 비트 OR 로 평가되어
-          // 인자 있는 파이프는 예외(값 소실), 인자 없는 파이프는 조용한 오답이 된다.
-          // DynamicRenderer 의 text 처리와 동일한 분기 순서를 유지한다.
-          // raw: 접두사는 아래 공통 분기(wrapRawDeep)가 담당하므로 여기서는 제거된
-          // effectivePath 만 넘긴다 — 원본 value 를 넘기면 raw 마커가 이중으로 감싸진다.
-          // @since engine-v1.54.3
-          // 반복 렌더의 props 값도 원본 타입이 필요하다 (문자열 서식 미적용).
-          // @since engine-v1.54.9
-          try {
-            result = bindingEngine.evaluatePipeExpression(effectivePath, context, { skipCache: true });
-          } catch (error) {
-            logger.warn('renderItemChildren: 파이프 표현식 평가 실패:', error);
-            return undefined;
-          }
-        } else if (isComplexExpression(effectivePath)) {
-          try {
-            result = bindingEngine.evaluateExpression(effectivePath, context);
-          } catch (error) {
+        // 형태 판정은 `BindingShape` 단일 출처에 맡긴다. 종전에는 이 지점만
+        // `hasPipes → isComplexExpression → 경로 탐색` 3분기를 직접 갈라, 판정 통일
+        // (engine-v1.55.0)이 모아 둔 **리터럴**(`true`/`false`/`null`/`undefined`)을
+        // 이 경로만 몰랐다. 그래서 `{{true}}` 가 조건 자리에서는 `true`, 반복 렌더 prop
+        // 자리에서는 경로 탐색으로 새어 `undefined` 가 됐다 — 통일이 없애려던 바로 그
+        // 비대칭이 여기에만 남아 있었다.
+        //
+        // 실행 정책은 종전과 같다: 파이프는 원본 타입 보존(engine-v1.54.9), 평가 실패는
+        // 경고 후 `undefined`(값 소실이 화면 전체를 깨뜨리지 않도록).
+        // raw: 접두사는 아래 공통 분기(wrapRawDeep)가 담당하므로 제거된 effectivePath 만
+        // 넘긴다 — 원본 value 를 넘기면 raw 마커가 이중으로 감싸진다. @since engine-v1.54.3
+        // @since engine-v1.56.4
+        let evaluationFailed = false;
+        let result = resolveSingleBindingValue(effectivePath, context, bindingEngine, {
+          skipCache: true,
+          onError: (error) => {
             logger.warn('renderItemChildren: 표현식 평가 실패:', error);
+            evaluationFailed = true;
+
             return undefined;
-          }
-        } else {
-          // skipCache: true - 반복 렌더링에서 같은 경로가 다른 값을 가져야 함
-          result = bindingEngine.resolve(effectivePath, context, { skipCache: true });
+          },
+          onEmpty: () => {
+            logger.warn('renderItemChildren: 빈 바인딩 `{{}}` 은 해석하지 않습니다.');
+          },
+        });
+
+        if (evaluationFailed) {
+          return undefined;
         }
 
         // 표현식 평가 결과가 $t: 접두사 문자열이면 번역 처리
