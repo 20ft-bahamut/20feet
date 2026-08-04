@@ -2155,13 +2155,60 @@ Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
 ```
 
-**응답 필드** (`data` 내부)
+**응답 필드** (`data` 내부, 배열의 각 항목)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| id | integer | 레이아웃 ID |
+| template_id | integer | 소속 템플릿 ID |
+| name | string | 레이아웃 이름 (예: `_admin_base`, `admin_user_list`) |
+| description | string | 레이아웃 설명. 본문의 `meta.description` 에서 파생하며 없으면 이름을 그대로 사용 |
+| route_path | string\|null | 이 레이아웃을 사용하는 라우트 path (routes.json 기준). 매핑이 없으면 null |
+| size | integer | 본문 크기(바이트) |
+| size_formatted | string | 사람이 읽는 크기 표기 (예: `176.9 KB`) |
+| has_update | boolean | 템플릿 파일 대비 갱신 여부 (현재 항상 false) |
+| lock_version | integer | 낙관적 잠금 버전. 편집 저장 시 `expected_lock_version` 으로 전달 |
+| created_at | string | 생성 일시 |
+| updated_at | string | 최종 수정 일시 |
+
+목록 응답에는 본문(`content`)과 본문에서 파생되는 구조(`components` · `data_sources` · `metadata` · `endpoint`)가 **포함되지 않습니다**. 파일 목록 화면은 위 필드만 사용하고, 편집 대상 본문은 상세 엔드포인트(`GET .../layouts/{name}`)가 제공합니다. 목록에 본문을 함께 실으면 레이아웃 수에 비례해 응답이 커져(실측: 102개 기준 18MB) 브라우저 메모리를 압박합니다.
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+  "success": true,
+  "message": "요청이 성공했습니다.",
+  "data": [
+    {
+      "id": 1,
+      "template_id": 1,
+      "name": "_admin_base",
+      "description": "관리자 기본 레이아웃",
+      "route_path": null,
+      "size": 181146,
+      "size_formatted": "176.9 KB",
+      "has_update": false,
+      "lock_version": 3,
+      "created_at": "2026-07-28T09:35:50.000000Z",
+      "updated_at": "2026-07-28T09:35:50.000000Z"
+    },
+    {
+      "id": 2,
+      "template_id": 1,
+      "name": "admin_user_list",
+      "description": "사용자 관리",
+      "route_path": "*/admin/users",
+      "size": 42130,
+      "size_formatted": "41.1 KB",
+      "has_update": false,
+      "lock_version": 0,
+      "created_at": "2026-07-28T09:35:50.000000Z",
+      "updated_at": "2026-07-28T09:35:50.000000Z"
+    }
+  ]
+}
+```
 
 **에러 응답**
 
@@ -2173,7 +2220,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 <!-- @generated:end -->
 
-**설명** 특정 템플릿의 모든 레이아웃 목록을 조회합니다. 각 레이아웃에 이름 → 라우트 path 매핑을 부착해, 코드 편집기가 파일 선택 시 `?route=` URL 동기화나 위지윅에서 넘어온 라우트로 파일을 복원할 수 있게 합니다(LayoutService::getLayoutsByTemplateId). `core.templates.read` 권한이 필요합니다.
+**설명** 특정 템플릿의 모든 레이아웃 목록을 조회합니다. 각 레이아웃에 이름 → 라우트 path 매핑을 부착해, 코드 편집기가 파일 선택 시 `?route=` URL 동기화나 위지윅에서 넘어온 라우트로 파일을 복원할 수 있게 합니다(LayoutService::getLayoutListByTemplateId). 목록은 본문을 담지 않는 경량 조회를 사용합니다. `core.templates.read` 권한이 필요합니다.
 
 
 ### GET /api/admin/templates/{templateName}/layouts/{name}

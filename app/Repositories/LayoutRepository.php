@@ -7,9 +7,13 @@ use App\Enums\LayoutSourceType;
 use App\Models\TemplateLayout;
 use App\Models\TemplateLayoutVersion;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 class LayoutRepository implements LayoutRepositoryInterface
 {
+    /** @var int 목록 조회 시 본문을 흘려 읽는 청크 크기 */
+    private const LIST_CHUNK_SIZE = 25;
+
     /**
      * 특정 템플릿의 모든 레이아웃 조회
      *
@@ -21,6 +25,55 @@ class LayoutRepository implements LayoutRepositoryInterface
         return TemplateLayout::where('template_id', $templateId)
             ->orderBy('name')
             ->get();
+    }
+
+    /**
+     * 목록 표시용 경량 레이아웃 행을 조회합니다.
+     *
+     * 목록 화면은 이름·설명·크기·수정일만 쓰고 본문은 상세 엔드포인트가 따로 제공한다.
+     * 그런데 `getByTemplateId()` 로 전체 컬럼을 읽으면 `content`(레이아웃 본문)까지 전부
+     * 메모리에 올라간다 — sirsoft-admin_basic 기준 102행 합계 17MB 이상이다.
+     *
+     * 여기서는 chunk 로 흘려 읽으며 본문에서 파생되는 값(설명·크기)만 뽑고 본문 자체는
+     * 즉시 버린다. 결과적으로 반환 컬렉션에 본문이 남지 않고, PHP 피크 메모리도 청크
+     * 단위로 묶인다.
+     *
+     * @param  int  $templateId  대상 템플릿 ID
+     * @return Collection<int, array> 목록 행 배열 (id, template_id, name, description, size, lock_version, created_at, updated_at)
+     */
+    public function getListByTemplateId(int $templateId): SupportCollection
+    {
+        $rows = collect();
+
+        // 순회 커서는 기본키다 — `chunkById` 는 `where id > lastId` 로 다음 페이지를 잡으므로
+        // 여기에 `orderBy('name')` 을 함께 걸면 정렬 순서와 커서 기준이 어긋나 행이 조용히
+        // 누락된다(실측: 102행 중 58행만 반환). 표시 정렬은 순회를 마친 뒤에 적용한다.
+        TemplateLayout::query()
+            ->where('template_id', $templateId)
+            ->select(['id', 'template_id', 'name', 'content', 'lock_version', 'created_at', 'updated_at'])
+            ->chunkById(self::LIST_CHUNK_SIZE, function (Collection $chunk) use ($rows) {
+                foreach ($chunk as $layout) {
+                    $content = $layout->content;
+                    $contentJson = is_array($content)
+                        ? json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                        : '{}';
+
+                    $rows->push([
+                        'id' => $layout->id,
+                        'template_id' => $layout->template_id,
+                        'name' => $layout->name,
+                        // 본문에서 파생 — 이 값만 남기고 본문은 버린다
+                        'description' => $content['meta']['description'] ?? null,
+                        'size' => strlen($contentJson),
+                        'lock_version' => $layout->lock_version,
+                        'created_at' => $layout->created_at,
+                        'updated_at' => $layout->updated_at,
+                    ]);
+                }
+            });
+
+        // 표시 정렬은 순회와 분리 — 커서 기준(id)과 섞으면 행이 누락된다
+        return $rows->sortBy('name', SORT_STRING)->values();
     }
 
     /**

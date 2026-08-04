@@ -6,6 +6,7 @@ use App\Enums\LayoutSourceType;
 use App\Models\TemplateLayout;
 use App\Models\TemplateLayoutVersion;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 
 interface LayoutRepositoryInterface
 {
@@ -16,6 +17,17 @@ interface LayoutRepositoryInterface
      * @return Collection 레이아웃 컬렉션
      */
     public function getByTemplateId(int $templateId): Collection;
+
+    /**
+     * 목록 표시용 경량 레이아웃 행 조회
+     *
+     * 본문(`content`)을 반환에 포함하지 않는다 — 설명·크기 등 본문 파생값만 계산해 담는다.
+     * 편집 대상 본문은 상세 조회가 제공한다.
+     *
+     * @param  int  $templateId  템플릿 ID
+     * @return Collection<int, array> 목록 행 배열 컬렉션
+     */
+    public function getListByTemplateId(int $templateId): SupportCollection;
 
     /**
      * 특정 레이아웃 조회 (템플릿 ID와 이름으로)

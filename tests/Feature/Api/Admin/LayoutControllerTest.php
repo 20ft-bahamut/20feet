@@ -149,6 +149,9 @@ class LayoutControllerTest extends TestCase
             ->getJson("/api/admin/templates/{$this->template->identifier}/layouts");
 
         // Assert
+        // 목록은 파일 목록 표시에 필요한 필드만 담는다 — 본문(content) 및 본문 파생 구조
+        // (components/data_sources/metadata/endpoint)는 상세 엔드포인트가 제공한다.
+        // @see LayoutIndexPayloadPruningTest
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'success',
@@ -158,11 +161,12 @@ class LayoutControllerTest extends TestCase
                         'id',
                         'template_id',
                         'name',
-                        'endpoint',
+                        'description',
                         'route_path',
-                        'components',
-                        'data_sources',
-                        'metadata',
+                        'size',
+                        'size_formatted',
+                        'lock_version',
+                        'updated_at',
                     ],
                 ],
             ]);

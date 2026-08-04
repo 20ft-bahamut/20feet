@@ -1351,6 +1351,28 @@ class LayoutService
     }
 
     /**
+     * 목록 표시용 경량 레이아웃 행을 조회합니다.
+     *
+     * 본문을 반환에 담지 않으므로 파일 목록 화면이 편집 대상이 아닌 레이아웃의 본문까지
+     * 내려받는 일이 없다. 편집 대상 본문은 {@see getLayoutByName()} 이 제공한다.
+     *
+     * @param  int  $templateId  대상 템플릿 ID
+     * @return \Illuminate\Support\Collection<int, array> 목록 행 배열 컬렉션
+     */
+    public function getLayoutListByTemplateId(int $templateId)
+    {
+        // Before 훅 - 레이아웃 목록 조회 전
+        HookManager::doAction('core.layout.before_index', $templateId);
+
+        $rows = $this->layoutRepository->getListByTemplateId($templateId);
+
+        // After 훅 - 레이아웃 목록 조회 후
+        HookManager::doAction('core.layout.after_index', $rows, $templateId);
+
+        return $rows;
+    }
+
+    /**
      * 특정 레이아웃 조회 (이름으로)
      *
      * @param  int  $templateId  대상 템플릿 ID
