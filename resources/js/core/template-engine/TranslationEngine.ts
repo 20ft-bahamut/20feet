@@ -14,6 +14,10 @@
 
 import { createLogger } from '../utils/Logger';
 import { suffixed } from '../support/assetUrl';
+// 순환 import (DataBindingEngine → TranslationEngine → DataBindingEngine) 이지만
+// 양쪽 모두 모듈 평가 시점이 아니라 메서드 실행 시점에만 서로를 참조하므로
+// live binding 이 채워진 뒤에 사용된다.
+import { dataBindingEngine } from './DataBindingEngine';
 
 const logger = createLogger('TranslationEngine');
 
@@ -497,10 +501,15 @@ export class TranslationEngine {
       const isComplexExpression = /[|&()[\]!?:+\-*/%<>=\s]/.test(expression);
 
       if (isComplexExpression && dataContext) {
-        // JavaScript 표현식으로 평가
+        // 평가는 엔진에 위임한다. 종전에는 `new Function(...Object.keys(dataContext))` 로
+        // 자체 평가해 `$localized(...)`/`$t(...)`/`$uuid()` 헬퍼와 optional chaining 전처리,
+        // 표현식 함수 캐시를 쓰지 못했다. 실패 시 조용히 빈 문자열이 되어 번역 문구에서
+        // 값만 사라졌다.
+        // (컨텍스트 키가 식별자가 아닐 때의 실패는 엔진 쪽 문제였고 engine-v1.56.2 에서
+        //  DataBindingEngine 이 그런 키를 제외하도록 고쳤다.)
+        // @since engine-v1.56.1
         try {
-          const func = new Function(...Object.keys(dataContext), `return ${expression}`);
-          const resolved = func(...Object.values(dataContext));
+          const resolved = dataBindingEngine.evaluateExpression(expression, dataContext);
           return String(resolved ?? '');
         } catch (error) {
           logger.error('Expression evaluation failed:', expression, error);

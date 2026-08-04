@@ -161,7 +161,17 @@ test.describe('프로덕션 소스맵 노출 차단', () => {
     ).toHaveLength(0);
   });
 
+  // 이 테스트도 **프로덕션(비-local) 전제**다 — 위 확장 소스맵 테스트와 같은 이유.
+  // `vite.config.core.js` 는 배포 빌드(`G7_BUILD_SOURCEMAP=0`)에서만 맵 생성을 끄고,
+  // 로컬 `core:build` 는 디버깅을 위해 의도적으로 맵을 생성한다. 코어 맵은 `public/build/`
+  // 아래에 있어 웹서버가 정적으로 서빙하므로, 로컬에서 한 번이라도 빌드하면 200 이 나온다.
+  // 그건 결함이 아니라 환경 불일치이므로 형제 테스트와 동일하게 건너뛴다.
   test('@smoke 코어 소스맵은 웹루트에서 서빙되지 않는다', async ({ request }) => {
+    test.skip(
+      appEnv() === 'local',
+      'APP_ENV=local 은 디버깅을 위해 코어 빌드가 소스맵을 생성한다 (프로덕션 전제 테스트)',
+    );
+
     const targets = [
       '/build/core/template-engine.min.js.map',
       '/build/core/layout-editor.min.js.map',

@@ -11,6 +11,8 @@ import type { Route } from './routing/Router';
 import { LayoutLoader, LayoutLoaderError } from './template-engine/LayoutLoader';
 import type { InitActionDefinition, LayoutScript, ComputedSwitchDefinition } from './template-engine/LayoutLoader';
 import { DataBindingEngine } from './template-engine/DataBindingEngine';
+import { extractSingleBinding } from './template-engine/BindingShape';
+import { hasPipes } from './template-engine/PipeRegistry';
 import { evaluateRenderCondition } from './template-engine/helpers/RenderHelpers';
 import { ComponentRegistry } from './template-engine/ComponentRegistry';
 import { DataSourceManager } from './template-engine/DataSourceManager';
@@ -1963,12 +1965,13 @@ export class TemplateApp {
      * extractValueByPathOrExpression(data, "{{data.items.map(i => i.id)}}", "cart")
      */
     private extractValueByPathOrExpression(obj: any, pathOrExpression: string, sourceId: string): any {
-        // 표현식 패턴 확인: {{...}}
-        const expressionMatch = pathOrExpression.match(/^\{\{(.+)\}\}$/);
+        // 단일 바인딩 판정은 BindingShape 정본을 쓴다. 종전 greedy 정규식
+        // `^\{\{(.+)\}\}$` 은 `"{{a}}-{{b}}"` 같은 보간 문자열까지 단일 바인딩으로 오판해
+        // `a}}-{{b` 를 식으로 평가하려 했고, 그 결과는 조용한 undefined 였다.
+        // @since engine-v1.55.0
+        const expression = extractSingleBinding(pathOrExpression);
 
-        if (expressionMatch) {
-            // 표현식으로 평가
-            const expression = expressionMatch[1].trim();
+        if (expression !== null) {
             const bindingEngine = new DataBindingEngine();
 
             // 컨텍스트 구성: data 변수로 API 응답 접근 가능
@@ -1980,7 +1983,11 @@ export class TemplateApp {
             };
 
             try {
-                const result = bindingEngine.evaluateExpression(expression, context);
+                // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — evaluateExpression 은
+                // `|` 를 JS 비트 OR 로 본다. @since engine-v1.55.0
+                const result = hasPipes(expression)
+                    ? bindingEngine.evaluatePipeExpression(expression, context, { skipCache: true })
+                    : bindingEngine.evaluateExpression(expression, context);
                 logger.log(`initLocal/initGlobal expression evaluated: ${pathOrExpression} -> `, result);
                 return result;
             } catch (error) {
