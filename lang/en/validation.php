@@ -514,6 +514,10 @@ return [
     'schedule_command' => [
         'shell_not_allowed' => 'This shell command is not allowed. Only executables registered on the server may be used, and special characters such as pipes (|) or semicolons (;) are not permitted.',
         'artisan_denied' => 'This Artisan command cannot be run as a schedule for security reasons.',
+        'artisan_not_allowlisted' => 'This Artisan command is not allowed to run on a schedule. Only maintenance commands such as cache clearing and queue processing can be registered.',
+        'artisan_malformed' => 'The Artisan command format is invalid. Quotes, backslashes, and short options (-v) are not allowed; use "command --option[=value]" only.',
+        'artisan_option_denied' => 'This Artisan command contains an option that is not allowed.',
+        'artisan_argument_denied' => 'This Artisan command does not accept additional arguments.',
     ],
 
     // Component existence validation messages

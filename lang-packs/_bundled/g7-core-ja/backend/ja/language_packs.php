@@ -24,8 +24,11 @@ return [
     'errors' => [
         'manifest_not_found' => 'ZIP内に language-pack.json ファイルが見つかりません。',
         'manifest_invalid_json' => 'language-pack.json の JSON 形式が正しくありません。',
-        'php_outside_backend' => 'backend/ ディレクトリ外に PHP ファイルが含まれています (:file)。',
-        'unsafe_php_pattern' => 'PHP ファイルに許可されていないコードパターンが含まれています (:file)。',
+        'php_outside_backend' => 'PHP ファイルは backend/{言語コード}/{グループ}.php の場所にのみ配置できます (:file)。',
+        'php_file_not_literal_array' => 'PHP ファイルには翻訳配列のみを含めることができます。:file ファイルの :line 行目に配列ではないコードがあります。',
+        'unsupported_file_type' => '言語パックに含めることができないファイル形式です (:file — :extension)。json、php、md ファイルのみ含めることができます。',
+        'symlink_not_allowed' => '言語パックにシンボリックリンクを含めることはできません (:file)。',
+        'auto_activate_requires_manage' => 'インストール後すぐに有効化するには言語パック管理権限が必要です。この項目を外せばインストールはそのまま進みます。',
         'core_locale_missing' => 'コア言語パック(:locale)を先に有効化する必要があります。',
         'target_not_installed' => '対象 :scope (:target) がインストールされていません。',
         'target_inactive' => '対象 :scope (:target) は無効化されています。先に有効化してください。',
