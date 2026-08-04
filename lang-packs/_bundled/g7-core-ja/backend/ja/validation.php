@@ -977,6 +977,12 @@ return [
         'identity_max_attempts_min' => '最大試行回数は最小1回以上である必要があります。',
         'identity_max_attempts_max' => '最大試行回数は最大20回を超えることはできません。',
         'sitemap_hreflang_enabled_boolean' => 'Sitemap 多言語代替リンク(hreflang) 設定は true または false 値である必要があります。',
+        'pagination_result_cap_integer' => '総件数集計上限は数値である必要があります。',
+        'pagination_result_cap_min' => '総件数集計上限は:min以上である必要があります。(0 = 無制限)',
+        'pagination_result_cap_max' => '総件数集計上限は:maxを超えることはできません。',
+        'pagination_max_page_integer' => 'ページ番号上限は数値である必要があります。',
+        'pagination_max_page_min' => 'ページ番号上限は:min以上である必要があります。(0 = 無制限)',
+        'pagination_max_page_max' => 'ページ番号上限は:maxを超えることはできません。',
     ],
     'identity_policy' => [
         'key_required' => 'ポリシーキーを入力してください。',

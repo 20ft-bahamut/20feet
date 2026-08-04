@@ -8,8 +8,11 @@ use App\Models\NotificationLog;
 use App\Models\User;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
+use App\Support\Query\KeysetPaginator;
+use App\Support\Query\PaginationLimits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class NotificationLogRepository implements NotificationLogRepositoryInterface
@@ -101,9 +104,9 @@ class NotificationLogRepository implements NotificationLogRepositoryInterface
      * @param  array<string, mixed>  $filters  필터 조건
      * @param  int  $perPage  페이지당 건수
      * @param  User|null  $scopeUser  스코프 적용 대상 사용자 (null이면 스코프 미적용)
-     * @return LengthAwarePaginator 페이지네이션 결과
+     * @return LengthAwarePaginator|CursorPaginator 페이지네이션 결과 (커서 요청 시 키셋)
      */
-    public function getPaginated(array $filters = [], int $perPage = 20, ?User $scopeUser = null): LengthAwarePaginator
+    public function getPaginated(array $filters = [], int $perPage = 20, ?User $scopeUser = null): LengthAwarePaginator|CursorPaginator
     {
         // 관계는 지연 조인의 outer 에서만 로드한다 (inner 는 키 컬럼만 조회한다)
         $query = NotificationLog::query();
@@ -152,6 +155,24 @@ class NotificationLogRepository implements NotificationLogRepositoryInterface
 
         $sort = $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'sent_at');
 
+        // 커서를 받은 요청은 키셋으로 응답한다. 로그는 계속 쌓이기만 해서 깊은 페이지를
+        // OFFSET 으로 훑으면 건너뛸 행을 실제로 읽어야 하지만, 커서는 직전 페이지의 정렬
+        // 키를 WHERE 경계로 삼아 깊이와 무관하게 일정하다.
+        $sortKeys = array_map(
+            static fn (array $spec): array => [$spec['column'], $spec['direction']],
+            $sort
+        );
+
+        if (! empty($filters['cursor']) && KeysetPaginator::supports($sortKeys, self::SORTABLE_COLUMNS)) {
+            return KeysetPaginator::paginate(
+                query: $query->with(['senderUser', 'recipientUser']),
+                perPage: $perPage,
+                sortKeys: $sortKeys,
+                uniqueKey: 'id',
+                cursor: (string) $filters['cursor'],
+            );
+        }
+
         // 목록 컬럼을 좁히지 않는 이유: 이 목록의 리소스는 렌더링된 본문(longText `body`)까지
         // 그대로 노출하므로 컬럼을 빼면 응답 계약이 바뀐다. 지연 조인만으로도 본문을 읽는
         // 행 수가 OFFSET 과 무관하게 이번 페이지 분량으로 고정된다.
@@ -161,6 +182,9 @@ class NotificationLogRepository implements NotificationLogRepositoryInterface
             sort: $sort,
             perPage: $perPage,
             relations: ['senderUser', 'recipientUser'],
+            // 로그 테이블은 계속 쌓이기만 한다. 총 건수는 상한까지만 세고 "다음" 이동은
+            // per_page + 1 실측으로 끝까지 열어 둔다 (계산 불가는 마지막 페이지 번호 하나뿐).
+            resultCap: PaginationLimits::resultCap('admin.notification_logs'),
         );
     }
 

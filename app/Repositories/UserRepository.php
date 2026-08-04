@@ -5,9 +5,11 @@ namespace App\Repositories;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Helpers\PermissionHelper;
 use App\Models\User;
+use App\Repositories\Concerns\FiltersByDateRange;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
+use App\Support\Query\PaginationLimits;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +18,7 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class UserRepository implements UserRepositoryInterface
 {
+    use FiltersByDateRange;
     use HasMultipleSearchFilters;
     use PaginatesWithDeferredJoin;
     use ResolvesSortSpec;
@@ -125,6 +128,8 @@ class UserRepository implements UserRepositoryInterface
             sort: $sort,
             perPage: $perPage,
             relations: ['roles'],
+            // 회원 수가 커져도 목록 첫 화면 비용이 총 건수 COUNT 에 끌려가지 않도록 상한을 건다.
+            resultCap: PaginationLimits::resultCap('admin.users'),
         );
     }
 
@@ -153,13 +158,13 @@ class UserRepository implements UserRepositoryInterface
      */
     private function applyDateFilters(Builder $query, array $filters): void
     {
-        if (! empty($filters['start_date'])) {
-            $query->whereDate('created_at', '>=', $filters['start_date']);
-        }
-
-        if (! empty($filters['end_date'])) {
-            $query->whereDate('created_at', '<=', $filters['end_date']);
-        }
+        // whereDate 는 컬럼에 DATE() 를 씌워 인덱스를 무력화한다 — 범위 조건으로 준다.
+        $this->applyDateRangeFilter(
+            $query,
+            'created_at',
+            $filters['start_date'] ?? null,
+            $filters['end_date'] ?? null
+        );
 
         // 기본 날짜 필터 (전체가 아닌 경우)
         if (empty($filters['start_date']) && empty($filters['end_date']) &&

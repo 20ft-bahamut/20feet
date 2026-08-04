@@ -308,6 +308,10 @@ class SaveSettingsRequest extends FormRequest
             'advanced.geoip_license_key' => ['nullable', 'string', 'max:200', 'regex:/^[A-Za-z0-9_]+$/'],
             'advanced.geoip_auto_update_enabled' => ['nullable', 'boolean'],
 
+            // 목록 한계값 (advanced 탭) — 0 은 무제한
+            'advanced.pagination_result_cap' => ['nullable', 'integer', 'min:'.config('core.settings_limits.advanced_pagination_result_cap_min', 0), 'max:'.config('core.settings_limits.advanced_pagination_result_cap_max', 1000000)],
+            'advanced.pagination_max_page' => ['nullable', 'integer', 'min:'.config('core.settings_limits.advanced_pagination_max_page_min', 0), 'max:'.config('core.settings_limits.advanced_pagination_max_page_max', 100000)],
+
             // 드라이버 설정 (drivers 탭)
             'drivers.storage_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_STORAGE_DRIVERS)]),
             'drivers.s3_bucket' => ['nullable', 'string', 'max:255'],
@@ -712,6 +716,14 @@ class SaveSettingsRequest extends FormRequest
             'advanced.debug_mode.boolean' => __('validation.settings.debug_mode_boolean'),
             'advanced.sql_query_log.required' => __('validation.settings.sql_query_log_required'),
             'advanced.sql_query_log.boolean' => __('validation.settings.sql_query_log_boolean'),
+
+            // 목록 한계값
+            'advanced.pagination_result_cap.integer' => __('validation.settings.pagination_result_cap_integer'),
+            'advanced.pagination_result_cap.min' => __('validation.settings.pagination_result_cap_min'),
+            'advanced.pagination_result_cap.max' => __('validation.settings.pagination_result_cap_max'),
+            'advanced.pagination_max_page.integer' => __('validation.settings.pagination_max_page_integer'),
+            'advanced.pagination_max_page.min' => __('validation.settings.pagination_max_page_min'),
+            'advanced.pagination_max_page.max' => __('validation.settings.pagination_max_page_max'),
 
             // 코어 업데이트 설정
             'advanced.core_update_github_url.url' => __('validation.settings.core_update_github_url_invalid'),

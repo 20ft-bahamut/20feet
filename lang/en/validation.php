@@ -906,6 +906,14 @@ return [
         'sql_query_log_required' => 'Please select the SQL query log setting.',
         'sql_query_log_boolean' => 'SQL query log must be true or false.',
 
+        // List limits
+        'pagination_result_cap_integer' => 'The total count cap must be a number.',
+        'pagination_result_cap_min' => 'The total count cap must be at least :min. (0 = unlimited)',
+        'pagination_result_cap_max' => 'The total count cap may not be greater than :max.',
+        'pagination_max_page_integer' => 'The maximum page number must be a number.',
+        'pagination_max_page_min' => 'The maximum page number must be at least :min. (0 = unlimited)',
+        'pagination_max_page_max' => 'The maximum page number may not be greater than :max.',
+
         // Core update settings
         'core_update_github_url_invalid' => 'The GitHub repository URL format is invalid.',
         'core_update_github_url_max' => 'The GitHub repository URL may not be greater than 500 characters.',

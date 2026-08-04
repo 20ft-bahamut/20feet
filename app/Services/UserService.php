@@ -88,6 +88,7 @@ class UserService
             // 역할 동기화
             if ($roleIds !== null && count($roleIds) > 0) {
                 $user->roles()->sync($roleIds);
+                $user->flushPermissionCaches();
             }
 
             // After 훅: 사용자 객체와 원본 데이터 전달
@@ -196,6 +197,7 @@ class UserService
             // 역할 동기화
             if ($roleIds !== null) {
                 $user->roles()->sync($roleIds);
+                $user->flushPermissionCaches();
             }
 
             // After 훅: 사용자 객체와 원본 데이터, 스냅샷 전달
@@ -313,6 +315,7 @@ class UserService
 
             // 역할 연결 해제 (명시적 삭제 - CASCADE 의존 금지)
             $user->roles()->detach();
+            $user->flushPermissionCaches();
 
             // 약관 동의 이력 삭제
             $user->consents()->delete();

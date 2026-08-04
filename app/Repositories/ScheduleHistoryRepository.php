@@ -6,6 +6,7 @@ use App\Contracts\Repositories\ScheduleHistoryRepositoryInterface;
 use App\Models\ScheduleHistory;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
+use App\Support\Query\PaginationLimits;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -116,6 +117,9 @@ class ScheduleHistoryRepository implements ScheduleHistoryRepositoryInterface
             sort: $sort,
             perPage: $perPage,
             relations: ['triggeredBy'],
+            // 로그 테이블은 계속 쌓이기만 한다. 총 건수는 상한까지만 세고 "다음" 이동은
+            // per_page + 1 실측으로 끝까지 열어 둔다 (계산 불가는 마지막 페이지 번호 하나뿐).
+            resultCap: PaginationLimits::resultCap('admin.schedule_histories'),
         );
     }
 

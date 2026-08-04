@@ -1019,7 +1019,7 @@ class CoreServiceProvider extends ServiceProvider
                 $listener = app($listenerClass);
                 $listener->registerDynamicHooks();
 
-                Log::info('동적 훅 리스너 등록 완료', ['listener' => $listenerClass]);
+                // 등록 성공은 로그로 남기지 않는다 — 요청마다 부팅되는 경로다. 실패만 아래에 남긴다.
             } catch (\Throwable $e) {
                 Log::warning('동적 훅 리스너 등록 실패', [
                     'listener' => $listenerClass,

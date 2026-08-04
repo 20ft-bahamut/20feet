@@ -263,6 +263,7 @@ class IdentityPolicyRepository implements IdentityPolicyRepositoryInterface
      */
     public function allEnabled(): Collection
     {
+        // audit:allow query-unbounded-get reason: 본인인증 정책은 운영자가 등록한 수만큼만 존재한다 (사용량과 무관)
         return IdentityPolicy::query()->where('enabled', true)->get();
     }
 
@@ -347,6 +348,7 @@ class IdentityPolicyRepository implements IdentityPolicyRepositoryInterface
                 return [];
             }
 
+            // audit:allow query-unbounded-get reason: 본인인증 정책은 운영자가 등록한 수만큼만 존재한다 (사용량과 무관)
             return IdentityPolicy::query()
                 ->where('scope', 'hook')
                 ->distinct()

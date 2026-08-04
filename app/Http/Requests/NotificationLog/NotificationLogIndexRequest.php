@@ -40,6 +40,10 @@ class NotificationLogIndexRequest extends FormRequest
             // 게이트가 더 좁으면 화면 정렬 셀렉트가 제공하는 옵션(수신자명순/제목순)이 422 로 막힌다.
             'sort_by' => ['nullable', 'string', 'in:id,channel,notification_type,status,sent_at,created_at,recipient_name,subject'],
             'sort_order' => ['nullable', 'string', 'in:asc,desc'],
+            // 커서를 주면 목록이 키셋 방식으로 응답한다. 로그는 계속 쌓이기만 하므로 깊은
+            // 페이지를 OFFSET 으로 훑으면 건너뛸 행을 실제로 읽어야 한다.
+            // 형식이 깨진 값은 KeysetPaginator 가 첫 페이지로 되돌리므로 여기서는 길이만 본다.
+            'cursor' => ['nullable', 'string', 'max:500'],
         ];
 
         return HookManager::applyFilters(

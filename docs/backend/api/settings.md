@@ -4,6 +4,22 @@
 
 ---
 
+
+## 목록 한계값 (`advanced` 탭)
+
+대용량 목록에서 총 건수를 세는 범위와 직접 요청할 수 있는 페이지 번호의 상한입니다.
+저장 경로는 다른 고급 설정과 같은 `advanced` 탭이며, 저장소에는 `pagination` 카테고리로 남습니다.
+
+| 필드 | 타입 | 범위 | 의미 |
+| --- | --- | --- | --- |
+| `advanced.pagination_result_cap` | integer | 0 ~ 1,000,000 | 총 건수를 정확히 세는 상한. 0 이면 항상 전부 셉니다 |
+| `advanced.pagination_max_page` | integer | 0 ~ 100,000 | 주소로 직접 요청할 수 있는 최대 페이지 번호. 0 이면 제한하지 않습니다 |
+
+경계값은 설정 응답의 `_meta.limits` 로 함께 내려오며(`advanced_pagination_result_cap_min` 등),
+화면 입력 칸의 min/max 와 저장 검증이 같은 값을 공유합니다.
+
+상한을 넘긴 목록의 응답 형태는 [pagination.md](../pagination.md) 를 참고하세요.
+
 ## TL;DR (5초 요약)
 
 ```text
