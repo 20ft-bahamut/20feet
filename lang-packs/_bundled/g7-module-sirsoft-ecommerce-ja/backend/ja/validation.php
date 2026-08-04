@@ -1296,6 +1296,8 @@ return [
         'mileage.currency_rules.*.use_unit' => '使用単位',
         'mileage.currency_rules.*.max_use_percent' => '最大使用率',
         'mileage.currency_rules.*.max_use_value' => '最大使用金額',
+        'mileage.currency_rules.*.earn_rounding_unit' => '積立端数処理単位',
+        'mileage.currency_rules.*.earn_rounding_method' => '積立端数処理方式',
         'mileage.expiry_days' => '有効期限',
         'mileage.expiry_notification_days_before' => '失効予定通知日',
         'country_settings' => '国別設定',
@@ -1713,6 +1715,12 @@ return [
                 'point_value' => [
                     'numeric' => '1ポイント当たりの金額は数字である必要があります。',
                     'min' => '1ポイント当たりの金額は0より大きい必要があります。',
+                ],
+                'earn_rounding_unit' => [
+                    'in' => '積立端数処理単位は1、10、100のいずれかである必要があります。',
+                ],
+                'earn_rounding_method' => [
+                    'in' => '積立端数処理方式はfloor、round、ceilのいずれかである必要があります。',
                 ],
                 'max_use_value' => [
                     'integer' => '最大使用金額は整数である必要があります。',
