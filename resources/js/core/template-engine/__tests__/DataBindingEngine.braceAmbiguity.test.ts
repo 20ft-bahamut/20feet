@@ -50,4 +50,36 @@ describe('DataBindingEngine — {}}} 닫기 모호성 (단일 바인딩 내부 �
     const out: any = eng.resolveObject({ s: '{{a}} {{b}}' }, ctx, {});
     expect(out.s).toBe('X Y');
   });
+
+  /**
+   * 파이프 식 안에 중괄호가 든 경우.
+   *
+   * 종전에는 파이프 분기가 `resolveBindings(`{{...}}`)` 로 위임했는데, 그 안의
+   * `BINDING_PATTERN`(`/\{\{([^}]+)\}\}/g`)이 `}` 를 포함한 식을 매칭하지 못해
+   * `String.replace` 가 입력을 그대로 돌려주었다. 결과적으로 원본 `{{...}}` 문자열이
+   * 화면에 노출됐다. evaluatePipeExpression 직접 호출로 문자열 조립 자체를 없앴다.
+   * @since engine-v1.54.9
+   */
+  describe('파이프 식 내부 중괄호', () => {
+    it('{{(row.meta ?? {}) | json}} 가 원본 문자열로 새지 않는다', () => {
+      const eng = new DataBindingEngine();
+      const ctx: any = { row: {} }; // row.meta === undefined → ?? {} fallback
+      const out: any = eng.resolveObject({ meta: '{{(row.meta ?? {}) | json}}' }, ctx, {});
+      expect(out.meta).toBe('{}');
+      expect(out.meta).not.toContain('{{');
+    });
+
+    it('중괄호를 포함한 파이프 식이 값이 있을 때도 정상 평가된다', () => {
+      const eng = new DataBindingEngine();
+      const ctx: any = { row: { meta: { a: 1 } } };
+      const out: any = eng.resolveObject({ meta: '{{(row.meta ?? {}) | json}}' }, ctx, {});
+      expect(out.meta).toBe('{"a":1}');
+    });
+
+    it('evaluatePipeExpression 직접 호출도 동일하게 평가된다', () => {
+      const eng = new DataBindingEngine();
+      const ctx: any = { row: { meta: { a: 1 } } };
+      expect(eng.evaluatePipeExpression('(row.meta ?? {}) | json', ctx)).toBe('{"a":1}');
+    });
+  });
 });

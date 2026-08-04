@@ -26,6 +26,10 @@ import { TranslationEngine, TranslationContext } from './TranslationEngine';
 import { ActionDispatcher, ActionDefinition } from './ActionDispatcher';
 import { resolveIterationSource, evaluateIfCondition, evaluateRenderCondition, bindComponentActions, resolveClassMap } from './helpers/RenderHelpers';
 import { hasPipes } from './PipeRegistry';
+import {
+  extractSingleBinding as canonicalExtractSingleBinding,
+  isComplexExpression as canonicalIsComplexExpression,
+} from './BindingShape';
 import { RAW_PREFIX, RAW_MARKER_START, RAW_MARKER_END, RAW_PLACEHOLDER_MARKER, isRawWrapped, unwrapRaw, containsRawMarker, wrapRawDeep } from './rawMarkers';
 import type { ConditionsProperty } from './helpers/ConditionEvaluator';
 import { useTransitionState } from './TransitionContext';
@@ -1723,7 +1727,13 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
               if (expression.startsWith('{{') && expression.endsWith('}}')) {
                 // {{...}} 형태의 표현식 평가
                 const innerExpression = (expression as string).slice(2, -2).trim();
-                const result = bindingEngine.evaluateExpression(innerExpression, computedContext, { skipCache: true });
+                // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — evaluateExpression 은
+                // `|` 를 JS 비트 OR 로 보므로 인자 있는 파이프는 예외로 아래 catch 에 걸려
+                // computed 가 이전 값에 고정된다(값이 바뀌지 않는 조용한 실패).
+                // @since engine-v1.54.10
+                const result = hasPipes(innerExpression)
+                  ? bindingEngine.evaluatePipeExpression(innerExpression, computedContext, { skipCache: true })
+                  : bindingEngine.evaluateExpression(innerExpression, computedContext, { skipCache: true });
                 newComputed[key] = result;
               } else {
                 // 순수 문자열은 그대로 사용
@@ -2020,7 +2030,13 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
             componentName: effectiveComponentDef.name,
             propName: 'slot',
           };
-          const result = bindingEngine.evaluateExpression(expr, extendedDataContext, slotTrackingInfo);
+          // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — evaluateExpression 은
+          // `|` 를 JS 비트 OR 로 보므로 결과가 문자열이 아니게 되고, 아래 `typeof result === 'string'`
+          // 가드에 걸려 슬롯 미등록으로 조용히 흡수된다(컴포넌트가 화면에서 사라짐).
+          // @since engine-v1.54.10
+          const result = hasPipes(expr)
+            ? bindingEngine.evaluatePipeExpression(expr, extendedDataContext, undefined, slotTrackingInfo)
+            : bindingEngine.evaluateExpression(expr, extendedDataContext, slotTrackingInfo);
           logger.log(`[Slot] 표현식 평가: "${expr}" => "${result}" (컴포넌트: ${effectiveComponentDef.id})`);
           return typeof result === 'string' ? result : null;
         } catch (error) {
@@ -2236,66 +2252,30 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
     /**
      * 복잡한 표현식 여부 감지
      *
-     * 삼항 연산자, 논리 연산자 등이 포함된 경우 true 반환
+     * 판정은 BindingShape 정본에 위임한다 — 종전에는 이 자리의 문자 집합이 좁아
+     * `query['sales_status[]']` 같은 따옴표 키 인덱싱과 배열/객체 리터럴이
+     * "단순 경로" 로 오판되어 경로 탐색으로 갔고, 결과는 조용한 undefined 였다.
+     * 같은 식이 `if`(RenderHelpers 방언)에서는 정상 동작해 재현 위치를 특정하기 어려웠다.
+     *
+     * @since engine-v1.55.0
      */
-    const isComplexExpression = useCallback((expr: string): boolean => {
-      // 삼항 연산자나 복잡한 표현식 감지 (?, :, ||, &&, !, 산술 연산자, 함수 호출 등)
-      // () 추가: $localized(menu.name) 같은 함수 호출 표현식도 복잡한 표현식으로 처리
-      return /[?:|&!+\-*/<>=()]/.test(expr);
-    }, []);
+    const isComplexExpression = useCallback(
+      (expr: string): boolean => canonicalIsComplexExpression(expr),
+      [],
+    );
 
     /**
-     * 단일 바인딩 표현식 매칭 정규식
+     * 단일 바인딩 표현식 추출
      *
-     * 전체가 {{...}}로 감싸진 표현식을 매칭합니다.
-     * 내부에 문자열 리터럴('...' 또는 "...")이 포함된 복잡한 표현식도 지원합니다.
+     * 전체가 `{{...}}` 로 감싸진 식이면 내부 식을, 아니면 null 을 반환한다.
+     * 판정은 BindingShape 정본에 위임한다 (따옴표·이스케이프·중괄호 균형 추적).
      *
-     * 예시:
-     * - {{user.name}} -> 매칭
-     * - {{row.status === 'active' ? 'yes' : 'no'}} -> 매칭
-     * - Hello {{name}} -> 매칭 안됨 (문자열 보간)
+     * @since engine-v1.55.0
      */
-    const extractSingleBinding = useCallback((value: string): string | null => {
-      // 시작이 {{이고 끝이 }}인지 확인
-      if (!value.startsWith('{{') || !value.endsWith('}}')) {
-        return null;
-      }
-
-      // 중간 내용 추출
-      const inner = value.slice(2, -2);
-
-      // 중간에 }}가 있으면 단일 바인딩이 아님 (예: {{a}} {{b}})
-      // 단, 문자열 리터럴 안의 }는 제외해야 함
-      let inString: string | null = null;
-      let braceCount = 0;
-
-      for (let i = 0; i < inner.length; i++) {
-        const char = inner[i];
-        const prevChar = i > 0 ? inner[i - 1] : '';
-
-        // 이스케이프된 문자는 무시
-        if (prevChar === '\\') continue;
-
-        // 문자열 시작/종료 감지
-        if ((char === '"' || char === "'") && !inString) {
-          inString = char;
-        } else if (char === inString) {
-          inString = null;
-        }
-
-        // 문자열 밖에서 중괄호 카운트
-        if (!inString) {
-          if (char === '{') braceCount++;
-          if (char === '}') braceCount--;
-
-          // 닫는 중괄호가 더 많으면 단일 바인딩이 아님
-          if (braceCount < 0) return null;
-        }
-      }
-
-      // 중괄호가 균형이 맞으면 단일 바인딩
-      return braceCount === 0 ? inner.trim() : null;
-    }, []);
+    const extractSingleBinding = useCallback(
+      (value: string): string | null => canonicalExtractSingleBinding(value),
+      [],
+    );
 
     /**
      * Props 처리
@@ -2321,6 +2301,13 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
       // iteration 컨텍스트에서는 캐시 사용 안 함
       // 같은 표현식이 다른 아이템 컨텍스트로 평가되어야 하므로 캐시 사용 시 잘못된 값 반환
       const bindingOptions = isInsideIteration ? { skipCache: true } : undefined;
+
+      // 중첩 객체 해석에도 컴포넌트별 skipBindingKeys 를 전달한다.
+      // 종전에는 전달하지 않아 resolveObject 의 기본 4개만 적용됐고, 그래서 컴포넌트가
+      // "내가 직접 반복 렌더한다" 고 선언한 키가 중첩 위치에서는 선평가됐다 —
+      // 그 시점에는 항목 컨텍스트가 없으므로 표현식이 stale 값으로 고정된다.
+      // 저장소 전수 스캔 기준 현재 해당 위치 0건(예방 목적). @since engine-v1.55.1
+      const nestedBindingOptions = { ...(bindingOptions ?? {}), skipBindingKeys };
 
       // _computed 참조 표현식의 캐시 스킵 여부를 판별하는 헬퍼
       // _computed는 컴포넌트마다 _local 기반으로 재계산되므로 컴포넌트 간 공유 캐시 사용 시
@@ -2361,11 +2348,27 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
 
             let resolvedValue;
             if (hasPipes(effectivePath)) {
-              // 파이프 표현식은 resolveBindings 로 위임 (파이프 체인 실행 포함).
+              // 파이프 표현식은 evaluatePipeExpression 으로 평가한다.
               // isComplexExpression 은 `|` 를 연산자로 보므로 그대로 두면
               // `value | pipe` 가 JS 비트 OR 로 평가된다 — text 처리와 동일 분기.
               // @since engine-v1.54.3
-              resolvedValue = bindingEngine.resolveBindings(`{{${effectivePath}}}`, extendedDataContext, bindingOptions, trackingInfo);
+              // prop 값은 원본 타입이 필요하므로 문자열 서식을 거치지 않으며,
+              // 캐시 옵션도 다른 분기와 동일하게 _computed 인지를 반영한다.
+              // @since engine-v1.54.9
+              try {
+                resolvedValue = bindingEngine.evaluatePipeExpression(
+                  effectivePath,
+                  extendedDataContext,
+                  getComputedAwareOptions(effectivePath),
+                  trackingInfo,
+                );
+              } catch (error) {
+                logger.warn(
+                  `파이프 표현식 평가 실패 (컴포넌트: ${effectiveComponentDef.id}, prop: ${key}):`,
+                  error
+                );
+                resolvedValue = undefined;
+              }
             } else if (isComplexExpression(effectivePath)) {
               try {
                 resolvedValue = bindingEngine.evaluateExpression(effectivePath, extendedDataContext, trackingInfo);
@@ -2394,11 +2397,11 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
             typeof item === 'string'
               ? bindingEngine.resolveBindings(item, extendedDataContext, bindingOptions)
               : typeof item === 'object' && item !== null
-                ? bindingEngine.resolveObject(item, extendedDataContext, bindingOptions)
+                ? bindingEngine.resolveObject(item, extendedDataContext, nestedBindingOptions)
                 : item
           );
         } else if (value && typeof value === 'object') {
-          props[key] = bindingEngine.resolveObject(value, extendedDataContext, bindingOptions);
+          props[key] = bindingEngine.resolveObject(value, extendedDataContext, nestedBindingOptions);
         }
       }
 
@@ -2690,9 +2693,20 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
               effectivePath = singleBindingPath.slice(RAW_PREFIX.length);
             }
 
-            // 파이프가 있는 경우 resolveBindings 사용 (파이프 처리 포함)
+            // 파이프가 있는 경우 evaluatePipeExpression 사용 (파이프 체인 실행 포함).
+            // 다른 두 분기(resolve/evaluateExpression)와 마찬가지로 원본 타입을 유지한다 —
+            // 문자열 서식을 거치면 `first`/`filter` 같은 파이프의 결과 타입이 바뀐다.
+            // @since engine-v1.54.9
             if (hasPipes(effectivePath)) {
-              resolvedText = bindingEngine.resolveBindings(`{{${effectivePath}}}`, extendedDataContext, { skipCache: true }, textTrackingInfo);
+              try {
+                resolvedText = bindingEngine.evaluatePipeExpression(effectivePath, extendedDataContext, { skipCache: true }, textTrackingInfo);
+              } catch (error) {
+                logger.warn(
+                  `text 파이프 표현식 평가 실패 (컴포넌트: ${effectiveComponentDef.id}):`,
+                  error
+                );
+                resolvedText = '';
+              }
             } else if (isComplexExpression(effectivePath)) {
               // 복잡한 표현식인 경우 evaluateExpression 사용
               try {
@@ -2846,9 +2860,14 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
         // 각 아이템에 대해 자식 컴포넌트 렌더링
         return dataArray.map((item, index) => {
           // 반복 컨텍스트 생성 (extendedDataContext 기반, _local 포함)
+          //
+          // `{item_var}_index` 자동 변수는 반복 렌더 경로(renderItemChildren)가 이미
+          // 제공하던 것으로, 이 경로에만 없어서 같은 작성이 한쪽에서만 동작했다.
+          // @since engine-v1.56.0
           const iterationContext: Record<string, any> = {
             ...extendedDataContext,
             [effectiveComponentDef.iteration!.item_var]: item,
+            [`${effectiveComponentDef.iteration!.item_var}_index`]: index,
           };
 
           if (effectiveComponentDef.iteration!.index_var) {
@@ -3741,8 +3760,19 @@ const DynamicRenderer: React.FC<DynamicRendererProps> = memo(
       }
 
       // 조건부 렌더링 체크
+      //
+      // iteration 이 있으면 여기서 끊지 않는다. `if` 가 항목 변수(`{{user.is_active}}` 등)를
+      // 참조하는 경우 이 시점의 컨텍스트에는 그 변수가 없어 조건이 항상 false 가 되고,
+      // **목록 전체가 렌더되지 않는다**(에러도 경고도 없음). 반복 렌더 경로
+      // (renderItemChildren)는 항목별 컨텍스트에서 평가하므로 같은 작성이 정상 동작했다 —
+      // 그 비대칭을 없앤다. 항목별 재평가는 자식 DynamicRenderer 가 수행한다
+      // (iteration 만 제거한 정의를 넘기므로 `if` 는 그대로 남는다).
+      // @since engine-v1.56.0
       if (!shouldRender) {
-        return null;
+        if (!effectiveComponentDef.iteration) {
+          return null;
+        }
+        return renderIteration;
       }
 
       // 정렬 가능 리스트 렌더링 체크 (sortable은 iteration보다 우선)

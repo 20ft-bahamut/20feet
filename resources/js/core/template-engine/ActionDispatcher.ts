@@ -17,6 +17,8 @@
  */
 
 import { DataBindingEngine } from './DataBindingEngine';
+import { extractSingleBinding } from './BindingShape';
+import { hasPipes } from './PipeRegistry';
 import { resolveExpressionString } from './helpers/RenderHelpers';
 import { TranslationEngine, TranslationContext } from './TranslationEngine';
 import { AuthManager, AuthType } from '../auth/AuthManager';
@@ -5392,11 +5394,21 @@ export class ActionDispatcher {
                 if (trimmed.startsWith('{{') && trimmed.endsWith('}}')) {
                   try {
                     const innerExpr = trimmed.slice(2, -2).trim();
-                    newComputed[key] = this.bindingEngine.evaluateExpression(
-                      innerExpr,
-                      computedContext,
-                      { skipCache: true }
-                    );
+                    // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — 렌더 경로의
+                    // computed 재계산(DynamicRenderer)과 같은 규칙이다. 한쪽만 고치면
+                    // 같은 computed 가 렌더 직후와 액션 직후에 다른 값이 된다.
+                    // @since engine-v1.54.10
+                    newComputed[key] = hasPipes(innerExpr)
+                      ? this.bindingEngine.evaluatePipeExpression(
+                        innerExpr,
+                        computedContext,
+                        { skipCache: true }
+                      )
+                      : this.bindingEngine.evaluateExpression(
+                        innerExpr,
+                        computedContext,
+                        { skipCache: true }
+                      );
                   } catch (e) {
                     // 평가 실패 시 기존 값 유지
                     newComputed[key] = currentComputed[key];
@@ -5442,11 +5454,19 @@ export class ActionDispatcher {
                   if (trimmed.startsWith('{{') && trimmed.endsWith('}}')) {
                     try {
                       const innerExpr = trimmed.slice(2, -2).trim();
-                      newComputed[key] = this.bindingEngine.evaluateExpression(
-                        innerExpr,
-                        computedContext,
-                        { skipCache: true }
-                      );
+                      // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — 위 setState
+                      // 직후 재계산 블록과 같은 규칙이다. @since engine-v1.54.10
+                      newComputed[key] = hasPipes(innerExpr)
+                        ? this.bindingEngine.evaluatePipeExpression(
+                          innerExpr,
+                          computedContext,
+                          { skipCache: true }
+                        )
+                        : this.bindingEngine.evaluateExpression(
+                          innerExpr,
+                          computedContext,
+                          { skipCache: true }
+                        );
                     } catch (e) {
                       // 평가 실패 시 기존 값 유지
                       newComputed[key] = currentComputed[key];
@@ -6426,14 +6446,14 @@ export class ActionDispatcher {
   private evaluateExpression(expr: string, dataContext?: any): any {
     if (!dataContext) return expr;
 
-    // {{expression}} 패턴 매칭 — 단일 {{...}} 표현식만 매칭
-    const match = expr.match(/^\{\{(.+)\}\}$/);
-    // 복합 표현식 감지: 캡처 그룹 내에 }} 또는 {{가 포함되면
-    // 실제로는 {{A}}/text/{{B}} 형태의 복합 표현식임
-    // (greedy .+가 첫 번째 {{부터 마지막 }}까지 모두 캡처하기 때문)
-    const isSingleExpression = match && !match[1].includes('}}') && !match[1].includes('{{');
+    // 단일 `{{...}}` 판정은 BindingShape 정본을 쓴다. 종전에는 greedy 정규식
+    // (`^\{\{(.+)\}\}$`)이 `{{A}}/text/{{B}}` 까지 잡아, 캡처 안에 `{{`/`}}` 가 있는지
+    // 확인하는 가드를 덧대어 걸러냈다. 정본은 따옴표·중괄호 균형을 추적하므로
+    // 그 가드 없이도 같은 판정을 하고, 식 안의 객체 리터럴(`?? {}`)도 지킨다.
+    // @since engine-v1.55.0
+    const singleExpression = extractSingleBinding(expr);
 
-    if (!isSingleExpression) {
+    if (singleExpression === null) {
       // {{}} 패턴이 아니거나 복합 표현식({{A}}/text/{{B}})인 경우
       // resolveBindings가 각 {{...}} 블록을 개별 처리
       // 복합 표현식에서도 최신 _global/_computed 상태 주입 (Stale Closure 방지)
@@ -6459,7 +6479,7 @@ export class ActionDispatcher {
       return this.bindingEngine.resolveBindings(expr, effectiveContext, { skipCache: true });
     }
 
-    let expression = match![1].trim();
+    let expression = singleExpression;
 
     // $args.숫자 형태를 $args[숫자]로 변환 (예: $args.1 → $args[1])
     expression = expression.replace(/\$args\.(\d+)/g, '$args[$1]');
@@ -6502,8 +6522,14 @@ export class ActionDispatcher {
     }
 
     try {
+      // 파이프 표현식은 evaluatePipeExpression 으로 평가한다 — evaluateExpression 은
+      // `|` 를 JS 비트 OR 로 보므로 인자 있는 파이프는 예외로 아래 catch 에 걸려
+      // 원본 `{{...}}` 문자열이 그대로 서버로 전송되고, 인자 없는 파이프는
+      // 날짜 문자열이 `0` 이 되는 식의 조용한 오답이 된다. @since engine-v1.54.10
       // DataBindingEngine.evaluateExpression을 사용하여 $t: 토큰 등을 올바르게 처리
-      const result = this.bindingEngine.evaluateExpression(expression, effectiveDataContext);
+      const result = hasPipes(expression)
+        ? this.bindingEngine.evaluatePipeExpression(expression, effectiveDataContext, { skipCache: true })
+        : this.bindingEngine.evaluateExpression(expression, effectiveDataContext);
 
       // 디버그 로그 (init_actions 바인딩 문제 진단용)
       if (expression.includes('_global.modules')) {

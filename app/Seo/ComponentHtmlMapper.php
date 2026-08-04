@@ -235,7 +235,13 @@ class ComponentHtmlMapper
         $component = $this->applyResponsiveOverrides($component);
 
         // 조건부 렌더링 (if / condition / conditions)
-        if (! $this->shouldRender($component, $context, $evaluator)) {
+        //
+        // iteration 이 있으면 여기서 끊지 않는다. 조건이 항목 변수(`{{user.is_active}}` 등)를
+        // 참조하면 이 시점 컨텍스트에는 그 변수가 없어 항상 거짓이 되고, 목록 전체가
+        // 사라진다. 항목별 컨텍스트에서 renderIteration 이 같은 조건을 다시 평가한다
+        // (iteration 만 제거한 정의를 넘기므로 `if` 는 그대로 남는다).
+        // React DynamicRenderer 와 동일한 순서 — 한쪽만 고치면 봇 화면에서만 목록이 빈다.
+        if (! isset($component['iteration']) && ! $this->shouldRender($component, $context, $evaluator)) {
             return '';
         }
 
@@ -1654,6 +1660,8 @@ class ComponentHtmlMapper
             $iterContext = array_merge($context, [
                 $itemVar => $item,
                 $indexVar => $index,
+                // `{item_var}_index` 자동 변수 — React 반복 렌더 경로와 동일하게 제공한다.
+                $itemVar.'_index' => $index,
             ]);
             $html .= $this->renderComponent($templateComponent, $iterContext, $evaluator);
         }
