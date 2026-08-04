@@ -222,4 +222,119 @@ class LayoutIndexPayloadPruningTest extends TestCase
             '목록 응답이 본문 총량보다 크다 — 본문이 그대로 실리고 있다'
         );
     }
+
+    /**
+     * 사전에 없는 `$t:` 토큰이 화면에 원문 그대로 노출되지 않는지 확인
+     *
+     * 레이아웃의 `meta.description` 은 그 레이아웃을 **소유한 템플릿**의 사전 키를 쓴다
+     * (예: 유저 템플릿 레이아웃이 `$t:user.base_layout_description`). 그런데 코드 편집
+     * 화면은 관리자 템플릿 사전으로 렌더하므로 그 키를 알지 못한다. 응답이 토큰을 그대로
+     * 내보내면 파일 목록 설명 칸에 `$t:user.base_layout_description` 이 노출된다.
+     * (브라우저 실측: 519개 중 83개가 이 형태)
+     */
+    #[Test]
+    public function it_does_not_expose_raw_translation_tokens_in_description(): void
+    {
+        TemplateLayout::factory()->create([
+            'template_id' => $this->template->id,
+            'name' => 'errors/404',
+            'content' => [
+                'version' => '1.0.0',
+                'layout_name' => 'errors/404',
+                'meta' => ['description' => '$t:error.404.description'],
+                'components' => [],
+            ],
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson("/api/admin/templates/{$this->template->identifier}/layouts");
+
+        $response->assertOk();
+
+        $row = collect($response->json('data'))->firstWhere('name', 'errors/404');
+        $this->assertNotNull($row);
+        $this->assertStringNotContainsString(
+            '$t:',
+            (string) $row['description'],
+            '번역 토큰이 해석되지 않은 채 목록 설명으로 노출됐다'
+        );
+        $this->assertSame('errors/404', $row['description'], '해석 불가 시 레이아웃 이름으로 폴백해야 한다');
+    }
+
+    /**
+     * 런타임 컨텍스트가 필요한 표현식 description 이 원문으로 노출되지 않는지 확인
+     *
+     * `{{route.id ? '$t:a' : '$t:b'}}` 형태는 목록 시점에 `route` 가 없어 서버가 해석할 수
+     * 없다. 원문을 그대로 내보내면 설명 칸에 표현식이 그대로 보인다.
+     */
+    #[Test]
+    public function it_does_not_expose_raw_expression_in_description(): void
+    {
+        TemplateLayout::factory()->create([
+            'template_id' => $this->template->id,
+            'name' => 'board/form',
+            'content' => [
+                'version' => '1.0.0',
+                'layout_name' => 'board/form',
+                'meta' => ['description' => "{{route.id ? '\$t:board.edit' : '\$t:board.new'}}"],
+                'components' => [],
+            ],
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson("/api/admin/templates/{$this->template->identifier}/layouts");
+
+        $response->assertOk();
+
+        $row = collect($response->json('data'))->firstWhere('name', 'board/form');
+        $this->assertNotNull($row);
+        $this->assertStringNotContainsString('{{', (string) $row['description']);
+        $this->assertSame('board/form', $row['description']);
+    }
+
+    /**
+     * 평문 설명은 종전대로 그대로 실리는지 확인 (회귀 보호)
+     */
+    #[Test]
+    public function it_keeps_plain_description_as_is(): void
+    {
+        $response = $this->withToken($this->token)
+            ->getJson("/api/admin/templates/{$this->template->identifier}/layouts");
+
+        $response->assertOk();
+
+        $row = collect($response->json('data'))->firstWhere('name', 'admin_settings');
+        $this->assertSame('설명 admin_settings', $row['description']);
+    }
+
+    /**
+     * 상세 응답도 목록과 같은 규칙으로 설명을 해석하는지 확인
+     *
+     * 코드 편집 화면은 선택한 파일의 설명을 헤더에 따로 표시하고, 그 값은 상세
+     * 엔드포인트(`current_layout`)에서 온다. 목록만 고치면 파일 목록에는 번역된 설명이,
+     * 헤더에는 `$t:` 토큰이 보이는 불일치가 생긴다. (브라우저 실측으로 발견)
+     */
+    #[Test]
+    public function it_resolves_description_in_detail_response_too(): void
+    {
+        TemplateLayout::factory()->create([
+            'template_id' => $this->template->id,
+            'name' => 'errors/500',
+            'content' => [
+                'version' => '1.0.0',
+                'layout_name' => 'errors/500',
+                'meta' => ['description' => '$t:error.500.description'],
+                'components' => [],
+            ],
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson("/api/admin/templates/{$this->template->identifier}/layouts/errors/500");
+
+        $response->assertOk();
+
+        $description = (string) $response->json('data.description');
+        $this->assertStringNotContainsString('$t:', $description, '상세 응답에 번역 토큰이 원문 노출됐다');
+        $this->assertSame('errors/500', $description);
+    }
 }

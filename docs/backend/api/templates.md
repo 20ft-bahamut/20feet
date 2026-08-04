@@ -2162,7 +2162,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | id | integer | 레이아웃 ID |
 | template_id | integer | 소속 템플릿 ID |
 | name | string | 레이아웃 이름 (예: `_admin_base`, `admin_user_list`) |
-| description | string | 레이아웃 설명. 본문의 `meta.description` 에서 파생하며 없으면 이름을 그대로 사용 |
+| description | string | 레이아웃 설명. 본문의 `meta.description` 에서 파생한다. 그 값은 레이아웃을 **소유한 템플릿**의 사전 키(`$t:user.base_layout_description` 등)일 수 있으므로 서버가 해당 템플릿 사전(활성 로케일)으로 해석해 내보낸다. 사전에 키가 없거나 `{{...}}` 표현식이어서 해석할 수 없으면 레이아웃 **이름**으로 폴백한다 — 번역 토큰이나 표현식 원문이 화면에 노출되지 않는다. 목록·상세 응답이 같은 규칙을 쓴다 |
 | route_path | string\|null | 이 레이아웃을 사용하는 라우트 path (routes.json 기준). 매핑이 없으면 null |
 | size | integer | 본문 크기(바이트) |
 | size_formatted | string | 사람이 읽는 크기 표기 (예: `176.9 KB`) |

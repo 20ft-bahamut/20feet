@@ -49,9 +49,16 @@ class LayoutController extends AdminBaseController
         // 동기화 / 위지윅에서 넘어온 ?route= 로 해당 파일 복원에 사용한다.
         $routePathMap = $this->templateService->getLayoutRoutePathMap($templateName);
 
+        // 레이아웃 설명(`meta.description`)은 그 레이아웃을 소유한 템플릿의 사전 키를 쓴다.
+        // 코드 편집 화면은 관리자 템플릿 사전으로 렌더하므로 유저 템플릿 키를 알지 못해,
+        // 해석하지 않고 내보내면 설명 칸에 `$t:user.…` 가 원문으로 노출된다.
+        $translations = $this->resolveTemplateTranslations($templateName);
+
         $collection = LayoutListResource::collection($layouts);
         $collection->collection->transform(
-            fn (LayoutListResource $resource) => $resource->withRoutePathMap($routePathMap)
+            fn (LayoutListResource $resource) => $resource
+                ->withRoutePathMap($routePathMap)
+                ->withTranslations($translations)
         );
 
         return $this->success('common.success', $collection);
@@ -80,7 +87,8 @@ class LayoutController extends AdminBaseController
 
         return $this->success(
             'common.success',
-            new LayoutResource($layout)
+            (new LayoutResource($layout))
+                ->withTranslations($this->resolveTemplateTranslations($templateName))
         );
     }
 
@@ -109,7 +117,8 @@ class LayoutController extends AdminBaseController
 
             return $this->success(
                 'common.success',
-                new LayoutResource($layout)
+                (new LayoutResource($layout))
+                    ->withTranslations($this->resolveTemplateTranslations($templateName))
             );
         } catch (ConcurrentModificationException $e) {
             DB::rollBack();
@@ -263,5 +272,26 @@ class LayoutController extends AdminBaseController
                 ['error' => $e->getMessage()]
             );
         }
+    }
+
+    /**
+     * 목록 설명 해석에 쓸 소유 템플릿 사전을 로드합니다.
+     *
+     * 활성 로케일 기준이며, 로드에 실패하면 빈 배열을 돌려준다 — 그 경우
+     * {@see LayoutListResource} 가 레이아웃 이름으로 폴백하므로 목록은 계속 그려진다.
+     *
+     * @param  string  $templateName  템플릿 식별자
+     * @return array<string, mixed> 템플릿 프론트엔드 다국어 데이터
+     */
+    private function resolveTemplateTranslations(string $templateName): array
+    {
+        $result = $this->templateService->getLanguageDataWithModules(
+            $templateName,
+            app()->getLocale()
+        );
+
+        return ($result['success'] ?? false) && is_array($result['data'] ?? null)
+            ? $result['data']
+            : [];
     }
 }

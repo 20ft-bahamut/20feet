@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\LayoutDescription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -27,6 +28,9 @@ class LayoutListResource extends BaseApiResource
     /** @var array<string, string|null> 레이아웃 이름 → 라우트 path 매핑 */
     private array $routePathMap = [];
 
+    /** @var array<string, mixed> 소유 템플릿의 프론트엔드 다국어 사전 (점 표기 중첩) */
+    private array $translations = [];
+
     /**
      * 라우트 path 매핑을 주입합니다.
      *
@@ -36,6 +40,19 @@ class LayoutListResource extends BaseApiResource
     public function withRoutePathMap(array $routePathMap): self
     {
         $this->routePathMap = $routePathMap;
+
+        return $this;
+    }
+
+    /**
+     * 설명 해석에 쓸 소유 템플릿 사전을 주입합니다.
+     *
+     * @param  array  $translations  템플릿 프론트엔드 다국어 데이터
+     * @return $this
+     */
+    public function withTranslations(array $translations): self
+    {
+        $this->translations = $translations;
 
         return $this;
     }
@@ -55,7 +72,7 @@ class LayoutListResource extends BaseApiResource
             'id' => $this->getValue('id'),
             'template_id' => $this->getValue('template_id'),
             'name' => $name,
-            'description' => $this->getValue('description') ?: $name,
+            'description' => LayoutDescription::resolve($this->getValue('description'), $name, $this->translations),
 
             // 이 레이아웃을 사용하는 라우트의 path (routes.json 기준). 파일 선택 시 ?route=
             // 동기화 / 위지윅에서 넘어온 ?route= 로 해당 파일 복원에 사용.
