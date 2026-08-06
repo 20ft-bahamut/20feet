@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Exceptions\ConcurrentModificationException;
 use App\Http\Controllers\Api\Base\AdminBaseController;
+use App\Http\Requests\Admin\LayoutVersionListRequest;
 use App\Http\Requests\Layout\StoreLayoutPreviewRequest;
 use App\Http\Requests\Layout\UpdateLayoutContentRequest;
 use App\Http\Resources\LayoutListResource;
@@ -148,11 +149,12 @@ class LayoutController extends AdminBaseController
     /**
      * 레이아웃의 모든 버전 목록 조회
      *
+     * @param  LayoutVersionListRequest  $request  버전 목록 조회 요청 (limit)
      * @param  string  $templateName  템플릿 identifier
      * @param  string  $name  레이아웃 이름
      * @return JsonResponse 버전 목록 응답
      */
-    public function versions(string $templateName, string $name): JsonResponse
+    public function versions(LayoutVersionListRequest $request, string $templateName, string $name): JsonResponse
     {
         $template = $this->templateService->findByIdentifier($templateName);
 
@@ -166,12 +168,19 @@ class LayoutController extends AdminBaseController
             return $this->notFound('common.not_found');
         }
 
-        $versions = $this->layoutService->getLayoutVersions($template->id, $name);
-
-        return $this->success(
-            'common.success',
-            LayoutVersionResource::collection($versions)
+        $versions = $this->layoutService->getLayoutVersions(
+            $template->id,
+            $name,
+            (int) ($request->validated()['limit'] ?? LayoutVersionListRequest::DEFAULT_LIMIT)
         );
+
+        // 목록은 경량 표현만 내려준다 — 분해된 본문은 버전 비교 diff 전용이라 단건 조회가 공급한다.
+        $items = $versions
+            ->map(fn ($version) => (new LayoutVersionResource($version))->toListArray($request))
+            ->values()
+            ->all();
+
+        return $this->success('common.success', $items);
     }
 
     /**

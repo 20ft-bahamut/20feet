@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Notification Logs 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -55,26 +55,26 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| number | integer | `677` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
-| id | integer | `677` | 기본 키 (내부 식별자) |
+| number | integer | `7549` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
+| id | integer | `7559` | 기본 키 (내부 식별자) |
 | channel | string | `mail` | 채널: mail, database, fcm 등 |
 | notification_type | string | `apidoc.sample.event` | 알림 타입: welcome, order_confirmed 등 |
 | extension_type | string | `core` | 확장 타입: core, module, plugin |
 | extension_identifier | string | `` | 확장 식별자 |
-| recipient_user_id | integer | `166` | recipient user 식별자 (연관 리소스 참조) |
+| recipient_user_id | integer | `1240` | recipient user 식별자 (연관 리소스 참조) |
 | recipient_identifier | string | `apidoc-sample-user@example.com` | 수신자 식별자 (채널별: 이메일, 디바이스토큰, user_id 등) |
 | recipient_name | string | `API 문서 샘플 사용자` | 수신자 표시명 (발송 시점 스냅샷) |
-| sender_user_id | integer | `166` | sender user 식별자 (연관 리소스 참조) |
-| sender | object | `{"uuid":"a231747f-e82e-4cf2-9ae1-a261849dce40","name":"AP…` | 발신자 사용자 객체 (uuid/name/email — senderUser 관계 파생) |
-| recipient | object | `{"uuid":"a231747f-e82e-4cf2-9ae1-a261849dce40","name":"AP…` | 수신자 사용자 객체 (uuid/name/email — recipientUser 관계 파생) |
+| sender_user_id | integer | `1240` | sender user 식별자 (연관 리소스 참조) |
+| sender | object | `{"uuid":"a2640dae-e87c-4a28-b4f1-481fd961dc02","name":"AP…` | 발신자 사용자 객체 (uuid/name/email — senderUser 관계 파생) |
+| recipient | object | `{"uuid":"a2640dae-e87c-4a28-b4f1-481fd961dc02","name":"AP…` | 수신자 사용자 객체 (uuid/name/email — recipientUser 관계 파생) |
 | subject | string | `API 문서 샘플 알림` | 렌더링된 제목 |
 | body | string | `문서 실측용 알림 본문입니다.` | 렌더링된 본문 |
 | status | string | `sent` | 상태: sent, failed, skipped |
-| error_message | string | `해당 채널은 비회원 발송을 허용하지 않아 발송을 건너뛰었습니다.` | 에러 메시지 |
+| error_message | string | `SMTP 호스트가 설정되지 않았습니다.` | 에러 메시지 |
 | source | string | `apidoc` | 발송 출처: notification, test_mail 등 |
-| sent_at | string | `2026-07-06 18:20:23` | sent 일시 |
-| created_at | string | `2026-07-06 19:20:23` | 생성 일시 |
-| updated_at | string | `2026-07-06 19:20:23` | 최종 수정 일시 |
+| sent_at | string | `2026-07-31 21:55:00` | sent 일시 |
+| created_at | string | `2026-07-31 22:55:00` | 생성 일시 |
+| updated_at | string | `2026-07-31 22:55:00` | 최종 수정 일시 |
 | abilities | object | `{"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -90,23 +90,23 @@ HTTP/1.1 200
     "data": {
         "data": [
             {
-                "number": 1,
-                "id": 1,
+                "number": 7549,
+                "id": 7559,
                 "channel": "mail",
                 "notification_type": "apidoc.sample.event",
                 "extension_type": "core",
                 "extension_identifier": "",
-                "recipient_user_id": 6,
+                "recipient_user_id": 1240,
                 "recipient_identifier": "apidoc-sample-user@example.com",
                 "recipient_name": "API 문서 샘플 사용자",
-                "sender_user_id": 6,
+                "sender_user_id": 1240,
                 "sender": {
-                    "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+                    "uuid": "a2640dae-e87c-4a28-b4f1-481fd961dc02",
                     "name": "API 문서 샘플 사용자",
                     "email": "apidoc-sample-user@example.com"
                 },
                 "recipient": {
-                    "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+                    "uuid": "a2640dae-e87c-4a28-b4f1-481fd961dc02",
                     "name": "API 문서 샘플 사용자",
                     "email": "apidoc-sample-user@example.com"
                 },
@@ -115,22 +115,48 @@ HTTP/1.1 200
                 "status": "sent",
                 "error_message": null,
                 "source": "apidoc",
-                "sent_at": "2026-07-08 09:41:24",
-                "created_at": "2026-07-08 10:41:24",
-                "updated_at": "2026-07-08 10:41:24",
+                "sent_at": "2026-07-31 21:55:00",
+                "created_at": "2026-07-31 22:55:00",
+                "updated_at": "2026-07-31 22:55:00",
                 "abilities": {
                     "can_delete": true
                 }
-            }
+            },
+            {
+                "number": 7548,
+                "id": 7558,
+                "channel": "mail",
+                "notification_type": "inquiry_received",
+                "extension_type": "module",
+                "extension_identifier": "sirsoft-ecommerce",
+                "recipient_user_id": null,
+                "recipient_identifier": "saemi.cho@example.com",
+                "recipient_name": "송민성",
+                "sender_user_id": null,
+                "sender": null,
+                "recipient": null,
+                "subject": null,
+                "body": null,
+                "status": "skipped",
+                "error_message": "SMTP 호스트가 설정되지 않았습니다.",
+                "source": "notification",
+                "sent_at": "2026-07-31 21:41:59",
+                "created_at": "2026-07-31 21:41:59",
+                "updated_at": "2026-07-31 21:41:59",
+                "abilities": {
+                    "can_delete": true
+                }
+            },
+            "... (총 25건 중 2건 표시)"
         ],
         "pagination": {
             "current_page": 1,
-            "last_page": 1,
+            "last_page": 302,
             "per_page": 25,
-            "total": 1,
+            "total": 7549,
             "from": 1,
-            "to": 1,
-            "has_more_pages": false
+            "to": 25,
+            "has_more_pages": true
         },
         "abilities": {
             "can_delete": true
@@ -182,7 +208,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Schedules 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -73,11 +73,11 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 | is_active | boolean | `true` | active 여부 |
 | last_result | string | `success` | 마지막 실행 결과: success(성공), failed(실패), running(실행중), never(미실행) |
 | last_result_label | string | `성공` | `last_result` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| last_run_at | string | `2026-07-05T19:20:23+09:00` | last run 일시 |
+| last_run_at | string | `2026-07-30T22:55:00+09:00` | last run 일시 |
 | last_duration | null | `null` | 마지막 실행의 소요 시간을 사람이 읽는 문자열로 포맷한 값 (예: "45초", "2분 3초" — 마지막 실행 이력의 duration 파생, 실행 이력이 없으면 null) |
-| next_run_at | string | `2026-07-07T12:00:00+09:00` | next run 일시 |
-| creator | object | `{"uuid":"a231747f-e82e-4cf2-9ae1-a261849dce40","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
-| created_at | string | `2026-07-06` | 생성 일시 |
+| next_run_at | string | `2026-08-01T12:00:00+09:00` | next run 일시 |
+| creator | object | `{"uuid":"a2640dae-e87c-4a28-b4f1-481fd961dc02","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
+| created_at | string | `2026-07-31` | 생성 일시 |
 | abilities | object | `{"can_create":true,"can_update":true,"can_delete":true,"c…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -106,14 +106,14 @@ HTTP/1.1 200
                 "is_active": true,
                 "last_result": "success",
                 "last_result_label": "성공",
-                "last_run_at": "2026-07-07T10:41:24+09:00",
+                "last_run_at": "2026-07-30T22:55:00+09:00",
                 "last_duration": null,
-                "next_run_at": "2026-07-08T12:00:00+09:00",
+                "next_run_at": "2026-08-01T12:00:00+09:00",
                 "creator": {
-                    "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+                    "uuid": "a2640dae-e87c-4a28-b4f1-481fd961dc02",
                     "name": "API 문서 샘플 사용자"
                 },
-                "created_at": "2026-07-08",
+                "created_at": "2026-07-31",
                 "abilities": {
                     "can_create": true,
                     "can_update": true,
@@ -213,7 +213,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | integer | `14` | 기본 키 (내부 식별자) |
+| id | integer | `12` | 기본 키 (내부 식별자) |
 | name | string | `실측 예시값` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
 | description | string | `실측 예시값` | 설명 (다국어 필드는 로케일별 값 객체) |
 | type | string | `artisan` | 작업 유형: artisan(Artisan 커맨드), shell(쉘 명령), url(URL 호출) |
@@ -230,10 +230,10 @@ _단건 응답: `data` 객체의 필드._
 | last_result_label | string | `미실행` | `last_result` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
 | last_duration | null | `null` | 마지막 실행 소요 시간 (초/밀리초 — 실행 이력 파생) |
 | extension_type | string | `core` | 이 리소스를 소유한 확장의 타입 (core/module/plugin/template) |
-| extension_identifier | string | `probe_6a4dc0a862b69` | 이 리소스를 소유한 확장의 식별자 |
-| creator | object | `{"uuid":"a234c2b1-cde8-437f-b28b-23323be2b98d","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
-| created_at | string | `2026-07-08 12:14:48` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:48` | 최종 수정 일시 |
+| extension_identifier | string | `probe_6a71e0dc9a253` | 이 리소스를 소유한 확장의 식별자 |
+| creator | object | `{"uuid":"a26219fc-94a0-4f63-9404-04c2a6ac99e4","name":"최고…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
+| created_at | string | `2026-08-04 21:53:48` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:48` | 최종 수정 일시 |
 | abilities | object | `{"can_create":true,"can_update":true,"can_delete":true,"c…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -247,7 +247,7 @@ HTTP/1.1 201
     "success": true,
     "message": "스케줄이 생성되었습니다.",
     "data": {
-        "id": 14,
+        "id": 12,
         "name": "실측 예시값",
         "description": "실측 예시값",
         "type": "artisan",
@@ -264,13 +264,13 @@ HTTP/1.1 201
         "last_result_label": "미실행",
         "last_duration": null,
         "extension_type": "core",
-        "extension_identifier": "probe_6a4dc0a862b69",
+        "extension_identifier": "probe_6a71e0dc9a253",
         "creator": {
-            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
-            "name": "API 문서 샘플 사용자"
+            "uuid": "a26219fc-94a0-4f63-9404-04c2a6ac99e4",
+            "name": "최고관리자"
         },
-        "created_at": "2026-07-08 12:14:48",
-        "updated_at": "2026-07-08 12:14:48",
+        "created_at": "2026-08-04 21:53:48",
+        "updated_at": "2026-08-04 21:53:48",
         "abilities": {
             "can_create": true,
             "can_update": true,
@@ -319,7 +319,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -372,7 +372,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -414,7 +414,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -596,14 +596,14 @@ _단건 응답: `data` 객체의 필드._
 | is_active | boolean | `true` | active 여부 |
 | last_result | string | `success` | 마지막 실행 결과: success(성공), failed(실패), running(실행중), never(미실행) |
 | last_result_label | string | `성공` | `last_result` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| last_run_at | string | `2026-07-05T19:20:23+09:00` | last run 일시 |
+| last_run_at | string | `2026-07-30T22:55:00+09:00` | last run 일시 |
 | last_duration | null | `null` | 마지막 실행의 소요 시간을 사람이 읽는 문자열로 포맷한 값 (예: "45초", "2분 3초" — 마지막 실행 이력의 duration 파생, 실행 이력이 없으면 null) |
-| next_run_at | string | `2026-07-07T12:00:00+09:00` | next run 일시 |
+| next_run_at | string | `2026-08-01T12:00:00+09:00` | next run 일시 |
 | extension_type | null | `null` | 확장 소유 타입: core(코어), module(모듈), plugin(플러그인), NULL(사용자 정의) |
 | extension_identifier | null | `null` | 확장 식별자 (예: core, sirsoft-board, sirsoft-payment) |
-| creator | object | `{"uuid":"a231747f-e82e-4cf2-9ae1-a261849dce40","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
-| created_at | string | `2026-07-06 19:20:23` | 생성 일시 |
-| updated_at | string | `2026-07-06 19:20:23` | 최종 수정 일시 |
+| creator | object | `{"uuid":"a2640dae-e87c-4a28-b4f1-481fd961dc02","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
+| created_at | string | `2026-07-31 22:55:00` | 생성 일시 |
+| updated_at | string | `2026-07-31 22:55:00` | 최종 수정 일시 |
 | abilities | object | `{"can_create":true,"can_update":true,"can_delete":true,"c…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -632,17 +632,17 @@ HTTP/1.1 200
         "is_active": true,
         "last_result": "success",
         "last_result_label": "성공",
-        "last_run_at": "2026-07-07T10:41:24+09:00",
+        "last_run_at": "2026-07-30T22:55:00+09:00",
         "last_duration": null,
-        "next_run_at": "2026-07-08T12:00:00+09:00",
+        "next_run_at": "2026-08-01T12:00:00+09:00",
         "extension_type": null,
         "extension_identifier": null,
         "creator": {
-            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "uuid": "a2640dae-e87c-4a28-b4f1-481fd961dc02",
             "name": "API 문서 샘플 사용자"
         },
-        "created_at": "2026-07-08 10:41:24",
-        "updated_at": "2026-07-08 10:41:24",
+        "created_at": "2026-07-31 22:55:00",
+        "updated_at": "2026-07-31 22:55:00",
         "abilities": {
             "can_create": true,
             "can_update": true,
@@ -738,13 +738,13 @@ _단건 응답: `data` 객체의 필드._
 | is_active | boolean | `true` | active 여부 |
 | last_result | string | `success` | 마지막 실행 결과: success(성공), failed(실패), running(실행중), never(미실행) |
 | last_result_label | string | `성공` | `last_result` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| last_run_at | string | `2026-07-07T10:41:24+09:00` | last run 일시 |
+| last_run_at | string | `2026-07-30T22:55:00+09:00` | last run 일시 |
 | last_duration | null | `null` | 마지막 실행 소요 시간 (초/밀리초 — 실행 이력 파생) |
 | extension_type | string | `core` | 이 리소스를 소유한 확장의 타입 (core/module/plugin/template) |
-| extension_identifier | string | `probe_6a4dc0a8e44c0` | 이 리소스를 소유한 확장의 식별자 |
-| creator | object | `{"uuid":"a234c2b1-cde8-437f-b28b-23323be2b98d","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
-| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:48` | 최종 수정 일시 |
+| extension_identifier | string | `probe_6a71e0dceb9a2` | 이 리소스를 소유한 확장의 식별자 |
+| creator | object | `{"uuid":"a2640dae-e87c-4a28-b4f1-481fd961dc02","name":"AP…` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
+| created_at | string | `2026-07-31 22:55:00` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:48` | 최종 수정 일시 |
 | abilities | object | `{"can_create":true,"can_update":true,"can_delete":true,"c…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -773,16 +773,16 @@ HTTP/1.1 200
         "is_active": true,
         "last_result": "success",
         "last_result_label": "성공",
-        "last_run_at": "2026-07-07T10:41:24+09:00",
+        "last_run_at": "2026-07-30T22:55:00+09:00",
         "last_duration": null,
         "extension_type": "core",
-        "extension_identifier": "probe_6a4dc0a8e44c0",
+        "extension_identifier": "probe_6a71e0dceb9a2",
         "creator": {
-            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "uuid": "a2640dae-e87c-4a28-b4f1-481fd961dc02",
             "name": "API 문서 샘플 사용자"
         },
-        "created_at": "2026-07-08 10:41:24",
-        "updated_at": "2026-07-08 12:14:48",
+        "created_at": "2026-07-31 22:55:00",
+        "updated_at": "2026-08-04 21:53:48",
         "abilities": {
             "can_create": true,
             "can_update": true,
@@ -834,7 +834,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | integer | `15` | 기본 키 (내부 식별자) |
+| id | integer | `13` | 기본 키 (내부 식별자) |
 | name | string | `API 문서 샘플 스케줄 (복사본)` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
 | description | string | `문서 실측용 스케줄` | 설명 (다국어 필드는 로케일별 값 객체) |
 | type | string | `artisan` | 작업 유형: artisan(Artisan 커맨드), shell(쉘 명령), url(URL 호출) |
@@ -852,8 +852,8 @@ _단건 응답: `data` 객체의 필드._
 | last_duration | null | `null` | 마지막 실행 소요 시간 (초/밀리초 — 실행 이력 파생) |
 | extension_type | null | `null` | 이 리소스를 소유한 확장의 타입 (core/module/plugin/template) |
 | extension_identifier | null | `null` | 이 리소스를 소유한 확장의 식별자 |
-| created_at | string | `2026-07-08 12:14:48` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:48` | 최종 수정 일시 |
+| created_at | string | `2026-08-04 21:53:48` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:48` | 최종 수정 일시 |
 | abilities | object | `{"can_create":true,"can_update":true,"can_delete":true,"c…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -867,7 +867,7 @@ HTTP/1.1 201
     "success": true,
     "message": "스케줄이 복제되었습니다.",
     "data": {
-        "id": 15,
+        "id": 13,
         "name": "API 문서 샘플 스케줄 (복사본)",
         "description": "문서 실측용 스케줄",
         "type": "artisan",
@@ -885,8 +885,8 @@ HTTP/1.1 201
         "last_duration": null,
         "extension_type": null,
         "extension_identifier": null,
-        "created_at": "2026-07-08 12:14:48",
-        "updated_at": "2026-07-08 12:14:48",
+        "created_at": "2026-08-04 21:53:48",
+        "updated_at": "2026-08-04 21:53:48",
         "abilities": {
             "can_create": true,
             "can_update": true,
@@ -1013,23 +1013,23 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | integer | `7` | 기본 키 (내부 식별자) |
+| id | integer | `6` | 기본 키 (내부 식별자) |
 | schedule_id | integer | `1` | schedule 식별자 (연관 리소스 참조) |
-| started_at | string | `2026-07-08T12:14:49+09:00` | started 일시 |
-| ended_at | string | `2026-07-08T12:14:49+09:00` | ended 일시 |
+| started_at | string | `2026-08-04T21:53:49+09:00` | started 일시 |
+| ended_at | string | `2026-08-04T21:53:49+09:00` | ended 일시 |
 | duration | integer | `0` | 실행 소요 시간 (초/밀리초) |
 | duration_formatted | null | `null` | `duration` 값의 표시용 포맷 문자열 (통화/용량/일시 등 로케일·단위 포맷) |
 | status | string | `success` | 상태 값 (도메인별 상태 집합 — 사람이 읽는 라벨은 status_label, UI 변형은 status_variant 참조) |
 | status_label | string | `성공` | 상태의 사람이 읽는 라벨 (상태 Enum label() 산물) |
 | exit_code | integer | `0` | 실행 종료 코드 (0=성공, 그 외=실패) |
-| memory_usage | integer | `427352` | 실행 중 최대 메모리 사용량 (바이트) |
-| memory_usage_formatted | string | `417.34 KB` | `memory_usage` 값의 표시용 포맷 문자열 (통화/용량/일시 등 로케일·단위 포맷) |
+| memory_usage | integer | `427312` | 실행 중 최대 메모리 사용량 (바이트) |
+| memory_usage_formatted | string | `417.3 KB` | `memory_usage` 값의 표시용 포맷 문자열 (통화/용량/일시 등 로케일·단위 포맷) |
 | output | string | `    INFO  Application cache cleared s…` | 실행 표준 출력 내용 |
 | error_output | null | `null` | 실행 표준 에러 출력 내용 (없으면 빈 문자열/null) |
 | trigger_type | string | `manual` | 동작을 유발한 방식/주체 구분 값 |
 | trigger_type_label | string | `수동 실행` | `trigger_type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
-| created_at | string | `2026-07-08 12:14:49` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:49` | 최종 수정 일시 |
+| created_at | string | `2026-08-04 21:53:49` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:49` | 최종 수정 일시 |
 
 **응답 예시**
 
@@ -1042,23 +1042,23 @@ HTTP/1.1 200
     "success": true,
     "message": "스케줄이 실행되었습니다.",
     "data": {
-        "id": 7,
+        "id": 6,
         "schedule_id": 1,
-        "started_at": "2026-07-08T12:14:49+09:00",
-        "ended_at": "2026-07-08T12:14:49+09:00",
+        "started_at": "2026-08-04T21:53:49+09:00",
+        "ended_at": "2026-08-04T21:53:49+09:00",
         "duration": 0,
         "duration_formatted": null,
         "status": "success",
         "status_label": "성공",
         "exit_code": 0,
-        "memory_usage": 427352,
-        "memory_usage_formatted": "417.34 KB",
+        "memory_usage": 427312,
+        "memory_usage_formatted": "417.3 KB",
         "output": "\n   INFO  Application cache cleared successfully.  \n\r\n",
         "error_output": null,
         "trigger_type": "manual",
         "trigger_type_label": "수동 실행",
-        "created_at": "2026-07-08 12:14:49",
-        "updated_at": "2026-07-08 12:14:49"
+        "created_at": "2026-08-04 21:53:49",
+        "updated_at": "2026-08-04 21:53:49"
     }
 }
 ```

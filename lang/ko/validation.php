@@ -1120,6 +1120,15 @@ return [
         'definition_already_exists' => '동일 (provider, scope_type, scope_value) 정의가 이미 존재합니다.',
     ],
 
+    // 레이아웃 버전 목록 조회
+    'layout_version' => [
+        'limit' => [
+            'integer' => '조회 건수는 숫자여야 합니다.',
+            'min' => '조회 건수는 1 이상이어야 합니다.',
+            'max' => '조회 건수는 최대 :max건입니다.',
+        ],
+    ],
+
     // 검증 속성명 (validation.attributes)
     'attributes' => [
         'ids' => '사용자 ID 목록',

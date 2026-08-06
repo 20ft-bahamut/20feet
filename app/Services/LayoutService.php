@@ -1479,13 +1479,17 @@ class LayoutService
     }
 
     /**
-     * 특정 레이아웃의 모든 버전 조회
+     * 특정 레이아웃의 최근 버전 목록 조회 (최신순)
+     *
+     * 버전 행은 저장할 때마다 쌓이고 정리되지 않으므로 조회 건수에 상한을 둡니다.
+     * 더 오래된 이력이 필요하면 호출자가 `$limit` 을 넓힙니다.
      *
      * @param  int  $templateId  대상 템플릿 ID
      * @param  string  $name  레이아웃 이름
+     * @param  int  $limit  조회할 최대 버전 수
      * @return Collection 버전 컬렉션
      */
-    public function getLayoutVersions(int $templateId, string $name)
+    public function getLayoutVersions(int $templateId, string $name, int $limit = 100)
     {
         // Before 훅 - 버전 목록 조회 전
         HookManager::doAction('core.layout.before_versions_index', $templateId, $name);
@@ -1500,7 +1504,7 @@ class LayoutService
         }
 
         // 버전 목록 조회
-        $versions = $this->layoutRepository->getVersionsByLayoutId($layout->id);
+        $versions = $this->layoutRepository->getVersionsByLayoutId($layout->id, $limit);
 
         // After 훅 - 버전 목록 조회 후
         HookManager::doAction('core.layout.after_versions_index', $versions, $templateId, $name);

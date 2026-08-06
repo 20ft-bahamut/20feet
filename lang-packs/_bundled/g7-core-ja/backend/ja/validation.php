@@ -526,7 +526,7 @@ return [
     ],
     'notification_channel' => [
         'invalid' => '通知チャネル識別子が正しくありません。',
-        'unavailable' => "利用できない通知チャネルです: ':value'",
+        'unavailable' => '利用できない通知チャネルです: \':value\'',
     ],
     'translatable' => [
         'must_be_array' => '多言語フィールドは配列である必要があります。',
@@ -678,7 +678,6 @@ return [
         'empty_word' => '拡張識別子でアンダースコアを連続させたり両端に置くことはできません。',
         'word_starts_with_digit' => '拡張識別子の各単語は数字で始めることはできません。',
     ],
-
     'module_path' => [
         'file_type_not_allowed' => '許可されていないファイルタイプです。拡張子: :extension（許可: :allowed）',
         'must_be_string' => 'パスは文字列である必要があります。',
@@ -1144,5 +1143,12 @@ return [
         'log_driver' => 'ログ ドライバー',
         'log_level' => 'ログレベル',
         'log_days' => 'ログ保持日数',
+    ],
+    'layout_version' => [
+        'limit' => [
+            'integer' => '閲覧数は数字である必要があります。',
+            'min' => '閲覧数は1以上である必要があります。',
+            'max' => '閲覧数は最大:max件です。',
+        ],
     ],
 ];

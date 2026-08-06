@@ -356,6 +356,24 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 
 > 상세: [validation.md "계층 리소스 순환 참조" / "배열 항목의 상위 스코프"](docs/backend/validation.md), [service-repository.md "중첩 리소스 스코프" / "설정 기반 한계값"](docs/backend/service-repository.md)
 
+### 목록 응답의 하위 컬렉션
+
+목록은 화면이 그 행에서 **실제로 그리는 것**만 싣는다. 행마다 하위 컬렉션을 통째로 직렬화하면 한 페이지를 여는 것만으로 수백~수천 행이 응답에 실린다 (공개 #76 — 상품 100건 × 옵션 20건).
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| `relationLoaded('x') ? $this->x : $this->whenLoaded('y')` (가짜 가드) | `whenLoaded('x', fn () => ...)` 하나만 — 로드 여부는 **Repository 가** 결정한다 |
+| Resource 는 `whenLoaded` 로 방어하는데 Repository 가 목록에서 무조건 eager load | 목록의 `relations:` 는 목록이 **실제로 직렬화하는** 관계만 |
+| 개수/합계를 PHP 컬렉션 연산으로 (`$this->options->where(...)->sum(...)`) | `withCount:` / `withSum`(`outerUsing:`) DB 집계 |
+| `toListArray()` 를 정의해 두고 컬렉션이 `toArray()` 를 호출 | 컨트롤러/컬렉션이 목록 표현을 **명시 호출** |
+| 목록 Resource 안에서 관계 재쿼리 (`$this->images()->first()`) | `relationLoaded` 분기로 로드된 컬렉션에서 고른다 |
+| 집계 별칭 존재 여부를 `!== null` 로 판정 | `array_key_exists($alias, $model->getAttributes())` — SUM 은 0건에서 NULL 이라 값 검사로는 "집계 안 함" 과 구분되지 않는다 |
+| 목록에서 뺀 값을 대체 경로 없이 제거 | 지연 로드 경로(배치 조회)를 먼저 만들고, 하위호환은 opt-in 파라미터(`?with_options=1`)로 |
+
+착수 전 **소비처를 실측**한다. 화면이 그 값을 실제로 순회·렌더하면 제거는 기능 축소다 — 계획서에 "안 쓴다" 고 적혀 있어도 레이아웃 JSON 을 열어 확인한다.
+
+> 상세: [api-resources.md](docs/backend/api-resources.md), [service-repository.md](docs/backend/service-repository.md)
+
 ### 목록 조회 컬럼 프루닝과 지연 조인
 
 | 금지 | 올바른 사용 |

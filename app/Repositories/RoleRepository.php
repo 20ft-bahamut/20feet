@@ -195,9 +195,19 @@ class RoleRepository implements RoleRepositoryInterface
      */
     public function getPaginated(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
+        // 권한 관계는 목록에서 로드하지 않는다. 목록 화면이 쓰는 것은 이름·설명·사용자 수·활성
+        // 여부뿐인데, 로드하면 Resource 가 같은 권한 집합을 `permissions`(계층 트리)·
+        // `permission_ids`·`permission_values` 세 형태로 중복 직렬화하고, 계층 트리를 만드느라
+        // 행마다 상위/카테고리 권한을 다시 조회한다(행 수만큼 추가 쿼리).
+        //
+        // Resource 의 `relationLoaded('permissions')` 가드는 그대로 두면 여기서 로드하지 않는 것만으로
+        // 세 필드가 함께 빠진다 — 권한 편집은 단건 조회(`GET /admin/roles/{id}`)가 공급한다.
+        //
+        // 권한 **개수**는 집계로 남긴다. 목록에서 뺀 값의 대체 경로 — 권한 트리를 전송하지 않고도
+        // "이 역할에 권한이 몇 개 걸려 있는가" 를 화면이 보여줄 수 있다. 값 검사가 아니라 별칭
+        // 존재 여부로 판정하므로(RoleResource) 0건인 역할도 0 으로 정확히 표시된다.
         $query = Role::query()
-            ->withCount('users')
-            ->with('permissions');
+            ->withCount(['users', 'permissions']);
 
         // 검색 필터
         if (! empty($filters['search'])) {

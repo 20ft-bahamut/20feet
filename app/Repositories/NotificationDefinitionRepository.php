@@ -131,7 +131,28 @@ class NotificationDefinitionRepository implements NotificationDefinitionReposito
      */
     public function getPaginated(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = NotificationDefinition::with('templates');
+        // 목록은 템플릿 본문을 싣지 않는다.
+        //
+        // 좁히지 않으면 한 페이지를 여는 것만으로 그 페이지 전 정의의 **모든 채널** 제목·본문이
+        // 응답에 실린다(정의 하나당 채널 × 로케일). 화면은 한 번에 한 채널만 그리므로 그 채널을
+        // `template_channel` 로 지정해 요청한다 — 지정하지 않은 호출자는 템플릿을 받지 않고,
+        // 필요하면 단건 조회(`GET .../notification-definitions/{id}`)가 전 채널을 제공한다.
+        $templateChannel = $filters['template_channel'] ?? null;
+
+        $query = NotificationDefinition::query()
+            // "되돌리기" 버튼 노출 조건은 채널을 가리지 않고 "커스터마이즈된 템플릿이 하나라도
+            // 있는가" 다. 템플릿을 한 채널로 좁히면 배열만으로는 알 수 없으므로 집계로 낸다.
+            ->withCount([
+                'templates as customized_templates_count' => function ($q) {
+                    $q->where('is_default', false);
+                },
+            ]);
+
+        if (! empty($templateChannel)) {
+            $query->with([
+                'templates' => fn ($q) => $q->where('channel', $templateChannel),
+            ]);
+        }
 
         if (! empty($filters['extension_type'])) {
             $query->where('extension_type', $filters['extension_type']);

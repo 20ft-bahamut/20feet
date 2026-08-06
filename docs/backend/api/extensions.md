@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Extensions 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -43,7 +43,7 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | items | object | `{"plugins":[],"modules":[],"templates":[]}` | 코어 비호환으로 자동 비활성화된 확장을 타입별(`plugins`/`modules`/`templates`)로 묶은 목록. 각 원소는 식별자(`identifier`), 비호환 요구 버전(`incompatible_required_version`), 비활성화 시각(`deactivated_at`)을 가지며, 사용자가 dismiss했거나 hidden(학습용 샘플) 확장은 제외됨 |
-| current_core_version | string | `7.0.1` | 현재 설치된 코어 버전 |
+| current_core_version | string | `7.0.6` | 현재 설치된 코어 버전 |
 
 **응답 예시**
 
@@ -61,7 +61,7 @@ HTTP/1.1 200
             "modules": [],
             "templates": []
         },
-        "current_core_version": "7.0.1"
+        "current_core_version": "7.0.6"
     }
 }
 ```
@@ -88,7 +88,7 @@ HTTP/1.1 200
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| type | path | string | 예 | module, plugin, template | 대상 확장의 타입 (module: 모듈, plugin: 플러그인, template: 템플릿). 타입에 맞는 Repository/Manager를 해석하는 데 사용되며 그 외 값은 422 |
+| type | path | string | 예 | — | 대상 확장의 타입 (module: 모듈, plugin: 플러그인, template: 템플릿). 타입에 맞는 Repository/Manager를 해석하는 데 사용되며 그 외 값은 422 |
 | identifier | path | string | 예 | — | 대상 리소스의 식별자 |
 
 **요청 예시**
@@ -102,7 +102,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -131,7 +131,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| type | path | string | 예 | module, plugin, template | 대상 확장의 타입 (module: 모듈, plugin: 플러그인, template: 템플릿). 타입에 맞는 Repository/Manager를 해석하는 데 사용되며 그 외 값은 422 |
+| type | path | string | 예 | — | 대상 확장의 타입 (module: 모듈, plugin: 플러그인, template: 템플릿). 타입에 맞는 Repository/Manager를 해석하는 데 사용되며 그 외 값은 422 |
 | identifier | path | string | 예 | — | 대상 리소스의 식별자 |
 
 **요청 예시**
@@ -145,7 +145,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

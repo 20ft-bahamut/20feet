@@ -138,12 +138,16 @@ interface LayoutRepositoryInterface
     public function updateContent(int $id, array $content, int $newLockVersion): TemplateLayout;
 
     /**
-     * 특정 레이아웃의 모든 버전 조회
+     * 특정 레이아웃의 최근 버전 목록 조회 (최신순)
+     *
+     * 버전 행은 저장할 때마다 쌓이고 정리되지 않으므로 조회 건수에 상한이 있습니다.
+     * 목록이 쓰지 않는 `content`(버전마다 레이아웃 본문 사본)는 조회하지 않습니다.
      *
      * @param  int  $layoutId  레이아웃 ID
+     * @param  int  $limit  조회할 최대 버전 수
      * @return Collection 버전 컬렉션
      */
-    public function getVersionsByLayoutId(int $layoutId): Collection;
+    public function getVersionsByLayoutId(int $layoutId, int $limit = 100): Collection;
 
     /**
      * 특정 버전 조회

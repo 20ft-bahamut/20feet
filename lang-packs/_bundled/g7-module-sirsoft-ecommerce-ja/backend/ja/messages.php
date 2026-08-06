@@ -58,6 +58,8 @@ return [
         'code_generation_failed' => '商品コード作成に失敗しました。',
         'logs_fetch_success' => '商品処理履歴を閲覧しました。',
         'logs_fetch_failed' => '商品処理履歴の閲覧に失敗しました。',
+        'options_fetch_success' => '商品オプションを閲覧しました。',
+        'options_fetch_failed' => '商品オプション閲覧に失敗しました。',
     ],
     'presets' => [
         'created' => '検索プリセットが保存されました。',

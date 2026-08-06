@@ -1053,6 +1053,7 @@
       "name": "ロール名",
       "description": "説明",
       "users_count": "ユーザー数",
+      "permissions_count": "権限数",
       "status": "ステータス",
       "created_at": "作成日"
     },

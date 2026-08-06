@@ -1127,6 +1127,15 @@ return [
         'definition_already_exists' => 'A definition with the same (provider, scope_type, scope_value) already exists.',
     ],
 
+    // Layout version list
+    'layout_version' => [
+        'limit' => [
+            'integer' => 'The limit must be a number.',
+            'min' => 'The limit must be at least 1.',
+            'max' => 'The limit may not be greater than :max.',
+        ],
+    ],
+
     // Validation attribute names (validation.attributes)
     'attributes' => [
         'ids' => 'user ID list',

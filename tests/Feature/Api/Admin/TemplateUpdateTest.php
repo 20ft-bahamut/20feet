@@ -452,6 +452,11 @@ class TemplateUpdateTest extends TestCase
     public function test_check_modified_layouts_returns_result(): void
     {
         $mockService = Mockery::mock(TemplateService::class);
+        // 컨트롤러는 조회 전에 식별자 존재를 먼저 확인한다 — 이 선행 호출을 스텁하지 않으면
+        // Mockery 가 미정의 호출로 예외를 던지고 그것이 500 으로 잡힌다.
+        $mockService->shouldReceive('getTemplateInfo')
+            ->with('test-template')
+            ->andReturn(['identifier' => 'test-template', 'name' => 'Test Template']);
         $mockService->shouldReceive('checkModifiedLayouts')
             ->with('test-template')
             ->once()

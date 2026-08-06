@@ -30,6 +30,14 @@ class ApiDocScaffolder
     private const LIST_EXAMPLE_LIMIT = 2;
 
     /**
+     * @var int 응답 예시 한 건의 최대 크기 (pretty JSON 기준 바이트)
+     *
+     * 목록 절단(`data.data[]`)만으로는 카탈로그·스펙처럼 목록이 아닌 큰 응답을 막지 못한다.
+     * 상한을 넘으면 절단 강도를 단계적으로 올려 이 크기 이하로 줄인다.
+     */
+    private const EXAMPLE_MAX_BYTES = 8192;
+
+    /**
      * @var string 요청 예시의 토큰 마스킹 placeholder
      *
      * 실측 토큰은 임시 발급분이므로 문서에 평문 유출하지 않고 placeholder 로 마스킹한다.
@@ -792,7 +800,10 @@ class ApiDocScaffolder
         // 응답 body 내부의 절대 URL(페이지네이터 링크·콜백 URL 등)에 실측 기준 호스트가
         // 그대로 직렬화돼 들어올 수 있으므로 공개 문서용 placeholder 호스트로 마스킹한다.
         $masked = $this->maskResponseHost($sanitized, $probeMeta['base_url'] ?? null);
-        $json = json_encode($masked, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        // 목록 절단은 페이지네이션 형태(`data.data[]`)만 다룬다. 카탈로그·스펙처럼 목록이 아닌
+        // 큰 응답은 그대로 두면 문서 한 파일이 수 MB 로 불어난다 — 전체 크기 상한을 별도로 건다.
+        $capped = $this->capExampleSize($masked);
+        $json = json_encode($capped, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         return "```http\nHTTP/1.1 {$status}\n```\n\n```json\n".(string) $json."\n```";
     }
@@ -912,6 +923,101 @@ class ApiDocScaffolder
     }
 
     /**
+     * 응답 예시 전체 크기를 상한 이하로 줄입니다.
+     *
+     * `truncateListBody()` 는 페이지네이션 형태(`data.data[]`)만 절단하므로, 편집기 스펙·컴포넌트
+     * 카탈로그·라우트 목록처럼 목록이 아닌 큰 응답은 통째로 직렬화된다. 그대로 두면 문서 한 파일이
+     * 수 MB 가 되어 리뷰·git·에디터가 모두 망가진다(#518 에서 templates.md 가 115KB → 8.65MB).
+     *
+     * 절단 강도를 단계적으로 올리며 상한 이하가 될 때까지 재시도하고, 그래도 넘으면 최상위 키만
+     * 남긴 요약으로 대체한다. 어느 경우에도 "무엇이 잘렸는지" 를 문서에 남긴다.
+     *
+     * @param  array<string, mixed>  $body  마스킹까지 끝난 응답 body
+     * @return array<string, mixed> 상한 이하로 절단된 body
+     */
+    private function capExampleSize(array $body): array
+    {
+        if ($this->encodedSize($body) <= self::EXAMPLE_MAX_BYTES) {
+            return $body;
+        }
+
+        // (배열 최대 항목 수, 문자열 최대 길이) 를 점점 조인다.
+        foreach ([[5, 400], [3, 200], [1, 80]] as [$maxItems, $maxChars]) {
+            $reduced = $this->shrinkNode($body, $maxItems, $maxChars);
+
+            if ($this->encodedSize($reduced) <= self::EXAMPLE_MAX_BYTES) {
+                return $reduced;
+            }
+        }
+
+        // 여기까지 와도 상한을 넘으면 구조만 남긴다.
+        $originalSize = $this->encodedSize($body);
+        $data = $body['data'] ?? null;
+        $keys = is_array($data) ? array_slice(array_keys($data), 0, 20) : [];
+
+        $body['data'] = [
+            '// 응답이 너무 커서 예시로 싣지 않습니다 (약 '.number_format($originalSize).' bytes)',
+            '// 최상위 키: '.($keys === [] ? '(스칼라 또는 빈 응답)' : implode(', ', $keys)),
+        ];
+
+        return $body;
+    }
+
+    /**
+     * 노드를 재귀적으로 축소합니다. 배열은 항목 수를, 문자열은 길이를 자릅니다.
+     *
+     * @param  mixed  $node  축소 대상
+     * @param  int  $maxItems  배열/객체에서 남길 최대 항목 수
+     * @param  int  $maxChars  문자열 최대 길이
+     * @return mixed 축소된 노드
+     */
+    private function shrinkNode(mixed $node, int $maxItems, int $maxChars): mixed
+    {
+        if (is_string($node)) {
+            return mb_strlen($node) > $maxChars
+                ? mb_substr($node, 0, $maxChars).'… (생략)'
+                : $node;
+        }
+
+        if (! is_array($node)) {
+            return $node;
+        }
+
+        $isList = array_is_list($node);
+        $total = count($node);
+        $sliced = array_slice($node, 0, $maxItems, ! $isList);
+
+        $result = [];
+        foreach ($sliced as $key => $value) {
+            $result[$key] = $this->shrinkNode($value, $maxItems, $maxChars);
+        }
+
+        if ($total > $maxItems) {
+            $omitted = $total - $maxItems;
+            if ($isList) {
+                $result[] = "... (총 {$total}건 중 {$maxItems}건 표시)";
+            } else {
+                $result['...'] = "({$omitted}개 키 생략, 총 {$total}개)";
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * 노드를 문서에 실릴 형태로 인코딩했을 때의 바이트 수를 반환합니다.
+     *
+     * @param  mixed  $node  측정 대상
+     * @return int 바이트 수 (인코딩 실패 시 상한 초과로 간주)
+     */
+    private function encodedSize(mixed $node): int
+    {
+        $json = json_encode($node, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        return $json === false ? PHP_INT_MAX : strlen($json);
+    }
+
+    /**
      * 마크다운 표 셀 안에서 안전하도록 파이프/개행을 이스케이프합니다.
      *
      * @param  string  $text  원본 텍스트
@@ -941,11 +1047,391 @@ class ApiDocScaffolder
 
         foreach ($sections as $i => $section) {
             $key = $sectionKeys[$i];
-            $preserved = $this->extractHumanProse($existing, $key);
-            $merged .= $this->applyPreservedProse($section, $preserved)."\n";
+            // 아직 생성 블록이 없던(사람이 직접 쓴) 섹션은 헤딩으로 찾는다. 키로만 찾으면
+            // 최초 생성 회차에 그 섹션의 서술·표 설명이 통째로 사라진다.
+            $legacy = $this->extractLegacySection($existing, $section, $key);
+
+            $preserved = $this->extractHumanProse($existing, $key)
+                ?? ($legacy === null ? null : $this->extractLegacyProse($legacy));
+            $withProse = $this->applyPreservedProse($section, $preserved);
+            // 순서 주의: 표 자체를 되살린 뒤에 셀 설명을 맞춘다.
+            $withFields = $this->restoreEmptyProbeTable($withProse, $existing, $key, $legacy);
+            $withTables = $this->restoreTableDescriptions($withFields, $existing, $key, $legacy);
+            $merged .= $this->restoreErrorSection($withTables, $existing, $key, $legacy)."\n";
         }
 
         return $merged;
+    }
+
+    /**
+     * 새 섹션의 TODO 설명 셀을 기존 문서의 사람 서술로 되돌립니다.
+     *
+     * `@generated` 블록의 파라미터/응답 필드 표는 재생성 때마다 통째로 다시 조립되므로,
+     * 정적 추출로 재현할 수 없는 도메인 설명(예: `no_category: 카테고리 미지정 상품만 필터`)이
+     * TODO 스텁으로 되돌아간다. 사람이 채운 설명이 재생성 한 번에 사라지는 것은 문서 손실이므로,
+     * 행 이름이 같고 새 셀이 TODO 스텁일 때만 기존 설명을 이어받는다.
+     *
+     * 기존 셀에 설명이 있으면 항상 그쪽을 쓴다. 도구가 만드는 설명은 필드명에서 유추한 일반
+     * 문구(예: `대상의 이름/명칭`)라 사람이 적은 도메인 사실(예: `플러그인 이름 (다국어 JSON)`,
+     * `desc 는 주문별 가장 늦은 발송일`)보다 언제나 정보량이 적다. 문서 헤더가 약속한
+     * "사람이 작성한 설명은 보존됩니다" 를 표 셀에도 적용한다. 사실이 바뀌면 사람이 그 셀을
+     * 고치거나 비우고, 비운 셀은 다음 재생성이 채운다.
+     *
+     * @param  string  $section  새로 생성된 섹션
+     * @param  string  $existing  기존 문서 전체
+     * @param  string  $key  라우트명(생성 블록 키)
+     * @param  string|null  $legacy  생성 블록이 없던 사람 작성 섹션 원문 (헤딩 매칭 폴백)
+     * @return string 설명이 복원된 섹션
+     */
+    private function restoreTableDescriptions(string $section, string $existing, string $key, ?string $legacy = null): string
+    {
+        $oldBlock = $this->extractGeneratedBlockBody($existing, $key) ?? $legacy;
+        if ($oldBlock === null) {
+            return $section;
+        }
+
+        $oldDescriptions = $this->collectRowDescriptions($oldBlock);
+        if ($oldDescriptions === []) {
+            return $section;
+        }
+
+        $lines = explode("\n", $section);
+        foreach ($lines as $index => $line) {
+            if (! str_starts_with(trim($line), '|')) {
+                continue;
+            }
+
+            $cells = $this->splitRowCells($line);
+            if (count($cells) < 2) {
+                continue;
+            }
+
+            $lastIndex = count($cells) - 1;
+            $rowKey = $this->rowKey($cells);
+            if ($rowKey === null || ! isset($oldDescriptions[$rowKey])) {
+                continue;
+            }
+
+            $cells[$lastIndex] = ' '.$oldDescriptions[$rowKey].' ';
+            $lines[$index] = '|'.implode('|', $cells).'|';
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * 이번 실측이 빈 응답이라 필드 표가 사라졌으면 기존 표를 되살립니다.
+     *
+     * 실측 대상 데이터가 없는 상태로 재생성하면 응답 필드 표가 통째로
+     * `<!-- 실측 응답에 필드 없음 ... -->` 한 줄로 대체된다. 이미 문서화돼 있던 필드 목록이
+     * "이번에 데이터가 없었다" 는 이유로 사라지는 것은 사실의 후퇴이므로, 기존 표가 있으면 유지한다
+     * (#518 에서 reviews.md 한 파일에서만 388줄이 이렇게 사라졌다).
+     *
+     * @param  string  $section  새로 생성된 섹션
+     * @param  string  $existing  기존 문서 전체
+     * @param  string  $key  라우트명(생성 블록 키)
+     * @param  string|null  $legacy  생성 블록이 없던 사람 작성 섹션 원문
+     * @return string 필드 표가 복원된 섹션
+     */
+    private function restoreEmptyProbeTable(string $section, string $existing, string $key, ?string $legacy = null): string
+    {
+        $newFields = $this->sliceFieldSection($section);
+
+        // 이번 실측이 필드를 확보했으면(표가 있으면) 그대로 둔다.
+        if ($newFields === null || ! str_contains($newFields, '실측 응답에 필드 없음')) {
+            return $section;
+        }
+
+        $oldBlock = $this->extractGeneratedBlockBody($existing, $key) ?? $legacy;
+        if ($oldBlock === null) {
+            return $section;
+        }
+
+        $oldFields = $this->sliceFieldSection($oldBlock);
+        if ($oldFields === null || ! str_contains($oldFields, '| --- |')) {
+            return $section;
+        }
+
+        return str_replace($newFields, $oldFields, $section);
+    }
+
+    /**
+     * 섹션에서 `**응답 필드**` 이후 ~ 다음 구획 전까지의 본문을 잘라냅니다.
+     *
+     * @param  string  $text  섹션 또는 생성 블록 본문
+     * @return string|null 응답 필드 구간 본문 (없으면 null)
+     */
+    private function sliceFieldSection(string $text): ?string
+    {
+        $pos = strpos($text, '**응답 필드**');
+        if ($pos === false) {
+            return null;
+        }
+
+        $rest = substr($text, $pos);
+        $lineEnd = strpos($rest, "\n");
+        if ($lineEnd === false) {
+            return null;
+        }
+
+        $body = substr($rest, $lineEnd);
+        $at = strpos($body, "\n**");
+        $end = $at === false ? strlen($body) : $at;
+
+        $slice = trim(substr($body, 0, $end));
+
+        return $slice === '' ? null : $slice;
+    }
+
+    /**
+     * 에러 응답 구간이 일반 스텁으로 되돌아가면 기존의 사람 서술을 되살립니다.
+     *
+     * `errorTable()` 은 라우트 메타만 보고 "대표 에러 없음 (공개 조회)" 같은 일반 문구를 만든다.
+     * 사람이 도메인 특이 에러(예: "활성 에셋이 없으면 빈 200 응답")를 적어 뒀다면 재생성 한 번에
+     * 그 사실이 사라지므로, 새 문구가 TODO 를 포함한 스텁일 때만 기존 구간을 이어받는다.
+     *
+     * @param  string  $section  새로 생성된 섹션
+     * @param  string  $existing  기존 문서 전체
+     * @param  string  $key  라우트명(생성 블록 키)
+     * @param  string|null  $legacy  생성 블록이 없던 사람 작성 섹션 원문
+     * @return string 에러 구간이 복원된 섹션
+     */
+    private function restoreErrorSection(string $section, string $existing, string $key, ?string $legacy = null): string
+    {
+        $newError = $this->sliceErrorSection($section);
+
+        // 새 문구가 스텁이 아니면(=도구가 실제 에러를 뽑았으면) 그대로 둔다.
+        if ($newError === null || ! str_contains($newError, '<!-- TODO')) {
+            return $section;
+        }
+
+        $oldBlock = $this->extractGeneratedBlockBody($existing, $key) ?? $legacy;
+        if ($oldBlock === null) {
+            return $section;
+        }
+
+        $oldError = $this->sliceErrorSection($oldBlock);
+        if ($oldError === null || $oldError === '' || str_contains($oldError, '<!-- TODO')) {
+            return $section;
+        }
+
+        return str_replace($newError, $oldError, $section);
+    }
+
+    /**
+     * 섹션에서 `**에러 응답**` 이후 ~ 다음 구획 전까지의 본문을 잘라냅니다.
+     *
+     * @param  string  $text  섹션 또는 생성 블록 본문
+     * @return string|null 에러 구간 본문 (없으면 null)
+     */
+    private function sliceErrorSection(string $text): ?string
+    {
+        $pos = strpos($text, '**에러 응답**');
+        if ($pos === false) {
+            return null;
+        }
+
+        $rest = substr($text, $pos + strlen('**에러 응답**'));
+
+        // 다음 구획: 생성 블록 종료 마커 · 다음 굵은 헤딩 · 다음 ### 헤딩
+        $stops = [];
+        foreach ([self::GEN_END, "\n**", "\n### "] as $marker) {
+            $at = strpos($rest, $marker);
+            if ($at !== false) {
+                $stops[] = $at;
+            }
+        }
+
+        $end = $stops === [] ? strlen($rest) : min($stops);
+
+        return trim(substr($rest, 0, $end));
+    }
+
+    /**
+     * 생성 블록 마커가 없던 사람 작성 섹션을 헤딩으로 찾아 원문을 반환합니다.
+     *
+     * 문서가 수기 작성 → 생성 관리로 넘어가는 최초 회차에는 기존 섹션에 `@generated` 마커가
+     * 없다. 키로만 찾으면 그 섹션의 표 설명과 서술이 통째로 사라지므로 헤딩(`### METHOD /uri`)
+     * 으로 한 번 더 찾는다. 이미 키로 찾을 수 있으면 이 폴백은 쓰지 않는다.
+     *
+     * @param  string  $existing  기존 문서 전체
+     * @param  string  $section  새로 생성된 섹션 (첫 줄이 헤딩)
+     * @param  string  $key  라우트명(생성 블록 키)
+     * @return string|null 사람 작성 섹션 원문 (없으면 null)
+     */
+    private function extractLegacySection(string $existing, string $section, string $key): ?string
+    {
+        if (str_contains($existing, self::GEN_START.$key.' -->')) {
+            return null;
+        }
+
+        $heading = strtok($section, "\n");
+        if (! is_string($heading) || ! str_starts_with($heading, '### ')) {
+            return null;
+        }
+
+        $startPos = strpos($existing, "\n".$heading."\n");
+        if ($startPos === false) {
+            return null;
+        }
+
+        $rest = substr($existing, $startPos + 1);
+        $nextHeading = preg_match('/\n### /', $rest, $m, PREG_OFFSET_CAPTURE)
+            ? $m[0][1]
+            : strlen($rest);
+
+        return substr($rest, 0, $nextHeading);
+    }
+
+    /**
+     * 사람 작성 섹션 원문에서 `**설명**` 이후의 서술을 뽑아냅니다.
+     *
+     * @param  string  $legacy  사람 작성 섹션 원문
+     * @return string|null 보존할 서술 (없으면 null)
+     */
+    private function extractLegacyProse(string $legacy): ?string
+    {
+        $pos = strpos($legacy, '**설명**');
+        if ($pos === false) {
+            return null;
+        }
+
+        $prose = trim(substr($legacy, $pos));
+
+        if ($prose === '' || Str::contains($prose, 'TODO: 이 엔드포인트의 용도')) {
+            return null;
+        }
+
+        return $prose;
+    }
+
+    /**
+     * 기존 문서에서 라우트의 `@generated` 블록 본문만 잘라냅니다 (헤딩 제외).
+     *
+     * 헤딩까지 함께 되살리는 {@see self::extractGeneratedBlock()} 과 달리, 표 셀 대조에만
+     * 쓰이므로 블록 본문만 필요하다.
+     *
+     * @param  string  $existing  기존 문서 전체
+     * @param  string  $key  라우트명(생성 블록 키)
+     * @return string|null 블록 본문 (없으면 null)
+     */
+    private function extractGeneratedBlockBody(string $existing, string $key): ?string
+    {
+        $startPos = strpos($existing, self::GEN_START.$key.' -->');
+        if ($startPos === false) {
+            return null;
+        }
+
+        $endPos = strpos($existing, self::GEN_END, $startPos);
+        if ($endPos === false) {
+            return null;
+        }
+
+        return substr($existing, $startPos, $endPos - $startPos);
+    }
+
+    /**
+     * 표 블록에서 `행 키 => 설명` 맵을 수집합니다 (TODO 셀은 제외).
+     *
+     * @param  string  $block  생성 블록 본문
+     * @return array<string, string> 행 키 => 설명
+     */
+    private function collectRowDescriptions(string $block): array
+    {
+        $map = [];
+
+        foreach (explode("\n", $block) as $line) {
+            if (! str_starts_with(trim($line), '|')) {
+                continue;
+            }
+
+            $cells = $this->splitRowCells($line);
+            if (count($cells) < 2) {
+                continue;
+            }
+
+            $description = trim($cells[count($cells) - 1]);
+            if ($description === '' || str_contains($description, '<!-- TODO')) {
+                continue;
+            }
+
+            // 구분선(`| --- | --- |`)은 건너뛴다.
+            if (preg_match('/^-{2,}$/', $description)) {
+                continue;
+            }
+
+            $rowKey = $this->rowKey($cells);
+            if ($rowKey !== null) {
+                $map[$rowKey] = $description;
+            }
+        }
+
+        return $map;
+    }
+
+    /** @var string 분해 중 인라인 코드 안 파이프를 감춰 두는 자리표시자 (문서에 등장할 수 없는 제어문자) */
+    private const CELL_PIPE_PLACEHOLDER = "\x00PIPE\x00";
+
+    /**
+     * 표 행 문자열을 셀 배열로 분해합니다 (앞뒤 파이프 제거, 셀 구분자가 아닌 파이프 보존).
+     *
+     * 셀 구분자가 아닌 파이프는 두 종류다. 이스케이프된 파이프(`\|`)와 **인라인 코드 스팬 안의
+     * 파이프**다. 후자는 실제 문서에 흔하다 — 셸 메타문자 안내처럼 파이프 자체를 설명하는 문장이
+     * 그렇다. 이를 구분자로 보면 셀 수가 늘어 마지막 셀(=설명)이 파이프 뒤 조각으로 바뀌고,
+     * {@see self::collectRowDescriptions()} 가 그 조각을 사람이 쓴 설명으로 승계해 문장 앞부분이
+     * 통째로 잘려 나간다. 오류 없이 문서만 훼손되므로 분해 단계에서 막는다.
+     *
+     * @param  string  $line  표 행
+     * @return array<int, string> 셀 배열
+     */
+    private function splitRowCells(string $line): array
+    {
+        $trimmed = trim($line);
+        $trimmed = preg_replace('/^\|/', '', $trimmed);
+        $trimmed = preg_replace('/\|$/', '', (string) $trimmed);
+
+        // 인라인 코드 스팬 안의 파이프를 잠시 감춘다 (분해 후 되돌린다).
+        $masked = preg_replace_callback(
+            '/`[^`]*`/',
+            static fn (array $matches): string => str_replace('|', self::CELL_PIPE_PLACEHOLDER, $matches[0]),
+            (string) $trimmed
+        );
+
+        // 이스케이프된 파이프(`\|`)도 셀 구분자가 아니다.
+        $parts = preg_split('/(?<!\\\\)\|/', (string) $masked);
+
+        if ($parts === false) {
+            return [];
+        }
+
+        return array_map(
+            static fn (string $cell): string => str_replace(self::CELL_PIPE_PLACEHOLDER, '|', $cell),
+            $parts
+        );
+    }
+
+    /**
+     * 표 행의 식별 키를 만듭니다.
+     *
+     * 파라미터 표는 `이름 + 위치(query/body/path)` 로, 응답 필드/에러 표는 이름(또는 상태코드)만으로
+     * 식별한다. 두 표의 키가 섞이지 않도록 두 번째 셀이 위치 값일 때만 결합한다.
+     *
+     * @param  array<int, string>  $cells  셀 배열
+     * @return string|null 행 키 (식별 불가 시 null)
+     */
+    private function rowKey(array $cells): ?string
+    {
+        $name = trim($cells[0]);
+        if ($name === '' || preg_match('/^-{2,}$/', $name)) {
+            return null;
+        }
+
+        $second = isset($cells[1]) ? trim($cells[1]) : '';
+        if (in_array($second, ['query', 'body', 'path', 'header'], true)) {
+            return $name.'@'.$second;
+        }
+
+        return $name;
     }
 
     /**

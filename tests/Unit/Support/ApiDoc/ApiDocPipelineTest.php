@@ -256,6 +256,43 @@ class ApiDocPipelineTest extends TestCase
     }
 
     #[Test]
+    public function 사람이_쓴_설명에_인라인_코드_파이프가_있어도_잘리지_않고_승계된다(): void
+    {
+        // 회귀: 표 행을 셀로 나눌 때 인라인 코드(`|`) 안의 파이프까지 구분자로 보면 셀 수가 늘고,
+        // "마지막 셀 = 설명" 규칙이 파이프 뒤 조각을 설명으로 승계한다. 그 결과 재생성 한 번에
+        // 문장 앞부분이 통째로 사라진다 — 오류도 경고도 없이 문서만 훼손된다.
+        // 실제 사례: 스케줄 문서의 command 설명("셸 메타문자(`|`, `;` …)")이 "`, `;` …" 로 잘렸다.
+        $scaffolder = new ApiDocScaffolder;
+
+        $humanDescription = '실행할 명령. 셸 메타문자(`|`, `;`, `$`)가 포함되면 거부됩니다';
+
+        $route = [
+            'method' => 'POST', 'uri' => '/api/admin/schedules', 'name' => 'api.admin.schedules.store',
+            'controller' => 'C', 'controller_method' => 'store', 'permission' => null,
+            'middleware' => [], 'path_params' => [],
+        ];
+        $request = ['request_class' => 'X', 'params' => [
+            ['name' => 'command', 'type' => 'string', 'required' => true, 'allowed' => 'max 2000'],
+        ], 'hook_filters' => []];
+
+        // 1회차: 생성된 문서의 command 행 설명 셀을 사람이 직접 채운 상태로 만든다
+        $first = $scaffolder->endpointSection($route, $request, null, ['status' => null, 'skipped_reason' => 'write-method']);
+        $humanRow = '| command | body | string | 예 | max 2000 | '.$humanDescription.' |';
+        $existing = "# 문서\n\n".preg_replace(
+            '/^\| command \| body \|.*$/m',
+            $humanRow,
+            $first
+        );
+        $this->assertStringContainsString($humanRow, $existing, '전제 실패: 사람 설명이 문서에 들어가지 않았다');
+
+        // 2회차: 재생성 → 사람 설명이 원문 그대로 승계되어야 한다
+        $regenerated = $scaffolder->endpointSection($route, $request, null, ['status' => null, 'skipped_reason' => 'write-method']);
+        $merged = $scaffolder->mergeDocument($existing, '# 문서', [$regenerated], ['api.admin.schedules.store']);
+
+        $this->assertStringContainsString($humanRow, $merged, '인라인 코드 안의 파이프를 셀 구분자로 보아 설명이 잘렸다');
+    }
+
+    #[Test]
     public function 쓰기_메서드는_응답_필드를_실측_제외로_표기한다(): void
     {
         $scaffolder = new ApiDocScaffolder;
@@ -887,5 +924,236 @@ MD;
             substr_count($regen, '(사람 서술)'),
             substr_count($regen2, '(사람 서술)')
         );
+    }
+
+    /**
+     * 목록이 아닌 큰 응답(카탈로그·스펙)도 예시 크기 상한 안으로 절단되어야 한다.
+     *
+     * 회귀 배경 (#518): 절단 로직이 페이지네이션 형태(`data.data[]`)만 다뤄, 편집기 스펙처럼
+     * 목록이 아닌 응답이 통째로 직렬화됐다. templates.md 한 파일이 115KB → 8.65MB 가 됐다.
+     */
+    #[Test]
+    public function 목록이_아닌_큰_응답도_예시_크기_상한으로_절단된다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        // 편집기 스펙 형태 — 중첩 객체 안에 큰 배열이 있고 페이지네이션 형태가 아니다.
+        $palette = [];
+        for ($i = 0; $i < 400; $i++) {
+            $palette["component_{$i}"] = [
+                'name' => "Component{$i}",
+                'description' => str_repeat('설명 텍스트 ', 40),
+                'props' => array_fill(0, 30, 'prop-value-'.str_repeat('x', 60)),
+            ];
+        }
+
+        $body = [
+            'success' => true,
+            'message' => '조회 성공',
+            'data' => ['palette' => $palette, 'version' => '1.0.0'],
+        ];
+
+        $rawSize = strlen((string) json_encode($body, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->assertGreaterThan(500_000, $rawSize, '전제: 원본이 충분히 커야 절단을 검증할 수 있다');
+
+        $block = $scaffolder->responseExampleBlock(null, ['status' => 200, 'body' => $body]);
+
+        // 존재를 먼저 확정한 뒤 크기를 단언한다.
+        $this->assertStringContainsString('```json', $block);
+        $this->assertLessThan(
+            16_384,
+            strlen($block),
+            '목록이 아닌 큰 응답도 상한 이하로 절단되어야 한다',
+        );
+        $this->assertStringContainsString('생략', $block, '무엇이 잘렸는지 문서에 남아야 한다');
+    }
+
+    /**
+     * 재생성이 표의 사람 서술을 TODO 로 되돌리지 않아야 한다.
+     *
+     * 회귀 배경 (#518): 전체 재생성이 `@generated` 블록의 파라미터/응답 필드 표를 통째로 다시
+     * 조립하면서, 정적 추출로 재현할 수 없는 도메인 설명이 TODO 스텁으로 되돌아갔다
+     * (54개 파일 1,181행). `--examples-only` 로만 우회 가능했던 것을 재생성 경로에서 막는다.
+     */
+    #[Test]
+    public function 재생성이_표의_사람_서술을_todo_로_되돌리지_않는다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $existing = <<<'MD'
+            # API
+
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            **요청 파라미터**
+
+            | 이름 | 위치 | 타입 | 필수 | 기본값 | 설명 |
+            | --- | --- | --- | --- | --- | --- |
+            | no_category | query | boolean | 아니오 | — | 카테고리 미지정 상품만 필터 |
+            | keyword | query | string | 아니오 | — | <!-- TODO: 용도 --> |
+
+            **응답 필드** (`data` 내부)
+
+            | 필드 | 타입 | 예시 | 설명 |
+            | --- | --- | --- | --- |
+            | uuid | string | `abc` | 외부 노출용 UUID |
+            <!-- @generated:end -->
+
+            **설명**
+
+            사람이 쓴 서술.
+            MD;
+
+        // 재생성 결과 — 두 설명 모두 TODO 스텁으로 조립된 상태
+        $newSection = <<<'MD'
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            **요청 파라미터**
+
+            | 이름 | 위치 | 타입 | 필수 | 기본값 | 설명 |
+            | --- | --- | --- | --- | --- | --- |
+            | no_category | query | boolean | 아니오 | — | <!-- TODO: 용도 --> |
+            | keyword | query | string | 아니오 | — | <!-- TODO: 용도 --> |
+
+            **응답 필드** (`data` 내부)
+
+            | 필드 | 타입 | 예시 | 설명 |
+            | --- | --- | --- | --- |
+            | uuid | string | `abc` | <!-- TODO: 설명 --> |
+            <!-- @generated:end -->
+
+            **설명** <!-- TODO: 이 엔드포인트의 용도·주의사항·예시 시나리오를 작성하세요 -->
+            MD;
+
+        $merged = $scaffolder->mergeDocument(
+            $existing,
+            '# API',
+            [$newSection],
+            ['api.admin.things.index'],
+        );
+
+        // 사람이 채운 설명은 되살아난다.
+        $this->assertStringContainsString('카테고리 미지정 상품만 필터', $merged);
+        $this->assertStringContainsString('외부 노출용 UUID', $merged);
+        // 원래도 비어 있던 셀은 TODO 로 남는다.
+        $this->assertStringContainsString('| keyword | query | string | 아니오 | — | <!-- TODO: 용도 --> |', $merged);
+        // 블록 밖 사람 서술도 그대로 보존된다.
+        $this->assertStringContainsString('사람이 쓴 서술.', $merged);
+    }
+
+    /**
+     * 실측 데이터가 없어 필드 표가 비면 기존 표를 유지해야 한다.
+     *
+     * 회귀 배경 (#518): 대상 데이터가 없는 상태로 재생성하자 응답 필드 표가 "실측 응답에 필드 없음"
+     * 한 줄로 대체됐다 (reviews.md 388줄 소실). "이번에 데이터가 없었다" 는 사실은 이미 문서화된
+     * 필드 목록을 지울 근거가 못 된다.
+     */
+    #[Test]
+    public function 빈_실측이_기존_응답_필드_표를_지우지_않는다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $existing = <<<'MD'
+            # API
+
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            **응답 필드** (`data` 내부)
+
+            | 필드 | 타입 | 예시 | 설명 |
+            | --- | --- | --- | --- |
+            | id | integer | `99` | 기본 키 (내부 식별자) |
+            | rating | integer | `5` | 별점 (1~5) |
+
+            **응답 예시**
+
+            ```json
+            {}
+            ```
+            <!-- @generated:end -->
+            MD;
+
+        $newSection = <<<'MD'
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            **응답 필드** (`data` 내부)
+
+            <!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+
+            **응답 예시**
+
+            ```json
+            {}
+            ```
+            <!-- @generated:end -->
+            MD;
+
+        $merged = $scaffolder->mergeDocument($existing, '# API', [$newSection], ['api.admin.things.index']);
+
+        $this->assertStringContainsString('| rating | integer | `5` | 별점 (1~5) |', $merged);
+        $this->assertStringNotContainsString('실측 응답에 필드 없음', $merged);
+    }
+
+    /**
+     * 기존 설명이 있으면 도구가 만든 일반 문구로 덮어쓰지 않는다.
+     *
+     * 도구의 설명은 필드명에서 유추한 일반 문구라 사람이 적은 도메인 사실보다 정보량이 적다.
+     * 회귀 배경 (#518): `플러그인 이름 (다국어 JSON)` 이 `대상의 이름/명칭 (다국어 필드는 …)` 로,
+     * `desc 는 주문별 가장 늦은 발송일` 같은 서술이 일반 문구로 대체돼 224건이 후퇴했다.
+     * 값이 바뀌는 컬럼(타입·예시·허용값)은 그대로 재생성되므로 최신성은 유지된다.
+     */
+    #[Test]
+    public function 기존_설명은_도구의_일반_문구로_덮어쓰지_않는다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $existing = <<<'MD'
+            # API
+
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            | 필드 | 타입 | 예시 | 설명 |
+            | --- | --- | --- | --- |
+            | name | string | `옛값` | 플러그인 이름 (다국어 JSON) |
+            <!-- @generated:end -->
+            MD;
+
+        $newSection = <<<'MD'
+            ### GET /api/admin/things
+            <!-- @generated:start:api.admin.things.index -->
+            | 필드 | 타입 | 예시 | 설명 |
+            | --- | --- | --- | --- |
+            | name | string | `새값` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
+            <!-- @generated:end -->
+            MD;
+
+        $merged = $scaffolder->mergeDocument($existing, '# API', [$newSection], ['api.admin.things.index']);
+
+        // 설명은 사람 서술을 유지하고,
+        $this->assertStringContainsString('플러그인 이름 (다국어 JSON)', $merged);
+        $this->assertStringNotContainsString('대상의 이름/명칭', $merged);
+        // 실측으로 갱신되는 예시값은 새 값으로 바뀐다.
+        $this->assertStringContainsString('`새값`', $merged);
+        $this->assertStringNotContainsString('`옛값`', $merged);
+    }
+
+    /**
+     * 상한 이하의 작은 응답은 손대지 않는다 (절단이 정상 예시를 훼손하지 않음).
+     */
+    #[Test]
+    public function 상한_이하_응답은_그대로_직렬화된다(): void
+    {
+        $scaffolder = new ApiDocScaffolder;
+
+        $body = [
+            'success' => true,
+            'message' => '조회 성공',
+            'data' => ['id' => 7, 'identifier' => 'sirsoft-admin_basic', 'version' => '1.0.4'],
+        ];
+
+        $block = $scaffolder->responseExampleBlock(null, ['status' => 200, 'body' => $body]);
+
+        $this->assertStringContainsString('"identifier": "sirsoft-admin_basic"', $block);
+        $this->assertStringNotContainsString('생략', $block);
     }
 }

@@ -17,12 +17,25 @@ class LayoutRepository implements LayoutRepositoryInterface
     /**
      * 특정 템플릿의 모든 레이아웃 조회
      *
+     * 편집 본문(`content`)은 읽지 않는다. 이 메서드의 남은 소비처는 캐시 무효화
+     * (`InvalidatesLayoutCache` 트레이트)뿐이고 그 경로는 캐시 키를 만드는 식별 컬럼만 쓰는데,
+     * 템플릿 하나에 수십~수백 레이아웃이 있으면 본문 JSON 전량이 메모리에 올라온다.
+     *
+     * 목록 응답은 이 메서드가 아니라 {@see getListByTemplateId()} 가 공급하고(본문에서 파생되는
+     * 설명·크기만 남기고 본문은 즉시 버린다), 본문 자체가 필요한 경로는 단건 조회
+     * (`findByName`)가 공급한다.
+     *
      * @param  int  $templateId  템플릿 ID
      * @return Collection 레이아웃 컬렉션
      */
     public function getByTemplateId(int $templateId): Collection
     {
         return TemplateLayout::where('template_id', $templateId)
+            ->select([
+                'id', 'template_id', 'name', 'original_content_hash', 'original_content_size',
+                'extends', 'source_type', 'source_identifier', 'created_by', 'updated_by',
+                'lock_version', 'created_at', 'updated_at',
+            ])
             ->orderBy('name')
             ->get();
     }
@@ -336,15 +349,24 @@ class LayoutRepository implements LayoutRepositoryInterface
      * 특정 레이아웃의 모든 버전 조회
      *
      * @param  int  $layoutId  레이아웃 ID
+     * @param  int  $limit  조회할 최대 버전 수 (버전 행은 정리되지 않고 쌓이므로 상한 필수)
      * @return Collection 버전 컬렉션
      */
-    public function getVersionsByLayoutId(int $layoutId): Collection
+    public function getVersionsByLayoutId(int $layoutId, int $limit = 100): Collection
     {
         // creator eager load — 버전 목록에 저장자 이름(created_by_name) 노출용 (N+1 회피).
+        //
+        // 목록이 쓰는 컬럼만 조회한다. `content` 는 버전마다 레이아웃 본문 사본이라, 상한이 있어도
+        // 100건이면 본문 100벌을 읽는다. 본문은 버전 비교 diff 전용이며 단건 조회가 공급한다.
+        // 정렬 기준은 `version` — 레이아웃 안에서 유일하다(uk_layout_version). 종전의
+        // `latest()`(created_at)는 같은 초에 저장된 버전들의 순서를 정하지 못해, 상한이 걸린
+        // 지금은 "어느 100건이 오는가" 까지 실행마다 달라질 수 있다.
         return TemplateLayoutVersion::with('creator:id,name')
             ->where('layout_id', $layoutId)
-            ->latest()
-            ->get();
+            ->orderBy('version', 'desc')
+            ->limit($limit)
+            // 이 테이블에는 updated_at 이 없다 (버전 행은 불변 스냅샷이라 created_at 만 둔다)
+            ->get(['id', 'layout_id', 'version', 'changes_summary', 'created_by', 'created_at']);
     }
 
     /**
@@ -398,9 +420,9 @@ class LayoutRepository implements LayoutRepositoryInterface
      * 특정 템플릿의 모든 레이아웃 이름 조회
      *
      * @param  int  $templateId  템플릿 ID
-     * @return \Illuminate\Support\Collection<int, string> 레이아웃 이름 컬렉션
+     * @return SupportCollection<int, string> 레이아웃 이름 컬렉션
      */
-    public function getLayoutNamesByTemplateId(int $templateId): \Illuminate\Support\Collection
+    public function getLayoutNamesByTemplateId(int $templateId): SupportCollection
     {
         return TemplateLayout::where('template_id', $templateId)
             ->pluck('name')
