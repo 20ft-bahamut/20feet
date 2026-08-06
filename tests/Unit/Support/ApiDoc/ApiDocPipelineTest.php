@@ -1429,7 +1429,11 @@ MD;
      * 도구의 설명은 필드명에서 유추한 일반 문구라 사람이 적은 도메인 사실보다 정보량이 적다.
      * 회귀 배경 (#518): `플러그인 이름 (다국어 JSON)` 이 `대상의 이름/명칭 (다국어 필드는 …)` 로,
      * `desc 는 주문별 가장 늦은 발송일` 같은 서술이 일반 문구로 대체돼 224건이 후퇴했다.
-     * 값이 바뀌는 컬럼(타입·예시·허용값)은 그대로 재생성되므로 최신성은 유지된다.
+     *
+     * 예시값 컬럼은 타입이 그대로면 기존 값을 유지한다 (#454 멱등성 — 실측값은 호출 시점
+     * DB 표본이라 매번 덮으면 스펙이 그대로인 문서까지 재실행마다 diff 가 난다). 타입이
+     * 바뀌면(스펙 변경) 새 실측값으로 갱신되므로 최신성은 그 경로로 유지된다 —
+     * `재생성_시_타입이_같은_필드의_실측_예시값을_보존한다` / `신규_필드와_타입_변경은_실측_예시값을_갱신한다` 참조.
      */
     #[Test]
     public function 기존_설명은_도구의_일반_문구로_덮어쓰지_않는다(): void
@@ -1461,9 +1465,9 @@ MD;
         // 설명은 사람 서술을 유지하고,
         $this->assertStringContainsString('플러그인 이름 (다국어 JSON)', $merged);
         $this->assertStringNotContainsString('대상의 이름/명칭', $merged);
-        // 실측으로 갱신되는 예시값은 새 값으로 바뀐다.
-        $this->assertStringContainsString('`새값`', $merged);
-        $this->assertStringNotContainsString('`옛값`', $merged);
+        // 타입이 같으므로 실측 예시값도 기존 값이 유지된다 (멱등 — 타입 변경 시에만 갱신).
+        $this->assertStringContainsString('`옛값`', $merged);
+        $this->assertStringNotContainsString('`새값`', $merged);
     }
 
     /**

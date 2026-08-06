@@ -8,6 +8,7 @@ use App\Extension\HookListenerRegistrar;
 use App\Extension\HookManager;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Validation\ValidationException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Plugins\Sirsoft\Tosspayments\Listeners\ValidateTossSettingsListener;
 use Plugins\Sirsoft\Tosspayments\Plugin;
 use Plugins\Sirsoft\Tosspayments\Tests\PluginTestCase;
@@ -82,9 +83,7 @@ class ValidateTossSettingsListenerTest extends PluginTestCase
         ];
     }
 
-    /**
-     * @dataProvider validHoursProvider
-     */
+    #[DataProvider('validHoursProvider')]
     public function test_valid_vbank_valid_hours_pass(int $hours): void
     {
         $this->listener->validateBeforeSave('sirsoft-tosspayments', ['vbank_valid_hours' => $hours]);
@@ -105,9 +104,7 @@ class ValidateTossSettingsListenerTest extends PluginTestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidHoursProvider
-     */
+    #[DataProvider('invalidHoursProvider')]
     public function test_out_of_range_vbank_valid_hours_are_rejected(mixed $hours): void
     {
         $this->expectException(ValidationException::class);
@@ -136,9 +133,7 @@ class ValidateTossSettingsListenerTest extends PluginTestCase
         ];
     }
 
-    /**
-     * @dataProvider invalidEscrowProvider
-     */
+    #[DataProvider('invalidEscrowProvider')]
     public function test_invalid_use_escrow_is_rejected(string $value): void
     {
         $this->expectException(ValidationException::class);
@@ -158,9 +153,7 @@ class ValidateTossSettingsListenerTest extends PluginTestCase
         ];
     }
 
-    /**
-     * @dataProvider validEscrowProvider
-     */
+    #[DataProvider('validEscrowProvider')]
     public function test_valid_use_escrow_passes(string $value): void
     {
         $this->listener->validateBeforeSave('sirsoft-tosspayments', ['use_escrow' => $value]);
