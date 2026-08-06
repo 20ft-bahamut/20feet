@@ -58,6 +58,8 @@ return [
         'kakao_request_failed' => 'カカオ管理API リクエストに失敗しました。',
         'sender_key_missing' => 'アラートトーク発信プロフィールキーを先に設定してください。',
         'template_not_sendable' => '送信可能(承認)ステータスではないテンプレートです。(コード: :code)',
+        'token_issue_failed_with_reason' => 'ビズプリオ認証トークンの発行に失敗しました。(:reason)',
+        'connection_failed' => 'ビズプリオ サーバーに接続できません。しばらく後にもう一度お試しください。',
     ],
     'send_skipped' => [
         'alimtalk_binding_missing' => 'アラートトークテンプレートが接続されていないため送信をスキップしました。(通知タイプ: :type)',
@@ -76,5 +78,8 @@ return [
     'channel_group' => [
         'text' => '文字',
         'alimtalk' => '通知トーク',
+    ],
+    'token_check' => [
+        'success' => '認証が正常に確認されました。ユーザーIDとパスワードが正しいです。',
     ],
 ];
