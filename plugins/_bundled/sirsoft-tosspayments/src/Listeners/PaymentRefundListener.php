@@ -4,7 +4,6 @@ namespace Plugins\Sirsoft\Tosspayments\Listeners;
 
 use App\Contracts\Extension\HookListenerInterface;
 use Illuminate\Support\Facades\Log;
-use Modules\Sirsoft\Ecommerce\Enums\PaymentMethodEnum;
 use Modules\Sirsoft\Ecommerce\Models\Order;
 use Modules\Sirsoft\Ecommerce\Models\OrderPayment;
 use Modules\Sirsoft\Ecommerce\Models\OrderRefund;
@@ -257,7 +256,7 @@ class PaymentRefundListener implements HookListenerInterface
      */
     private function requiresRefundReceiveAccount(OrderPayment $payment): bool
     {
-        return $payment->payment_method === PaymentMethodEnum::VBANK;
+        return $payment->isVirtualAccount();
     }
 
     /**
