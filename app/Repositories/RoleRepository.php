@@ -17,6 +17,7 @@ class RoleRepository implements RoleRepositoryInterface
      */
     public function getAll(): Collection
     {
+        // audit:allow query-unbounded-get reason: 역할은 운영자가 정의한 수만큼만 존재한다 (회원 수와 무관)
         return Role::with(['permissions'])
             ->orderBy('id')
             ->get();
@@ -29,6 +30,7 @@ class RoleRepository implements RoleRepositoryInterface
      */
     public function getActiveRoles(): Collection
     {
+        // audit:allow query-unbounded-get reason: 역할은 운영자가 정의한 수만큼만 존재한다 (회원 수와 무관)
         return Role::where('is_active', true)
             ->orderBy('id')
             ->get();
@@ -142,6 +144,7 @@ class RoleRepository implements RoleRepositoryInterface
      */
     public function getByExtension(ExtensionOwnerType $extensionType, string $extensionIdentifier): Collection
     {
+        // audit:allow query-unbounded-get reason: 역할은 운영자가 정의한 수만큼만 존재한다 (회원 수와 무관)
         return Role::where('extension_type', $extensionType)
             ->where('extension_identifier', $extensionIdentifier)
             ->get();

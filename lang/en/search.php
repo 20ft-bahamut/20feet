@@ -7,6 +7,9 @@
 return [
     'empty_keyword' => 'Please enter a search keyword.',
     'results_found' => ':count results found.',
+    'results_found_at_least' => 'More than :count results found.',
+    'result_cap_notice' => 'More than :cap items matched, so the exact total was not counted. You can still move to the next page.',
+    'refine_query_hint' => 'Narrow your search terms to see the exact total and jump to the last page.',
     'no_results' => 'No results found.',
     'view_more' => 'View more',
 
@@ -16,6 +19,7 @@ return [
         'q_max' => 'Search keyword must not exceed 200 characters.',
         'page_integer' => 'Page number must be a number.',
         'page_min' => 'Page number must be at least 1.',
+        'page_max' => 'Page number must not exceed :max. Please narrow your search terms.',
         'per_page_integer' => 'Items per page must be a number.',
         'per_page_min' => 'Items per page must be at least 1.',
         'per_page_max' => 'Items per page must not exceed 100.',

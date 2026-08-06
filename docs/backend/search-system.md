@@ -24,10 +24,11 @@
 2. [FulltextSearchable 인터페이스](#fulltextsearchable-인터페이스)
 3. [검색 엔진 드라이버](#검색-엔진-드라이버)
 4. [확장 포인트](#확장-포인트)
-5. [마이그레이션](#마이그레이션)
-6. [AsUnicodeJson 캐스트](#asunicodejson-캐스트)
-7. [환경설정](#환경설정)
-8. [관련 문서](#관련-문서)
+5. [검색 목록의 페이지 이동](#검색-목록의-페이지-이동)
+6. [마이그레이션](#마이그레이션)
+7. [AsUnicodeJson 캐스트](#asunicodejson-캐스트)
+8. [환경설정](#환경설정)
+9. [관련 문서](#관련-문서)
 
 ---
 
@@ -187,6 +188,93 @@ DatabaseFulltextEngine::whereFulltext($query, 'title', $keyword, 'or');
 DBMS에 따라 자동 분기:
 - MySQL/MariaDB: `WHERE MATCH(\`content\`) AGAINST(? IN BOOLEAN MODE)`
 - 그 외: `WHERE content LIKE '%keyword%'`
+
+### 키워드 술어는 활성 엔진이 만든다
+
+Scout 의 `Model::search()` 는 "엔진이 결과를 돌려준다" 모델입니다. 그래서 결과를 받은 뒤 그 ID
+로 DB 를 다시 조회해야 하고, 매칭이 많으면 ID 전량을 메모리에 올려 무제한 `IN (...)` 을 만들게
+됩니다. 페이지네이션·조인·필터를 DB 에 남긴 채 키워드 조건만 얹으려면 **엔진에게 술어를 달라고
+요청할 통로**가 따로 필요합니다.
+
+그 통로가 `App\Search\Contracts\KeywordPredicateProvider` 이고, 해석은
+`App\Search\KeywordSearch` 가 단독으로 수행합니다.
+
+```php
+use App\Search\KeywordSearch;
+
+// 컬럼들을 하나의 조건으로 함께 평가 (복합 인덱스가 있는 테이블)
+KeywordSearch::apply($query, ['title', 'content'], $keyword);
+
+// 컬럼마다 따로 평가해 OR 로 묶기 (컬럼별 단일 인덱스만 있는 테이블)
+KeywordSearch::applyAny($query, ['name', 'description'], $keyword);
+```
+
+**저장소는 구체 엔진 클래스를 지목하지 않습니다.** 지목하는 순간 플러그인이 등록한 검색 엔진은
+호출될 기회 자체를 잃고, 오류도 경고도 없이 그 사이트의 검색만 조용히 다른 방식으로 동작합니다.
+
+활성 엔진이 이 계약을 구현하지 않으면 부분일치로 내려가며, 그 사실이 기록에 남습니다 — 폴백은
+정상 동작처럼 보이므로 기록하지 않으면 "검색이 느리고 관련도가 이상하다" 는 증상만 남습니다.
+
+#### 페이지네이션은 DB 가, 상한은 엔진이
+
+엔진에게 페이지 번호를 넘기지 않습니다. 엔진이 자기 순서로 한 페이지 분량만 돌려주면, 그 뒤에
+적용되는 DB 필터(분류·전시상태·조인)에 일부가 탈락해 페이지가 비고, DB 정렬과 엔진의 관련도
+순서가 달라 페이지 경계도 어긋나기 때문입니다.
+
+엔진이 책임지는 것은 **"얼마까지 돌려줄 것인가"** 하나이며, 그 값은 `KeywordSearchContext` 로
+전달됩니다. 외부 검색 서버를 쓰는 엔진은 자기 서버에서 키 집합을 받아 조건으로 붙이는데,
+상한을 지키지 않으면 매칭이 큰 검색어에서 그 집합 자체가 메모리 폭발이 됩니다.
+
+```php
+KeywordSearch::applyAny($query, ['name', 'description'], $keyword, 'and', 'search');
+//                                                                        ↑ 상한 해석 컨텍스트
+```
+
+상한은 목록 총 건수 상한(`PaginationLimits::resultCap()`)과 **같은 값**을 씁니다. 두 기준이
+갈라지면 "엔진이 돌려준 건수" 와 "화면이 보고하는 총 건수" 가 서로 다른 근거를 갖게 됩니다.
+상한에 걸려 잘린 경우 그 이상은 도달 불가이고 총 건수는 "이상" 으로 보고됩니다.
+
+이 의무는 정적 검사로 강제할 수 없습니다 — 외부 엔진 코드는 이 저장소 밖입니다. 코어가 할 수
+있는 것은 **값을 손에 쥐어 주는 것**까지이며, 그 값이 실제로 도달하는지는 계약 테스트가
+고정합니다.
+
+#### 전문검색을 제공하지 않는 DBMS
+
+부분일치 경로는 임시방편이 아닙니다. 전문검색을 제공하지 않는 DBMS 로 설치된 사이트에서는
+**이것이 정상 검색 경로**이므로 이식성을 갖춥니다.
+
+- 검색어의 `%` `_` `\` 를 escape 해 이용자가 입력한 글자 그대로 찾습니다.
+- "대소문자를 구분하지 않는 부분일치" 를 어떤 연산자로 쓰는지는 DBMS 마다 다릅니다. 그 표는
+  `config('core.search.like_operators')` 에 **선언형으로** 있고, 표에 없는 드라이버는
+  `like_operator_default` 를 씁니다. 코어 코드에는 드라이버명을 적지 않습니다 — 적으면
+  DBMS 가 공식 지원 목록에 추가될 때마다 코어를 고쳐야 합니다.
+- 확장은 `core.search.like_operators` 필터 훅으로 새 DBMS 의 연산자를 선언합니다.
+
+```php
+HookManager::addFilter('core.search.like_operators', function (array $operators) {
+    $operators['somedb'] = 'imatch';
+
+    return $operators;
+});
+```
+
+해당 DBMS 의 진짜 전문검색(예: PostgreSQL `tsvector`)은 그 엔진을 `core.search.engine_drivers`
+로 등록하고 `KeywordPredicateProvider` 를 구현하면 코어 수정 없이 이 경로를 그대로 탑니다.
+
+### 검색어 토큰은 OR 로 결합한다 (확정)
+
+`sanitizeBooleanModeKeyword()` 는 BOOLEAN MODE 연산자를 제거한 뒤 남은 토큰을 각각
+따옴표로 묶어 **공백으로 잇는다**. BOOLEAN MODE 에서 공백 결합은 OR 이므로, "빨간 운동화"
+는 "빨간" 이 든 행과 "운동화" 가 든 행을 **모두** 매치한다.
+
+각 토큰에 `+` 를 붙여 AND 로 바꾸면 매칭 집합 자체가 줄어 대용량에서 검색 시간이 줄어들
+여지가 있다. 그럼에도 **OR 을 유지한다** — 이용자가 입력한 단어 중 하나만 든 문서가
+결과에서 통째로 사라지는 것은 성능과 맞바꿀 수 없는 손실이기 때문이다. 한글은 ngram 파서가
+2글자 단위로 토큰을 쪼개므로 AND 전환의 결과 축소 폭이 특히 크다.
+
+성능 축이 문제가 되면 토큰 결합 방식이 아니라 전용 검색 엔진(`core.search.engine_drivers`
+훅으로 교체)으로 해결한다. 상한 COUNT 가 매칭 시간을 줄이지 못하는 이유와 실측치는
+[pagination.md](pagination.md) 참조.
 
 ---
 
@@ -481,8 +569,77 @@ SCOUT_QUEUE=false
 
 ---
 
+## 검색 목록의 페이지 이동
+
+검색 결과는 컬렉션 리소스를 거치지 않고 리스너가 배열을 만들어 넘긴다. 그 조립과 판정을
+도메인마다 손으로 하면 검색 모듈 수만큼 같은 코드가 복제되고, 나중에 필드가 하나 늘 때
+어떤 화면은 받고 어떤 화면은 못 받는다. **코어가 계약을 소유하고 확장은 선언만 한다.**
+
+| 코어가 소유하는 것 | 위치 |
+|---|---|
+| 커서 적용 가능 여부 판정 | `App\Search\SearchPagePolicy` |
+| 카테고리 응답 페이로드 조립 | `App\Search\SearchCategoryPayload` |
+| 커서 인코딩·디코딩 | `App\Support\Query\KeysetPaginator` |
+
+확장이 선언하는 것은 **정렬 이름이 어떤 실제 컬럼인가** 둘뿐이다.
+
+```php
+/** 정렬 이름 → [실제 컬럼, 방향]. 여기에 없는 이름은 커서를 쓰지 않는다. */
+public const SEARCH_SORT_MAP = [
+    'latest' => ['created_at', 'desc'],
+    'oldest' => ['created_at', 'asc'],
+];
+
+/** 커서 경계로 쓸 수 있는 실제 컬럼 */
+public const SEARCH_CURSOR_COLUMNS = ['created_at'];
+```
+
+서비스는 규칙을 다시 쓰지 않고 코어에 판정을 위임한다. 적용할 수 없는 정렬이면 `null` 을
+돌려주고, 호출자는 기존 offset 경로를 그대로 쓴다.
+
+```php
+$sortKeys = SearchPagePolicy::sortKeys($sort, self::SEARCH_SORT_MAP);
+
+if (! SearchPagePolicy::usesCursor($cursor, $sortKeys, self::SEARCH_CURSOR_COLUMNS)) {
+    return null;
+}
+
+return $this->repository->searchByKeywordWithCursor($keyword, $sortKeys, $perPage, $cursor);
+```
+
+### 관련도순에는 커서를 쓸 수 없다
+
+커서는 정렬 키를 WHERE 절 경계로 삼으므로 정렬 키가 **실제 컬럼**이어야 한다. 관련도순은
+전문 검색 점수라는 계산값으로 정렬하므로 경계로 쓸 수 없고, 그 정렬에서는 offset 을
+유지한다. 이 판정은 선언에 그 이름이 없는 것으로 자연히 이루어진다.
+
+### 응답 키 집합은 세 형태가 모두 같다
+
+offset·커서·건수전용 세 응답은 채워지는 값만 다르고 키 구성은 동일하다. 화면이 분기 없이
+같은 키를 읽을 수 있어야 하기 때문이다.
+
+| 키 | offset | 커서 | 건수전용 |
+|---|---|---|---|
+| `total` / `total_relation` / `total_is_exact` / `result_cap` | 채움 | 채움(별도 집계) | 채움 |
+| `last_page` | 상한 초과 시 `null` | 언제나 `null` | `null` |
+| `has_more_pages` | 실측 | 실측 | `false` |
+| `next_cursor` / `prev_cursor` | `null` | 채움 | `null` |
+| `items` | 채움 | 채움 | 빈 배열 |
+
+커서 응답에 `last_page` 가 없는 것은 결함이 아니라 **커서 방식에 마지막 페이지 번호라는
+개념이 없기 때문**이다. 화면은 그때 마지막 페이지 점프만 감추고 "다음" 이동은 유지한다.
+
+### 탭 배지에도 정확도가 따라간다
+
+배지는 숫자 하나만 그리므로, 상한에 걸려 잘린 값이 정확한 것처럼 나가도 오류로 드러나지
+않고 그냥 틀린 숫자로만 보인다. 코어가 카테고리별 정확도를 `counts_are_exact` 로 일괄
+제공하며, 화면은 정확하지 않은 배지에 "이상" 표시를 붙인다.
+
+---
+
 ## 관련 문서
 
+- [대용량 목록 페이지네이션](pagination.md) - 상한 COUNT·커서 적용 기준
 - [Service-Repository 패턴](service-repository.md) - Repository에서 whereFulltext() 사용
 - [훅 시스템](../extension/hooks.md) - core.search.engine_drivers 필터 훅
 - [데이터베이스 가이드](../database-guide.md) - 마이그레이션 규칙

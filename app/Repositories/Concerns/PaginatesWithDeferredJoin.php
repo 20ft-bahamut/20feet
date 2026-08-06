@@ -2,10 +2,14 @@
 
 namespace App\Repositories\Concerns;
 
+use App\Enums\TotalRelation;
+use App\Support\Query\BoundedPage;
+use App\Support\Query\BoundedPaginator;
 use Closure;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Contracts\Pagination\Paginator as PaginatorContract;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
@@ -66,10 +70,11 @@ trait PaginatesWithDeferredJoin
      * @param  bool  $preserveIdOrder  true = inner 가 정한 ID 순서를 outer 에서 그대로 복원
      * @param  string  $pageName  페이지 쿼리 파라미터명
      * @param  Closure|null  $outerUsing  outer 에만 적용할 조인/집계 (inner 에서는 실행되지 않는다)
-     * @return PaginatorContract 페이지네이터 ($simple=true 면 Paginator, 아니면 LengthAwarePaginator)
+     * @param  int|null  $resultCap  총 건수 집계 상한 (null = 항상 정확한 COUNT)
+     * @return PaginatorContract 페이지네이터 ($simple=true 면 Paginator, $resultCap 지정 시 BoundedPage, 아니면 LengthAwarePaginator)
      */
     protected function paginateWithDeferredJoin(
-        Builder $query,
+        Builder|Relation $query,
         array $columns,
         array $sort,
         int $perPage,
@@ -82,7 +87,14 @@ trait PaginatesWithDeferredJoin
         bool $preserveIdOrder = false,
         string $pageName = 'page',
         ?Closure $outerUsing = null,
+        ?int $resultCap = null,
     ): PaginatorContract {
+        // 관계(`$model->items()`)도 받는다 — 표준 `paginate()` 가 되는 자리는 이 계약으로
+        // 바꿔도 되어야 한다. 관계의 소속 조건은 그 밑 빌더에 이미 들어가 있어 보존된다.
+        // (쿼리 빌더는 받지 않는다. 이 계약은 모델의 키 컬럼·eager load 를 다루므로
+        //  Eloquent 가 전제다 — 넓힐 수 있는 범위와 없는 범위를 구분한다.)
+        $query = $query instanceof Relation ? $query->getQuery() : $query;
+
         $page = $page ?: Paginator::resolveCurrentPage($pageName);
         $page = max(1, $page);
 
@@ -94,7 +106,16 @@ trait PaginatesWithDeferredJoin
         // whereHas 는 결과 집합을 결정하는 조건이라 setEagerLoads 로 지워지지 않는다 (의도된 구분).
         $inner = (clone $query)->setEagerLoads([]);
 
-        if (! $simple && $total === null) {
+        // 상한이 지정되면 총 건수를 상한까지만 센다. 다음 페이지 판정은 총 건수와 무관하게
+        // per_page + 1 실측으로 하므로, 마지막 페이지 번호 하나만 계산 불가가 된다.
+        $bounded = ! $simple && $resultCap !== null && $resultCap > 0;
+        $relation = null;
+
+        if ($bounded && $total === null) {
+            // Eloquent 빌더를 그대로 넘긴다 — countWithCap 이 내부에서 toBase() 로
+            // 글로벌 스코프까지 적용한 기반 쿼리를 만든다.
+            [$total, $relation] = BoundedPaginator::countWithCap(clone $inner, $resultCap);
+        } elseif (! $simple && $total === null) {
             // Laravel 의 paginate() 와 같은 집계 경로를 쓴다. count() 는 groupBy/having 이 있는
             // 쿼리에서 `select count(*) ... group by ...` 를 그대로 실행해 **첫 그룹의 행 수**를
             // 총 건수로 돌려준다. getCountForPagination() 은 그룹 쿼리를 서브쿼리로 감싸므로
@@ -105,16 +126,23 @@ trait PaginatesWithDeferredJoin
 
         $this->applySortSpec($inner, $sort);
 
-        // simple 모드는 다음 페이지 유무 판정을 위해 한 건을 더 읽는다 (Paginator 가 잘라낸다).
+        // simple/bounded 모드는 다음 페이지 유무 판정을 위해 한 건을 더 읽는다.
         // forPage() 를 쓰면 offset 이 (page-1) * (perPage+1) 로 계산돼 페이지가 넘어갈수록
         // 건너뛰는 행이 어긋나므로, offset 은 perPage 기준으로 직접 지정한다.
-        $fetchCount = $simple ? $perPage + 1 : $perPage;
+        $probesNextPage = $simple || $bounded;
+        $fetchCount = $probesNextPage ? $perPage + 1 : $perPage;
 
         $ids = $inner
             ->select($inner->getModel()->qualifyColumn($keyName))
             ->offset(($page - 1) * $perPage)
             ->limit($fetchCount)
             ->pluck($keyName);
+
+        $hasMorePages = $probesNextPage && $ids->count() > $perPage;
+
+        if ($bounded && $hasMorePages) {
+            $ids = $ids->slice(0, $perPage)->values();
+        }
 
         $items = $ids->isEmpty()
             ? new Collection
@@ -127,6 +155,22 @@ trait PaginatesWithDeferredJoin
 
         if ($simple) {
             return new Paginator($items, $perPage, $page, $options);
+        }
+
+        if ($bounded) {
+            // 동시 삽입으로 집계 시점과 조회 시점의 모수가 달라질 수 있다
+            $seenSoFar = ($page - 1) * $perPage + $items->count();
+
+            return new BoundedPage(
+                items: $items,
+                total: max((int) $total, $seenSoFar),
+                perPage: $perPage,
+                currentPage: $page,
+                totalRelation: $relation ?? TotalRelation::Exact,
+                resultCap: $resultCap,
+                hasMorePages: $hasMorePages,
+                options: $options,
+            );
         }
 
         return new LengthAwarePaginator($items, $total ?? $items->count(), $perPage, $page, $options);

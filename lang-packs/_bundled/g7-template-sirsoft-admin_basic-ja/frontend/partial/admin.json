@@ -1788,7 +1788,13 @@
       "geoip_update_success": "GeoIP DBの更新が完了しました。",
       "geoip_update_failed": "GeoIP DBの更新に失敗しました。",
       "seo_sitemap_cache": "Sitemap キャッシュ",
-      "seo_sitemap_cache_desc": "sitemap.xml をキャッシュします。"
+      "seo_sitemap_cache_desc": "sitemap.xml をキャッシュします。",
+      "pagination": "リスト制限値",
+      "pagination_desc": "大規模リストにおいて、総件数を集計する範囲と直接リクエスト可能なページ番号の上限です。上限を超えると、総件数を「N件以上」と表示し、最後のページへのジャンプのみ非表示になります — 次ページへの移動はそのまま利用可能です。",
+      "pagination_result_cap": "総件数集計の上限",
+      "pagination_result_cap_desc": "この件数までのみ正確に集計します。0の場合は常にすべてを集計します(大規模リストの場合、リストが遅くなる可能性があります)。",
+      "pagination_max_page": "ページ番号の上限",
+      "pagination_max_page_desc": "アドレスから直接リクエスト可能な最大ページ番号です。0の場合は制限しません。通常の次ページへの移動はこの値に関わらず引き続き可能です。"
     },
     "notification_definitions": {
       "title": "通知設定",
@@ -2307,7 +2313,8 @@
       "no_value": "-"
     },
     "pagination": {
-      "total": "合計{{count}}件"
+      "total": "合計{{count}}件",
+      "total_at_least": "合計{{count}}件以上"
     },
     "empty": {
       "title": "アクティビティログがありません",

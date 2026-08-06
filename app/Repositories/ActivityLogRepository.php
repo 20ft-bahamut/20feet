@@ -5,10 +5,14 @@ namespace App\Repositories;
 use App\Contracts\Repositories\ActivityLogRepositoryInterface;
 use App\Helpers\PermissionHelper;
 use App\Helpers\TimezoneHelper;
+use App\Http\Resources\BaseApiCollection;
 use App\Models\ActivityLog;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
+use App\Support\Query\KeysetPaginator;
+use App\Support\Query\PaginationLimits;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -65,16 +69,22 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             columns: ['*'],
             sort: [['column' => 'created_at', 'direction' => $sortOrder]],
             perPage: (int) ($filters['per_page'] ?? 15),
+            // 로그 테이블은 계속 쌓이기만 한다. 총 건수는 상한까지만 세고 "다음" 이동은
+            // per_page + 1 실측으로 끝까지 열어 둔다 (계산 불가는 마지막 페이지 번호 하나뿐).
+            resultCap: PaginationLimits::resultCap('admin.activity_logs'),
         );
     }
 
     /**
      * 활동 로그 목록을 페이지네이션하여 조회합니다.
      *
+     * 요청에 `cursor` 가 있으면 키셋(커서) 방식으로, 없으면 페이지 번호 방식으로 응답합니다.
+     * 두 방식의 응답 봉투 차이는 {@see BaseApiCollection} 이 흡수합니다.
+     *
      * @param  array  $filters  필터 조건
-     * @return LengthAwarePaginator 페이지네이션된 로그 목록
+     * @return LengthAwarePaginator|CursorPaginator 페이지네이션된 로그 목록
      */
-    public function getPaginated(array $filters = []): LengthAwarePaginator
+    public function getPaginated(array $filters = []): LengthAwarePaginator|CursorPaginator
     {
         // 관계는 지연 조인의 outer 에서만 로드한다 (inner 는 키 컬럼만 조회한다)
         $query = ActivityLog::query();
@@ -122,6 +132,26 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
         }
 
         $sort = $this->resolveSortSpec($filters, self::SORTABLE_COLUMNS, 'created_at');
+        $perPage = (int) ($filters['per_page'] ?? 15);
+
+        // 커서를 받은 요청은 키셋으로 응답한다. 로그는 계속 쌓이기만 해서 깊은 페이지를
+        // OFFSET 으로 훑으면 건너뛸 행을 실제로 읽어야 하지만, 커서는 직전 페이지의 정렬
+        // 키를 WHERE 경계로 삼아 깊이와 무관하게 일정하다.
+        // 커서 모드에서는 OFFSET 자체가 없으므로 지연 조인이 해결하려던 문제도 함께 사라진다.
+        $sortKeys = array_map(
+            static fn (array $spec): array => [$spec['column'], $spec['direction']],
+            $sort
+        );
+
+        if (! empty($filters['cursor']) && KeysetPaginator::supports($sortKeys, self::SORTABLE_COLUMNS)) {
+            return KeysetPaginator::paginate(
+                query: $query->with('user:id,uuid,name,email'),
+                perPage: $perPage,
+                sortKeys: $sortKeys,
+                uniqueKey: 'id',
+                cursor: (string) $filters['cursor'],
+            );
+        }
 
         // 목록 컬럼을 좁히지 않는 이유: 활동 로그 리소스는 변경 내역(mediumText `changes`)과
         // 부가 정보(`properties`)까지 그대로 노출하므로 컬럼을 빼면 응답 계약이 바뀐다.
@@ -130,8 +160,11 @@ class ActivityLogRepository implements ActivityLogRepositoryInterface
             query: $query,
             columns: ['*'],
             sort: $sort,
-            perPage: (int) ($filters['per_page'] ?? 15),
+            perPage: $perPage,
             relations: ['user:id,uuid,name,email'],
+            // 로그 테이블은 계속 쌓이기만 한다. 총 건수는 상한까지만 세고 "다음" 이동은
+            // per_page + 1 실측으로 끝까지 열어 둔다 (계산 불가는 마지막 페이지 번호 하나뿐).
+            resultCap: PaginationLimits::resultCap('admin.activity_logs'),
         );
     }
 

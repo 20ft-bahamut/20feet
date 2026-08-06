@@ -356,6 +356,7 @@ class AuthService
         $userRole = $this->roleRepository->findByIdentifier('user');
         if ($userRole) {
             $user->roles()->sync([$userRole->id]);
+            $user->flushPermissionCaches();
         }
 
         $token = $user->createToken('auth-token', ['*'], $this->getTokenExpiresAt())->plainTextToken;

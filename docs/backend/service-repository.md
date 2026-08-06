@@ -942,11 +942,25 @@ class OrderRepository implements OrderRepositoryInterface
 
 `paginate` / `simplePaginate` / 캐시 total 주입은 인자로 구분한다 — inner 쿼리는 동일하고 COUNT 수행 여부와 반환 클래스만 달라진다.
 
-| 호출자 상황 | `$simple` | `$total` | 반환 |
-| ------ | ------ | ------ | ------ |
-| 일반 목록 | `false` | `null` | `LengthAwarePaginator` (COUNT 1회) |
-| COUNT 를 피하고 다음 페이지 유무만 필요 | `true` | — | `Paginator` |
-| 총 건수를 이미 캐시해 둠 | `false` | 캐시값 | `LengthAwarePaginator` (COUNT 없음) |
+| 호출자 상황 | `$simple` | `$total` | `$resultCap` | 반환 |
+| ------ | ------ | ------ | ------ | ------ |
+| 일반 목록 | `false` | `null` | `null` | `LengthAwarePaginator` (COUNT 1회) |
+| COUNT 를 피하고 다음 페이지 유무만 필요 | `true` | — | — | `Paginator` |
+| 총 건수를 이미 캐시해 둠 | `false` | 캐시값 | `null` | `LengthAwarePaginator` (COUNT 없음) |
+| 계속 쌓이기만 하는 목록 (로그·회원 등) | `false` | `null` | 상한 | `BoundedPage` (상한 COUNT + `per_page + 1` 실측) |
+
+상한을 지정하면 총 건수는 그 값까지만 세고, 다음 페이지 판정은 `per_page + 1` 실측으로 따로 한다. 계산이 불가능해지는 것은 마지막 페이지 번호 하나뿐이다. 상세는 [pagination.md](pagination.md).
+
+```php
+return $this->paginateWithDeferredJoin(
+    query: $query,
+    columns: ['*'],
+    sort: $sort,
+    perPage: $perPage,
+    relations: ['user:id,uuid,name,email'],
+    resultCap: PaginationLimits::resultCap('admin.activity_logs'),
+);
+```
 
 정렬 순서 복원은 `whereIn` + 같은 정렬 스펙 재적용으로 한다. 키 컬럼이 정렬에 포함돼 전순서가 성립하므로 결과가 inner 순서와 동일하다. MySQL 전용 `FIELD()` 는 쓰지 않는다. outer 에 존재하지 않는 표현식(집계·조인 서브쿼리)으로 정렬해 재현이 불가능한 경우에만 `$preserveIdOrder = true` 로 표준 SQL `CASE WHEN` 경로를 쓴다.
 

@@ -7,6 +7,9 @@
 return [
     'empty_keyword' => '검색어를 입력해주세요.',
     'results_found' => ':count건의 검색 결과를 찾았습니다.',
+    'results_found_at_least' => ':count건 이상의 검색 결과를 찾았습니다.',
+    'result_cap_notice' => '일치하는 항목이 :cap건을 넘어 총 건수를 정확히 세지 않았습니다. 다음 페이지로 계속 이동할 수 있습니다.',
+    'refine_query_hint' => '검색어를 더 구체적으로 입력하면 정확한 건수와 마지막 페이지를 볼 수 있습니다.',
     'no_results' => '검색 결과가 없습니다.',
     'view_more' => '더보기',
 
@@ -16,6 +19,7 @@ return [
         'q_max' => '검색어는 최대 200자까지 입력 가능합니다.',
         'page_integer' => '페이지 번호는 숫자여야 합니다.',
         'page_min' => '페이지 번호는 1 이상이어야 합니다.',
+        'page_max' => '페이지 번호는 :max 이하여야 합니다. 검색어를 더 구체적으로 입력해 주세요.',
         'per_page_integer' => '페이지당 항목 수는 숫자여야 합니다.',
         'per_page_min' => '페이지당 항목 수는 1 이상이어야 합니다.',
         'per_page_max' => '페이지당 항목 수는 최대 100개까지 가능합니다.',

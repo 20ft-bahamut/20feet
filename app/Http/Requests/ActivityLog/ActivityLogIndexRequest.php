@@ -47,6 +47,10 @@ class ActivityLogIndexRequest extends FormRequest
             // 조용히 기본 정렬로 되돌리지 않도록 한다 (service-repository.md "정렬 컬럼 화이트리스트").
             'sort_by' => ['nullable', 'string', Rule::in(['created_at', 'action', 'log_type'])],
             'sort_order' => ['nullable', 'string', Rule::in(['asc', 'desc'])],
+            // 커서를 주면 목록이 키셋 방식으로 응답한다. 로그는 계속 쌓이기만 하므로 깊은
+            // 페이지를 OFFSET 으로 훑으면 건너뛸 행을 실제로 읽어야 한다.
+            // 형식이 깨진 값은 KeysetPaginator 가 첫 페이지로 되돌리므로 여기서는 길이만 본다.
+            'cursor' => ['nullable', 'string', 'max:500'],
         ];
 
         return HookManager::applyFilters('core.activity_log.index_validation_rules', $rules, $this);

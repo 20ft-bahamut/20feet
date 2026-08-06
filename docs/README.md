@@ -9,7 +9,7 @@
 
 | 카테고리 | 문서 수 | 링크 상태 |
 |----------|---------|----------|
-| [백엔드](backend/) | 34개 | 정상 |
+| [백엔드](backend/) | 35개 | 정상 |
 | [프론트엔드](frontend/) | 51개 | 정상 |
 | [확장 시스템](extension/) | 31개 | 정상 |
 | 공통 | 20개 | 정상 |
@@ -125,7 +125,7 @@ G7 이 제공하는 REST API 의 엔드포인트별 요청 파라미터·응답 
 <!-- AUTO-GENERATED-START: docs-readme-full-list -->
 ## 카테고리별 전체 문서 목록
 
-### 백엔드 (34개)
+### 백엔드 (35개)
 
 | 문서 | 제목 |
 |------|------|
@@ -152,6 +152,7 @@ G7 이 제공하는 REST API 의 엔드포인트별 요청 파라미터·응답 
 | [language-pack-service.md](backend/language-pack-service.md) | LanguagePackService (백엔드 Service 레이어) |
 | [middleware.md](backend/middleware.md) | 미들웨어 등록 규칙 |
 | [notification-system.md](backend/notification-system.md) | 알림 시스템 (Notification System) |
+| [pagination.md](backend/pagination.md) | 대용량 목록 페이지네이션 (Pagination) |
 | [README.md](backend/README.md) | 백엔드 개발 가이드 |
 | [response-helper.md](backend/response-helper.md) | API 응답 규칙 (ResponseHelper) |
 | [routing.md](backend/routing.md) | 라우트 네이밍 및 경로 |

@@ -120,8 +120,8 @@ class PageRepositorySearchTest extends TestCase
 
         $result = $this->repository->searchByKeyword('이용약관');
 
-        $this->assertEquals(1, $result['total']);
-        $this->assertEquals('test-terms-search', $result['items']->first()->slug);
+        $this->assertEquals(1, $result->total());
+        $this->assertEquals('test-terms-search', $result->getCollection()->first()->slug);
     }
 
     /**
@@ -144,9 +144,9 @@ class PageRepositorySearchTest extends TestCase
         $koFull = $this->repository->searchByKeyword('이용약관');
         $koPartial = $this->repository->searchByKeyword('약관');
 
-        $this->assertEquals(1, $koFull['total'], '제목 전체 일치가 검색되지 않았다');
-        $this->assertEquals('aaa-bbb-ccc', $koFull['items']->first()->slug);
-        $this->assertEquals(1, $koPartial['total'], '제목 부분 일치가 검색되지 않았다');
+        $this->assertEquals(1, $koFull->total(), '제목 전체 일치가 검색되지 않았다');
+        $this->assertEquals('aaa-bbb-ccc', $koFull->getCollection()->first()->slug);
+        $this->assertEquals(1, $koPartial->total(), '제목 부분 일치가 검색되지 않았다');
     }
 
     /**
@@ -160,8 +160,8 @@ class PageRepositorySearchTest extends TestCase
 
         $result = $this->repository->searchByKeyword('Terms');
 
-        $this->assertEquals(1, $result['total'], '영문 제목으로 검색되지 않았다');
-        $this->assertEquals('ddd-eee-fff', $result['items']->first()->slug);
+        $this->assertEquals(1, $result->total(), '영문 제목으로 검색되지 않았다');
+        $this->assertEquals('ddd-eee-fff', $result->getCollection()->first()->slug);
     }
 
     /**
@@ -174,8 +174,8 @@ class PageRepositorySearchTest extends TestCase
 
         $result = $this->repository->searchByKeyword('쿠키 정책');
 
-        $this->assertEquals(1, $result['total']);
-        $this->assertEquals('test-guide-search', $result['items']->first()->slug);
+        $this->assertEquals(1, $result->total());
+        $this->assertEquals('test-guide-search', $result->getCollection()->first()->slug);
     }
 
     /**
@@ -188,7 +188,10 @@ class PageRepositorySearchTest extends TestCase
 
         $count = $this->repository->countByKeyword('사이트 점검');
 
-        $this->assertEquals(1, $count);
+        // 건수만 세는 자리도 정확도를 함께 돌려준다 (#519) — 상한에 걸려 잘린 값이
+        // 정확한 것처럼 화면에 나가지 않도록.
+        $this->assertSame(1, $count->total);
+        $this->assertTrue($count->totalRelation()->isExact());
     }
 
     /**
@@ -201,7 +204,7 @@ class PageRepositorySearchTest extends TestCase
 
         $result = $this->repository->searchByKeyword('독점 서비스');
 
-        $this->assertEquals(0, $result['total']);
+        $this->assertEquals(0, $result->total());
     }
 
     // ─── 헬퍼 ────────────────────────────────────────────

@@ -50,6 +50,7 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
      */
     public function getActivePacks(): Collection
     {
+        // audit:allow query-unbounded-get reason: 언어팩은 설치된 팩 × 로케일 수만큼만 존재한다 (사용량과 무관)
         return LanguagePack::query()
             ->where('status', LanguagePackStatus::Active->value)
             ->get();
@@ -96,6 +97,7 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
         ?string $targetIdentifier,
         string $locale
     ): Collection {
+        // audit:allow query-unbounded-get reason: 언어팩은 설치된 팩 × 로케일 수만큼만 존재한다 (사용량과 무관)
         return LanguagePack::query()
             ->where('scope', $scope)
             ->where('target_identifier', $targetIdentifier)
@@ -112,6 +114,7 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
      */
     public function getActiveCoreLocales(): array
     {
+        // audit:allow query-unbounded-get reason: 언어팩은 설치된 팩 × 로케일 수만큼만 존재한다 (사용량과 무관)
         return LanguagePack::query()
             ->where('scope', LanguagePackScope::Core->value)
             ->where('status', LanguagePackStatus::Active->value)
@@ -246,6 +249,7 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
      */
     public function getPacksForTarget(string $scope, string $targetIdentifier): Collection
     {
+        // audit:allow query-unbounded-get reason: 언어팩은 설치된 팩 × 로케일 수만큼만 존재한다 (사용량과 무관)
         return LanguagePack::query()
             ->where('scope', $scope)
             ->where('target_identifier', $targetIdentifier)
@@ -260,6 +264,7 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
      */
     public function getPacksForLocale(string $locale): Collection
     {
+        // audit:allow query-unbounded-get reason: 언어팩은 설치된 팩 × 로케일 수만큼만 존재한다 (사용량과 무관)
         return LanguagePack::query()->where('locale', $locale)->get();
     }
 

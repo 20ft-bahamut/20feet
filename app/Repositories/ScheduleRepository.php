@@ -8,6 +8,7 @@ use App\Enums\ScheduleResultStatus;
 use App\Enums\ScheduleType;
 use App\Helpers\PermissionHelper;
 use App\Models\Schedule;
+use App\Repositories\Concerns\FiltersByDateRange;
 use App\Repositories\Concerns\HasMultipleSearchFilters;
 use App\Repositories\Concerns\ResolvesSortSpec;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ScheduleRepository implements ScheduleRepositoryInterface
 {
+    use FiltersByDateRange;
     use HasMultipleSearchFilters;
     use ResolvesSortSpec;
 
@@ -198,13 +200,13 @@ class ScheduleRepository implements ScheduleRepositoryInterface
      */
     private function applyDateFilters(Builder $query, array $filters): void
     {
-        if (! empty($filters['created_from'])) {
-            $query->whereDate('created_at', '>=', $filters['created_from']);
-        }
-
-        if (! empty($filters['created_to'])) {
-            $query->whereDate('created_at', '<=', $filters['created_to']);
-        }
+        // whereDate 는 컬럼에 DATE() 를 씌워 인덱스를 무력화한다 — 범위 조건으로 준다.
+        $this->applyDateRangeFilter(
+            $query,
+            'created_at',
+            $filters['created_from'] ?? null,
+            $filters['created_to'] ?? null
+        );
     }
 
     /**

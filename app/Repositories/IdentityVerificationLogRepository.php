@@ -8,6 +8,7 @@ use App\Helpers\TimezoneHelper;
 use App\Models\IdentityPolicy;
 use App\Models\IdentityVerificationLog;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
+use App\Support\Query\PaginationLimits;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
@@ -219,6 +220,9 @@ class IdentityVerificationLogRepository implements IdentityVerificationLogReposi
             columns: ['*'],
             sort: [['column' => $sortBy, 'direction' => $sortOrder]],
             perPage: $perPage,
+            // 로그 테이블은 계속 쌓이기만 한다. 총 건수는 상한까지만 세고 "다음" 이동은
+            // per_page + 1 실측으로 끝까지 열어 둔다 (계산 불가는 마지막 페이지 번호 하나뿐).
+            resultCap: PaginationLimits::resultCap('admin.identity_logs'),
         );
     }
 

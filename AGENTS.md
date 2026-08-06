@@ -6,7 +6,7 @@
 
 <!-- AUTO-GENERATED-START: docs-quick-reference -->
 
-### 백엔드 [backend/](docs/backend/) (33개)
+### 백엔드 [backend/](docs/backend/) (34개)
 
 | 문서 | 설명 | TL;DR 핵심 |
 |------|------|-----------|
@@ -33,6 +33,7 @@
 | [language-pack-service.md](docs/backend/language-pack-service.md) | LanguagePackService (백엔드 Service 레이어) | LanguagePackService 가 install/activate/deactivate/uninsta... |
 | [middleware.md](docs/backend/middleware.md) | 미들웨어 등록 규칙 | 인증 필요 미들웨어 → 전역 등록 금지! |
 | [notification-system.md](docs/backend/notification-system.md) | 알림 시스템 (Notification System) | GenericNotification 범용 클래스 1개로 모든 알림 처리 (개별 클래스 불필요) |
+| [pagination.md](docs/backend/pagination.md) | 대용량 목록 페이지네이션 (Pagination) | 총 건수만 상한을 받는다 — 상한 이하면 정확, 초과면 "이상"(total_relation=at_least) |
 | [response-helper.md](docs/backend/response-helper.md) | API 응답 규칙 (ResponseHelper) | 모든 API 응답은 ResponseHelper 사용 |
 | [routing.md](docs/backend/routing.md) | 라우트 네이밍 및 경로 | 모든 라우트는 name() 필수: ->name('api.users.index') |
 | [search-system.md](docs/backend/search-system.md) | Scout 검색 엔진 시스템 (Search System) | Laravel Scout + DatabaseFulltextEngine: MySQL FULLTEXT + ... |
@@ -151,7 +152,7 @@
 
 | 대상 | 진입점 | 문서/엔드포인트 |
 |------|--------|----------------|
-| 코어 | [docs/backend/api/README.md](docs/backend/api/README.md) | 35 / 291 |
+| 코어 | [docs/backend/api/README.md](docs/backend/api/README.md) | 36 / 319 |
 
 
 ### 확장 API 레퍼런스 (13개 확장, 자동 스캔)
@@ -162,7 +163,7 @@
 |------|------|--------------|----------------|
 | `gnuboard7-hello_module` | 모듈 | [docs/api/](modules/_bundled/gnuboard7-hello_module/docs/api/README.md) | 1 / 7 |
 | `sirsoft-board` | 모듈 | [docs/api/](modules/_bundled/sirsoft-board/docs/api/README.md) | 10 / 80 |
-| `sirsoft-ecommerce` | 모듈 | [docs/api/](modules/_bundled/sirsoft-ecommerce/docs/api/README.md) | 33 / 231 |
+| `sirsoft-ecommerce` | 모듈 | [docs/api/](modules/_bundled/sirsoft-ecommerce/docs/api/README.md) | 33 / 232 |
 | `sirsoft-page` | 모듈 | [docs/api/](modules/_bundled/sirsoft-page/docs/api/README.md) | 2 / 17 |
 | `sirsoft-ckeditor5` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-ckeditor5/docs/api/README.md) | 2 / 2 |
 | `sirsoft-gdpr` | 플러그인 | [docs/api/](plugins/_bundled/sirsoft-gdpr/docs/api/README.md) | 4 / 15 |
@@ -397,6 +398,28 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 
 > 상세: [service-repository.md "목록 조회 컬럼 프루닝과 지연 조인" / "정렬 컬럼 화이트리스트" / "화면 정렬 옵션은 게이트의 부분집합이어야 한다" / "관계 테이블 컬럼 기준 정렬" / "허용되는 Raw 쿼리"](docs/backend/service-repository.md)
 
+### 대용량 목록의 총 건수와 페이지 이동
+
+총 건수 상한과 페이지 이동 범위는 **별개 결정**이다. 묶으면 필요 없이 기능이 깎인다. 총 건수만 상한을 받고, "다음" 이동은 `per_page + 1` 실측으로 끝까지 열어 둔다. 계산이 불가능해지는 것은 마지막 페이지 번호 하나뿐이다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+|--------|---------------|
+| 같은 술어를 `count()` 한 번, `get()` 한 번 실행 | `BoundedPaginator::paginate()` 한 번 (총 건수 + 페이지를 한 번에) |
+| `paginate(PHP_INT_MAX)` 후 PHP `array_slice` | 실제 `page`/`per_page` 를 저장소까지 하달 |
+| `forPage($page, $perPage + 1)` | offset 은 `per_page` 기준으로 따로 계산 (안 그러면 페이지가 깊어질수록 경계가 밀린다) |
+| Scout `->keys()->all()` + 무제한 `whereIn` | 키워드 술어를 페이지 쿼리에 직접 밀어넣기 (`DatabaseFulltextEngine::whereFulltext`) |
+| FULLTEXT 원문 키워드를 raw 로 바인딩 | 코어 sanitizer 경유 — `+` `-` `*` `"` 입력이 파싱 오류로 500 이 된다 |
+| `whereDate` / `whereYear`+`whereMonth` | `FiltersByDateRange` 의 범위 조건 (컬럼에 함수를 씌우면 인덱스를 못 쓴다) |
+| 총 건수를 모르는데 `last_page` 를 1 로 채움 | `null` 로 내보내 화면이 마지막 페이지 점프만 감추게 한다 |
+| 상한값을 저장소·화면에 리터럴로 재기입 | `PaginationLimits` 단일 해석 + 확장은 `core.pagination.filter_*` 필터 훅으로만 조정 |
+| 결과 크기가 데이터 증가에 비례하는데 상한 없는 `->get()` / `->pluck()` | 목록은 페이지네이션, 순회는 `chunkById`/`lazyById`, 몇 건이면 `limit` — 운영자 등록 수에 묶인 설정성 테이블만 예외이며 그 근거를 코드에 남긴다 |
+| 배지·요약 건수를 `int` 하나로 돌려주기 | `BoundedPaginator::count()` 의 `BoundedCount` — 잘린 값과 정확한 값이 구분되지 않으면 잘린 10,000 이 "정확히 10,000 건" 으로 화면에 나간다 |
+| 여러 카테고리 건수를 합치며 정확도는 버리기 | 하나라도 부정확하면 합계도 부정확. 단, 특정 탭만 볼 때는 그 카테고리의 정확도만 본다 |
+| 정렬 마지막이 비고유 컬럼 | 기본키를 덧붙여 전순서 보장 (동률 구간에서 행이 겹치거나 샌다) |
+| 관련도순(`_ft_score`)에 커서 적용 | 계산값은 WHERE 절 경계로 쓸 수 없다 — offset 유지 (`KeysetPaginator::supports` 가 판정) |
+
+> 상세: [pagination.md](docs/backend/pagination.md)
+
 ### 검색 인덱스 재생성(리인덱싱)
 
 | ❌ 금지 | ✅ 올바른 사용 |
@@ -411,6 +434,24 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 | "점검 대상 0" 과 "점검 불가" 를 같은 문구로 보고 | 구분 보고 — 뭉뚱그리면 "인덱스가 다 정상" 으로 읽힌다 |
 
 > 상세: [search-system.md](docs/backend/search-system.md)
+
+### 검색 질의는 활성 엔진이 만든다
+
+검색 엔진은 `core.search.engine_drivers` 훅으로 교체 가능하다. 그런데 그 교체가 실제로 먹는 것은 **활성 엔진을 거치는 경로뿐**이다. 저장소가 구체 엔진 클래스를 지목하면 등록된 엔진은 호출될 기회 자체를 잃고, 오류도 경고도 없이 그 사이트의 검색만 조용히 다른 방식으로 동작한다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+|--------|---------------|
+| `DatabaseFulltextEngine::whereFulltext(...)` 등 구체 엔진 정적 호출 | `KeywordSearch::apply()` / `::applyAny()` (해석기가 활성 엔진에 위임) |
+| `DB::getDriverName() === 'pgsql'` 처럼 드라이버명을 코드에 비교 | 선언형 `config('core.search.*')` + `core.search.like_operators` 필터 훅 |
+| 매칭 ID 전량을 PHP 로 적재 후 `whereIn` (`search()->keys()->all()`) | 술어를 페이지 쿼리에 직접 부착 — ID 왕복도 목록 폭발도 없다 |
+| 엔진에게 페이지 번호를 넘겨 한 페이지만 받기 | 페이지네이션은 DB 담당. 엔진은 **키 집합 상한**만 책임진다 (`KeywordSearchContext`) |
+| 키 집합 상한을 총 건수 상한과 다른 값으로 두기 | 둘 다 `PaginationLimits::resultCap()` — 갈라지면 엔진이 돌려준 건수와 화면 총 건수의 근거가 달라진다 |
+| 부분일치 폴백을 "전문검색 없을 때의 임시방편" 으로 취급 | 전문검색 미제공 DBMS 에서는 **그것이 정상 경로** — 와일드카드 escape + 대소문자 규칙을 갖춘다 |
+| 확장이 `Model::search()` 를 쓰는 것을 금지로 오해 | Scout 경로는 그대로 유효하다. 새 계약은 대체가 아니라 **추가 통로** |
+
+정적 검사는 이 저장소 안만 볼 수 있다 — 외부 엔진이 상한을 지키는지는 강제할 수 없으므로, 코어는 **값을 손에 쥐어 주는 것**까지 하고 그 값이 도달하는지를 계약 테스트가 고정한다.
+
+> 상세: [search-system.md "키워드 술어는 활성 엔진이 만든다"](docs/backend/search-system.md)
 
 ### Listener 데이터 접근
 
@@ -873,6 +914,7 @@ BaseApiController (최상위)
 필수: StorageInterface 사용 (Storage::disk() 직접 호출 금지)
 필수: ActionDispatcher 에 핸들러를 등록하는 확장은 재등록 진입점을 window 전역에 고정 이름으로 노출 — 모듈 window.__[Name].initModule, 플러그인 window.__[Name].initPlugin (미노출 시 로케일 전환 후 해당 확장 액션이 전부 무반응, 에러·토스트 없음). 진입점은 핸들러 재등록만 수행
 필수: 확장 미들웨어는 getMiddleware() 로 부착 대상(targets) 명시 선언 (self-gate) — SP Kernel 미들웨어 그룹 직접 조작·라우트 파일 자기 미들웨어 FQCN 부착 금지, 무규율 전역 개입 금지
+필수: 라우트 정의를 바꾸는 지점은 App\Support\RouteCacheHelper::rebuild() 로 라우트 캐시 갱신 — 확장 설치/활성화/비활성화/삭제/업데이트, 코어 업데이트·업그레이드 스텝. route:clear/route:cache 를 각 지점에 직접 흩어 놓지 않는다 (누락 발생, 비우기만 하면 재생성되지 않아 성능 이점 영구 소실). 훅 캐시와 달리 라우트 캐시에는 스캔 폴백이 없어 캐시에 없는 라우트는 예외·경고 없이 404. 파일 교체 중인 코어 업데이트는 중간에 clear(), 끝에서 rebuild(). 템플릿·모듈 설정은 서버 라우트 무관 (상세: docs/backend/routing.md "라우트 캐시")
 필수: 코어 레이아웃에 모듈 UI 주입은 layout_extensions만 사용
 필수: 모든 확장 작업은 Artisan 커맨드로 수행
 ```

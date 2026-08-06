@@ -989,6 +989,14 @@ return [
         'sql_query_log_required' => 'SQL 쿼리 로그 설정을 선택해주세요.',
         'sql_query_log_boolean' => 'SQL 쿼리 로그는 true 또는 false 값이어야 합니다.',
 
+        // 목록 한계값
+        'pagination_result_cap_integer' => '총 건수 집계 상한은 숫자여야 합니다.',
+        'pagination_result_cap_min' => '총 건수 집계 상한은 :min 이상이어야 합니다. (0 = 무제한)',
+        'pagination_result_cap_max' => '총 건수 집계 상한은 :max 를 초과할 수 없습니다.',
+        'pagination_max_page_integer' => '페이지 번호 상한은 숫자여야 합니다.',
+        'pagination_max_page_min' => '페이지 번호 상한은 :min 이상이어야 합니다. (0 = 무제한)',
+        'pagination_max_page_max' => '페이지 번호 상한은 :max 를 초과할 수 없습니다.',
+
         // 코어 업데이트 설정
         'core_update_github_url_invalid' => 'GitHub 저장소 URL 형식이 올바르지 않습니다.',
         'core_update_github_url_max' => 'GitHub 저장소 URL은 500자를 초과할 수 없습니다.',
@@ -1266,6 +1274,8 @@ return [
         'geoip_enabled' => 'GeoIP 사용',
         'geoip_license_key' => 'GeoIP 라이선스 키',
         'geoip_auto_update_enabled' => 'GeoIP 자동 업데이트',
+        'pagination_result_cap' => '목록 총 건수 상한',
+        'pagination_max_page' => '목록 최대 페이지 번호',
         // 드라이버 설정 (추가)
         'websocket_app_id' => '웹소켓 앱 ID',
         'websocket_app_secret' => '웹소켓 앱 시크릿',

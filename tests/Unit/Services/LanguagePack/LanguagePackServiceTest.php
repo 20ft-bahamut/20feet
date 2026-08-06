@@ -10,6 +10,7 @@ use App\Models\LanguagePack;
 use App\Services\LanguagePack\LanguagePackRegistry;
 use App\Services\LanguagePackService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
@@ -603,6 +604,98 @@ class LanguagePackServiceTest extends TestCase
 
         $this->expectException(LanguagePackOperationException::class);
         $this->service->activate($dependent);
+    }
+
+    /**
+     * 활성 팩을 같은 identifier 로 재설치해도 자기 자신을 슬롯 충돌로 오인해 강등하지 않는다.
+     *
+     * `finalizeInstall` 은 트랜잭션에서 항상 `installed` 로 기록하고 그 뒤 activate() 를
+     * 호출한다. 이때 `findActiveForSlot` 이 `$existing?->id` 를 제외하지 않으면 이미 활성인
+     * 자기 자신이 슬롯 점유자로 잡혀 `shouldActivate=false` 가 되고, 팩이 조용히 `installed`
+     * 로 내려간다 — 의존하는 확장 언어팩이 `core_locale_missing` 으로 차단되어 인스톨러가
+     * 멈추던 회귀다.
+     *
+     * 같은 회귀를 고정하는 `test_reinstall_active_pack_keeps_active_status` 는 실제 ja 번들
+     * 산출물을 요구해 미빌드 환경에서 skip 된다. 활성화 경로가 activate() 경유로 바뀐 뒤에도
+     * 이 가드가 환경에 따라 조용히 건너뛰어지지 않도록, 합성 번들 픽스처로 항상 실행되는
+     * 판을 따로 둔다.
+     *
+     * @scenario vector=finalize_install_activation, actor_permission=cli_system
+     *
+     * @effects reinstalling_an_active_pack_does_not_demote_it
+     */
+    public function test_finalize_install_does_not_demote_self_on_reinstall_of_active_pack(): void
+    {
+        $identifier = 'selfslot-core-ja';
+        $bundledDir = $this->createBundledFixture($identifier, $this->coreJaManifest($identifier, 'selfslot', '1.0.0'));
+
+        try {
+            $first = $this->service->installFromBundled($identifier, autoActivate: true);
+            $this->assertSame(
+                LanguagePackStatus::Active->value,
+                $first->status,
+                '전제 조건 붕괴 — 첫 설치가 활성화되지 않으면 강등 여부를 관측할 수 없다'
+            );
+
+            $second = $this->service->installFromBundled($identifier, autoActivate: true);
+
+            $this->assertSame($first->id, $second->id, '같은 identifier 는 같은 행을 갱신해야 한다');
+            $this->assertSame(
+                LanguagePackStatus::Active->value,
+                $second->status,
+                '재설치가 자기 자신을 슬롯 충돌로 오인해 active → installed 로 강등했다 (회귀)'
+            );
+            $this->assertSame(
+                LanguagePackStatus::Active->value,
+                DB::table('language_packs')->where('identifier', $identifier)->value('status'),
+                '반환값만 active 이고 DB 에는 강등된 값이 남았다'
+            );
+        } finally {
+            File::deleteDirectory($bundledDir);
+            File::deleteDirectory(base_path('lang-packs/'.$identifier));
+        }
+    }
+
+    /**
+     * CLI 설치는 HTTP 활성화 권한 게이트의 영향을 받지 않는다.
+     *
+     * `auto_activate` 의 활성화 권한 검사는 FormRequest 계층(`RequiresActivationPermission`)
+     * 이 소유한다. 이 검사가 Service 계층으로 내려가면 인증 컨텍스트가 없는 CLI 가 전부
+     * 깨진다 — `language-pack:install` 과 `language-pack:provision` 은 `--no-activate` 를
+     * 주지 않는 한 설치 직후 자동 활성화를 기본 동작으로 삼기 때문이다.
+     *
+     * Service 를 목으로 바꾸지 않고 실제 커맨드를 인증 없이 실행해 활성화까지 도달하는지
+     * 고정한다. 게이트가 서비스 계층으로 새어 들어오면 여기서 red 가 된다.
+     *
+     * @scenario vector=finalize_install_activation, actor_permission=cli_system
+     *
+     * @effects cli_installation_is_unaffected_by_the_http_activation_gate
+     */
+    public function test_cli_install_auto_activates_without_an_http_permission_context(): void
+    {
+        $identifier = 'cliact-core-ja';
+        $bundledDir = $this->createBundledFixture($identifier, $this->coreJaManifest($identifier, 'cliact', '1.0.0'));
+
+        try {
+            $this->assertFalse(
+                Auth::check(),
+                '전제 조건 붕괴 — 인증된 사용자가 있으면 CLI 컨텍스트를 재현한 것이 아니다'
+            );
+
+            $this->artisan('language-pack:install', [
+                'identifier' => $identifier,
+                '--source' => 'bundled',
+            ])->assertExitCode(0);
+
+            $this->assertSame(
+                LanguagePackStatus::Active->value,
+                DB::table('language_packs')->where('identifier', $identifier)->value('status'),
+                'CLI 설치가 자동 활성화되지 않았다 — 활성화 권한 검사가 Service 계층으로 내려왔을 가능성'
+            );
+        } finally {
+            File::deleteDirectory($bundledDir);
+            File::deleteDirectory(base_path('lang-packs/'.$identifier));
+        }
     }
 
     /**

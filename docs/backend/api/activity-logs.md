@@ -39,6 +39,7 @@
 | per_page | query | integer | 아니오 | min 1, max 100 | 페이지당 항목 수 |
 | sort_by | query | string | 아니오 | — | 정렬 기준 필드명 |
 | sort_order | query | string | 아니오 | — | 정렬 방향 (asc 오름차순 / desc 내림차순) |
+| cursor | query | string | 아니오 | max 500 | 이어보기 커서. 주면 페이지 번호 대신 키셋 방식으로 응답합니다 (기록이 많이 쌓인 사이트에서 뒤쪽 페이지가 느려지지 않음). 형식이 깨진 값은 오류 없이 첫 페이지로 해석됩니다 |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.activity_log.index_validation_rules`).
 
@@ -168,6 +169,27 @@ HTTP/1.1 200
     }
 }
 ```
+
+**커서 방식 응답 (cursor 파라미터를 준 경우)**
+
+페이지 번호 대신 앞뒤 커서를 싣습니다. 총 건수를 세지 않으므로 `total` 과 `last_page` 는 없습니다.
+
+```json
+{
+    "success": true,
+    "data": {
+        "data": [],
+        "pagination": {
+            "per_page": 25,
+            "next_cursor": "eyJpZCI6MTIzLCJfcG9pbnRzVG9OZXh0SXRlbXMiOnRydWV9",
+            "prev_cursor": null,
+            "has_more_pages": true
+        }
+    }
+}
+```
+
+총 건수가 상한을 넘겨 정확히 세지 못한 경우(페이지 번호 방식)에는 `pagination` 에 `total_relation`·`total_is_exact`·`result_cap` 이 함께 실리고 `last_page` 가 `null` 이 됩니다. 상세는 [pagination.md](../pagination.md).
 
 **에러 응답**
 

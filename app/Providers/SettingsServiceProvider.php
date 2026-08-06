@@ -30,6 +30,7 @@ class SettingsServiceProvider extends ServiceProvider
         'geoip',
         'seo',
         'identity',
+        'pagination',
     ];
 
     /**

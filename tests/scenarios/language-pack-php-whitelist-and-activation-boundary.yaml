@@ -41,7 +41,7 @@ exclusions:
   - { vector: assert_security_rules, actor_permission: install_only, reason: "서비스 계층의 내용·형식 검사로 권한과 무관하게 모든 설치 경로에 동일 적용" }
   - { vector: assert_security_rules, actor_permission: manage_only, reason: "동일 — 권한별 분기 없음" }
   - { vector: assert_security_rules, actor_permission: install_and_manage, reason: "동일 — 권한별 분기 없음" }
-  - { vector: install_from_untrusted_source, actor_permission: cli_system, reason: "CLI 는 FormRequest 를 거치지 않는다 — 권한 게이트를 서비스에 두지 않기로 한 설계의 직접 귀결이며 CLI 비파괴는 별도 커맨드 테스트가 담당" }
+  - { vector: install_from_untrusted_source, actor_permission: cli_system, reason: "CLI 는 FormRequest 를 거치지 않는다 — 권한 게이트를 서비스에 두지 않기로 한 설계의 직접 귀결이다. CLI 비파괴 자체는 finalize_install_activation × cli_system 셀이 실 커맨드 실행으로 단언한다(cli_installation_is_unaffected_by_the_http_activation_gate)" }
   - { vector: install_from_bundled, actor_permission: manage_only, reason: "설치 권한이 없어 라우트 미들웨어에서 끊긴다 — 외부 소스 쪽에서 같은 경계를 이미 단언하므로 번들에서 반복하지 않는다" }
   - { vector: install_from_bundled, actor_permission: cli_system, reason: "동일 — FormRequest 미경유" }
   - { vector: finalize_install_activation, actor_permission: install_only, reason: "서비스 계층 활성화 경로로 HTTP 권한 컨텍스트가 없다 — 권한 판정은 FormRequest 계층이 소유" }
@@ -72,6 +72,8 @@ effects:
   - activated_hook_fires_exactly_once_on_auto_activate
   - auto_activate_skipped_when_slot_occupied
   - auto_activate_goes_through_activate_and_enforces_dependencies
+  - reinstalling_an_active_pack_does_not_demote_it
+  - cli_installation_is_unaffected_by_the_http_activation_gate
   - update_of_an_active_pack_keeps_it_active
   - update_of_an_inactive_pack_does_not_promote_it
 

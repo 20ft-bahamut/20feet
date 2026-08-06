@@ -7,9 +7,15 @@ use App\Repositories\Concerns\HasMultipleSearchFilters;
 use App\Repositories\Concerns\PaginatesWithDeferredJoin;
 use App\Repositories\Concerns\ResolvesSortSpec;
 use App\Search\Engines\DatabaseFulltextEngine;
+use App\Search\KeywordSearch;
+use App\Support\Query\BoundedCount;
+use App\Support\Query\BoundedPage;
+use App\Support\Query\BoundedPaginator;
+use App\Support\Query\KeysetPaginator;
+use App\Support\Query\PaginationLimits;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Sirsoft\Page\Models\Page;
 use Modules\Sirsoft\Page\Repositories\Contracts\PageRepositoryInterface;
@@ -53,20 +59,20 @@ class PageRepository implements PageRepositoryInterface
 
         $this->applyFilters($query, $filters);
 
-        // 지연 조인: 본문 content(longText)는 목록에 쓰이지 않는데도 OFFSET 이 훑는
-        // 모든 행에서 함께 읽힌다. inner 는 id 만 훑고 본문은 이번 페이지에서만 읽는다.
-        // 목록이 실제로 쓰는 컬럼만 읽는다. 본문(`content`)은 longText 인데 목록 표현
-        // (`PageResource::toListArray`)이 출력하지 않으므로, 이번 페이지 행에서도 읽을 이유가 없다.
+        // 지연 조인: inner 는 id 만 훑는다. outer 도 목록 리소스가 실제로 쓰는 컬럼만
+        // 읽는다 — 본문 content(mediumText)는 목록 표현(`PageResource::toListArray`)이
+        // 출력하지 않으므로 한 페이지 분량이라도 읽을 이유가 없다 (오버플로 페이지 읽기 제거).
         // 응답 형태는 변하지 않고 DB/메모리 비용만 줄어든다.
         return $this->paginateWithDeferredJoin(
             query: $query,
             columns: [
-                'id', 'slug', 'title', 'published', 'published_at', 'current_version',
-                'created_by', 'updated_by', 'created_at', 'updated_at',
+                'id', 'slug', 'title', 'published', 'published_at',
+                'current_version', 'created_by', 'updated_by', 'created_at', 'updated_at',
             ],
             sort: $this->resolveListSortSpec($filters),
             perPage: $perPage,
             relations: ['creator', 'updater'],
+            resultCap: PaginationLimits::resultCap('admin.pages'),
         );
     }
 
@@ -183,35 +189,75 @@ class PageRepository implements PageRepositoryInterface
      * @param  string  $keyword  검색 키워드
      * @param  string  $orderBy  정렬 컬럼
      * @param  string  $direction  정렬 방향 (asc, desc)
-     * @param  int  $limit  조회할 최대 항목 수
-     * @return array{total: int, items: Collection}
+     * @param  int  $perPage  페이지당 항목 수
+     * @param  int  $page  페이지 번호
+     * @return BoundedPage 페이지 결과 (총 건수 정확도 포함)
      */
-    public function searchByKeyword(string $keyword, string $orderBy = 'created_at', string $direction = 'desc', int $limit = 10): array
-    {
-        $results = $this->buildKeywordQuery($keyword)
+    public function searchByKeyword(
+        string $keyword,
+        string $orderBy = 'created_at',
+        string $direction = 'desc',
+        int $perPage = 10,
+        int $page = 1
+    ): BoundedPage {
+        $query = $this->buildKeywordQuery($keyword)
             ->orderBy($orderBy, $direction)
             // 전순서 보장 — 정렬 컬럼이 비고유라 페이지 경계가 흔들릴 수 있다
-            ->orderBy('id', $direction === 'asc' ? 'asc' : 'desc')
-            // audit:allow repository-paginate-column-pruning reason: 통합검색 전용 진입점 —
-            // 유일한 호출자(SearchPagesListener)가 전체 탭은 limit=5, 페이지 탭은 limit=PHP_INT_MAX 로
-            // 1페이지에 결과를 받아가므로 OFFSET 이 발생하지 않는다
-            ->paginate($limit);
+            ->orderBy('id', $direction === 'asc' ? 'asc' : 'desc');
 
-        return [
-            'total' => $results->total(),
-            'items' => $results->getCollection(),
-        ];
+        // 검색 결과 카드가 실제로 쓰는 컬럼만 읽는다.
+        //
+        // content 만 예외로 남긴다. 검색 결과는 키워드 **주변** 문맥을 잘라 보여주므로
+        // 본문 어디에 키워드가 있든 그 위치를 찾을 수 있어야 하고, 이 컬럼은 다국어
+        // JSON 이라 DB 에서 `SUBSTRING` 으로 자르면 캐스팅이 깨진다. 관리자 페이지 목록
+        // (위 paginate)은 본문을 전혀 쓰지 않으므로 그쪽에서는 제외했다.
+        //
+        // 비용 측면의 목적은 달성돼 있다 — 종전에는 매칭 전량의 본문을 끌어왔지만
+        // 지금은 이번 페이지 분량(per_page + 1)만 읽는다.
+        return BoundedPaginator::paginate(
+            $query,
+            perPage: $perPage,
+            page: $page,
+            resultCap: PaginationLimits::resultCap('search'),
+            columns: ['id', 'slug', 'title', 'content', 'published_at', 'created_at'],
+        );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function searchByKeywordWithCursor(
+        string $keyword,
+        array $sortKeys,
+        int $perPage = 10,
+        ?string $cursor = null
+    ): CursorPaginator {
+        // 커서 모드에는 OFFSET 이 없다 — 건너뛸 행을 실제로 읽던 비용이 사라진다.
+        // 읽는 컬럼은 offset 경로와 같게 유지해 화면이 받는 항목 형태를 맞춘다.
+        return KeysetPaginator::paginate(
+            query: $this->buildKeywordQuery($keyword),
+            perPage: $perPage,
+            sortKeys: $sortKeys,
+            uniqueKey: 'id',
+            cursor: $cursor,
+            columns: ['id', 'slug', 'title', 'content', 'published_at', 'created_at'],
+        );
     }
 
     /**
      * 키워드와 일치하는 발행된 페이지 수를 조회합니다.
      *
      * @param  string  $keyword  검색 키워드
-     * @return int 일치하는 페이지 수
+     * @return BoundedCount 일치하는 페이지 수 (정확도 포함)
      */
-    public function countByKeyword(string $keyword): int
+    public function countByKeyword(string $keyword): BoundedCount
     {
-        return $this->buildKeywordQuery($keyword)->count();
+        // 비활성 탭의 배지용 건수다. 상한을 걸어 대량 매칭에서도 비용이 일정하게 유지된다.
+        // 상한에 걸리면 값이 잘리므로 정확도를 함께 돌려준다.
+        return BoundedPaginator::count(
+            $this->buildKeywordQuery($keyword),
+            PaginationLimits::resultCap('search')
+        );
     }
 
     /**
@@ -225,8 +271,9 @@ class PageRepository implements PageRepositoryInterface
      * `WHERE published = ? OR slug LIKE ? AND id IN (...)` 형태로 연산자 우선순위가 깨져
      * `published = ?` 만 유효해지고 total 이 모든 발행 페이지 수로 부풀려지는 회귀가 발생한다.
      * 이 Repository 의 applyTitleKeywordSearch 에서 이미 사용중인
-     * `DatabaseFulltextEngine::whereFulltext` 정적 헬퍼 패턴과 동일하게 해결한다
-     * (Scout 엔진은 indexing 및 다른 검색에서 계속 사용됨).
+     * `KeywordSearch::apply()` 패턴과 동일하게 해결한다 — 키워드 조건을 진행 중인 쿼리에
+     * 직접 붙이므로 Scout 의 재계수 경로를 타지 않는다. 어떤 조건이 붙는지는 활성 검색
+     * 엔진이 정하므로 플러그인 엔진도 이 경로를 그대로 탄다.
      *
      * @param  string  $keyword  검색 키워드
      */
@@ -253,7 +300,7 @@ class PageRepository implements PageRepositoryInterface
                 }
 
                 // 본문은 순수 텍스트/HTML 이라 FULLTEXT 가 유효하다.
-                DatabaseFulltextEngine::whereFulltext($q, 'content', $keyword, 'or');
+                KeywordSearch::apply($q, 'content', $keyword, 'or');
                 $q->orWhere('slug', 'like', '%'.$keyword.'%');
             });
     }
@@ -332,7 +379,7 @@ class PageRepository implements PageRepositoryInterface
             $query->where('slug', 'like', "%{$keyword}%");
         }
 
-        DatabaseFulltextEngine::whereFulltext($query, 'title', $keyword, 'or');
+        KeywordSearch::apply($query, 'title', $keyword, 'or');
     }
 
     /**
