@@ -283,6 +283,14 @@ class TemplateService
 가리키기 때문이다 — 차단하면 브라우저 콘솔에 404 가 쌓인다. `--production` 빌드는 소스맵을
 생성하지 않으므로(`G7_BUILD_SOURCEMAP=0`) 운영에서는 참조 자체가 없다.
 
+이 주입이 실제로 먹으려면 확장의 vite config 가 그 환경변수를 읽어야 한다. `sourcemap: true`
+리터럴 하드코딩은 주입을 조용히 무시해 `--production` 빌드에도 `.map` 과 dangling 참조가
+배포본에 남는다. 확장 vite config 의 소스맵 선언은 다음 형태만 사용한다:
+
+```ts
+sourcemap: !['0', 'false'].includes(process.env.G7_BUILD_SOURCEMAP ?? ''),
+```
+
 판정 지점은 `Allowed{Module,Plugin,Template}FileType::getAllowedExtensions()` 한 곳이며,
 `validate()` 도 이 게터를 참조한다(상수 직접 참조 금지 — 환경 분기가 우회된다).
 

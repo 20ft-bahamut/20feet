@@ -15,6 +15,7 @@ import { hasExplicitSetStateForField } from '../FormContext';
 import { responsiveManager } from '../ResponsiveManager';
 import { hasPipes } from '../PipeRegistry';
 import { DataBindingEngine } from '../DataBindingEngine';
+import { deepMergeState } from '../DynamicRenderer';
 
 describe('트러블슈팅 회귀 테스트 - flex 압착(shrink)', () => {
   /**
@@ -841,6 +842,85 @@ describe('트러블슈팅 회귀 테스트 - Form 자동 바인딩 bindingType �
     it('Input(checkable) + type=checkbox + boolean 값 → checked 바인딩 유지', () => {
       // sirsoft-admin_basic/sirsoft-basic 모두 Input에 bindingType: "checkable" 등록
       expect(calcIsCheckedBinding('checkable', true, 'checkbox')).toBe(true);
+    });
+  });
+
+  /**
+   * [사례 5] 저장값이 null 이면 체크박스가 빈 문자열을 전송한다
+   *
+   * troubleshooting-components-form.md 사례 6 회귀 가드.
+   *
+   * bindingType: 'checked' 로 등록된 Checkbox 라도 현재 값이 boolean 이 아니면
+   * isCheckedBinding 이 false 가 되어 value 바인딩 분기로 떨어지고,
+   * 거기서 `currentValue ?? ''` 로 빈 문자열이 만들어진다.
+   * 그 빈 문자열이 서버에서 null 로 저장되면 기본값(false)을 덮어 영구 고착된다.
+   */
+  describe('[사례 5] 저장값이 boolean 이 아니면 value 바인딩으로 떨어져 빈 문자열이 된다', () => {
+    /** DynamicRenderer 의 value 바인딩 분기와 동일 (`effectiveValue = currentValue ?? ''`) */
+    const calcValueBindingValue = (currentValue: any): any => currentValue ?? '';
+
+    it('null 이면 Checkbox(checked) 여도 checked 바인딩이 아니다', () => {
+      expect(calcIsCheckedBinding('checked', null)).toBe(false);
+    });
+
+    it('undefined 여도 checked 바인딩이 아니다 (미저장 키)', () => {
+      expect(calcIsCheckedBinding('checked', undefined)).toBe(false);
+    });
+
+    it('null 이 value 바인딩으로 가면 빈 문자열이 전송된다 (고착의 시작점)', () => {
+      expect(calcValueBindingValue(null)).toBe('');
+      expect(calcValueBindingValue(undefined)).toBe('');
+    });
+
+    it('boolean 이면 정상적으로 checked 바인딩된다 (false 도 포함)', () => {
+      expect(calcIsCheckedBinding('checked', true)).toBe(true);
+      expect(calcIsCheckedBinding('checked', false)).toBe(true);
+    });
+
+    it('레이아웃이 !! 로 boolean 을 강제하면 null 이어도 checked 바인딩이 성립한다', () => {
+      // 해결책: props.checked = "{{!!_local.form?.x}}" → 항상 boolean
+      const coerced = !!(null as any);
+      expect(typeof coerced).toBe('boolean');
+      expect(calcIsCheckedBinding('checked', coerced)).toBe(true);
+    });
+
+    it('$event.target.checked 는 항상 boolean 이므로 change 액션은 boolean 만 기록한다', () => {
+      // 해결책: change 액션이 setState 로 $event.target.checked 를 직접 쓴다
+      const eventChecked: boolean = true;
+      expect(typeof eventChecked).toBe('boolean');
+      expect(calcIsCheckedBinding('checked', eventChecked)).toBe(true);
+    });
+  });
+
+  /**
+   * [사례 6] initLocal 로는 null 고착을 막을 수 없다
+   *
+   * troubleshooting-components-form.md 사례 6 의 "initLocal 로는 막을 수 없다" 근거.
+   * deepMergeState 는 source 의 null 을 그대로 반영하므로, 레이아웃이 선언한
+   * boolean 기본값이 API 응답의 null 에 덮인다.
+   */
+  describe('[사례 6] deepMergeState 는 source 의 null 로 기본값을 덮는다', () => {
+    it('deep 병합에서 null 이 boolean 기본값(false)을 덮는다', () => {
+      const layoutDefaults = { form: { method_card: false, method_samsungpay: false } };
+      const apiResponse = { form: { method_card: true, method_samsungpay: null } };
+
+      const merged = deepMergeState(layoutDefaults, apiResponse);
+
+      expect(merged.form.method_card).toBe(true);
+      // 기본값 false 가 남지 않고 null 로 덮인다 → 이것이 고착의 원인
+      expect(merged.form.method_samsungpay).toBeNull();
+      expect(typeof merged.form.method_samsungpay).not.toBe('boolean');
+    });
+
+    it('shallow 병합(기본값)은 form 객체를 통째로 교체하므로 기본값이 아예 남지 않는다', () => {
+      const prev = { form: { method_card: false, method_samsungpay: false } };
+      const initData = { form: { method_card: true, method_samsungpay: null } };
+
+      // DynamicRenderer 의 shallow 분기: { ...prev, ...initDataWithoutMeta }
+      const merged = { ...prev, ...initData };
+
+      expect(merged.form).toEqual({ method_card: true, method_samsungpay: null });
+      expect(merged.form.method_samsungpay).toBeNull();
     });
   });
 });

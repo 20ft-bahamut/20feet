@@ -237,19 +237,74 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| plugin | object | `{"identifier":"sirsoft-daum_postcode","status":"active", …}` | 활성화된 플러그인 리소스 (PluginResource — 목록 항목과 동일 필드 구성) |
+| pending_language_packs | array | `[]` | 이 플러그인 비활성화 시 cascade 로 함께 비활성화됐던 번들 언어팩 목록 (재활성화 대기 후보) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 활성화되었습니다.",
+    "data": {
+        "plugin": {
+            "id": 3,
+            "identifier": "sirsoft-daum_postcode",
+            "vendor": "sirsoft",
+            "name": "Daum 우편번호",
+            "version": "1.0.0",
+            "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+            "dependencies": [],
+            "permissions": [],
+            "roles": [],
+            "config": [],
+            "hooks": [],
+            "status": "active",
+            "is_installed": true,
+            "has_settings": true,
+            "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+            "assets": {
+                "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+                "css": null,
+                "priority": 100
+            },
+            "update_available": false,
+            "update_source": null,
+            "latest_version": null,
+            "file_version": "1.0.0",
+            "github_url": null,
+            "github_changelog_url": null,
+            "is_pending": false,
+            "is_bundled": true,
+            "deactivated_reason": null,
+            "deactivated_at": null,
+            "incompatible_required_version": null,
+            "abilities": {
+                "can_install": true,
+                "can_activate": true,
+                "can_uninstall": true
+            }
+        },
+        "pending_language_packs": []
+    }
+}
+```
+
+의존 확장이 미충족인 상태에서 `force` 없이 호출하면 409 로 경고가 반환됩니다 (`error.warning`, `error.missing_modules`, `error.missing_plugins`, `error.message`).
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.activate`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 409 | Conflict | 필요한 의존 확장(모듈/플러그인)이 설치·활성화되지 않은 경우 (`force: true` 로 우회 가능) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 활성화 처리 중 예외 발생 (`plugins.activate_error`) |
 
 <!-- @generated:end -->
 
@@ -277,18 +332,45 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| updated_count | integer | `1` | 업데이트 가능으로 감지된 플러그인 개수 |
+| details | array | `[{"identifier":"sirsoft-daum_postcode", …}]` | 업데이트 가능한 플러그인별 상세 배열 (아래 필드) |
+| details[].identifier | string | `sirsoft-daum_postcode` | 플러그인 고유 식별자 |
+| details[].current_version | string | `1.0.0` | 현재 설치된 버전 |
+| details[].latest_version | string | `1.1.0` | 감지된 최신 배포 버전 |
+| details[].update_source | string | `github` | 업데이트 감지 출처 (`github` \| `bundled`) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "업데이트 확인이 완료되었습니다.",
+    "data": {
+        "updated_count": 1,
+        "details": [
+            {
+                "identifier": "sirsoft-daum_postcode",
+                "current_version": "1.0.0",
+                "latest_version": "1.1.0",
+                "update_source": "github"
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 업데이트 확인 중 예외 발생 (`plugins.check_updates_failed`) |
 
 <!-- @generated:end -->
 
@@ -327,19 +409,81 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 — 비활성화된 플러그인 리소스(PluginResource) 를 그대로 반환합니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer\|null | `3` | 기본 키 (내부 식별자) |
+| identifier | string | `sirsoft-daum_postcode` | 플러그인 고유 식별자 (vendor-plugin 형식) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Daum 우편번호` | 플러그인 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 플러그인 버전 |
+| status | string | `inactive` | 비활성화 후 상태 (`inactive`) |
+| is_installed | boolean | `true` | 설치 여부 |
+| deactivated_reason | string\|null | `manual` | 비활성화 사유 (manual: 사용자 수동 \| incompatible_core: 코어 버전 비호환) |
+| deactivated_at | string\|null | `2026-07-14T05:12:33.000000Z` | 비활성화 일시 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자의 수행 가능 작업 맵 |
+
+나머지 필드는 목록(`GET /api/admin/plugins`) 응답 항목과 동일합니다 (PluginResource 단일 정의).
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 비활성화되었습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.0.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "dependencies": [],
+        "permissions": [],
+        "roles": [],
+        "config": [],
+        "hooks": [],
+        "status": "inactive",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "assets": {
+            "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+            "css": null,
+            "priority": 100
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": "manual",
+        "deactivated_at": "2026-07-14T05:12:33.000000Z",
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+의존 확장이 있는 상태에서 `force` 없이 호출하면 409 로 경고가 반환됩니다 (`error.warning`, `error.dependent_templates`, `error.dependent_modules`, `error.dependent_plugins`, `error.message`).
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.activate`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 409 | Conflict | 이 플러그인에 의존하는 활성 템플릿/모듈/플러그인이 있는 경우 (`force: true` 로 우회 가능) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 비활성화 처리 중 예외 발생 (`plugins.deactivate_error`) |
 
 <!-- @generated:end -->
 
@@ -386,19 +530,79 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 — 설치된 플러그인 리소스(PluginResource) + `language_pack_failures`._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-daum_postcode` | 설치된 플러그인 고유 식별자 |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Daum 우편번호` | 플러그인 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 설치된 버전 |
+| status | string | `inactive` | 설치 직후 상태 (설치만 수행 — 활성화는 별도 호출) |
+| is_installed | boolean | `true` | 설치 여부 |
+| has_settings | boolean | `true` | 설정 UI 제공 여부 |
+| settings_route | string\|null | `/admin/plugins/sirsoft-daum_postcode/settings` | 설정 페이지 경로 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자의 수행 가능 작업 맵 |
+| language_pack_failures | array | `[]` | cascade 2단계(번들 언어팩 best-effort 설치) 에서 실패한 항목 목록 (성공 시 빈 배열) |
+
+나머지 필드는 목록(`GET /api/admin/plugins`) 응답 항목과 동일합니다 (PluginResource 단일 정의).
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 설치되었습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.0.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "dependencies": [],
+        "permissions": [],
+        "roles": [],
+        "config": [],
+        "hooks": [],
+        "status": "inactive",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "assets": {
+            "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+            "css": null,
+            "priority": 100
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        },
+        "language_pack_failures": []
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패 또는 설치 실패 (`plugin_name` 에 번역된 설치 실패 사유 — 이미 설치됨/대기소 미존재/의존성 미충족 등) |
+| 500 | Server Error | 설치 처리 중 예외 발생 (`plugins.installation_failed`) |
 
 <!-- @generated:end -->
 
@@ -438,19 +642,75 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 — 설치된 플러그인 리소스(PluginResource). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-daum_postcode` | 설치된 플러그인 고유 식별자 (ZIP 내 plugin.json 기준) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Daum 우편번호` | 플러그인 이름 |
+| version | string | `1.0.0` | 설치된 버전 |
+| status | string | `inactive` | 설치 직후 상태 |
+| is_installed | boolean | `true` | 설치 여부 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자의 수행 가능 작업 맵 |
+
+나머지 필드는 목록(`GET /api/admin/plugins`) 응답 항목과 동일합니다 (PluginResource 단일 정의).
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 설치되었습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.0.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "dependencies": [],
+        "permissions": [],
+        "roles": [],
+        "config": [],
+        "hooks": [],
+        "status": "inactive",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "assets": {
+            "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+            "css": null,
+            "priority": 100
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 파일 검증 실패(ZIP 아님/50MB 초과) 또는 ZIP 처리 실패 (plugin.json 미존재/형식 오류/식별자 누락/이미 설치됨) |
+| 500 | Server Error | 설치 처리 중 예외 발생 (`plugins.install_failed`) |
 
 <!-- @generated:end -->
 
@@ -487,19 +747,76 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 — 설치된 플러그인 리소스(PluginResource). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-daum_postcode` | 설치된 플러그인 고유 식별자 (저장소 plugin.json 기준) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Daum 우편번호` | 플러그인 이름 |
+| version | string | `1.0.0` | 설치된 버전 (GitHub 릴리스 기준) |
+| status | string | `inactive` | 설치 직후 상태 |
+| is_installed | boolean | `true` | 설치 여부 |
+| github_url | string\|null | `https://github.com/gnuboard/g7-plugin-daum_postcode` | 설치 출처 GitHub 저장소 URL |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자의 수행 가능 작업 맵 |
+
+나머지 필드는 목록(`GET /api/admin/plugins`) 응답 항목과 동일합니다 (PluginResource 단일 정의).
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 설치되었습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.0.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "dependencies": [],
+        "permissions": [],
+        "roles": [],
+        "config": [],
+        "hooks": [],
+        "status": "inactive",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "assets": {
+            "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+            "css": null,
+            "priority": 100
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_url": "https://github.com/gnuboard/g7-plugin-daum_postcode",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": false,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | URL 형식 오류(GitHub 저장소 URL 아님) 또는 다운로드/압축 해제/검증 실패 (저장소 미존재·ZIP URL 미발견·plugin.json 오류·이미 설치됨) |
+| 500 | Server Error | 설치 처리 중 예외 발생 (`plugins.install_failed`) |
 
 <!-- @generated:end -->
 
@@ -666,6 +983,8 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -703,19 +1022,48 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| manifest | object\|null | `{"identifier":"sirsoft-daum_postcode","version":"1.0.0", …}` | ZIP 내 plugin.json 원문 (파싱 실패 시 null) |
+| validation | object | `{"errors":[],"is_valid":true, …}` | 검증 결과 객체 (아래 필드) |
+| validation.errors | array | `[]` | 압축 해제/manifest 검증 실패 사유 문자열 목록 (성공 시 빈 배열) |
+| validation.is_valid | boolean | `true` | 검증 통과 여부 (errors 가 비었고 manifest 파싱 성공) |
+| validation.already_installed | boolean | `false` | 동일 식별자 플러그인이 이미 설치되어 있는지 여부 |
+| validation.existing_version | string\|null | `1.0.0` | 이미 설치된 경우 그 버전 (미설치 시 null) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "manifest 미리보기를 완료했습니다.",
+    "data": {
+        "manifest": {
+            "identifier": "sirsoft-daum_postcode",
+            "vendor": "sirsoft",
+            "name": "Daum 우편번호",
+            "version": "1.0.0",
+            "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다."
+        },
+        "validation": {
+            "errors": [],
+            "is_valid": true,
+            "already_installed": false,
+            "existing_version": null
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 파일 검증 실패(ZIP 아님/50MB 초과) 또는 미리보기 처리 실패 (`plugins.preview_failed`) |
 
 <!-- @generated:end -->
 
@@ -752,19 +1100,40 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| layouts_refreshed | integer | `3` | 갱신 처리된 레이아웃 총 건수 |
+| created | integer | `1` | 신규 등록된 레이아웃 건수 |
+| updated | integer | `2` | 내용이 변경되어 갱신된 레이아웃 건수 |
+| deleted | integer | `0` | 파일에서 사라져 DB 에서도 삭제된 레이아웃 건수 |
+| unchanged | integer | `0` | 변경 없이 그대로 유지된 레이아웃 건수 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 레이아웃이 성공적으로 갱신되었습니다.",
+    "data": {
+        "layouts_refreshed": 3,
+        "created": 1,
+        "updated": 2,
+        "deleted": 0,
+        "unchanged": 0
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.activate`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패 또는 레이아웃 갱신 실패 (`plugin_name` 에 레이아웃 JSON 파싱/검증 오류 사유) |
+| 500 | Server Error | 갱신 처리 중 예외 발생 (`plugins.refresh_layouts_error`) |
 
 <!-- @generated:end -->
 
@@ -797,19 +1166,26 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만)._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인이 성공적으로 제거되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.uninstall`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패 또는 제거 실패 (`plugin_name` 에 번역된 제거 실패 사유 — 미설치/진행 중 상태 등) |
+| 500 | Server Error | 제거 처리 중 예외 발생 (`plugins.uninstall_error`) |
 
 <!-- @generated:end -->
 
@@ -849,6 +1225,8 @@ _단건 응답: `data` 객체의 필드._
 | changelog | array | `[{"version":"1.0.1","date":"2026-07-22","categories":[{"n…` | 변경 이력 텍스트 (원격/파일 CHANGELOG 본문) |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -992,8 +1370,8 @@ HTTP/1.1 200
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1027,14 +1405,16 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| identifier | string | `sirsoft-basic` | 플러그인 고유 식별자 (vendor-plugin 형식) |
-| name | string | `Basic` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
-| version | string | `1.0.4` | 플러그인 버전 |
-| type | string | `user` | <!-- TODO: 설명 --> |
-| status | string | `active` | 상태 값 (도메인별 상태 집합 — 사람이 읽는 라벨은 status_label, UI 변형은 status_variant 참조) |
-| required_version | string | `>=1.0.0` | <!-- TODO: 설명 --> |
+| identifier | string | `sirsoft-ckeditor5` | 플러그인 고유 식별자 (vendor-plugin 형식) |
+| name | string | `CKEditor 5 WYSIWYG 에디터` | 플러그인 이름 (다국어 JSON) |
+| version | string | `1.0.0` | 플러그인 버전 |
+| type | string | `user` | 의존 템플릿의 타입 (admin: 관리자 템플릿 / user: 사용자 템플릿) |
+| status | string | `active` | 상태 (active: 활성화, inactive: 비활성화, installing: 설치 중, uninstalling: 제거 중, updating: 업데이트 중) |
+| required_version | string | `>=1.0.0` | 요구되는 최소 버전 |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -1067,6 +1447,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1104,6 +1485,8 @@ _단건 응답: `data` 객체의 필드._
 
 **응답 예시**
 
+<!-- @probed -->
+
 ```http
 HTTP/1.1 200
 ```
@@ -1125,6 +1508,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1158,12 +1542,14 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| display_mode | string | `layer` | <!-- TODO: 설명 --> |
-| popup_width | integer | `500` | <!-- TODO: 설명 --> |
-| popup_height | integer | `600` | <!-- TODO: 설명 --> |
-| theme_color | string | `#1D4ED8` | <!-- TODO: 설명 --> |
+| display_mode | string | `layer` | 표시 방식 (렌더/노출 모드 구분 값) |
+| popup_width | integer | `500` | 팝업 창 너비 (px) |
+| popup_height | integer | `600` | 팝업 창 높이 (px) |
+| theme_color | string | `#1D4ED8` | 테마 대표 색상 |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -1172,7 +1558,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "display_mode": "layer",
         "popup_width": 500,
@@ -1189,6 +1575,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1218,11 +1605,29 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 저장 후 다시 조회한 설정 값 맵입니다. 필드 구성은 플러그인마다 다르며 각 플러그인의 설정 스키마(`GET /api/admin/plugins/{identifier}/settings/layout` 의 `schema`)를 따릅니다. 아래는 `sirsoft-daum_postcode` 예._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| display_mode | string | `layer` | 주소 검색창 표시 방식 (popup: 팝업 창 \| layer: 레이어) |
+| popup_width | integer | `500` | 팝업 창 너비 (px) |
+| popup_height | integer | `600` | 팝업 창 높이 (px) |
+| theme_color | string | `#1D4ED8` | 검색창 테마 대표 색상 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 설정이 성공적으로 업데이트되었습니다.",
+    "data": {
+        "display_mode": "layer",
+        "popup_width": 500,
+        "popup_height": 600,
+        "theme_color": "#1D4ED8"
+    }
+}
+```
 
 **에러 응답**
 
@@ -1231,6 +1636,8 @@ Authorization: Bearer {YOUR_TOKEN}
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.update`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 설정 저장 실패 (`plugins.settings.update_failed`) |
 
 <!-- @generated:end -->
 
@@ -1265,16 +1672,18 @@ _단건 응답: `data` 객체의 필드._
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | version | string | `1.0.0` | 플러그인 버전 |
-| layout_name | string | `plugin_settings` | <!-- TODO: 설명 --> |
-| permissions | array | `["core.plugins.update"]` | 권한 목록 (각 원소 id/identifier/name — permissions 관계 또는 역할 경유 파생) |
-| extends | string | `_admin_base` | <!-- TODO: 설명 --> |
-| meta | object | `{"title":"$t:sirsoft-daum_postcode.settings.title","descr…` | <!-- TODO: 설명 --> |
-| data_sources | array | `[{"id":"settings","label_key":"$t:sirsoft-daum_postcode.e…` | <!-- TODO: 설명 --> |
-| slots | object | `{"content":[{"id":"plugin_settings_content","type":"basic…` | <!-- TODO: 설명 --> |
-| pageConfig | object | `{"notice":"$t:sirsoft-daum_postcode.settings.notice","gui…` | <!-- TODO: 설명 --> |
-| schema | object | `{"display_mode":{"type":"enum","options":["popup","layer"…` | <!-- TODO: 설명 --> |
+| layout_name | string | `plugin_settings` | 레이아웃 식별자 (파일 경로 기반 — 예: board/popular) |
+| permissions | array | `[]` | 연결된 권한 목록 (id/identifier/name — 역할 경유 권한 관계 파생) |
+| extends | string | `_admin_base` | 상속하는 베이스 레이아웃 이름 (미상속 시 null) |
+| meta | object | `{"title":"$t:sirsoft-daum_postcode.settings.title","descr…` | 메타 정보 객체 (title/description/seo 등) |
+| data_sources | array | `[{"id":"settings","label_key":"$t:sirsoft-daum_postcode.e…` | API 데이터 소스 정의 배열 (id/endpoint/method) |
+| slots | object | `{"content":[{"id":"plugin_settings_content","type":"basic…` | 슬롯별 삽입 콘텐츠 맵 (베이스 레이아웃의 slot 위치에 주입) |
+| pageConfig | object | `{"notice":"$t:sirsoft-daum_postcode.settings.notice","gui…` | 페이지 단위 설정 객체 |
+| schema | object | `{"display_mode":{"type":"enum","options":["popup","layer"…` | 스키마 정의 객체 |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -1283,7 +1692,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "version": "1.0.0",
         "layout_name": "plugin_settings",
@@ -1307,6 +1716,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1336,11 +1746,85 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (PluginResource::toDetailArray + 언어팩 주입)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer\|null | `3` | 기본 키 (내부 식별자, 미설치 시 null) |
+| identifier | string | `sirsoft-daum_postcode` | 플러그인 고유 식별자 (vendor-plugin 형식) |
+| vendor | string | `sirsoft` | 벤더/개발자명 |
+| name | string | `Daum 우편번호` | 플러그인 이름 (현재 로케일로 해석) |
+| version | string | `1.0.0` | 플러그인 버전 |
+| description | string | `Daum 우편번호 서비스를 통한 주소 검색 기능을 …` | 플러그인 설명 (현재 로케일로 해석) |
+| github_url | string\|null | `https://github.com/gnuboard/g7-plugin-daum_postcode` | GitHub 저장소 URL |
+| requires_core | string\|null | `>=7.0.0-beta.2` | 요구되는 코어 최소 버전 (manifest `requires.g7_version`) |
+| dependencies | array | `[]` | 의존하는 확장 목록 (manifest 파생) |
+| status | string | `active` | 상태 (active/inactive/uninstalled/installing/uninstalling/updating) |
+| is_installed | boolean | `true` | 설치 여부 |
+| has_settings | boolean | `true` | 설정 UI 제공 여부 |
+| settings_route | string\|null | `/admin/plugins/sirsoft-daum_postcode/settings` | 설정 페이지 경로 |
+| permissions | array | `[]` | 연결된 권한 목록 |
+| roles | array | `[]` | 플러그인이 정의한 역할 목록 |
+| hooks | array | `[]` | 훅 설정 정보 |
+| config | array | `[]` | 플러그인 설정 값 맵 |
+| license | string\|null | `MIT` | 라이선스 식별자 (manifest `license`) |
+| metadata | array | `[]` | manifest 부가 메타데이터 |
+| update_available | boolean | `false` | 업데이트 가능 여부 |
+| update_source | string\|null | `github` | 업데이트 감지 출처 (github \| bundled) |
+| latest_version | string\|null | `1.0.0` | 감지된 최신 배포 버전 |
+| file_version | string\|null | `1.0.0` | 설치된 파일의 manifest 버전 |
+| github_changelog_url | string\|null | `https://github.com/gnuboard/g7-plugin-daum_postcode/releases` | GitHub 변경 내역 URL |
+| is_pending | boolean | `false` | _pending 대기소에 있어 설치 대기 중인지 여부 |
+| is_bundled | boolean | `true` | 코어에 선탑재된 번들 확장인지 여부 |
+| deactivated_reason | string\|null | `null` | 비활성화 사유 (manual \| incompatible_core \| null) |
+| deactivated_at | string\|null | `null` | 비활성화 일시 |
+| incompatible_required_version | string\|null | `null` | 코어 버전 미충족 시 필요한 버전 (호환되면 null) |
+| created_at | string\|null | `2026-07-01T02:11:03.000000Z` | 설치(레코드 생성) 일시 |
+| updated_at | string\|null | `2026-07-10T08:24:51.000000Z` | 최종 갱신 일시 |
+| language_packs | array | `[]` | 이 플러그인이 지원하는 번들 언어팩 목록 (설치/설치가능 슬롯) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.0.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "github_url": null,
+        "requires_core": ">=7.0.0-beta.2",
+        "dependencies": [],
+        "status": "active",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "permissions": [],
+        "roles": [],
+        "hooks": [],
+        "config": [],
+        "license": "MIT",
+        "metadata": [],
+        "update_available": false,
+        "update_source": null,
+        "latest_version": null,
+        "file_version": "1.0.0",
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "created_at": "2026-07-01T02:11:03.000000Z",
+        "updated_at": "2026-07-10T08:24:51.000000Z",
+        "language_packs": []
+    }
+}
+```
 
 **에러 응답**
 
@@ -1348,7 +1832,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 식별자의 플러그인이 존재하지 않는 경우 (`plugins.not_found`) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 조회 처리 중 예외 발생 (`plugins.fetch_failed`) |
 
 <!-- @generated:end -->
 
@@ -1378,11 +1864,38 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| has_modified_layouts | boolean | `true` | 사용자가 수정한 레이아웃이 하나라도 있는지 여부 |
+| modified_count | integer | `1` | 수정된 레이아웃 건수 |
+| modified_layouts | array | `[{"id":12,"name":"plugin_settings", …}]` | 수정된 레이아웃 상세 배열 (아래 필드) |
+| modified_layouts[].id | integer | `12` | 레이아웃 레코드 기본 키 |
+| modified_layouts[].name | string | `plugin_settings` | 레이아웃 이름 (파일 경로 기반) |
+| modified_layouts[].updated_at | string\|null | `2026-07-10 08:24:51` | 최종 수정 일시 (Y-m-d H:i:s) |
+| modified_layouts[].size_diff | integer | `128` | 원본 대비 콘텐츠 크기 증감 (바이트, 음수 가능) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "수정된 레이아웃 확인이 완료되었습니다.",
+    "data": {
+        "has_modified_layouts": true,
+        "modified_count": 1,
+        "modified_layouts": [
+            {
+                "id": 12,
+                "name": "plugin_settings",
+                "updated_at": "2026-07-10 08:24:51",
+                "size_diff": 128
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -1390,7 +1903,9 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
-| 404 | Not Found | 해당 식별자의 플러그인이 설치되어 있지 않은 경우 (레이아웃 0건과 구분됨) |
+| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 확인 처리 실패 (`plugin_name` 에 실패 사유 — `plugins.check_modified_layouts_failed`) |
+| 500 | Server Error | 확인 처리 중 예외 발생 |
 
 <!-- @generated:end -->
 
@@ -1420,19 +1935,70 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| target | object | `{"identifier":"sirsoft-daum_postcode","name":"Daum 우편번호","version":"1.0.0"}` | 설치 대상 플러그인 요약 (identifier/name/version) |
+| dependencies | array | `[]` | 의존 확장 cascade 후보 목록 (아래 필드) |
+| dependencies[].type | string | `module` | 의존 확장 유형 (module \| plugin) |
+| dependencies[].identifier | string | `sirsoft-ecommerce` | 의존 확장 식별자 |
+| dependencies[].name | string\|null | `이커머스` | 의존 확장 이름 |
+| dependencies[].required_version | string\|null | `>=1.0.0` | 요구되는 최소 버전 |
+| dependencies[].installed_version | string\|null | `null` | 현재 설치된 버전 (미설치 시 null) |
+| dependencies[].is_installed | boolean | `false` | 설치 여부 |
+| dependencies[].is_active | boolean | `false` | 활성화 여부 |
+| dependencies[].is_met | boolean | `false` | 의존 조건 충족 여부 |
+| dependencies[].available | boolean | `true` | cascade 선택 후보 여부 (미충족 항목만 true) |
+| dependencies[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 (미충족 + 미설치) |
+| language_packs | array | `[]` | 함께 설치 가능한 미설치 번들 언어팩 목록 (아래 필드) |
+| language_packs[].bundled_identifier | string | `g7-plugin-daum_postcode-ja` | 번들 언어팩 식별자 |
+| language_packs[].locale | string | `ja` | 로케일 코드 |
+| language_packs[].locale_native_name | string | `日本語` | 로케일 원어 표기 |
+| language_packs[].locale_name | string | `일본어` | 로케일 이름 (현재 로케일 표기) |
+| language_packs[].version | string | `1.0.0` | 언어팩 버전 |
+| language_packs[].depends_on_extension | string\|null | `null` | 이 언어팩이 귀속된 의존 확장 식별자 (본 확장 소유이면 null) |
+| language_packs[].available | boolean | `true` | 함께 설치 가능한지 여부 |
+| language_packs[].default_selected | boolean | `true` | 체크리스트 기본 선택 여부 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "target": {
+            "identifier": "sirsoft-daum_postcode",
+            "name": "Daum 우편번호",
+            "version": "1.0.0"
+        },
+        "dependencies": [],
+        "language_packs": [
+            {
+                "bundled_identifier": "g7-plugin-daum_postcode-ja",
+                "locale": "ja",
+                "locale_native_name": "日本語",
+                "locale_name": "일본어",
+                "version": "1.0.0",
+                "depends_on_extension": null,
+                "available": true,
+                "default_selected": true
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 대상 확장을 찾을 수 없거나 프리뷰 빌드 중 예외 발생 (`plugins.fetch_failed`) |
 
 <!-- @generated:end -->
 
@@ -1462,19 +2028,62 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| tables | array | `[{"name":"plugin_daum_logs","size_bytes":16384, …}]` | 삭제 대상 DB 테이블 목록 (마이그레이션 정적 테이블 + 동적 테이블) |
+| tables[].name | string | `plugin_daum_logs` | 테이블명 (prefix 제외) |
+| tables[].size_bytes | integer\|null | `16384` | 테이블 용량 (바이트). 용량 조회 미지원 DB 에서는 null |
+| tables[].size_formatted | string | `16 KB` | 사람이 읽는 용량 표기 |
+| storage_directories | array | `[]` | `storage/app/plugins/{identifier}` 하위 1-depth 디렉토리 목록 (name/size_bytes/size_formatted) |
+| vendor_directory | object\|null | `{"items":[…],"total_size_bytes":1048576,"total_size_formatted":"1 MB"}` | Composer vendor/ 및 composer.lock 정보 (없으면 null) |
+| extension_directory | object\|null | `{"path":"plugins/sirsoft-daum_postcode","size_bytes":524288,"size_formatted":"512 KB"}` | 확장 설치 디렉토리 경로와 용량 (없으면 null) |
+| shared_records | array | `[{"table":"permissions","label_key":"permissions","count":3}]` | 코어 공유 테이블에 적재된 이 플러그인 소유 레코드 (permissions/menus/notification_definitions/identity_policies/identity_message_definitions, 0건 항목은 제외) |
+| total_table_size_bytes | integer | `16384` | 삭제 대상 테이블 총 용량 (바이트) |
+| total_table_size_formatted | string | `16 KB` | 테이블 총 용량 표기 |
+| total_storage_size_bytes | integer | `0` | 스토리지 디렉토리 총 용량 (바이트) |
+| total_storage_size_formatted | string | `0 B` | 스토리지 총 용량 표기 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 삭제 정보를 성공적으로 조회했습니다.",
+    "data": {
+        "tables": [],
+        "storage_directories": [],
+        "vendor_directory": null,
+        "extension_directory": {
+            "path": "plugins/sirsoft-daum_postcode",
+            "size_bytes": 524288,
+            "size_formatted": "512 KB"
+        },
+        "shared_records": [
+            {
+                "table": "permissions",
+                "label_key": "permissions",
+                "count": 3
+            }
+        ],
+        "total_table_size_bytes": 0,
+        "total_table_size_formatted": "0 B",
+        "total_storage_size_bytes": 0,
+        "total_storage_size_formatted": "0 B"
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.uninstall`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
+| 404 | Not Found | 해당 식별자의 플러그인이 존재하지 않는 경우 (`plugins.not_found`) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 삭제 정보 조회 중 예외 발생 (`plugins.uninstall_info_failed`) |
 
 <!-- @generated:end -->
 
@@ -1518,20 +2127,76 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 는 업데이트된 플러그인 리소스(PluginResource) 입니다. 플러그인 정보를 얻을 수 없는 예외 경로에서는 업데이트 결과 맵(success/from_version/to_version/message) 이 반환됩니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-daum_postcode` | 업데이트된 플러그인 고유 식별자 |
+| version | string | `1.1.0` | 업데이트 후 버전 |
+| file_version | string\|null | `1.1.0` | 설치된 파일의 manifest 버전 |
+| status | string | `active` | 업데이트 후 상태 (업데이트 이전 상태로 복원) |
+| update_available | boolean | `false` | 업데이트 후 재계산된 업데이트 가능 여부 |
+| latest_version | string\|null | `1.1.0` | 감지된 최신 배포 버전 |
+| abilities | object | `{"can_install":true,"can_activate":true,"can_uninstall":true}` | 현재 사용자의 수행 가능 작업 맵 |
+
+나머지 필드는 목록(`GET /api/admin/plugins`) 응답 항목과 동일합니다 (PluginResource 단일 정의). 업데이트할 내용이 없고 `force` 도 없는 경우에는 `{"success": false, "from_version": …, "to_version": …, "message": "업데이트할 내용이 없습니다."}` 형태가 `data` 로 반환됩니다.
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "플러그인 \"sirsoft-daum_postcode\"이(가) 1.1.0 버전으로 업데이트되었습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "sirsoft-daum_postcode",
+        "vendor": "sirsoft",
+        "name": "Daum 우편번호",
+        "version": "1.1.0",
+        "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+        "dependencies": [],
+        "permissions": [],
+        "roles": [],
+        "config": [],
+        "hooks": [],
+        "status": "active",
+        "is_installed": true,
+        "has_settings": true,
+        "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+        "assets": {
+            "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+            "css": null,
+            "priority": 100
+        },
+        "update_available": false,
+        "update_source": null,
+        "latest_version": "1.1.0",
+        "file_version": "1.1.0",
+        "github_url": null,
+        "github_changelog_url": null,
+        "is_pending": false,
+        "is_bundled": true,
+        "deactivated_reason": null,
+        "deactivated_at": null,
+        "incompatible_required_version": null,
+        "abilities": {
+            "can_install": true,
+            "can_activate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.plugins.install`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 업데이트 실패 (`plugin_name` 에 번역된 사유 — 다운그레이드 차단, 강제 업데이트 소스 없음, 코어 버전 비호환, 진행 중 상태 등) |
+| 500 | Server Error | 업데이트 처리 중 예외 발생 (`plugins.errors.update_failed`) |
 
 <!-- @generated:end -->
 
@@ -1602,18 +2267,35 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 요청한 에셋 파일의 원본 바이트를 그대로 서빙합니다 (성공 시 200 또는 304)._
+
+| 응답 헤더 | 예시값 | 용도/설명 |
+| --- | --- | --- |
+| Content-Type | `text/javascript` | 파일 확장자에서 감지한 MIME 타입 |
+| ETag | `"a1b2c3d4…"` | 파일 내용 기반 검증자 (재요청 시 304 판정) |
+| Cache-Control | `public, max-age=31536000` | 1년 캐시 (환경별로 달라짐 — 비프로덕션은 no-cache) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/javascript
+Cache-Control: public, max-age=31536000
+ETag: "a1b2c3d4e5f6"
+
+(function(){/* 플러그인 IIFE 번들 원본 바이트 */})();
+```
+
+에러 시에는 JSON 봉투로 응답합니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 403 | Forbidden | 허용되지 않은 파일 형식 (`plugins.errors.file_type_not_allowed`) |
+| 404 | Not Found | 플러그인이 없거나 비활성 (`plugins.errors.not_found`) 또는 파일 미존재 (`plugins.errors.file_not_found`) |
+| 422 | Unprocessable Entity | 경로/확장자 보안 검증 실패 (ServePluginAssetRequest) |
+| 500 | Server Error | 알 수 없는 오류 (`plugins.errors.unknown_error`) |
 
 <!-- @generated:end -->
 
@@ -1640,15 +2322,32 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 활성 플러그인 CSS 를 병합한 텍스트를 그대로 서빙합니다 (성공 시 200 또는 304)._
+
+| 응답 헤더 | 예시값 | 용도/설명 |
+| --- | --- | --- |
+| Content-Type | `text/css` | 항상 CSS |
+| ETag | `"a1b2c3d4…"` | 병합 파일 내용 기반 검증자 (병합 파일이 있는 경우) |
+| Cache-Control | `public, max-age=31536000` | 1년 캐시 (환경별로 달라짐 — 비프로덕션은 매 요청 재병합) |
+
+활성 global 플러그인 에셋이 하나도 없으면 본문이 빈 200 응답(`text/css`) 입니다.
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/css
+Cache-Control: public, max-age=31536000
+
+/* sirsoft-gdpr */
+.g7-gdpr-banner{position:fixed;bottom:0}
+/* sirsoft-ckeditor5 */
+.ck-editor__editable{min-height:240px}
+```
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회 — 활성 에셋이 없으면 빈 200 응답)._
+_에러 응답 없음 — 공개 조회이며 요청 파라미터가 없고, 활성 에셋이 하나도 없는 경우에도 빈 200 을 반환합니다._
 
 <!-- @generated:end -->
 
@@ -1675,15 +2374,31 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 JSON 봉투를 반환하지 않습니다 — 활성 플러그인 IIFE JS 를 병합한 텍스트를 그대로 서빙합니다 (성공 시 200 또는 304)._
+
+| 응답 헤더 | 예시값 | 용도/설명 |
+| --- | --- | --- |
+| Content-Type | `text/javascript` | 항상 JavaScript |
+| ETag | `"a1b2c3d4…"` | 병합 파일 내용 기반 검증자 (병합 파일이 있는 경우) |
+| Cache-Control | `public, max-age=31536000` | 1년 캐시 (환경별로 달라짐 — 비프로덕션은 매 요청 재병합) |
+
+활성 global 플러그인 에셋이 하나도 없으면 본문이 빈 200 응답(`text/javascript`) 입니다. 병합 시 각 IIFE 사이는 `\n;\n` 구분자로 연결됩니다.
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: text/javascript
+Cache-Control: public, max-age=31536000
+
+(function(){/* sirsoft-gdpr plugin.iife.js */})();
+;
+(function(){/* sirsoft-ckeditor5 plugin.iife.js */})();
+```
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회 — 활성 에셋이 없으면 빈 200 응답)._
+_에러 응답 없음 — 공개 조회이며 요청 파라미터가 없고, 활성 에셋이 하나도 없는 경우에도 빈 200 을 반환합니다._
 
 <!-- @generated:end -->
 
@@ -1838,17 +2553,44 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `success/message/data` 봉투를 사용하지 않습니다 — 플러그인의 `components.json` 원문을 그대로 JSON body 로 반환합니다 (`Cache-Control: public, max-age=3600`). 파일이 없는 구버전 플러그인은 빈 객체(`{}`) 로 폴백합니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| $schema | string | `https://json-schema.org/draft/2020-12/schema` | 매니페스트 JSON 스키마 참조 |
+| identifier | string | `sirsoft-ckeditor5` | 이 매니페스트를 소유한 플러그인 식별자 |
+| version | string | `1.0.0-beta.4` | 매니페스트(플러그인) 버전 |
+| components | object | `{"basic":[],"composite":[],"layout":[]}` | 타입별 컴포넌트 정의 맵 |
+| components.basic | array | `[]` | Basic 컴포넌트 정의 목록 (HTML 래핑 계층) |
+| components.composite | array | `[]` | Composite 컴포넌트 정의 목록 (집합 컴포넌트) |
+| components.layout | array | `[]` | Layout 컴포넌트 정의 목록 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+Content-Type: application/json
+Cache-Control: public, max-age=3600
+```
+
+```json
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "identifier": "sirsoft-ckeditor5",
+    "version": "1.0.0-beta.4",
+    "components": {
+        "basic": [],
+        "composite": [],
+        "layout": []
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 식별자의 플러그인이 없거나 비활성 상태인 경우 (`plugins.errors.not_found`) |
 
 <!-- @generated:end -->
 
@@ -1886,6 +2628,8 @@ _단건 응답: `data` 객체의 필드._
 
 **응답 예시**
 
+<!-- @probed -->
+
 ```http
 HTTP/1.1 200
 ```
@@ -1905,7 +2649,10 @@ HTTP/1.1 200
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.plugins.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

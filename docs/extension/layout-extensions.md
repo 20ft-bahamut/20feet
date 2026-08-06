@@ -419,6 +419,53 @@ v1.17.0 이전: modals 내부의 extension_point는 처리되지 않았음
 | `prepend` | default **앞에** 추가 | `[NEW] [default...]` |
 | `replace` | default **완전 교체** | `[NEW]` (default 제거) |
 
+### 확장 병합 칸 (주입 폼의 값을 템플릿 API 요청에 실어 보내기)
+
+슬롯에 주입한 폼이 입력값을 서버로 보내려면, 그 값이 **템플릿이 소유한 apiCall 의 `params.body`** 에 도달해야 한다. 그런데 확장에는 body 에 키를 추가할 수단이 없다.
+
+- 결제 버튼처럼 `id` 가 없는 노드는 overlay `target_id` 로 잡을 수 없다
+- `inject_props` 는 컴포넌트 props 병합 전용이라 `actions[].params.body` 에 닿지 않는다 (`_merge` 는 shallow)
+
+그래서 템플릿이 **확장 병합 칸**을 하나 열어 둔다. 규약은 이렇다.
+
+**템플릿 쪽** — body 를 통짜 표현식으로 만들고 말미에 확장 칸을 spread 한다.
+
+```json
+{
+  "handler": "apiCall",
+  "target": "/api/modules/sirsoft-ecommerce/user/orders",
+  "params": {
+    "body": "{{ ({ temp_order_id: _local.tempOrderId, payment_method: _computed.selectedPaymentMethod, ...(_local.checkoutExtraPayload ?? {}) }) }}"
+  }
+}
+```
+
+**확장 쪽** — 자기 필드를 그 칸에 setState 한다.
+
+```json
+{
+  "type": "change",
+  "handler": "setState",
+  "params": {
+    "target": "local",
+    "checkoutExtraPayload.cash_receipt_requested": "{{$event.target.checked}}"
+  }
+}
+```
+
+지켜야 할 것:
+
+- 확장은 **자기 도메인 키만** 쓴다. spread 가 뒤에 오므로 템플릿의 기존 키를 덮어쓸 수 있다
+- 폼을 접거나 신청을 해제하면 칸을 `{}` 로 비운다. 남겨 두면 서버가 신청으로 오인한다
+- 템플릿이 소유한 필드(예: 환불계좌)는 칸을 경유하지 않고 body 에 직접 기재한다
+- body 를 통짜 표현식으로 전환할 때는 **전환 전후 산출값이 동일한지** 회귀 테스트로 고정한다 (`DataBindingEngine.evaluateExpression` 으로 실제 평가)
+
+현재 열려 있는 칸:
+
+| 칸 이름 | 위치 | 소비처 |
+|---------|------|--------|
+| `_local.checkoutExtraPayload` | `sirsoft-basic` 주문서 (`_checkout_summary.json`) | 주문 생성 `POST /user/orders` |
+
 ---
 
 ## 템플릿 오버라이드

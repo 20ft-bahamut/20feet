@@ -112,7 +112,7 @@ class GdprCookieConsentController extends PublicBaseController
         $needsRenewal = ! $hasConsented
             && $this->consentService->hasAnyConsentHistory($userId, $sessionId);
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'has_consented' => $hasConsented,
             'consents' => $consents,
             'needs_renewal' => $needsRenewal,

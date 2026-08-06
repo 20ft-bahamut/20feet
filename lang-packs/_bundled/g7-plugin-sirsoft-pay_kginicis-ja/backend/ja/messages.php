@@ -2,9 +2,6 @@
 
 return [
     'errors' => [
-        'cash_receipt_invalid_issue_type' => '発行タイプが正しくありません。',
-        'cash_receipt_missing_issue_number' => '識別番号を入力してください。',
-        'cash_receipt_already_issued' => 'すでに現金領収書が発行された決済です。',
         'cash_receipt_issue_failed' => '現金領収書の発行に失敗しました。',
         'order_not_found' => '注文が見つかりません。',
         'cbt_failed' => '海外決済の処理に失敗しました。',
@@ -38,6 +35,9 @@ return [
         'japan_contact_phone_required' => 'ライブ日本決済画面に表示するお問い合わせ電話番号が必要です。',
         'japan_contact_opening_hours_required' => 'ライブ日本決済画面に表示するお問い合わせ営業時間が必要です。',
         'replace_sample_value' => 'ライブモードではサンプル値の代わりに実際の契約情報を入力してください。',
+    ],
+    'cash_receipt' => [
+        'provider_name' => 'KGイニシス',
     ],
     'cbt_cvs' => [
         'simulate_success' => '入金シミュレーションが完了しました。',

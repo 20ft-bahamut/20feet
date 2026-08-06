@@ -248,18 +248,48 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`LanguagePackService::bulkActivate()` 반환값)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| succeeded | array | `[3, 5]` | 활성화에 성공한 언어팩 ID 목록 |
+| failed | array | `[{"id": 7, "reason": "not_found"}]` | 활성화에 실패한 항목 목록 (요소: `id`, `reason`) |
+| failed[].id | integer\|string | `7` | 실패한 항목의 요청 ID (요청 `ids` 원본 값) |
+| failed[].reason | string | `not_found` | 실패 사유. 대상 미존재 시 `not_found`, 그 외에는 발생한 예외 메시지 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "language_packs.bulk_activate_success",
+    "data": {
+        "succeeded": [
+            3,
+            5
+        ],
+        "failed": [
+            {
+                "id": 7,
+                "reason": "not_found"
+            }
+        ]
+    }
+}
+```
+
+> `message` 는 `language_packs.bulk_activate_success` 키로 응답하지만, 현재 `lang/ko/language_packs.php` 에 해당 키가 정의되어 있지 않아 번역되지 않은 키 문자열이 그대로 내려갑니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.manage`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -288,18 +318,60 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`LanguagePackService::checkUpdates()` 반환값)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| checked | integer | `3` | 실제로 검사한 언어팩 수 (GitHub URL 해석 가능하거나 번들 매니페스트가 있는 팩만 대상) |
+| updates | integer | `1` | 검사 결과 업데이트가 있는 언어팩 수 |
+| details | array | `[{"identifier": "g7-core-ja", "current": "1.0.0", "latest": "1.1.0", "has_update": true, "error": null}]` | 팩별 검사 결과 목록 |
+| details[].identifier | string | `g7-core-ja` | 검사 대상 언어팩 식별자 |
+| details[].current | string | `1.0.0` | 현재 설치된 버전 |
+| details[].latest | string\|null | `1.1.0` | 감지된 최신 버전 (GitHub 릴리스 태그 → 실패 시 번들 매니페스트 폴백, 둘 다 없으면 null) |
+| details[].has_update | boolean | `true` | `latest > current` 여부 |
+| details[].error | string\|null | `null` | GitHub 조회 중 발생한 오류 메시지 (성공 시 null) |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "업데이트 확인을 완료했습니다.",
+    "data": {
+        "checked": 3,
+        "updates": 1,
+        "details": [
+            {
+                "identifier": "g7-core-ja",
+                "current": "1.0.0",
+                "latest": "1.1.0",
+                "has_update": true,
+                "error": null
+            },
+            {
+                "identifier": "apidoc-sample-lang",
+                "current": "1.0.0",
+                "latest": "1.0.0",
+                "has_update": false,
+                "error": null
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 업데이트 확인 중 예외 발생 (`업데이트 확인에 실패했습니다: :error` — `language_packs.check_updates_failed`) |
 
 <!-- @generated:end -->
 
@@ -336,18 +408,100 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (설치된 언어팩 = `LanguagePackResource::toArray()`, 상태코드 201)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| identifier | string | `g7-core-ja` | 언어팩 고유 식별자 ({vendor}-{scope}-{target?}-{locale}) |
+| vendor | string | `g7` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `ja` | IETF BCP-47 locale 태그 |
+| locale_name | string | `Japanese` | 영문 언어명 |
+| locale_native_name | string | `日本語` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 설치된 언어팩 버전 |
+| latest_version | string\|null | `1.0.0` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `일본어 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `코어 일본어 번역` | 언어팩 설명 (다국어) |
+| status | string | `active` | 언어팩 상태 (auto_activate=true 면 active, 아니면 installed) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `bundled` | 설치 소스 유형 (zip/github/url/bundled/bundled_with_extension/built_in) |
+| origin | string\|null | `bundled` | source_type 에서 파생된 출처 값 (`LanguagePackOrigin`) |
+| source_url | string\|null | `null` | 설치 소스 URL 또는 경로 |
+| github_url | string\|null | `null` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 (번들 원본 매칭용) |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 (scope+target_identifier 로 해석) |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 활성화 일시 (사용자 타임존) |
+| created_at | string\|null | `2026-07-05 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-05 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 설치했습니다.",
+    "data": {
+        "id": 1,
+        "identifier": "g7-core-ja",
+        "vendor": "g7",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "ja",
+        "locale_name": "Japanese",
+        "locale_native_name": "日本語",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": "1.0.0",
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "일본어 언어팩",
+        "license": "MIT",
+        "description": "코어 일본어 번역",
+        "status": "active",
+        "is_protected": false,
+        "source_type": "bundled",
+        "origin": "bundled",
+        "source_url": null,
+        "github_url": null,
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-05 10:41:24",
+        "updated_at": "2026-07-05 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -391,18 +545,102 @@ Content-Disposition: form-data; name="auto_activate"
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (설치된 언어팩 = `LanguagePackResource::toArray()`, 상태코드 201). 필드 구성은 [install-from-bundled](#post-apiadminlanguage-packsinstall-from-bundled) 응답과 동일합니다 — `source_type` 은 `zip`._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `2` | 기본 키 (내부 식별자) |
+| identifier | string | `acme-core-de` | 언어팩 고유 식별자 |
+| vendor | string | `acme` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `de` | IETF BCP-47 locale 태그 |
+| locale_name | string | `German` | 영문 언어명 |
+| locale_native_name | string | `Deutsch` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 설치된 언어팩 버전 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `독일어 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `—` | 언어팩 설명 (다국어) |
+| status | string | `installed` | 언어팩 상태 (auto_activate=true 면 active) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `zip` | 설치 소스 유형 (파일 업로드 설치이므로 zip) |
+| origin | string\|null | `zip` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `null` | 설치 소스 URL 또는 경로 |
+| github_url | string\|null | `null` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `null` | 활성화 일시 (미활성 시 null) |
+| created_at | string\|null | `2026-07-05 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-05 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 설치했습니다.",
+    "data": {
+        "id": 2,
+        "identifier": "acme-core-de",
+        "vendor": "acme",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "de",
+        "locale_name": "German",
+        "locale_native_name": "Deutsch",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": null,
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "독일어 언어팩",
+        "license": "MIT",
+        "description": null,
+        "status": "installed",
+        "is_protected": false,
+        "source_type": "zip",
+        "origin": "zip",
+        "source_url": null,
+        "github_url": null,
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": null,
+        "created_at": "2026-07-05 10:41:24",
+        "updated_at": "2026-07-05 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+> manifest 검증 실패 시 422 (`language-pack.json 검증에 실패했습니다.`), 그 외 설치 실패 시 500 (`언어팩 설치에 실패했습니다: :error`) 으로 응답합니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -440,18 +678,100 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (설치된 언어팩 = `LanguagePackResource::toArray()`, 상태코드 201). 필드 구성은 install-from-bundled 응답과 동일하며 `source_type` 이 `github`, `source_url`/`github_url` 에 저장소 URL 이 들어갑니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `3` | 기본 키 (내부 식별자) |
+| identifier | string | `acme-core-es` | 언어팩 고유 식별자 |
+| vendor | string | `acme` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `es` | IETF BCP-47 locale 태그 |
+| locale_name | string | `Spanish` | 영문 언어명 |
+| locale_native_name | string | `Español` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 설치된 언어팩 버전 (GitHub 최신 릴리스 태그 기준) |
+| latest_version | string\|null | `1.0.0` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `스페인어 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `—` | 언어팩 설명 (다국어) |
+| status | string | `active` | 언어팩 상태 (auto_activate=true 면 active, 아니면 installed) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `github` | 설치 소스 유형 |
+| origin | string\|null | `github` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `https://github.com/acme/g7-core-es` | 설치에 사용한 GitHub 저장소 URL |
+| github_url | string\|null | `https://github.com/acme/g7-core-es` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 활성화 일시 |
+| created_at | string\|null | `2026-07-05 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-05 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 설치했습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "acme-core-es",
+        "vendor": "acme",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "es",
+        "locale_name": "Spanish",
+        "locale_native_name": "Español",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": "1.0.0",
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "스페인어 언어팩",
+        "license": "MIT",
+        "description": null,
+        "status": "active",
+        "is_protected": false,
+        "source_type": "github",
+        "origin": "github",
+        "source_url": "https://github.com/acme/g7-core-es",
+        "github_url": "https://github.com/acme/g7-core-es",
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-05 10:41:24",
+        "updated_at": "2026-07-05 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -493,18 +813,102 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (설치된 언어팩 = `LanguagePackResource::toArray()`, 상태코드 201). 필드 구성은 install-from-bundled 응답과 동일하며 `source_type` 이 `url`, `source_url` 에 다운로드 URL 이 들어갑니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `4` | 기본 키 (내부 식별자) |
+| identifier | string | `acme-core-it` | 언어팩 고유 식별자 |
+| vendor | string | `acme` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `it` | IETF BCP-47 locale 태그 |
+| locale_name | string | `Italian` | 영문 언어명 |
+| locale_native_name | string | `Italiano` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 설치된 언어팩 버전 |
+| latest_version | string\|null | `null` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `이탈리아어 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `—` | 언어팩 설명 (다국어) |
+| status | string | `active` | 언어팩 상태 (auto_activate=true 면 active, 아니면 installed) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `url` | 설치 소스 유형 |
+| origin | string\|null | `url` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `https://cdn.example.com/acme-core-it.zip` | 다운로드에 사용한 URL |
+| github_url | string\|null | `null` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 활성화 일시 |
+| created_at | string\|null | `2026-07-05 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-05 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 설치했습니다.",
+    "data": {
+        "id": 4,
+        "identifier": "acme-core-it",
+        "vendor": "acme",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "it",
+        "locale_name": "Italian",
+        "locale_native_name": "Italiano",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": null,
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "이탈리아어 언어팩",
+        "license": "MIT",
+        "description": null,
+        "status": "active",
+        "is_protected": false,
+        "source_type": "url",
+        "origin": "url",
+        "source_url": "https://cdn.example.com/acme-core-it.zip",
+        "github_url": null,
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-05 10:41:24",
+        "updated_at": "2026-07-05 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+> `checksum` 불일치 시 500 (`체크섬이 일치하지 않습니다.`), manifest 검증 실패 시 422 로 응답합니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -543,18 +947,58 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`LanguagePackService::previewManifest()` 반환값)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| manifest | object | `{"identifier":"acme-core-de","locale":"de","version":"1.0.0"}` | ZIP 안 `language-pack.json` 원본 전체 (파싱된 객체) |
+| validation | object | `{"errors":[],"is_valid":true,...}` | manifest 검증 결과 요약 |
+| validation.errors | array | `[]` | 검증 실패 메시지 목록 (통과 시 빈 배열) |
+| validation.is_valid | boolean | `true` | 검증 통과 여부 (`errors` 가 비어 있으면 true) |
+| validation.already_installed | boolean | `false` | 동일 `identifier` 언어팩이 이미 설치되어 있는지 여부 |
+| validation.existing_version | string\|null | `null` | 이미 설치되어 있다면 그 버전 (없으면 null) |
+| validation.target_version_mismatch | boolean | `false` | 대상 확장 버전이 manifest 요구 조건과 어긋나는지 여부 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "manifest 미리보기를 완료했습니다.",
+    "data": {
+        "manifest": {
+            "identifier": "acme-core-de",
+            "vendor": "acme",
+            "scope": "core",
+            "locale": "de",
+            "version": "1.0.0",
+            "name": {
+                "ko": "독일어 언어팩",
+                "en": "German Language Pack"
+            },
+            "license": "MIT"
+        },
+        "validation": {
+            "errors": [],
+            "is_valid": true,
+            "already_installed": false,
+            "existing_version": null,
+            "target_version_mismatch": false
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.install`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -583,18 +1027,41 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`LanguagePackService::refreshCache()` 반환값 — 각 캐시 계층의 무효화 성공 여부)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| registry | boolean | `true` | 언어팩 레지스트리 캐시 무효화 성공 여부 |
+| translator | boolean | `true` | Laravel 번역기(loaded 번역 배열) 초기화 성공 여부 |
+| template | boolean | `true` | 템플릿 언어(`template-lang`) 캐시 플러시 성공 여부 |
+| version | boolean | `true` | 프론트엔드 cache busting 용 확장 캐시 버전 증가 성공 여부 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩 캐시를 갱신했습니다.",
+    "data": {
+        "registry": true,
+        "translator": true,
+        "template": true,
+        "version": true
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.manage`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -625,20 +1092,32 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('language_packs.uninstall_success')` 만 호출하므로 `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 제거했습니다.",
+    "data": null
+}
+```
+
+> 보호된 언어팩(`is_protected`)은 제거할 수 없으며, 이 경우 500 (`언어팩 제거에 실패했습니다: 보호된 언어팩은 비활성화/제거할 수 없습니다.`) 으로 응답합니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.manage`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -681,6 +1160,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -710,19 +1190,117 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (활성화된 언어팩 = `LanguagePackResource::toArray()`). 필드 구성은 [GET /api/admin/language-packs/{id}](#get-apiadminlanguage-packsid) 의 `manifest`/`validation_summary`/`source_meta`/`changelog_entries` 4개를 제외한 나머지와 동일합니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| identifier | string | `apidoc-sample-lang` | 언어팩 고유 식별자 |
+| vendor | string | `apidoc` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `fr` | IETF BCP-47 locale 태그 |
+| locale_name | string | `French` | 영문 언어명 |
+| locale_native_name | string | `Français` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 언어팩 버전 |
+| latest_version | string\|null | `1.0.0` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `API 문서 샘플 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `문서 실측용 언어팩` | 언어팩 설명 (다국어) |
+| status | string | `active` | 활성화 후 상태 (`active`) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `bundled` | 설치 소스 유형 |
+| origin | string\|null | `bundled` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `null` | 설치 소스 URL 또는 경로 |
+| github_url | string\|null | `null` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 활성화 일시 (사용자 타임존) |
+| created_at | string\|null | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-08 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 활성화했습니다.",
+    "data": {
+        "id": 1,
+        "identifier": "apidoc-sample-lang",
+        "vendor": "apidoc",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "fr",
+        "locale_name": "French",
+        "locale_native_name": "Français",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": "1.0.0",
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "API 문서 샘플 언어팩",
+        "license": "MIT",
+        "description": "문서 실측용 언어팩",
+        "status": "active",
+        "is_protected": false,
+        "source_type": "bundled",
+        "origin": "bundled",
+        "source_url": null,
+        "github_url": null,
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+**슬롯 충돌(409) 응답**
+
+동일 슬롯(scope·target·locale)에 다른 활성 팩이 있고 `force=true` 가 아니면 409 로 응답하며, `errors` 에 현재 팩(`current`)과 대상 팩(`target`)이 위 필드 구성 그대로 담깁니다.
+
+```json
+{
+    "success": false,
+    "message": "같은 슬롯에 이미 활성 언어팩(:current)이 있습니다. (:target)으로 교체하려면 확인이 필요합니다.",
+    "errors": {
+        "current": { "id": 1, "identifier": "apidoc-sample-lang", "status": "active" },
+        "target": { "id": 2, "identifier": "acme-core-fr", "status": "installed" }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.manage`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -765,6 +1343,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -794,19 +1373,104 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (비활성화된 언어팩 = `LanguagePackResource::toArray()`). 필드 구성은 activate 응답과 동일하며 `status` 만 `inactive` 로 바뀝니다 (`activated_at` 은 마지막 활성화 시각 그대로 유지)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| identifier | string | `apidoc-sample-lang` | 언어팩 고유 식별자 |
+| vendor | string | `apidoc` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `fr` | IETF BCP-47 locale 태그 |
+| locale_name | string | `French` | 영문 언어명 |
+| locale_native_name | string | `Français` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.0.0` | 언어팩 버전 |
+| latest_version | string\|null | `1.0.0` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `API 문서 샘플 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `문서 실측용 언어팩` | 언어팩 설명 (다국어) |
+| status | string | `inactive` | 비활성화 후 상태 |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 (보호 팩은 비활성화 불가) |
+| source_type | string | `bundled` | 설치 소스 유형 |
+| origin | string\|null | `bundled` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `null` | 설치 소스 URL 또는 경로 |
+| github_url | string\|null | `null` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 마지막 활성화 일시 (비활성화 시에도 초기화되지 않음) |
+| created_at | string\|null | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-08 10:41:24` | 최종 수정 일시 |
+| has_update | boolean | `false` | `latest_version > version` 여부 |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 비활성화했습니다.",
+    "data": {
+        "id": 1,
+        "identifier": "apidoc-sample-lang",
+        "vendor": "apidoc",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "fr",
+        "locale_name": "French",
+        "locale_native_name": "Français",
+        "text_direction": "ltr",
+        "version": "1.0.0",
+        "latest_version": "1.0.0",
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "API 문서 샘플 언어팩",
+        "license": "MIT",
+        "description": "문서 실측용 언어팩",
+        "status": "inactive",
+        "is_protected": false,
+        "source_type": "bundled",
+        "origin": "bundled",
+        "source_url": null,
+        "github_url": null,
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 10:41:24",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+> 보호된 언어팩은 비활성화할 수 없으며, 이 경우 500 (`언어팩 비활성화에 실패했습니다: 보호된 언어팩은 비활성화/제거할 수 없습니다.`) 으로 응답합니다. 같은 슬롯에 다른 후보 팩이 있으면 가장 최근 inactive/installed 팩이 자동으로 활성 승격됩니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.manage`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -836,19 +1500,104 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (업데이트된 언어팩 = `LanguagePackResource::toArray()`). 필드 구성은 activate/deactivate 응답과 동일하며 `version` 이 새 버전으로 갱신되고 `has_update` 가 `false` 가 됩니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `3` | 기본 키 (내부 식별자) |
+| identifier | string | `acme-core-es` | 언어팩 고유 식별자 |
+| vendor | string | `acme` | 언어팩 제작자 식별자 |
+| scope | string | `core` | 적용 대상 분류 (core/module/plugin/template) |
+| target_identifier | string\|null | `null` | 대상 확장 식별자 (scope=core 일 때 null) |
+| locale | string | `es` | IETF BCP-47 locale 태그 |
+| locale_name | string | `Spanish` | 영문 언어명 |
+| locale_native_name | string | `Español` | 원어 언어명 |
+| text_direction | string | `ltr` | 텍스트 방향 (ltr/rtl) |
+| version | string | `1.1.0` | 업데이트 후 적용된 버전 |
+| latest_version | string\|null | `1.1.0` | 감지된 최신 배포 버전 |
+| target_version_constraint | string\|null | `null` | 대상 확장 버전 제약 (semver) |
+| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
+| name | string\|null | `스페인어 언어팩` | manifest `name` 의 현재 로케일 해석값 |
+| license | string\|null | `MIT` | 라이선스 |
+| description | string\|null | `—` | 언어팩 설명 (다국어) |
+| status | string | `active` | 언어팩 상태 (업데이트 전 상태 유지) |
+| is_protected | boolean | `false` | 보호(protected) 팩 여부 |
+| source_type | string | `github` | 설치 소스 유형 (업데이트는 GitHub/번들 소스만 가능) |
+| origin | string\|null | `github` | source_type 에서 파생된 출처 값 |
+| source_url | string\|null | `https://github.com/acme/g7-core-es` | 설치 소스 URL 또는 경로 |
+| github_url | string\|null | `https://github.com/acme/g7-core-es` | GitHub 저장소 URL (manifest 파생) |
+| github_changelog_url | string\|null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
+| bundled_identifier | string\|null | `null` | 대응하는 번들 확장 식별자 |
+| install_blocked_reason | string\|null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
+| target_name | string\|null | `null` | 대상 확장의 표시 이름 |
+| installed_at | string\|null | `2026-07-05 10:41:24` | 설치 일시 (사용자 타임존) |
+| activated_at | string\|null | `2026-07-05 10:41:24` | 활성화 일시 (사용자 타임존) |
+| created_at | string\|null | `2026-07-05 10:41:24` | 생성 일시 |
+| updated_at | string\|null | `2026-07-09 09:12:00` | 최종 수정 일시 (업데이트 시각으로 갱신) |
+| has_update | boolean | `false` | `latest_version > version` 여부 (업데이트 직후 false) |
+| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall":true}` | 현재 사용자가 이 언어팩에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "언어팩을 업데이트했습니다.",
+    "data": {
+        "id": 3,
+        "identifier": "acme-core-es",
+        "vendor": "acme",
+        "scope": "core",
+        "target_identifier": null,
+        "locale": "es",
+        "locale_name": "Spanish",
+        "locale_native_name": "Español",
+        "text_direction": "ltr",
+        "version": "1.1.0",
+        "latest_version": "1.1.0",
+        "target_version_constraint": null,
+        "target_version_mismatch": false,
+        "name": "스페인어 언어팩",
+        "license": "MIT",
+        "description": null,
+        "status": "active",
+        "is_protected": false,
+        "source_type": "github",
+        "origin": "github",
+        "source_url": "https://github.com/acme/g7-core-es",
+        "github_url": "https://github.com/acme/g7-core-es",
+        "github_changelog_url": null,
+        "bundled_identifier": null,
+        "install_blocked_reason": null,
+        "target_name": null,
+        "installed_at": "2026-07-05 10:41:24",
+        "activated_at": "2026-07-05 10:41:24",
+        "created_at": "2026-07-05 10:41:24",
+        "updated_at": "2026-07-09 09:12:00",
+        "has_update": false,
+        "abilities": {
+            "can_activate": true,
+            "can_deactivate": true,
+            "can_uninstall": true
+        }
+    }
+}
+```
+
+> 업데이트 소스 정보가 없거나(`업데이트 소스 정보가 없습니다 (GitHub 소스 언어팩만 업데이트 가능).`) 이미 최신 버전이면(`이미 최신 버전입니다.`) 500 (`언어팩 업데이트에 실패했습니다: :error`) 으로 응답합니다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.language_packs.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.language_packs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

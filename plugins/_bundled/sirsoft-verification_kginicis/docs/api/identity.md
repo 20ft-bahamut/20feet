@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Identity 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(raw HTTP) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -38,9 +38,35 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
+_단건 응답: `data` 객체의 필드. 본인확인 record 가 없는 사용자는 `data` 가 `null` 이다(컨트롤러가 `ResponseHelper::success('messages.success', null)` 로 분기)._
 
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| method | string | `"KG이니시스 본인확인"` | 본인확인 수단 표시 라벨 (Resource 고정 문자열) |
+| verified_at | string\|null | `"2026-07-01 14:22:10"` | 최종 본인확인 시각 (`Y-m-d H:i:s`). 재인증 이력이 있으면 `re_verified_at`, 없으면 최초 `verified_at` |
+| name_masked | string | `"홍**"` | 마스킹된 실명 (첫 글자 + 나머지 `*`) |
+| birthday_masked | string | `"1990-**-**"` | 마스킹된 생년월일 (연도 4자리만 노출) |
+| phone_masked | string | `"010-****-5678"` | 마스킹된 휴대폰 번호 (앞 3자리 + 뒤 4자리) |
+| is_adult | boolean | `true` | 성인 여부 (생년월일 기반 만 19세 이상 자동 계산값) |
+| is_foreigner | boolean | `false` | 외국인 여부 (이니시스 `isForeign`) |
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+`di`/`ci`/`ci2` 등 동일인 식별값과 평문 PII 는 응답에 포함하지 않는다. `InicisIdentityResource` 는 `resourceMeta()` 를 spread 하지 않으므로 `is_owner`/`abilities` 메타도 포함되지 않는다.
+
+**응답 예시**
+
+<!-- @probed -->
+
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -69,7 +95,7 @@ Authorization: Bearer {YOUR_TOKEN}
   | is_adult | boolean | `true` | 성인 여부(연령 게이팅 판정에 사용). |
   | is_foreigner | boolean | `false` | 외국인 여부. |
 
-  이 외에 `BaseApiResource` 공통 메타 `is_owner`(항상 본인이므로 `true`) + `abilities` 가 함께 붙는다.
+  `InicisIdentityResource` 는 `BaseApiResource` 를 상속하지만 `resourceMeta()` 를 spread 하지 않으므로 `is_owner`/`abilities` 메타 필드는 응답에 포함되지 않는다(대상이 항상 본인이며 조회 전용이라 불필요).
 - **응답 예시 주의**: 실측 시 샘플 사용자에게 본인인증 record 가 없어 `data: null`(record 없음) 응답만 관측된다. 아래 두 응답 예시 중 "record 존재 시" 는 `InicisIdentityResource` 구조 기준 정적 작성이다. 실제 record 가 있는 사용자로 실측하면 마스킹된 본인확인 정보가 채워진다.
 
 **응답 예시** (record 존재 시 — 정적, `InicisIdentityResource` 구조 기준)
@@ -77,6 +103,7 @@ Authorization: Bearer {YOUR_TOKEN}
 ```json
 {
   "success": true,
+  "message": "성공적으로 처리되었습니다.",
   "data": {
     "method": "KG이니시스 본인확인",
     "verified_at": "2026-07-01 14:22:10",
@@ -84,12 +111,8 @@ Authorization: Bearer {YOUR_TOKEN}
     "birthday_masked": "1990-**-**",
     "phone_masked": "010-****-5678",
     "is_adult": true,
-    "is_foreigner": false,
-    "is_owner": true,
-    "abilities": {}
-  },
-  "message": "성공적으로 처리되었습니다.",
-  "error": null
+    "is_foreigner": false
+  }
 }
 ```
 
@@ -98,9 +121,8 @@ Authorization: Bearer {YOUR_TOKEN}
 ```json
 {
   "success": true,
-  "data": null,
   "message": "성공적으로 처리되었습니다.",
-  "error": null
+  "data": null
 }
 ```
 

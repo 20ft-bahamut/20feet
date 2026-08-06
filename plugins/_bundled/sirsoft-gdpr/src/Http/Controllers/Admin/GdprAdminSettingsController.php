@@ -51,7 +51,7 @@ class GdprAdminSettingsController extends AdminBaseController
 
         $settings = $this->normalizeJsonFields(is_array($settings) ? $settings : []);
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'settings' => $settings,
         ]);
     }

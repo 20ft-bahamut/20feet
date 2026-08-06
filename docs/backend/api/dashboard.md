@@ -141,15 +141,29 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
+_목록 응답: `data` 배열 항목의 필드. `data` 는 `core.dashboard.alerts` 필터 훅의 결과이며, 알릴 항목이 없으면 빈 배열(`[]`)입니다. 코어 기본 리스너(`ExtensionCompatibilityAlertListener`)가 주입하는 항목의 필드는 다음과 같습니다._
 
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | string | `compat_plugins_sirsoft-gdpr` | 알림 식별자 (`compat_{type}_{identifier}` = 자동 비활성화, `recover_{type}_{identifier}` = 재호환. 알림 닫기(dismiss) 상태 판정 키) |
+| type | string | `warning` | 알림 등급 (`warning`: 코어 비호환 자동 비활성화, `info`: 재호환 복구 가능) |
+| subtype | string | `incompatible_core` | 알림 세부 분류 (`incompatible_core`: 코어 버전 비호환으로 자동 비활성화됨, `recovery_available`: 코어 업그레이드 후 다시 활성화 가능) |
+| icon | string | `exclamation-triangle` | 아이콘 식별자 (warning: `exclamation-triangle`, info: `check-circle`) |
+| title | string | `플러그인 "sirsoft-gdpr" 자동 비활성화됨` | 알림 제목 (다국어 문구 — `extensions.alerts.incompatible_deactivated` / `recovered_title`) |
+| message | string | `필요 버전: 7.0.0-beta.9, 현재 설치됨: 7.0.0-beta.8` | 알림 본문 (다국어 문구 — `extensions.alerts.incompatible_message` / `recovered_body`) |
+| extension_type | string | `plugin` | 대상 확장 종류 (`module` / `plugin` / `template`) |
+| identifier | string | `sirsoft-gdpr` | 대상 확장 식별자 |
+| recover_endpoint | string | `/api/admin/extensions/plugin/sirsoft-gdpr/recover` | 재활성화 호출 엔드포인트 (재호환 알림 `subtype=recovery_available` 에만 존재) |
+| time | string\|null | `3시간 전` | 자동 비활성화 시각의 상대 표시 (diffForHumans() 산물, 비활성화 시각이 없으면 `null`) |
+| read | boolean | `false` | 읽음 여부 (주입 시점에는 항상 `false`) |
 
 **응답 예시**
 
 ```http
 HTTP/1.1 200
 ```
+
+알릴 항목이 없는 경우 (기본):
 
 ```json
 {
@@ -159,12 +173,48 @@ HTTP/1.1 200
 }
 ```
 
+코어 비호환으로 자동 비활성화된 확장이 있는 경우:
+
+```json
+{
+    "success": true,
+    "message": "시스템 알림을 성공적으로 조회했습니다.",
+    "data": [
+        {
+            "id": "compat_plugins_sirsoft-gdpr",
+            "type": "warning",
+            "subtype": "incompatible_core",
+            "icon": "exclamation-triangle",
+            "title": "플러그인 \"sirsoft-gdpr\" 자동 비활성화됨",
+            "message": "필요 버전: 7.0.0-beta.9, 현재 설치됨: 7.0.0-beta.8",
+            "extension_type": "plugin",
+            "identifier": "sirsoft-gdpr",
+            "time": "3시간 전",
+            "read": false
+        },
+        {
+            "id": "recover_modules_sirsoft-board",
+            "type": "info",
+            "subtype": "recovery_available",
+            "icon": "check-circle",
+            "title": "모듈 \"sirsoft-board\" 다시 호환 가능",
+            "message": "코어 업그레이드 후 호환됩니다 (이전 요구: 7.0.0-beta.9). 다시 활성화할 수 있습니다.",
+            "extension_type": "module",
+            "identifier": "sirsoft-board",
+            "recover_endpoint": "/api/admin/extensions/module/sirsoft-board/recover",
+            "time": "2일 전",
+            "read": false
+        }
+    ]
+}
+```
+
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.dashboard.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.dashboard.activities`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -273,7 +323,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.notification-logs.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.dashboard.activities`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -345,7 +395,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.dashboard.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.dashboard.activities`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -431,7 +481,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.dashboard.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.dashboard.activities`)이 없는 경우 |
 
 <!-- @generated:end -->
 

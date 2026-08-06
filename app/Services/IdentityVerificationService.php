@@ -199,6 +199,10 @@ class IdentityVerificationService
             $publicPayload = $log->properties['public_payload'];
         }
 
+        // 누적 시도 횟수(attempts) 는 노출하지 않는다.
+        // 이 엔드포인트는 권한 가드 없는 공개 폴링용이라 challenge id 만 알면 누구나 조회할 수 있고,
+        // 남의 인증 시도 실패 횟수가 드러나면 잠금 직전까지 시도 횟수를 맞춰 보는 데 쓰일 수 있다.
+        // 상한(max_attempts) 은 정책 상수라 노출해도 무방하다 — 아래 반환 배열의 주석 참조.
         return [
             'id' => $log->id,
             'status' => $log->status->value,

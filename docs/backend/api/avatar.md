@@ -38,17 +38,25 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — `data` 는 `null`)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "프로필 이미지가 성공적으로 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 404 | Not Found | 삭제할 아바타 첨부파일이 없는 경우 (`user.avatar_not_found` — "삭제할 프로필 이미지가 없습니다.") |
+| 500 | Server Error | 첨부파일/실제 파일 삭제 중 예외 발생 (`user.avatar_delete_failed` — "프로필 이미지 삭제에 실패했습니다.") |
 
 <!-- @generated:end -->
 
@@ -86,11 +94,25 @@ Content-Type: image/png
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| avatar | string\|null | `/api/attachment/9f1c2b7d8e...` | 업로드된 아바타의 다운로드 URL (`Attachment.download_url` = `/api/attachment/{hash}`). 레거시 `avatar` 컬럼만 있는 경우 `storage/attachments/avatars/{파일명}` 형태의 절대 URL |
+| attachment_id | integer | `1` | 생성된 첨부파일(Attachment) 레코드의 기본 키 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "프로필 이미지가 성공적으로 업로드되었습니다.",
+    "data": {
+        "avatar": "/api/attachment/9f1c2b7d8e3a4c5b6d7e8f90a1b2c3d4",
+        "attachment_id": 1
+    }
+}
+```
 
 **에러 응답**
 
@@ -98,6 +120,7 @@ Content-Type: image/png
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Server Error | 파일 저장/첨부파일 생성 중 예외 발생 (`user.avatar_upload_failed` — "프로필 이미지 업로드에 실패했습니다.") |
 
 <!-- @generated:end -->
 

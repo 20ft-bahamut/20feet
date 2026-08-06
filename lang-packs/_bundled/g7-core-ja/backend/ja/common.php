@@ -30,4 +30,7 @@ return [
         'version_format' => ':attributeのフォーマットが正しくありません。(例:1.0.0、1.0.0-beta.1)',
         'to_version_required' => '開始バージョンが指定されている場合、終了バージョンも必須です。',
     ],
+    'created' => '作成されました。',
+    'updated' => '編集されました。',
+    'deleted' => '削除されました。',
 ];

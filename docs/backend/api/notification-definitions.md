@@ -146,7 +146,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-GET /api/admin/notification-definitions/1 HTTP/1.1
+GET /api/admin/notification-definitions/{definition} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -323,6 +323,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -349,7 +350,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PUT /api/admin/notification-definitions/1 HTTP/1.1
+PUT /api/admin/notification-definitions/{definition} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -368,20 +369,104 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드. 수정된 알림 정의를 `templates` 관계와 함께 반환합니다 (`NotificationDefinitionResource`)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| type | string | `apidoc-sample.event` | 알림 타입 (welcome, order_confirmed 등) |
+| hook_prefix | string | `core` | 훅 접두사 (core.auth, sirsoft-ecommerce 등) |
+| extension_type | string | `core` | 이 정의를 소유한 확장의 타입 (core/module/plugin) |
+| extension_identifier | string | `` | 이 정의를 소유한 확장의 식별자 (코어는 빈 문자열) |
+| name | object | `{"ko":"API 문서 샘플 알림","en":"API Doc Sample Notification"}` | 다국어 이름 (로케일별 값 객체) |
+| description | object | `{"ko":"문서 실측용 알림 정의","en":"Sample notification"}` | 다국어 설명 (로케일별 값 객체) |
+| variables | array | `[]` | 사용 가능 변수 메타데이터 ([{key, description}]) |
+| channels | array | `["database","mail"]` | 수정 후의 활성 채널 (["mail", "database"]) |
+| hooks | array | `[]` | 수정 후의 트리거 훅 목록 (["core.auth.after_register"]) |
+| is_active | boolean | `true` | active 여부 |
+| is_default | boolean | `false` | default 여부 (사용자 수정 시 false) |
+| templates | array | `[{"id":1,"definition_id":1,"channel":"mail", ...}]` | 채널별 알림 템플릿 목록 (`templates` 관계를 로드해 반환 — NotificationTemplateResource 배열) |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:14:43` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update/can_delete — 모두 `core.settings.update` 기준) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림 정의가 수정되었습니다.",
+    "data": {
+        "id": 1,
+        "type": "apidoc-sample.event",
+        "hook_prefix": "core",
+        "extension_type": "core",
+        "extension_identifier": "",
+        "name": {
+            "ko": "API 문서 샘플 알림",
+            "en": "API Doc Sample Notification"
+        },
+        "description": {
+            "ko": "문서 실측용 알림 정의",
+            "en": "Sample notification"
+        },
+        "variables": [],
+        "channels": [
+            "database",
+            "mail"
+        ],
+        "hooks": [],
+        "is_active": true,
+        "is_default": false,
+        "templates": [
+            {
+                "id": 1,
+                "definition_id": 1,
+                "channel": "mail",
+                "subject": "API 문서 샘플 템플릿 제목",
+                "body": "안녕하세요 {{name}} 님, 문서 실측용 본문입니다.",
+                "click_url": "/admin/apidoc-sample",
+                "recipients": [
+                    {
+                        "type": "role",
+                        "value": "admin",
+                        "display_name": "관리자"
+                    }
+                ],
+                "is_active": true,
+                "is_default": false,
+                "user_overrides": null,
+                "updated_by": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+                "created_at": "2026-07-08 10:41:24",
+                "updated_at": "2026-07-08 10:41:24",
+                "abilities": {
+                    "can_update": true,
+                    "can_delete": true
+                }
+            }
+        ],
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 12:14:43",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -403,7 +488,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-POST /api/admin/notification-definitions/1/reset HTTP/1.1
+POST /api/admin/notification-definitions/{definition}/reset HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -578,8 +663,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -601,7 +687,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PATCH /api/admin/notification-definitions/1/toggle-active HTTP/1.1
+PATCH /api/admin/notification-definitions/{definition}/toggle-active HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -711,8 +797,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

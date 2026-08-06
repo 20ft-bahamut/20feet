@@ -286,7 +286,7 @@ HTTP/1.1 201
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.create`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -319,18 +319,34 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| deleted_count | integer | `3` | 실제로 삭제된 스케줄 건수 (`ScheduleService::bulkDelete` 반환값) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "선택한 스케줄이 삭제되었습니다.",
+    "data": {
+        "deleted_count": 3
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.delete`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -372,18 +388,34 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| updated_count | integer | `3` | 상태가 실제로 변경된 스케줄 건수 (`ScheduleService::bulkUpdateStatus` 반환값) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "선택한 스케줄의 상태가 변경되었습니다.",
+    "data": {
+        "updated_count": 3
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -414,19 +446,30 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('schedule.history_delete_success')` 를 데이터 없이 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "실행 이력이 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.delete`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
+| 404 | Not Found | 지정한 `historyId` 의 실행 이력이 존재하지 않는 경우 (`schedule.history_not_found`) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -494,6 +537,7 @@ HTTP/1.1 200
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -515,7 +559,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-DELETE /api/admin/schedules/1 HTTP/1.1
+DELETE /api/admin/schedules/{schedule} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -523,9 +567,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-
-
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('schedule.delete_success')` 를 데이터 없이 호출)._
 
 **응답 예시**
 
@@ -546,8 +588,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.delete`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -569,7 +612,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-GET /api/admin/schedules/1 HTTP/1.1
+GET /api/admin/schedules/{schedule} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -660,6 +703,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -695,7 +739,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PUT /api/admin/schedules/1 HTTP/1.1
+PUT /api/admin/schedules/{schedule} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -798,9 +842,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -822,7 +866,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-POST /api/admin/schedules/1/duplicate HTTP/1.1
+POST /api/admin/schedules/{schedule}/duplicate HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -902,8 +946,9 @@ HTTP/1.1 201
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.create`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -935,7 +980,7 @@ HTTP/1.1 201
 **요청 예시**
 
 ```http
-GET /api/admin/schedules/1/history?page=1&per_page=1&status=success&trigger_type=scheduled&started_from=2026-01-01&started_to=2026-01-01&sort_by=started_at&sort_order=asc HTTP/1.1
+GET /api/admin/schedules/{schedule}/history?page=1&per_page=1&status=success&trigger_type=scheduled&started_from=2026-01-01&started_to=2026-01-01&sort_by=started_at&sort_order=asc HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -945,7 +990,25 @@ Authorization: Bearer {YOUR_TOKEN}
 
 _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+목록 항목은 `ScheduleHistoryResource::toListArray()` 산물입니다 (단건 실행 응답과 달리 `output`/`error_output`/`memory_usage`(raw)/`created_at`/`updated_at` 은 포함되지 않습니다).
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `7` | 실행 이력의 기본 키 (내부 식별자) |
+| schedule_id | integer | `1` | 이 이력이 속한 스케줄의 식별자 |
+| started_at | string\|null | `2026-07-08T12:14:49+09:00` | 실행 시작 일시 (사용자 타임존 포맷) |
+| ended_at | string\|null | `2026-07-08T12:14:49+09:00` | 실행 종료 일시 (사용자 타임존 포맷, 실행 중이면 null) |
+| duration | integer\|null | `0` | 실행 소요 시간 |
+| duration_formatted | string\|null | `45초` | `duration` 값의 표시용 포맷 문자열 (모델 접근자 파생, 없으면 null) |
+| status | string | `success` | 실행 결과 상태: success(성공), failed(실패), running(실행중) |
+| status_label | string\|null | `성공` | `status` 값의 사람이 읽는 라벨 (`schedule.result.*` 현지화) |
+| exit_code | integer\|null | `0` | 실행 종료 코드 (0=성공, 그 외=실패) |
+| memory_usage_formatted | string\|null | `417.34 KB` | 실행 중 메모리 사용량의 표시용 포맷 문자열 |
+| trigger_type | string | `manual` | 실행 방식: scheduled(예약 자동 실행), manual(수동 즉시 실행) |
+| trigger_type_label | string\|null | `수동 실행` | `trigger_type` 값의 사람이 읽는 라벨 (`schedule.trigger_type.*` 현지화) |
+| triggered_by | object\|null | `{"uuid":"a234c2b1-cde8-437f-b28b-23323be2b98d","name":"관리자"}` | 수동 실행을 트리거한 사용자 정보 (uuid/name — triggeredBy 관계가 로드되지 않았거나 자동 실행이면 null) |
+
+`data.pagination` 은 `current_page`/`last_page`/`per_page`/`total`/`from`/`to`/`has_more_pages` 로 구성됩니다.
 
 **응답 예시**
 
@@ -958,14 +1021,30 @@ HTTP/1.1 200
     "success": true,
     "message": "실행 이력을 조회했습니다.",
     "data": {
-        "data": [],
+        "data": [
+            {
+                "id": 7,
+                "schedule_id": 1,
+                "started_at": "2026-07-08T12:14:49+09:00",
+                "ended_at": "2026-07-08T12:14:49+09:00",
+                "duration": 0,
+                "duration_formatted": null,
+                "status": "success",
+                "status_label": "성공",
+                "exit_code": 0,
+                "memory_usage_formatted": "417.34 KB",
+                "trigger_type": "manual",
+                "trigger_type_label": "수동 실행",
+                "triggered_by": null
+            }
+        ],
         "pagination": {
             "current_page": 1,
             "last_page": 1,
             "per_page": 25,
-            "total": 0,
-            "from": null,
-            "to": null,
+            "total": 1,
+            "from": 1,
+            "to": 1,
             "has_more_pages": false
         }
     }
@@ -978,8 +1057,8 @@ HTTP/1.1 200
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1001,7 +1080,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-POST /api/admin/schedules/1/run HTTP/1.1
+POST /api/admin/schedules/{schedule}/run HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -1068,8 +1147,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.schedules.run`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.schedules.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

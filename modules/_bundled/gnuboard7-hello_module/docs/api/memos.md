@@ -335,11 +335,49 @@ HTTP/1.1 200
 }
 ```
 
+**응답 예시**
+
+```json
+{
+    "success": true,
+    "message": "메모를 조회했습니다.",
+    "data": {
+        "data": [
+            {
+                "id": 1,
+                "uuid": "9f1c0b4e-3a2d-4c8e-9f77-0a1b2c3d4e5f",
+                "title": "샘플 메모",
+                "content": "메모 본문 내용",
+                "created_at": "2026-04-21 09:00:00",
+                "updated_at": "2026-04-21 09:00:00",
+                "abilities": {
+                    "can_create": false,
+                    "can_update": false,
+                    "can_delete": false
+                }
+            }
+        ],
+        "meta": {
+            "current_page": 1,
+            "last_page": 3,
+            "per_page": 10,
+            "total": 21
+        },
+        "abilities": {
+            "can_create": false,
+            "can_update": false,
+            "can_delete": false
+        }
+    }
+}
+```
+
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 429 | Too Many Requests | `throttle:600,1` 초과 (분당 600회) |
+| 500 | Internal Server Error | 목록 조회 중 예외 발생 시 `messages.memo.fetch_failed` (`메모 조회에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -378,7 +416,7 @@ HTTP/1.1 200
 
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
-| id | path | string | 예 | — | 대상 리소스의 식별자 |
+| id | path | string | 예 | — | 조회할 메모의 고유번호(기본 키). `MemoService::getMemo($id)` 로 직접 조회하며 없으면 404 |
 
 **요청 예시**
 
@@ -391,17 +429,47 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체(`MemoResource`)의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 메모 고유번호 (기본 키) |
+| uuid | string | `9f1c0b4e-3a2d-4c8e-9f77-0a1b2c3d4e5f` | 메모 UUID (외부 식별자, 36자) |
+| title | string | `샘플 메모` | 메모 제목 (최대 255자) |
+| content | string | `메모 본문 내용` | 메모 본문 |
+| created_at | string | `2026-04-21 09:00:00` | 생성 일시 (사용자 타임존 기준 `Y-m-d H:i:s`, 값이 없으면 필드 자체 생략) |
+| updated_at | string | `2026-04-21 09:00:00` | 수정 일시 (사용자 타임존 기준 `Y-m-d H:i:s`, 값이 없으면 필드 자체 생략) |
+| abilities | object | `{"can_create":false,"can_update":false,"can_delete":false}` | 권한 능력 (`gnuboard7-hello_module.memos.{create,update,delete}` 보유 여부). `MemoResource` 는 `ownerField()` 미정의 → `is_owner` 미포함 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "메모를 조회했습니다.",
+    "data": {
+        "id": 1,
+        "uuid": "9f1c0b4e-3a2d-4c8e-9f77-0a1b2c3d4e5f",
+        "title": "샘플 메모",
+        "content": "메모 본문 내용",
+        "created_at": "2026-04-21 09:00:00",
+        "updated_at": "2026-04-21 09:00:00",
+        "abilities": {
+            "can_create": false,
+            "can_update": false,
+            "can_delete": false
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 `id` 의 메모가 없는 경우 — `ModelNotFoundException` → `메모를 찾을 수 없습니다.` |
+| 429 | Too Many Requests | `throttle:600,1` 초과 (분당 600회) |
+| 500 | Internal Server Error | 조회 중 예외 발생 시 `메모 조회에 실패했습니다.` |
 
 <!-- @generated:end -->
 

@@ -93,7 +93,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "data": [
             {
@@ -221,7 +221,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "purged_count": 200,
         "older_than_days": 1
@@ -234,7 +234,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.purge`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -352,7 +352,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -414,19 +414,108 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (생성된 정의를 `IdentityMessageDefinitionResource` 로 직렬화, `templates` eager load 포함). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `13` | 기본 키 (내부 식별자) |
+| provider_id | string | `g7:core.mail` | 이 정의가 속한 IDV 프로바이더 ID |
+| scope_type | string | `policy` | 메시지 정의 스코프 (관리자 생성은 항상 `policy`) |
+| scope_value | string | `admin.custom_action` | 스코프 값 (source_type='admin' 인 IdentityPolicy.key) |
+| name | object | `{"ko":"...","en":"..."}` | 다국어 표시명 |
+| description | object | `{"ko":"...","en":"..."}` | 다국어 설명 (미전달 시 null) |
+| channels | array | `["mail"]` | 이 정의가 지원하는 활성 채널 목록 |
+| variables | array | `[{"key":"code","description":"인증 코드"}]` | 템플릿 치환 가능 변수 메타데이터 목록 (미전달 시 null) |
+| extension_type | string | `core` | 이 리소스를 소유한 확장의 타입 (관리자 생성은 core) |
+| extension_identifier | string | `core` | 이 리소스를 소유한 확장의 식별자 |
+| is_active | boolean | `true` | 활성 여부 |
+| is_default | boolean | `false` | 시드 기본 정의 여부 (관리자 생성 정의는 false → 삭제 가능) |
+| user_overrides | array | `null` | 운영자가 시드 기본값에서 수정한 필드 경로 목록 (신규 생성 직후 null) |
+| templates | array | `[{"id":13,"definition_id":13,"channel":"mail","subject":{…},"body":{…}}]` | 함께 생성된 채널별 하위 템플릿 목록 |
+| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
+| updated_at | string | `2026-07-08 10:43:32` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "IDV 메시지 정의가 생성되었습니다.",
+    "data": {
+        "id": 13,
+        "provider_id": "g7:core.mail",
+        "scope_type": "policy",
+        "scope_value": "admin.custom_action",
+        "name": {
+            "ko": "커스텀 민감작업 인증",
+            "en": "Custom Sensitive Action"
+        },
+        "description": {
+            "ko": "운영자가 등록한 정책 전용 인증 메일",
+            "en": "Policy-specific verification mail added by admin"
+        },
+        "channels": [
+            "mail"
+        ],
+        "variables": [
+            {
+                "key": "code",
+                "description": "인증 코드 (text_code 흐름)"
+            }
+        ],
+        "extension_type": "core",
+        "extension_identifier": "core",
+        "is_active": true,
+        "is_default": false,
+        "user_overrides": null,
+        "templates": [
+            {
+                "id": 13,
+                "definition_id": 13,
+                "channel": "mail",
+                "subject": {
+                    "ko": "[{app_name}] 인증 코드",
+                    "en": "[{app_name}] Verification Code"
+                },
+                "body": {
+                    "ko": "<p>인증 코드: {code}</p>",
+                    "en": "<p>Your code: {code}</p>"
+                },
+                "is_active": true,
+                "is_default": false,
+                "user_overrides": null,
+                "updated_by": null,
+                "created_at": "2026-07-08 10:43:32",
+                "updated_at": "2026-07-08 10:43:32",
+                "abilities": {
+                    "can_update": true,
+                    "can_delete": true
+                }
+            }
+        ],
+        "created_at": "2026-07-08 10:43:32",
+        "updated_at": "2026-07-08 10:43:32",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 정의 생성 중 예외 발생 (`IDV 메시지 정의 생성에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -448,7 +537,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-DELETE /api/admin/identity/messages/definitions/1 HTTP/1.1
+DELETE /api/admin/identity/messages/definitions/{definition} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -456,19 +545,26 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `$this->success(__('identity_message.definition_deleted'))` 를 인자 1개로 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-403 — 응답 예시는 사람이 작성하세요. -->
+```json
+{
+    "success": true,
+    "message": "IDV 메시지 정의가 삭제되었습니다."
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우, 또는 대상 정의가 시드 기본 정의(`is_default=true`)인 경우 (`시드된 기본 메시지 정의는 삭제할 수 없습니다.`) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 삭제 중 예외 발생 (`IDV 메시지 정의 삭제에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -490,7 +586,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/identity/messages/definitions/1 HTTP/1.1
+GET /api/admin/identity/messages/definitions/{definition} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -617,8 +713,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -646,7 +743,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PATCH /api/admin/identity/messages/definitions/1 HTTP/1.1
+PATCH /api/admin/identity/messages/definitions/{definition} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -668,11 +765,101 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 정의를 `IdentityMessageDefinitionResource` 로 직렬화, `templates` eager load 포함 — GET 상세 응답과 동일 구조)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| provider_id | string | `g7:core.mail` | IDV 프로바이더 ID |
+| scope_type | string | `purpose` | 메시지 정의 스코프 (provider_default\|purpose\|policy) |
+| scope_value | string | `checkout_verification` | 범위 값 (provider_default 빈 문자열 / purpose 키 / policy 키) |
+| name | object | `{"ko":"결제 시 본인 확인","en":"Checkout Verification"}` | 다국어 표시명 (수정 반영) |
+| description | object | `{"ko":"...","en":"..."}` | 다국어 설명 (수정 반영) |
+| channels | array | `["mail"]` | 활성 채널 목록 (수정 반영) |
+| variables | array | `[{"key":"code","description":"인증 코드 (text_code 흐름)"}]` | 템플릿 치환 변수 메타데이터 목록 |
+| extension_type | string | `module` | 이 리소스를 소유한 확장의 타입 |
+| extension_identifier | string | `sirsoft-ecommerce` | 이 리소스를 소유한 확장의 식별자 |
+| is_active | boolean | `true` | 활성 여부 (수정 반영) |
+| is_default | boolean | `true` | 시드 기본 정의 여부 |
+| user_overrides | array | `["name","channels"]` | 이번 수정으로 append 된 운영자 재정의 필드 목록 (시더 재실행 시 보존 대상) |
+| templates | array | `[{"id":1,"definition_id":1,"channel":"mail",…}]` | 채널별 하위 템플릿 목록 |
+| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:14:36` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":false}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "IDV 메시지 정의가 수정되었습니다.",
+    "data": {
+        "id": 1,
+        "provider_id": "g7:core.mail",
+        "scope_type": "purpose",
+        "scope_value": "checkout_verification",
+        "name": {
+            "ko": "결제 시 본인 확인",
+            "en": "Checkout Verification"
+        },
+        "description": {
+            "ko": "결제 진행 전 본인/성인 확인 인증 코드 메일",
+            "en": "Identity/adult verification code mail before checkout"
+        },
+        "channels": [
+            "mail"
+        ],
+        "variables": [
+            {
+                "key": "code",
+                "description": "인증 코드 (text_code 흐름)"
+            }
+        ],
+        "extension_type": "module",
+        "extension_identifier": "sirsoft-ecommerce",
+        "is_active": true,
+        "is_default": true,
+        "user_overrides": [
+            "name"
+        ],
+        "templates": [
+            {
+                "id": 1,
+                "definition_id": 1,
+                "channel": "mail",
+                "subject": {
+                    "ko": "[{app_name}] 결제 본인 확인 인증 코드",
+                    "en": "[{app_name}] Checkout Verification Code"
+                },
+                "body": {
+                    "ko": "<h1>결제 본인 확인</h1>…",
+                    "en": "<h1>Checkout Verification</h1>…"
+                },
+                "is_active": true,
+                "is_default": true,
+                "user_overrides": null,
+                "updated_by": null,
+                "created_at": "2026-07-08 10:43:32",
+                "updated_at": "2026-07-08 10:43:32",
+                "abilities": {
+                    "can_update": true,
+                    "can_delete": true
+                }
+            }
+        ],
+        "created_at": "2026-07-08 10:43:32",
+        "updated_at": "2026-07-08 12:14:36",
+        "abilities": {
+            "can_update": true,
+            "can_delete": false
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -680,8 +867,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 수정 중 예외 발생 (`IDV 메시지 정의 수정에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -703,7 +891,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-POST /api/admin/identity/messages/definitions/1/reset HTTP/1.1
+POST /api/admin/identity/messages/definitions/{definition}/reset HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -727,7 +915,7 @@ _단건 응답: `data` 객체의 필드._
 | extension_identifier | string | `sirsoft-ecommerce` | 이 리소스를 소유한 확장의 식별자 |
 | is_active | boolean | `true` | active 여부 |
 | is_default | boolean | `true` | default 여부 |
-| user_overrides | null | `null` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
+| user_overrides | array | `["name.ja"]` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
 | templates | array | `[{"id":1,"definition_id":1,"channel":"mail","subject":{"k…` | 템플릿 목록 (각 원소 identifier/name 등 — 템플릿 관계 파생) |
 | created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
 | updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
@@ -830,8 +1018,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -853,7 +1042,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PATCH /api/admin/identity/messages/definitions/1/toggle-active HTTP/1.1
+PATCH /api/admin/identity/messages/definitions/{definition}/toggle-active HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -956,8 +1145,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -998,11 +1188,29 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`IdentityMessageTemplate::replaceVariables()` 의 반환값 — 저장 없이 렌더 결과만 반환)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| subject | string | `[G7] 결제 본인 확인 인증 코드` | 지정 로케일 제목에 `{key}` 변수를 `data` 값으로 치환한 결과 문자열 |
+| body | string | `<h1>결제 본인 확인</h1><p>… 123456 …</p>` | 지정 로케일 본문(HTML)에 `{key}` 변수를 치환한 결과 문자열 |
 
 **응답 예시**
 
-<!-- 실측 제외: side-effectful-write — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "IDV 메시지 템플릿 미리보기를 생성했습니다.",
+    "data": {
+        "subject": "[G7] 결제 본인 확인 인증 코드",
+        "body": "<h1>결제 본인 확인</h1><p>결제를 진행하기 위해 본인 확인이 필요합니다. 아래 인증 코드를 입력해 주세요.</p><p style=\"font-size:28px; font-weight:bold; letter-spacing:4px; text-align:center; padding:16px; background:#f4f6f8; border-radius:6px;\">123456</p><p>이 코드는 <strong>5분</strong> 후 만료됩니다.</p>"
+    }
+}
+```
 
 **에러 응답**
 
@@ -1011,6 +1219,7 @@ Content-Type: application/json
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.admin.identity.messages.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | `template_id` 에 해당하는 템플릿이 없거나(`findOrFail`) 렌더 중 예외 발생 (`IDV 메시지 템플릿 미리보기 생성에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -1037,7 +1246,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-PATCH /api/admin/identity/messages/templates/1 HTTP/1.1
+PATCH /api/admin/identity/messages/templates/{template} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -1056,11 +1265,61 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정된 템플릿을 `IdentityMessageTemplateResource` 로 직렬화 — templates reset 응답과 동일 구조)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| definition_id | integer | `1` | 이 템플릿이 속한 메시지 정의 ID |
+| channel | string | `mail` | 메시지 템플릿 채널 (mail 현재 / sms 등 향후) |
+| subject | object | `{"ko":"[{app_name}] 결제 본인 확인 인증 코드","en":"…"}` | 다국어 제목 (수정 반영, mail 채널에서만 의미) |
+| body | object | `{"ko":"<h1>결제 본인 확인</h1>…","en":"…"}` | 다국어 본문 (수정 반영) |
+| is_active | boolean | `true` | 활성 여부 (수정 반영) |
+| is_default | boolean | `false` | 시더 기본값 유지 여부 (운영자 수정 시 false) |
+| user_overrides | array | `["subject","body"]` | 이번 수정으로 append 된 운영자 재정의 필드 목록 |
+| updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — 없으면 null) |
+| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:14:36` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "IDV 메시지 템플릿이 수정되었습니다.",
+    "data": {
+        "id": 1,
+        "definition_id": 1,
+        "channel": "mail",
+        "subject": {
+            "ko": "[{app_name}] 결제 본인 확인 인증 코드",
+            "en": "[{app_name}] Checkout Verification Code"
+        },
+        "body": {
+            "ko": "<h1>결제 본인 확인</h1><p>아래 인증 코드를 입력해 주세요.</p><p>{code}</p>",
+            "en": "<h1>Checkout Verification</h1><p>Please enter the code below.</p><p>{code}</p>"
+        },
+        "is_active": true,
+        "is_default": false,
+        "user_overrides": [
+            "subject",
+            "body"
+        ],
+        "updated_by": null,
+        "created_at": "2026-07-08 10:43:32",
+        "updated_at": "2026-07-08 12:14:36",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -1068,8 +1327,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 500 | Internal Server Error | 수정 중 예외 발생 (`IDV 메시지 템플릿 수정에 실패했습니다.`) |
 
 <!-- @generated:end -->
 
@@ -1091,7 +1351,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-POST /api/admin/identity/messages/templates/1/reset HTTP/1.1
+POST /api/admin/identity/messages/templates/{template}/reset HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -1110,7 +1370,7 @@ _단건 응답: `data` 객체의 필드._
 | body | object | `{"ko":"<h1>결제 본인 확인<\/h1><p>결제를 진행하기 위해 본인 확인이 필요합니다. 아래 …` | 다국어 본문 ({"ko":"...", "en":"..."}) |
 | is_active | boolean | `true` | active 여부 |
 | is_default | boolean | `true` | default 여부 |
-| user_overrides | null | `null` | 운영자가 수정한 필드명 목록 (예: ["subject","body","is_active"]) |
+| user_overrides | array | `[]` | 운영자가 수정한 필드명 목록 (예: ["subject","body","is_active"]) |
 | updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
 | created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
 | updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
@@ -1157,8 +1417,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1180,7 +1441,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PATCH /api/admin/identity/messages/templates/1/toggle-active HTTP/1.1
+PATCH /api/admin/identity/messages/templates/{template}/toggle-active HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -1248,8 +1509,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.messages.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1319,7 +1581,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "data": [
             {
@@ -1390,7 +1652,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.policies.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -1452,11 +1714,64 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (생성된 정책을 `PolicyResource` 로 직렬화). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `25` | 기본 키 (내부 식별자) |
+| key | string | `admin.custom_action` | 정책 식별자 (고유) |
+| scope | string | `route` | 정책 적용 범위 (route / hook / custom — IdentityPolicyScope) |
+| target | string | `api.me.password.update` | 매칭 대상 (라우트명/URI 패턴, 훅 이름, 또는 custom key) |
+| purpose | string | `sensitive_action` | 이 정책이 요구하는 인증 목적 |
+| provider_id | null | `null` | 강제할 프로바이더 ID (미지정 시 null → 목적 기본 프로바이더 사용) |
+| grace_minutes | integer | `30` | 재인증 유예 시간(분) — 0=매번 요구 |
+| enabled | boolean | `true` | 정책 사용 여부 |
+| priority | integer | `100` | 정책 우선순위 (작을수록 우선) |
+| conditions | object | `{"changed_fields":["email"]}` | 추가 매칭 조건 JSON (미지정 시 null) |
+| source_type | string | `admin` | 정책 출처 — 이 엔드포인트로 생성한 정책은 항상 `admin` |
+| source_identifier | string | `null` | 출처 식별자 (요청에서 전달한 값, 미전달 시 null) |
+| applies_to | string | `both` | 적용 대상 사용자 (self / admin / both) |
+| fail_mode | string | `block` | 실패 시 동작 (block: HTTP 428 차단 / log_only: 감사 로그만) |
+| user_overrides | array | `[]` | 운영자가 선언 기본값에서 재정의한 필드 목록 (admin 정책은 빈 배열) |
+| created_at | string | `2026-07-08 10:44:35` | 생성 일시 |
+| updated_at | string | `2026-07-08 10:44:35` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "생성되었습니다.",
+    "data": {
+        "id": 25,
+        "key": "admin.custom_action",
+        "scope": "route",
+        "target": "api.me.password.update",
+        "purpose": "sensitive_action",
+        "provider_id": null,
+        "grace_minutes": 30,
+        "enabled": true,
+        "priority": 100,
+        "conditions": null,
+        "source_type": "admin",
+        "source_identifier": null,
+        "applies_to": "both",
+        "fail_mode": "block",
+        "user_overrides": [],
+        "created_at": "2026-07-08 10:44:35",
+        "updated_at": "2026-07-08 10:44:35",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -1464,7 +1779,7 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — `key` 중복, `scope`/`applies_to`/`fail_mode` 허용값 위반 등) |
 
 <!-- @generated:end -->
 
@@ -1496,20 +1811,30 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `$this->success('messages.deleted')` 를 인자 1개로 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "삭제되었습니다."
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우, 또는 대상 정책의 `source_type` 이 `admin` 이 아닌 선언형 정책(core/module/plugin)인 경우 (`messages.cannot_delete_system_resource`) |
+| 404 | Not Found | 해당 ID 의 정책이 없는 경우 (`messages.not_found`) |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 500 | Internal Server Error | 삭제 처리 실패 (`messages.failed`) |
 
 <!-- @generated:end -->
 
@@ -1569,11 +1894,67 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (수정 후 `refresh()` 한 정책을 `PolicyResource` 로 직렬화 — 목록 항목과 동일 구조)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `11` | 기본 키 (내부 식별자) |
+| key | string | `sirsoft-board.report.create` | 정책 식별자 (선언형 정책은 변경 불가) |
+| scope | string | `hook` | 정책 적용 범위 (선언형 정책은 변경 불가) |
+| target | string | `sirsoft-board.report.before_create` | 매칭 대상 (선언형 정책은 변경 불가) |
+| purpose | string | `sensitive_action` | 이 정책이 요구하는 인증 목적 (수정 반영) |
+| provider_id | null | `null` | 강제할 프로바이더 ID (수정 반영) |
+| grace_minutes | integer | `30` | 재인증 유예 시간(분) (수정 반영) |
+| enabled | boolean | `true` | 정책 사용 여부 (수정 반영) |
+| priority | integer | `100` | 정책 우선순위 (수정 반영) |
+| conditions | object | `null` | 추가 매칭 조건 JSON (수정 반영) |
+| source_type | string | `module` | 정책 출처 (core/module/plugin/admin) |
+| source_identifier | string | `sirsoft-board` | 출처 식별자 |
+| applies_to | string | `self` | 적용 대상 사용자 (수정 반영) |
+| fail_mode | string | `block` | 실패 시 동작 (수정 반영) |
+| user_overrides | array | `["enabled","grace_minutes"]` | 이번 수정으로 append 된 운영자 재정의 필드 목록 (시더 재실행 시 보존) |
+| created_at | string | `2026-07-08 10:44:35` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:14:36` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "수정되었습니다.",
+    "data": {
+        "id": 11,
+        "key": "sirsoft-board.report.create",
+        "scope": "hook",
+        "target": "sirsoft-board.report.before_create",
+        "purpose": "sensitive_action",
+        "provider_id": null,
+        "grace_minutes": 30,
+        "enabled": true,
+        "priority": 100,
+        "conditions": null,
+        "source_type": "module",
+        "source_identifier": "sirsoft-board",
+        "applies_to": "self",
+        "fail_mode": "block",
+        "user_overrides": [
+            "enabled",
+            "grace_minutes"
+        ],
+        "created_at": "2026-07-08 10:44:35",
+        "updated_at": "2026-07-08 12:14:36",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -1581,8 +1962,9 @@ Content-Type: application/json
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 404 | Not Found | 해당 ID 의 정책이 없는 경우 (`messages.not_found`) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우, 또는 선언형 정책에 화이트리스트(`enabled`/`grace_minutes`/`provider_id`/`fail_mode`/`conditions`/`purpose`/`applies_to`/`priority`) 밖 필드만 전달되어 적용할 값이 남지 않은 경우 (`validation.nothing_to_update`) |
+| 500 | Internal Server Error | 수정 처리 실패 (`messages.failed`) |
 
 <!-- @generated:end -->
 
@@ -1620,20 +2002,73 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (복원 후 `fresh()` 한 정책을 `PolicyResource` 로 직렬화 — 목록 항목과 동일 구조)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `11` | 기본 키 (내부 식별자) |
+| key | string | `sirsoft-board.report.create` | 정책 식별자 |
+| scope | string | `hook` | 정책 적용 범위 (route / hook / custom) |
+| target | string | `sirsoft-board.report.before_create` | 매칭 대상 |
+| purpose | string | `sensitive_action` | 이 정책이 요구하는 인증 목적 |
+| provider_id | null | `null` | 강제할 프로바이더 ID |
+| grace_minutes | integer | `0` | 재인증 유예 시간(분) — 요청한 `field` 가 이 필드였다면 선언 기본값으로 복원된 값 |
+| enabled | boolean | `false` | 정책 사용 여부 — 요청한 `field` 가 이 필드였다면 선언 기본값으로 복원된 값 |
+| priority | integer | `100` | 정책 우선순위 |
+| conditions | object | `null` | 추가 매칭 조건 JSON |
+| source_type | string | `module` | 정책 출처 (admin 이면 이 엔드포인트는 403) |
+| source_identifier | string | `sirsoft-board` | 출처 식별자 |
+| applies_to | string | `self` | 적용 대상 사용자 |
+| fail_mode | string | `block` | 실패 시 동작 |
+| user_overrides | array | `[]` | 남아 있는 운영자 재정의 필드 목록 (요청한 `field` 가 제거된 상태) |
+| created_at | string | `2026-07-08 10:44:35` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:20:11` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "id": 11,
+        "key": "sirsoft-board.report.create",
+        "scope": "hook",
+        "target": "sirsoft-board.report.before_create",
+        "purpose": "sensitive_action",
+        "provider_id": null,
+        "grace_minutes": 0,
+        "enabled": false,
+        "priority": 100,
+        "conditions": null,
+        "source_type": "module",
+        "source_identifier": "sirsoft-board",
+        "applies_to": "self",
+        "fail_mode": "block",
+        "user_overrides": [],
+        "created_at": "2026-07-08 10:44:35",
+        "updated_at": "2026-07-08 12:20:11",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.policies.update`)이 없는 경우, 또는 대상 정책의 `source_type` 이 `admin` 이라 선언 기본값이 존재하지 않는 경우 (`관리자가 직접 생성한 정책에는 선언 기본값이 없습니다.`) |
+| 404 | Not Found | 해당 ID 의 정책이 없는 경우 (`messages.not_found`) |
+| 422 | Unprocessable Entity | `field` 가 허용값 밖이거나 복원에 실패한 경우 (`선언 기본값 복원에 실패했습니다. 필드가 유효한지 확인하세요.`) |
 
 <!-- @generated:end -->
 
@@ -1681,7 +2116,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": [
         {
             "id": "g7:core.mail",
@@ -1780,7 +2215,8 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.admin.identity.providers.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1824,18 +2260,49 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (성공 + `return` 쿼리가 없을 때만 JSON 을 반환합니다. `return` 이 있고 same-origin 이면 302 redirect 이므로 본문이 없습니다)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| challenge_id | string | `00484973-8cd3-4a1d-85f2-78361feb6f0d` | 검증이 완료된 challenge 의 식별자 |
+| provider_id | string | `inicis` | 이 콜백을 처리한 프로바이더 식별자 |
+| verified_at | string | `2026-05-12T18:14:19+00:00` | 검증 완료 일시 (ISO 8601, 미검증이면 null) |
+| verification_token | string | `eyJ0eXAiOiJKV1QiLCJhbGciOi…` | 후속 민감 작업 요청에 제출할 본인인증 토큰 (`claims.verification_token`, 없으면 빈 문자열) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "본인 확인이 완료되었습니다.",
+    "data": {
+        "challenge_id": "00484973-8cd3-4a1d-85f2-78361feb6f0d",
+        "provider_id": "inicis",
+        "verified_at": "2026-05-12T18:14:19+00:00",
+        "verification_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+    }
+}
+```
+
+`return` 쿼리(same-origin) 가 있으면 JSON 대신 302 redirect 입니다.
+
+```http
+HTTP/1.1 302
+Location: /checkout?verification_token=eyJ0eXAiOiJKV1Qi...&challenge_id=00484973-8cd3-4a1d-85f2-78361feb6f0d
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 302 | Found (실패 redirect) | 검증 실패 + `return` 쿼리(same-origin) 존재 시 `{return}?identity_error={failure_code}` 로 리다이렉트 |
+| 401 | Unauthenticated | Bearer 토큰을 보냈으나 만료/무효인 경우 (비회원은 헤더 생략 가능) |
+| 404 | Not Found | `providerId` 에 해당하는 프로바이더가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패, 또는 검증 실패 + `return` 쿼리 없음 — 본문의 `error.failure_code` 에 실패 사유 코드 (`CHALLENGE_NOT_FOUND`/`EXPIRED`/`INVALID_CODE` 등, `identity.errors.*` 메시지 동반) |
 
 <!-- @generated:end -->
 
@@ -1854,6 +2321,8 @@ Content-Type: application/json
 | --- | --- | --- | --- | --- | --- |
 | purpose | body | string | 예 | max 64 | 인증 목적 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
 | target | body | array | 아니오 | — | 비로그인 게스트의 인증 대상 (target.email 또는 target.phone — 로그인 사용자는 본인으로 자동 설정) |
+| target.email | body | email | 아니오 | max 255 | 이메일 주소 |
+| target.phone | body | string | 아니오 | max 32 | 전화번호 |
 | provider_id | body | string | 아니오 | max 64 | provider 식별자 |
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.identity.request_validation_rules`).
@@ -1872,24 +2341,59 @@ Content-Type: application/json
     "target": [
         "예시값"
     ],
+    "target.email": "user@example.com",
+    "target.phone": "010-1234-5678",
     "provider_id": "예시값"
 }
 ```
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (`ChallengeResource` 로 직렬화한 VerificationChallenge DTO — 민감 metadata(code_hash 등) 제외). 성공 시 HTTP 201._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | string | `00484973-8cd3-4a1d-85f2-78361feb6f0d` | 생성된 challenge 의 식별자 (이후 verify/cancel/show 에 사용) |
+| provider_id | string | `g7:core.mail` | 이 challenge 를 처리하는 프로바이더 식별자 |
+| purpose | string | `signup` | 인증 목적 |
+| channel | string | `email` | 실제 발송에 사용된 전송 채널 |
+| render_hint | string | `text_code` | 프론트 렌더 방식 힌트 (text_code / link / external_redirect) |
+| redirect_url | string | `null` | external_redirect 흐름에서 사용자를 보낼 외부 인증 페이지 URL (그 외 흐름은 null) |
+| expires_at | string | `2026-05-12T18:14:19+00:00` | 만료 일시 (ISO 8601) |
+| public_payload | array | `[]` | 프론트 렌더에 필요한 공개 안전 페이로드 (프로바이더별 UI 힌트, 없으면 빈 배열) |
+| max_attempts | integer | `5` | 허용되는 최대 검증 시도 횟수 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-429 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 201
+```
+
+```json
+{
+    "success": true,
+    "message": "본인인증 코드를 발송했습니다.",
+    "data": {
+        "id": "00484973-8cd3-4a1d-85f2-78361feb6f0d",
+        "provider_id": "g7:core.mail",
+        "purpose": "signup",
+        "channel": "email",
+        "render_hint": "text_code",
+        "redirect_url": null,
+        "expires_at": "2026-05-12T18:14:19+00:00",
+        "public_payload": [],
+        "max_attempts": 5
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | Bearer 토큰을 보냈으나 만료/무효인 경우 (비회원은 헤더 생략 가능) |
 | 403 | Forbidden | 요구 권한(`core.identity.request`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 422 | Unprocessable Entity | 요청 파라미터 검증 실패, 또는 비로그인 상태에서 `target.email`·`target.phone` 이 모두 비어 있는 경우 (`인증 대상(이메일·전화번호)이 필요합니다.`), 선택한 프로바이더가 해당 목적을 지원하지 않는 경우(`선택된 프로바이더는 이 목적을 지원하지 않습니다.`), 프로바이더 사용 불가(`본인인증 프로바이더를 사용할 수 없습니다.`) |
 
 <!-- @generated:end -->
 
@@ -1934,6 +2438,8 @@ _단건 응답: `data` 객체의 필드._
 
 **응답 예시**
 
+<!-- @probed -->
+
 ```http
 HTTP/1.1 200
 ```
@@ -1941,7 +2447,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": {
         "id": "006209fd-1b6c-40aa-a38f-9b907f1a4bca",
         "status": "requested",
@@ -1959,7 +2465,10 @@ HTTP/1.1 200
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -1989,18 +2498,29 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `$this->success('identity.messages.challenge_cancelled')` 를 인자 1개로 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-429 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "본인인증 요청이 취소되었습니다."
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 403 | Forbidden | 요구 권한(`core.identity.cancel`)이 없는 경우 |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 401 | Unauthenticated | Bearer 토큰을 보냈으나 만료/무효인 경우 (비회원은 헤더 생략 가능) |
+| 403 | Forbidden | 요구 권한(`core.identity.cancel`)이 없는 경우, 또는 scope=self 가드가 본인 challenge 가 아니라고 판정한 경우 |
+| 404 | Not Found | path 의 challenge 를 찾을 수 없거나 취소 처리에 실패한 경우 (`유효하지 않은 인증 요청입니다.`) |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -2040,19 +2560,42 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (컨트롤러가 VerificationResult DTO 에서 직접 조립)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| challenge_id | string | `00484973-8cd3-4a1d-85f2-78361feb6f0d` | 검증이 완료된 challenge 의 식별자 |
+| provider_id | string | `g7:core.mail` | 이 challenge 를 처리한 프로바이더 식별자 |
+| verified_at | string | `2026-05-12T18:14:19+00:00` | 검증 완료 일시 (ISO 8601, 없으면 null) |
+| verification_token | string | `eyJ0eXAiOiJKV1QiLCJhbGciOi…` | 후속 민감 작업 요청에 제출할 본인인증 토큰 (`claims.verification_token`, 없으면 null) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-429 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "본인 확인이 완료되었습니다.",
+    "data": {
+        "challenge_id": "00484973-8cd3-4a1d-85f2-78361feb6f0d",
+        "provider_id": "g7:core.mail",
+        "verified_at": "2026-05-12T18:14:19+00:00",
+        "verification_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 403 | Forbidden | 요구 권한(`core.identity.verify`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
-| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 401 | Unauthenticated | Bearer 토큰을 보냈으나 만료/무효인 경우 (비회원은 헤더 생략 가능) |
+| 403 | Forbidden | 요구 권한(`core.identity.verify`)이 없는 경우, 또는 scope=self 가드가 본인 challenge 가 아니라고 판정한 경우 |
+| 404 | Not Found | path 파라미터에 해당하는 challenge 가 없는 경우 |
+| 422 | Unprocessable Entity | 검증 실패 — 응답 `error` 에 `failure_code`(예: `INVALID_CODE`/`EXPIRED`/`MAX_ATTEMPTS`) 와 서버 기준 `attempts`/`max_attempts` 를 함께 반환. 메시지는 `identity.errors.*` (`인증 코드가 올바르지 않습니다.` / `인증 시간이 만료되었습니다. 다시 시도해주세요.` / `시도 횟수를 초과했습니다. 다시 요청해주세요.` 등) |
 
 <!-- @generated:end -->
 
@@ -2083,17 +2626,58 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (매칭·활성 정책이 없으면 `data` 는 `null`). 컨트롤러가 UI 힌트용 최소 필드만 직접 조립하며 민감 필드는 노출하지 않습니다._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| policy_key | string | `sirsoft-board.report.create` | 매칭된 정책의 식별자 |
+| scope | string | `hook` | 정책 적용 범위 (route / hook / custom) |
+| target | string | `sirsoft-board.report.before_create` | 매칭 대상 |
+| purpose | string | `sensitive_action` | 이 정책이 요구하는 인증 목적 |
+| provider_id | null | `null` | 강제할 프로바이더 ID (미지정 시 null) |
+| grace_minutes | integer | `30` | 재인증 유예 시간(분) — 0=매번 요구 |
+| applies_to | string | `self` | 적용 대상 사용자 (self / admin / both) |
+| fail_mode | string | `block` | 실패 시 동작 (block: HTTP 428 차단 / log_only: 감사 로그만) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": {
+        "policy_key": "sirsoft-board.report.create",
+        "scope": "hook",
+        "target": "sirsoft-board.report.before_create",
+        "purpose": "sensitive_action",
+        "provider_id": null,
+        "grace_minutes": 30,
+        "applies_to": "self",
+        "fail_mode": "block"
+    }
+}
+```
+
+매칭 정책이 없거나 `enabled=false` 인 경우:
+
+```json
+{
+    "success": true,
+    "message": "성공적으로 처리되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 401 | Unauthenticated | Bearer 토큰을 보냈으나 만료/무효인 경우 (비회원은 헤더 생략 가능) |
+| 422 | Unprocessable Entity | 필수 쿼리 `scope`/`target` 누락 또는 길이 초과 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -2139,7 +2723,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": [
         {
             "id": "g7:core.mail",
@@ -2177,7 +2761,11 @@ HTTP/1.1 200
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회). 인증·권한 미요구 엔드포인트로 도메인 특이 에러를 반환하지 않습니다._
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -2223,7 +2811,7 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "messages.success",
+    "message": "성공적으로 처리되었습니다.",
     "data": [
         {
             "id": "signup",
@@ -2314,7 +2902,11 @@ HTTP/1.1 200
 
 **에러 응답**
 
-_대표 에러 없음 (공개 조회). 인증·권한 미요구 엔드포인트로 도메인 특이 에러를 반환하지 않습니다._
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
+| 403 | Forbidden | 요구 권한(`core.admin.identity.logs.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

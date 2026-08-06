@@ -324,7 +324,7 @@ HTTP/1.1 201
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.menus.create`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -448,6 +448,7 @@ HTTP/1.1 200
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -480,11 +481,94 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data.data[]` 배열 항목의 필드 + 컬렉션 레벨 `data.abilities`._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `15` | 기본 키 (내부 식별자) |
+| name | object | `{"ko":"게시판 관리","en":"Board Management"}` | 메뉴 이름 (다국어 JSON) |
+| slug | string | `sirsoft-board` | 메뉴 슬러그 |
+| url | string \| null | `null` | 메뉴 URL (그룹 메뉴는 null) |
+| icon | string \| null | `fas fa-clipboard-list` | 메뉴 아이콘 (Font Awesome 클래스) |
+| order | integer | `30` | 메뉴 순서 (작을수록 우선 — `order` 오름차순 정렬) |
+| is_active | boolean | `true` | 활성 여부 |
+| parent_id | integer \| null | `null` | 상위 메뉴 ID (최상위는 null) |
+| extension_type | string | `module` | 확장 소유 타입 (`module` / `plugin`) |
+| extension_identifier | string | `sirsoft-board` | 확장 식별자 (요청 path 의 `identifier` 와 동일) |
+| parent | object \| null | `null` | 상위 항목 객체 (id/name/url/icon — parent 관계 파생) |
+| children | array | `[{"id":16,"name":{"ko":"환경설정"},"slug":"sirsoft-board-settings", ...}]` | 하위 메뉴 배열 (order 오름차순 — children 관계 파생) |
+| creator | object \| null | `null` | 생성자 정보 객체 (uuid/name/email — creator 관계 파생) |
+| created_at | string | `2026-07-08 10:44:35` | 생성 일시 |
+| updated_at | string | `2026-07-08 10:44:35` | 최종 수정 일시 |
+| is_owner | boolean | `false` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_create":true,"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
+
+> `roles` 관계는 이 엔드포인트에서 eager-load 되지 않으므로(`MenuRepository::getMenusByExtension` 은 `creator`/`parent`/`children` 만 로드) 항목에 `roles` 키가 포함되지 않습니다.
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "메뉴를 성공적으로 가져왔습니다.",
+    "data": {
+        "data": [
+            {
+                "id": 15,
+                "name": {
+                    "ko": "게시판 관리",
+                    "en": "Board Management"
+                },
+                "slug": "sirsoft-board",
+                "url": null,
+                "icon": "fas fa-clipboard-list",
+                "order": 30,
+                "is_active": true,
+                "parent_id": null,
+                "extension_type": "module",
+                "extension_identifier": "sirsoft-board",
+                "parent": null,
+                "children": [
+                    {
+                        "id": 16,
+                        "name": {
+                            "ko": "환경설정",
+                            "en": "Settings"
+                        },
+                        "slug": "sirsoft-board-settings",
+                        "url": "/admin/boards/settings",
+                        "icon": "fas fa-cog",
+                        "order": 1,
+                        "is_active": true,
+                        "parent_id": 15,
+                        "extension_type": "module",
+                        "extension_identifier": "sirsoft-board",
+                        "roles": []
+                    }
+                ],
+                "creator": null,
+                "created_at": "2026-07-08 10:44:35",
+                "updated_at": "2026-07-08 10:44:35",
+                "is_owner": false,
+                "abilities": {
+                    "can_create": true,
+                    "can_update": true,
+                    "can_delete": true
+                }
+            }
+        ],
+        "abilities": {
+            "can_create": true,
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -493,6 +577,7 @@ Authorization: Bearer {YOUR_TOKEN}
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -587,6 +672,7 @@ HTTP/1.1 200
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -635,19 +721,29 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('menu.order_update_success')` 를 데이터 없이 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "메뉴 순서가 성공적으로 업데이트되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.menus.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). `moved_items[].new_parent_id` 가 자기 자신·자손을 가리키는 순환 참조인 경우 포함 |
 
 <!-- @generated:end -->
 
@@ -671,7 +767,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-DELETE /api/admin/menus/1 HTTP/1.1
+DELETE /api/admin/menus/{menu} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -679,19 +775,32 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만 — 컨트롤러가 `success('menu.delete_success')` 를 데이터 없이 호출)._
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+<!-- @probed -->
+
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "메뉴가 성공적으로 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.menus.delete`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -715,7 +824,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/menus/1 HTTP/1.1
+GET /api/admin/menus/{menu} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -852,6 +961,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -887,7 +997,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-PUT /api/admin/menus/1 HTTP/1.1
+PUT /api/admin/menus/{menu} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -911,20 +1021,90 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드 (갱신된 메뉴를 `MenuResource` 로 반환 — `creator`/`parent`/`children`/`roles` eager-load)._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| name | object | `{"ko":"API 문서 샘플 메뉴","en":"API Doc Sample Menu"}` | 메뉴 이름 (다국어 JSON) |
+| slug | string | `apidoc-sample-menu` | 메뉴 슬러그 |
+| url | string \| null | `/admin/apidoc-sample` | 메뉴 URL |
+| icon | string \| null | `fas fa-book` | 메뉴 아이콘 |
+| order | integer | `35` | 메뉴 순서 |
+| is_active | boolean | `true` | 활성 여부 |
+| parent_id | integer \| null | `null` | 상위 메뉴 ID |
+| extension_type | string \| null | `core` | 확장 소유 타입: core / module / plugin / null(사용자 정의) |
+| extension_identifier | string \| null | `core` | 확장 식별자 |
+| parent | object \| null | `null` | 상위 항목 객체 (id/name/url/icon — parent 관계 파생) |
+| children | array | `[]` | 하위 항목 배열 (order 오름차순 — children 관계 파생) |
+| creator | object \| null | `{"uuid":"a234c2b1-…","name":"API 문서 샘플 사용자","email":"apidoc-sample-user@example.com"}` | 생성자 정보 객체 (creator 관계 파생) |
+| roles | array | `[{"id":1,"name":{"ko":"관리자","en":"Administrator"},"permission_type":"read"}]` | 이 메뉴 노출이 허용된 역할 목록 (요청 `roles` 로 교체된 결과) |
+| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
+| updated_at | string | `2026-07-08 12:20:11` | 최종 수정 일시 |
+| is_owner | boolean | `true` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
+| abilities | object | `{"can_create":true,"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 |
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "메뉴가 성공적으로 업데이트되었습니다.",
+    "data": {
+        "id": 1,
+        "name": {
+            "ko": "API 문서 샘플 메뉴",
+            "en": "API Doc Sample Menu"
+        },
+        "slug": "apidoc-sample-menu",
+        "url": "/admin/apidoc-sample",
+        "icon": "fas fa-book",
+        "order": 35,
+        "is_active": true,
+        "parent_id": null,
+        "extension_type": null,
+        "extension_identifier": null,
+        "parent": null,
+        "children": [],
+        "creator": {
+            "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
+            "name": "API 문서 샘플 사용자",
+            "email": "apidoc-sample-user@example.com"
+        },
+        "roles": [
+            {
+                "id": 1,
+                "name": {
+                    "ko": "관리자",
+                    "en": "Administrator"
+                },
+                "permission_type": "read"
+            }
+        ],
+        "created_at": "2026-07-08 10:41:24",
+        "updated_at": "2026-07-08 12:20:11",
+        "is_owner": true,
+        "abilities": {
+            "can_create": true,
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.menus.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 
@@ -950,7 +1130,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-PATCH /api/admin/menus/1/toggle-status HTTP/1.1
+PATCH /api/admin/menus/{menu}/toggle-status HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -1018,8 +1198,9 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.menus.update`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.menus.read`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
 

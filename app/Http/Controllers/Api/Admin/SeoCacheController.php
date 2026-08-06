@@ -48,9 +48,9 @@ class SeoCacheController extends AdminBaseController
                 'by_module' => $this->statsService->getStatsByModule($since),
             ];
 
-            return $this->success('messages.success', $data);
+            return $this->success('common.success', $data);
         } catch (\Exception $e) {
-            return $this->error('messages.error_occurred', 500, $e->getMessage());
+            return $this->error('common.error_occurred', 500, $e->getMessage());
         }
     }
 
@@ -70,14 +70,14 @@ class SeoCacheController extends AdminBaseController
             if ($layout) {
                 $count = $this->cacheManager->invalidateByLayout($layout);
 
-                return $this->success('messages.success', ['cleared' => $count]);
+                return $this->success('common.success', ['cleared' => $count]);
             }
 
             $this->cacheManager->clearAll();
 
-            return $this->success('messages.success', ['cleared' => 'all']);
+            return $this->success('common.success', ['cleared' => 'all']);
         } catch (\Exception $e) {
-            return $this->error('messages.error_occurred', 500, $e->getMessage());
+            return $this->error('common.error_occurred', 500, $e->getMessage());
         }
     }
 
@@ -92,12 +92,12 @@ class SeoCacheController extends AdminBaseController
     {
         try {
             // Phase 5의 SeoDeclarationCollector 구현 후 실제 워밍업 로직 추가 예정
-            return $this->success('messages.success', [
+            return $this->success('common.success', [
                 'status' => 'dispatched',
                 'message' => __('seo.warmup_dispatched'),
             ]);
         } catch (\Exception $e) {
-            return $this->error('messages.error_occurred', 500, $e->getMessage());
+            return $this->error('common.error_occurred', 500, $e->getMessage());
         }
     }
 
@@ -149,9 +149,9 @@ class SeoCacheController extends AdminBaseController
         try {
             $urls = $this->cacheManager->getCachedUrls();
 
-            return $this->success('messages.success', ['urls' => $urls, 'count' => count($urls)]);
+            return $this->success('common.success', ['urls' => $urls, 'count' => count($urls)]);
         } catch (\Exception $e) {
-            return $this->error('messages.error_occurred', 500, $e->getMessage());
+            return $this->error('common.error_occurred', 500, $e->getMessage());
         }
     }
 }

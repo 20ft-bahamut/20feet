@@ -49,7 +49,7 @@ class GdprConsentController extends AuthBaseController
         // 상태별로 액션(철회/다시 동의/동의/필수 안내) 을 분기.
         $consents = $this->consentService->getMyConsentMatrix($user->id);
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'user_id' => $user->id,
             'needs_renewal' => $this->consentService->needsRenewal($user->id),
             'current_policy_version' => $this->consentService->getCurrentPolicyVersion(),
@@ -71,7 +71,7 @@ class GdprConsentController extends AuthBaseController
 
         $histories = $this->consentService->getHistories($user->id);
 
-        return ResponseHelper::success('messages.success', [
+        return ResponseHelper::success('common.success', [
             'histories' => GdprUserConsentHistoryResource::collection($histories),
         ]);
     }
