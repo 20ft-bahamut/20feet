@@ -1281,6 +1281,8 @@ return [
         'geoip_enabled' => 'GeoIP',
         'geoip_license_key' => 'GeoIP license key',
         'geoip_auto_update_enabled' => 'GeoIP auto update',
+        'pagination_result_cap' => 'list total count cap',
+        'pagination_max_page' => 'list maximum page number',
         // Driver settings (additional)
         'websocket_app_id' => 'WebSocket app ID',
         'websocket_app_secret' => 'WebSocket app secret',

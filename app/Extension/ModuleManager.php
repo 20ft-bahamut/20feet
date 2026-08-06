@@ -43,6 +43,7 @@ use App\Models\Template;
 use App\Providers\CoreServiceProvider;
 use App\Services\LayoutExtensionService;
 use App\Support\AssetUrl;
+use App\Support\RouteCacheHelper;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -517,6 +518,7 @@ class ModuleManager implements ModuleManagerInterface
 
         // 확장 캐시 버전 증가 (프론트엔드가 새로운 캐시로 요청하도록)
         $this->incrementExtensionCacheVersion();
+        RouteCacheHelper::rebuild();
 
         // 확장 미들웨어 인덱스 무효화 — 새 모듈의 미들웨어 선언이 즉시 게이트에 반영.
         ExtensionMiddlewareRegistry::flush();
@@ -646,6 +648,7 @@ class ModuleManager implements ModuleManagerInterface
 
             // 확장 기능 캐시 버전 증가 (프론트엔드 캐시 무효화)
             $this->incrementExtensionCacheVersion();
+            RouteCacheHelper::rebuild();
 
             // 모듈 상태 캐시 무효화
             self::invalidateModuleStatusCache();
@@ -788,6 +791,7 @@ class ModuleManager implements ModuleManagerInterface
 
             // 확장 기능 캐시 버전 증가 (프론트엔드 캐시 무효화)
             $this->incrementExtensionCacheVersion();
+            RouteCacheHelper::rebuild();
 
             // 모듈 자체 캐시 전체 정리
             $this->flushModuleCache($module);
@@ -968,6 +972,7 @@ class ModuleManager implements ModuleManagerInterface
 
                 // 확장 기능 캐시 버전 증가 (프론트엔드 캐시 무효화)
                 $this->incrementExtensionCacheVersion();
+                RouteCacheHelper::rebuild();
 
                 // 모듈 자체 캐시 전체 정리
                 $this->flushModuleCache($module);
@@ -4512,6 +4517,7 @@ class ModuleManager implements ModuleManagerInterface
             $this->clearAllTemplateLanguageCaches();
             $this->clearAllTemplateRoutesCaches();
             $this->incrementExtensionCacheVersion();
+            RouteCacheHelper::rebuild();
             self::invalidateModuleStatusCache();
 
             // 훅 발행: 모듈 업데이트 완료 (Artisan 직접 호출 시에도 리스너 트리거)

@@ -6,6 +6,7 @@ use App\Contracts\Pagination\BoundedTotalAware;
 use App\Helpers\PermissionHelper;
 use App\Http\Resources\Traits\HasRowNumber;
 use App\Support\Query\BoundedPage;
+use App\Support\Query\KeysetPaginator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as LengthAwarePaginatorContract;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -120,6 +121,9 @@ abstract class BaseApiCollection extends ResourceCollection
      * 커서 방식은 총 건수와 페이지 번호를 계산하지 않습니다. 대신 앞뒤 이동 커서를
      * 그대로 실어 보내며, 화면은 이 값으로 이전/다음 버튼을 만듭니다.
      *
+     * 인코딩은 {@see KeysetPaginator} 를 거칩니다. 커서 문자열의 형식은 디코딩과 짝을
+     * 이뤄야 하므로, 한쪽만 여기서 직접 만들면 표준이 두 벌이 됩니다.
+     *
      * @param  CursorPaginator  $resource  커서 페이지 결과
      * @return array<string, mixed> pagination 메타
      */
@@ -128,8 +132,8 @@ abstract class BaseApiCollection extends ResourceCollection
         return [
             'per_page' => $resource->perPage(),
             'has_more_pages' => $resource->hasMorePages(),
-            'next_cursor' => $resource->nextCursor()?->encode(),
-            'prev_cursor' => $resource->previousCursor()?->encode(),
+            'next_cursor' => KeysetPaginator::nextCursor($resource),
+            'prev_cursor' => KeysetPaginator::previousCursor($resource),
         ];
     }
 }

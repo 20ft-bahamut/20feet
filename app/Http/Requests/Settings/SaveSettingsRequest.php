@@ -907,6 +907,8 @@ class SaveSettingsRequest extends FormRequest
             'advanced.geoip_enabled' => __('validation.attributes.geoip_enabled'),
             'advanced.geoip_license_key' => __('validation.attributes.geoip_license_key'),
             'advanced.geoip_auto_update_enabled' => __('validation.attributes.geoip_auto_update_enabled'),
+            'advanced.pagination_result_cap' => __('validation.attributes.pagination_result_cap'),
+            'advanced.pagination_max_page' => __('validation.attributes.pagination_max_page'),
             // drivers
             'drivers.storage_driver' => __('validation.attributes.storage_driver'),
             'drivers.s3_bucket' => __('validation.attributes.s3_bucket'),

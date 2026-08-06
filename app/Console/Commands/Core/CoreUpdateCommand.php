@@ -17,6 +17,7 @@ use App\Extension\Vendor\Exceptions\VendorInstallException;
 use App\Extension\Vendor\VendorMode;
 use App\Services\CoreUpdateService;
 use App\Support\ConfigCacheHelper;
+use App\Support\RouteCacheHelper;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -542,6 +543,11 @@ class CoreUpdateCommand extends Command
             // 요청이 config 파일을 재파싱한다(성능 손실). ConfigCacheHelper 는 설치 미완료
             // 상태를 가드하고 실패를 안전하게 흡수한다.
             ConfigCacheHelper::rebuild();
+
+            // 라우트 캐시도 같은 이유로 되살린다. 코어 업데이트는 routes/*.php 와 vendor 를
+            // 교체하므로 흐름 중간에 비우는 것이 맞지만, 비운 채로 끝내면 이후 모든 요청이
+            // 라우트를 다시 등록한다. 재생성은 파일이 전부 안착한 이 지점에서만 안전하다.
+            RouteCacheHelper::rebuild();
 
             $log('정리 완료');
 

@@ -130,9 +130,11 @@ class SearchPagesListener implements HookListenerInterface
 
             // 커서를 받았고 그 정렬을 커서로 처리할 수 있으면 키셋으로 응답한다.
             // 전체 탭은 미리보기 몇 건뿐이라 깊은 페이지가 없어 대상이 아니다.
+            // 페이지 번호를 함께 넘겨 커서 없이 깊은 페이지를 지목한 딥링크를 코어가 가려내게
+            // 한다 — 넘기지 않으면 기본값 1 이 적용돼 그 링크가 첫 페이지로 되돌아간다.
             $cursorPage = $isAllTab
                 ? null
-                : $this->pageService->searchByKeywordWithCursor($q, $sort, $perPage, $context['cursor'] ?? null);
+                : $this->pageService->searchByKeywordWithCursor($q, $sort, $perPage, $context['cursor'] ?? null, $pageNumber);
 
             if ($cursorPage !== null) {
                 $results['pages'] = SearchCategoryPayload::fromCursor(

@@ -29,7 +29,7 @@ axes:
   position: [first, middle, last]
   query_shape: [flat, grouped, deferred_join, fulltext]
   cap_source: [settings, config_fallback, hook_override, unlimited]
-  surface: [core_repository, module_search, admin_datagrid, storefront_grid]
+  surface: [core_repository, module_search, admin_datagrid, product_grid]
 
 exclusions:
   - { navigation: keyset_cursor, query_shape: fulltext, reason: "관련도순은 계산값 정렬이라 커서 경계로 쓸 수 없다 — KeysetPaginator::supports 가 거부하고 offset 을 유지한다" }
@@ -68,6 +68,11 @@ effects:
   - search_latest_sort_uses_cursor
   - search_relevance_sort_stays_on_offset
   - search_cursor_payload_keeps_offset_key_set
+  # 판정 규칙을 코어가 소유해도 호출자가 페이지 번호를 넘기지 않으면 규칙이 무력해진다.
+  # 기본값 1 이 적용돼 모든 요청이 첫 페이지로 판정되고 딥링크가 조용히 되돌아간다.
+  - every_uses_cursor_call_forwards_page
+  - search_deep_page_link_keeps_offset
+  - search_first_page_starts_cursor
   # ── 집계 정확도 (P1) ──
   - aggregate_is_inexact_when_any_category_truncated
   - single_tab_accuracy_ignores_other_categories
@@ -85,29 +90,39 @@ effects:
   # ── 화면 소비단 (P1) ──
   - datagrid_preserves_null_last_page
   - datagrid_shows_pager_when_only_has_more_pages_is_known
-  - storefront_grid_pager_uses_has_more_pages
-  - shared_partial_reads_parent_declared_names
+  - product_grid_pager_uses_has_more_pages
   # ── 절단 노출 (P1) ──
   - comment_list_discloses_truncation
   - comment_count_reports_at_least_over_cap
   # ── 한계값 해석 (P1) ──
   - limits_resolve_settings_then_config_then_hook
   - zero_limit_means_unlimited
+  # ── 한계값 설정 저장 (P1) ──
+  # 상한값 해석은 관리자 설정을 1순위로 읽는다. 그런데 고급 탭 저장이 그 카테고리를
+  # 분류하지 않으면 입력값이 어디에도 담기지 않고 버려진다 — 저장은 200 으로 성공하고
+  # 검증도 통과하므로, 운영자에게는 "바꿨는데 안 바뀐다" 로만 나타난다.
+  - pagination_limits_persist_from_admin_settings
+  - advanced_tab_persists_every_merged_category
+  # ── 확장 다국어 키 해석 (P1) ──
+  # 네임스페이스 없는 키는 번역이 실패해도 예외가 나지 않고 원시 키가 화면에 그대로 나간다.
+  - extension_non_namespaced_key_resolves_to_core_group
   # ── 종단(브라우저) 확인 (P1) ──
   # 위 항목들은 계약 단위이고, 아래 넷은 그 계약이 실제 화면까지 도달했는지를 본다.
   # 응답이 정상이어도 바인딩 경로가 어긋나면 화면만 조용히 비므로 API 테스트로는 안 잡힌다.
   - search_count_marks_inexact_total
   - search_pager_survives_null_last_page
-  - storefront_uses_single_request
-  - storefront_sections_render
-  # ── 요청당 중복 조회 제거 (F3 / F4) ──
+  # ── 검색 화면 상태의 주소 승계 (P1) ──
+  # 탭·정렬·페이지가 전역 상태에만 있으면 주소가 바뀌지 않는다. 화면은 정상으로 보이고
+  # 콘솔 에러도 없지만 새로고침·뒤로가기에서 조건이 통째로 초기화되고 공유도 불가능하다.
+  - search_state_persists_in_url
+  - search_state_survives_reload
+  - search_state_restores_on_back
+  - search_new_keyword_resets_state
+  # ── 요청당 중복 조회 제거 (F3) ──
   # 같은 행을 두 번 읽는 것은 응답이 정상이라 어떤 기능 테스트에도 걸리지 않는다.
   # "몇 번 읽었는가" 를 직접 세야만 회귀가 드러난다.
   - post_detail_reads_post_row_once
   - post_detail_reads_board_row_once
-  - storefront_category_matches_single_endpoint
-  - storefront_without_slug_omits_category
-  - storefront_unknown_slug_returns_not_found
 
 # scale: 대용량 회귀 축. block-array of flow objects (내장 fallback 파서 제약 — flow 객체만 중첩 파싱)
 scale:
@@ -126,6 +141,8 @@ test_files:
   - tests/Feature/Search/SearchAccuracyContractTest.php
   # 코어 — 커서 적용 판정 규칙 (도메인이 아니라 코어가 소유한다는 성질)
   - tests/Unit/Search/SearchPagePolicyTest.php
+  # 코어 — 그 판정에 페이지 번호가 도달하는지 (호출 지점 전수 스캔)
+  - tests/Unit/Search/SearchCursorPagePropagationParityTest.php
   # 코어 — 탭 배지 정확도가 카테고리마다 응답에 실리는지
   - tests/Feature/Search/SearchBadgeAccuracyTest.php
   # 게시판 — 검색이 커서 경로를 타는지 + 세 응답 형태의 키 집합이 같은지
@@ -143,6 +160,10 @@ test_files:
   - modules/_bundled/sirsoft-board/tests/Feature/ListQueryCountRegressionTest.php
   # 이커머스 — 상품 목록·공개 목록·카테고리 트리 쿼리 수 회귀
   - modules/_bundled/sirsoft-ecommerce/tests/Feature/Performance/ListQueryCountRegressionTest.php
+  # 이커머스 — 쇼핑 첫 화면 조각별(인기·신상품·최근 본) 쿼리 수 회귀
+  - modules/_bundled/sirsoft-ecommerce/tests/Feature/Performance/ShopHomeQueryCountRegressionTest.php
+  # 이커머스 — 상품 검색의 커서 딥링크 (커서 없는 깊은 페이지는 offset 유지)
+  - modules/_bundled/sirsoft-ecommerce/tests/Feature/Search/ProductSearchCursorDeepLinkTest.php
   # 이커머스 — 집계 캐시와 무효화 (낡은 수치 방지)
   - modules/_bundled/sirsoft-ecommerce/tests/Feature/ListCacheInvalidationTest.php
   # 이커머스 — 진열·판매 집계 색인이 옵티마이저에 실제로 잡히는지
@@ -154,11 +175,17 @@ test_files:
   - modules/_bundled/sirsoft-page/tests/Feature/Performance/ListQueryCountRegressionTest.php
   # 페이지 — 비활성 탭 배지의 정확도 전달
   - modules/_bundled/sirsoft-page/tests/Unit/Listeners/SearchPagesListenerTest.php
-  # 화면 — 공유 partial 이 부모가 선언한 이름을 읽는지 + 페이저가 has_more_pages 로 열리는지
-  - templates/_bundled/sirsoft-basic/__tests__/layouts/shop-shared-partial-datasource-contract.test.tsx
+  # 페이지 — 페이지 검색의 커서 딥링크 (커서 없는 깊은 페이지는 offset 유지)
+  - modules/_bundled/sirsoft-page/tests/Feature/Search/PageSearchCursorDeepLinkTest.php
   # 중복 조회 — 상세에서 같은 글/게시판을 몇 번 읽는지
   - modules/_bundled/sirsoft-board/tests/Feature/PostDetailQueryCountRegressionTest.php
-  # 통합 조회의 단건 분류가 개별 엔드포인트와 같은 계약인지
-  - modules/_bundled/sirsoft-ecommerce/tests/Feature/StorefrontCategoryContractTest.php
-  # 브라우저 — 상한 목록의 다음 이동 / 마지막 페이지 감춤 / 쇼핑 첫 화면 단일 요청
-  - tests/Playwright/specs/pagination/bounded-total-and-storefront.spec.ts
+  # 브라우저 — 상한 목록의 다음 이동 / 상품 그리드 페이저
+  - tests/Playwright/specs/pagination/bounded-total-and-product-grid.spec.ts
+  # 코어 — 고급 탭 저장이 병합 대상 카테고리(상한값 포함)를 빠짐없이 분류하는지
+  - tests/Feature/Settings/AdvancedTabCategoryPersistenceTest.php
+  # 코어 — 확장의 네임스페이스 없는 다국어 키가 해석되는지 (확장 소스 전수 스캔)
+  - tests/Unit/ExtensionTranslationKeyResolutionTest.php
+  # 화면 — 검색 상태의 SSoT 가 URL 쿼리인지 (레이아웃 전수 스캔)
+  - templates/_bundled/sirsoft-basic/__tests__/layouts/search-url-state-contract.test.ts
+  # 브라우저 — 검색 상태의 주소 승계 / 새로고침·뒤로가기 복원 / 재검색 리셋
+  - tests/Playwright/specs/search/url-state.spec.ts

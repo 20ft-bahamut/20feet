@@ -590,21 +590,46 @@ class SettingsService
     }
 
     /**
-     * advanced 탭 설정을 cache와 debug 카테고리로 분리하여 저장합니다.
+     * advanced 탭 설정의 카테고리별 필드 분류표를 만듭니다.
+     *
+     * 분류표는 스키마(`frontend_schema.*.merge_into === 'advanced'`)에서 도출합니다.
+     * 손으로 열거하면 고급 탭에 카테고리가 새로 합류할 때 분류표가 뒤처지고, 그 값은
+     * 어느 카테고리에도 담기지 않은 채 조용히 버려집니다(저장은 성공으로 보고됨).
+     *
+     * 아래 기본 목록은 스키마가 노출하지 않지만 고급 탭이 계속 저장해 온 레거시 필드
+     * (cache 카테고리 전반, debug.log_level)를 보존하기 위한 것입니다.
+     *
+     * @return array<string, array<int, string>> 카테고리 → 원본 필드명 목록
+     */
+    private function buildAdvancedCategoryFieldMap(): array
+    {
+        // (frontend_key → 원본 키 역변환 후의 키 기준)
+        $map = [
+            'cache' => ['enabled', 'layout_enabled', 'layout_ttl', 'stats_enabled', 'stats_ttl', 'seo_enabled', 'seo_ttl', 'seo_sitemap_ttl'],
+            'debug' => ['mode', 'sql_query_log', 'log_level'],
+        ];
+
+        foreach ($this->configRepository->getFrontendSchema() as $category => $categorySchema) {
+            if (str_starts_with($category, '_') || ($categorySchema['merge_into'] ?? null) !== 'advanced') {
+                continue;
+            }
+
+            $fields = array_keys($categorySchema['fields'] ?? []);
+            $map[$category] = array_values(array_unique(array_merge($map[$category] ?? [], $fields)));
+        }
+
+        return $map;
+    }
+
+    /**
+     * advanced 탭 설정을 소속 카테고리로 분리하여 저장합니다.
      *
      * @param  array  $settings  저장할 설정 배열
      * @return bool 저장 성공 여부
      */
     private function saveAdvancedSettings(array $settings): bool
     {
-        // 각 카테고리에 속하는 원본 필드명 목록
-        // (frontend_key → 원본 키 역변환 후의 키 기준)
-        $categoryFieldMap = [
-            'cache' => ['enabled', 'layout_enabled', 'layout_ttl', 'stats_enabled', 'stats_ttl', 'seo_enabled', 'seo_ttl', 'seo_sitemap_ttl'],
-            'debug' => ['mode', 'sql_query_log', 'log_level'],
-            'core_update' => ['github_url', 'github_token'],
-            'geoip' => ['feature_enabled', 'license_key', 'auto_update_enabled', 'last_updated_at'],
-        ];
+        $categoryFieldMap = $this->buildAdvancedCategoryFieldMap();
 
         // 설정을 카테고리별로 분류
         $categorized = array_fill_keys(array_keys($categoryFieldMap), []);

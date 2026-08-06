@@ -1139,6 +1139,8 @@ return [
         'geoip_enabled' => 'GeoIP の使用',
         'geoip_license_key' => 'GeoIP ライセンスキー',
         'geoip_auto_update_enabled' => 'GeoIP 自動更新',
+        'pagination_result_cap' => '総件数集計上限',
+        'pagination_max_page' => 'ページ番号上限',
         'websocket_app_id' => 'WebSocket アプリ ID',
         'websocket_app_secret' => 'WebSocket アプリ シークレット',
         'websocket_verify_ssl' => 'WebSocket SSL 証明書の検証',

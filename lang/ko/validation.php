@@ -1274,6 +1274,8 @@ return [
         'geoip_enabled' => 'GeoIP 사용',
         'geoip_license_key' => 'GeoIP 라이선스 키',
         'geoip_auto_update_enabled' => 'GeoIP 자동 업데이트',
+        'pagination_result_cap' => '목록 총 건수 상한',
+        'pagination_max_page' => '목록 최대 페이지 번호',
         // 드라이버 설정 (추가)
         'websocket_app_id' => '웹소켓 앱 ID',
         'websocket_app_secret' => '웹소켓 앱 시크릿',
