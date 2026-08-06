@@ -103,6 +103,12 @@ effects:
   # 검증도 통과하므로, 운영자에게는 "바꿨는데 안 바뀐다" 로만 나타난다.
   - pagination_limits_persist_from_admin_settings
   - advanced_tab_persists_every_merged_category
+  # ── 목록 집계값의 정확도 (P1) ──
+  # 평점·리뷰 수는 조회 시 조인으로 붙는 집계다. 값이 비었는지로 판정하면 "집계를 안 했다" 와
+  # "집계했더니 0건이다" 가 같은 0 으로 뭉개져, 리뷰가 달린 상품도 평점 0.0 으로 나간다.
+  - recently_viewed_products_carry_real_review_stats
+  - list_resource_omits_review_stats_when_not_aggregated
+  - wishlist_cards_carry_real_review_stats
   # ── 확장 다국어 키 해석 (P1) ──
   # 네임스페이스 없는 키는 번역이 실패해도 예외가 나지 않고 원시 키가 화면에 그대로 나간다.
   - extension_non_namespaced_key_resolves_to_core_group
@@ -183,6 +189,8 @@ test_files:
   - tests/Playwright/specs/pagination/bounded-total-and-product-grid.spec.ts
   # 코어 — 고급 탭 저장이 병합 대상 카테고리(상한값 포함)를 빠짐없이 분류하는지
   - tests/Feature/Settings/AdvancedTabCategoryPersistenceTest.php
+  # 이커머스 — 목록 리뷰 통계가 실제 값인지 / 집계 없는 경로에서 0 을 지어내지 않는지
+  - modules/_bundled/sirsoft-ecommerce/tests/Feature/Http/Resources/ProductListReviewAggregateTest.php
   # 코어 — 확장의 네임스페이스 없는 다국어 키가 해석되는지 (확장 소스 전수 스캔)
   - tests/Unit/ExtensionTranslationKeyResolutionTest.php
   # 화면 — 검색 상태의 SSoT 가 URL 쿼리인지 (레이아웃 전수 스캔)
