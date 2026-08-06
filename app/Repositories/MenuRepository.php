@@ -95,8 +95,13 @@ class MenuRepository implements MenuRepositoryInterface
             if ($user) {
                 $query->accessibleBy($user);
             }
-            $query->with('roles')
-                ->orderBy('order');
+            // 하위 메뉴의 역할은 목록에서 로드하지 않는다 — 화면이 쓰는 것은 하위 메뉴의
+            // 개수와 표시 정보뿐이고, 역할 배지는 선택한(상위) 메뉴에만 나온다. 로드하면
+            // 상위 메뉴마다 하위 전체의 역할 피벗까지 함께 실려 응답이 배가 된다.
+            // Resource 는 로드되지 않은 하위 메뉴의 `roles` 키를 **생략**한다(빈 배열이 아니다)
+            // — 빈 배열은 "역할 제한 없음" 이라는 사실 아닌 단언이 되어, 화면이 그 값을 그대로
+            // 저장 요청에 실으면 역할 제한이 통째로 해제된다.
+            $query->orderBy('order');
         }])
             ->orderBy('order')
             ->get();
@@ -470,7 +475,12 @@ class MenuRepository implements MenuRepositoryInterface
                 $childQuery->where('is_active', $filters['is_active']);
             }
 
-            $childQuery->with('roles')->orderBy('order');
+            // 하위 메뉴의 역할은 목록에서 로드하지 않는다 — 화면이 쓰는 것은 하위 메뉴의
+            // 개수와 표시 정보뿐이고, 역할 배지는 선택한(상위) 메뉴에만 나온다. 로드하면
+            // 상위 메뉴마다 하위 전체의 역할 피벗까지 함께 실려 응답이 배가 된다.
+            // 접근 제어(accessibleBy)는 whereHas 로 결과 집합을 좁히므로 그대로 유지된다.
+            // Resource 는 로드되지 않은 하위 메뉴의 `roles` 키를 생략한다 — 위 메서드와 동일.
+            $childQuery->orderBy('order');
         }])->get();
     }
 

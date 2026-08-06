@@ -151,7 +151,11 @@ class IdentityMessageDefinitionRepository implements IdentityMessageDefinitionRe
      */
     public function getPaginated(array $filters = [], int $perPage = 20): LengthAwarePaginator
     {
-        $query = IdentityMessageDefinition::with('templates');
+        // 목록은 대표 템플릿 1건만 싣는다 — 화면이 그리는 것은 `templates[0]` 의 제목/본문뿐이다.
+        // `templates` 를 통째로 로드하면 한 페이지를 여는 것만으로 그 페이지 전 정의의 모든 채널
+        // 템플릿 본문이 응답에 실린다. 전체 템플릿은 단건 조회(show)가 공급한다.
+        $query = IdentityMessageDefinition::with('firstTemplate')
+            ->withCount('templates as templates_count');
 
         if (! empty($filters['provider_id'])) {
             $query->where('provider_id', $filters['provider_id']);

@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Plugins 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -66,7 +66,7 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 | is_installed | boolean | `false` | installed 여부 |
 | has_settings | boolean | `true` | settings 여부 |
 | settings_route | string | `/admin/plugins/sirsoft-ckeditor5/sett…` | 설정 페이지 경로 (설정 UI 진입 라우트, 설정 미제공 시 null) |
-| assets | object | `{"js":"\/api\/plugins\/assets\/sirsoft-ckeditor5\/dist\/j…` | 프론트엔드 에셋 매니페스트 (manifest 파생 — js/css 진입점·로딩 전략) |
+| assets | object | `{"js":"\/api\/plugins\/assets\/sirsoft-ckeditor5?file=dis…` | 프론트엔드 에셋 매니페스트 (manifest 파생 — js/css 진입점·로딩 전략) |
 | update_available | boolean | `false` | 최신 버전 대비 업데이트 가능 여부 |
 | update_source | null | `null` | 업데이트 감지 출처 (github, bundled 등) |
 | latest_version | string | `1.0.0` | 감지된 최신 배포 버전 |
@@ -104,21 +104,21 @@ HTTP/1.1 200
                 "roles": [],
                 "config": [],
                 "hooks": [],
-                "status": "uninstalled",
+                "status": "active",
                 "is_installed": false,
                 "has_settings": true,
                 "settings_route": "/admin/plugins/sirsoft-ckeditor5/settings",
                 "assets": {
-                    "js": "/api/plugins/assets/sirsoft-ckeditor5/dist/js/plugin.iife.js",
+                    "js": "/api/plugins/assets/sirsoft-ckeditor5?file=dist%2Fjs%2Fplugin.iife.js",
                     "css": null,
                     "priority": 100
                 },
                 "update_available": false,
                 "update_source": null,
-                "latest_version": null,
-                "file_version": null,
-                "github_url": null,
-                "github_changelog_url": null,
+                "latest_version": "1.0.0",
+                "file_version": "1.0.0",
+                "github_url": "https://github.com/gnuboard/g7-plugin-sirsoft-ckeditor5",
+                "github_changelog_url": "https://github.com/gnuboard/g7-plugin-sirsoft-ckeditor5/releases",
                 "is_pending": false,
                 "is_bundled": false,
                 "deactivated_reason": null,
@@ -135,28 +135,28 @@ HTTP/1.1 200
                 "identifier": "sirsoft-daum_postcode",
                 "vendor": "sirsoft",
                 "name": "Daum 우편번호",
-                "version": "1.0.0",
+                "version": "1.0.1",
                 "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
                 "dependencies": [],
                 "permissions": [],
                 "roles": [],
                 "config": [],
                 "hooks": [],
-                "status": "uninstalled",
+                "status": "active",
                 "is_installed": false,
                 "has_settings": true,
                 "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
                 "assets": {
-                    "js": "/api/plugins/assets/sirsoft-daum_postcode/dist/js/plugin.iife.js",
+                    "js": "/api/plugins/assets/sirsoft-daum_postcode?file=dist%2Fjs%2Fplugin.iife.js",
                     "css": null,
                     "priority": 100
                 },
                 "update_available": false,
                 "update_source": null,
-                "latest_version": null,
-                "file_version": null,
-                "github_url": null,
-                "github_changelog_url": null,
+                "latest_version": "1.0.1",
+                "file_version": "1.0.1",
+                "github_url": "https://github.com/gnuboard/g7-plugin-sirsoft-daum_postcode",
+                "github_changelog_url": "https://github.com/gnuboard/g7-plugin-sirsoft-daum_postcode/releases",
                 "is_pending": false,
                 "is_bundled": false,
                 "deactivated_reason": null,
@@ -168,20 +168,20 @@ HTTP/1.1 200
                     "can_uninstall": true
                 }
             },
-            "... (총 9건 중 2건 표시)"
+            "... (총 10건 중 2건 표시)"
         ],
         "pagination": {
-            "total": 9,
+            "total": 10,
             "current_page": 1,
             "last_page": 1,
             "per_page": 25
         },
         "meta": {
-            "total_plugins": 9,
-            "active_plugins": 0,
+            "total_plugins": 10,
+            "active_plugins": 8,
             "inactive_plugins": 0,
-            "installed_plugins": 0,
-            "uninstalled_plugins": 9
+            "installed_plugins": 8,
+            "uninstalled_plugins": 2
         },
         "abilities": {
             "can_install": true,
@@ -237,7 +237,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -277,7 +277,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -327,7 +327,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -386,7 +386,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -438,7 +438,7 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -487,7 +487,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -546,7 +546,7 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 | is_installed | boolean | `false` | installed 여부 |
 | has_settings | boolean | `true` | settings 여부 |
 | settings_route | string | `/admin/plugins/sirsoft-ckeditor5/sett…` | 설정 페이지 경로 (설정 UI 진입 라우트, 설정 미제공 시 null) |
-| assets | object | `{"js":"\/api\/plugins\/assets\/sirsoft-ckeditor5\/dist\/j…` | 프론트엔드 에셋 매니페스트 (manifest 파생 — js/css 진입점·로딩 전략) |
+| assets | object | `{"js":"\/api\/plugins\/assets\/sirsoft-ckeditor5?file=dis…` | 프론트엔드 에셋 매니페스트 (manifest 파생 — js/css 진입점·로딩 전략) |
 | update_available | boolean | `false` | 최신 버전 대비 업데이트 가능 여부 |
 | update_source | null | `null` | 업데이트 감지 출처 (github, bundled 등) |
 | latest_version | string | `1.0.0` | 감지된 최신 배포 버전 |
@@ -571,12 +571,90 @@ HTTP/1.1 200
     "success": true,
     "message": "플러그인 목록을 성공적으로 가져왔습니다.",
     "data": {
-        "data": [],
+        "data": [
+            {
+                "id": null,
+                "identifier": "sirsoft-ckeditor5",
+                "vendor": "sirsoft",
+                "name": "CKEditor 5 WYSIWYG 에디터",
+                "version": "1.0.0",
+                "description": "CKEditor 5를 이용한 WYSIWYG 에디터 플러그인입니다. 플러그인 설치만으로 기존 HtmlEditor가 교체됩니다.",
+                "dependencies": [],
+                "permissions": [],
+                "roles": [],
+                "config": [],
+                "hooks": [],
+                "status": "active",
+                "is_installed": false,
+                "has_settings": true,
+                "settings_route": "/admin/plugins/sirsoft-ckeditor5/settings",
+                "assets": {
+                    "js": "/api/plugins/assets/sirsoft-ckeditor5?file=dist%2Fjs%2Fplugin.iife.js",
+                    "css": null,
+                    "priority": 100
+                },
+                "update_available": false,
+                "update_source": null,
+                "latest_version": "1.0.0",
+                "file_version": "1.0.0",
+                "github_url": "https://github.com/gnuboard/g7-plugin-sirsoft-ckeditor5",
+                "github_changelog_url": "https://github.com/gnuboard/g7-plugin-sirsoft-ckeditor5/releases",
+                "is_pending": false,
+                "is_bundled": false,
+                "deactivated_reason": null,
+                "deactivated_at": null,
+                "incompatible_required_version": null,
+                "abilities": {
+                    "can_install": true,
+                    "can_activate": true,
+                    "can_uninstall": true
+                }
+            },
+            {
+                "id": null,
+                "identifier": "sirsoft-daum_postcode",
+                "vendor": "sirsoft",
+                "name": "Daum 우편번호",
+                "version": "1.0.1",
+                "description": "Daum 우편번호 서비스를 통한 주소 검색 기능을 제공하는 플러그인입니다. API 키 없이 무료로 사용할 수 있습니다.",
+                "dependencies": [],
+                "permissions": [],
+                "roles": [],
+                "config": [],
+                "hooks": [],
+                "status": "active",
+                "is_installed": false,
+                "has_settings": true,
+                "settings_route": "/admin/plugins/sirsoft-daum_postcode/settings",
+                "assets": {
+                    "js": "/api/plugins/assets/sirsoft-daum_postcode?file=dist%2Fjs%2Fplugin.iife.js",
+                    "css": null,
+                    "priority": 100
+                },
+                "update_available": false,
+                "update_source": null,
+                "latest_version": "1.0.1",
+                "file_version": "1.0.1",
+                "github_url": "https://github.com/gnuboard/g7-plugin-sirsoft-daum_postcode",
+                "github_changelog_url": "https://github.com/gnuboard/g7-plugin-sirsoft-daum_postcode/releases",
+                "is_pending": false,
+                "is_bundled": false,
+                "deactivated_reason": null,
+                "deactivated_at": null,
+                "incompatible_required_version": null,
+                "abilities": {
+                    "can_install": true,
+                    "can_activate": true,
+                    "can_uninstall": true
+                }
+            },
+            "... (총 8건 중 2건 표시)"
+        ],
         "meta": {
-            "total_plugins": 0,
-            "active_plugins": 0,
+            "total_plugins": 8,
+            "active_plugins": 8,
             "inactive_plugins": 0,
-            "installed_plugins": 0,
+            "installed_plugins": 8,
             "uninstalled_plugins": 0
         }
     }
@@ -625,7 +703,7 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -674,7 +752,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -719,7 +797,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -753,12 +831,10 @@ Authorization: Bearer {YOUR_TOKEN}
 | from_version | query | string | 아니오 | — | 시작 버전 (범위 하한) |
 | to_version | query | string | 아니오 | — | 대상 버전 (범위 상한) |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.extension.changelog_validation_rules`).
-
 **요청 예시**
 
 ```http
-GET /api/admin/plugins/{identifier}/changelog?source=active&from_version=%EC%98%88%EC%8B%9C%EA%B0%92&to_version=%EC%98%88%EC%8B%9C%EA%B0%92 HTTP/1.1
+GET /api/admin/plugins/sirsoft-daum_postcode/changelog?source=active&from_version=%EC%98%88%EC%8B%9C%EA%B0%92&to_version=%EC%98%88%EC%8B%9C%EA%B0%92 HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -766,11 +842,149 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| changelog | array | `[{"version":"1.0.1","date":"2026-07-22","categories":[{"n…` | 변경 이력 텍스트 (원격/파일 CHANGELOG 본문) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "플러그인 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "changelog": [
+            {
+                "version": "1.0.1",
+                "date": "2026-07-22",
+                "categories": [
+                    {
+                        "name": "Fixed",
+                        "items": [
+                            "오류 안내가 뜨기는 하지만 내용이 비어 있던 문제를 수정했습니다. 설정 저장에 실패하면 서버가 알려 준 사유가 그대로 표시됩니다.",
+                            "설정 화면의 아이콘이 의도한 크기보다 크거나 작게 보이던 문제를 수정했습니다."
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "1.0.0",
+                "date": "2026-07-01",
+                "categories": [
+                    {
+                        "name": "Added",
+                        "items": [
+                            "레이아웃 편집기 데이터 소스 목록에서 이 확장이 제공하는 데이터 소스가 친화 명칭으로 표시되고, 어느 확장이 제공했는지 출처가 함께 표시됩니다."
+                        ]
+                    },
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "플러그인 환경설정 화면의 하단 저장 버튼이 스크롤 중에도 화면에 고정되도록 개선."
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "1.0.0-beta.2",
+                "date": "2026-04-20",
+                "categories": [
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "주소 검색 영역의 콘텐츠 카드 / 세로 정렬 컨테이너 외형을 sirsoft-admin_basic 표준 시맨틱과 정합 — 다른 화면과 같은 결로 통일.",
+                            "코어 최소 요구 버전을 7.0.0-beta.2 로 상향",
+                            "extension JSON: `extensionPointProps.onAddressSelect` → `extensionPointCallbacks.onAddressSelect` 참조 변경 (extension_point props/callbacks 분리)",
+                            "플러그인 환경설정 화면의 하단 저장 버튼이 스크롤 중에도 화면에 고정되도록 개선.",
+                            "플러그인 환경설정 화면의 폼 라벨 / 보조 설명 / 에러 메시지 시각 시맨틱을 sirsoft-admin_basic 표준 시맨틱과 정합 — 다른 관리자 화면과 같은 결로 통일.",
+                            "플러그인 환경설정 화면 곳곳의 텍스트 톤 (보조 설명 · 라벨 · 본문 · 강조 · 작은 보조) 시각 시맨틱을 관리자 표준 시맨틱과 정합 — 같은 결의 글자 톤이 한 곳에서 일괄 조정 가능.",
+                            "플러그인 환경설정 화면의 세로 정렬 컨테이너 / 입력 박스를 sirsoft-admin_basic 표준 시맨틱 (.stack / .input) 과 정합 — 표준 간격과 외형이 일관 표시되도록 정리."
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "1.0.0-beta.1",
+                "date": "2026-04-01",
+                "categories": [
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "오픈 베타 릴리즈"
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "0.1.3",
+                "date": "2026-03-16",
+                "categories": [
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "라이선스 프로그램 명칭 정비"
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "0.1.2",
+                "date": "2026-03-13",
+                "categories": [
+                    {
+                        "name": "Added",
+                        "items": [
+                            "manifest에 license 필드 및 LICENSE 파일 추가"
+                        ]
+                    },
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "설정 레이아웃 경로를 `resources/layouts/settings.json` → `resources/layouts/admin/plugin_settings.json`으로 이동 (모듈과 동일한 구조 통일)"
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "0.1.1",
+                "date": "2026-02-24",
+                "categories": [
+                    {
+                        "name": "Changed",
+                        "items": [
+                            "버전 체계 조정 (정식 출시 전 0.x 체계로 변경)"
+                        ]
+                    }
+                ]
+            },
+            {
+                "version": "0.1.0",
+                "date": "2026-02-23",
+                "categories": [
+                    {
+                        "name": "Added",
+                        "items": [
+                            "Daum 우편번호 검색 플러그인 초기 구현",
+                            "Daum 우편번호 서비스 API 연동 (API 키 불필요)",
+                            "주소 검색 팝업/레이어 표시 모드 설정",
+                            "커스텀 핸들러 (openPostcode, setFieldReadOnly)",
+                            "이커머스 주소 검색 레이아웃 확장 (ecommerce-address-search)",
+                            "플러그인 설정 UI (표시 모드, 테마 설정)",
+                            "다국어 지원 (ko, en)"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
 
 **에러 응답**
 
@@ -801,7 +1015,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/plugins/{identifier}/dependent-templates HTTP/1.1
+GET /api/admin/plugins/sirsoft-daum_postcode/dependent-templates HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -809,11 +1023,42 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_목록 응답: `data.data[]` 배열 항목의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-basic` | 플러그인 고유 식별자 (vendor-plugin 형식) |
+| name | string | `Basic` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
+| version | string | `1.0.4` | 플러그인 버전 |
+| type | string | `user` | <!-- TODO: 설명 --> |
+| status | string | `active` | 상태 값 (도메인별 상태 집합 — 사람이 읽는 라벨은 status_label, UI 변형은 status_variant 참조) |
+| required_version | string | `>=1.0.0` | <!-- TODO: 설명 --> |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "의존 템플릿 정보를 성공적으로 조회했습니다.",
+    "data": {
+        "data": [
+            {
+                "identifier": "sirsoft-basic",
+                "name": "Basic",
+                "version": "1.0.4",
+                "type": "user",
+                "status": "active",
+                "required_version": ">=1.0.0"
+            }
+        ],
+        "total": 1
+    }
+}
+```
 
 **에러 응답**
 
@@ -843,7 +1088,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/plugins/{identifier}/license HTTP/1.1
+GET /api/admin/plugins/sirsoft-daum_postcode/license HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -851,11 +1096,27 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| content | string | `프로그램 명칭 : 그누보드7용 Daum 우편번호 플러그인 (sirs…` | 본문 내용 |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "플러그인 정보를 성공적으로 가져왔습니다.",
+    "data": {
+        "content": "프로그램 명칭 : 그누보드7용 Daum 우편번호 플러그인 (sirsoft-daum_postcode)\n\n저작자 : (주)에스아이알소프트\n\n----- MIT 라이선스 (한국어 번역) --------------------------------------------------------\n\nMIT 라이선스\n\nCopyright (c) 2026 (주)에스아이알소프트\n\n이 소프트웨어와 관련 문서 파일(이하 \"소프트웨어\")의 복사본을 취득하는 모든 사람에게\n소프트웨어를 제한 없이 사용, 복사, 수정, 병합, 출판, 배포, 서브라이선스 허여 및/또는\n판매할 수 있는 권리를 무상으로 부여합니다. 다만, 소프트웨어를 제공받은 사람은 다음\n조건을 따라야 합니다:\n\n위 저작권 고지와 본 허가 고지는 소프트웨어의 모든 복사본 또는 상당 부분에 포함되어야\n합니다.\n\n소프트웨어는 \"있는 그대로\" 제공되며, 명시적이든 묵시적이든 어떠한 종류의 보증도 하지\n않습니다. 여기에는 상품성, 특정 목적에의 적합성 및 비침해에 대한 보증이 포함되나 이에\n국한되지 않습니다. 어떠한 경우에도 저작자 또는 저작권자는 소프트웨어나 소프트웨어의\n사용 또는 기타 거래로 인해 발생하는 계약, 불법행위 또는 기타 청구, 손해 또는 기타\n책임에 대해 책임을 지지 않습니다.\n\n----- MIT License (English Original) --------------------------------------------------------\n\nThe MIT License (MIT)\n\nCopyright (c) 2026 SIRSOFT\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+    }
+}
+```
 
 **에러 응답**
 
@@ -885,7 +1146,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/plugins/{identifier}/settings HTTP/1.1
+GET /api/admin/plugins/sirsoft-daum_postcode/settings HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -893,11 +1154,33 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| display_mode | string | `layer` | <!-- TODO: 설명 --> |
+| popup_width | integer | `500` | <!-- TODO: 설명 --> |
+| popup_height | integer | `600` | <!-- TODO: 설명 --> |
+| theme_color | string | `#1D4ED8` | <!-- TODO: 설명 --> |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "messages.success",
+    "data": {
+        "display_mode": "layer",
+        "popup_width": 500,
+        "popup_height": 600,
+        "theme_color": "#1D4ED8"
+    }
+}
+```
 
 **에러 응답**
 
@@ -924,12 +1207,10 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- | --- | --- | --- |
 | identifier | path | string | 예 | — | 대상 리소스의 식별자 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.plugin_settings.update_validation_rules`).
-
 **요청 예시**
 
 ```http
-PUT /api/admin/plugins/{identifier}/settings HTTP/1.1
+PUT /api/admin/plugins/sirsoft-daum_postcode/settings HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -937,7 +1218,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -949,7 +1230,6 @@ Authorization: Bearer {YOUR_TOKEN}
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.plugins.update`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 
 <!-- @generated:end -->
@@ -972,7 +1252,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/plugins/{identifier}/settings/layout HTTP/1.1
+GET /api/admin/plugins/sirsoft-daum_postcode/settings/layout HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -980,11 +1260,45 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| version | string | `1.0.0` | 플러그인 버전 |
+| layout_name | string | `plugin_settings` | <!-- TODO: 설명 --> |
+| permissions | array | `["core.plugins.update"]` | 권한 목록 (각 원소 id/identifier/name — permissions 관계 또는 역할 경유 파생) |
+| extends | string | `_admin_base` | <!-- TODO: 설명 --> |
+| meta | object | `{"title":"$t:sirsoft-daum_postcode.settings.title","descr…` | <!-- TODO: 설명 --> |
+| data_sources | array | `[{"id":"settings","label_key":"$t:sirsoft-daum_postcode.e…` | <!-- TODO: 설명 --> |
+| slots | object | `{"content":[{"id":"plugin_settings_content","type":"basic…` | <!-- TODO: 설명 --> |
+| pageConfig | object | `{"notice":"$t:sirsoft-daum_postcode.settings.notice","gui…` | <!-- TODO: 설명 --> |
+| schema | object | `{"display_mode":{"type":"enum","options":["popup","layer"…` | <!-- TODO: 설명 --> |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "messages.success",
+    "data": {
+        "version": "1.0.0",
+        "layout_name": "plugin_settings",
+        "permissions": [
+            "core.plugins.update"
+        ],
+        "extends": "_admin_base",
+        "meta": {
+            "title": "$t:sirsoft-daum_postcode.settings.title",
+            "description": "$t:sirsoft-daum_postcode.settings.description"
+        },
+        "...": "(4개 키 생략, 총 9개)"
+    }
+}
+```
 
 **에러 응답**
 
@@ -1064,38 +1378,11 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-| 필드 | 타입 | 설명 |
-| --- | --- | --- |
-| has_modified_layouts | boolean | 수정된 레이아웃 존재 여부 |
-| modified_count | integer | 수정된 레이아웃 수 |
-| modified_layouts | array | 수정된 레이아웃 목록 |
-| modified_layouts[].id | integer | 레이아웃 ID |
-| modified_layouts[].name | string | 레이아웃 이름 |
-| modified_layouts[].updated_at | string\|null | 최종 수정 일시 (`Y-m-d H:i:s`) |
-| modified_layouts[].size_diff | integer | 원본 대비 바이트 증감 (음수는 축소) |
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-```json
-{
-  "success": true,
-  "message": "수정된 레이아웃 확인이 완료되었습니다.",
-  "data": {
-    "has_modified_layouts": true,
-    "modified_count": 1,
-    "modified_layouts": [
-      {
-        "id": 47,
-        "name": "sirsoft-board.admin_board_index",
-        "updated_at": "2026-07-31 09:20:05",
-        "size_diff": 28
-      }
-    ]
-  }
-}
-```
-
-집계 범위는 해당 플러그인이 **소유한** 레이아웃으로 한정됩니다. 같은 템플릿에 등록된 다른 확장의 레이아웃은 포함되지 않습니다.
+<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -1225,13 +1512,13 @@ Content-Type: application/json
     "layout_strategy": "overwrite",
     "vendor_mode": "auto",
     "force": true,
-    "rebuild_search_index": false
+    "rebuild_search_index": true
 }
 ```
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1251,6 +1538,47 @@ Content-Type: application/json
 **설명** 특정 플러그인을 최신 버전으로 업데이트합니다. `core.plugins.install` 권한이 필요합니다. `layout_strategy` 로 레이아웃 처리 방식을(overwrite: 새 버전으로 교체, keep: 사용자 수정본 유지) 지정하며, `vendor_mode` 로 Composer 의존성 처리 방식을 선택합니다. 버전 제약·호환성 문제로 막힐 경우 `force: true` 로 강제 진행할 수 있습니다. `keep` 을 지정하면 사용자가 수정한 레이아웃(원본 해시와 현재 내용이 다른 레이아웃)은 갱신 대상에서 제외되어 현재 내용이 그대로 유지되고, 나머지 레이아웃만 파일 기준으로 갱신됩니다. 성공 응답 메시지에는 대상 식별자와 적용된 버전이 채워집니다. `rebuild_search_index: true` 를 함께 보내면 업데이트 후 색인이 누락된 검색 인덱스를 재생성합니다 — 인덱스 잠금·재색인 비용이 있어 기본은 수행하지 않으며, 보내지 않아도 응답의 `search_index` 에 현재 누락 여부가 담깁니다.
 
 
+### GET /api/plugins/assets/{identifier}
+<!-- @generated:start:api.public.plugins.assets.extensionless -->
+- **라우트명**: `api.public.plugins.assets.extensionless`
+- **컨트롤러**: `App\Http\Controllers\Api\Public\PublicPluginController@serveAsset`
+- **인증/권한**: 공개 (인증 불필요)
+
+**요청 파라미터**
+
+| 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
+| --- | --- | --- | --- | --- | --- |
+| identifier | path | string | 예 | — | 대상 리소스의 식별자 |
+| path | query | string | 예 | — | 경로 |
+
+**요청 예시**
+
+```http
+GET /api/plugins/assets/sirsoft-daum_postcode?identifier=example-key&path=%EC%98%88%EC%8B%9C%EA%B0%92 HTTP/1.1
+Host: api.example.com
+Accept: application/json
+```
+
+**응답 필드** (`data` 내부)
+
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
+
+**응답 예시**
+
+<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+
+**에러 응답**
+
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
+| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+
+<!-- @generated:end -->
+
+**설명** <!-- TODO: 이 엔드포인트의 용도·주의사항·예시 시나리오를 작성하세요 -->
+
+
 ### GET /api/plugins/assets/{identifier}/{path}
 <!-- @generated:start:api.public.plugins.assets -->
 - **라우트명**: `api.public.plugins.assets`
@@ -1267,7 +1595,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-GET /api/plugins/assets/{identifier}/{path} HTTP/1.1
+GET /api/plugins/assets/sirsoft-daum_postcode/{path}?identifier=example-key HTTP/1.1
 Host: api.example.com
 Accept: application/json
 ```
@@ -1312,11 +1640,11 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-200 — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-<!-- 실측 제외: http-200 — 응답 예시는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -1347,11 +1675,11 @@ Accept: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: http-200 — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-<!-- 실측 제외: http-200 — 응답 예시는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -1360,6 +1688,132 @@ _대표 에러 없음 (공개 조회 — 활성 에셋이 없으면 빈 200 응�
 <!-- @generated:end -->
 
 **설명** 활성 플러그인들의 프론트엔드 IIFE JS 를 서버에서 하나로 병합한 번들을 서빙하는 공개 엔드포인트입니다. 인증이 필요하지 않습니다. 활성 global 플러그인 에셋이 없으면 빈 200(text/javascript) 응답을 반환하고, 있으면 병합 파일을 ETag·환경별 Cache-Control 과 함께 서빙합니다. 프론트는 `G7Config.bundleUrls` 를 읽어 이 번들을 로드합니다.
+
+
+### GET /api/plugins/bundle/css
+<!-- @generated:start:api.public.plugins.bundle.css.extensionless -->
+- **라우트명**: `api.public.plugins.bundle.css.extensionless`
+- **컨트롤러**: `App\Http\Controllers\Api\Public\PublicPluginController@serveBundleCss`
+- **인증/권한**: 공개 (인증 불필요)
+
+**요청 파라미터**
+
+_요청 파라미터 없음._
+
+**요청 예시**
+
+```http
+GET /api/plugins/bundle/css HTTP/1.1
+Host: api.example.com
+Accept: application/json
+```
+
+**응답 필드** (`data` 내부)
+
+<!-- 실측 제외: http-200 — 응답 필드는 사람이 작성하세요. -->
+
+**응답 예시**
+
+<!-- 실측 제외: http-200 — 응답 예시는 사람이 작성하세요. -->
+
+**에러 응답**
+
+_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_
+
+<!-- @generated:end -->
+
+**설명** <!-- TODO: 이 엔드포인트의 용도·주의사항·예시 시나리오를 작성하세요 -->
+
+
+### GET /api/plugins/bundle/js
+<!-- @generated:start:api.public.plugins.bundle.js.extensionless -->
+- **라우트명**: `api.public.plugins.bundle.js.extensionless`
+- **컨트롤러**: `App\Http\Controllers\Api\Public\PublicPluginController@serveBundleJs`
+- **인증/권한**: 공개 (인증 불필요)
+
+**요청 파라미터**
+
+_요청 파라미터 없음._
+
+**요청 예시**
+
+```http
+GET /api/plugins/bundle/js HTTP/1.1
+Host: api.example.com
+Accept: application/json
+```
+
+**응답 필드** (`data` 내부)
+
+<!-- 실측 제외: http-200 — 응답 필드는 사람이 작성하세요. -->
+
+**응답 예시**
+
+<!-- 실측 제외: http-200 — 응답 예시는 사람이 작성하세요. -->
+
+**에러 응답**
+
+_대표 에러 없음 (공개 조회). <!-- TODO: 도메인 특이 에러가 있으면 보강 -->_
+
+<!-- @generated:end -->
+
+**설명** <!-- TODO: 이 엔드포인트의 용도·주의사항·예시 시나리오를 작성하세요 -->
+
+
+### GET /api/plugins/{identifier}/components
+<!-- @generated:start:api.public.plugins.components.extensionless -->
+- **라우트명**: `api.public.plugins.components.extensionless`
+- **컨트롤러**: `App\Http\Controllers\Api\Public\PublicPluginController@serveComponents`
+- **인증/권한**: 공개 (인증 불필요)
+
+**요청 파라미터**
+
+| 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
+| --- | --- | --- | --- | --- | --- |
+| identifier | path | string | 예 | — | 대상 리소스의 식별자 |
+
+**요청 예시**
+
+```http
+GET /api/plugins/sirsoft-daum_postcode/components HTTP/1.1
+Host: api.example.com
+Accept: application/json
+```
+
+**응답 필드** (`data` 내부)
+
+
+
+<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+
+**응답 예시**
+
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "identifier": "sirsoft-daum_postcode",
+    "version": "1.0.0",
+    "components": {
+        "basic": [],
+        "composite": [],
+        "layout": []
+    }
+}
+```
+
+**에러 응답**
+
+| 상태코드 | 의미 | 발생 조건 |
+| --- | --- | --- |
+| 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
+
+<!-- @generated:end -->
+
+**설명** <!-- TODO: 이 엔드포인트의 용도·주의사항·예시 시나리오를 작성하세요 -->
 
 
 ### GET /api/plugins/{identifier}/components.json
@@ -1377,18 +1831,18 @@ _대표 에러 없음 (공개 조회 — 활성 에셋이 없으면 빈 200 응�
 **요청 예시**
 
 ```http
-GET /api/plugins/{identifier}/components.json HTTP/1.1
+GET /api/plugins/sirsoft-daum_postcode/components.json HTTP/1.1
 Host: api.example.com
 Accept: application/json
 ```
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -1416,18 +1870,36 @@ Accept: application/json
 **요청 예시**
 
 ```http
-GET /api/plugins/{identifier}/editor-spec HTTP/1.1
+GET /api/plugins/sirsoft-daum_postcode/editor-spec HTTP/1.1
 Host: api.example.com
 Accept: application/json
 ```
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| identifier | string | `sirsoft-daum_postcode` | 플러그인 고유 식별자 (vendor-plugin 형식) |
+| spec | null | `null` | 스펙 정의 객체 (편집기/컴포넌트 선언 스키마 등) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "편집기 스펙이 비어 있습니다.",
+    "data": {
+        "identifier": "sirsoft-daum_postcode",
+        "spec": null
+    }
+}
+```
 
 **에러 응답**
 

@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Identity 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -64,25 +64,25 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | string | `e6ab6cd6-cdff-46cd-b4c2-b89dfda8745b` | 기본 키 (내부 식별자) |
+| id | string | `06f077b4-fc53-4dad-81ff-846cd6426a0f` | 기본 키 (내부 식별자) |
 | provider_id | string | `inicis` | provider 식별자 (연관 리소스 참조) |
-| purpose | string | `sensitive_action` | 인증 목적 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
-| channel | string | `ipin` | 인증에 사용된 전송 채널 (email 등 코어 채널 또는 모듈 provider 자체 식별자) |
-| user_id | integer | `130` | user 식별자 (연관 리소스 참조) |
-| target_hash | string | `d88d36166bbeffc41eb6994e390f4715280c1…` | 인증 대상 해시 (SHA256(email\|phone) — PII 원본 저장 회피) |
-| status | string | `cancelled` | 인증 시도 결과 상태 (requested/sent/processing/verified/failed/expired/cancelled/policy_violation_logged) |
-| attempts | integer | `0` | 현재까지 누적된 검증 시도 횟수 |
-| max_attempts | integer | `0` | 허용되는 최대 검증 시도 횟수 (초과 시 실패 처리) |
-| ip_address | string | `127.0.0.1` | 요청/행위가 발생한 IP 주소 |
+| purpose | string | `checkout_verification` | 인증 목적 (signup/password_reset/self_update/sensitive_action/login 또는 모듈 정의 목적) |
+| channel | string | `email` | 인증에 사용된 전송 채널 (email 등 코어 채널 또는 모듈 provider 자체 식별자) |
+| user_id | integer | `1209` | user 식별자 (연관 리소스 참조) |
+| target_hash | string | `eebbbc80cbc838162aaa9437c7aba415dc81d…` | 인증 대상 해시 (SHA256(email\|phone) — PII 원본 저장 회피) |
+| status | string | `verified` | 인증 시도 결과 상태 (requested/sent/processing/verified/failed/expired/cancelled/policy_violation_logged) |
+| attempts | integer | `2` | 현재까지 누적된 검증 시도 횟수 |
+| max_attempts | integer | `5` | 허용되는 최대 검증 시도 횟수 (초과 시 실패 처리) |
+| ip_address | string | `59.16.7.205` | 요청/행위가 발생한 IP 주소 |
 | user_agent | string | `Mozilla/5.0 (Windows NT 10.0; Win64; …` | 요청 클라이언트의 User-Agent 문자열 |
-| origin_type | string | `api` | 인증 트리거 출처 유형 (route/hook/policy/middleware/api/custom/system — IdentityOriginType) |
-| origin_identifier | string | `/api/identity/challenges` | 실제 트리거 경로/훅명 (예: PUT /api/me/password, core.user.before_update) |
-| origin_policy_key | null | `null` | 정책이 인증을 강제한 경우 해당 identity_policies.key (정책 외 트리거는 null) |
-| properties | null | `null` | 요청 페이로드 요약 (감사용 부가 정보, 없으면 null) |
-| metadata | object | `{"mid":"INIiasTest","reqSvcCd":"03","mtxid_hash":"981546e…` | 프로바이더 내부 데이터 (코드 해시·외부 인증 식별자 등, PII 원본 미포함) |
-| created_at | string | `2026-06-27 19:06:17` | 생성 일시 |
-| verified_at | string | `2026-06-27 18:58:30` | verified 일시 |
-| expires_at | string | `2026-06-27 19:21:17` | expires 일시 |
+| origin_type | string | `policy` | 인증 트리거 출처 유형 (route/hook/policy/middleware/api/custom/system — IdentityOriginType) |
+| origin_identifier | string | `sirsoft-ecommerce` | 실제 트리거 경로/훅명 (예: PUT /api/me/password, core.user.before_update) |
+| origin_policy_key | string | `sirsoft-ecommerce.checkout.before_pay` | 정책이 인증을 강제한 경우 해당 identity_policies.key (정책 외 트리거는 null) |
+| properties | object | `{"code_length":6}` | 요청 페이로드 요약 (감사용 부가 정보, 없으면 null) |
+| metadata | object | `{"hint_used":"text_code"}` | 프로바이더 내부 데이터 (코드 해시·외부 인증 식별자 등, PII 원본 미포함) |
+| created_at | string | `2026-07-30 21:14:43` | 생성 일시 |
+| verified_at | string | `2026-07-30 21:21:16` | verified 일시 |
+| expires_at | string | `2026-07-30 21:29:43` | expires 일시 |
 
 **응답 예시**
 
@@ -95,15 +95,67 @@ HTTP/1.1 200
     "success": true,
     "message": "messages.success",
     "data": {
-        "data": [],
+        "data": [
+            {
+                "id": "06f077b4-fc53-4dad-81ff-846cd6426a0f",
+                "provider_id": "inicis",
+                "purpose": "checkout_verification",
+                "channel": "email",
+                "user_id": null,
+                "target_hash": "eebbbc80cbc838162aaa9437c7aba415dc81d33a7c2c8ad21ef11e102d8ac16b",
+                "status": "verified",
+                "attempts": 2,
+                "max_attempts": 5,
+                "ip_address": "59.16.7.205",
+                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+                "origin_type": "policy",
+                "origin_identifier": "sirsoft-ecommerce",
+                "origin_policy_key": "sirsoft-ecommerce.checkout.before_pay",
+                "properties": {
+                    "code_length": 6
+                },
+                "metadata": {
+                    "hint_used": "text_code"
+                },
+                "created_at": "2026-07-30 21:14:43",
+                "verified_at": "2026-07-30 21:21:16",
+                "expires_at": "2026-07-30 21:29:43"
+            },
+            {
+                "id": "2cd9f0a8-44da-447b-96b9-81fe2174016f",
+                "provider_id": "g7:core.mail",
+                "purpose": "checkout_verification",
+                "channel": "email",
+                "user_id": null,
+                "target_hash": "08f2668d172fd18e4103d0e13de6159b3f7112f4c427918104af923c6c086790",
+                "status": "verified",
+                "attempts": 3,
+                "max_attempts": 5,
+                "ip_address": "180.182.50.7",
+                "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+                "origin_type": "policy",
+                "origin_identifier": "sirsoft-ecommerce",
+                "origin_policy_key": "sirsoft-ecommerce.checkout.before_pay",
+                "properties": {
+                    "code_length": 6
+                },
+                "metadata": {
+                    "hint_used": "text_code"
+                },
+                "created_at": "2026-07-30 16:58:29",
+                "verified_at": "2026-07-30 16:59:06",
+                "expires_at": "2026-07-30 17:13:29"
+            },
+            "... (총 25건 중 2건 표시)"
+        ],
         "pagination": {
             "current_page": 1,
-            "last_page": 1,
+            "last_page": 8,
             "per_page": 25,
-            "total": 0,
-            "from": null,
-            "to": null,
-            "has_more_pages": false
+            "total": 200,
+            "from": 1,
+            "to": 25,
+            "has_more_pages": true
         },
         "abilities": {
             "can_purge": true
@@ -157,7 +209,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| purged_count | integer | `0` | purged 개수 (집계) |
+| purged_count | integer | `200` | purged 개수 (집계) |
 | older_than_days | integer | `1` | 기준 경과 일수 (이 일수보다 오래된 대상 필터/집계) |
 
 **응답 예시**
@@ -171,7 +223,7 @@ HTTP/1.1 200
     "success": true,
     "message": "messages.success",
     "data": {
-        "purged_count": 0,
+        "purged_count": 200,
         "older_than_days": 1
     }
 }
@@ -232,20 +284,21 @@ _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 | number | integer | `1` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
 | id | integer | `1` | 기본 키 (내부 식별자) |
 | provider_id | string | `g7:core.mail` | provider 식별자 (연관 리소스 참조) |
-| scope_type | string | `provider_default` | 메시지 정의 스코프 (provider_default: 프로바이더 기본 / purpose: 목적별 / policy: 정책별 — IdentityMessageScopeType) |
-| scope_value | string | `` | 스코프 값 (provider_default 빈 문자열 / purpose 목적 키 / policy 정책 키) |
-| name | object | `{"ko":"메일 본인 확인 (기본)","en":"Mail Verification (default)",…` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
-| description | object | `{"ko":"특정 목적이 매칭되지 않을 때 사용되는 기본 메일 템플릿","en":"Fallback ma…` | 설명 (다국어 필드는 로케일별 값 객체) |
+| scope_type | string | `purpose` | 메시지 정의 스코프 (provider_default: 프로바이더 기본 / purpose: 목적별 / policy: 정책별 — IdentityMessageScopeType) |
+| scope_value | string | `checkout_verification` | 스코프 값 (provider_default 빈 문자열 / purpose 목적 키 / policy 정책 키) |
+| name | object | `{"ko":"결제 시 본인 확인","en":"Checkout Verification"}` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
+| description | object | `{"ko":"결제 진행 전 본인\/성인 확인 인증 코드 메일","en":"Identity\/adult …` | 설명 (다국어 필드는 로케일별 값 객체) |
 | channels | array | `["mail"]` | 이 정의가 지원하는 활성 채널 목록 (현재 mail, 향후 sms 등 확장) |
 | variables | array | `[{"key":"code","description":"인증 코드 (text_code 흐름)"},{"ke…` | 템플릿에서 치환 가능한 변수 메타데이터 목록 (원소 key/description) |
-| extension_type | string | `core` | 이 리소스를 소유한 확장의 타입 (core/module/plugin/template) |
-| extension_identifier | string | `core` | 이 리소스를 소유한 확장의 식별자 |
+| extension_type | string | `module` | 이 리소스를 소유한 확장의 타입 (core/module/plugin/template) |
+| extension_identifier | string | `sirsoft-ecommerce` | 이 리소스를 소유한 확장의 식별자 |
 | is_active | boolean | `true` | active 여부 |
 | is_default | boolean | `true` | default 여부 |
 | user_overrides | array | `["name.ja"]` | 운영자가 시드 기본값에서 수정한 필드 경로 목록 (예: name.ja — 시더 재실행 시 보존 대상) |
-| templates | array | `[{"id":1,"definition_id":1,"channel":"mail","subject":{"k…` | 이 정의에 속한 채널별 하위 메시지 템플릿 목록 (원소 id/channel/subject/body 등, eager load 시에만 포함) |
-| created_at | string | `2026-05-27 15:20:18` | 생성 일시 |
-| updated_at | string | `2026-06-30 13:33:16` | 최종 수정 일시 |
+| templates | array | `[{"id":1,"definition_id":1,"channel":"mail","subject":{"k…` | 이 정의에 속한 채널별 하위 메시지 템플릿 목록 (원소 id/channel/subject/body 등). **목록 조회에서는 대표 1건만 실린다** — 전체 채널이 필요하면 단건 조회를 사용한다 |
+| templates_count | integer | `1` | templates 개수 (집계) |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":false}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -266,89 +319,25 @@ HTTP/1.1 200
                 "provider_id": "g7:core.mail",
                 "scope_type": "purpose",
                 "scope_value": "checkout_verification",
-                "name": {
-                    "ko": "결제 시 본인 확인",
-                    "en": "Checkout Verification"
-                },
-                "description": {
-                    "ko": "결제 진행 전 본인/성인 확인 인증 코드 메일",
-                    "en": "Identity/adult verification code mail before checkout"
-                },
-                "channels": [
-                    "mail"
-                ],
-                "variables": [
-                    {
-                        "key": "code",
-                        "description": "인증 코드 (text_code 흐름)"
-                    },
-                    {
-                        "key": "expire_minutes",
-                        "description": "만료까지 남은 분"
-                    },
-                    {
-                        "key": "purpose_label",
-                        "description": "인증 목적 라벨"
-                    },
-                    {
-                        "key": "app_name",
-                        "description": "사이트명"
-                    },
-                    {
-                        "key": "site_url",
-                        "description": "사이트 URL"
-                    },
-                    {
-                        "key": "recipient_email",
-                        "description": "수신자 이메일"
-                    }
-                ],
-                "extension_type": "module",
-                "extension_identifier": "sirsoft-ecommerce",
-                "is_active": true,
-                "is_default": true,
-                "user_overrides": null,
-                "templates": [
-                    {
-                        "id": 1,
-                        "definition_id": 1,
-                        "channel": "mail",
-                        "subject": {
-                            "ko": "[{app_name}] 결제 본인 확인 인증 코드",
-                            "en": "[{app_name}] Checkout Verification Code"
-                        },
-                        "body": {
-                            "ko": "<h1>결제 본인 확인</h1><p>결제를 진행하기 위해 본인 확인이 필요합니다. 아래 인증 코드를 입력해 주세요.</p><p style=\"font-size:28px; font-weight:bold; letter-spacing:4px; text-align:center; padding:16px; background:#f4f6f8; border-radius:6px;\">{code}</p><p>이 코드는 <strong>{expire_minutes}분</strong> 후 만료됩니다.</p><p><strong>본인이 결제를 진행하지 않았다면 이 메일을 무시하고 즉시 비밀번호를 변경해 주세요.</strong></p><p>감사합니다,<br><a href=\"{site_url}\">{app_name}</a></p>",
-                            "en": "<h1>Checkout Verification</h1><p>Please enter the code below to proceed with payment.</p><p style=\"font-size:28px; font-weight:bold; letter-spacing:4px; text-align:center; padding:16px; background:#f4f6f8; border-radius:6px;\">{code}</p><p>This code will expire in <strong>{expire_minutes} minutes</strong>.</p><p><strong>If you did not initiate this payment, please ignore this email and change your password immediately.</strong></p><p>Thank you,<br><a href=\"{site_url}\">{app_name}</a></p>"
-                        },
-                        "is_active": true,
-                        "is_default": true,
-                        "user_overrides": null,
-                        "updated_by": null,
-                        "created_at": "2026-07-08 10:43:32",
-                        "updated_at": "2026-07-08 10:43:32",
-                        "abilities": {
-                            "can_update": true,
-                            "can_delete": true
-                        }
-                    }
-                ],
-                "created_at": "2026-07-08 10:43:32",
-                "updated_at": "2026-07-08 10:43:32",
-                "abilities": {
-                    "can_update": true,
-                    "can_delete": false
-                }
-            }
+                "...": "(14개 키 생략, 총 19개)"
+            },
+            {
+                "number": 2,
+                "id": 2,
+                "provider_id": "g7:core.mail",
+                "scope_type": "provider_default",
+                "scope_value": "",
+                "...": "(14개 키 생략, 총 19개)"
+            },
+            "... (총 6건 중 2건 표시)"
         ],
         "pagination": {
             "current_page": 1,
             "last_page": 1,
             "per_page": 25,
-            "total": 1,
+            "total": 6,
             "from": 1,
-            "to": 1,
-            "has_more_pages": false
+            "...": "(2개 키 생략, 총 7개)"
         },
         "abilities": {
             "can_create": true,
@@ -368,7 +357,7 @@ HTTP/1.1 200
 
 <!-- @generated:end -->
 
-**설명** 본인인증 알림 메시지 정의(프로바이더별·목적별·정책별 메일/SMS 템플릿 묶음) 목록을 필터·검색하여 페이지네이션 조회합니다. `auth:sanctum` + `core.admin.identity.messages.read` 관리자 권한이 필요합니다. 확장이 `core.identity.message_definition.index_validation_rules` 필터 훅으로 추가 검색 파라미터를 등록할 수 있습니다. 응답 각 항목의 `user_overrides` 로 운영자가 시드 기본값에서 수정한 필드를, `templates` 로 채널별 하위 템플릿을 함께 내려 관리자 메시지 설정 화면을 구성할 때 사용합니다.
+**설명** 본인인증 알림 메시지 정의(프로바이더별·목적별·정책별 메일/SMS 템플릿 묶음) 목록을 필터·검색하여 페이지네이션 조회합니다. `auth:sanctum` + `core.admin.identity.messages.read` 관리자 권한이 필요합니다. 확장이 `core.identity.message_definition.index_validation_rules` 필터 훅으로 추가 검색 파라미터를 등록할 수 있습니다. 응답 각 항목의 `user_overrides` 로 운영자가 시드 기본값에서 수정한 필드를 함께 내려 관리자 메시지 설정 화면을 구성할 때 사용합니다. 목록의 `templates` 에는 **대표 템플릿 1건만** 실리고, 전체 채널 수는 `templates_count` 로 제공합니다 — 정의마다 채널×로케일 템플릿 본문을 전부 실으면 목록을 여는 것만으로 전 행의 메일 본문이 전송되기 때문입니다. 채널별 템플릿 전체가 필요하면 단건 조회(`GET /api/admin/identity/messages/definitions/{definition}`)를 사용합니다.
 
 
 ### POST /api/admin/identity/messages/definitions
@@ -425,7 +414,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -467,7 +456,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-403 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -515,20 +504,20 @@ _단건 응답: `data` 객체의 필드._
 | --- | --- | --- | --- |
 | id | integer | `1` | 기본 키 (내부 식별자) |
 | provider_id | string | `g7:core.mail` | IDV 프로바이더 ID (예: g7:core.mail, kcp, portone) |
-| scope_type | string | `provider_default` | 메시지 정의 스코프 (provider_default\|purpose\|policy) — App\Enums\IdentityMessageScopeType enum |
-| scope_value | string | `` | 범위 값: provider_default 빈 문자열 / purpose 키 / policy 키 |
-| name | object | `{"ko":"메일 본인 확인 (기본)","en":"Mail Verification (default)",…` | 다국어 표시명 ({"ko":"...", "en":"..."}) |
-| description | object | `{"ko":"특정 목적이 매칭되지 않을 때 사용되는 기본 메일 템플릿","en":"Fallback ma…` | 다국어 설명 |
+| scope_type | string | `purpose` | 메시지 정의 스코프 (provider_default\|purpose\|policy) — App\Enums\IdentityMessageScopeType enum |
+| scope_value | string | `checkout_verification` | 범위 값: provider_default 빈 문자열 / purpose 키 / policy 키 |
+| name | object | `{"ko":"결제 시 본인 확인","en":"Checkout Verification"}` | 다국어 표시명 ({"ko":"...", "en":"..."}) |
+| description | object | `{"ko":"결제 진행 전 본인\/성인 확인 인증 코드 메일","en":"Identity\/adult …` | 다국어 설명 |
 | channels | array | `["mail"]` | 활성 채널 (현재 ["mail"], 향후 sms 등 확장) |
 | variables | array | `[{"key":"code","description":"인증 코드 (text_code 흐름)"},{"ke…` | 사용 가능 변수 메타데이터 ([{key, description}]) |
-| extension_type | string | `core` | 확장 타입: core, module, plugin |
-| extension_identifier | string | `core` | 확장 식별자 |
+| extension_type | string | `module` | 확장 타입: core, module, plugin |
+| extension_identifier | string | `sirsoft-ecommerce` | 확장 식별자 |
 | is_active | boolean | `true` | active 여부 |
 | is_default | boolean | `true` | default 여부 |
-| user_overrides | array | `["name.ja"]` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
+| user_overrides | null | `null` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
 | templates | array | `[{"id":1,"definition_id":1,"channel":"mail","subject":{"k…` | 이 정의에 속한 채널별 하위 메시지 템플릿 목록 (원소 id/channel/subject/body 등) |
-| created_at | string | `2026-05-27 15:20:18` | 생성 일시 |
-| updated_at | string | `2026-06-30 13:33:16` | 최종 수정 일시 |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":false}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -605,16 +594,16 @@ HTTP/1.1 200
                 "is_default": true,
                 "user_overrides": null,
                 "updated_by": null,
-                "created_at": "2026-07-08 10:43:32",
-                "updated_at": "2026-07-08 10:43:32",
+                "created_at": "2026-07-30 18:47:09",
+                "updated_at": "2026-07-30 18:47:09",
                 "abilities": {
                     "can_update": true,
                     "can_delete": true
                 }
             }
         ],
-        "created_at": "2026-07-08 10:43:32",
-        "updated_at": "2026-07-08 10:43:32",
+        "created_at": "2026-07-30 18:47:09",
+        "updated_at": "2026-07-30 18:47:09",
         "abilities": {
             "can_update": true,
             "can_delete": false
@@ -679,7 +668,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -740,8 +729,8 @@ _단건 응답: `data` 객체의 필드._
 | is_default | boolean | `true` | default 여부 |
 | user_overrides | null | `null` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
 | templates | array | `[{"id":1,"definition_id":1,"channel":"mail","subject":{"k…` | 템플릿 목록 (각 원소 identifier/name 등 — 템플릿 관계 파생) |
-| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
-| updated_at | string | `2026-07-08 10:43:32` | 최종 수정 일시 |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":false}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -818,16 +807,16 @@ HTTP/1.1 200
                 "is_default": true,
                 "user_overrides": null,
                 "updated_by": null,
-                "created_at": "2026-07-08 10:43:32",
-                "updated_at": "2026-07-08 10:43:32",
+                "created_at": "2026-07-30 18:47:09",
+                "updated_at": "2026-07-30 18:47:09",
                 "abilities": {
                     "can_update": true,
                     "can_delete": true
                 }
             }
         ],
-        "created_at": "2026-07-08 10:43:32",
-        "updated_at": "2026-07-08 10:43:32",
+        "created_at": "2026-07-30 18:47:09",
+        "updated_at": "2026-07-30 18:47:09",
         "abilities": {
             "can_update": true,
             "can_delete": false
@@ -889,9 +878,8 @@ _단건 응답: `data` 객체의 필드._
 | is_active | boolean | `false` | active 여부 |
 | is_default | boolean | `true` | default 여부 |
 | user_overrides | array | `["is_active"]` | 운영자가 수정한 필드명 목록 (예: ["name","is_active"]) |
-| templates | null | `null` | 템플릿 목록 (각 원소 identifier/name 등 — 템플릿 관계 파생) |
-| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:36` | 최종 수정 일시 |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:38` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":false}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -953,9 +941,8 @@ HTTP/1.1 200
         "user_overrides": [
             "is_active"
         ],
-        "templates": null,
-        "created_at": "2026-07-08 10:43:32",
-        "updated_at": "2026-07-08 12:14:36",
+        "created_at": "2026-07-30 18:47:09",
+        "updated_at": "2026-08-04 21:53:38",
         "abilities": {
             "can_update": true,
             "can_delete": false
@@ -1011,7 +998,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1069,7 +1056,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1125,8 +1112,8 @@ _단건 응답: `data` 객체의 필드._
 | is_default | boolean | `true` | default 여부 |
 | user_overrides | null | `null` | 운영자가 수정한 필드명 목록 (예: ["subject","body","is_active"]) |
 | updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
-| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
-| updated_at | string | `2026-07-08 10:43:32` | 최종 수정 일시 |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-07-30 18:47:09` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -1155,8 +1142,8 @@ HTTP/1.1 200
         "is_default": true,
         "user_overrides": null,
         "updated_by": null,
-        "created_at": "2026-07-08 10:43:32",
-        "updated_at": "2026-07-08 10:43:32",
+        "created_at": "2026-07-30 18:47:09",
+        "updated_at": "2026-07-30 18:47:09",
         "abilities": {
             "can_update": true,
             "can_delete": true
@@ -1214,8 +1201,8 @@ _단건 응답: `data` 객체의 필드._
 | is_default | boolean | `true` | default 여부 |
 | user_overrides | array | `["is_active"]` | 운영자가 수정한 필드명 목록 (예: ["subject","body","is_active"]) |
 | updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
-| created_at | string | `2026-07-08 10:43:32` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:36` | 최종 수정 일시 |
+| created_at | string | `2026-07-30 18:47:09` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:39` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -1246,8 +1233,8 @@ HTTP/1.1 200
             "is_active"
         ],
         "updated_by": null,
-        "created_at": "2026-07-08 10:43:32",
-        "updated_at": "2026-07-08 12:14:36",
+        "created_at": "2026-07-30 18:47:09",
+        "updated_at": "2026-08-04 21:53:39",
         "abilities": {
             "can_update": true,
             "can_delete": true
@@ -1304,23 +1291,23 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | integer | `25` | 기본 키 (내부 식별자) |
-| key | string | `test` | 정책 식별자 (고유, 예: core.profile.password_change) |
+| id | integer | `29` | 기본 키 (내부 식별자) |
+| key | string | `core.admin.extension_uninstall` | 정책 식별자 (고유, 예: core.profile.password_change) |
 | scope | string | `route` | 정책 적용 범위 (route: 라우트 패턴 / hook: Service 훅 / custom: 모듈 커스텀 키, IdentityPolicyScope) |
-| target | string | `sdfsfsf` | 매칭 대상 (scope 에 따라 라우트명/URI 패턴, 훅 이름, 또는 custom key) |
-| purpose | string | `inicis.adult_verification` | 이 정책이 요구하는 인증 목적 |
-| provider_id | string | `inicis` | provider 식별자 (연관 리소스 참조) |
+| target | string | `api.admin.{modules,plugins}.uninstall` | 매칭 대상 (scope 에 따라 라우트명/URI 패턴, 훅 이름, 또는 custom key) |
+| purpose | string | `sensitive_action` | 이 정책이 요구하는 인증 목적 |
+| provider_id | null | `null` | provider 식별자 (연관 리소스 참조) |
 | grace_minutes | integer | `0` | 재인증 유예 시간(분) — 최근 N분 이내 동일 목적 인증 성공 시 재인증 생략 (0=매번 요구) |
-| enabled | boolean | `true` | 정책 사용 여부 (false 시 인증 미강제) |
+| enabled | boolean | `false` | 정책 사용 여부 (false 시 인증 미강제) |
 | priority | integer | `100` | 정책 우선순위 (같은 대상에 여러 정책 매칭 시 작을수록 우선) |
-| conditions | array | `[]` | 추가 매칭 조건 (역할/HTTP 메서드/파라미터 매칭 조건 JSON, 없으면 빈 배열) |
-| source_type | string | `admin` | 정책 출처 (core/module/plugin: 선언형 / admin: 운영자 직접 등록, IdentityPolicySourceType) |
-| source_identifier | string | `sirsoft-board` | 출처 식별자 (선언형 정책의 소유 확장 identifier) |
-| applies_to | string | `both` | 적용 대상 사용자 (self: 일반 사용자 / admin: 관리자 / both: 모두, IdentityPolicyAppliesTo) |
+| conditions | object | `{"changed_fields":["email","phone","mobile"]}` | 추가 매칭 조건 (역할/HTTP 메서드/파라미터 매칭 조건 JSON, 없으면 빈 배열) |
+| source_type | string | `core` | 정책 출처 (core/module/plugin: 선언형 / admin: 운영자 직접 등록, IdentityPolicySourceType) |
+| source_identifier | string | `core` | 출처 식별자 (선언형 정책의 소유 확장 identifier) |
+| applies_to | string | `admin` | 적용 대상 사용자 (self: 일반 사용자 / admin: 관리자 / both: 모두, IdentityPolicyAppliesTo) |
 | fail_mode | string | `block` | 실패 시 동작 (block: HTTP 428 차단 / log_only: 감사 로그만 남기고 통과, IdentityPolicyFailMode) |
 | user_overrides | array | `[]` | 운영자가 선언 기본값에서 재정의한 필드 목록 (선언형 정책만 의미, 시더 재실행 시 보존) |
-| created_at | string | `2026-06-26 16:33:04` | 생성 일시 |
-| updated_at | string | `2026-06-26 16:33:04` | 최종 수정 일시 |
+| created_at | string | `2026-07-31 00:15:09` | 생성 일시 |
+| updated_at | string | `2026-07-31 00:15:09` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -1336,52 +1323,52 @@ HTTP/1.1 200
     "data": {
         "data": [
             {
-                "id": 12,
-                "key": "sirsoft-board.post.user_create",
-                "scope": "hook",
-                "target": "sirsoft-board.post.before_create",
+                "id": 29,
+                "key": "core.admin.extension_uninstall",
+                "scope": "route",
+                "target": "api.admin.{modules,plugins}.uninstall",
                 "purpose": "sensitive_action",
                 "provider_id": null,
                 "grace_minutes": 0,
                 "enabled": false,
                 "priority": 100,
                 "conditions": null,
-                "source_type": "module",
-                "source_identifier": "sirsoft-board",
-                "applies_to": "self",
+                "source_type": "core",
+                "source_identifier": "core",
+                "applies_to": "admin",
                 "fail_mode": "block",
                 "user_overrides": [],
-                "created_at": "2026-07-08 10:44:35",
-                "updated_at": "2026-07-08 10:44:35",
+                "created_at": "2026-07-31 00:15:09",
+                "updated_at": "2026-07-31 00:15:09",
                 "abilities": {
                     "can_update": true,
                     "can_delete": true
                 }
             },
             {
-                "id": 11,
-                "key": "sirsoft-board.report.create",
+                "id": 28,
+                "key": "core.admin.user_delete",
                 "scope": "hook",
-                "target": "sirsoft-board.report.before_create",
+                "target": "core.user.before_delete",
                 "purpose": "sensitive_action",
                 "provider_id": null,
-                "grace_minutes": 30,
+                "grace_minutes": 0,
                 "enabled": false,
                 "priority": 100,
                 "conditions": null,
-                "source_type": "module",
-                "source_identifier": "sirsoft-board",
-                "applies_to": "self",
+                "source_type": "core",
+                "source_identifier": "core",
+                "applies_to": "admin",
                 "fail_mode": "block",
                 "user_overrides": [],
-                "created_at": "2026-07-08 10:44:35",
-                "updated_at": "2026-07-08 10:44:35",
+                "created_at": "2026-07-31 00:15:09",
+                "updated_at": "2026-07-31 00:15:09",
                 "abilities": {
                     "can_update": true,
                     "can_delete": true
                 }
             },
-            "... (총 12건 중 2건 표시)"
+            "... (총 21건 중 2건 표시)"
         ],
         "abilities": {
             "can_create": true,
@@ -1391,7 +1378,7 @@ HTTP/1.1 200
         "meta": {
             "current_page": 1,
             "per_page": 25,
-            "total": 12,
+            "total": 21,
             "last_page": 1
         }
     }
@@ -1465,7 +1452,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1509,7 +1496,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1582,7 +1569,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1633,7 +1620,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1715,6 +1702,8 @@ HTTP/1.1 200
                     "label": "인증 코드 길이",
                     "type": "integer",
                     "default": 6,
+                    "min": 4,
+                    "max": 10,
                     "help": "발송되는 숫자 코드의 자릿수 (기본 6, 최소 4, 최대 10)."
                 },
                 "from_address": {
@@ -1722,6 +1711,63 @@ HTTP/1.1 200
                     "type": "string",
                     "default": null,
                     "help": "비어 있으면 시스템 기본 발신자를 사용합니다."
+                }
+            }
+        },
+        {
+            "id": "inicis",
+            "label": "KG이니시스 본인확인",
+            "channels": [
+                "ipin"
+            ],
+            "channel_labels": {
+                "ipin": "아이핀"
+            },
+            "render_hint": "text_code",
+            "is_available": true,
+            "abilities": {
+                "can_update": true
+            },
+            "settings_schema": {
+                "is_test_mode": {
+                    "label": "테스트 모드",
+                    "type": "boolean",
+                    "default": true
+                },
+                "test_mid": {
+                    "label": "Test MID",
+                    "type": "text",
+                    "default": "INIiasTest"
+                },
+                "test_api_key": {
+                    "label": "Test API Key",
+                    "type": "password",
+                    "default": "TGdxb2l3enJDWFRTbTgvREU3MGYwUT09"
+                },
+                "live_mid": {
+                    "label": "Live MID (SRB prefix)",
+                    "type": "text",
+                    "default": ""
+                },
+                "live_api_key": {
+                    "label": "Live API Key",
+                    "type": "password",
+                    "default": ""
+                },
+                "duplicate_field": {
+                    "label": "Duplicate Field",
+                    "type": "radio",
+                    "options": [
+                        "di",
+                        "ci"
+                    ],
+                    "default": "di"
+                },
+                "duplicate_block_enabled": {
+                    "label": "중복 가입 차단",
+                    "description": "활성화 시 본인인증을 통과한 사람이 이전에 다른 이메일로 가입한 적이 있으면 가입을 거부합니다. 가족 휴대폰 공유 또는 B2B 시나리오 등에서 한 사람이 여러 계정을 가입해야 한다면 비활성화하세요. 이 설정과 무관하게 동일 이메일 재가입은 항상 차단됩니다 (코어 기본 동작).",
+                    "type": "toggle",
+                    "default": true
                 }
             }
         }
@@ -1778,7 +1824,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1832,7 +1878,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -1865,7 +1911,7 @@ Content-Type: application/json
 **요청 예시**
 
 ```http
-GET /api/identity/challenges/{challenge} HTTP/1.1
+GET /api/identity/challenges/006209fd-1b6c-40aa-a38f-9b907f1a4bca HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생략 가능)
@@ -1877,18 +1923,37 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | string | `00484973-8cd3-4a1d-85f2-78361feb6f0d` | 기본 키 (내부 식별자) |
-| status | string | `verified` | requested\|sent\|processing\|verified\|failed\|expired\|cancelled\|policy_violation_logged |
-| provider_id | string | `inicis` | 프로바이더 식별자 (예: g7:core.mail, kcp) |
+| id | string | `006209fd-1b6c-40aa-a38f-9b907f1a4bca` | 기본 키 (내부 식별자) |
+| status | string | `requested` | requested\|sent\|processing\|verified\|failed\|expired\|cancelled\|policy_violation_logged |
+| provider_id | string | `g7:core.mail` | 프로바이더 식별자 (예: g7:core.mail, kcp) |
 | purpose | string | `sensitive_action` | 인증 목적 (signup\|password_reset\|self_update\|sensitive_action\|login\|*module-defined*) — 코어 5종은 App\Enums\IdentityVerificationPurpose enum, 모듈/플러그인은 declaredPurposes 레지스트리 |
 | render_hint | string | `text_code` | 프론트 렌더 힌트 (text_code\|link\|external_redirect) |
-| expires_at | string | `2026-05-12T18:14:19+00:00` | expires 일시 |
+| expires_at | string | `2026-07-20T20:11:14+00:00` | expires 일시 |
 | max_attempts | integer | `5` | 허용 최대 시도 횟수 (정책 상수). 누적 시도 횟수(attempts)는 잠금 직전까지 시도 횟수를 맞춰 보는 데 쓰일 수 있어 본 응답에 포함하지 않는다 |
 | public_payload | array | `[]` | 프론트 렌더에 필요한 공개 안전 페이로드 (민감 metadata 제외, 프로바이더별 UI 힌트 — 없으면 빈 배열) |
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "messages.success",
+    "data": {
+        "id": "006209fd-1b6c-40aa-a38f-9b907f1a4bca",
+        "status": "requested",
+        "provider_id": "g7:core.mail",
+        "purpose": "sensitive_action",
+        "render_hint": "text_code",
+        "expires_at": "2026-07-20T20:11:14+00:00",
+        "max_attempts": 5,
+        "public_payload": []
+    }
+}
+```
 
 **에러 응답**
 
@@ -1916,7 +1981,7 @@ _단건 응답: `data` 객체의 필드._
 **요청 예시**
 
 ```http
-POST /api/identity/challenges/{challenge}/cancel HTTP/1.1
+POST /api/identity/challenges/006209fd-1b6c-40aa-a38f-9b907f1a4bca/cancel HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생략 가능)
@@ -1924,11 +1989,11 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+<!-- 실측 제외: http-429 — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -1961,7 +2026,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 **요청 예시**
 
 ```http
-POST /api/identity/challenges/{challenge}/verify HTTP/1.1
+POST /api/identity/challenges/006209fd-1b6c-40aa-a38f-9b907f1a4bca/verify HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생략 가능)
@@ -1975,11 +2040,11 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-429 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
+<!-- 실측 제외: http-429 — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -2084,6 +2149,21 @@ HTTP/1.1 200
             ],
             "channel_labels": {
                 "email": "이메일"
+            },
+            "render_hint": "text_code",
+            "is_available": true,
+            "abilities": {
+                "can_update": false
+            }
+        },
+        {
+            "id": "inicis",
+            "label": "KG이니시스 본인확인",
+            "channels": [
+                "ipin"
+            ],
+            "channel_labels": {
+                "ipin": "아이핀"
             },
             "render_hint": "text_code",
             "is_available": true,
@@ -2197,10 +2277,9 @@ HTTP/1.1 200
             "id": "login",
             "label": "로그인 2단계 인증",
             "description": "2단계 인증을 켰을 때 비밀번호 확인 뒤 한 단계를 더 요구.",
-            "default_provider": "g7:core.mail",
+            "default_provider": null,
             "allowed_channels": [
-                "mail",
-                "sms"
+                "email"
             ],
             "source_type": "core",
             "source_identifier": "core"
@@ -2217,6 +2296,17 @@ HTTP/1.1 200
             ],
             "source_type": "module",
             "source_identifier": "sirsoft-ecommerce"
+        },
+        {
+            "id": "inicis.adult_verification",
+            "label": "성인인증 (KG이니시스 본인확인 전용)",
+            "description": "반드시 KG이니시스 provider 로만 매핑하세요. 메일/SMS provider 는 생년월일을 반환하지 않아 성인 여부 판정이 불가능합니다. 잘못 매핑 시 비성인 사용자에게 19금 컨텐츠가 노출될 수 있습니다.",
+            "default_provider": "inicis",
+            "allowed_channels": [
+                "ipin"
+            ],
+            "source_type": "plugin",
+            "source_identifier": "sirsoft-verification_kginicis"
         }
     ]
 }

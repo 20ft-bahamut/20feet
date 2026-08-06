@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Me 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -38,7 +38,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-500 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -82,31 +82,31 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| uuid | string | `a231747f-e82e-4cf2-9ae1-a261849dce40` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
-| name | string | `API 문서 샘플 사용자` | 사용자 이름 |
-| nickname | string | `gunwoo.oh` | 닉네임 |
-| email | string | `apidoc-sample-user@example.com` | 이메일 주소 |
+| uuid | string | `a26219fc-94a0-4f63-9404-04c2a6ac99e4` | 외부 노출용 UUID (URL/API 식별자, 내부 id 비노출) |
+| name | string | `최고관리자` | 사용자 이름 |
+| nickname | string | `최고관리자` | 닉네임 |
+| email | string | `heuristing@gmail.com` | 이메일 주소 |
 | avatar | null | `null` | 아바타 이미지 URL (User::getAvatarUrl() 산물, 미등록 시 null) |
 | language | string | `ko` | 사용자 언어 설정 (ko: 한국어, en: 영어) |
 | timezone | string | `Asia/Seoul` | 사용자 시간대 (예: Asia/Seoul, UTC) |
-| country | string | `KR` | 국가 코드 (ISO 3166-1 alpha-2) |
+| country | null | `null` | 국가 코드 (ISO 3166-1 alpha-2) |
 | status | string | `active` | 계정 상태 (active: 활성, inactive: 비활성, blocked: 차단, withdrawn: 탈퇴) |
 | status_label | string | `활성` | 상태의 사람이 읽는 라벨 (상태 Enum label() 산물) |
 | status_variant | string | `success` | 상태 표시 색상/스타일 변형 키 (상태 Enum variant() 산물 — UI 배지용) |
-| homepage | string | `https://example.com` | 홈페이지 URL |
-| mobile | string | `010-9070-5662` | 휴대폰 번호 |
-| phone | string | `02-805-4759` | 전화번호 |
-| zipcode | string | `93153` | 우편번호 |
-| address | string | `대구광역시 북구 백제고분로 720` | 기본 주소 |
-| address_detail | string | `40동 835호` | 상세 주소 |
-| signature | string | `Ipsam rem amet expedita est.` | 서명 |
-| bio | string | `Tenetur omnis et amet omnis veniam to…` | 자기소개 |
-| is_super | boolean | `false` | super 여부 |
+| homepage | null | `null` | 홈페이지 URL |
+| mobile | null | `null` | 휴대폰 번호 |
+| phone | null | `null` | 전화번호 |
+| zipcode | null | `null` | 우편번호 |
+| address | null | `null` | 기본 주소 |
+| address_detail | null | `null` | 상세 주소 |
+| signature | null | `null` | 서명 |
+| bio | null | `null` | 자기소개 |
+| is_super | boolean | `true` | super 여부 |
 | is_admin | boolean | `true` | 관리자 역할 보유 여부 (User::isAdmin() — 역할 관계 기반 파생) |
 | withdrawn_at | null | `null` | withdrawn 일시 |
-| last_login_at | string | `2026-07-05 19:15:16` | last login 일시 |
-| last_login_human | string | `1일 전` | 마지막 로그인 시각의 상대 표현 (diffForHumans() 산물, 사용자 시간대 기준) |
-| created_at | string | `2026-07-06 19:15:16` | 생성 일시 |
+| last_login_at | string | `2026-08-04 19:00:10` | last login 일시 |
+| last_login_human | string | `2시간 전` | 마지막 로그인 시각의 상대 표현 (diffForHumans() 산물, 사용자 시간대 기준) |
+| created_at | string | `2026-07-30 23:37:44` | 생성 일시 |
 | is_owner | boolean | `true` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
 | notify_post_complete | boolean | `false` | 게시글 작성 완료 알림 수신 설정 (게시판 모듈 주입) |
 | notify_post_reply | boolean | `false` | 내 게시글에 대한 답글 알림 수신 설정 (게시판 모듈 주입) |
@@ -150,36 +150,66 @@ HTTP/1.1 200
     "success": true,
     "message": "프로필 정보를 성공적으로 가져왔습니다.",
     "data": {
-        "uuid": "a234c2b1-cde8-437f-b28b-23323be2b98d",
-        "name": "API 문서 샘플 사용자",
-        "nickname": "song.hyunji",
-        "email": "apidoc-sample-user@example.com",
+        "uuid": "a26219fc-94a0-4f63-9404-04c2a6ac99e4",
+        "name": "최고관리자",
+        "nickname": "최고관리자",
+        "email": "heuristing@gmail.com",
         "avatar": null,
         "language": "ko",
         "timezone": "Asia/Seoul",
-        "country": "KR",
+        "country": null,
         "status": "active",
         "status_label": "활성",
         "status_variant": "success",
-        "homepage": "https://example.com",
-        "mobile": "010-9595-2897",
-        "phone": "02-637-5618",
-        "zipcode": "16505",
-        "address": "경기도 안양시 봉은사로 2918",
-        "address_detail": "48동 718호",
-        "signature": "Fugit consequuntur repellendus sed.",
-        "bio": "Ut magni et sunt ducimus error adipisci. Pariatur corporis voluptatem ratione quo non saepe. Illo atque praesentium possimus dolores qui est fugit. Sint fugiat numquam voluptates.",
-        "is_super": false,
+        "homepage": null,
+        "mobile": null,
+        "phone": null,
+        "zipcode": null,
+        "address": null,
+        "address_detail": null,
+        "signature": null,
+        "bio": null,
+        "is_super": true,
         "is_admin": true,
         "withdrawn_at": null,
-        "last_login_at": "2026-07-07 10:41:24",
-        "last_login_human": "1일 전",
-        "created_at": "2026-07-08 10:41:24",
+        "last_login_at": "2026-08-04 19:00:10",
+        "last_login_human": "2시간 전",
+        "created_at": "2026-07-30 23:37:44",
         "is_owner": true,
         "notify_post_complete": false,
         "notify_post_reply": false,
         "notify_comment": false,
         "notify_reply_comment": false,
+        "email_subscription": false,
+        "email_subscription_at": null,
+        "marketing_consent": false,
+        "marketing_consent_at": null,
+        "third_party_consent": false,
+        "third_party_consent_at": null,
+        "info_disclosure": false,
+        "info_disclosure_at": null,
+        "marketing_consent_enabled": true,
+        "marketing_consent_terms_slug": "marketing-terms",
+        "marketing_consent_terms_slug_set": true,
+        "third_party_consent_enabled": true,
+        "third_party_consent_terms_slug": null,
+        "third_party_consent_terms_slug_set": false,
+        "info_disclosure_enabled": true,
+        "info_disclosure_terms_slug": null,
+        "info_disclosure_terms_slug_set": false,
+        "email_subscription_enabled": true,
+        "email_subscription_terms_slug": null,
+        "email_subscription_terms_slug_set": false,
+        "channels": [
+            {
+                "key": "email_subscription",
+                "label": "광고성 이메일 수신",
+                "enabled": true,
+                "terms_slug": null,
+                "terms_slug_set": false
+            }
+        ],
+        "consent_histories": [],
         "ecommerce_mileage": {
             "enabled": false
         },
@@ -269,13 +299,17 @@ Content-Type: application/json
     "notify_post_complete": true,
     "notify_post_reply": true,
     "notify_comment": true,
-    "notify_reply_comment": true
+    "notify_reply_comment": true,
+    "email_subscription": true,
+    "marketing_consent": true,
+    "third_party_consent": true,
+    "info_disclosure": true
 }
 ```
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

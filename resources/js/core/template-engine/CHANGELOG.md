@@ -5,6 +5,18 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.57.0] - 2026-08-06
+
+### Added
+
+#### 버전 이력 목록 조회 상한 + '더 보기'
+
+- `useLayoutVersions.ts` — 버전 목록 조회에 `limit` 을 붙이고, 한 묶음(`VERSION_PAGE_SIZE` 100)이 가득 찼을 때만 '더 보기' 를 노출한다. 버전 행은 저장할 때마다 쌓이고 정리되지 않아, 상한이 없으면 오래 편집한 레이아웃 하나가 수백~수천 건을 한 응답에 담았다.
+- 더 보기는 이어붙이기가 아니라 **상한을 한 묶음씩 넓혀 재조회**한다. 서버가 최신순 상한 조회만 지원하므로 append 하면 경계에서 중복·누락이 생긴다.
+- 넓히기는 서버 상한(`VERSION_MAX_LIMIT` 500)에서 멈춘다. 클램프가 없으면 상한을 넘는 순간 목록 전체가 422 가 되어 **이미 보고 있던 이력까지 사라진다**. 상한에 도달하면 '더 보기' 를 감춘다.
+- 두 상수는 서버 `LayoutVersionListRequest` 의 `DEFAULT_LIMIT`/`MAX_LIMIT` 과 같아야 하며, 그 일치는 `tests/Unit/LayoutVersionLimitParityTest.php` 가 검사한다. 한쪽만 바꾸면 테스트가 깨진다.
+- `VersionHistoryModal.tsx` — '더 보기' 버튼(`g7le-version-history-load-more`) + 조회 중 비활성 처리.
+
 ## [engine-v1.56.4] - 2026-08-04
 
 ### Fixed

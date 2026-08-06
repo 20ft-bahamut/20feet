@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Language Packs 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -52,22 +52,22 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| id | integer | `16` | 기본 키 (내부 식별자) |
+| id | integer | `1` | 기본 키 (내부 식별자) |
 | identifier | string | `g7-core-en` | 언어팩 고유 식별자 ({vendor}-{scope}-{target?}-{locale}) |
 | vendor | string | `g7` | 언어팩 제작자 식별자 |
 | scope | string | `core` | 적용 대상 분류 |
-| target_identifier | string | `gnuboard7-hello_module` | 대상 확장 식별자 (scope=core일 때 null) |
+| target_identifier | string | `apidoc-sample-module` | 대상 확장 식별자 (scope=core일 때 null) |
 | locale | string | `en` | IETF BCP-47 locale 태그 |
 | locale_name | string | `EN` | 영문 언어명 |
 | locale_native_name | string | `English` | 원어 언어명 |
 | text_direction | string | `ltr` | 텍스트 방향 |
-| version | string | `7.0.1` | 언어팩 버전 |
+| version | string | `7.0.6` | 언어팩 버전 |
 | latest_version | string | `1.0.0` | 감지된 최신 배포 버전 |
 | target_version_constraint | null | `null` | 대상 확장 버전 제약 (semver) |
 | target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
-| name | string | `API 문서 샘플 언어팩` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
+| name | string | `G7 코어 일본어 언어팩` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
 | license | string | `MIT` | 라이선스 |
-| description | string | `문서 실측용 언어팩` | 언어팩 설명 (다국어) |
+| description | string | `G7 코어 일본어 언어팩 (번들)` | 언어팩 설명 (다국어) |
 | status | string | `active` | 언어팩 상태 |
 | is_protected | boolean | `true` | protected 여부 |
 | source_type | string | `built_in` | 설치 소스 유형 (zip/github/url/bundled/bundled_with_extension) |
@@ -75,15 +75,15 @@ _목록 응답: `data.data[]` 배열 항목의 필드._
 | source_url | string | `lang/en` | 설치 소스 URL 또는 경로 |
 | github_url | null | `null` | GitHub 저장소 URL (manifest 파생) |
 | github_changelog_url | null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
-| bundled_identifier | string | `g7-module-gnuboard7-hello_module-ja` | 대응하는 번들 확장 식별자 (번들 원본 매칭용) |
-| install_blocked_reason | string | `target_not_installed` | 설치가 차단된 사유 (차단 없으면 null) |
+| bundled_identifier | string | `g7-core-ja` | 대응하는 번들 확장 식별자 (번들 원본 매칭용) |
+| install_blocked_reason | string | `core_locale_missing` | 설치가 차단된 사유 (차단 없으면 null) |
 | files_missing | boolean | `false` | 드리프트 여부 — active 로 기록됐으나 설치본 파일이 부재해 런타임에 조용히 ko 로 폴백하는 상태이면 true |
 | bundled_source_available | boolean | `false` | 번들 소스(`lang-packs/_bundled/{identifier}`)가 실재해 재설치로 복구 가능하면 true. 설치 경로(source_type)와 무관하게 소스 실재 여부로 판정 |
-| target_name | string | `게시판` | 대상 확장의 표시 이름 (scope+target_identifier 로 해석) |
-| installed_at | string | `2026-07-03 19:20:23` | installed 일시 |
-| activated_at | string | `2026-07-03 19:20:23` | activated 일시 |
-| created_at | string | `2026-07-06 19:20:23` | 생성 일시 |
-| updated_at | string | `2026-07-06 19:20:23` | 최종 수정 일시 |
+| target_name | string | `Hello 모듈` | 대상 확장의 표시 이름 (scope+target_identifier 로 해석) |
+| installed_at | string | `2026-07-28 22:55:00` | installed 일시 |
+| activated_at | string | `2026-08-01 11:36:31` | activated 일시 |
+| created_at | string | `2026-07-31 22:55:00` | 생성 일시 |
+| updated_at | string | `2026-07-31 22:55:00` | 최종 수정 일시 |
 | has_update | boolean | `false` | update 여부 |
 | abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
@@ -109,7 +109,7 @@ HTTP/1.1 200
                 "locale_name": "EN",
                 "locale_native_name": "English",
                 "text_direction": "ltr",
-                "version": "7.0.1",
+                "version": "7.0.6",
                 "latest_version": null,
                 "target_version_constraint": null,
                 "target_version_mismatch": false,
@@ -140,56 +140,54 @@ HTTP/1.1 200
                 }
             },
             {
-                "id": 1,
-                "identifier": "apidoc-sample-lang",
-                "vendor": "apidoc",
+                "id": null,
+                "identifier": "g7-core-ja",
+                "vendor": "sirsoft",
                 "scope": "core",
                 "target_identifier": null,
-                "locale": "fr",
-                "locale_name": "French",
-                "locale_native_name": "Français",
+                "locale": "ja",
+                "locale_name": "Japanese",
+                "locale_native_name": "日本語",
                 "text_direction": "ltr",
-                "version": "1.0.0",
-                "latest_version": "1.0.0",
+                "version": "1.0.9",
+                "latest_version": null,
                 "target_version_constraint": null,
                 "target_version_mismatch": false,
-                "name": "API 문서 샘플 언어팩",
+                "name": "G7 코어 일본어 언어팩",
                 "license": "MIT",
-                "description": "문서 실측용 언어팩",
-                "status": "active",
+                "description": "G7 코어 일본어 언어팩 (번들)",
+                "status": "uninstalled",
                 "is_protected": false,
                 "source_type": "bundled",
                 "origin": "bundled",
-                "source_url": null,
+                "source_url": "g7-core-ja",
                 "github_url": null,
                 "github_changelog_url": null,
-                "bundled_identifier": null,
+                "bundled_identifier": "g7-core-ja",
                 "install_blocked_reason": null,
                 "files_missing": false,
-                "bundled_source_available": false,
+                "bundled_source_available": true,
                 "target_name": null,
-                "installed_at": "2026-07-05 10:41:24",
-                "activated_at": "2026-07-05 10:41:24",
-                "created_at": "2026-07-08 10:41:24",
-                "updated_at": "2026-07-08 10:41:24",
+                "installed_at": null,
+                "activated_at": null,
+                "created_at": null,
+                "updated_at": null,
                 "has_update": false,
                 "abilities": {
-                    "can_activate": true,
-                    "can_deactivate": true,
-                    "can_uninstall": true
+                    "can_install": true
                 }
             },
             "... (총 25건 중 2건 표시)"
         ],
         "meta": {
-            "total": 43,
+            "total": 57,
             "active": 15,
-            "installed": 0,
+            "installed": 1,
             "inactive": 0,
             "error": 0,
-            "uninstalled": 10,
+            "uninstalled": 9,
             "current_page": 1,
-            "last_page": 2,
+            "last_page": 3,
             "per_page": 25
         },
         "abilities": {
@@ -250,7 +248,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -290,7 +288,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -338,7 +336,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -393,7 +391,7 @@ Content-Disposition: form-data; name="auto_activate"
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -442,7 +440,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -475,6 +473,8 @@ Content-Type: application/json
 | checksum | body | string | 아니오 | — | 무결성 검증 체크섬 (SHA-256) |
 | auto_activate | body | boolean | 아니오 | — | 설치 후 자동 활성화 여부. 외부 소스(파일·URL·GitHub)에서 설치할 때 이 값을 참으로 보내려면 `core.language_packs.manage` 권한이 함께 필요하며, 없으면 이 항목만 422 로 거부됩니다 — 항목을 빼면 설치는 그대로 진행되고 상태는 `installed` 로 남습니다. 설치(install)와 활성화(manage)를 별도 권한으로 두는 정책을 따르기 위함입니다 |
 
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.language_packs.install_from_url_validation_rules`).
+
 **요청 예시**
 
 ```http
@@ -493,7 +493,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -543,7 +543,7 @@ Content-Type: application/octet-stream
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -583,7 +583,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -617,7 +617,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-DELETE /api/admin/language-packs/1?cascade=1 HTTP/1.1
+DELETE /api/admin/language-packs/{id}?cascade=1 HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -625,7 +625,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -660,7 +660,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/language-packs/1 HTTP/1.1
+GET /api/admin/language-packs/{id} HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -668,117 +668,11 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-_단건 응답: `data` 객체의 필드._
-
-| 필드 | 타입 | 실측 예시값 | 용도/설명 |
-| --- | --- | --- | --- |
-| id | integer | `1` | 기본 키 (내부 식별자) |
-| identifier | string | `apidoc-sample-lang` | 언어팩 고유 식별자 ({vendor}-{scope}-{target?}-{locale}) |
-| vendor | string | `apidoc` | 언어팩 제작자 식별자 |
-| scope | string | `core` | 적용 대상 분류 |
-| target_identifier | null | `null` | 대상 확장 식별자 (scope=core일 때 null) |
-| locale | string | `fr` | IETF BCP-47 locale 태그 |
-| locale_name | string | `French` | 영문 언어명 |
-| locale_native_name | string | `Français` | 원어 언어명 |
-| text_direction | string | `ltr` | 텍스트 방향 |
-| version | string | `1.0.0` | 언어팩 버전 |
-| latest_version | string | `1.0.0` | 감지된 최신 배포 버전 |
-| target_version_constraint | null | `null` | 대상 확장 버전 제약 (semver) |
-| target_version_mismatch | boolean | `false` | 대상 버전 불일치 경고 플래그 |
-| name | string | `API 문서 샘플 언어팩` | 대상의 이름/명칭 (다국어 필드는 로케일별 값 객체) |
-| license | string | `MIT` | 라이선스 |
-| description | string | `문서 실측용 언어팩` | 설명 (다국어 필드는 로케일별 값 객체) |
-| status | string | `active` | 상태 값 (도메인별 상태 집합 — 사람이 읽는 라벨은 status_label, UI 변형은 status_variant 참조) |
-| is_protected | boolean | `false` | protected 여부 |
-| source_type | string | `bundled` | 설치 소스 유형 (zip/github/url/bundled/bundled_with_extension) |
-| origin | string | `bundled` | 출처 (설치/등록 원천 구분 값) |
-| source_url | null | `null` | source URL |
-| github_url | null | `null` | GitHub 저장소 URL (manifest 파생) |
-| github_changelog_url | null | `null` | GitHub 변경 이력(CHANGELOG) URL (manifest 파생) |
-| bundled_identifier | null | `null` | 대응하는 번들 확장 식별자 (번들 원본 매칭용) |
-| install_blocked_reason | null | `null` | 설치가 차단된 사유 (차단 없으면 null) |
-| target_name | null | `null` | 대상 확장의 표시 이름 (scope+target_identifier 로 해석) |
-| installed_at | string | `2026-07-05 10:41:24` | installed 일시 |
-| activated_at | string | `2026-07-05 10:41:24` | activated 일시 |
-| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
-| updated_at | string | `2026-07-08 10:41:24` | 최종 수정 일시 |
-| has_update | boolean | `false` | update 여부 |
-| abilities | object | `{"can_activate":true,"can_deactivate":true,"can_uninstall…` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
-| manifest | object | `{"name":{"en":"API Doc Sample Pack","ko":"API 문서 샘플 언어팩"}…` | language-pack.json 전체 스냅샷 |
-| validation_summary | object | `{"target_version_mismatch":false,"depends_on_core_locale"…` | 검증 결과 요약 객체 (통과/실패 건수 등) |
-| source_meta | object | `{"type":"bundled","url":null,"installed_by":6,"latest_ver…` | 원천 메타데이터 객체 (출처·경로·해석 정보) |
-| changelog_entries | array | `[]` | 변경 이력 항목 목록 (버전별 변경 내용) |
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-```http
-HTTP/1.1 200
-```
-
-```json
-{
-    "success": true,
-    "message": "언어팩 목록을 조회했습니다.",
-    "data": {
-        "id": 1,
-        "identifier": "apidoc-sample-lang",
-        "vendor": "apidoc",
-        "scope": "core",
-        "target_identifier": null,
-        "locale": "fr",
-        "locale_name": "French",
-        "locale_native_name": "Français",
-        "text_direction": "ltr",
-        "version": "1.0.0",
-        "latest_version": "1.0.0",
-        "target_version_constraint": null,
-        "target_version_mismatch": false,
-        "name": "API 문서 샘플 언어팩",
-        "license": "MIT",
-        "description": "문서 실측용 언어팩",
-        "status": "active",
-        "is_protected": false,
-        "source_type": "bundled",
-        "origin": "bundled",
-        "source_url": null,
-        "github_url": null,
-        "github_changelog_url": null,
-        "bundled_identifier": null,
-        "install_blocked_reason": null,
-        "target_name": null,
-        "installed_at": "2026-07-05 10:41:24",
-        "activated_at": "2026-07-05 10:41:24",
-        "created_at": "2026-07-08 10:41:24",
-        "updated_at": "2026-07-08 10:41:24",
-        "has_update": false,
-        "abilities": {
-            "can_activate": true,
-            "can_deactivate": true,
-            "can_uninstall": true
-        },
-        "manifest": {
-            "name": {
-                "en": "API Doc Sample Pack",
-                "ko": "API 문서 샘플 언어팩"
-            },
-            "locale": "fr",
-            "version": "1.0.0"
-        },
-        "validation_summary": {
-            "target_version_mismatch": false,
-            "depends_on_core_locale": null
-        },
-        "source_meta": {
-            "type": "bundled",
-            "url": null,
-            "installed_by": 6,
-            "latest_version": "1.0.0",
-            "directory_path": "lang-packs/apidoc-sample-lang"
-        },
-        "changelog_entries": []
-    }
-}
-```
+<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -808,7 +702,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-POST /api/admin/language-packs/1/activate HTTP/1.1
+POST /api/admin/language-packs/{id}/activate HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -816,7 +710,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -850,7 +744,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-GET /api/admin/language-packs/1/changelog HTTP/1.1
+GET /api/admin/language-packs/{id}/changelog HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -858,33 +752,11 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-_단건 응답: `data` 객체의 필드._
-
-| 필드 | 타입 | 실측 예시값 | 용도/설명 |
-| --- | --- | --- | --- |
-| identifier | string | `apidoc-sample-lang` | 언어팩 고유 식별자 ({vendor}-{scope}-{target?}-{locale}) |
-| entries | array | `[]` | 항목 목록 (각 원소는 대상 도메인 레코드) |
-| changelog | string | `` | 변경 이력 텍스트 (원격/파일 CHANGELOG 본문) |
-| has_changelog | boolean | `false` | changelog 여부 |
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
-```http
-HTTP/1.1 200
-```
-
-```json
-{
-    "success": true,
-    "message": "언어팩 목록을 조회했습니다.",
-    "data": {
-        "identifier": "apidoc-sample-lang",
-        "entries": [],
-        "changelog": "",
-        "has_changelog": false
-    }
-}
-```
+<!-- 실측 제외: unresolved-path-param — 응답 예시는 사람이 작성하세요. -->
 
 **에러 응답**
 
@@ -914,7 +786,7 @@ HTTP/1.1 200
 **요청 예시**
 
 ```http
-POST /api/admin/language-packs/1/deactivate HTTP/1.1
+POST /api/admin/language-packs/{id}/deactivate HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -922,7 +794,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -956,7 +828,7 @@ Authorization: Bearer {YOUR_TOKEN}
 **요청 예시**
 
 ```http
-POST /api/admin/language-packs/1/update HTTP/1.1
+POST /api/admin/language-packs/{id}/update HTTP/1.1
 Host: api.example.com
 Accept: application/json
 Authorization: Bearer {YOUR_TOKEN}
@@ -964,7 +836,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

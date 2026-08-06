@@ -210,6 +210,9 @@ return [
         'shipping_policy_id' => [
             'integer' => '配送ポリシーIDは数字である必要があります。',
         ],
+        'with_options' => [
+            'boolean' => 'オプション含有の有無は true または false である必要があります。',
+        ],
     ],
     'category_required' => 'カテゴリを選択してください。',
     'category_min' => '最小1個以上のカテゴリを選択してください。',
@@ -1771,5 +1774,15 @@ return [
         'currency_not_registered' => '登録されていない通貨(:currency)です。言語/通貨設定に先に追加してください。',
         'earn_rate_required_when_enabled' => 'マイレージを使用するには、基本積立率は0より大きい必要があります。',
         'expires_at_invalid' => '有効期限は正しい日付である必要があります。',
+    ],
+    'options_list' => [
+        'product_ids' => [
+            'required' => '閲覧する商品を選択してください。',
+            'array' => '商品 ID リストは配列である必要があります。',
+            'min' => '閲覧する商品を1つ以上指定してください。',
+            'max' => '一度に閲覧できる商品は最大 :max 個です。',
+            'integer' => '商品 ID は数字である必要があります。',
+            'item_min' => '商品 ID は1以上である必要があります。',
+        ],
     ],
 ];

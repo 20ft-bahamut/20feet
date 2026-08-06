@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Notification Templates 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -28,7 +28,7 @@
 | 이름 | 위치 | 타입 | 필수 | 허용값 | 용도 |
 | --- | --- | --- | --- | --- | --- |
 | definition_id | body | integer | 예 | — | definition 식별자 |
-| subject | body | array | 아니오 | — | 다국어 제목. 컬럼이 nullable 이므로 미전송·`null` 이 허용된다(제목 개념이 없는 채널 대응). 전송하는 경우 로케일별 문자열 배열이어야 하며 각 값은 500자 이하 |
+| subject | body | array | 예 | — | 다국어 제목. 컬럼이 nullable 이므로 미전송·`null` 이 허용된다(제목 개념이 없는 채널 대응). 전송하는 경우 로케일별 문자열 배열이어야 하며 각 값은 500자 이하 |
 | body | body | array | 예 | — | 본문 |
 | locale | body | string | 아니오 | max 10 | 로케일 코드 (표시 언어/지역) |
 
@@ -55,7 +55,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: side-effectful-write — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -119,7 +119,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -162,11 +162,68 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+_단건 응답: `data` 객체의 필드._
+
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| id | integer | `1` | 기본 키 (내부 식별자) |
+| definition_id | integer | `1` | definition 식별자 (연관 리소스 참조) |
+| channel | string | `mail` | 채널: mail, database, fcm |
+| subject | object | `{"ko":"[{board_name}] 게시글에 새 댓글이 등록되었습니다","en":"[{board_n…` | 다국어 제목 ({"ko": "...", "en": "..."}) |
+| body | object | `{"ko":"<h1>{name}님, 안녕하세요.<\/h1><p><strong>{board_name}<\…` | 다국어 본문 ({"ko": "...", "en": "..."}) |
+| click_url | null | `null` | click URL |
+| recipients | array | `[{"type":"related_user","relation":"post_author","exclude…` | 수신자 규칙 JSON ([{type, value, relation, exclude_trigger_user}]) |
+| is_active | boolean | `true` | active 여부 |
+| is_default | boolean | `true` | default 여부 |
+| user_overrides | null | `null` | 사용자가 수정한 필드명 목록 |
+| updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
+| created_at | string | `2026-07-30 18:45:11` | 생성 일시 |
+| updated_at | string | `2026-07-30 18:45:11` | 최종 수정 일시 |
+| abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
 
-<!-- 실측 제외: http-404 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "알림 템플릿이 기본값으로 복원되었습니다.",
+    "data": {
+        "id": 1,
+        "definition_id": 1,
+        "channel": "mail",
+        "subject": {
+            "ko": "[{board_name}] 게시글에 새 댓글이 등록되었습니다",
+            "en": "[{board_name}] New comment on your post"
+        },
+        "body": {
+            "ko": "<h1>{name}님, 안녕하세요.</h1><p><strong>{board_name}</strong> 게시판의 게시글에 <strong>{comment_author}</strong>님이 댓글을 남겼습니다.</p><blockquote style=\"border-left: 3px solid #cbd5e0; padding-left: 12px; color: #718096;\">{comment_content}</blockquote><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 24px 0;\"><tr><td align=\"center\"><a href=\"{post_url}\" style=\"display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;\">게시글 보기</a></td></tr></table><p>감사합니다,<br><a href=\"{site_url}\">{app_name}</a></p>",
+            "en": "<h1>Hello, {name}.</h1><p><strong>{comment_author}</strong> commented on your post in <strong>{board_name}</strong>.</p><blockquote style=\"border-left: 3px solid #cbd5e0; padding-left: 12px; color: #718096;\">{comment_content}</blockquote><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 24px 0;\"><tr><td align=\"center\"><a href=\"{post_url}\" style=\"display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;\">View Post</a></td></tr></table><p>Thank you,<br><a href=\"{site_url}\">{app_name}</a></p>"
+        },
+        "click_url": null,
+        "recipients": [
+            {
+                "type": "related_user",
+                "relation": "post_author",
+                "exclude_trigger_user": true
+            }
+        ],
+        "is_active": true,
+        "is_default": true,
+        "user_overrides": null,
+        "updated_by": null,
+        "created_at": "2026-07-30 18:45:11",
+        "updated_at": "2026-07-30 18:45:11",
+        "abilities": {
+            "can_update": true,
+            "can_delete": true
+        }
+    }
+}
+```
 
 **에러 응답**
 
@@ -211,16 +268,16 @@ _단건 응답: `data` 객체의 필드._
 | id | integer | `1` | 기본 키 (내부 식별자) |
 | definition_id | integer | `1` | definition 식별자 (연관 리소스 참조) |
 | channel | string | `mail` | 채널: mail, database, fcm |
-| subject | string | `API 문서 샘플 템플릿 제목` | 다국어 제목 ({"ko": "...", "en": "..."}) |
-| body | string | `안녕하세요 {{name}} 님, 문서 실측용 본문입니다.` | 다국어 본문 ({"ko": "...", "en": "..."}) |
-| click_url | string | `/admin/apidoc-sample` | click URL |
-| recipients | array | `[{"type":"role","value":"admin","display_name":"관리자"}]` | 수신자 규칙 JSON ([{type, value, relation, exclude_trigger_user}]) |
+| subject | object | `{"ko":"[{board_name}] 게시글에 새 댓글이 등록되었습니다","en":"[{board_n…` | 다국어 제목 ({"ko": "...", "en": "..."}) |
+| body | object | `{"ko":"<h1>{name}님, 안녕하세요.<\/h1><p><strong>{board_name}<\…` | 다국어 본문 ({"ko": "...", "en": "..."}) |
+| click_url | null | `null` | click URL |
+| recipients | array | `[{"type":"related_user","relation":"post_author","exclude…` | 수신자 규칙 JSON ([{type, value, relation, exclude_trigger_user}]) |
 | is_active | boolean | `false` | active 여부 |
-| is_default | boolean | `false` | default 여부 |
+| is_default | boolean | `true` | default 여부 |
 | user_overrides | array | `["is_active"]` | 사용자가 수정한 필드명 목록 |
-| updated_by | string | `a234c2b1-cde8-437f-b28b-23323be2b98d` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
-| created_at | string | `2026-07-08 10:41:24` | 생성 일시 |
-| updated_at | string | `2026-07-08 12:14:43` | 최종 수정 일시 |
+| updated_by | null | `null` | 최종 수정한 사용자 정보 (uuid/name — updated_by 관계 파생, 없으면 null) |
+| created_at | string | `2026-07-30 18:45:11` | 생성 일시 |
+| updated_at | string | `2026-08-04 21:53:43` | 최종 수정 일시 |
 | abilities | object | `{"can_update":true,"can_delete":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -237,24 +294,30 @@ HTTP/1.1 200
         "id": 1,
         "definition_id": 1,
         "channel": "mail",
-        "subject": "API 문서 샘플 템플릿 제목",
-        "body": "안녕하세요 {{name}} 님, 문서 실측용 본문입니다.",
-        "click_url": "/admin/apidoc-sample",
+        "subject": {
+            "ko": "[{board_name}] 게시글에 새 댓글이 등록되었습니다",
+            "en": "[{board_name}] New comment on your post"
+        },
+        "body": {
+            "ko": "<h1>{name}님, 안녕하세요.</h1><p><strong>{board_name}</strong> 게시판의 게시글에 <strong>{comment_author}</strong>님이 댓글을 남겼습니다.</p><blockquote style=\"border-left: 3px solid #cbd5e0; padding-left: 12px; color: #718096;\">{comment_content}</blockquote><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 24px 0;\"><tr><td align=\"center\"><a href=\"{post_url}\" style=\"display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;\">게시글 보기</a></td></tr></table><p>감사합니다,<br><a href=\"{site_url}\">{app_name}</a></p>",
+            "en": "<h1>Hello, {name}.</h1><p><strong>{comment_author}</strong> commented on your post in <strong>{board_name}</strong>.</p><blockquote style=\"border-left: 3px solid #cbd5e0; padding-left: 12px; color: #718096;\">{comment_content}</blockquote><table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin: 24px 0;\"><tr><td align=\"center\"><a href=\"{post_url}\" style=\"display: inline-block; padding: 12px 32px; background-color: #2d3748; color: #ffffff; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 14px;\">View Post</a></td></tr></table><p>Thank you,<br><a href=\"{site_url}\">{app_name}</a></p>"
+        },
+        "click_url": null,
         "recipients": [
             {
-                "type": "role",
-                "value": "admin",
-                "display_name": "관리자"
+                "type": "related_user",
+                "relation": "post_author",
+                "exclude_trigger_user": true
             }
         ],
         "is_active": false,
-        "is_default": false,
+        "is_default": true,
         "user_overrides": [
             "is_active"
         ],
-        "updated_by": "a234c2b1-cde8-437f-b28b-23323be2b98d",
-        "created_at": "2026-07-08 10:41:24",
-        "updated_at": "2026-07-08 12:14:43",
+        "updated_by": null,
+        "created_at": "2026-07-30 18:45:11",
+        "updated_at": "2026-08-04 21:53:43",
         "abilities": {
             "can_update": true,
             "can_delete": true

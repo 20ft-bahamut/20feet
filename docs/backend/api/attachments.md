@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Attachments 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -34,9 +34,7 @@
 | source_type | body | string | 아니오 | — | 첨부 생성 출처 구분 (AttachmentSourceType Enum — core: 코어 시스템, module: 모듈, plugin: 플러그인). 미지정 시 core로 기본 설정 |
 | source_identifier | body | string | 아니오 | max 255 | 출처 식별자 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_validation_rules`).
->
-> 업로드 가능한 확장자는 환경설정의 허용 형식 목록을 따르며, 확장은 `core.attachment.allowed_extensions` 필터로 목록을 조정할 수 있습니다 (허용 목록이 비어 있으면 확장자를 제한하지 않습니다).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_validation_rules`, `core.attachment.allowed_extensions`).
 
 **요청 예시**
 
@@ -77,7 +75,7 @@ example-key
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -113,9 +111,7 @@ example-key
 | source_type | body | string | 아니오 | — | 첨부 생성 출처 구분 (AttachmentSourceType Enum — core: 코어 시스템, module: 모듈, plugin: 플러그인). 미지정 시 core로 기본 설정 |
 | source_identifier | body | string | 아니오 | max 255 | 출처 식별자 |
 
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_batch_validation_rules`).
->
-> 업로드 가능한 확장자는 환경설정의 허용 형식 목록을 따르며, 확장은 `core.attachment.allowed_extensions` 필터로 목록을 조정할 수 있습니다 (허용 목록이 비어 있으면 확장자를 제한하지 않습니다).
+> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.attachment.upload_batch_validation_rules`, `core.attachment.allowed_extensions`).
 
 **요청 예시**
 
@@ -140,7 +136,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -191,7 +187,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -233,7 +229,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Notifications 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -47,7 +47,18 @@ Authorization: Bearer {YOUR_TOKEN}
 
 _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| number | integer | `23` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
+| id | string | `518b9c94-5853-4b68-8193-83af1851bbc6` | 기본 키 (내부 식별자) |
+| type | string | `inquiry_received` | <!-- TODO: 설명 --> |
+| type_label | string | `상품 문의 접수` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
+| subject | string | `새로운 상품 문의가 접수되었습니다` | <!-- TODO: 설명 --> |
+| body | string | `옥혜진님이 "면 손수건 3매입 #1" 상품에 문의를 남겼습니다.` | <!-- TODO: 설명 --> |
+| url | string | `https://g7_2.dev/admin/ecommerce/prod…` | <!-- TODO: 설명 --> |
+| data | object | `{"type":"inquiry_received","subject":"새로운 상품 문의가 접수되었습니다"…` | <!-- TODO: 설명 --> |
+| read_at | string | `2026-07-31 22:06:53` | read 일시 |
+| created_at | string | `2026-07-31 21:41:58` | 생성 일시 |
 
 **응답 예시**
 
@@ -60,14 +71,68 @@ HTTP/1.1 200
     "success": true,
     "message": "알림 목록을 조회했습니다.",
     "data": {
-        "data": [],
+        "data": [
+            {
+                "number": 23,
+                "id": "518b9c94-5853-4b68-8193-83af1851bbc6",
+                "type": "inquiry_received",
+                "type_label": "상품 문의 접수",
+                "subject": "새로운 상품 문의가 접수되었습니다",
+                "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                "url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                "data": {
+                    "type": "inquiry_received",
+                    "subject": "새로운 상품 문의가 접수되었습니다",
+                    "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                    "click_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                    "data": {
+                        "name": "최고관리자",
+                        "app_name": "그누보드7",
+                        "product_name": "면 손수건 3매입 #1",
+                        "customer_name": "옥혜진",
+                        "inquiry_content": "타인 계정 문의 3 입니다. 스코프 격리 검증용.",
+                        "inquiry_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                        "site_url": "https://api.example.com"
+                    }
+                },
+                "read_at": null,
+                "created_at": "2026-07-31 21:41:58"
+            },
+            {
+                "number": 22,
+                "id": "75da60b8-3ec9-457f-ad8c-b52652f7adcf",
+                "type": "inquiry_received",
+                "type_label": "상품 문의 접수",
+                "subject": "새로운 상품 문의가 접수되었습니다",
+                "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                "url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                "data": {
+                    "type": "inquiry_received",
+                    "subject": "새로운 상품 문의가 접수되었습니다",
+                    "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                    "click_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                    "data": {
+                        "name": "최고관리자",
+                        "app_name": "그누보드7",
+                        "product_name": "면 손수건 3매입 #1",
+                        "customer_name": "옥혜진",
+                        "inquiry_content": "타인 계정 문의 2 입니다. 스코프 격리 검증용.",
+                        "inquiry_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                        "site_url": "https://api.example.com"
+                    }
+                },
+                "read_at": null,
+                "created_at": "2026-07-31 21:41:55"
+            },
+            "... (총 23건 중 2건 표시)"
+        ],
         "pagination": {
             "current_page": 1,
             "last_page": 1,
             "per_page": 25,
-            "total": 0,
-            "from": null,
-            "to": null,
+            "total": 23,
+            "from": 1,
+            "to": 23,
             "has_more_pages": false
         }
     }
@@ -114,7 +179,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| deleted_count | integer | `0` | deleted 개수 (집계) |
+| deleted_count | integer | `23` | deleted 개수 (집계) |
 
 **응답 예시**
 
@@ -127,7 +192,7 @@ HTTP/1.1 200
     "success": true,
     "message": "모든 알림이 삭제되었습니다.",
     "data": {
-        "deleted_count": 0
+        "deleted_count": 23
     }
 }
 ```
@@ -171,7 +236,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| marked_count | integer | `0` | marked 개수 (집계) |
+| marked_count | integer | `7` | marked 개수 (집계) |
 
 **응답 예시**
 
@@ -184,7 +249,7 @@ HTTP/1.1 200
     "success": true,
     "message": "모든 알림을 읽음 처리했습니다.",
     "data": {
-        "marked_count": 0
+        "marked_count": 7
     }
 }
 ```
@@ -235,7 +300,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -281,7 +346,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| unread_count | integer | `0` | unread 개수 (집계) |
+| unread_count | integer | `7` | unread 개수 (집계) |
 
 **응답 예시**
 
@@ -294,7 +359,7 @@ HTTP/1.1 200
     "success": true,
     "message": "미읽음 알림 수를 조회했습니다.",
     "data": {
-        "unread_count": 0
+        "unread_count": 7
     }
 }
 ```
@@ -336,7 +401,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -380,7 +445,7 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -431,7 +496,18 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 _목록 응답: `data.data[]` 배열 항목의 필드 + `data.pagination`._
 
-<!-- 실측 응답에 필드 없음(빈 목록 등) — 데이터가 있는 상태로 재실측하거나 사람이 작성. -->
+| 필드 | 타입 | 실측 예시값 | 용도/설명 |
+| --- | --- | --- | --- |
+| number | integer | `23` | 목록에서의 순번 (페이지네이션 반영 행 번호 — HasRowNumber 파생) |
+| id | string | `518b9c94-5853-4b68-8193-83af1851bbc6` | 기본 키 (내부 식별자) |
+| type | string | `inquiry_received` | <!-- TODO: 설명 --> |
+| type_label | string | `상품 문의 접수` | `type` 값의 사람이 읽는 라벨 (현지화/Enum 파생) |
+| subject | string | `새로운 상품 문의가 접수되었습니다` | <!-- TODO: 설명 --> |
+| body | string | `옥혜진님이 "면 손수건 3매입 #1" 상품에 문의를 남겼습니다.` | <!-- TODO: 설명 --> |
+| url | string | `https://g7_2.dev/admin/ecommerce/prod…` | <!-- TODO: 설명 --> |
+| data | object | `{"type":"inquiry_received","subject":"새로운 상품 문의가 접수되었습니다"…` | <!-- TODO: 설명 --> |
+| read_at | string | `2026-07-31 22:06:53` | read 일시 |
+| created_at | string | `2026-07-31 21:41:58` | 생성 일시 |
 
 **응답 예시**
 
@@ -444,14 +520,68 @@ HTTP/1.1 200
     "success": true,
     "message": "알림 목록을 조회했습니다.",
     "data": {
-        "data": [],
+        "data": [
+            {
+                "number": 23,
+                "id": "518b9c94-5853-4b68-8193-83af1851bbc6",
+                "type": "inquiry_received",
+                "type_label": "상품 문의 접수",
+                "subject": "새로운 상품 문의가 접수되었습니다",
+                "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                "url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                "data": {
+                    "type": "inquiry_received",
+                    "subject": "새로운 상품 문의가 접수되었습니다",
+                    "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                    "click_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                    "data": {
+                        "name": "최고관리자",
+                        "app_name": "그누보드7",
+                        "product_name": "면 손수건 3매입 #1",
+                        "customer_name": "옥혜진",
+                        "inquiry_content": "타인 계정 문의 3 입니다. 스코프 격리 검증용.",
+                        "inquiry_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                        "site_url": "https://api.example.com"
+                    }
+                },
+                "read_at": null,
+                "created_at": "2026-07-31 21:41:58"
+            },
+            {
+                "number": 22,
+                "id": "75da60b8-3ec9-457f-ad8c-b52652f7adcf",
+                "type": "inquiry_received",
+                "type_label": "상품 문의 접수",
+                "subject": "새로운 상품 문의가 접수되었습니다",
+                "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                "url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                "data": {
+                    "type": "inquiry_received",
+                    "subject": "새로운 상품 문의가 접수되었습니다",
+                    "body": "옥혜진님이 \"면 손수건 3매입 #1\" 상품에 문의를 남겼습니다.",
+                    "click_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                    "data": {
+                        "name": "최고관리자",
+                        "app_name": "그누보드7",
+                        "product_name": "면 손수건 3매입 #1",
+                        "customer_name": "옥혜진",
+                        "inquiry_content": "타인 계정 문의 2 입니다. 스코프 격리 검증용.",
+                        "inquiry_url": "https://api.example.com/admin/ecommerce/product-inquiries",
+                        "site_url": "https://api.example.com"
+                    }
+                },
+                "read_at": null,
+                "created_at": "2026-07-31 21:41:55"
+            },
+            "... (총 23건 중 2건 표시)"
+        ],
         "pagination": {
             "current_page": 1,
             "last_page": 1,
             "per_page": 25,
-            "total": 0,
-            "from": null,
-            "to": null,
+            "total": 23,
+            "from": 1,
+            "to": 23,
             "has_more_pages": false
         }
     }
@@ -497,7 +627,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| deleted_count | integer | `0` | deleted 개수 (집계) |
+| deleted_count | integer | `23` | deleted 개수 (집계) |
 
 **응답 예시**
 
@@ -510,7 +640,7 @@ HTTP/1.1 200
     "success": true,
     "message": "모든 알림이 삭제되었습니다.",
     "data": {
-        "deleted_count": 0
+        "deleted_count": 23
     }
 }
 ```
@@ -553,7 +683,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| marked_count | integer | `0` | marked 개수 (집계) |
+| marked_count | integer | `7` | marked 개수 (집계) |
 
 **응답 예시**
 
@@ -566,7 +696,7 @@ HTTP/1.1 200
     "success": true,
     "message": "모든 알림을 읽음 처리했습니다.",
     "data": {
-        "marked_count": 0
+        "marked_count": 7
     }
 }
 ```
@@ -616,7 +746,7 @@ Content-Type: application/json
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: http-422 — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -661,7 +791,7 @@ _단건 응답: `data` 객체의 필드._
 
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
-| unread_count | integer | `0` | unread 개수 (집계) |
+| unread_count | integer | `7` | unread 개수 (집계) |
 
 **응답 예시**
 
@@ -674,7 +804,7 @@ HTTP/1.1 200
     "success": true,
     "message": "미읽음 알림 수를 조회했습니다.",
     "data": {
-        "unread_count": 0
+        "unread_count": 7
     }
 }
 ```
@@ -715,7 +845,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 
@@ -758,7 +888,7 @@ Authorization: Bearer {YOUR_TOKEN}   (optional.sanctum: 비회원은 헤더 생�
 
 **응답 필드** (`data` 내부)
 
-<!-- 실측 제외: write-method — 응답 필드는 사람이 작성하세요. -->
+<!-- 실측 제외: unresolved-path-param — 응답 필드는 사람이 작성하세요. -->
 
 **응답 예시**
 

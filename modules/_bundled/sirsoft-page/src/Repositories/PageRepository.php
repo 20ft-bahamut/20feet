@@ -55,9 +55,15 @@ class PageRepository implements PageRepositoryInterface
 
         // 지연 조인: 본문 content(longText)는 목록에 쓰이지 않는데도 OFFSET 이 훑는
         // 모든 행에서 함께 읽힌다. inner 는 id 만 훑고 본문은 이번 페이지에서만 읽는다.
+        // 목록이 실제로 쓰는 컬럼만 읽는다. 본문(`content`)은 longText 인데 목록 표현
+        // (`PageResource::toListArray`)이 출력하지 않으므로, 이번 페이지 행에서도 읽을 이유가 없다.
+        // 응답 형태는 변하지 않고 DB/메모리 비용만 줄어든다.
         return $this->paginateWithDeferredJoin(
             query: $query,
-            columns: ['*'],
+            columns: [
+                'id', 'slug', 'title', 'published', 'published_at', 'current_version',
+                'created_by', 'updated_by', 'created_at', 'updated_at',
+            ],
             sort: $this->resolveListSortSpec($filters),
             perPage: $perPage,
             relations: ['creator', 'updater'],

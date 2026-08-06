@@ -53,7 +53,13 @@ trait PaginatesWithDeferredJoin
      * @param  int  $perPage  페이지당 건수
      * @param  int|null  $page  현재 페이지 (null = 요청에서 해석)
      * @param  array<int, string>  $relations  outer 전용 eager load 관계
-     * @param  array<int, string>  $withCount  outer 전용 관계 카운트
+     * @param  array<int|string, string|Closure>  $withCount  outer 전용 관계 카운트. `withCount()` 로
+     *                                                        그대로 forward 되므로 Laravel 의 두 형태를
+     *                                                        모두 받는다 — 목록 형태(`['options']`) 와
+     *                                                        제약 클로저를 붙인 연관 형태
+     *                                                        (`['options as active_count' => fn ($q) => ...]`).
+     *                                                        별칭 없이 같은 관계를 두 번 세면 기본 별칭이
+     *                                                        충돌해 뒤엣것이 앞엣것을 덮으므로 `as` 로 구분한다
      * @param  string  $keyName  키 컬럼명 (기본 id)
      * @param  int|null  $total  전체 건수 (null = COUNT 수행, 값 지정 시 캐시 total 사용)
      * @param  bool  $simple  true = COUNT 없이 다음 페이지 유무만 판정
@@ -134,7 +140,7 @@ trait PaginatesWithDeferredJoin
      * @param  array<int, array{column: string, direction: string}>  $sort  정렬 스펙
      * @param  array<int, mixed>  $ids  이번 페이지의 키 값 목록
      * @param  array<int, string>  $relations  eager load 관계
-     * @param  array<int, string>  $withCount  관계 카운트
+     * @param  array<int|string, string|Closure>  $withCount  관계 카운트 (목록/연관 두 형태 모두 허용)
      * @param  string  $keyName  키 컬럼명
      * @param  bool  $preserveIdOrder  ID 순서 그대로 복원 여부
      * @param  Closure|null  $outerUsing  outer 전용 조인/집계

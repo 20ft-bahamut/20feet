@@ -832,6 +832,43 @@ public function getAll(): Collection
 }
 ```
 
+### 목록의 eager load 는 목록이 직렬화하는 관계만
+
+eager load 는 N+1 을 막지만, **목록에 필요 없는 관계까지 로드하면** 이번에는 페이로드가 커진다. 한 페이지를 여는 것만으로 그 페이지 전 행의 하위 컬렉션이 통째로 메모리에 올라오고 응답에 실린다.
+
+```php
+// ❌ Resource 는 whenLoaded 로 방어하는데 Repository 가 목록에서 무조건 로드
+//    → 가드가 항상 참이 되어 무력화된다
+$listRelations = ['categories', 'images', 'brand', 'options'];
+
+// ✅ 목록이 실제로 직렬화하는 관계만. 개수·합계는 집계로
+$listRelations = ['categories', 'images', 'brand'];
+// withCount: ['options as options_count'], outerUsing: fn ($q) => $q->withSum(...)
+```
+
+로드 여부를 정하는 곳은 Repository 다. Resource 의 `whenLoaded` 는 그 결정을 **따르는** 장치이지, 그 자체가 페이로드를 줄이지는 않는다.
+
+목록에서 뺀 관계는 단건 조회가 공급해야 한다. 이때 **단건이 목록용 조회 메서드를 재사용하지 않도록** 한다 — 목록 조회는 컬럼을 좁히고 건수 상한을 두므로, 재사용하면 단건이 그 제약을 그대로 물려받아 값이 비거나 상한 밖 행을 찾지 못한다.
+
+```php
+// ❌ 단건이 목록용 조회를 재사용 → content 소실 + 상한 밖 행은 못 찾음
+$version = $this->repository->getVersions($id)->firstWhere('version', $version);
+
+// ✅ 단건 전용 조회 (전 컬럼 + 키로 직접 조회)
+$version = $this->repository->findVersionByNumber($id, $version);
+```
+
+### 대표 1건만 필요하면 관계를 1건으로 좁힌다
+
+```php
+// ❌ eager load 의 limit 은 부모별이 아니라 배치 전체에 걸린다
+//    → 첫 주문만 옵션을 받고 나머지는 빈 값
+->with(['options' => fn ($q) => $q->limit(1)])
+
+// ✅ 관계 자체를 "가장 오래된 1건" 으로 정의해 부모별 1건 보장
+->with('firstOption')   // hasOne(...)->oldestOfMany()
+```
+
 ---
 
 ## 목록 조회 컬럼 프루닝과 지연 조인

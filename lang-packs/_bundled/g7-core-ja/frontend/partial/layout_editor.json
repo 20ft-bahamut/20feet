@@ -126,7 +126,8 @@
     "diff_title": "v{old} → v{new} 変更内容",
     "diff_back": "一覧",
     "diff_identical": "2つのバージョンの内容は同じです。",
-    "diff_too_large": "変更内容が大きすぎて表示できません。"
+    "diff_too_large": "変更内容が大きすぎて表示できません。",
+    "load_more": "もっと見る"
   },
   "preview_action": {
     "no_document": "プレビュー用のレイアウトが選択されていません。"

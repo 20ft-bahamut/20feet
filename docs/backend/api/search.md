@@ -8,8 +8,8 @@
 
 ```text
 1. 이 문서는 실제 API 호출로 실측한 Search 엔드포인트 레퍼런스입니다
-2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 실측 응답 필드 표
-3. 응답 필드의 예시값은 실제 호출 응답에서 관측된 값입니다
+2. 각 엔드포인트: 메서드/URI/권한 + 요청 파라미터 표 + 요청 예시(curl) + 실측 응답 필드 표 + 응답 예시(envelope)
+3. 응답 필드의 예시값·응답 예시 JSON 은 실제 호출 응답에서 관측된 값입니다
 4. 갱신: 코드 변경 후 php artisan api:docgen 재실행
 5. 설명(TODO) 칸은 사람이 채웁니다
 ```
@@ -34,8 +34,6 @@
 | per_page | query | integer | 아니오 | min 1, max 100 | 페이지당 항목 수 |
 | board_slug | query | string | 아니오 | max 100 | 검색 범위를 특정 게시판으로 한정 (게시판 모듈이 `core.search.index_validation_rules` 훅으로 추가하는 파라미터, 해당 slug의 게시판 글만 검색) |
 | category_id | query | integer | 아니오 | — | category 식별자 |
-
-> 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.search.index_validation_rules`).
 
 **요청 예시**
 
