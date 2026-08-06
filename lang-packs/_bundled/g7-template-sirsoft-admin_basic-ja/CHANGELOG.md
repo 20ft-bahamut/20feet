@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.6] - 2026-08-05
+
+### Added
+
+- 레이아웃 버전 이력의 「이전 버전 더 보기」 버튼 문구 일본어 번역 추가 — 기본 표시 개수를 넘는 오래된 버전을 여는 버튼이 일본어 로케일에서도 정상 표기됩니다.
+
 ## [1.0.5] - 2026-08-01
 
 ### Added

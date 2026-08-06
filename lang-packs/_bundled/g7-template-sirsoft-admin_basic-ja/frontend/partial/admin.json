@@ -2159,7 +2159,9 @@
         "saved_by": "保存者：{{name}}",
         "lines": "行",
         "modified": "編集",
-        "chars": "個"
+        "chars": "個",
+        "load_more": "以前のバージョンをもっと見る",
+        "limit_reached": "表示できる最大件数に達しました。"
       },
       "wysiwyg_select_layout_title": "ウィジウィグ編集 - レイアウト選択",
       "wysiwyg_select_layout_description": "編集するレイアウトを選択してください。選択したレイアウトが新しいタブでウィジウィグ編集モードで開きます。",
