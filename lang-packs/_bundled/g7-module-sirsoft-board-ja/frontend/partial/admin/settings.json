@@ -301,8 +301,10 @@
       "notify_author": "投稿者通知",
       "new_display_hours": "新着表示時間",
       "default_board_permissions": "デフォルト権限",
-      "manager": "掲示板管理"
-    }
+      "manager": "掲示板管理",
+      "use_reaction": "リアクション使用"
+    },
+    "select_boards_hint": "下記から一括適用する掲示板を検索して選択してください。"
   },
   "bulk_apply_modal": {
     "title": "一括適用確認",
