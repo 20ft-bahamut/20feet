@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.1.1] - 2026-08-07
+
+### Changed
+
+- 화면 편집기 상품 상세의 상태 미리보기 라벨(`editor.state.out_of_stock`, `editor.state.sold_out`)을 서로 구분되도록 정정했습니다. 두 상태 모두 "品切れ" 로 표시되어 목록에서 어느 쪽인지 구별할 수 없었습니다.
+
 ## [1.1.0] - 2026-08-06
 
 ### Added
