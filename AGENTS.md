@@ -320,6 +320,18 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 
 정규식 location 은 프리픽스 location 보다 먼저 매칭되므로, 정적 최적화 블록(`location ~* \.(js|css|json)$`)이 있는 서버에서는 확장자 붙은 동적 응답이 `try_files ... /index.php` 폴백 기회 없이 404 가 된다. 서버측 `AssetUrl` 과 프론트측 `assetUrl.ts` 는 동일 규칙을 공유하므로 한쪽만 바꾸면 그 자산만 404 가 된다. 상세: [routing.md](docs/backend/routing.md) "정적 확장자로 끝나는 동적 엔드포인트", [api/README.md](docs/backend/api/README.md) "자산 URL 이중 모드".
 
+### 라우트 캐시 안전성
+
+`route:cache` 가 걸리면 `RouteServiceProvider::boot()` 이 캐시 로드로 분기해 라우트 파일 자체가 실행되지 않는다. 클로저는 직렬화 형태로 복원되므로 문제가 아니다 (`routes/web.php` SPA catch-all 이 증거). 깨지는 것은 오토로드되지 않는 심볼 참조뿐이다.
+
+| 금지 | 올바른 사용 |
+|------|------------|
+| 라우트 파일에 전역 함수 선언 + 핸들러가 호출 | 로직을 클래스(`app/Support/…`)로 옮기고 핸들러는 위임만 |
+| 파일 스코프 변수를 핸들러가 `use` 없이 참조 | 클래스 상수 또는 `use ($var)` 로 클로저에 캡처 |
+| 벤더/프로바이더가 `boot()` 에서 조건부 등록하는 라우트에 의존 | 그 URI 를 G7 라우트 파일이 직접 소유 |
+
+전역 함수 위반은 `Call to undefined function` 500 인데 예외의 `file` 이 `laravel-serializable-closure://` 라 원인 파일이 스택에 드러나지 않는다. 프로바이더 등록분이 사라지는 이유는 별개다 — `Router::setCompiledRoutes()` 가 `booted` 콜백에서 라우트 컬렉션을 통째로 교체하므로 그보다 앞선 등록은 조건 충족 여부와 무관하게 폐기된다(프레임워크 자신의 `BroadcastManager::routes()` 는 `routesAreCached()` 가드를 갖지만 모든 패키지가 그렇지는 않다). 정적 검사가 라우트 파일의 전역 함수 선언을 차단한다. 상세: [routing.md](docs/backend/routing.md) "캐시 안전한 라우트 작성".
+
 ### 목록 컨텍스트 왕복 (list context round-trip)
 
 페이지네이션 목록 화면과 그에 딸린 상세·형제 상세·작성/수정 폼·확인 모달은 하나의 목록 클러스터다. 이 클러스터 안에서의 이동은 URL 목록 상태(`page`/`search`/`category`/`filters[*]`/정렬/`per_page`)를 손실 없이 보존해야 한다.
