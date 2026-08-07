@@ -192,6 +192,17 @@ interface UserRepositoryInterface
     public function getIdsByUuids(array $uuids): array;
 
     /**
+     * 사용자 ID 목록에 해당하는 이름을 ID 로 색인해 반환합니다.
+     *
+     * 목록 화면이 작성자 이름을 행마다 조회하면 N+1 이 되므로, 표시에 필요한
+     * 이름만 한 번에 모아 오기 위한 배치 조회입니다.
+     *
+     * @param  array  $ids  사용자 ID 배열
+     * @return array<int, string> 사용자 ID => 이름
+     */
+    public function getNamesByIds(array $ids): array;
+
+    /**
      * 사용자 ID 목록의 지정 컬럼을 일괄 갱신합니다.
      *
      * @param  array  $ids  사용자 ID 배열

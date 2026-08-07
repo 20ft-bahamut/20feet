@@ -5,6 +5,7 @@ namespace Plugins\Sirsoft\Tosspayments\Http\Requests;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Plugins\Sirsoft\Tosspayments\Support\ShopRedirectUrl;
 
 /**
  * 토스페이먼츠 결제 성공 콜백 요청 검증
@@ -45,14 +46,15 @@ class SuccessCallbackRequest extends FormRequest
      *
      * PG 콜백은 브라우저 리다이렉트이므로 422 대신 실패 페이지로 이동합니다.
      *
-     * @param Validator $validator 검증기 인스턴스
+     * @param  Validator  $validator  검증기 인스턴스
      * @return void
+     *
      * @throws HttpResponseException
      */
     protected function failedValidation(Validator $validator): void
     {
         $settings = plugin_settings(self::PLUGIN_IDENTIFIER);
-        $baseUrl = $settings['redirect_fail_url'] ?? '/shop/checkout';
+        $baseUrl = ShopRedirectUrl::resolve($settings['redirect_fail_url'] ?? ShopRedirectUrl::DEFAULT_FAIL_URL);
         $separator = str_contains($baseUrl, '?') ? '&' : '?';
 
         throw new HttpResponseException(

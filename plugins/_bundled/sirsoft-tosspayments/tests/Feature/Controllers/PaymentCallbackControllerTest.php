@@ -4,6 +4,7 @@ namespace Plugins\Sirsoft\Tosspayments\Tests\Feature\Controllers;
 
 use App\Models\User;
 use App\Services\PluginSettingsService;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Modules\Sirsoft\Ecommerce\Database\Factories\OrderFactory;
 use Modules\Sirsoft\Ecommerce\Database\Factories\OrderPaymentFactory;
@@ -11,6 +12,7 @@ use Modules\Sirsoft\Ecommerce\Enums\OrderStatusEnum;
 use Modules\Sirsoft\Ecommerce\Enums\PaymentMethodEnum;
 use Modules\Sirsoft\Ecommerce\Enums\PaymentStatusEnum;
 use Modules\Sirsoft\Ecommerce\Models\Order;
+use Plugins\Sirsoft\Tosspayments\Support\ShopRedirectUrl;
 use Plugins\Sirsoft\Tosspayments\Tests\PluginTestCase;
 
 /**
@@ -70,6 +72,25 @@ class PaymentCallbackControllerTest extends PluginTestCase
      */
     private static int $orderSequence = 0;
 
+    /**
+     * 주문 통화 고정값.
+     *
+     * 팩토리 기본값은 이커머스 통화 설정에서 읽으므로 앞서 실행된 다른 스위트가 남긴
+     * 설정 상태에 따라 통화가 달라진다. 더 중요한 것은 **소수 자릿수**다 —
+     * `resolveSnapshotPaymentCharge` 는 스냅샷에 `decimal_places` 가 없으면 상점 통화
+     * 설정에서 조회하는데, 그 설정이 비어 있으면 KRW(0자리)가 2자리로 해석되어 청구액이
+     * 최소단위 환산으로 100배가 된다. 그러면 콜백 금액 검증이 `amount_mismatch` 로 갈라져
+     * 이 파일의 리다이렉트 단언이 성공 분기가 아닌 실패 분기를 본다.
+     * (실측: 게시판 스위트 직후 expected 5,000,000 vs 콜백 amount 50,000)
+     *
+     * 이 파일은 리다이렉트 주소를 검증하는 것이지 통화 환산을 검증하지 않으므로,
+     * 통화와 자릿수를 스냅샷에 못박아 선행 스위트와 무관하게 결정적으로 동작하게 한다.
+     */
+    private const TEST_CURRENCY = 'KRW';
+
+    /** 원화 소수 자릿수 — 스냅샷에 명시해 상점 설정 조회로 떨어지지 않게 한다. */
+    private const TEST_CURRENCY_DECIMALS = 0;
+
     private function createTestOrder(int $totalAmount = 50000): Order
     {
         $user = User::factory()->create();
@@ -78,6 +99,24 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'user_id' => $user->id,
             'order_number' => 'ORD-TEST-'.(++self::$orderSequence),
             'order_status' => OrderStatusEnum::PENDING_ORDER,
+            'currency' => self::TEST_CURRENCY,
+            'currency_snapshot' => [
+                'base_currency' => self::TEST_CURRENCY,
+                'order_currency' => self::TEST_CURRENCY,
+                'exchange_rate' => 1.0,
+                // 환율을 단순 float 로 두면 `resolveSnapshotPaymentCharge` 가 자릿수를
+                // 상점 설정에서 조회한다. 배열 형태로 `decimal_places` 를 명시해야
+                // 설정 상태와 무관하게 원화 0 자리로 고정된다.
+                'exchange_rates' => [
+                    self::TEST_CURRENCY => [
+                        'rate' => 1.0,
+                        'decimal_places' => self::TEST_CURRENCY_DECIMALS,
+                        'rounding_unit' => '1',
+                        'rounding_method' => 'round',
+                    ],
+                ],
+                'snapshot_at' => now()->toIso8601String(),
+            ],
             'subtotal_amount' => $totalAmount,
             'total_discount_amount' => 0,
             'total_coupon_discount_amount' => 0,
@@ -100,6 +139,8 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'payment_status' => PaymentStatusEnum::READY,
             'payment_method' => PaymentMethodEnum::CARD,
             'pg_provider' => 'tosspayments',
+            'currency' => self::TEST_CURRENCY,
+            'currency_snapshot' => [self::TEST_CURRENCY => 1.0],
             'paid_amount_local' => 0,
             'paid_at' => null,
             'transaction_id' => null,
@@ -120,8 +161,8 @@ class PaymentCallbackControllerTest extends PluginTestCase
             'is_test_mode' => true,
             'test_secret_key' => 'test_sk_mock_key',
             'test_client_key' => 'test_ck_mock_key',
-            'redirect_success_url' => '/shop/orders/{orderId}/complete',
-            'redirect_fail_url' => '/shop/checkout',
+            'redirect_success_url' => ShopRedirectUrl::DEFAULT_SUCCESS_URL,
+            'redirect_fail_url' => ShopRedirectUrl::DEFAULT_FAIL_URL,
         ];
 
         $settingsMock = $this->createMock(PluginSettingsService::class);
@@ -129,6 +170,44 @@ class PaymentCallbackControllerTest extends PluginTestCase
             ->willReturn(array_merge($defaults, $overrides));
 
         $this->app->instance(PluginSettingsService::class, $settingsMock);
+    }
+
+    /**
+     * 상점 주소를 바꾼 상점에서도 결제 완료 이동 주소가 그 주소를 따르는지 확인 (공개 #85)
+     *
+     * 기본값이 `/shop/...` 리터럴이던 시절에는 주소를 바꾼 상점의 구매자가 결제를 마치고
+     * 존재하지 않는 페이지로 떨어졌다. 리다이렉트라 예외도 404 로그도 남지 않는다.
+     *
+     * @scenario case=payment_redirect_follows_shop_route_path
+     *
+     * @effects payment_redirect_follows_route_path
+     */
+    public function test_success_redirect_follows_shop_route_path_setting(): void
+    {
+        Config::set(
+            'g7_settings.modules.sirsoft-ecommerce.basic_info',
+            ['route_path' => 'store']
+        );
+
+        $order = $this->createTestOrder(50000);
+        $paymentKey = 'pk_test_route_path';
+
+        $this->mockPluginSettings();
+
+        Http::fake([
+            'api.tosspayments.com/v1/payments/confirm' => Http::response(
+                $this->makeMockConfirmResponse($paymentKey, $order->order_number, 50000),
+                200
+            ),
+        ]);
+
+        $response = $this->get('/plugins/sirsoft-tosspayments/payment/success?'.http_build_query([
+            'paymentKey' => $paymentKey,
+            'orderId' => $order->order_number,
+            'amount' => 50000,
+        ]));
+
+        $response->assertRedirect("/store/orders/{$order->order_number}/complete");
     }
 
     // ===== Success 콜백 테스트 =====

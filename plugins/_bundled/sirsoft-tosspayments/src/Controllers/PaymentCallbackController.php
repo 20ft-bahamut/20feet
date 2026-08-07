@@ -16,6 +16,7 @@ use Modules\Sirsoft\Ecommerce\Services\OrderProcessingService;
 use Plugins\Sirsoft\Tosspayments\Http\Requests\FailCallbackRequest;
 use Plugins\Sirsoft\Tosspayments\Http\Requests\SuccessCallbackRequest;
 use Plugins\Sirsoft\Tosspayments\Services\TossPaymentsApiService;
+use Plugins\Sirsoft\Tosspayments\Support\ShopRedirectUrl;
 
 /**
  * 토스페이먼츠 결제 콜백 컨트롤러
@@ -273,9 +274,9 @@ class PaymentCallbackController
     private function resolveSuccessUrl(string $orderId): string
     {
         $settings = $this->pluginSettingsService->get(self::PLUGIN_IDENTIFIER) ?? [];
-        $urlTemplate = $settings['redirect_success_url'] ?? '/shop/orders/{orderId}/complete';
+        $urlTemplate = $settings['redirect_success_url'] ?? ShopRedirectUrl::DEFAULT_SUCCESS_URL;
 
-        return str_replace('{orderId}', $orderId, $urlTemplate);
+        return ShopRedirectUrl::resolve($urlTemplate, ['{orderId}' => $orderId]);
     }
 
     /**
@@ -287,7 +288,7 @@ class PaymentCallbackController
     private function resolveFailUrl(array $queryParams = []): string
     {
         $settings = $this->pluginSettingsService->get(self::PLUGIN_IDENTIFIER) ?? [];
-        $baseUrl = $settings['redirect_fail_url'] ?? '/shop/checkout';
+        $baseUrl = ShopRedirectUrl::resolve($settings['redirect_fail_url'] ?? ShopRedirectUrl::DEFAULT_FAIL_URL);
 
         if (empty($queryParams)) {
             return $baseUrl;
