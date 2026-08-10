@@ -5,6 +5,26 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.58.1] - 2026-08-07
+
+### Fixed
+
+#### `event` 키로 적은 DOM 이벤트가 핸들러로 연결되지 않던 문제
+
+- `ActionDispatcher.ts::bindActionsToProps` — 액션의 `event` 값이 알려진 DOM 이벤트 이름이면 React prop 이름으로 정규화한다(`click` → `onClick`). 기존에는 `type` 만 매핑을 거치고 `event` 는 값이 그대로 prop 이름이 되어, `event: "click"` 이 `props.click` 을 만들었다. React 는 그런 prop 을 무시하므로 **예외도 경고도 콘솔 출력도 없이 핸들러가 붙지 않은 채** 렌더됐다 — 버튼이 눌리기는 하는데 아무 일도 일어나지 않는다.
+- 규정은 액션 이벤트 키를 `type` 또는 `event` 로 적을 수 있다고 명시하므로, 어느 쪽으로 적었는지에 따라 동작이 갈리면 안 된다. 두 경로가 같은 매핑 표(`DOM_EVENT_PROP_MAP`)를 공유하도록 통일했다.
+- 정규화는 **알려진 DOM 이벤트 이름에만** 적용한다. 이미 `onXxx` 형태인 컴포넌트 콜백(`onSortEnd`)과 확장이 발행하는 네임스페이스 이벤트(`upload:board_attachments`, `notification.received` 등)는 손대지 않는다 — 일괄로 접두사를 붙이면 그 이벤트들이 통째로 끊긴다.
+- 부수 효과로 `event: "drop"` / `"dragover"` 도 자동 `preventDefault` 가드에 정상 편입된다(그 가드는 `onDrop`/`onDragOver` 이름으로 판정한다).
+- 저장소 영향 범위(전수 확인): DOM 이벤트 이름을 `event` 로 적은 곳은 2건이며 둘 다 이 결함으로 동작하지 않고 있었다 — 관리자 주문상세의 현금영수증 "발급 이력" 아코디언(`click`), 게시판 글쓰기 폼의 카테고리 선택(`change`). 나머지 `event` 사용처는 모두 네임스페이스 커스텀 이벤트라 동작 변화가 없다.
+
+#### `event` 경로에서 커스텀 컴포넌트 이벤트의 `$event` payload 가 사라지던 문제
+
+- `ActionDispatcher.ts::bindActionsToProps` — `event` 로 적은 액션도 `type` 경로와 같은 규칙으로 이벤트 객체를 해석한다(표준 DOM 이벤트 > 커스텀 컴포넌트 이벤트 synthetic 승격 > 빈 이벤트). 해석 로직을 `resolveEventForHandler()` 한 곳으로 모았다.
+- 합성 컴포넌트(Select·MultilingualInput 등)는 `preventDefault` 없는 `{ target: { name, value } }` 를 emit 한다. 기존 `event` 경로는 이를 빈 `Event('custom')` 으로 갈아끼워 `$event.target.value` 가 `undefined` 가 됐고, **액션은 success 로 기록되는데 저장되는 값만 비는** 상태가 됐다 — 콘솔·네트워크 어디에도 흔적이 없어 발견이 늦다.
+- 저장소 영향 범위(전수 확인): 현재 `event` 로 바인딩된 지점 중 이 수정으로 **동작이 달라지는 곳은 없다.** 합성 컴포넌트(Select·Toggle·TagInput·HtmlEditor)가 모두 `preventDefault` 를 실어 emit 하고 있고, `preventDefault` 없이 emit 하는 CodeEditor 는 유일한 `event` 바인딩 지점에 `debounce` 가 걸려 있어 이미 승격 로직을 타고 있었다. 즉 이 항목은 **`type` 경로에만 있던 규칙을 `event` 경로에도 맞춘 예방적 통일**이다 — 규정이 명시한 컴포넌트 계약(`{ target: { value } }`)을 그대로 따르는 컴포넌트를 debounce 없이 `event` 로 바인딩하는 순간 종전 코드에서는 값이 비게 된다.
+- `_changedKeys` 메타데이터는 승격 시에도 보존한다(디바운스 병합이 이 값을 쓴다).
+- raw value 를 그대로 넘기는 콜백(`onChange(value)`)은 `event` 경로에서도 빈 이벤트를 유지한다 — 마운트 시점 콜백까지 값으로 승격하면 API 로드 데이터를 초기값으로 덮어쓰는 기존 회귀가 재발한다.
+
 ## [engine-v1.58.0] - 2026-08-07
 
 ### Added

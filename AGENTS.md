@@ -466,6 +466,27 @@ Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 
 
 > 상세: [search-system.md "키워드 술어는 활성 엔진이 만든다"](docs/backend/search-system.md)
 
+### 통화 단위는 설정이 정한다
+
+G7 은 **기본 통화**(상품·쿠폰·배송비 저장 기준), **표시 통화**(구매자가 고른 통화), **결제 통화**(PG 청구 통화)를 각각 따로 설정한다. 셋은 같을 수도, 모두 다를 수도 있다. 금액을 다루는 지점이 특정 통화를 전제하면 값은 맞고 **단위만 틀린** 금액이 나가며, 예외도 경고도 없다.
+
+| 금지 | 올바른 사용 |
+|--------|---------------|
+| 다국어 문구에 `:amount원` / `:amount円` | 문구는 `:amount` 로 중립, 호출부가 `ecommerce_format_price($amount, $currency)` 로 포맷해 전달 |
+| 레이아웃에서 `{{금액.toLocaleString()}}원` 조립 | 서버가 준 `*_formatted` / `multi_currency_*[통화].formatted` 를 그대로 출력 |
+| `formatCurrencyPrice($price, 'KRW')` (통화 코드 리터럴) | `formatBaseCurrency()` / `formatOrderCurrency()` (설정·주문 스냅샷이 통화를 정한다) |
+| `number_format($amount).'원'` | 같은 도메인의 통화 인지 헬퍼(`formatOrderChargeAmount()` 등) 경유 |
+| `_global.preferredCurrency ?? 'KRW'` | `_global.preferredCurrency ?? _global.defaultCurrency` (둘 다 없으면 `*_formatted` 로 내려간다) |
+| 통화표를 코드에 고정(기호·자릿수 5종 표 + 특정 통화 폴백) | 설정의 `symbol` / `decimal_places` 를 읽고, 미설정 시에만 폴백표 |
+| `code === 'KRW' ? 0자리 : 2자리` 식 코드 분기 | `decimal_places` 로 판정 (운영자가 추가한 0자리 통화도 포함) |
+| 통화 선택 입력의 기본값을 `"KRW"` 로 시드 | 설정의 `default_currency` — 마일리지처럼 **통화별 원장**을 쓰는 도메인은 표시가 아니라 **기록이 틀어진다** |
+
+언어는 통화가 아니다. 한국어 문구에 `원`, 일본어에 `円` 을 박으면 기본 통화가 다른 상점에서 UI 언어가 통화를 결정하게 된다 — 영어 문구가 `:amount` 로 중립인 것이 정답이다.
+
+주문·결제·환불 금액은 **거래 시점 통화로 동결**한다(`currency_snapshot.base_currency`). 운영자가 이후 기본 통화를 바꿔도 과거 주문의 표기는 불변이어야 한다.
+
+> 상세: [api-resources.md](docs/backend/api-resources.md), [service-repository.md](docs/backend/service-repository.md)
+
 ### Listener 데이터 접근
 
 | 금지 | 올바른 사용 |

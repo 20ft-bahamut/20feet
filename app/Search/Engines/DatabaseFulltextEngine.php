@@ -114,6 +114,13 @@ class DatabaseFulltextEngine extends Engine implements KeywordPredicateProvider
     /**
      * 검색 결과에서 모델 ID를 추출합니다.
      *
+     * 넘겨받은 쿼리의 SELECT 는 건드리지 않는다 — ORDER BY 가 `_ft_score`(그리고 소비자
+     * `->query()` 콜백이 얹은 별칭)를 참조하므로 SELECT 를 갈아끼우면 정렬 대상이 사라져
+     * `Unknown column ... in 'order clause'` 로 죽는다. 키만 읽어야 하는 경로는
+     * `applySelect(keysOnly: true)` 가 조립 시점에 이미 좁혀 두었고, `pluck()` 은 기존
+     * SELECT 를 보존하므로(`onceWithColumns` 는 columns 가 있으면 덮어쓰지 않는다)
+     * 여기서 다시 좁힐 이유가 없다. `clone()` 은 호출자 쿼리 불변을 위해 유지한다.
+     *
      * @param  array  $results  검색 결과
      */
     public function mapIds($results): \Illuminate\Support\Collection
@@ -123,13 +130,7 @@ class DatabaseFulltextEngine extends Engine implements KeywordPredicateProvider
             return collect();
         }
 
-        // `pluck()` 은 이미 걸려 있는 SELECT 를 보존한다(onceWithColumns). 검색 쿼리는
-        // 관련도 점수를 위해 `table.*` 를 선택해 두므로, 그대로 두면 ID 만 필요한 자리에서
-        // 전 컬럼을 읽는다. 사본에서 키 컬럼만 남겨 좁힌다.
-        $model = $query->getModel();
-        $key = $model->getQualifiedKeyName();
-
-        return $query->clone()->select($key)->pluck($model->getKeyName());
+        return $query->clone()->pluck($query->getModel()->getKeyName());
     }
 
     /**
@@ -648,6 +649,10 @@ class DatabaseFulltextEngine extends Engine implements KeywordPredicateProvider
      *
      * 키만 필요한 경로에서는 키 컬럼과 정렬용 스코어로 좁힙니다. 스코어는 `ORDER BY` 가
      * 참조하므로 좁힐 때도 함께 남겨야 합니다.
+     *
+     * 검색 쿼리의 SELECT 를 재작성하는 유일한 지점입니다. `mapIds()`/`map()`/`lazyMap()` 은
+     * 넘겨받은 쿼리의 SELECT·ORDER BY 를 바꾸지 않습니다 — 소비자가 `->query()` 로 얹은
+     * 별칭에도 정렬이 걸릴 수 있어, 재작성은 알려진 별칭 하나만 보존해도 안전하지 않습니다.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query  대상 쿼리
      * @param  Model  $model  기준 모델

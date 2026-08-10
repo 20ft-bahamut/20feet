@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.3] - 2026-08-07
+
+### Fixed
+
+- 返金金額の案内から通貨単位（円）の固定表記を削除 — 決済通貨の単位で表示されます。
+
 ## [1.0.2] - 2026-08-07
 
 ### Changed

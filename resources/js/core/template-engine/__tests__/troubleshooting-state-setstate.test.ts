@@ -5019,3 +5019,135 @@ describe('[사례 36] _localInit useLayoutEffect 의 stale pending baseline (eng
     });
   });
 });
+
+describe('[사례 38] 액션을 event 로 적은 경우의 prop 이름과 $event payload (engine-v1.58.1)', () => {
+  /**
+   * 증상 ①: `event: "click"` → props.click → React 가 무시 → 예외 없이 핸들러 미부착
+   * 증상 ②: `event` 경로만 합성 컴포넌트 이벤트를 빈 Event 로 갈아끼워 $event.target 유실
+   *
+   * 두 경로(type/event)가 같은 표·같은 이벤트 해석을 쓰는지 고정한다.
+   */
+  let dispatcher: ActionDispatcher;
+  let mockSetState: ReturnType<typeof vi.fn>;
+  let captured: any;
+
+  const componentContext = () => ({ state: {}, setState: mockSetState });
+
+  beforeEach(() => {
+    captured = null;
+    mockSetState = vi.fn((updater) => {
+      captured = typeof updater === 'function' ? updater({}) : updater;
+      return captured;
+    });
+    dispatcher = new ActionDispatcher({ navigate: vi.fn() });
+    dispatcher.setGlobalStateUpdater(vi.fn());
+    Logger.getInstance().setDebug(false);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('event 에 적은 DOM 이벤트명이 React prop 이름으로 정규화된다', () => {
+    const bound = dispatcher.bindActionsToProps(
+      {
+        actions: [
+          { event: 'click', handler: 'setState', params: { target: 'local', opened: true } },
+        ],
+      },
+      { _local: {}, _global: {} },
+      componentContext()
+    );
+
+    expect(bound.onClick).toBeDefined();
+    // 정규화 전에는 이 키로 만들어져 React 가 조용히 버렸다
+    expect((bound as any).click).toBeUndefined();
+  });
+
+  it('컴포넌트 콜백·네임스페이스 이벤트 이름은 정규화하지 않는다', () => {
+    const bound = dispatcher.bindActionsToProps(
+      {
+        actions: [
+          { event: 'onSortEnd', handler: 'setState', params: { target: 'local', a: 1 } },
+          { event: 'upload:board_attachments', handler: 'setState', params: { target: 'local', b: 1 } },
+          { event: 'notification.received', handler: 'setState', params: { target: 'local', c: 1 } },
+        ],
+      },
+      { _local: {}, _global: {} },
+      componentContext()
+    );
+
+    // 접두사를 덧붙이면(onOnSortEnd) 기존 확장 이벤트가 통째로 끊긴다
+    expect(bound.onSortEnd).toBeDefined();
+    expect((bound as any)['upload:board_attachments']).toBeDefined();
+    expect((bound as any)['notification.received']).toBeDefined();
+    expect((bound as any).onOnSortEnd).toBeUndefined();
+  });
+
+  it('event 경로도 합성 컴포넌트 이벤트의 $event.target 을 보존한다', () => {
+    const bound = dispatcher.bindActionsToProps(
+      {
+        actions: [
+          {
+            event: 'onChange',
+            handler: 'setState',
+            params: { target: 'local', 'form.description': '{{$event.target.value}}' },
+          },
+        ],
+      },
+      { _local: { form: { description: '' } }, _global: {} },
+      componentContext()
+    );
+
+    // HtmlEditor / TagInput 등이 emit 하는 preventDefault 없는 plain object
+    bound.onChange({ target: { name: 'description', value: '사용자가 입력한 본문' } });
+
+    expect(mockSetState).toHaveBeenCalled();
+    expect(captured?.form?.description).toBe('사용자가 입력한 본문');
+  });
+
+  it('type 경로와 event 경로가 같은 값을 기록한다 (경로별 비대칭 금지)', () => {
+    const params = { target: 'local', 'form.title': '{{$event.target.value}}' };
+    const payload = { target: { name: 'title', value: '같은 값' } };
+
+    const byType = dispatcher.bindActionsToProps(
+      { actions: [{ type: 'change', handler: 'setState', params }] },
+      { _local: { form: {} }, _global: {} },
+      componentContext()
+    );
+    byType.onChange(payload);
+    const fromType = captured;
+
+    captured = null;
+    const byEvent = dispatcher.bindActionsToProps(
+      { actions: [{ event: 'onChange', handler: 'setState', params }] },
+      { _local: { form: {} }, _global: {} },
+      componentContext()
+    );
+    byEvent.onChange(payload);
+
+    expect(fromType?.form?.title).toBe('같은 값');
+    expect(captured?.form?.title).toBe(fromType?.form?.title);
+  });
+
+  it('raw value 콜백은 event 경로에서도 $event.target 을 만들지 않는다 (사례 26 의도 유지)', () => {
+    const bound = dispatcher.bindActionsToProps(
+      {
+        actions: [
+          {
+            event: 'onChange',
+            handler: 'setState',
+            params: { target: 'local', 'form.content': '{{$event.target.value}}' },
+          },
+        ],
+      },
+      { _local: { form: { content: 'loaded-from-api' } }, _global: {} },
+      componentContext()
+    );
+
+    // CodeEditor 처럼 raw value 를 넘기는 컴포넌트 — 값 승격은 폐기된 채로 둔다
+    bound.onChange('raw-string');
+
+    expect(captured?.form?.content).toBeFalsy();
+  });
+});
