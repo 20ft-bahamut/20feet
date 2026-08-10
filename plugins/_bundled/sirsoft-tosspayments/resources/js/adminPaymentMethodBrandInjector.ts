@@ -1,8 +1,22 @@
-const PLUGIN_ID = 'sirsoft-pay_nhnkcp';
-const FLAG = '__nhnkcpAdminPaymentMethodBrandInjectorInstalled';
-const LISTENER_FLAG = '__nhnkcpAdminPaymentMethodBrandSyncListenerAttached';
+/**
+ * 관리자 주문설정 결제수단 목록의 브랜드 마크 주입.
+ *
+ * 관리자 레이아웃(`_payment_methods_list.json` / `_payment_methods_cards.json`)은 결제수단
+ * 아이콘 열을 `Icon name={{$method._cached_icon}}` 하나로만 그린다 — 카탈로그의
+ * `_cached_brand_mark` 를 읽는 노드가 없다(그 값을 렌더하는 곳은 사용자 템플릿 체크아웃뿐).
+ * 그래서 각 PG 플러그인이 자기 결제수단 행의 아이콘을 브랜드 배지로 치환하는 관리자 전용
+ * injector 를 직접 싣는다. 토스에만 이 파일이 없어 간편결제가 회색 기본 아이콘으로 보였다.
+ *
+ * 구조는 다른 PG 플러그인(nicepayments·kginicis)의 동명 파일과 동일하게 맞춘다 — 행 판별은
+ * 라벨 텍스트, 치환 대상은 드래그 핸들/컨트롤을 제외한 첫 아이콘, 재적용은 MutationObserver
+ * + 폴링이다. 배지 색·문자는 같은 브랜드가 어느 PG 를 통하든 같아야 하므로 서버측
+ * `RegisterTossPaymentMethodsListener::METHOD_PRESENTATION` 의 `brand_mark` 와 값을 맞춘다.
+ */
+const PLUGIN_ID = 'sirsoft-tosspayments';
+const FLAG = '__tossAdminPaymentMethodBrandInjectorInstalled';
+const LISTENER_FLAG = '__tossAdminPaymentMethodBrandSyncListenerAttached';
 const ADMIN_SETTINGS_RE = /^\/admin\/ecommerce\/settings\/?$/;
-const MARK_SELECTOR = '[data-nhnkcp-admin-payment-brand-mark="true"]';
+const MARK_SELECTOR = '[data-toss-admin-payment-brand-mark="true"]';
 const SYNC_RETRY_INTERVAL_MS = 200;
 const SYNC_RETRY_ATTEMPTS = 120;
 
@@ -16,39 +30,39 @@ interface AdminPaymentBrandDefinition {
 
 const ADMIN_PAYMENT_BRAND_DEFINITIONS: AdminPaymentBrandDefinition[] = [
     {
-        id: 'nhnkcp_payco',
-        labels: ['PAYCO (NHN KCP)', 'PAYCO로 결제 (NHN KCP)', 'Pay with PAYCO (NHN KCP)'],
-        shortLabels: ['PAYCO'],
-        markLines: ['P'],
-        markClassName: 'bg-red-500 text-white',
+        id: 'toss_tosspay',
+        labels: ['토스페이 (토스페이먼츠)', '토스페이 간편결제 — 토스페이먼츠를 통해 처리', 'TossPay (TossPayments)', 'TossPay easy payment — processed via TossPayments'],
+        shortLabels: [],
+        markLines: ['T'],
+        markClassName: 'bg-blue-500 text-white',
     },
     {
-        id: 'nhnkcp_naverpay',
-        labels: ['네이버페이 (NHN KCP)', '네이버페이 신용카드로 결제 (NHN KCP)', 'Naver Pay (NHN KCP)', 'Pay by Naver Pay credit card (NHN KCP)'],
-        shortLabels: ['네이버페이 (카드)', 'Naver Pay (Card)'],
-        markLines: ['N'],
-        markClassName: 'bg-green-500 text-white',
-    },
-    {
-        id: 'nhnkcp_naverpay_point',
-        labels: ['네이버페이 포인트 (NHN KCP)', '네이버페이 머니/포인트로 결제 (NHN KCP)', 'Naver Pay Point (NHN KCP)', 'Pay with Naver Pay Money/Points (NHN KCP)'],
-        shortLabels: ['네이버페이 (포인트)', 'Naver Pay (Point)'],
-        markLines: ['NP'],
-        markClassName: 'bg-green-600 text-white',
-    },
-    {
-        id: 'nhnkcp_kakaopay',
-        labels: ['카카오페이 (NHN KCP)', '카카오페이로 결제 (NHN KCP)', 'Kakao Pay (NHN KCP)', 'Pay with Kakao Pay (NHN KCP)'],
-        shortLabels: ['카카오페이', 'Kakao Pay'],
+        id: 'toss_kakaopay',
+        labels: ['카카오페이 (토스페이먼츠)', '카카오페이 간편결제 — 토스페이먼츠를 통해 처리', 'KakaoPay (TossPayments)', 'KakaoPay easy payment — processed via TossPayments'],
+        shortLabels: [],
         markLines: ['K'],
         markClassName: 'bg-yellow-400 text-gray-950',
     },
     {
-        id: 'nhnkcp_applepay',
-        labels: ['애플페이 (NHN KCP)', '애플페이로 결제 (NHN KCP)', 'Apple Pay (NHN KCP)', 'Pay with Apple Pay (NHN KCP)'],
-        shortLabels: ['애플페이', 'Apple Pay'],
-        markLines: ['A'],
-        markClassName: 'bg-gray-900 text-white',
+        id: 'toss_naverpay',
+        labels: ['네이버페이 (토스페이먼츠)', '네이버페이 간편결제 — 토스페이먼츠를 통해 처리', 'NaverPay (TossPayments)', 'NaverPay easy payment — processed via TossPayments'],
+        shortLabels: [],
+        markLines: ['N'],
+        markClassName: 'bg-green-500 text-white',
+    },
+    {
+        id: 'toss_payco',
+        labels: ['페이코 (토스페이먼츠)', '페이코 간편결제 — 토스페이먼츠를 통해 처리', 'PAYCO (TossPayments)', 'PAYCO easy payment — processed via TossPayments'],
+        shortLabels: [],
+        markLines: ['P'],
+        markClassName: 'bg-red-500 text-white',
+    },
+    {
+        id: 'toss_samsungpay',
+        labels: ['삼성페이 (토스페이먼츠)', '삼성페이 간편결제 — 토스페이먼츠를 통해 처리', 'Samsung Pay (TossPayments)', 'Samsung Pay easy payment — processed via TossPayments'],
+        shortLabels: [],
+        markLines: ['S'],
+        markClassName: 'bg-blue-600 text-white',
     },
 ];
 
@@ -73,7 +87,7 @@ function classNameOf(element: Element): string {
 
 function comparableText(value: string | null | undefined): string {
     return (value ?? '')
-        .replace(/\u200B/g, '')
+        .replace(/​/g, '')
         .replace(/\s+/g, ' ')
         .trim();
 }
@@ -115,8 +129,8 @@ function findPaymentIcon(item: HTMLElement): Element | null {
 }
 
 function applyBrandMarkContent(mark: HTMLSpanElement, definition: AdminPaymentBrandDefinition): void {
-    mark.dataset.nhnkcpAdminPaymentBrandMark = 'true';
-    mark.dataset.nhnkcpAdminPaymentMethod = definition.id;
+    mark.dataset.tossAdminPaymentBrandMark = 'true';
+    mark.dataset.tossAdminPaymentMethod = definition.id;
     mark.setAttribute('aria-hidden', 'true');
     mark.className = `inline-flex items-center justify-center rounded-lg font-bold ${definition.markClassName}`;
     mark.style.width = '32px';
@@ -126,19 +140,7 @@ function applyBrandMarkContent(mark: HTMLSpanElement, definition: AdminPaymentBr
     mark.style.fontSize = definition.markLines.join('').length > 2 ? '9px' : '12px';
 
     const expectedText = definition.markLines.join('');
-    if (mark.textContent === expectedText) return;
-
-    mark.replaceChildren();
-    if (definition.markLines.length > 1) {
-        mark.style.flexDirection = 'column';
-        definition.markLines.forEach((line) => {
-            const lineElement = document.createElement('span');
-            lineElement.style.lineHeight = '1';
-            lineElement.textContent = line;
-            mark.appendChild(lineElement);
-        });
-    } else {
-        mark.style.removeProperty('flex-direction');
+    if (mark.textContent !== expectedText) {
         mark.textContent = definition.markLines[0] ?? '';
     }
 }
@@ -153,7 +155,7 @@ function createBrandMark(definition: AdminPaymentBrandDefinition): HTMLSpanEleme
 function syncBrandMark(item: HTMLElement, definition: AdminPaymentBrandDefinition): boolean {
     const existing = item.querySelector<HTMLElement>(MARK_SELECTOR);
     if (existing instanceof HTMLSpanElement) {
-        item.dataset.nhnkcpAdminPaymentMethod = definition.id;
+        item.dataset.tossAdminPaymentMethod = definition.id;
         applyBrandMarkContent(existing, definition);
         return true;
     }
@@ -161,14 +163,14 @@ function syncBrandMark(item: HTMLElement, definition: AdminPaymentBrandDefinitio
     const mark = createBrandMark(definition);
     const icon = findPaymentIcon(item);
     if (icon && icon.parentElement) {
-        item.dataset.nhnkcpAdminPaymentMethod = definition.id;
+        item.dataset.tossAdminPaymentMethod = definition.id;
         icon.replaceWith(mark);
         return true;
     }
 
     const title = findTitleElement(item);
     if (title && title.parentElement) {
-        item.dataset.nhnkcpAdminPaymentMethod = definition.id;
+        item.dataset.tossAdminPaymentMethod = definition.id;
         title.parentElement.insertBefore(mark, title);
         return true;
     }
