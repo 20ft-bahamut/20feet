@@ -523,6 +523,37 @@ export class ActionError extends Error {
 // ============================================================================
 
 /**
+ * DOM 이벤트 이름 → React prop 이름 매핑 (camelCase)
+ *
+ * 액션의 `type` 과 `event` 두 경로가 **같은 표**를 써야 한다. 한쪽만 매핑하면
+ * 같은 이벤트를 어떤 키로 적었는지에 따라 핸들러가 붙기도 하고 안 붙기도 한다.
+ */
+const DOM_EVENT_PROP_MAP: Record<string, string> = {
+  click: 'onClick',
+  change: 'onChange',
+  input: 'onInput',
+  submit: 'onSubmit',
+  focus: 'onFocus',
+  blur: 'onBlur',
+  keydown: 'onKeyDown',
+  keyup: 'onKeyUp',
+  keypress: 'onKeyPress',
+  mousedown: 'onMouseDown',
+  mouseup: 'onMouseUp',
+  mouseenter: 'onMouseEnter',
+  mouseleave: 'onMouseLeave',
+  scroll: 'onScroll',
+  // 드래그 앤 드롭 이벤트
+  dragstart: 'onDragStart',
+  drag: 'onDrag',
+  dragend: 'onDragEnd',
+  dragenter: 'onDragEnter',
+  dragover: 'onDragOver',
+  dragleave: 'onDragLeave',
+  drop: 'onDrop',
+};
+
+/**
  * 이벤트 핸들러 관리 및 액션 실행 엔진
  *
  * @example
@@ -7115,7 +7146,9 @@ export class ActionDispatcher {
       for (const rawAction of props.actions) {
         // actionRef 해석 - named_actions 참조를 실제 액션 정의로 변환
         const action = this.resolveActionRef(rawAction);
-        const eventName = action.event || this.getEventHandlerName(action.type);
+        const eventName = action.event
+          ? this.normalizeEventPropName(action.event)
+          : this.getEventHandlerName(action.type);
         if (!actionsByEvent.has(eventName)) {
           actionsByEvent.set(eventName, []);
         }
@@ -7229,8 +7262,12 @@ export class ActionDispatcher {
                   $args: args,
                 };
 
-                // 표준 DOM 이벤트가 아닌 경우 빈 이벤트 객체 생성
-                const eventForHandler = isStandardEvent ? firstArg : new Event('custom');
+                // 이벤트 객체 결정: 표준 DOM 이벤트 > 커스텀 컴포넌트 이벤트 > 빈 이벤트.
+                // `type` 경로와 **같은 규칙**이어야 한다. 합성 컴포넌트(Select/MultilingualInput 등)는
+                // `preventDefault` 없는 `{ target: { name, value } }` 를 emit 하는데, 이걸 빈 이벤트로
+                // 갈아끼우면 `$event.target.value` 가 사라져 **핸들러는 실행되는데 값만 비는** 상태가 된다
+                // (콘솔·네트워크에 흔적이 없어 발견이 늦다).
+                const eventForHandler = this.resolveEventForHandler(firstArg, isStandardEvent);
                 this.createHandler(action, contextWithArgs, componentContext)(eventForHandler);
               } else {
                 // 표준 이벤트 핸들러
@@ -7278,33 +7315,74 @@ export class ActionDispatcher {
    * @param eventType 이벤트 타입
    */
   private getEventHandlerName(eventType: EventType): string {
-    // React 이벤트 이름 매핑 (camelCase)
-    const eventNameMap: Record<string, string> = {
-      click: 'onClick',
-      change: 'onChange',
-      input: 'onInput',
-      submit: 'onSubmit',
-      focus: 'onFocus',
-      blur: 'onBlur',
-      keydown: 'onKeyDown',
-      keyup: 'onKeyUp',
-      keypress: 'onKeyPress',
-      mousedown: 'onMouseDown',
-      mouseup: 'onMouseUp',
-      mouseenter: 'onMouseEnter',
-      mouseleave: 'onMouseLeave',
-      scroll: 'onScroll',
-      // 드래그 앤 드롭 이벤트
-      dragstart: 'onDragStart',
-      drag: 'onDrag',
-      dragend: 'onDragEnd',
-      dragenter: 'onDragEnter',
-      dragover: 'onDragOver',
-      dragleave: 'onDragLeave',
-      drop: 'onDrop',
+    return (
+      DOM_EVENT_PROP_MAP[eventType] || `on${eventType.charAt(0).toUpperCase()}${eventType.slice(1)}`
+    );
+  }
+
+  /**
+   * `event` 키로 적힌 이벤트 이름을 React prop 이름으로 정규화합니다.
+   *
+   * 액션은 이벤트를 `type` 또는 `event` 로 적을 수 있는데, `event` 값은 그대로 prop 이름이
+   * 되도록 설계돼 있습니다(`onSortEnd` 같은 컴포넌트 콜백, `upload:*` 같은 확장 발행 이벤트).
+   * 그래서 DOM 이벤트 이름을 `event: "click"` 처럼 적으면 `props.click` 이 만들어지고,
+   * React 는 그런 prop 을 무시하므로 **예외도 경고도 없이 핸들러가 붙지 않은 채** 렌더됩니다.
+   *
+   * 정규화는 알려진 DOM 이벤트 이름에만 적용합니다. 그 외(이미 `onXxx` 형태이거나
+   * 네임스페이스 커스텀 이벤트)는 손대지 않습니다 — 접두사를 덧붙이면 기존 확장 이벤트가
+   * 통째로 끊깁니다(`onSortEnd` → `onOnSortEnd`).
+   *
+   * @param eventName 액션의 `event` 값
+   * @returns React prop 이름 (알려진 DOM 이벤트가 아니면 입력 그대로)
+   */
+  private normalizeEventPropName(eventName: string): string {
+    return DOM_EVENT_PROP_MAP[eventName] ?? eventName;
+  }
+
+  /**
+   * 콜백 첫 인자를 핸들러에 넘길 이벤트 객체로 해석합니다.
+   *
+   * 우선순위: 표준 DOM 이벤트 > 커스텀 컴포넌트 이벤트(synthetic 승격) > 빈 이벤트.
+   *
+   * 합성 컴포넌트(Select, MultilingualInput 등)는 `preventDefault` 없는
+   * `{ target: { name, value } }` 를 emit 합니다. 이를 빈 이벤트로 대체하면
+   * `$event.target.value` 바인딩이 조용히 `undefined` 가 되어, 액션은 성공으로 기록되는데
+   * 저장되는 값만 비는 상태가 됩니다. `type` 경로와 `event` 경로가 같은 규칙을 쓰도록
+   * 이 해석을 한 곳에 모읍니다.
+   *
+   * @param firstArg 콜백의 첫 번째 인자
+   * @param isStandardEvent 표준 DOM 이벤트 여부(`preventDefault` 보유)
+   * @returns 핸들러에 전달할 이벤트 객체
+   */
+  private resolveEventForHandler(firstArg: any, isStandardEvent: boolean): Event {
+    if (isStandardEvent) {
+      return firstArg as Event;
+    }
+
+    const isCustomComponentEvent =
+      firstArg &&
+      typeof firstArg === 'object' &&
+      !('preventDefault' in firstArg) &&
+      'target' in firstArg &&
+      firstArg.target !== null;
+
+    if (!isCustomComponentEvent) {
+      return new Event('custom');
+    }
+
+    const syntheticEvent: any = {
+      type: 'custom',
+      target: firstArg.target,
+      preventDefault: () => {},
+      stopPropagation: () => {},
     };
 
-    return eventNameMap[eventType] || `on${eventType.charAt(0).toUpperCase()}${eventType.slice(1)}`;
+    // _changedKeys 메타데이터 보존 (디바운스 병합에 사용)
+    if (firstArg._changedKeys) {
+      syntheticEvent._changedKeys = firstArg._changedKeys;
+    }
+
+    return syntheticEvent as Event;
   }
 
   /**

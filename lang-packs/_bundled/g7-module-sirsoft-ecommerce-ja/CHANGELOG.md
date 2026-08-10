@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.1.1] - 2026-08-07
+
+### Fixed
+
+- 金額表示から通貨単位（円）の固定表記を削除 — マイレージ・注文金額・一括変更の要約などが、ショップに設定された基準通貨の単位で表示されます。
+
 ## [1.1.0] - 2026-08-06
 
 ### Added

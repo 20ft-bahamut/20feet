@@ -126,6 +126,22 @@ ORDER BY _ft_score DESC
 
 LIKE fallback 시 `_ft_score`는 항상 0 (관련성 순위 불가).
 
+### `_ft_score` SELECT 와 ORDER BY 는 불가분
+
+`_ft_score` 는 실제 컬럼이 아니라 **SELECT 별칭**이다. SELECT 에서 빠지면 정렬이 참조할 대상이 사라져 `SQLSTATE[42S22] Unknown column '_ft_score' in 'order clause'` 로 조회가 통째로 실패한다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+| ------- | -------------- |
+| 결과 소비 메서드(`mapIds()`/`map()`/`lazyMap()`/`getTotalCount()`)가 넘겨받은 쿼리에 `select()`/`selectRaw()`/`addSelect()` 를 걸어 SELECT 를 재작성 | 소비 메서드는 실행만 한다. `pluck()` 은 기존 SELECT 를 보존하므로 좁힐 필요가 없다 |
+| 스코어 별칭만 보존해 SELECT 를 재조립 | 재작성 자체를 하지 않는다 — 소비자가 `->query()` 로 얹은 별칭(`withCount()` 의 `*_count` 등)에도 정렬이 걸릴 수 있어 알려진 별칭 하나만 막으면 다른 이름으로 재발한다 |
+| `reorder()` 로 정렬을 지워 회피 | `keys()` 는 Scout 공개 계약상 **관련도 순** 키 목록을 약속한다 — 정렬을 지우면 오류 없이 무순서 키를 돌려주는 무음 회귀가 된다 |
+
+SELECT 를 재작성하는 지점은 엔진이 쿼리를 **조립하는 자리 하나뿐**이며(`applySelect()`), 키만 필요한 경로에서도 스코어를 함께 남긴다. 조립 지점이 남긴 것을 소비 지점이 되돌리면 두 지점이 정면으로 상충한다.
+
+`->query()` 콜백의 `orderBy` 는 Scout `Builder::$orders` 를 채우지 않으므로 엔진이 `_ft_score DESC` 를 항상 tiebreak 으로 덧붙인다. 즉 **검색 쿼리의 ORDER BY 에는 사실상 언제나 `_ft_score` 가 있다** — "이 경로는 스코어 정렬을 안 쓰니 괜찮다" 는 판단은 성립하지 않는다.
+
+정적 검사가 결과 소비 메서드 안의 SELECT·정렬 재작성을 차단한다.
+
 ### 현재 FulltextSearchable 구현 모델
 
 | 모듈 | 모델 | 검색 컬럼 |

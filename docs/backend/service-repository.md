@@ -832,6 +832,25 @@ public function getAll(): Collection
 }
 ```
 
+### 평면 맵은 Eloquent, 중첩 맵은 Support
+
+`Illuminate\Database\Eloquent\Collection` 의 계약은 "**모델의** 컬렉션" 이다 — `load()` / `modelKeys()` / `fresh()` 가 전부 항목이 `Model` 임을 전제한다. 그래서 `map()` / `mapWithKeys()` / `pluck()` / `flatMap()` / `countBy()` / `partition()` 은 결과 항목 중 하나라도 Model 이 아니면 `toBase()` 로 **Support 컬렉션으로 강등**한다. 이것은 버그가 아니라 그 불변식을 지키는 프레임워크의 의도된 방어다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+| ------- | -------------- |
+| 중첩 맵(`id => Collection`)을 만들면서 반환 선언은 `Eloquent\Collection` | 선언을 `Illuminate\Support\Collection` 으로 정정 |
+| 빈 입력 early return 만 `collect()` (선언은 Eloquent) | `new Collection` / `$this->model->newCollection()` — 분기마다 타입이 갈리지 않게 |
+| `new EloquentCollection($grouped->all())` 로 강제 캐스팅해 선언을 지키기 | 항목이 Model 이 아닌 Eloquent 컬렉션이 만들어져 `->load()` 즉시 fatal — 타입 선언을 지키려고 타입 계약을 깨는 자기모순 |
+| `return $q->get()->groupBy('col');` 을 `Eloquent\Collection` 선언으로 두기 | 선언을 Support 로 정정 — `groupBy()` 는 강등하지 않아 **TypeError 조차 나지 않는다** |
+
+강등은 **결과가 비면 일어나지 않는다.** `groupBy()` 결과가 비면 `map()` 이 항목을 하나도 보지 않아 Eloquent 인 채로 통과한다. 그래서 이 결함은 "일부 데이터에서만 500" 이라는 형태로 나타나고, 픽스처가 빈 테스트는 green 이 된다 — 실제로 추가옵션 선택지가 있는 상품만 장바구니 담기가 죽었다.
+
+**즉사하지 않는 변종이 더 위험하다.** `Eloquent\Collection` 은 `groupBy()` 를 오버라이드하지 않으므로 Support 구현의 `new static` 이 그대로 쓰인다 — 외곽은 Eloquent 인데 항목은 컬렉션인 값이 반환 타입 검사를 **통과**한다. 위 표의 강제 캐스팅과 결과물이 같은 형태이며, 터지는 곳은 반환 지점이 아니라 그 값을 받아 `->load()` / `->modelKeys()` 를 부르는 훨씬 나중의 호출부다. `map()` 말단이 즉시 TypeError 로 드러나는 것과 달리, 이쪽은 소비자가 생길 때까지 조용히 산다.
+
+판정 기준은 단순하다. **꺼내는 값이 Model 이면 Eloquent, 컬렉션·배열이면 Support.** `*Keyed` 류 메서드 대부분은 평면 `id => Model` 맵이라 Eloquent 선언이 정당하고 실제로 지켜진다. 중첩 맵을 만들면서 옆 메서드의 평면 맵 선언을 복사하는 것이 전형적인 실수다.
+
+정적 검사가 이 불일치를 차단하지만, 정규식 기반이라 강등 여부를 의미적으로 판정하지는 못한다. 권위 있는 가드는 **저장소 단위 테스트**다 — 반환 타입을 바꾸거나 중첩 맵을 새로 만들 때는 `assertInstanceOf` / `assertNotInstanceOf` 로 외곽과 내부 항목의 타입을 함께 고정한다.
+
 ### 목록의 eager load 는 목록이 직렬화하는 관계만
 
 eager load 는 N+1 을 막지만, **목록에 필요 없는 관계까지 로드하면** 이번에는 페이로드가 커진다. 한 페이지를 여는 것만으로 그 페이지 전 행의 하위 컬렉션이 통째로 메모리에 올라오고 응답에 실린다.
