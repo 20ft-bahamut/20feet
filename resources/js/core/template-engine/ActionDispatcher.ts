@@ -4222,6 +4222,41 @@ export class ActionDispatcher {
         const update = this.createNestedUpdate(path, value, currentState);
         const mergedState = { ...currentState, ...update };
         context.setState(update);
+
+        // engine-v1.58.2: dot notation 경로도 canonical source(_global._local)에 동기화한다.
+        //
+        // 배경: 이 분기는 context.setState(저장소 A: React localDynamicState)만 갱신하고
+        // _global._local(저장소 B)은 갱신하지 않았다. 커스텀 핸들러(모듈/플러그인)가 상태를
+        // 읽는 유일한 공개 통로인 G7Core.state.getLocal() 은 B 를 읽으므로, dot notation 으로
+        // 기록된 값은 핸들러에게 undefined 로 보였다 (체크아웃 간편결제 선택 → PG 플러그인이
+        // 선택값을 못 읽어 통합결제창이 열린 결함). target: "local" 형태는 engine-v1.50.0 에서
+        // 이미 B 를 동기화하므로, 남아 있던 비대칭을 해소한다.
+        //
+        // [동기화 기준을 전체 스냅샷이 아니라 "live B + 변경 키"로 잡은 이유]
+        // COMPONENT path(target:"local")는 currentState(=pending ?? context.state) 전체 스냅샷을
+        // B 에 통째로 넘긴다. context.state 는 클릭된 리프 컴포넌트의 부분 상태일 수 있어
+        // B 의 다른 키를 잃을 수 있고(engine-v1.50.0 주석의 안전성 의존 관계), 앞선
+        // 커스텀 핸들러 setLocal 결과를 stale base 로 되돌릴 수 있다(트러블슈팅 사례 24).
+        // 여기서는 live B 를 base 로 삼고 변경된 최상위 키만 얹으므로 두 위험이 모두 없다.
+        // B 를 못 읽는 환경(테스트 등 __templateApp 부재)에서만 전체 스냅샷으로 폴백한다.
+        //
+        // [__g7PendingLocalState 를 쓰지 않는 이유]
+        // pending 에 B 기반 전체 스냅샷을 넣으면 handleLocalSetState 의 effectivePrev 병합에서
+        // React 전용 상태(DataGrid expandedRows 등)를 초기값으로 덮어쓴다(트러블슈팅 사례 22).
+        // setGlobalState 는 globalState 를 동기 대입하므로 pending 없이도 같은 tick 의
+        // getLocal() 이 즉시 최신값을 읽는다 — 오염 경로에 진입할 이유가 없다.
+        //
+        // scope: 'parent' | 'root' 은 이 분기가 구현하지 않는 타깃이므로 동기화 대상에서 제외한다
+        // (모달에서 부모 스코프를 노린 setState 가 페이지 저장소를 오염시키는 것 방지 — 사례 29).
+        if (this.globalStateUpdater && scope !== 'parent' && scope !== 'root') {
+          const canonicalLocal = (window as any).__templateApp?.getGlobalState?.()?._local;
+          const syncedLocal = canonicalLocal && typeof canonicalLocal === 'object'
+            ? { ...canonicalLocal, ...update }
+            : mergedState;
+          this.globalStateUpdater({ _local: syncedLocal }, { render: false });
+          logger.log('[handleSetState] _global._local synced for dot notation (render:false):', syncedLocal);
+        }
+
         if (setStateId && devTools) setTimeout(() => devTools.completeStateChange(setStateId), 0);
         return mergedState;
       } else {

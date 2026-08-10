@@ -5,6 +5,20 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.58.2] - 2026-08-10
+
+### Fixed
+
+#### `target: "_local.xxx"` 로 기록한 값을 커스텀 핸들러가 읽지 못하던 문제
+
+- `ActionDispatcher.ts::handleSetState` — dot notation 경로(`target: "_local.paymentMethod"`)로 기록한 값을 canonical source 인 `_global._local` 에도 동기화한다. 기존에는 `context.setState`(React `localDynamicState`)만 갱신하고 `_global._local` 은 갱신하지 않았다. 모듈·플러그인 커스텀 핸들러가 상태를 읽는 공개 통로인 `G7Core.state.getLocal()` 은 `_global._local` 을 읽으므로, dot notation 으로 기록된 값은 핸들러에게 `undefined` 로 보였다.
+- 화면은 정상으로 보인다 — 선택 표시는 React 저장소만으로 그려지기 때문이다. **예외도 경고도 콘솔 출력도 없이 핸들러가 받는 값만 비어** 발견이 늦다. 실제 발현: 주문서형 결제에서 간편결제(네이버페이 등)를 고르고 결제하면 PG 플러그인이 선택값을 못 읽어 간편결제 자체창 대신 통합결제창이 열렸다.
+- `target: "local"` 형태는 engine-v1.50.0 에서 이미 `_global._local` 을 동기화하고 있었다. 같은 뜻의 두 표기가 서로 다른 저장소에 쓰이던 비대칭을 해소한 것이다.
+- 동기화 기준은 **현재 `_global._local` + 변경된 최상위 키**다. `target: "local"` 경로처럼 전체 스냅샷을 넘기지 않는다 — 클릭된 리프 컴포넌트의 부분 상태가 base 가 되면 `_global._local` 의 다른 키를 잃거나, 앞서 커스텀 핸들러가 `setLocal()` 로 기록한 값을 되돌릴 수 있다.
+- `__g7PendingLocalState` 는 갱신하지 않는다. `_global._local` 기반 전체 스냅샷을 pending 에 넣으면 DataGrid `expandedRows` 처럼 React 에만 존재하는 상태를 초기값으로 덮어쓴다. 전역 상태 대입은 동기적이라 pending 없이도 같은 tick 의 `getLocal()` 이 최신값을 읽는다.
+- `scope: "parent" | "root"` 는 dot notation 분기가 구현하지 않는 타깃이므로 동기화 대상에서 제외한다(모달에서 부모 스코프를 노린 `setState` 가 페이지 저장소를 오염시키는 것 방지).
+- 저장소 영향 범위(전수 확인): `target: "_local.xxx"` 사용은 8건이며 전부 `sirsoft-basic` 체크아웃 3개 파일이다(결제수단 선택·무통장 은행 선택·환불계좌 초기화·주문 제출 플래그). TS/TSX 코드에서 이 형태로 dispatch 하는 곳과 `$parent._local.xxx` / `$root._local.xxx` 사용은 0건이다.
+
 ## [engine-v1.58.1] - 2026-08-07
 
 ### Fixed
