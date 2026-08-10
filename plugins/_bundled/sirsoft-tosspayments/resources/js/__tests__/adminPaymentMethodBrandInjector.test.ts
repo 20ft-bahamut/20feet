@@ -1,3 +1,11 @@
+/**
+ * 관리자 주문설정 브랜드 마크 주입 회귀.
+ *
+ * 배경: #475 "확장 결제수단 1급화" 가 nicepayments·nhnkcp·kginicis 에 관리자 브랜드
+ * injector 를 도입할 때 토스는 전환 대상에서 빠졌다(그 커밋에 tosspayments 파일 0건).
+ * 관리자 레이아웃은 아이콘 열을 `Icon name={{$method._cached_icon}}` 하나로만 그리므로,
+ * injector 가 없는 플러그인의 결제수단은 브랜드 배지 없이 회색 기본 아이콘으로 남는다.
+ */
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
     installAdminPaymentMethodBrandInjector,
@@ -41,15 +49,15 @@ function mobileItem(testId: string, title: string): string {
     `;
 }
 
-describe('adminPaymentMethodBrandInjector', () => {
+describe('adminPaymentMethodBrandInjector (tosspayments)', () => {
     beforeEach(() => {
         document.documentElement.lang = 'ko';
         window.history.pushState({}, '', '/admin/ecommerce/settings?tab=order_settings');
         document.body.innerHTML = `
-            ${desktopItem('naverpay', '네이버페이 (KG이니시스)', '네이버페이로 결제')}
-            ${mobileItem('kakaopay', '카카오페이 (KG이니시스)')}
-            ${desktopItem('nhn-naverpay', '네이버페이 (카드)', '네이버페이 신용카드로 결제 (NHN KCP)')}
-            ${desktopItem('card', '신용카드', '신용카드로 결제')}
+            ${desktopItem('toss-naverpay', '네이버페이 (토스페이먼츠)', '네이버페이 간편결제 — 토스페이먼츠를 통해 처리')}
+            ${mobileItem('toss-kakaopay', '카카오페이 (토스페이먼츠)')}
+            ${desktopItem('nice-naverpay', '네이버페이 (나이스페이먼츠)', '네이버페이로 결제 (나이스페이먼츠)')}
+            ${desktopItem('toss-card', '신용카드 (토스페이먼츠)', '신용·체크카드로 결제 — 토스페이먼츠를 통해 처리')}
         `;
     });
 
@@ -58,32 +66,46 @@ describe('adminPaymentMethodBrandInjector', () => {
         document.body.innerHTML = '';
     });
 
-    it('KG이니시스 간편결제 행의 기본 아이콘을 브랜드 텍스트 배지로 바꾼다', () => {
+    it('토스 간편결제 행의 기본 아이콘을 브랜드 배지로 바꾼다', () => {
         expect(syncRenderedAdminPaymentMethodBrands()).toBe(true);
 
-        const naverPay = document.querySelector<HTMLElement>('[data-test-item="naverpay"]');
-        const kakaoPay = document.querySelector<HTMLElement>('[data-test-item="kakaopay"]');
-        const nhnNaverPay = document.querySelector<HTMLElement>('[data-test-item="nhn-naverpay"]');
-        const card = document.querySelector<HTMLElement>('[data-test-item="card"]');
+        const naverpay = document.querySelector<HTMLElement>('[data-test-item="toss-naverpay"]');
+        expect(naverpay?.dataset.tossAdminPaymentMethod).toBe('toss_naverpay');
+        expect(naverpay?.querySelector('[data-toss-admin-payment-brand-mark="true"]')?.textContent).toBe('N');
+        // 원래 아이콘은 치환되고, 드래그 핸들 아이콘은 남아야 한다
+        expect(naverpay?.querySelector('[data-original-icon="true"]')).toBeNull();
+        expect(naverpay?.querySelector('[data-drag-icon="true"]')).not.toBeNull();
+    });
 
-        expect(naverPay?.dataset.kginicisAdminPaymentMethod).toBe('kginicis_naverpay');
-        expect(naverPay?.querySelector('[data-kginicis-admin-payment-brand-mark="true"]')?.textContent).toBe('NPay');
-        expect(naverPay?.querySelector('[data-original-icon="true"]')).toBeNull();
-        expect(naverPay?.querySelector('[data-drag-icon="true"]')).not.toBeNull();
+    it('모바일 카드 뷰에서도 동일하게 주입한다', () => {
+        expect(syncRenderedAdminPaymentMethodBrands()).toBe(true);
 
-        expect(kakaoPay?.dataset.kginicisAdminPaymentMethod).toBe('kginicis_kakaopay');
-        expect(kakaoPay?.querySelector('[data-kginicis-admin-payment-brand-mark="true"]')?.textContent).toBe('KakaoPay');
+        const kakaopay = document.querySelector<HTMLElement>('[data-test-item="toss-kakaopay"]');
+        expect(kakaopay?.dataset.tossAdminPaymentMethod).toBe('toss_kakaopay');
+        expect(kakaopay?.querySelector('[data-toss-admin-payment-brand-mark="true"]')?.textContent).toBe('K');
+    });
 
-        expect(nhnNaverPay?.dataset.kginicisAdminPaymentMethod).toBeUndefined();
-        expect(nhnNaverPay?.querySelector('[data-original-icon="true"]')).not.toBeNull();
+    it('다른 PG 의 같은 브랜드 행은 건드리지 않는다 (플러그인 간 침범 금지)', () => {
+        syncRenderedAdminPaymentMethodBrands();
+
+        const nice = document.querySelector<HTMLElement>('[data-test-item="nice-naverpay"]');
+        expect(nice?.dataset.tossAdminPaymentMethod).toBeUndefined();
+        expect(nice?.querySelector('[data-original-icon="true"]')).not.toBeNull();
+    });
+
+    it('브랜드가 아닌 수단(카드)은 기본 아이콘을 유지한다', () => {
+        syncRenderedAdminPaymentMethodBrands();
+
+        const card = document.querySelector<HTMLElement>('[data-test-item="toss-card"]');
+        expect(card?.dataset.tossAdminPaymentMethod).toBeUndefined();
         expect(card?.querySelector('[data-original-icon="true"]')).not.toBeNull();
     });
 
-    it('주문설정 화면이 아니면 관리자 결제수단 아이콘을 바꾸지 않는다', () => {
+    it('주문설정 화면이 아니면 아무것도 바꾸지 않는다', () => {
         window.history.pushState({}, '', '/admin/ecommerce/settings?tab=shipping');
 
         expect(syncRenderedAdminPaymentMethodBrands()).toBe(false);
-        expect(document.querySelector('[data-kginicis-admin-payment-brand-mark="true"]')).toBeNull();
+        expect(document.querySelector('[data-toss-admin-payment-brand-mark="true"]')).toBeNull();
     });
 
     /**
@@ -96,7 +118,7 @@ describe('adminPaymentMethodBrandInjector', () => {
      */
     it('replaceState 로 탭을 전환했다 돌아와도 배지를 재주입한다', async () => {
         installAdminPaymentMethodBrandInjector();
-        expect(document.querySelectorAll('[data-kginicis-admin-payment-brand-mark="true"]').length).toBeGreaterThan(0);
+        expect(document.querySelectorAll('[data-toss-admin-payment-brand-mark="true"]').length).toBeGreaterThan(0);
 
         // 다른 탭으로 이동 (replaceState) — 화면이 갈아끼워지며 배지가 사라진 상태를 재현
         window.history.replaceState({}, '', '/admin/ecommerce/settings?tab=shipping');
@@ -104,12 +126,12 @@ describe('adminPaymentMethodBrandInjector', () => {
         await new Promise((r) => setTimeout(r, 300));
 
         // 주문설정으로 복귀 (replaceState) + 행 재렌더
-        document.body.innerHTML = desktopItem('naverpay', '네이버페이 (KG이니시스)', '네이버페이로 결제');
+        document.body.innerHTML = desktopItem('toss-naverpay', '네이버페이 (토스페이먼츠)', '네이버페이 간편결제 — 토스페이먼츠를 통해 처리');
         window.history.replaceState({}, '', '/admin/ecommerce/settings?tab=order_settings');
         await new Promise((r) => setTimeout(r, 600));
 
         expect(
-            document.querySelectorAll('[data-kginicis-admin-payment-brand-mark="true"]').length,
+            document.querySelectorAll('[data-toss-admin-payment-brand-mark="true"]').length,
             'replaceState 복귀 후 배지가 재주입되지 않았다',
         ).toBeGreaterThan(0);
     });
