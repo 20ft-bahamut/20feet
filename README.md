@@ -425,7 +425,24 @@ The setup wizard creates the application key, configures the database connection
 
 Official language packs you can install alongside the initial setup, so the core and the main modules, plugins, and templates share one consistent translation from the start.
 
-Sixteen Japanese (`-ja`) packs are bundled: one for the core and one for each bundled module, plugin, and template — `g7-core-ja`, `g7-module-sirsoft-board-ja`, `g7-module-sirsoft-ecommerce-ja`, `g7-module-sirsoft-page-ja`, `g7-plugin-sirsoft-ckeditor5-ja`, `g7-plugin-sirsoft-daum_postcode-ja`, `g7-plugin-sirsoft-gdpr-ja`, `g7-plugin-sirsoft-marketing-ja`, `g7-plugin-sirsoft-pay_kginicis-ja`, `g7-plugin-sirsoft-pay_nicepayments-ja`, `g7-plugin-sirsoft-pay_nhnkcp-ja`, `g7-plugin-sirsoft-tosspayments-ja`, `g7-plugin-sirsoft-verification_kginicis-ja`, `g7-plugin-sirsoft-verification_nhnkcp-ja`, `g7-template-sirsoft-admin_basic-ja`, and `g7-template-sirsoft-basic-ja`.
+| Identifier | Description |
+| ---------- | ----------- |
+| **g7-core-ja** | Core, Japanese |
+| **g7-module-sirsoft-board-ja** | Board module, Japanese |
+| **g7-module-sirsoft-ecommerce-ja** | E-commerce module, Japanese |
+| **g7-module-sirsoft-page-ja** | Page module, Japanese |
+| **g7-plugin-sirsoft-ckeditor5-ja** | CKEditor 5 plugin, Japanese |
+| **g7-plugin-sirsoft-daum_postcode-ja** | Daum postcode plugin, Japanese |
+| **g7-plugin-sirsoft-gdpr-ja** | Privacy/GDPR plugin, Japanese |
+| **g7-plugin-sirsoft-marketing-ja** | Marketing plugin, Japanese |
+| **g7-plugin-sirsoft-pay_kginicis-ja** | KG Inicis payment plugin, Japanese |
+| **g7-plugin-sirsoft-pay_nicepayments-ja** | NICE Payments plugin, Japanese |
+| **g7-plugin-sirsoft-pay_nhnkcp-ja** | NHN KCP payment plugin, Japanese |
+| **g7-plugin-sirsoft-tosspayments-ja** | Toss Payments plugin, Japanese |
+| **g7-plugin-sirsoft-verification_kginicis-ja** | KG Inicis identity verification plugin, Japanese |
+| **g7-plugin-sirsoft-verification_nhnkcp-ja** | NHN KCP mobile identity verification plugin, Japanese |
+| **g7-template-sirsoft-admin_basic-ja** | Default admin template, Japanese |
+| **g7-template-sirsoft-basic-ja** | Default user template, Japanese |
 
 > Korean and English are built into the core and bundled extensions and are always active without installation. Any other language can be added freely from a ZIP file or a GitHub URL.
 
