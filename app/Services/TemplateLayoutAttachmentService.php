@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Extension\StorageInterface;
 use App\Contracts\Repositories\TemplateLayoutAttachmentRepositoryInterface;
 use App\Contracts\Repositories\TemplateRepositoryInterface;
+use App\Extension\HookManager;
 use App\Models\TemplateLayoutAttachment;
 use App\Support\ImageResizer;
 use Illuminate\Database\Eloquent\Collection;
@@ -52,6 +53,12 @@ class TemplateLayoutAttachmentService
             return ['success' => false, 'attachment' => null, 'url' => null, 'error' => 'template_not_found'];
         }
 
+        // 훅: 업로드 전 (확장 지점)
+        HookManager::doAction('core.template_layout_attachment.before_upload', $file, $templateIdentifier, $layoutName);
+
+        // 필터 훅 - 파일 데이터 변형 (압축, 리사이즈 등 확장 포인트)
+        $file = HookManager::applyFilters('core.template_layout_attachment.filter_upload_file', $file);
+
         // 저장 경로 — 템플릿 식별자/날짜별 디렉토리 + UUID 파일명 (충돌 회피)
         $storedFilename = Str::uuid().'.'.$file->getClientOriginalExtension();
         $relativePath = "{$templateIdentifier}/".date('Y/m/d')."/{$storedFilename}";
@@ -86,6 +93,8 @@ class TemplateLayoutAttachmentService
             'template_id' => $template->id,
             'path' => $relativePath,
         ]);
+
+        HookManager::doAction('core.template_layout_attachment.after_upload', $attachment);
 
         return [
             'success' => true,

@@ -527,6 +527,7 @@ cp .env.example .env
   <a href="https://github.com/devrhee16" title="devrhee16"><img src="https://github.com/devrhee16.png" width="48" alt="devrhee16"></a>
   <a href="https://github.com/GyusoonKim" title="GyusoonKim"><img src="https://github.com/GyusoonKim.png" width="48" alt="GyusoonKim"></a>
   <a href="https://github.com/Lastorder-DC" title="Lastorder-DC"><img src="https://github.com/Lastorder-DC.png" width="48" alt="Lastorder-DC"></a>
+  <a href="https://github.com/lyg-kaban" title="lyg-kaban"><img src="https://github.com/lyg-kaban.png" width="48" alt="lyg-kaban"></a>
   <a href="https://github.com/miles44229" title="miles44229"><img src="https://github.com/miles44229.png" width="48" alt="miles44229"></a>
   <a href="https://github.com/minyho" title="minyho"><img src="https://github.com/minyho.png" width="48" alt="minyho"></a>
 </p>
