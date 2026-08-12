@@ -4,6 +4,12 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.3] - 2026-08-12
+
+### Changed
+
+- 신고 반려 누적 제한 안내 문구의 일본어 번역을 실제 동작(설정 건수 도달 시 차단)에 맞게 정정했습니다.
+
 ## [1.0.2] - 2026-08-10
 
 ### Added
