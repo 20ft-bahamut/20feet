@@ -149,7 +149,7 @@ modules/_bundled/sirsoft-ecommerce/
 ├── package.json             ← npm 패키지 정의
 ├── vite.config.ts           ← Vite 빌드 설정
 ├── tsconfig.json            ← TypeScript 설정
-├── dist/                    ← 빌드 출력 (git ignore)
+├── dist/                    ← 빌드 출력 (_bundled 은 Git 추적 — 배포 산출물, `*.map` 만 ignore)
 │   ├── js/module.iife.js
 │   ├── css/module.css
 │   └── assets/

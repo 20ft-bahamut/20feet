@@ -1106,6 +1106,8 @@ php artisan plugin:build sirsoft-payment --active       # 활성 디렉토리에
 ```
 
 > **빌드 원칙**: 기본값은 `_bundled` 디렉토리. 빌드 결과물은 빌드 경로 내에만 남음.
+
+`_bundled` 의 `dist/`(코어는 `public/build/core/`)는 Git 추적되는 배포 산출물이다 (`*.map` 만 ignore). src 변경 시 커밋 dist 를 `--production` 으로 동반 재빌드한다 — 신규 소스 리터럴이 dist 에 없으면 stale 빌드이며, 정적 검사가 이를 검출한다. 커밋 dist 에 `//# sourceMappingURL=` 참조를 남기지 않는다 — `.map` 은 배포본에 존재하지 않아 브라우저 개발자 도구에서 404 를 유발한다. 코어 3번들 재빌드는 `core:build --production` (`--full` 은 앱 번들 전용 — `public/build` 를 비워 코어 3번들을 지운다).
 > 활성 디렉토리 반영은 `update` 커맨드로만 수행. `--watch` 모드는 실시간 개발용으로 활성 디렉토리를 자동 사용.
 
 ---
