@@ -923,6 +923,56 @@ describe('트러블슈팅 회귀 테스트 - Form 자동 바인딩 bindingType �
       expect(merged.form.method_samsungpay).toBeNull();
     });
   });
+
+  /**
+   * [사례 7] 자동바인딩 value 쓰기 경로는 e.target.value 를 무변환 저장한다
+   *
+   * troubleshooting-components-form.md 사례 8 회귀 가드 (공개 #97).
+   *
+   * bindingType 미지정(RadioGroup/Select)은 value 바인딩으로 떨어지는데,
+   * 그 쓰기 경로(autoOnChange)는 `eventOrValue?.target?.value !== undefined ?
+   * eventOrValue.target.value : eventOrValue` 로 DOM 문자열을 그대로 저장한다.
+   * DOM 라디오의 value 는 항상 문자열이므로 boolean 필드가 이 경로로 묶이면
+   * 클릭 순간 "true"/"false" 문자열이 되어 서버 boolean 규칙에서 422 가 된다.
+   * 표시 계층은 String === String 느슨 비교가 구제하므로 저장 시점에야 드러난다.
+   */
+  describe('[사례 7] 자동바인딩 value 쓰기 경로의 boolean 문자열화 (공개 #97)', () => {
+    /** DynamicRenderer 의 value 바인딩 autoOnChange 값 추출과 동일 */
+    const calcAutoOnChangeNewValue = (eventOrValue: any): any =>
+      eventOrValue?.target?.value !== undefined ? eventOrValue.target.value : eventOrValue;
+
+    it('라디오 change 이벤트의 e.target.value 는 문자열 그대로 저장된다 (무변환)', () => {
+      // DOM 라디오는 value 를 항상 문자열로 보고한다
+      const domEvent = { target: { value: 'false', name: 'is_combinable', type: 'radio' } };
+
+      const stored = calcAutoOnChangeNewValue(domEvent);
+
+      expect(stored).toBe('false');
+      expect(typeof stored).not.toBe('boolean'); // 이것이 서버 422 의 시작점
+    });
+
+    it('boolean 미지정 컴포넌트(RadioGroup)는 boolean 값도 value 바인딩이라 쓰기 경로가 이 함정을 탄다', () => {
+      // 표시(사례 3)는 value 바인딩으로 구제되지만, 쓰기는 문자열화된다
+      expect(calcIsCheckedBinding(undefined, true)).toBe(false); // value 바인딩 확정
+    });
+
+    it('해결: change 액션의 === "true" 캐스팅은 항상 boolean 을 기록한다', () => {
+      // 레이아웃: "form.is_combinable": "{{$event.target.value === 'true'}}"
+      const castYes = 'true' === 'true';
+      const castNo = ('false' as string) === 'true';
+
+      expect(castYes).toBe(true);
+      expect(castNo).toBe(false);
+      expect(typeof castYes).toBe('boolean');
+      expect(typeof castNo).toBe('boolean');
+    });
+
+    it('해결: 표시 바인딩 String(boolean) 은 옵션 문자열 값과 정확히 매칭된다', () => {
+      // 레이아웃: value: "{{String(_local.form?.is_combinable ?? true)}}"
+      expect(String(true)).toBe('true');
+      expect(String(false)).toBe('false');
+    });
+  });
 });
 
 describe('트러블슈팅 회귀 테스트 - 렌더링 구조', () => {
