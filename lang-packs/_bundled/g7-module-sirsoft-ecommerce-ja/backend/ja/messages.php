@@ -440,6 +440,11 @@ return [
             'per_volume' => ':unitL当たり:fee',
             'per_volume_weight' => ':unitkg当たり:fee',
             'per_amount' => ':unit当たり:fee',
+            'range_unit' => [
+                'quantity' => '個',
+                'weight' => 'kg',
+                'volume' => 'L',
+            ],
         ],
         'fee_details' => [
             'base_fee' => '送料',
