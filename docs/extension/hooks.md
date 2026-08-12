@@ -121,6 +121,23 @@ core.attachment.download
 core.attachment.update
 core.attachment.delete
 
+# 업로드 트라이어드 — 사용자 첨부 업로드 지점의 표준 3훅 패턴
+# before_upload(액션) → filter_upload_file(필터: UploadedFile 을 받아 변형본을 반환.
+# 저장 파일명·MIME·크기가 모두 반환 파일 기준이 된다) → after_upload(액션)
+# 포맷 변환(예: jpg → webp) 시에는 바이트만 제자리 덮어쓰지 말고, 변환된 임시 파일 경로와
+# 새 원본 파일명(xxx.webp)으로 UploadedFile 을 재구성해 반환할 것 — 일부 소비처는 저장
+# 확장자를 원본 파일명에서 얻으므로, 이름을 갱신하지 않으면 확장자와 내용이 어긋난다.
+core.attachment.filter_upload_file                      # 코어 첨부 (아바타 포함)
+core.template_layout_attachment.before_upload           # 레이아웃 편집기 첨부 (7.0.7)
+core.template_layout_attachment.filter_upload_file      # 레이아웃 편집기 첨부 (7.0.7)
+core.template_layout_attachment.after_upload            # 레이아웃 편집기 첨부 (7.0.7)
+sirsoft-board.attachment.filter_upload_file             # 게시판 첨부
+sirsoft-page.attachment.filter_upload_file              # 페이지 첨부
+sirsoft-ecommerce.product-image.filter_upload_file      # 상품 이미지
+sirsoft-ecommerce.category-image.filter_upload_file     # 카테고리 이미지
+sirsoft-ecommerce.review-image.filter_upload_file       # 리뷰 이미지 (공개 #96)
+sirsoft-ckeditor5.image.filter_upload_file              # 에디터 이미지
+
 # FormRequest Validation Rules 훅 (Filter)
 core.user.create_validation_rules
 core.user.update_validation_rules
