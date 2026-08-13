@@ -1208,7 +1208,13 @@ return [
             'min' => '注文金額は 0 以上である必要があります。',
         ],
     ],
+    // 公開アセットディスク (コアカタログ照会による検証)
+    'public_asset_disk_invalid' => '有効な公開アセットディスクを選択してください。',
+
     'attributes' => [
+        // 公開アセットストレージ
+        'basic_info.public_asset_disk' => '公開アセットディスク',
+
         'basic_info' => '基本情報',
         'basic_info.shop_name' => 'ショップ名',
         'basic_info.route_path' => 'ルートパス',

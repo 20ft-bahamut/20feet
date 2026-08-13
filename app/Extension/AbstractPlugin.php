@@ -1204,6 +1204,75 @@ abstract class AbstractPlugin implements CacheableExtensionInterface, PluginInte
     }
 
     /**
+     * 카테고리별 스토리지 인스턴스 캐시 (디스크명 키 memoize)
+     *
+     * @var array<string, StorageInterface>
+     */
+    private array $storageByDisk = [];
+
+    /**
+     * 카테고리별 스토리지 디스크 이름 반환
+     *
+     * 기본값은 getStorageDisk() 와 동일 (현행 동작 100% 보존).
+     * 특정 카테고리(예: 'images')만 다른 디스크를 쓰려면 플러그인이 오버라이드합니다.
+     *
+     * 주의: 오버라이드 구현은 'settings' 카테고리에서 플러그인 설정을 조회하면 안 됩니다 —
+     * 설정 로드가 getStorage()->get('settings', ...) 를 경유하므로 재귀 고리가 생깁니다.
+     * 설정 조회는 'images' 등 설정 저장과 무관한 카테고리에서만 수행합니다.
+     *
+     * @param  string  $category  카테고리 (settings, data, images, temp)
+     * @return string 디스크 이름
+     */
+    public function getStorageDiskFor(string $category): string
+    {
+        return $this->getStorageDisk();
+    }
+
+    /**
+     * 카테고리별 스토리지 드라이버 인스턴스 반환
+     *
+     * getStorageDiskFor() 가 결정한 디스크의 드라이버를 디스크 단위로 memoize 하여 반환합니다.
+     * 기본 디스크와 동일하면 getStorage() 인스턴스를 그대로 재사용합니다.
+     *
+     * @param  string  $category  카테고리
+     * @return StorageInterface 스토리지 드라이버 인스턴스
+     */
+    public function getStorageFor(string $category): StorageInterface
+    {
+        $disk = $this->getStorageDiskFor($category);
+
+        if (! isset($this->storageByDisk[$disk])) {
+            $base = $this->getStorage();
+            $this->storageByDisk[$disk] = ($disk === $base->getDisk()) ? $base : $base->withDisk($disk);
+        }
+
+        return $this->storageByDisk[$disk];
+    }
+
+    /**
+     * 공개 자산 디스크 설정값을 해석합니다.
+     *
+     * 우선순위: 확장 개별 설정(override) > 코어 전역 설정(core.storage.public_asset_disk).
+     * 미설정('')/'none'/config 에 존재하지 않는 디스크(고아 플러그인 디스크)는 null 로
+     * 해석되어 호출측이 기존 디스크(스트리밍)로 폴백합니다.
+     *
+     * @param  string|null  $override  확장 개별 설정값 (''/null 이면 코어 전역 설정 사용)
+     * @return string|null 사용할 디스크 이름 (스트리밍 유지면 null)
+     */
+    protected function resolvePublicAssetDisk(?string $override = null): ?string
+    {
+        $disk = ($override !== null && $override !== '')
+            ? $override
+            : (string) config('core.storage.public_asset_disk', '');
+
+        if ($disk === '' || $disk === 'none' || config("filesystems.disks.{$disk}") === null) {
+            return null;
+        }
+
+        return $disk;
+    }
+
+    /**
      * 플러그인 캐시 드라이버 인스턴스 반환
      *
      * 플러그인별로 격리된 캐시를 제공합니다.

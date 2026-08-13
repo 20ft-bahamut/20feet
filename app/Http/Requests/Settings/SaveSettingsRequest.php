@@ -342,6 +342,9 @@ class SaveSettingsRequest extends FormRequest
             'drivers.log_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_LOG_DRIVERS)]),
             'drivers.log_level' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_LOG_LEVELS)]),
             'drivers.log_days' => ['nullable', 'integer', 'min:'.config('core.settings_limits.drivers_log_days_min', 1), 'max:'.config('core.settings_limits.drivers_log_days_max', 365)],
+            // 공개 자산 디스크 — 코어 3종(none/public/s3) + 플러그인 훅 등록 디스크.
+            // 카탈로그가 동적(플러그인 훅)이라 정적 Rule::in 불가 → 레지스트리 조회 closure
+            'drivers.public_asset_disk' => $this->getPublicAssetDiskRules(),
 
             // 본인인증(IDV) provider 기술 파라미터 — 정책 분기는 IdentityPolicy 로 흡수됨
             'identity.default_provider' => ['nullable', 'string', 'max:100'],
@@ -502,6 +505,32 @@ class SaveSettingsRequest extends FormRequest
                 ]));
             }
         };
+    }
+
+    /**
+     * 공개 자산 디스크에 대한 검증 규칙을 반환합니다.
+     *
+     * 선택지가 코어 3종 + 플러그인 훅 등록 디스크로 동적이라 정적 Rule::in 을 쓸 수 없고,
+     * DriverRegistryService 카탈로그 조회로 판정합니다.
+     *
+     * @return array 검증 규칙 배열
+     */
+    private function getPublicAssetDiskRules(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:100',
+            function ($attribute, $value, $fail) {
+                if ($value === null || $value === '') {
+                    return;
+                }
+
+                if (! app(DriverRegistryService::class)->isDriverAvailable('public_asset', $value)) {
+                    $fail(__('validation.settings.public_asset_disk_invalid'));
+                }
+            },
+        ];
     }
 
     /**
@@ -816,6 +845,8 @@ class SaveSettingsRequest extends FormRequest
             'drivers.log_days.integer' => __('validation.settings.log_days_integer'),
             'drivers.log_days.min' => __('validation.settings.log_days_min'),
             'drivers.log_days.max' => __('validation.settings.log_days_max'),
+            'drivers.public_asset_disk.string' => __('validation.settings.public_asset_disk_invalid'),
+            'drivers.public_asset_disk.max' => __('validation.settings.public_asset_disk_invalid'),
 
             // 본인인증(IDV) 설정
             'identity.default_provider.string' => __('validation.settings.identity_default_provider_string'),
@@ -973,6 +1004,7 @@ class SaveSettingsRequest extends FormRequest
             'drivers.log_driver' => __('validation.attributes.log_driver'),
             'drivers.log_level' => __('validation.attributes.log_level'),
             'drivers.log_days' => __('validation.attributes.log_days'),
+            'drivers.public_asset_disk' => __('validation.attributes.public_asset_disk'),
         ];
     }
 }

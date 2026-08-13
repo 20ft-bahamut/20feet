@@ -1088,6 +1088,9 @@ return [
         'log_days_min' => 'Log retention days must be at least 1.',
         'log_days_max' => 'Log retention days may not be greater than 365.',
 
+        // Public asset disk settings
+        'public_asset_disk_invalid' => 'Please select a valid public asset disk.',
+
         // Identity verification (IDV) settings
         'identity_default_provider_string' => 'Default provider must be a string.',
         'identity_default_provider_max' => 'Default provider identifier may not be longer than 100 characters.',
@@ -1300,5 +1303,6 @@ return [
         'log_driver' => 'log driver',
         'log_level' => 'log level',
         'log_days' => 'log retention days',
+        'public_asset_disk' => 'public asset disk',
     ],
 ];

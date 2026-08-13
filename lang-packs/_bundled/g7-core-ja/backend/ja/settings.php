@@ -36,6 +36,11 @@ return [
             'local' => 'ローカル',
             's3' => 'Amazon S3',
         ],
+        'public_asset' => [
+            'none' => '使用しない (ストリーミング)',
+            'public' => 'Public ディスク',
+            's3' => 'Amazon S3',
+        ],
         'cache' => [
             'file' => 'ファイル',
             'redis' => 'Redis',
