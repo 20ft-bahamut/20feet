@@ -270,12 +270,15 @@ class AttachmentService
     /**
      * 이미지 파일 정보 조회 (캐싱 응답용)
      *
-     * 권한 체크 후 파일 경로와 메타 정보를 반환합니다.
-     * 컨트롤러에서 fileResponse()로 캐싱 헤더와 함께 응답할 수 있습니다.
+     * 권한 체크 후 인라인 스트림 응답과 캐싱용 메타를 반환합니다.
+     * 로컬 절대 경로 조립(getBasePath) 방식은 S3 등 원격 디스크 행에서 성립하지
+     * 않으므로(#99 — filemtime stat 실패 500), 행 disk 를 그대로 따르는
+     * StorageInterface::response() 스트림으로 서빙합니다. 컨트롤러는
+     * streamedFileResponse() 로 캐싱 헤더(ETag/304)를 입혀 응답합니다.
      *
      * @param  string  $hash  첨부파일 해시
      * @param  User|null  $user  요청한 사용자 (null이면 비로그인)
-     * @return array{path: string, mime_type: string, filename: string}|null 파일 정보 또는 null
+     * @return array{response: StreamedResponse, etag_source: string, mime_type: string, filename: string}|null 서빙 정보 또는 null
      *
      * @throws AuthorizationException 기능 레벨 권한이 없는 경우
      */
@@ -293,9 +296,19 @@ class AttachmentService
         // 필터 훅 - 다운로드 전 처리
         $attachment = HookManager::applyFilters('core.attachment.before_download', $attachment, $user);
 
-        // 파일 존재 확인
-        $diskStorage = $this->storage->withDisk($attachment->disk);
-        if (! $diskStorage->exists('', $attachment->path)) {
+        // 행 disk 기준 인라인 스트림 (존재 검사는 response() 내부에서 수행)
+        // Content-Type/Length 를 행 메타로 선지정해 원격 디스크의 추가 메타 조회를 생략한다.
+        $response = $this->storage->withDisk($attachment->disk)->response(
+            '',
+            $attachment->path,
+            $attachment->original_filename,
+            [
+                'Content-Type' => $attachment->mime_type,
+                'Content-Length' => (string) $attachment->size,
+            ]
+        );
+
+        if (! $response) {
             Log::error('첨부파일 스토리지에 없음', [
                 'attachment_id' => $attachment->id,
                 'path' => $attachment->path,
@@ -305,7 +318,14 @@ class AttachmentService
         }
 
         return [
-            'path' => $diskStorage->getBasePath('').DIRECTORY_SEPARATOR.$attachment->path,
+            'response' => $response,
+            // 파일 stat 없이 결정적인 ETag 소스 (업로드 파일은 경로당 불변)
+            'etag_source' => implode('|', [
+                $attachment->disk,
+                $attachment->path,
+                (string) $attachment->updated_at?->getTimestamp(),
+                (string) $attachment->size,
+            ]),
             'mime_type' => $attachment->mime_type,
             'filename' => $attachment->original_filename,
         ];

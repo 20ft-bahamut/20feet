@@ -237,7 +237,8 @@ sudo chmod -R 755 storage bootstrap/cache vendor modules plugins templates
 | AWS SES | 이메일 발송 | 선택 |
 | AWS SQS | 큐 처리 (대규모 트래픽) | 선택 |
 
-- `aws/aws-sdk-php` 패키지 포함됨
+- `aws/aws-sdk-php` · `league/flysystem-aws-s3-v3` 패키지 포함됨 (S3 및 S3 호환 스토리지 — Cloudflare R2, MinIO 등 — 를 별도 설치 없이 사용 가능)
+- `predis/predis` 패키지 포함됨 (phpredis PHP 확장이 없는 서버에서도 Redis 드라이버 사용 가능)
 
 ### 4.3 메일 서비스
 

@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Extension\HookManager;
 use App\Repositories\JsonConfigRepository;
 use Illuminate\Support\Facades\Lang;
-use Illuminate\Support\Facades\Log;
+use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
+use Predis\Client;
 
 /**
  * 코어 드라이버 레지스트리 서비스
@@ -59,7 +60,10 @@ class DriverRegistryService
         'cache' => 'cache.default',
         'session' => 'session.driver',
         'queue' => 'queue.default',
-        'log' => 'logging.default',
+        // 실제 적용 키 — SettingsServiceProvider::applyLogConfig() 가 기록하는 키와 동일해야
+        // 플러그인 로그 드라이버 폴백이 실효한다 (logging.default 는 어디에서도 읽지 않는 죽은 키였다).
+        // 이 키의 값은 채널 "배열" 이다 — getConfigValueForDriver() 로 형태를 맞춘다.
+        'log' => 'logging.channels.stack.channels',
         'websocket' => 'broadcasting.default',
         'mail' => 'mail.default',
     ];
@@ -75,7 +79,9 @@ class DriverRegistryService
         'session' => ['category' => 'drivers', 'key' => 'session_driver'],
         'queue' => ['category' => 'drivers', 'key' => 'queue_driver'],
         'log' => ['category' => 'drivers', 'key' => 'log_driver'],
-        'websocket' => ['category' => 'drivers', 'key' => 'websocket_driver'],
+        // websocket 은 드라이버 ID 선택 설정이 없다 (불리언 websocket_enabled 뿐) —
+        // 종전의 'websocket_driver' 는 어떤 저장 경로에도 없는 유령 키라 항상 skip 이었다.
+        // 카테고리 제외로 같은 동작을 명시화한다 (getSettingsKey('websocket') === null).
         'mail' => ['category' => 'mail', 'key' => 'mailer'],
     ];
 
@@ -235,6 +241,70 @@ class DriverRegistryService
         }
 
         return $inUse;
+    }
+
+    /**
+     * 주어진 드라이버가 현재 서버에서 실제로 동작 가능한지 판정합니다.
+     *
+     * isDriverAvailable() 이 "등록 여부"(카탈로그 소속)를 보는 것과 달리, 이 메서드는
+     * 어댑터 클래스·PHP 확장 등 런타임 능력의 존재를 검사합니다. 사용 불능 드라이버가
+     * 저장되면 다음 부팅에서 사이트 전면 다운으로 이어질 수 있으므로 저장/테스트
+     * FormRequest 의 서버 게이트가 이 판정을 사용합니다.
+     *
+     * @param  string  $category  드라이버 카테고리 (storage, cache, session, queue 등)
+     * @param  string  $driverId  드라이버 ID
+     * @return bool 동작 가능하면 true
+     */
+    public function isDriverUsable(string $category, string $driverId): bool
+    {
+        return $this->usabilityFailureReason($category, $driverId) === null;
+    }
+
+    /**
+     * 드라이버 사용 불능 사유를 반환합니다.
+     *
+     * 판정은 드라이버 ID 가 요구하는 런타임 능력 기준입니다. 코어가 능력을 모르는
+     * 드라이버(플러그인 등록 드라이버 포함)는 null(사용 가능) — 플러그인 드라이버의
+     * 가용성은 그 플러그인의 ServiceProvider 가 보증합니다.
+     *
+     * @param  string  $category  드라이버 카테고리
+     * @param  string  $driverId  드라이버 ID
+     * @return string|null 사용 불능 사유 (다국어), 사용 가능하면 null
+     */
+    public function usabilityFailureReason(string $category, string $driverId): ?string
+    {
+        return match ($driverId) {
+            's3' => class_exists(AwsS3V3Adapter::class)
+                ? null
+                : __('settings.driver_unusable_s3_adapter'),
+            // redis 는 설정된 클라이언트 기준으로 판정한다 — predis 명시 설정이면 predis
+            // 존재만 본다. phpredis 설정은 확장 부재여도 부트 폴백(SettingsServiceProvider::
+            // shouldFallBackToPredis)이 predis 로 전환하므로 predis 존재까지 사용 가능이다.
+            'redis' => (config('database.redis.client', 'phpredis') === 'predis'
+                ? class_exists(Client::class)
+                : (extension_loaded('redis') || class_exists(Client::class)))
+                    ? null
+                    : __('settings.driver_unusable_redis_client'),
+            'memcached' => extension_loaded('memcached')
+                ? null
+                : __('settings.driver_unusable_memcached_extension'),
+            default => null,
+        };
+    }
+
+    /**
+     * 카테고리의 Config 키에 기록할 값 형태로 드라이버 ID 를 변환합니다.
+     *
+     * log 카테고리의 적용 키(logging.channels.stack.channels)는 채널 배열이므로
+     * 배열로 감싸고, 그 외 카테고리는 드라이버 ID 문자열 그대로입니다.
+     *
+     * @param  string  $category  드라이버 카테고리
+     * @param  string  $driverId  드라이버 ID
+     * @return string|array<int, string> Config 기록 값
+     */
+    public function getConfigValueForDriver(string $category, string $driverId): string|array
+    {
+        return $category === 'log' ? [$driverId] : $driverId;
     }
 
     /**

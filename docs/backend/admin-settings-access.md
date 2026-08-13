@@ -41,7 +41,8 @@
 | `drivers.search_engine_driver` | `scout.driver` |
 | `drivers.redis_*` | `database.redis.*` |
 | `drivers.memcached_*` | `cache.stores.memcached.*` |
-| `drivers.s3_*` | `filesystems.disks.s3.*` |
+| `drivers.s3_*` | `filesystems.disks.s3.*` — `s3_url` → `url`(공개 URL base), `s3_endpoint` → `endpoint`(API 요청 대상), `s3_use_path_style` → `use_path_style_endpoint` |
+| `drivers.storage_driver` = `s3` | `attachment.disk` = `s3` (단, `ATTACHMENT_DISK` env 명시 시 env 우선 — `attachment.disk_explicit` 로 판별) |
 | `geoip.feature_enabled`, `geoip.license_key`, `geoip.auto_update_enabled` | `geoip.*` |
 
 위 매핑은 [`app/Providers/SettingsServiceProvider.php`](../../app/Providers/SettingsServiceProvider.php) 가 단일 SSoT.

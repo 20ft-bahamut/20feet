@@ -72,10 +72,12 @@ _단건 응답: `data` 객체의 필드._
 | notifications | object | `{"channels":[{"id":"mail","is_active":true,"sort_order":1…` | 알림 탭 설정 그룹. channels 는 알림 채널 목록으로 각 원소가 id(채널 식별자)·is_active(활성 여부)·sort_order(표시 순서)를 가짐 |
 | identity | object | `{"default_provider":"g7:core.mail","purpose_providers":{"…` | 본인인증(IDV) 탭 설정 그룹 (기본 provider·목적별 provider 매핑(purpose_providers)·챌린지 유효시간(분)·최대 시도 횟수) |
 | available_drivers | object | `{"storage":[{"id":"local","label":{"ko":"로컬","en":"Local"…` | 드라이버 선택지 카탈로그 (DriverRegistryService 산물). 종류별(storage/cache/session/queue 등) 선택 가능한 드라이버 목록을 id/다국어 label 형태로 제공 |
-| _meta | object | `{"limits":{"upload_max_file_size_min":1,"upload_max_file_…` | <!-- TODO: 설명 --> |
+| _meta | object | `{"limits":{"upload_max_file_size_min":1,"upload_max_file_…` | 화면 검증 메타 — `limits` 는 각 설정 항목의 min/max 경계값 맵 (`config/core.php` 의 `settings_limits` 가 SSoT, 화면 입력 힌트와 FormRequest 검증이 같은 값을 공유) |
 | abilities | object | `{"can_update":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -120,19 +122,19 @@ HTTP/1.1 200
                 "webp",
                 "... (총 11건 중 5건 표시)"
             ],
-            "image_max_width": "800",
-            "image_max_height": "600",
+            "image_max_width": 2000,
+            "image_max_height": 2000,
             "image_quality": 85
         },
         "seo": {
-            "meta_title_suffix": null,
-            "meta_description": null,
-            "meta_keywords": null,
-            "google_analytics_id": null,
-            "google_site_verification": null,
-            "...": "(24개 키 생략, 총 29개)"
+            "meta_title_suffix": "",
+            "meta_description": "",
+            "meta_keywords": "",
+            "google_analytics_id": "",
+            "google_site_verification": "",
+            "...": "(23개 키 생략, 총 28개)"
         },
-        "...": "(11개 키 생략, 총 16개)"
+        "...": "(12개 키 생략, 총 17개)"
     }
 }
 ```
@@ -243,10 +245,12 @@ HTTP/1.1 200
 | advanced.geoip_auto_update_enabled | body | boolean | 아니오 | — | GeoIP DB 자동 업데이트 사용 여부 (주 1회 자동 재다운로드) |
 | drivers.storage_driver | body | string | 아니오 | — | 스토리지 드라이버 (local/s3) |
 | drivers.s3_bucket | body | string | 아니오 | max 255 | S3 버킷명 |
-| drivers.s3_region | body | string | 아니오 | — | S3 리전 |
+| drivers.s3_region | body | string | 아니오 | max 64, 소문자 영숫자·하이픈 (`^[a-z0-9-]+$`) | S3 리전 — AWS 리전 코드 또는 S3 호환 스토리지 값 (Cloudflare R2 는 `auto`, MinIO 관례는 `us-east-1`) |
 | drivers.s3_access_key | body | string | 아니오 | max 255 | S3 액세스 키 |
 | drivers.s3_secret_key | body | string | 아니오 | max 255 | S3 시크릿 키 |
-| drivers.s3_url | body | string | 아니오 | max 500 | S3 엔드포인트 URL |
+| drivers.s3_url | body | string | 아니오 | url, max 500 | S3 공개 URL(CDN) base — 파일 URL 생성에만 사용 (API 요청 주소 아님) |
+| drivers.s3_endpoint | body | string | 아니오 | url, max 500 | S3 API 엔드포인트 — S3 호환 스토리지(R2/MinIO/NCP 등)용. AWS S3 는 미입력 (예: `https://<account-id>.r2.cloudflarestorage.com`) |
+| drivers.s3_use_path_style | body | boolean | 아니오 | — | S3 path-style 주소 사용 여부 — MinIO 등 path-style 전용 스토리지에서 true |
 | drivers.cache_driver | body | string | 아니오 | — | 캐시 드라이버 (file/redis/memcached) |
 | drivers.redis_host | body | string | 아니오 | max 255 | Redis 호스트 주소 |
 | drivers.redis_port | body | integer | 아니오 | min 1, max 65535 | Redis 포트 번호 |
@@ -328,6 +332,7 @@ Content-Type: application/json
     "general.language": "예시값",
     "general.currency": "예시값",
     "general.maintenance_mode": true,
+    "general.asset_url_mode": "https://example.com",
     "general.site_logo": [
         "예시값"
     ],
@@ -370,6 +375,11 @@ Content-Type: application/json
     "seo.cache_ttl": 1,
     "seo.sitemap_enabled": true,
     "seo.sitemap_cache_ttl": 1,
+    "seo.sitemap_urls_per_file": 1,
+    "seo.sitemap_gzip": true,
+    "seo.sitemap_serve_stale_on_miss": true,
+    "seo.sitemap_max_urls_per_contributor": 1,
+    "seo.sitemap_hreflang_enabled": true,
     "seo.sitemap_schedule": "예시값",
     "seo.sitemap_schedule_time": "예시값",
     "seo.generator_enabled": true,
@@ -379,6 +389,10 @@ Content-Type: application/json
     "security.auth_token_lifetime": 1,
     "security.max_login_attempts": 1,
     "security.login_lockout_time": 1,
+    "security.password_min_length": 1,
+    "security.require_password_special_char": true,
+    "security.two_factor_auth": true,
+    "security.allow_internal_outbound_urls": true,
     "advanced.cache_enabled": true,
     "advanced.layout_cache_enabled": true,
     "advanced.layout_cache_ttl": 1,
@@ -386,6 +400,7 @@ Content-Type: application/json
     "advanced.stats_cache_ttl": 1,
     "advanced.seo_cache_enabled": true,
     "advanced.seo_cache_ttl": 1,
+    "advanced.seo_sitemap_cache_ttl": 1,
     "advanced.debug_mode": true,
     "advanced.sql_query_log": true,
     "advanced.core_update_github_url": "https://example.com",
@@ -393,12 +408,16 @@ Content-Type: application/json
     "advanced.geoip_enabled": true,
     "advanced.geoip_license_key": "예시값",
     "advanced.geoip_auto_update_enabled": true,
+    "advanced.pagination_result_cap": 1,
+    "advanced.pagination_max_page": 1,
     "drivers.storage_driver": "예시값",
     "drivers.s3_bucket": "예시값",
     "drivers.s3_region": "예시값",
     "drivers.s3_access_key": "예시값",
     "drivers.s3_secret_key": "예시값",
     "drivers.s3_url": "https://example.com",
+    "drivers.s3_endpoint": "예시값",
+    "drivers.s3_use_path_style": true,
     "drivers.cache_driver": "예시값",
     "drivers.redis_host": "예시값",
     "drivers.redis_port": 1,
@@ -528,6 +547,8 @@ _단건 응답: `data` 객체의 필드._
 | app_key | string | `base64:YlAis*************************…` | 현재 애플리케이션 키(`APP_KEY`)를 마스킹한 문자열. 앞부분 일부만 노출하고 나머지는 별표로 가려 전체 원문은 반환하지 않음 |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -795,6 +816,8 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 
 **응답 예시**
 
+<!-- @probed -->
+
 ```http
 HTTP/1.1 200
 ```
@@ -983,7 +1006,7 @@ _단건 응답: `data` 객체의 필드._
 | php_memory_limit | string | `512M` | PHP `memory_limit` ini 값 |
 | max_execution_time | string | `36000초` | PHP `max_execution_time` ini 값 (초 단위 접미사 부착) |
 | upload_max_filesize | string | `2G` | PHP `upload_max_filesize` ini 값 |
-| opcache | object | `{"loaded":true,"enabled":true}` | <!-- TODO: 설명 --> |
+| opcache | object | `{"loaded":true,"enabled":true}` | PHP OPcache 상태 — `loaded`(확장 로드 여부) / `enabled`(런타임 활성화 여부, `opcache.enable` 설정 기준) |
 | install_path | string | `C:\Users\HeuJung\htdocs\g7_2` | 애플리케이션 설치 루트 경로 (`base_path()`) |
 | config_path | string | `C:\Users\HeuJung\htdocs\g7_2\storage\…` | 설정 파일 저장 경로 (`storage/app/settings`) |
 | log_path | string | `C:\Users\HeuJung\htdocs\g7_2\storage\…` | 로그 파일 저장 경로 (`storage/logs`) |
@@ -994,6 +1017,8 @@ _단건 응답: `data` 객체의 필드._
 | server_time | string | `2026-08-04 12:53:55` | 서버 현재 시각 (Y-m-d H:i:s) |
 
 **응답 예시**
+
+<!-- @probed -->
 
 ```http
 HTTP/1.1 200
@@ -1008,22 +1033,22 @@ HTTP/1.1 200
         "web_server": "nginx/1.27.3",
         "php_version": "8.3.26",
         "mysql_version": "Mysql 8.4.3",
-        "g7_version": "7.0.6",
+        "g7_version": "7.0.7",
         "g7_release_year": "2026",
         "laravel_version": "12.62.0",
-        "environment": "local",
+        "environment": "production",
         "cpu_info": "Intel(R) Core(TM) Ultra 5 225H",
         "memory_usage": {
             "total": "31.49 GB",
-            "used": "24.31 GB",
-            "free": "7.18 GB",
-            "percentage": 77.2
+            "used": "28.24 GB",
+            "free": "3.25 GB",
+            "percentage": 89.69
         },
         "disk_usage": {
             "total": "474.72 GB",
-            "used": "408.15 GB",
-            "free": "66.57 GB",
-            "percentage": 85.98
+            "used": "375.43 GB",
+            "free": "99.28 GB",
+            "percentage": 79.09
         },
         "php_memory_limit": "512M",
         "max_execution_time": "36000초",
@@ -1032,10 +1057,10 @@ HTTP/1.1 200
             "loaded": true,
             "enabled": true
         },
-        "install_path": "C:\\Users\\HeuJung\\htdocs\\g7_2",
-        "config_path": "C:\\Users\\HeuJung\\htdocs\\g7_2\\storage\\app/settings",
-        "log_path": "C:\\Users\\HeuJung\\htdocs\\g7_2\\storage\\logs",
-        "upload_path": "C:\\Users\\HeuJung\\htdocs\\g7_2\\storage\\app/public",
+        "install_path": "C:\\Users\\HeuJung\\htdocs\\g7",
+        "config_path": "C:\\Users\\HeuJung\\htdocs\\g7\\storage\\app/settings",
+        "log_path": "C:\\Users\\HeuJung\\htdocs\\g7\\storage\\logs",
+        "upload_path": "C:\\Users\\HeuJung\\htdocs\\g7\\storage\\app/public",
         "php_extensions": {
             "required": {
                 "openssl": true,
@@ -1066,13 +1091,13 @@ HTTP/1.1 200
             "write": {
                 "host": "localhost",
                 "port": 3306,
-                "database": "g7_2",
-                "username": "g7_2"
+                "database": "g7",
+                "username": "g7"
             },
             "read": []
         },
         "timezone": "UTC",
-        "server_time": "2026-08-04 12:53:55"
+        "server_time": "2026-08-13 05:00:24"
     }
 }
 ```
@@ -1107,10 +1132,12 @@ HTTP/1.1 200
 | queue_driver | body | string | 아니오 | — | 큐 드라이버 (sync/database/redis) |
 | websocket_enabled | body | boolean | 아니오 | — | WebSocket 사용 여부 |
 | s3_bucket | body | string | 아니오 | max 255 | S3 버킷명 |
-| s3_region | body | string | 아니오 | — | S3 리전 |
+| s3_region | body | string | 아니오 | max 64, 소문자 영숫자·하이픈 (`^[a-z0-9-]+$`) | S3 리전 — AWS 리전 코드 또는 S3 호환 스토리지 값 (Cloudflare R2 는 `auto`) |
 | s3_access_key | body | string | 아니오 | max 255 | S3 액세스 키 |
 | s3_secret_key | body | string | 아니오 | max 255 | S3 시크릿 키 |
-| s3_url | body | string | 아니오 | max 500 | S3 엔드포인트 URL |
+| s3_url | body | string | 아니오 | url, max 500 | S3 공개 URL(CDN) base — 연결 테스트에는 사용되지 않음 |
+| s3_endpoint | body | string | 아니오 | url, max 500 | S3 API 엔드포인트 — 테스트 시 실제 아웃바운드 대상에 반영 (S3 호환 스토리지용) |
+| s3_use_path_style | body | boolean | 아니오 | — | S3 path-style 주소 사용 여부 (MinIO 등) |
 | redis_host | body | string | 아니오 | max 255 | Redis 호스트 주소 |
 | redis_port | body | integer | 아니오 | min 1, max 65535 | Redis 포트 번호 |
 | redis_password | body | string | 아니오 | max 255 | Redis 비밀번호 |
@@ -1118,9 +1145,18 @@ HTTP/1.1 200
 | memcached_host | body | string | 아니오 | max 255 | Memcached 호스트 주소 |
 | memcached_port | body | integer | 아니오 | min 1, max 65535 | Memcached 포트 번호 |
 | websocket_app_key | body | string | 아니오 | max 255 | WebSocket 앱 키 |
-| websocket_host | body | string | 아니오 | max 255 | WebSocket 호스트 주소 |
-| websocket_port | body | integer | 아니오 | min 1, max 65535 | WebSocket 포트 번호 |
-| websocket_scheme | body | string | 아니오 | — | WebSocket 스킴 (http/https) |
+| websocket_host | body | string | 아니오 | max 255 | WebSocket 클라이언트(브라우저 접속) 호스트 주소 |
+| websocket_port | body | integer | 아니오 | min 1, max 65535 | WebSocket 클라이언트 포트 번호 |
+| websocket_scheme | body | string | 아니오 | — | WebSocket 클라이언트 스킴 (http/https) |
+| websocket_server_host | body | string | 아니오 | max 255 | WebSocket 서버(백엔드 발송용) 호스트 주소 — 미입력 시 클라이언트 값으로 폴백 |
+| websocket_server_port | body | integer | 아니오 | min 1, max 65535 | WebSocket 서버 포트 번호 — 미입력 시 클라이언트 값으로 폴백 |
+| websocket_server_scheme | body | string | 아니오 | — | WebSocket 서버 스킴 (http/https) — 미입력 시 클라이언트 값으로 폴백 |
+
+> WebSocket 테스트는 클라이언트/서버 양측 endpoint 를 모두 probe 합니다. 백엔드 broadcast 는 서버 endpoint 를 사용하므로, 서버 endpoint 실패 시 별도 메시지(`settings.websocket_server_test_failed`)로 구분 보고됩니다.
+
+> S3 테스트는 Flysystem 어댑터(`league/flysystem-aws-s3-v3`) 존재를 선검사하며, `s3_endpoint`/`s3_use_path_style` 이 실제 아웃바운드 대상에 반영됩니다.
+
+> 사용 불능 드라이버(어댑터 클래스·PHP 확장 부재)는 저장/테스트 모두 422 (`validation.settings.driver_unusable`) 로 거부됩니다.
 
 > 이 엔드포인트는 확장이 파라미터를 추가할 수 있습니다 (`core.settings.test_driver_connection_validation_rules`).
 
@@ -1144,6 +1180,8 @@ Content-Type: application/json
     "s3_access_key": "예시값",
     "s3_secret_key": "예시값",
     "s3_url": "https://example.com",
+    "s3_endpoint": "예시값",
+    "s3_use_path_style": true,
     "redis_host": "예시값",
     "redis_port": 1,
     "redis_password": "Password123!",
@@ -1153,7 +1191,10 @@ Content-Type: application/json
     "websocket_app_key": "예시값",
     "websocket_host": "예시값",
     "websocket_port": 1,
-    "websocket_scheme": "예시값"
+    "websocket_scheme": "예시값",
+    "websocket_server_host": "예시값",
+    "websocket_server_port": 1,
+    "websocket_server_scheme": "예시값"
 }
 ```
 

@@ -5,6 +5,7 @@ namespace App\Http\Requests\Settings;
 use App\Extension\HookManager;
 use App\Models\Attachment;
 use App\Search\Engines\DatabaseFulltextEngine;
+use App\Services\DriverRegistryService;
 use App\Support\AllowedExtensions;
 use App\Support\AssetUrl;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -30,9 +31,9 @@ class SaveSettingsRequest extends FormRequest
     private const SUPPORTED_STORAGE_DRIVERS = ['local', 's3'];
 
     /**
-     * 지원되는 S3 리전 목록
+     * S3 리전 형식 (AWS 리전 코드 + S3 호환 스토리지 임의값 허용 — R2 의 `auto` 등)
      */
-    private const SUPPORTED_S3_REGIONS = ['ap-northeast-2', 'ap-northeast-1', 'us-east-1', 'us-west-2', 'eu-west-1'];
+    private const S3_REGION_FORMAT = 'regex:/^[a-z0-9-]+$/';
 
     /**
      * 지원되는 캐시 드라이버 목록
@@ -53,11 +54,6 @@ class SaveSettingsRequest extends FormRequest
      * 지원되는 웹소켓 프로토콜 목록
      */
     private const SUPPORTED_WEBSOCKET_SCHEMES = ['http', 'https'];
-
-    /**
-     * 지원되는 검색엔진 드라이버 기본 목록
-     */
-    private const DEFAULT_SEARCH_ENGINE_DRIVERS = ['mysql-fulltext'];
 
     /**
      * 지원되는 로그 드라이버 목록
@@ -313,22 +309,24 @@ class SaveSettingsRequest extends FormRequest
             'advanced.pagination_max_page' => ['nullable', 'integer', 'min:'.config('core.settings_limits.advanced_pagination_max_page_min', 0), 'max:'.config('core.settings_limits.advanced_pagination_max_page_max', 100000)],
 
             // 드라이버 설정 (drivers 탭)
-            'drivers.storage_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_STORAGE_DRIVERS)]),
+            'drivers.storage_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_STORAGE_DRIVERS), $this->getDriverUsabilityRule('storage')]),
             'drivers.s3_bucket' => ['nullable', 'string', 'max:255'],
-            'drivers.s3_region' => ['nullable', Rule::in(self::SUPPORTED_S3_REGIONS)],
+            'drivers.s3_region' => ['nullable', 'string', 'max:64', self::S3_REGION_FORMAT],
             'drivers.s3_access_key' => ['nullable', 'string', 'max:255'],
             'drivers.s3_secret_key' => ['nullable', 'string', 'max:255'],
             'drivers.s3_url' => ['nullable', 'url', 'max:500'],
-            'drivers.cache_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_CACHE_DRIVERS)]),
+            'drivers.s3_endpoint' => ['nullable', 'url', 'max:500'],
+            'drivers.s3_use_path_style' => ['nullable', 'boolean'],
+            'drivers.cache_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_CACHE_DRIVERS), $this->getDriverUsabilityRule('cache')]),
             'drivers.redis_host' => ['nullable', 'string', 'max:255'],
             'drivers.redis_port' => ['nullable', 'integer', 'min:'.config('core.settings_limits.drivers_redis_port_min', 1), 'max:'.config('core.settings_limits.drivers_redis_port_max', 65535)],
             'drivers.redis_password' => ['nullable', 'string', 'max:255'],
             'drivers.redis_database' => ['nullable', 'integer', 'min:'.config('core.settings_limits.drivers_redis_database_min', 0), 'max:'.config('core.settings_limits.drivers_redis_database_max', 15)],
             'drivers.memcached_host' => ['nullable', 'string', 'max:255'],
             'drivers.memcached_port' => ['nullable', 'integer', 'min:'.config('core.settings_limits.drivers_memcached_port_min', 1), 'max:'.config('core.settings_limits.drivers_memcached_port_max', 65535)],
-            'drivers.session_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_SESSION_DRIVERS)]),
+            'drivers.session_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_SESSION_DRIVERS), $this->getDriverUsabilityRule('session')]),
             'drivers.session_lifetime' => ['nullable', 'integer', 'min:'.config('core.settings_limits.drivers_session_lifetime_min', 1), 'max:'.config('core.settings_limits.drivers_session_lifetime_max', 43200)], // 1분 ~ 30일
-            'drivers.queue_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_QUEUE_DRIVERS)]),
+            'drivers.queue_driver' => $this->getTabRules($tab, 'drivers', [Rule::in(self::SUPPORTED_QUEUE_DRIVERS), $this->getDriverUsabilityRule('queue')]),
             'drivers.websocket_enabled' => ['nullable', 'boolean'],
             'drivers.websocket_app_id' => [Rule::requiredIf(fn () => $this->boolean('drivers.websocket_enabled')), 'nullable', 'string', 'max:255'],
             'drivers.websocket_app_key' => [Rule::requiredIf(fn () => $this->boolean('drivers.websocket_enabled')), 'nullable', 'string', 'max:255'],
@@ -476,6 +474,34 @@ class SaveSettingsRequest extends FormRequest
             'min:'.config('core.settings_limits.advanced_cache_ttl_min', 0),
             'max:'.config('core.settings_limits.advanced_cache_ttl_max', 14400),
         ]);
+    }
+
+    /**
+     * 드라이버 가용성 검증 rule 을 반환합니다.
+     *
+     * 선택된 드라이버가 현재 서버에서 실제로 동작 가능한지(어댑터 클래스·PHP 확장 존재)를
+     * 저장 시점에 검사합니다. 사용 불능 드라이버가 저장되면 사이트 전면 다운으로 이어질 수
+     * 있으므로(예: phpredis 확장 없는 서버의 redis) 서버 게이트로 차단합니다.
+     *
+     * @param  string  $category  드라이버 카테고리 (storage, cache, session, queue)
+     * @return \Closure 검증 클로저
+     */
+    private function getDriverUsabilityRule(string $category): \Closure
+    {
+        return function ($attribute, $value, $fail) use ($category) {
+            if (empty($value)) {
+                return;
+            }
+
+            $registry = app(DriverRegistryService::class);
+
+            if (! $registry->isDriverUsable($category, $value)) {
+                $fail(__('validation.settings.driver_unusable', [
+                    'driver' => $value,
+                    'reason' => $registry->usabilityFailureReason($category, $value),
+                ]));
+            }
+        };
     }
 
     /**
@@ -734,11 +760,15 @@ class SaveSettingsRequest extends FormRequest
             'drivers.storage_driver.required' => __('validation.settings.storage_driver_required'),
             'drivers.storage_driver.in' => __('validation.settings.storage_driver_invalid'),
             'drivers.s3_bucket.max' => __('validation.settings.s3_bucket_max'),
-            'drivers.s3_region.in' => __('validation.settings.s3_region_invalid'),
+            'drivers.s3_region.regex' => __('validation.settings.s3_region_invalid'),
+            'drivers.s3_region.max' => __('validation.settings.s3_region_max'),
             'drivers.s3_access_key.max' => __('validation.settings.s3_access_key_max'),
             'drivers.s3_secret_key.max' => __('validation.settings.s3_secret_key_max'),
             'drivers.s3_url.url' => __('validation.settings.s3_url_invalid'),
             'drivers.s3_url.max' => __('validation.settings.s3_url_max'),
+            'drivers.s3_endpoint.url' => __('validation.settings.s3_endpoint_invalid'),
+            'drivers.s3_endpoint.max' => __('validation.settings.s3_endpoint_max'),
+            'drivers.s3_use_path_style.boolean' => __('validation.settings.s3_use_path_style_boolean'),
             'drivers.cache_driver.required' => __('validation.settings.cache_driver_required'),
             'drivers.cache_driver.in' => __('validation.settings.cache_driver_invalid'),
             'drivers.redis_host.max' => __('validation.settings.redis_host_max'),
@@ -916,6 +946,8 @@ class SaveSettingsRequest extends FormRequest
             'drivers.s3_access_key' => __('validation.attributes.s3_access_key'),
             'drivers.s3_secret_key' => __('validation.attributes.s3_secret_key'),
             'drivers.s3_url' => __('validation.attributes.s3_url'),
+            'drivers.s3_endpoint' => __('validation.attributes.s3_endpoint'),
+            'drivers.s3_use_path_style' => __('validation.attributes.s3_use_path_style'),
             'drivers.cache_driver' => __('validation.attributes.cache_driver'),
             'drivers.redis_host' => __('validation.attributes.redis_host'),
             'drivers.redis_port' => __('validation.attributes.redis_port'),

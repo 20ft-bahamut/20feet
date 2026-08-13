@@ -517,6 +517,7 @@ cp .env.example .env
   <a href="https://github.com/laelbe" title="laelbe"><img src="https://github.com/laelbe.png" width="48" alt="laelbe"></a>
   <a href="https://github.com/bigmsg" title="bigmsg"><img src="https://github.com/bigmsg.png" width="48" alt="bigmsg"></a>
   <a href="https://github.com/hwaryeon1234" title="hwaryeon1234"><img src="https://github.com/hwaryeon1234.png" width="48" alt="hwaryeon1234"></a>
+  <a href="https://github.com/lyg-kaban" title="lyg-kaban"><img src="https://github.com/lyg-kaban.png" width="48" alt="lyg-kaban"></a>
   <a href="https://github.com/koojunho" title="koojunho"><img src="https://github.com/koojunho.png" width="48" alt="koojunho"></a>
   <a href="https://github.com/abc101" title="abc101"><img src="https://github.com/abc101.png" width="48" alt="abc101"></a>
   <a href="https://github.com/yks118" title="yks118"><img src="https://github.com/yks118.png" width="48" alt="yks118"></a>
@@ -527,7 +528,6 @@ cp .env.example .env
   <a href="https://github.com/devrhee16" title="devrhee16"><img src="https://github.com/devrhee16.png" width="48" alt="devrhee16"></a>
   <a href="https://github.com/GyusoonKim" title="GyusoonKim"><img src="https://github.com/GyusoonKim.png" width="48" alt="GyusoonKim"></a>
   <a href="https://github.com/Lastorder-DC" title="Lastorder-DC"><img src="https://github.com/Lastorder-DC.png" width="48" alt="Lastorder-DC"></a>
-  <a href="https://github.com/lyg-kaban" title="lyg-kaban"><img src="https://github.com/lyg-kaban.png" width="48" alt="lyg-kaban"></a>
   <a href="https://github.com/miles44229" title="miles44229"><img src="https://github.com/miles44229.png" width="48" alt="miles44229"></a>
   <a href="https://github.com/minyho" title="minyho"><img src="https://github.com/minyho.png" width="48" alt="minyho"></a>
 </p>
