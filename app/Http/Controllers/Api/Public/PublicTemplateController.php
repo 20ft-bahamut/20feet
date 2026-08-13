@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * 공개 템플릿 API 컨트롤러
@@ -340,21 +341,22 @@ class PublicTemplateController extends PublicBaseController
      *
      * @param  string  $identifier  템플릿 식별자
      * @param  TemplateLayoutAttachment  $attachment  라우트 모델 바인딩된 첨부
-     * @return BinaryFileResponse|Response|JsonResponse 파일 응답 또는 404
+     * @return StreamedResponse|Response|JsonResponse 파일 응답 또는 404
      */
-    public function serveFile(string $identifier, TemplateLayoutAttachment $attachment): BinaryFileResponse|Response|JsonResponse
+    public function serveFile(string $identifier, TemplateLayoutAttachment $attachment): StreamedResponse|Response|JsonResponse
     {
-        $filePath = $this->layoutAttachmentService->getServableFilePath($identifier, $attachment);
+        $serveInfo = $this->layoutAttachmentService->getServableResponse($identifier, $attachment);
 
-        if ($filePath === null) {
+        if ($serveInfo === null) {
             return $this->notFound('templates.layout_attachments.errors.not_found');
         }
 
         // 이미지/일반 파일 모두 캐싱 헤더와 함께 인라인 응답 (레이아웃 캐시 TTL, 기본 24시간).
-        // PublicAttachmentController 의 이미지 서빙과 동일한 fileResponse(ETag/Cache-Control) 사용.
-        return $this->fileResponse(
-            $filePath,
-            $attachment->mime_type,
+        // PublicAttachmentController 의 이미지 서빙과 동일한 streamedFileResponse(ETag/Cache-Control) 사용
+        // — 행 disk 를 따르는 스토리지 스트림이라 S3 등 원격 디스크 행에서도 성립한다 (#99).
+        return $this->streamedFileResponse(
+            $serveInfo['response'],
+            $serveInfo['etag_source'],
             (int) g7_core_settings('cache.layout_ttl', 86400)
         );
     }

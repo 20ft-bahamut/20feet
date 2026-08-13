@@ -4,6 +4,22 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.6] - 2026-08-12
+
+### Added
+
+- S3 호환 스토리지 설정 신설 항목(엔드포인트 URL·Path-style 주소)과 리전 형식 안내의 검증 메시지 일본어 번역 추가 (`validation.settings.s3_endpoint_*`, `s3_use_path_style_boolean`, `s3_region_*`) — 드라이버 설정 저장 시 오류 안내가 일본어 로케일에서 자연스럽게 표시됩니다. (#99 @lyg-kaban 님께서 제보해주셨습니다.)
+- 드라이버 사용 불능 안내 문구 일본어 번역 추가 (`validation.settings.driver_unusable`, `settings.driver_unusable_*`, `settings.s3_adapter_missing`) — 필요한 라이브러리·PHP 확장이 없는 드라이버를 저장·테스트할 때의 사유 안내가 일본어 로케일에서 표시됩니다.
+- 웹소켓 서버(백엔드 발송용) endpoint 연결 실패 안내 일본어 번역 추가 (`settings.websocket_server_test_failed`).
+
+### Changed
+
+- S3 리전 검증 메시지를 목록 선택 안내에서 형식 안내(소문자 영숫자·하이픈, R2 는 `auto`)로 개정했습니다.
+
+### Removed
+
+- 참조처가 사라진 S3 리전 선택 검증 메시지(`validation.settings.s3_region_required`)를 원본(ko/en)과 함께 정리했습니다.
+
 ## [1.0.5] - 2026-08-10
 
 ### Added

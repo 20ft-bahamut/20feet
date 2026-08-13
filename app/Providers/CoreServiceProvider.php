@@ -269,14 +269,14 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->when(AttachmentService::class)
             ->needs(StorageInterface::class)
             ->give(function () {
-                return new CoreStorageDriver(config('attachment.disk', 'local'));
+                return new CoreStorageDriver(config('attachment.disk', 'attachments'));
             });
 
         // TemplateLayoutAttachmentService용 CoreStorageDriver 바인딩
         $this->app->when(TemplateLayoutAttachmentService::class)
             ->needs(StorageInterface::class)
             ->give(function () {
-                return new CoreStorageDriver(config('attachment.disk', 'local'));
+                return new CoreStorageDriver(config('attachment.disk', 'attachments'));
             });
 
         // 코어 서비스용 CoreCacheDriver 바인딩
@@ -888,7 +888,8 @@ class CoreServiceProvider extends ServiceProvider
                     $configKey = $driverRegistry->getConfigKey($category);
 
                     if ($configKey && $defaultDriver) {
-                        Config::set($configKey, $defaultDriver);
+                        // log 카테고리의 적용 키(stack.channels)는 배열형 — 형태 변환은 레지스트리가 담당
+                        Config::set($configKey, $driverRegistry->getConfigValueForDriver($category, $defaultDriver));
                     }
 
                     Log::warning("플러그인 드라이버 '{$selectedDriver}'가 '{$category}' 카테고리에서 사용 불가능합니다. 기본 드라이버 '{$defaultDriver}'로 폴백합니다.");

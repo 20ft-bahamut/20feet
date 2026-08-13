@@ -1631,17 +1631,15 @@
         },
         "s3_bucket": "S3バケット",
         "s3_region": "S3リージョン",
-        "regions": {
-          "ap_northeast_2": "アジアパシフィック（ソウル）",
-          "ap_northeast_1": "アジアパシフィック（東京）",
-          "us_east_1": "米国東部（バージニア）",
-          "us_west_2": "米国西部（オレゴン）",
-          "eu_west_1": "ヨーロッパ（アイルランド）"
-        },
+        "s3_region_desc": "AWSリージョンコードまたはS3互換ストレージのリージョン値を入力してください。(例: ap-northeast-2、Cloudflare R2 は auto)",
         "s3_access_key": "Access Key",
         "s3_secret_key": "Secret Key",
-        "s3_url": "S3 URL",
-        "s3_url_desc": "カスタムエンドポイントまたはCDN URLを使用する場合のみ入力してください。"
+        "s3_endpoint": "エンドポイントURL",
+        "s3_endpoint_desc": "S3互換ストレージ(Cloudflare R2、MinIOなど)のAPIアドレスです。AWS S3の場合は空欄にしてください。",
+        "s3_use_path_style": "Path-styleアドレスを使用",
+        "s3_use_path_style_desc": "MinIOなどpath-styleアドレス専用ストレージで有効にします。",
+        "s3_url": "S3 URL (公開URL)",
+        "s3_url_desc": "ファイルの公開URL生成に使うCDN/カスタムドメインです。APIリクエストアドレスはエンドポイントURLに入力してください。"
       },
       "cache": {
         "title": "キャッシュ",

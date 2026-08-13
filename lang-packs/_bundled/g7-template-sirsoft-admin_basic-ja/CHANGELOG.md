@@ -4,6 +4,20 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [1.0.5] - 2026-08-12
+
+### Added
+
+- 환경설정 > 드라이버 > 파일 스토리지의 S3 신설 항목 일본어 번역 추가 (`settings.drivers.storage.s3_endpoint*`, `s3_use_path_style*`, `s3_region_desc`) — 엔드포인트 URL·Path-style 토글·리전 입력 도움말이 일본어 로케일에서 자연스럽게 표시됩니다. (#99 @lyg-kaban 님께서 제보해주셨습니다.)
+
+### Changed
+
+- S3 URL 항목의 이름·설명을 공개 URL(CDN) 용도로 명확히 한 문구 개정을 반영했습니다.
+
+### Removed
+
+- 리전 목록 선택 라벨(`settings.drivers.storage.regions.*`) 5종 제거 — 리전이 자유 입력으로 바뀌어 더 이상 사용되지 않습니다.
+
 ## [1.0.4] - 2026-08-10
 
 ### Added

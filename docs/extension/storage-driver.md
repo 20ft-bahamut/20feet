@@ -25,6 +25,7 @@
 - [마이그레이션 가이드](#마이그레이션-가이드)
 - [API 레퍼런스](#api-레퍼런스)
 - [트러블슈팅](#트러블슈팅)
+- [S3 호환 스토리지 연결](#s3-호환-스토리지-연결)
 - [FAQ](#faq)
 
 ---
@@ -1245,6 +1246,24 @@ Route::get('/api/attachments/{id}/download', [AttachmentController::class, 'down
 
 ---
 
+## S3 호환 스토리지 연결
+
+코어 7.0.7+ 의 S3 드라이버는 AWS 뿐 아니라 S3 API 를 제공하는 호환 스토리지(Cloudflare R2, MinIO, 네이버 클라우드 등)에도 연결할 수 있다. 관리자 > 환경설정 > 드라이버 > 파일 스토리지의 두 항목이 이를 담당한다.
+
+| 항목 | 의미 | 예시 |
+| --- | --- | --- |
+| 엔드포인트 URL | SDK 가 요청을 보내는 API 주소. 비워 두면 AWS 리전 도메인을 사용 | `https://<account-id>.r2.cloudflarestorage.com`, `http://minio.internal:9000` |
+| Path-style 주소 사용 | 버킷을 호스트가 아닌 경로에 두는 주소 형식(`endpoint/bucket/...`). MinIO 등 path-style 전용 스토리지에서 켠다 | — |
+
+- 리전은 자유 입력이다 — Cloudflare R2 는 `auto`, MinIO 는 관례상 `us-east-1` 을 쓴다.
+- **S3 URL(공개 URL)** 은 파일 공개 URL 생성에 쓰는 CDN/커스텀 도메인이며 API 요청 주소가 아니다 — API 주소는 엔드포인트 URL 에만 넣는다.
+- IP 주소 엔드포인트는 SDK 가 path-style 을 자동 적용하므로 토글과 무관하게 동작한다. 호스트명 엔드포인트에서는 토글이 주소 형식을 결정한다.
+- 연결 테스트는 실제 저장 경로와 같은 설정(엔드포인트·path-style 포함)을 사용한다.
+
+`.env` 로 설정하는 경우 대응 키는 `AWS_ENDPOINT` / `AWS_USE_PATH_STYLE_ENDPOINT` 다 (아래 FAQ Q2 의 ② 경로 참조).
+
+---
+
 ## FAQ
 
 ### Q1: 기존 파일은 어떻게 되나요?
@@ -1270,7 +1289,19 @@ if (Storage::disk('local')->exists($oldPath)) {
 
 ### Q2: S3로 전환하려면 어떻게 하나요?
 
-**A**: 다음 3단계만 수행하면 됩니다.
+**A**: 코어 7.0.7+ 는 S3 어댑터(`league/flysystem-aws-s3-v3`)를 기본 포함하므로 별도 패키지 설치가 필요 없습니다. 전환 경로는 두 가지입니다.
+
+**① 관리자 설정 UI (권장)** — 관리자 > 환경설정 > 드라이버 > 파일 스토리지:
+
+1. 스토리지 드라이버를 `Amazon S3` 로 선택
+2. 버킷 / 리전 / Access Key / Secret Key 입력
+3. S3 호환 스토리지(Cloudflare R2, MinIO, NCP 등)는 위 [S3 호환 스토리지 연결](#s3-호환-스토리지-연결) 절의 두 항목(엔드포인트 URL·Path-style 주소)을 함께 설정
+4. 연결 테스트 성공 후 저장 — 코어 첨부 업로드 디스크가 s3 로 전환됩니다
+   (`ATTACHMENT_DISK` env 를 명시한 경우 env 가 항상 우선. 기존 파일은 저장 당시의 disk 로 계속 서빙되므로 혼재 안전)
+
+참고: **S3 URL(공개 URL)** 칸은 파일 공개 URL 생성에 쓰는 CDN/커스텀 도메인이며, API 요청 주소가 아닙니다.
+
+**② `.env` (모듈별 커스텀)**:
 
 1. `.env` 파일에 S3 설정 추가:
    ```env
@@ -1278,6 +1309,9 @@ if (Storage::disk('local')->exists($oldPath)) {
    AWS_SECRET_ACCESS_KEY=your-secret
    AWS_DEFAULT_REGION=ap-northeast-2
    AWS_BUCKET=your-bucket
+   # S3 호환 스토리지(R2/MinIO 등)만:
+   AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+   AWS_USE_PATH_STYLE_ENDPOINT=false
    ```
 
 2. 모듈 설정 변경:

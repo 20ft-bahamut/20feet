@@ -123,6 +123,8 @@
             "s3_access_key": "",
             "s3_secret_key": "",
             "s3_url": "",
+            "s3_endpoint": "",
+            "s3_use_path_style": false,
             "cache_driver": "file",
             "redis_host": "127.0.0.1",
             "redis_port": 6379,
@@ -305,6 +307,8 @@
                 "s3_access_key": { "type": "string", "sensitive": true },
                 "s3_secret_key": { "type": "string", "sensitive": true },
                 "s3_url": { "type": "string", "sensitive": false },
+                "s3_endpoint": { "type": "string", "sensitive": false },
+                "s3_use_path_style": { "type": "boolean", "sensitive": false },
                 "cache_driver": { "type": "string", "sensitive": false },
                 "redis_host": { "type": "string", "sensitive": false },
                 "redis_port": { "type": "integer", "sensitive": false },
@@ -328,7 +332,8 @@
                 "websocket_verify_ssl": { "type": "boolean", "sensitive": false },
                 "websocket_server_host": { "type": "string", "sensitive": false },
                 "websocket_server_port": { "type": "integer", "sensitive": false },
-                "websocket_server_scheme": { "type": "string", "sensitive": false }
+                "websocket_server_scheme": { "type": "string", "sensitive": false },
+                "search_engine_driver": { "type": "string", "sensitive": false }
             }
         },
         "notifications": {

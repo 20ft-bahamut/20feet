@@ -6,6 +6,7 @@ use App\Repositories\JsonConfigRepository;
 use App\Support\AllowedExtensions;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
+use Predis\Client;
 
 /**
  * 설정 서비스 프로바이더
@@ -48,7 +49,6 @@ class SettingsServiceProvider extends ServiceProvider
         $this->applyAppConfig($configRepository);
         $this->applyDebugConfig($configRepository);
         $this->applyDriverConfig($configRepository);
-        $this->applyCacheConfig($configRepository);
         $this->applyUploadConfig($configRepository);
         $this->applyCoreUpdateConfig($configRepository);
         $this->applyGeoIpConfig($configRepository);
@@ -342,6 +342,16 @@ class SettingsServiceProvider extends ServiceProvider
             Config::set('filesystems.default', $driverSettings['storage_driver']);
         }
 
+        // 코어 첨부 업로드 디스크: ATTACHMENT_DISK env 명시가 항상 우선하고,
+        // 미설정 시 storage_driver=s3 를 따른다. env() 직접 호출은 config:cache 환경에서
+        // null 로 고정되므로 config 에 태운 attachment.disk_explicit 로 판별한다.
+        // 빈 문자열도 미명시로 취급한다 — `ATTACHMENT_DISK=` 가 복사된 .env 에서
+        // 빈 값을 명시로 읽으면 전환이 영구 미발동한다 (config 정규화의 2차 방어).
+        // 기존 행은 행 disk 로 서빙되므로 신구 디스크 혼재는 안전하다.
+        if (($driverSettings['storage_driver'] ?? null) === 's3' && in_array(config('attachment.disk_explicit'), [null, ''], true)) {
+            Config::set('attachment.disk', 's3');
+        }
+
         // 웹소켓 설정
         $this->applyWebsocketConfig($driverSettings);
 
@@ -359,6 +369,16 @@ class SettingsServiceProvider extends ServiceProvider
      */
     private function applyRedisConfig(array $driverSettings): void
     {
+        // phpredis 확장이 없는 서버에서 redis 드라이버 선택 시 `Class "Redis" not found` 로
+        // 사이트 전면 다운되는 결함 방어 — 설정된 클라이언트가 phpredis 인데 확장이 없고
+        // predis 가 있으면 predis 로 폴백한다. 확장이 있으면 기존 phpredis 경로 그대로다.
+        // env('REDIS_CLIENT') 미명시 판별은 무효였다: .env.example 이 REDIS_CLIENT=phpredis
+        // 를 활성 배포하므로 표준 설치에서 영구 미발동이었고, env() 직접 호출은
+        // config:cache 환경에서 null 로 고정된다 (A8 disk_explicit 와 동형 함정).
+        if ($this->shouldFallBackToPredis(extension_loaded('redis'))) {
+            Config::set('database.redis.client', 'predis');
+        }
+
         if (! empty($driverSettings['redis_host'])) {
             Config::set('database.redis.default.host', $driverSettings['redis_host']);
             Config::set('database.redis.cache.host', $driverSettings['redis_host']);
@@ -378,6 +398,25 @@ class SettingsServiceProvider extends ServiceProvider
             Config::set('database.redis.default.database', (int) $driverSettings['redis_database']);
             Config::set('database.redis.cache.database', (int) $driverSettings['redis_database']);
         }
+    }
+
+    /**
+     * Redis 클라이언트를 predis 로 폴백해야 하는지 판정합니다.
+     *
+     * 설정된 클라이언트(config — env 시점 값이 config:cache 에도 박제됨)가 phpredis 를
+     * 가리키는데 확장이 로드되어 있지 않고 predis 가 존재하면 참. phpredis 명시 설정이라도
+     * 확장이 없으면 어차피 동작 불가이므로 predis 전환이 유일한 동작 경로다 (#99 A2).
+     * 확장 로드 여부는 인자로 받는다 — 확장 설치 머신에서 부재 상태를 재현할 수 없어
+     * 판정 자체를 단위 검증 가능하게 분리한 것 (테스트가 양 분기를 주입 검증).
+     *
+     * @param  bool  $phpredisLoaded  phpredis 확장 로드 여부 (extension_loaded('redis'))
+     * @return bool predis 로 폴백해야 하면 true
+     */
+    private function shouldFallBackToPredis(bool $phpredisLoaded): bool
+    {
+        return config('database.redis.client', 'phpredis') !== 'predis'
+            && ! $phpredisLoaded
+            && class_exists(Client::class);
     }
 
     /**
@@ -417,6 +456,16 @@ class SettingsServiceProvider extends ServiceProvider
 
         if (! empty($driverSettings['s3_url'])) {
             Config::set('filesystems.disks.s3.url', $driverSettings['s3_url']);
+        }
+
+        // S3 호환 스토리지(R2/MinIO/NCP 등)의 API 요청 대상 — s3_url(공개 URL base)과 별개 축이다.
+        // endpoint 미주입 시 SDK 는 AWS 리전 도메인으로만 요청하므로 호환 스토리지 연결이 불가능하다.
+        if (! empty($driverSettings['s3_endpoint'])) {
+            Config::set('filesystems.disks.s3.endpoint', $driverSettings['s3_endpoint']);
+        }
+
+        if (! empty($driverSettings['s3_use_path_style'])) {
+            Config::set('filesystems.disks.s3.use_path_style_endpoint', true);
         }
     }
 
@@ -620,26 +669,6 @@ class SettingsServiceProvider extends ServiceProvider
     }
 
     /**
-     * 캐시 설정을 Laravel config에 적용합니다.
-     */
-    private function applyCacheConfig(JsonConfigRepository $configRepository): void
-    {
-        $cacheSettings = $configRepository->getCategory('cache');
-
-        if (empty($cacheSettings)) {
-            return;
-        }
-
-        if (! empty($cacheSettings['driver'])) {
-            Config::set('cache.default', $cacheSettings['driver']);
-        }
-
-        if (! empty($cacheSettings['prefix'])) {
-            Config::set('cache.prefix', $cacheSettings['prefix']);
-        }
-    }
-
-    /**
      * 업로드 설정을 Laravel config에 적용합니다.
      */
     private function applyUploadConfig(JsonConfigRepository $configRepository): void
@@ -648,10 +677,6 @@ class SettingsServiceProvider extends ServiceProvider
 
         if (empty($uploadSettings)) {
             return;
-        }
-
-        if (! empty($uploadSettings['disk'])) {
-            Config::set('filesystems.default', $uploadSettings['disk']);
         }
 
         // 관리자 설정은 MB, config/attachment.* 는 KB — 변환은 이 지점 단 한 곳에서만 수행한다.
