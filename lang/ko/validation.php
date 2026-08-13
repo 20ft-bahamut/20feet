@@ -1066,6 +1066,9 @@ return [
         'log_days_min' => '로그 보관 일수는 1 이상이어야 합니다.',
         'log_days_max' => '로그 보관 일수는 365를 초과할 수 없습니다.',
 
+        // 공개 자산 디스크 설정
+        'public_asset_disk_invalid' => '올바른 공개 자산 디스크를 선택해주세요.',
+
         // 드라이버 조건부 필수 메시지 (선택 드라이버에 따라 필수)
         's3_bucket_required' => 'S3 버킷 이름은 필수입니다.',
         's3_access_key_required' => 'S3 Access Key는 필수입니다.',
@@ -1293,5 +1296,6 @@ return [
         'log_driver' => '로그 드라이버',
         'log_level' => '로그 레벨',
         'log_days' => '로그 보관 일수',
+        'public_asset_disk' => '공개 자산 디스크',
     ],
 ];

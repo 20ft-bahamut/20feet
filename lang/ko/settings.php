@@ -43,6 +43,11 @@ return [
             'local' => '로컬',
             's3' => 'Amazon S3',
         ],
+        'public_asset' => [
+            'none' => '사용 안 함 (스트리밍)',
+            'public' => 'Public 디스크',
+            's3' => 'Amazon S3',
+        ],
         'cache' => [
             'file' => '파일',
             'redis' => 'Redis',

@@ -38,6 +38,7 @@
 | `drivers.session_lifetime` | `session.lifetime` (testing 차단) |
 | `drivers.queue_driver` | `queue.default` (testing 차단) |
 | `drivers.storage_driver` | `filesystems.default` |
+| `drivers.public_asset_disk` | `core.storage.public_asset_disk` (`'none'`/빈값 → `''`, testing 차단) |
 | `drivers.search_engine_driver` | `scout.driver` |
 | `drivers.redis_*` | `database.redis.*` |
 | `drivers.memcached_*` | `cache.stores.memcached.*` |

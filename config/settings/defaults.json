@@ -118,6 +118,7 @@
         },
         "drivers": {
             "storage_driver": "local",
+            "public_asset_disk": "none",
             "s3_bucket": "",
             "s3_region": "ap-northeast-2",
             "s3_access_key": "",
@@ -302,6 +303,7 @@
             "_comment": "드라이버 설정 — 프론트엔드 미노출 (admin_settings에서 API 원본값 기반 비교로 변경)",
             "fields": {
                 "storage_driver": { "type": "string", "sensitive": false },
+                "public_asset_disk": { "type": "string", "sensitive": false },
                 "s3_bucket": { "type": "string", "sensitive": false },
                 "s3_region": { "type": "string", "sensitive": false },
                 "s3_access_key": { "type": "string", "sensitive": true },

@@ -43,6 +43,11 @@ return [
             'local' => 'Local',
             's3' => 'Amazon S3',
         ],
+        'public_asset' => [
+            'none' => 'Disabled (streaming)',
+            'public' => 'Public disk',
+            's3' => 'Amazon S3',
+        ],
         'cache' => [
             'file' => 'File',
             'redis' => 'Redis',

@@ -49,6 +49,7 @@ class SettingsServiceProvider extends ServiceProvider
         $this->applyAppConfig($configRepository);
         $this->applyDebugConfig($configRepository);
         $this->applyDriverConfig($configRepository);
+        $this->applyPublicAssetDiskConfig($configRepository);
         $this->applyUploadConfig($configRepository);
         $this->applyCoreUpdateConfig($configRepository);
         $this->applyGeoIpConfig($configRepository);
@@ -362,6 +363,40 @@ class SettingsServiceProvider extends ServiceProvider
 
         // 로그 설정
         $this->applyLogConfig($driverSettings);
+    }
+
+    /**
+     * 공개 자산 디스크 설정을 적용합니다.
+     *
+     * testing 환경에서는 dev 공유 drivers.json 값이 테스트로 흘러들지 않도록
+     * 주입을 건너뜁니다 (테스트 격리). 실제 주입/정규화는
+     * injectPublicAssetDiskConfig() 가 담당합니다 — 가드와 분리해 두어야
+     * 정규화 규칙('none' → '')이 테스트에서 단언 가능합니다.
+     */
+    private function applyPublicAssetDiskConfig(JsonConfigRepository $configRepository): void
+    {
+        if (env('APP_ENV') === 'testing') {
+            return;
+        }
+
+        $this->injectPublicAssetDiskConfig($configRepository);
+    }
+
+    /**
+     * drivers.public_asset_disk 저장값을 core.storage.public_asset_disk 로 주입합니다.
+     *
+     * 'none'(스트리밍 유지 선택)/빈값은 미설정('')으로 정규화합니다.
+     * 테스트 격리 가드(applyPublicAssetDiskConfig)를 통과한 뒤에만 호출됩니다.
+     *
+     * @param  JsonConfigRepository  $configRepository  설정 저장소
+     */
+    private function injectPublicAssetDiskConfig(JsonConfigRepository $configRepository): void
+    {
+        $driverSettings = $configRepository->getCategory('drivers');
+
+        $disk = (string) ($driverSettings['public_asset_disk'] ?? '');
+
+        Config::set('core.storage.public_asset_disk', $disk === 'none' ? '' : $disk);
     }
 
     /**

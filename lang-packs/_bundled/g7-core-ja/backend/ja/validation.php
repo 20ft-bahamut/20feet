@@ -954,6 +954,7 @@ return [
         'log_days_integer' => 'ログ保持日数は整数である必要があります。',
         'log_days_min' => 'ログ保持日数は1以上である必要があります。',
         'log_days_max' => 'ログ保持日数は365を超えることはできません。',
+        'public_asset_disk_invalid' => '正しい公開アセットディスクを選択してください。',
         's3_bucket_required' => 'S3バケット名は必須です。',
         's3_access_key_required' => 'S3 Access Keyは必須です。',
         's3_secret_key_required' => 'S3 Secret Keyは必須です。',
@@ -1157,6 +1158,7 @@ return [
         'log_driver' => 'ログ ドライバー',
         'log_level' => 'ログレベル',
         'log_days' => 'ログ保持日数',
+        'public_asset_disk' => '公開アセットディスク',
     ],
     'layout_version' => [
         'limit' => [

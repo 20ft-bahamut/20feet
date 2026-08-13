@@ -121,6 +121,10 @@ core.attachment.download
 core.attachment.update
 core.attachment.delete
 
+# 스토리지 공개 URL 훅 (Filter) — StorageInterface::url() 결과 공급/수정/차단 (공개#100)
+# 컨텍스트 6키는 아래 "스토리지·드라이버 확장 훅 페이로드" 표 참조
+core.storage.filter_url
+
 # 업로드 트라이어드 — 사용자 첨부 업로드 지점의 표준 3훅 패턴
 # before_upload(액션) → filter_upload_file(필터: UploadedFile 을 받아 변형본을 반환.
 # 저장 파일명·MIME·크기가 모두 반환 파일 기준이 된다) → after_upload(액션)
@@ -162,7 +166,9 @@ core.layout_extension.before_apply
 core.layout_extension.after_apply
 
 # 드라이버 확장 훅 (Filter) — 플러그인이 새 드라이버를 등록
+# 항목 3키 구조는 아래 "스토리지·드라이버 확장 훅 페이로드" 표 참조
 core.settings.available_storage_drivers
+core.settings.available_public_asset_drivers   # 공개 자산 직접 URL 서빙 디스크 (공개#100)
 core.settings.available_cache_drivers
 core.settings.available_session_drivers
 core.settings.available_queue_drivers
@@ -194,6 +200,35 @@ core.seo.sitemap.after_regenerate_failed # 재생성 실패 시 (['status'=>'fai
 ```
 
 > `sitemap.index.collect_for_resource` 는 제3자 확장이 리소스 하나에 대한 sitemap 항목을 추가/보정할 때 씁니다(filter — `'type' => 'filter'` 명시 필수). `core.seo.sitemap.after_regenerate_failed` 는 재생성 잡이 실패했을 때 확장이 알림/복구를 걸 수 있는 action 훅입니다.
+
+### 스토리지·드라이버 확장 훅 페이로드
+
+#### `core.storage.filter_url`
+
+`StorageInterface::url()` 의 결과를 공급·수정·차단합니다. 첫 인자는 생성된 URL(`?string`)이며, **디스크 종류와 무관하게 항상 발화**합니다 — 직접 URL 을 만들 수 없어 `null` 인 경우에도 발화하므로 확장이 서명 URL 등을 공급할 수 있습니다. 반환이 문자열이 아니거나 빈 문자열/공백이면 호출측이 스트리밍으로 폴백합니다.
+
+두 번째 인자는 컨텍스트 배열입니다.
+
+| 키 | 타입 | 값 |
+| --- | --- | --- |
+| `scope` | string | `core` / `module` / `plugin` — 호출한 드라이버 종류 |
+| `identifier` | ?string | 확장 식별자 (`sirsoft-ecommerce` 등). 코어 드라이버는 `null` |
+| `disk` | string | 대상 디스크명 |
+| `category` | string | 스토리지 카테고리 (`images`, `settings` 등) |
+| `path` | string | 카테고리 하위 상대 경로 |
+| `full_path` | string | 디스크 루트 기준 전체 경로 — `Storage::temporaryUrl()` 등에 그대로 사용 가능 |
+
+#### `core.settings.available_{category}_drivers`
+
+플러그인이 드라이버/디스크 선택지를 카탈로그에 추가합니다. 첫 인자인 드라이버 배열에 다음 구조의 항목을 append 합니다.
+
+| 키 | 타입 | 값 |
+| --- | --- | --- |
+| `id` | string | 드라이버/디스크 식별자 — 저장값이자 config 조회 키 |
+| `label` | array | 로케일별 표시 라벨 (예: `['ko' => 'CDN', 'en' => 'CDN']`) |
+| `provider` | string | 공급 플러그인 식별자 — 비활성화 시 "사용 중 드라이버" 경고 판정에 사용 (코어 기본 항목에는 없음) |
+
+`core.settings.available_public_asset_drivers` 로 등록하는 디스크는 플러그인 ServiceProvider 에서 `filesystems.disks.{id}` 정의가 함께 있어야 하며, 그 정의에 `url` 키가 있어야 직접 URL 이 생성됩니다(없으면 스트리밍 폴백). 플러그인이 비활성화되어 디스크 정의가 사라지면 저장값은 보존된 채 스트리밍으로 자동 폴백합니다.
 
 ---
 

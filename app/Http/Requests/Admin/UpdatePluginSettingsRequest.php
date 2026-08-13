@@ -4,6 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use App\Extension\HookManager;
 use App\Extension\PluginManager;
+use App\Services\DriverRegistryService;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -104,6 +105,24 @@ class UpdatePluginSettingsRequest extends FormRequest
             }
 
             $rules[$field] = $fieldRules;
+        }
+
+        // 공개 자산 디스크는 스키마 타입만으로 검증할 수 없다 — 선택지가 코어 3종 +
+        // 플러그인이 훅으로 등록한 디스크라 런타임에만 확정되기 때문이다.
+        // PluginSettingsController 가 카탈로그를 부착하는 게이트(스키마에 이 키를 선언한
+        // 플러그인)와 동일한 조건에서 검증도 걸어, "선택지를 내려준 표면" 과 "값을 받는
+        // 표면" 의 강도를 맞춘다. 이렇게 두면 이 키를 선언하는 플러그인은 각자 훅을
+        // 구독하지 않아도 코어 환경설정과 같은 422 를 얻는다.
+        if (array_key_exists('public_asset_disk', $schema)) {
+            $rules['public_asset_disk'][] = function (string $attribute, mixed $value, \Closure $fail): void {
+                if ($value === null || $value === '') {
+                    return;
+                }
+
+                if (! app(DriverRegistryService::class)->isDriverAvailable('public_asset', $value)) {
+                    $fail(__('validation.settings.public_asset_disk_invalid'));
+                }
+            };
         }
 
         // 표준 이름(`core.{대상}.{동작}_validation_rules`)으로 발행하되, 이미 공개돼 구독 중일 수 있는

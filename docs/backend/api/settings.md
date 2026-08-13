@@ -71,7 +71,7 @@ _단건 응답: `data` 객체의 필드._
 | geoip | object | `{"geoip_enabled":false,"geoip_license_key":null,"geoip_au…` | GeoIP 원본 카테고리 (GeoIP 사용 여부·MaxMind 라이선스 키·DB 자동 갱신 사용). advanced 탭에 병합된 파생 뷰 |
 | notifications | object | `{"channels":[{"id":"mail","is_active":true,"sort_order":1…` | 알림 탭 설정 그룹. channels 는 알림 채널 목록으로 각 원소가 id(채널 식별자)·is_active(활성 여부)·sort_order(표시 순서)를 가짐 |
 | identity | object | `{"default_provider":"g7:core.mail","purpose_providers":{"…` | 본인인증(IDV) 탭 설정 그룹 (기본 provider·목적별 provider 매핑(purpose_providers)·챌린지 유효시간(분)·최대 시도 횟수) |
-| available_drivers | object | `{"storage":[{"id":"local","label":{"ko":"로컬","en":"Local"…` | 드라이버 선택지 카탈로그 (DriverRegistryService 산물). 종류별(storage/cache/session/queue 등) 선택 가능한 드라이버 목록을 id/다국어 label 형태로 제공 |
+| available_drivers | object | `{"storage":[{"id":"local","label":{"ko":"로컬","en":"Local"…` | 드라이버 선택지 카탈로그 (DriverRegistryService 산물). 종류별(storage/public_asset/cache/session/queue 등) 선택 가능한 드라이버 목록을 id/다국어 label 형태로 제공. `public_asset` 은 공개 자산 직접 URL 서빙 디스크 선택지 (코어 none/public/s3 + 플러그인 훅 등록분) |
 | _meta | object | `{"limits":{"upload_max_file_size_min":1,"upload_max_file_…` | 화면 검증 메타 — `limits` 는 각 설정 항목의 min/max 경계값 맵 (`config/core.php` 의 `settings_limits` 가 SSoT, 화면 입력 힌트와 FormRequest 검증이 같은 값을 공유) |
 | abilities | object | `{"can_update":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
@@ -244,6 +244,7 @@ HTTP/1.1 200
 | advanced.geoip_license_key | body | string | 아니오 | max 200 | MaxMind GeoLite2 라이선스 키 |
 | advanced.geoip_auto_update_enabled | body | boolean | 아니오 | — | GeoIP DB 자동 업데이트 사용 여부 (주 1회 자동 재다운로드) |
 | drivers.storage_driver | body | string | 아니오 | — | 스토리지 드라이버 (local/s3) |
+| drivers.public_asset_disk | body | string | 아니오 | max 100 | 공개 자산 직접 URL 서빙 디스크 (none/public/s3 + 플러그인 훅 등록 디스크). 카탈로그(`available_drivers.public_asset`)에 없는 값은 422 |
 | drivers.s3_bucket | body | string | 아니오 | max 255 | S3 버킷명 |
 | drivers.s3_region | body | string | 아니오 | max 64, 소문자 영숫자·하이픈 (`^[a-z0-9-]+$`) | S3 리전 — AWS 리전 코드 또는 S3 호환 스토리지 값 (Cloudflare R2 는 `auto`, MinIO 관례는 `us-east-1`) |
 | drivers.s3_access_key | body | string | 아니오 | max 255 | S3 액세스 키 |
