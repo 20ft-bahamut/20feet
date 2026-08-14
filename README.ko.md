@@ -71,7 +71,7 @@ Laravel과 React를 기반으로, 보안부터 아키텍처까지 처음부터 �
 
 | 구분 | 기술 |
 |------|------|
-| **백엔드** | PHP 8.2+, Laravel 12.x, MySQL 8.0+, Redis 6.0+ |
+| **백엔드** | PHP 8.2+, Laravel 12.x, MySQL 8.0+ / MariaDB 10.3+, Redis 6.0+ |
 | **프론트엔드** | React 19, Vite, Tailwind CSS 4 (다크 모드 지원) |
 | **인증** | Laravel Sanctum (Bearer 토큰) |
 | **테스트** | PHPUnit 11.x, Vitest |
@@ -353,10 +353,12 @@ HookManager::doAction('sirsoft-ecommerce.order.after_confirm', $order);
 
 ### 시스템 요구사항
 
-- PHP 8.2+ (필수 확장 30개 포함)
+- PHP 8.2+ (필수 확장 16개 포함 — `ctype`, `curl`, `dom`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, `zip` 등. `gd`/`imagick`, `intl`, `redis`, `bcmath` 등은 해당 기능을 쓸 때만 필요하며 전체 목록은 [docs/requirements.md](docs/requirements.md) 참조)
 - MySQL 8.0+ 또는 MariaDB 10.3+ (utf8mb4)
-- Node.js 20+ (빌드 시에만 필요)
 - Composer 2.x
+- Node.js 20+ (프론트엔드 에셋을 직접 빌드할 때만 필요)
+- 웹 서버(Apache 또는 Nginx) — 문서 루트를 `public/` 으로 지정
+- Redis 6.0+ (선택 — 프로덕션의 캐시·큐에 권장)
 
 ### 설치
 
