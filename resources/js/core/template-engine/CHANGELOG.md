@@ -5,6 +5,19 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.58.3] - 2026-08-14
+
+### Fixed
+
+#### 교차 출처(공개 자산 CDN) 요청에 세션 토큰이 실리고 이미지가 통째로 실패하던 문제
+
+- `api/ApiClient.ts::setupInterceptors` — 요청 인터셉터가 `Authorization` 을 **동일 출처 요청에만** 첨부한다. 판정은 신설 `isCrossOriginRequest()` 가 담당하며, 상대 경로는 항상 동일 출처, 절대 URL(`https://…`)과 프로토콜 상대 URL(`//host/…`)만 `window.location.origin` 과 비교한다(파싱 실패·SSR 은 동일 출처로 간주해 기존 동작 유지).
+- 공개 자산 디스크(S3/CDN) 옵트인이 켜지면 첨부·이미지의 `download_url` 이 외부 origin 절대 URL 이 된다. 종전 인터셉터는 URL 출처를 보지 않고 토큰을 붙였으므로 두 가지가 동시에 발생했다.
+  1. **토큰 노출** — 관리자 세션 토큰이 제3자 CDN origin 으로 전송된다. CDN 이 `Access-Control-Allow-Origin` 을 허용하는 흔한 구성에서는 요청이 성공하므로 그 origin 의 접근 로그에 토큰이 남는다.
+  2. **이미지 전면 실패** — `Authorization` 은 CORS 안전목록 밖이라 preflight 가 발생한다. 버킷/배포에 CORS 규칙이 없으면(AWS S3 기본값) preflight 가 거절되어 그 이미지가 전부 깨진다.
+- 실측(AWS S3 실 버킷, 관리자 상품 이미지 탭): 요청 헤더에 `authorization: Bearer …` 가 실린 채 `net::ERR_FAILED` + 콘솔 CORS 오류 15건. 같은 이미지를 `<img>` 로 여는 상점 화면은 CORS 대상이 아니라 정상이어서, **관리자 화면에서만** 증상이 나타난다.
+- 로컬 `public` 디스크(동일 출처)나 CORS 를 허용하는 개발용 오브젝트 스토리지에서는 재현되지 않는다 — 두 조건(외부 origin + CORS 미허용)이 겹쳐야 드러난다.
+
 ## [engine-v1.58.2] - 2026-08-10
 
 ### Fixed
