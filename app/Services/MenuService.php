@@ -11,6 +11,7 @@ use App\Models\Menu;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class MenuService
@@ -182,13 +183,16 @@ class MenuService
             ]);
         }
 
-        // Hook: 메뉴 삭제 전
-        HookManager::doAction('core.menu.before_delete', $menu);
+        // 역할 연결만 끊기고 메뉴는 남는 상태를 막기 위해 두 단계를 하나로 묶는다.
+        $result = DB::transaction(function () use ($menu) {
+            // Hook: 메뉴 삭제 전
+            HookManager::doAction('core.menu.before_delete', $menu);
 
-        // 역할 연결 해제 (명시적 삭제 - CASCADE 의존 금지)
-        $menu->roles()->detach();
+            // 역할 연결 해제 (명시적 삭제 - CASCADE 의존 금지)
+            $menu->roles()->detach();
 
-        $result = $this->menuRepository->delete($menu);
+            return $this->menuRepository->delete($menu);
+        });
 
         // Hook: 메뉴 삭제 후
         HookManager::doAction('core.menu.after_delete', $menu->id);

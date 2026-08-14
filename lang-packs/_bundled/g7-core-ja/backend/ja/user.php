@@ -123,4 +123,5 @@ return [
         'exclude_user_id_uuid' => '除外するユーザーIDは有効なUUIDである必要があります。',
         'exclude_user_id_exists' => '存在しないユーザーです。',
     ],
+    'withdraw_failed_unknown' => '不明なエラーにより退会処理に失敗しました。',
 ];

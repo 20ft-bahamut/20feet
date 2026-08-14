@@ -71,6 +71,7 @@ return [
     'withdraw_success' => '회원 탈퇴가 완료되었습니다.',
     'withdraw_failed' => '회원 탈퇴에 실패했습니다: :error',
     'withdraw_admin_forbidden' => '관리자 계정은 탈퇴할 수 없습니다.',
+    'withdraw_failed_unknown' => '알 수 없는 오류로 탈퇴 처리에 실패했습니다.',
 
     // 유효성 검사 메시지
     'validation' => [

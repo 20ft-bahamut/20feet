@@ -9,6 +9,7 @@ use App\Extension\HookManager;
 use App\Http\Resources\AttachmentResource;
 use App\Seo\Contracts\SeoCacheManagerInterface;
 use App\Support\ConfigCacheHelper;
+use App\Support\ExtensionSettingsMirror;
 use App\Support\OpcacheStatus;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -43,6 +44,11 @@ class SettingsService
     {
         $this->cache->forget('settings.system');
         ConfigCacheHelper::rebuild();
+
+        // 같은 프로세스의 in-memory 미러도 즉시 다시 채운다 (공개이슈 #109).
+        // 이 호출이 없으면 상주 프로세스(큐 워커·schedule:work·Reverb)는 저장 후에도
+        // 부팅 시점의 옛 값을 영원히 읽는다 — FPM 에서만 드러나지 않는 결함이다.
+        app(ExtensionSettingsMirror::class)->refreshCore();
     }
 
     /**
@@ -703,7 +709,9 @@ class SettingsService
             $result = $this->configRepository->set($key, $value);
 
             if ($result) {
-                $this->cache->forget('settings.system');
+                // 인라인 무효화 대신 공통 경로를 탄다 — saveSettings/saveAdvancedSettings 와
+                // 같은 처리를 받아야 미러 재채움·디스크 config 캐시 재생성이 빠지지 않는다.
+                $this->invalidateSettingsCache();
             }
 
             // After 훅
@@ -738,7 +746,9 @@ class SettingsService
         $result = $this->configRepository->restore($backupPath);
 
         if ($result) {
-            $this->cache->forget('settings.system');
+            // 복원도 설정 전체를 갈아엎는 쓰기다 — 캐시만 비우고 미러를 두면
+            // 같은 프로세스가 복원 전 값을 계속 읽는다 (저장 경로와 동일 결함, 공개이슈 #109).
+            $this->invalidateSettingsCache();
         }
 
         return $result;

@@ -10,6 +10,7 @@
 
 - 환경설정 > 드라이버 > 파일 스토리지의 S3 신설 항목 일본어 번역 추가 (`settings.drivers.storage.s3_endpoint*`, `s3_use_path_style*`, `s3_region_desc`) — 엔드포인트 URL·Path-style 토글·리전 입력 도움말이 일본어 로케일에서 자연스럽게 표시됩니다. (#99 @lyg-kaban 님께서 제보해주셨습니다.)
 - 환경설정 드라이버 탭의 "공개 자산 스토리지" 카드 문구 일본어 번역을 추가했습니다.
+- 회원 정보 수정 화면의 탈퇴 확인 창 문구 일본어 번역 추가 (`admin.users.modals.withdraw_confirm_*`) — 되돌릴 수 없는 처리라는 안내와 함께 처리되는 항목 목록이 일본어 로케일에서 표시됩니다. (#112 @Tuwasduliebst 님께서 제보해주셨습니다.)
 
 ### Changed
 

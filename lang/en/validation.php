@@ -1153,7 +1153,8 @@ return [
 
     // Validation attribute names (validation.attributes)
     'attributes' => [
-        'ids' => 'user ID list',
+        'ids' => 'ID list',
+        'user_ids' => 'user ID list',
         'user_id' => 'user ID',
         'status' => 'status',
         // Settings fields
@@ -1162,7 +1163,8 @@ return [
         'site_description' => 'site description',
         'admin_email' => 'admin email',
         'timezone' => 'timezone',
-        'language' => 'default language',
+        'language' => 'language',
+        'default_language' => 'default language',
         // Identity verification (IDV) fields
         'identity_default_provider' => 'default provider',
         'identity_purpose_providers' => 'purpose-to-provider mapping',
@@ -1180,10 +1182,14 @@ return [
         'identity_policy_fail_mode' => 'fail mode',
         // Mail settings
         'mailer' => 'mailer',
-        'host' => 'SMTP host',
-        'port' => 'SMTP port',
-        'username' => 'SMTP username',
-        'password' => 'SMTP password',
+        'host' => 'host',
+        'port' => 'port',
+        'username' => 'username',
+        'password' => 'password',
+        'smtp_host' => 'SMTP host',
+        'smtp_port' => 'SMTP port',
+        'smtp_username' => 'SMTP username',
+        'smtp_password' => 'SMTP password',
         'encryption' => 'encryption',
         'from_address' => 'sender email',
         'from_name' => 'sender name',
@@ -1237,8 +1243,10 @@ return [
         'ses_region' => 'SES region',
         'mailgun_endpoint' => 'Mailgun endpoint',
         // General settings (additional)
-        'channels' => 'notification channels',
-        'currency' => 'default currency',
+        'channels' => 'channels',
+        'notification_channels' => 'notification channels',
+        'currency' => 'currency',
+        'default_currency' => 'default currency',
         'maintenance_mode' => 'maintenance mode',
         'asset_url_mode' => 'asset URL mode',
         'site_logo' => 'site logo',
@@ -1252,7 +1260,8 @@ return [
         'twitter_default_card' => 'Twitter default card type',
         'twitter_default_site' => 'Twitter default account',
         'seo_page_cache_enabled' => 'SEO page cache',
-        'cache_ttl' => 'SEO page cache lifetime',
+        'cache_ttl' => 'cache lifetime',
+        'seo_page_cache_ttl' => 'SEO page cache lifetime',
         'sitemap_enabled' => 'sitemap',
         'sitemap_cache_ttl' => 'sitemap cache lifetime',
         'sitemap_urls_per_file' => 'sitemap URLs per file',

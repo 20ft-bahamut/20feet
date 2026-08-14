@@ -208,7 +208,16 @@
       "bulk_block_success": "ユーザーがブロックされました。",
       "bulk_withdraw_title": "ユーザー退会処理",
       "bulk_withdraw_confirm": "{{count}}人のユーザーを退会処理します。この操作は取り消すが難しい場合があります。",
-      "bulk_withdraw_success": "ユーザーが退会処理されました。"
+      "bulk_withdraw_success": "ユーザーが退会処理されました。",
+      "withdraw_confirm_title": "退会処理の確認",
+      "withdraw_confirm_lead": "ステータスを「退会」に保存すると、この会員は実際に退会処理されます。元に戻すことはできません。",
+      "withdraw_confirm_effects_title": "一緒に処理される項目",
+      "withdraw_confirm_effect_anonymize": "メールアドレス·名前·ニックネームが匿名化されます。",
+      "withdraw_confirm_effect_sessions": "この会員のすべてのログインセッションが解除されます。",
+      "withdraw_confirm_effect_linked": "この会員の規約同意履歴·プロフィール画像が削除され、マイレージ·本人認証記録など連携データが整理されます。",
+      "withdraw_confirm_submit": "退会処理",
+      "bulk_withdraw_partial": "{updated}名を退会処理しました。{failed}名は処理できませんでした — {reason}",
+      "bulk_withdraw_all_failed": "退会処理できませんでした — {reason}"
     },
     "form": {
       "page_title_create": "ユーザー登録",
