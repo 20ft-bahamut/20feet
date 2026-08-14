@@ -151,6 +151,7 @@
       "min_order_amount": "最小注文金額",
       "is_active": "使用有無",
       "orphaned_badge": "プラグイン未インストール",
+      "orphaned_pg_badge": "指定PG削除済み",
       "remove_orphaned": "削除",
       "pg_provider": "PG社",
       "pg_use_default": "デフォルトPG",

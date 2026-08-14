@@ -35,18 +35,23 @@ class DriverRegistryServiceTest extends TestCase
     }
 
     /**
-     * 코어 드라이버가 8개 카테고리를 모두 포함하는지 검증합니다.
+     * 코어 드라이버가 9개 카테고리를 모두 포함하는지 검증합니다.
      *
-     * @effects settings_catalog_includes_plugin_registered_disks
+     * search 는 폴백 가드 편입(A5b)으로 추가되었다 — 이 목록에서 빠지면 검색엔진 플러그인
+     * 제거 시 죽은 `scout.driver` 가 그대로 남아 공개 검색이 500 이 된다.
+     *
+     * @scenario engine_source=core
+     *
+     * @effects search_category_registered_in_driver_registry
      */
     #[Test]
-    public function it_returns_all_eight_categories(): void
+    public function it_returns_all_nine_categories(): void
     {
         $categories = $this->service->getCategories();
 
-        $this->assertCount(8, $categories);
+        $this->assertCount(9, $categories);
         $this->assertEquals(
-            ['storage', 'public_asset', 'cache', 'session', 'queue', 'log', 'websocket', 'mail'],
+            ['storage', 'public_asset', 'cache', 'session', 'queue', 'log', 'websocket', 'mail', 'search'],
             $categories
         );
     }
@@ -128,7 +133,8 @@ class DriverRegistryServiceTest extends TestCase
         $this->assertArrayHasKey('log', $all);
         $this->assertArrayHasKey('websocket', $all);
         $this->assertArrayHasKey('mail', $all);
-        $this->assertCount(8, $all);
+        $this->assertArrayHasKey('search', $all);
+        $this->assertCount(9, $all);
     }
 
     /**

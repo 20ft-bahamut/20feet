@@ -95,6 +95,7 @@ use App\Services\AttachmentService;
 use App\Services\DriverRegistryService;
 use App\Services\LayoutExtensionService;
 use App\Services\TemplateLayoutAttachmentService;
+use App\Services\TemplateService;
 use App\Services\UniqueIdService;
 use App\Support\ExtensionSettingsMirror;
 use App\Support\PrivilegedDatabaseAccounts;
@@ -347,6 +348,12 @@ class CoreServiceProvider extends ServiceProvider
         $this->app->singleton(TemplateManagerInterface::class, function ($app) {
             return $app->make(TemplateManager::class);
         });
+
+        // 템플릿 서비스도 공유 인스턴스로 등록한다.
+        // 미등록 상태에서는 주입 지점마다 새로 만들어지고, 그 생성자가 매번 템플릿
+        // 디렉토리를 재스캔했다. 요청 단위 상태는 라우트 병합 열화 플래그 하나뿐이며
+        // 그 플래그는 병합 진입 시 재설정되므로 공유해도 안전하다.
+        $this->app->singleton(TemplateService::class);
     }
 
     /**

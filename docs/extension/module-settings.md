@@ -559,6 +559,29 @@ public function clearCache(): void
 - 스키마에 `sensitive: true` 로 선언한 필드는 미러에 담기지 않는다. 민감값은 자체 설정 서비스(복호화 경로)로 읽는다.
 - 배경과 코어 축(코어/플러그인)의 처리는 [admin-settings-access.md](../backend/admin-settings-access.md) "config 미러 갱신 시점" 참조.
 
+### 8.5 저장 완료 훅 발화
+
+모듈 설정 저장을 알리는 코어 훅은 `core.module_settings.after_save` 이며, payload 는
+`($identifier, [category => fields], $result)` 다. SEO 캐시 무효화·활동 로그 등 코어와 타 확장의
+리스너가 이 훅을 구독한다.
+
+발화 지점은 **관리자 컨트롤러**다 — 설정 서비스가 아니다.
+
+- 훅의 의미가 "관리자가 설정을 저장했다" 이다. 서비스에 두면 내부 저장 호출(시드·마이그레이션·
+  테스트 픽스처) 전부가 활동 로그와 캐시 무효화를 유발한다.
+- 각 모듈의 설정은 그 모듈의 SettingsService 가 직접 파일에 쓰므로, 코어에는 이 훅을 발화할
+  공통 지점이 없다. 모듈이 자기 컨트롤러의 저장 성공 분기에서 직접 발화한다.
+
+```php
+if ($result) {
+    HookManager::doAction('core.module_settings.after_save', 'vendor-module', $settings, $result);
+}
+```
+
+단건 저장 경로(dot-key)는 payload 를 카테고리 하위 구조로 되돌려 벌크 저장과 같은 형태로
+맞춘다(`Arr::set($payload, $key, $value)`). 구독 리스너가 카테고리 기준으로 관심 키를 찾으므로,
+평탄한 dot-key 를 그대로 넘기면 그 리스너들이 아무것도 감지하지 못한다.
+
 ---
 
 ## 9. 카탈로그 병합 설정의 공개 응답
