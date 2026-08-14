@@ -428,6 +428,8 @@ _단건 응답: `data` 객체의 필드 (UserService::bulkUpdateStatus() 반환�
 | 필드 | 타입 | 실측 예시값 | 용도/설명 |
 | --- | --- | --- | --- |
 | updated_count | integer | `3` | 실제로 상태가 변경된 사용자 수 (요청자 본인 제외 규칙 적용 후 갱신된 행 수) |
+| failed_count | integer | `1` | 처리하지 못한 사용자 수 (탈퇴 전환에서 관리자·수퍼관리자 등 차단 대상이 섞인 경우). 탈퇴 외 상태 전환은 항상 `0` |
+| failed_reasons | array\<string\> | `["관리자 계정은 탈퇴할 수 없습니다."]` | 처리하지 못한 사유 (중복 제거). 탈퇴 외 상태 전환은 항상 `[]` |
 
 **응답 예시**
 
@@ -440,7 +442,9 @@ HTTP/1.1 200
     "success": true,
     "message": ":count명의 사용자 상태가 변경되었습니다.",
     "data": {
-        "updated_count": 3
+        "updated_count": 3,
+        "failed_count": 0,
+        "failed_reasons": []
     }
 }
 ```
@@ -461,6 +465,10 @@ HTTP/1.1 200
 **설명**
 
 여러 사용자의 계정 상태를 한 번에 변경합니다. `ids` 는 대상 사용자 UUID 배열이며, `status` 는 `active`/`inactive`/`blocked`/`withdrawn`/`pending_verification`(UserStatus Enum 값) 중 하나이다. `ExcludeCurrentUser` 규칙으로 요청자 본인은 대상에서 제외된다. 목록 화면의 다중 선택 후 일괄 상태 변경에 사용한다.
+
+`status=withdrawn` 요청은 상태 컬럼만 바꾸지 않고 **건별로 정식 탈퇴 처리**를 수행한다 (익명화 + 연계 데이터 정리 + 탈퇴 훅). 회원이 직접 탈퇴한 경우와 결과가 같다. 관리자 역할을 가진 대상은 건너뛰고 `failed_count` 로 집계되며, 나머지 대상의 처리는 계속된다.
+
+전건이 차단되어도 응답은 200 이다. 소비자는 `updated_count` 와 `failed_count` 를 함께 읽어 결과를 판정해야 한다 — 200 만 보고 성공으로 안내하면 아무 일도 일어나지 않은 요청이 처리된 것으로 표시된다. 사유는 `failed_reasons` 로 전달되므로 그대로 노출하면 된다.
 
 
 ### POST /api/admin/users/check-email
@@ -1003,7 +1011,17 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 
 **응답 예시**
 
-<!-- 실측 제외: http-422 — 응답 예시는 사람이 작성하세요. -->
+```http
+HTTP/1.1 200
+```
+
+```json
+{
+    "success": true,
+    "message": "사용자가 삭제되었습니다.",
+    "data": null
+}
+```
 
 **에러 응답**
 
@@ -1019,6 +1037,8 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 **설명**
 
 지정한 사용자(경로 파라미터는 UUID 로 바인딩)를 삭제합니다. 슈퍼관리자 계정은 삭제할 수 없으며 시도 시 422(`exceptions.cannot_delete_super_admin`)를 반환한다. 그 외 삭제 실패 시에는 실패 상세 사유가 담긴 422 를, 나머지 오류는 500 을 반환한다. 삭제는 Service 계층에서 관련 데이터 정리와 훅을 거쳐 처리된다.
+
+삭제는 원자적으로 처리된다 — 역할 연결 해제·약관 동의 이력 삭제·토큰 삭제·계정 삭제가 하나의 트랜잭션이며, 마지막 삭제가 외래키 제약 등으로 실패하면 앞 단계도 전부 취소된다(연결만 끊긴 활성 계정이 남지 않는다). 아바타 파일 삭제는 커밋 후에 수행된다.
 
 
 ### GET /api/admin/users/{user}
@@ -1091,7 +1111,7 @@ _단건 응답: `data` 객체의 필드._
 | withdrawn_at | null | `null` | withdrawn 일시 |
 | blocked_at | null | `null` | blocked 일시 |
 | failed_login_attempts | integer | `0` | 연속 로그인 실패 횟수 |
-| locked_permanently | boolean | `false` | <!-- TODO: 설명 --> |
+| locked_permanently | boolean | `false` | 무기한 잠금 여부 (보안 설정의 잠금 시간이 `0` 이면 자동 해제 없이 관리자가 직접 풀어야 한다) |
 | locked_until | null | `null` | 계정 잠금 해제 시각 (NULL = 잠금 없음) |
 | is_locked | boolean | `false` | locked 여부 |
 | notify_post_complete | boolean | `false` | 게시글 작성 완료 알림 수신 여부 (게시판 모듈 알림 설정) |

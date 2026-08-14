@@ -125,6 +125,14 @@ core.attachment.delete
 # 컨텍스트 6키는 아래 "스토리지·드라이버 확장 훅 페이로드" 표 참조
 core.storage.filter_url
 
+# 보존 기간 자동 파기 (7.0.7) — 운영자 일괄 삭제 훅과 별개로 발행한다.
+# 운영자 삭제 훅에는 본인인증 같은 대화형 가드가 물려 있어 무인 예약이 탈 수 없고,
+# 그렇다고 훅 없이 지우면 확장이 가장 큰 삭제 경로(첫 실행의 누적분)를 볼 수 없다.
+# 인자는 (보존일) / (보존일, 삭제건수) — 대상을 ID 로 지목하지 않는다.
+core.activity_log.before_prune          core.activity_log.after_prune
+core.notification_log.before_prune      core.notification_log.after_prune
+core.schedule.before_prune_history      core.schedule.after_prune_history
+
 # 업로드 트라이어드 — 사용자 첨부 업로드 지점의 표준 3훅 패턴
 # before_upload(액션) → filter_upload_file(필터: UploadedFile 을 받아 변형본을 반환.
 # 저장 파일명·MIME·크기가 모두 반환 파일 기준이 된다) → after_upload(액션)

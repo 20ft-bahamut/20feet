@@ -54,6 +54,12 @@ return [
             'notification:cleanup' => ['options' => []],
             'layout-previews:cleanup' => ['options' => []],
             'ext-bundles:cleanup' => ['options' => []],
+            'seo:prune-stats' => ['options' => ['days']],
+            'schedules:prune-history' => ['options' => ['days']],
+            'identity:expire-challenges' => ['options' => []],
+            'identity:prune-logs' => ['options' => ['days']],
+            'activity-log:prune' => ['options' => ['days']],
+            'notification-log:prune' => ['options' => ['days']],
 
             // SEO
             'seo:warmup' => ['options' => ['layout']],

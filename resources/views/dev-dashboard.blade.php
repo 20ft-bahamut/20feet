@@ -1070,6 +1070,30 @@ if (isset($_GET['ajax_action'])) {
                                     <span>확장 번들 정리</span>
                                     <span class="text-[10px] opacity-60">(ext-bundles:cleanup)</span>
                                 </button>
+                                <button onclick="runCommand('seo:prune-stats')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>SEO 캐시 통계 정리</span>
+                                    <span class="text-[10px] opacity-60">(seo:prune-stats)</span>
+                                </button>
+                                <button onclick="runCommand('schedules:prune-history')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>스케줄 이력 정리</span>
+                                    <span class="text-[10px] opacity-60">(schedules:prune-history)</span>
+                                </button>
+                                <button onclick="runCommand('activity-log:prune')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>활동 로그 정리</span>
+                                    <span class="text-[10px] opacity-60">(activity-log:prune)</span>
+                                </button>
+                                <button onclick="runCommand('notification-log:prune')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>알림 발송 이력 정리</span>
+                                    <span class="text-[10px] opacity-60">(notification-log:prune)</span>
+                                </button>
+                                <button onclick="runCommand('identity:expire-challenges')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>본인인증 challenge 만료 처리</span>
+                                    <span class="text-[10px] opacity-60">(identity:expire-challenges)</span>
+                                </button>
+                                <button onclick="runCommand('identity:prune-logs')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium rounded transition-colors">
+                                    <span>본인인증 이력 파기</span>
+                                    <span class="text-[10px] opacity-60">(identity:prune-logs)</span>
+                                </button>
                                 <button onclick="runCommand('geoip:update')" class="inline-flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors">
                                     <span>GeoIP DB 갱신</span>
                                     <span class="text-[10px] opacity-60">(geoip:update)</span>

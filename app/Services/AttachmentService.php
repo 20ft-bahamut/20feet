@@ -13,6 +13,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -181,23 +182,40 @@ class AttachmentService
         $attachmentableId = $attachment->attachmentable_id;
         $collection = $attachment->collection;
 
-        // Before 훅
-        HookManager::doAction('core.attachment.before_delete', $attachment);
+        // DB 를 먼저 지우고 파일은 커밋 후에 지운다.
+        // 순서를 반대로 두면 DB 삭제가 실패했을 때 파일 없는 행이 남아 다운로드가 404 가 된다.
+        // 반대로 이 순서에서는 최악이어도 참조되지 않는 고아 파일만 남고 데이터는 온전하다.
+        $result = DB::transaction(function () use ($id, $attachment, $attachmentableType, $attachmentableId, $collection) {
+            // Before 훅
+            HookManager::doAction('core.attachment.before_delete', $attachment);
 
-        // 스토리지에서 파일 삭제
-        $this->storage->withDisk($attachment->disk)->delete('', $attachment->path);
+            // DB에서 영구 삭제
+            $deleted = $this->repository->forceDelete($id);
 
-        // DB에서 영구 삭제
-        $result = $this->repository->forceDelete($id);
+            // 삭제 후 남은 파일들의 순서 재정렬
+            if ($deleted && $attachmentableType && $attachmentableId) {
+                $this->repository->reorderAfterDelete($attachmentableType, $attachmentableId, $collection);
+            }
 
-        Log::info('첨부파일 삭제 완료', [
-            'attachment_id' => $id,
-            'hash' => $attachment->hash,
-        ]);
+            return $deleted;
+        });
 
-        // 삭제 후 남은 파일들의 순서 재정렬
-        if ($result && $attachmentableType && $attachmentableId) {
-            $this->repository->reorderAfterDelete($attachmentableType, $attachmentableId, $collection);
+        if ($result) {
+            // 커밋 후 스토리지 파일 삭제 (실패해도 DB 는 되돌리지 않는다)
+            try {
+                $this->storage->withDisk($attachment->disk)->delete('', $attachment->path);
+            } catch (\Throwable $e) {
+                Log::warning('첨부파일 스토리지 삭제 실패 (고아 파일 잔존)', [
+                    'attachment_id' => $id,
+                    'path' => $attachment->path,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            Log::info('첨부파일 삭제 완료', [
+                'attachment_id' => $id,
+                'hash' => $attachment->hash,
+            ]);
         }
 
         // After 훅
@@ -378,17 +396,28 @@ class AttachmentService
         // Before 훅
         HookManager::doAction('core.attachment.before_bulk_delete', $identifier);
 
-        // 해당 첨부파일들의 스토리지 파일 삭제
+        // 삭제 대상 스냅샷 + 파일 경로를 먼저 수집한다 (DB 삭제 후에는 조회할 수 없다).
         $attachments = $this->repository->getBySourceIdentifier($identifier);
         $attachmentIds = $attachments->pluck('id')->toArray();
         $snapshots = $attachments->keyBy('id')->map(fn ($a) => $a->toArray())->toArray();
+        $files = $attachments->map(fn ($a) => ['disk' => $a->disk, 'path' => $a->path])->all();
 
-        foreach ($attachments as $attachment) {
-            $this->storage->withDisk($attachment->disk)->delete('', $attachment->path);
+        // DB 일괄 삭제를 먼저 커밋한다 — 루프 중간에 실패하면 파일만 일부 사라지고
+        // DB 행은 전부 남아 다운로드가 404 가 되기 때문이다.
+        $count = DB::transaction(fn () => $this->repository->deleteBySourceIdentifier($identifier));
+
+        // 커밋 후 파일 정리 (실패해도 DB 는 되돌리지 않는다 — 고아 파일은 비파괴)
+        foreach ($files as $file) {
+            try {
+                $this->storage->withDisk($file['disk'])->delete('', $file['path']);
+            } catch (\Throwable $e) {
+                Log::warning('첨부파일 스토리지 일괄 삭제 실패 (고아 파일 잔존)', [
+                    'source_identifier' => $identifier,
+                    'path' => $file['path'],
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
-
-        // DB에서 삭제
-        $count = $this->repository->deleteBySourceIdentifier($identifier);
 
         Log::info('소스 식별자 기준 첨부파일 일괄 삭제', [
             'source_identifier' => $identifier,

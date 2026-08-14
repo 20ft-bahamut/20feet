@@ -71,6 +71,7 @@ return [
     'withdraw_success' => 'Account withdrawal completed successfully.',
     'withdraw_failed' => 'Failed to withdraw account: :error',
     'withdraw_admin_forbidden' => 'Administrator account cannot be withdrawn.',
+    'withdraw_failed_unknown' => 'Withdrawal failed due to an unknown error.',
 
     // Validation messages
     'validation' => [

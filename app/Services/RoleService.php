@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RoleService
@@ -183,16 +184,20 @@ class RoleService
             throw new ExtensionOwnedRoleDeleteException;
         }
 
-        // 훅: 삭제 전
-        HookManager::doAction('core.role.before_delete', $role);
+        // 관계 해제 후 삭제가 실패하면 그 역할을 가진 사용자 전원이 권한만 잃고
+        // 역할은 그대로 남는다. 전 단계를 하나로 묶는다.
+        $result = DB::transaction(function () use ($role) {
+            // 훅: 삭제 전
+            HookManager::doAction('core.role.before_delete', $role);
 
-        // 관계 해제 (명시적 삭제 - CASCADE 의존 금지)
-        $this->roleRepository->detachAllPermissions($role);
-        $role->menus()->detach();
-        $role->users()->detach();
+            // 관계 해제 (명시적 삭제 - CASCADE 의존 금지)
+            $this->roleRepository->detachAllPermissions($role);
+            $role->menus()->detach();
+            $role->users()->detach();
 
-        // 역할 삭제
-        $result = $this->roleRepository->delete($role);
+            // 역할 삭제
+            return $this->roleRepository->delete($role);
+        });
 
         // 훅: 삭제 후
         HookManager::doAction('core.role.after_delete', $role->id);

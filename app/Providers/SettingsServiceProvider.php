@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Repositories\JsonConfigRepository;
 use App\Support\AllowedExtensions;
+use App\Support\ExtensionSettingsMirror;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 use Predis\Client;
@@ -16,23 +17,8 @@ use Predis\Client;
  */
 class SettingsServiceProvider extends ServiceProvider
 {
-    /**
-     * 코어 설정 카테고리 목록
-     */
-    private const CORE_CATEGORIES = [
-        'mail',
-        'general',
-        'security',
-        'debug',
-        'drivers',
-        'cache',
-        'upload',
-        'core_update',
-        'geoip',
-        'seo',
-        'identity',
-        'pagination',
-    ];
+    // 코어 설정 카테고리 목록은 ExtensionSettingsMirror::CORE_CATEGORIES 가 단독 소유한다.
+    // 여기에 사본을 두면 미러가 읽는 목록과 갈라져도 아무도 알아채지 못한다.
 
     /**
      * 서비스를 등록합니다.
@@ -41,6 +27,10 @@ class SettingsServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // 미러 채움 소유자를 컨테이너 싱글톤으로 등록한다 — 부팅/저장/테스트가
+        // 같은 인스턴스를 해석해야 교체(스텁 주입)가 모든 경로에 통한다.
+        $this->app->singleton(ExtensionSettingsMirror::class);
+
         // JsonConfigRepository를 직접 인스턴스화 (DI 컨테이너 사용 불가)
         $configRepository = new JsonConfigRepository;
 
@@ -67,16 +57,9 @@ class SettingsServiceProvider extends ServiceProvider
      */
     private function loadCoreSettingsToConfig(JsonConfigRepository $configRepository): void
     {
-        $coreSettings = [];
-
-        foreach (self::CORE_CATEGORIES as $category) {
-            $settings = $configRepository->getCategory($category);
-            if (! empty($settings)) {
-                $coreSettings[$category] = $settings;
-            }
-        }
-
-        Config::set('g7_settings.core', $coreSettings);
+        // 미러 채움 로직은 ExtensionSettingsMirror 가 단일 소유한다 —
+        // 저장 시점 재채움(공개이슈 #109)과 같은 코드를 써야 부팅과 저장의 결과가 갈리지 않는다.
+        $this->app->make(ExtensionSettingsMirror::class)->refreshCore($configRepository);
     }
 
     /**
@@ -188,6 +171,14 @@ class SettingsServiceProvider extends ServiceProvider
             // 환경설정의 timezone은 사용자 표시용 기본 타임존
             // app.timezone(서버 저장 타임존)은 항상 UTC 유지
             Config::set('app.default_user_timezone', $generalSettings['timezone']);
+
+            // 예약 작업의 시각 해석 기준도 사이트 설정 시간대를 따른다.
+            // Laravel 의 Kernel::scheduleTimezone() 이 이 키를 읽어 Schedule 인스턴스
+            // 전체에 일괄 적용하므로, 코어·확장이 등록한 모든 예약이 같은 기준을 공유한다.
+            // (이벤트마다 ->timezone() 을 붙이는 방식은 나중에 추가되는 예약이
+            //  조용히 UTC 기준으로 돌아가므로 채택하지 않는다.)
+            // 미설정 시에는 Laravel 기본 폴백(app.timezone = UTC)이 그대로 적용된다.
+            Config::set('app.schedule_timezone', $generalSettings['timezone']);
         }
 
         if (! empty($generalSettings['language'])) {

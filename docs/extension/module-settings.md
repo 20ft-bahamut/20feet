@@ -527,6 +527,38 @@ $timing = $this->settingsService->getStockDeductionTiming($method);
 
 > **판단 기준**: `getSetting()` 단일 호출만 필요하면 `module_setting()` 헬퍼 사용, 모듈 전용 메서드가 필요하면 서비스 직접 주입
 
+### 8.4 저장하면 config 미러를 다시 채운다
+
+`g7_module_settings()` 가 읽는 값은 in-memory config 미러(`g7_settings.modules.{id}`)다. 이 미러는 부팅 때 채워지므로, 저장 경로가 아무것도 하지 않으면 **그 프로세스는 저장 후에도 옛 값을 계속 읽는다.**
+
+php-fpm 은 요청마다 부팅해 문제가 드러나지 않는다. 큐 워커 · `schedule:work` · Reverb 처럼 프로세스가 상주하는 환경에서만 나타나고, 예외도 경고도 로그도 남지 않는다 — 운영자는 저장했는데 배경 작업만 옛 설정으로 도는 상태가 된다.
+
+모듈 설정 저장에는 코어 공통 지점이 없다(각 모듈의 설정 서비스가 직접 저장한다). 그래서 **자기 캐시를 비우는 모든 자리에서** 미러 재채움을 함께 호출한다.
+
+```php
+public function saveSettings(array $settings): bool
+{
+    // ... 저장 ...
+
+    $this->settings = null;                                   // 자기 캐시 비우기
+    g7_refresh_module_settings_config('vendor-module');       // config 미러 다시 채우기
+
+    return true;
+}
+
+public function clearCache(): void
+{
+    $this->settings = null;
+    g7_refresh_module_settings_config('vendor-module');
+}
+```
+
+호출 지점은 저장 메서드 하나가 아니다 — 초기화·복원·부분 저장 등 **값을 바꾸는 자리 전부**다. 한 곳만 빠지면 그 경로로 저장했을 때만 미러가 옛 값으로 남는다.
+
+- 이 헬퍼는 코어 7.0.7 부터 제공된다. 사용하는 모듈은 `module.json` 의 `requires.g7_version` 을 그에 맞춰 올린다.
+- 스키마에 `sensitive: true` 로 선언한 필드는 미러에 담기지 않는다. 민감값은 자체 설정 서비스(복호화 경로)로 읽는다.
+- 배경과 코어 축(코어/플러그인)의 처리는 [admin-settings-access.md](../backend/admin-settings-access.md) "config 미러 갱신 시점" 참조.
+
 ---
 
 ## 9. 카탈로그 병합 설정의 공개 응답
@@ -641,3 +673,4 @@ GET /api/modules/{id}/settings/payment    # 고아 제외 (정상)
 - [ ] 레이아웃에 `data_sources` 추가
 - [ ] 저장 버튼 액션 연결
 - [ ] `frontend_schema`로 민감정보 필터링 설정
+- [ ] 값을 바꾸는 모든 자리에서 `g7_refresh_module_settings_config()` 호출 (8.4)

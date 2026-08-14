@@ -94,6 +94,40 @@ g7_core_settings('drivers.queue_driver');   // dev 공유 drivers.json 의 datab
 
 ---
 
+## config 미러 갱신 시점 (부팅 + 저장)
+
+`g7_settings.core` / `g7_settings.modules.{id}` / `g7_settings.plugins.{id}` 는 in-memory config 미러다. `g7_core_settings()` / `g7_module_settings()` / `g7_plugin_settings()` 가 이 미러를 읽는다.
+
+미러는 **부팅 때와 저장 때** 모두 채워진다. 채움 로직은 `App\Support\ExtensionSettingsMirror` 가 단일 소유하며, Provider 와 저장 경로가 같은 코드를 호출한다.
+
+| 축 | 채우는 지점 |
+|----|-----------|
+| 코어 | 부팅 `SettingsServiceProvider::register()` / 저장 `SettingsService::invalidateSettingsCache()` |
+| 모듈 | 부팅 `CoreServiceProvider` / 저장 각 모듈 SettingsService 의 캐시 초기화 지점에서 `g7_refresh_module_settings_config($id)` |
+| 플러그인 | 부팅 `CoreServiceProvider` / 저장 `PluginSettingsService::save()` |
+
+부팅만으로 채우면 FPM 에서는 요청마다 재부팅되어 드러나지 않지만, 큐 워커·`schedule:work`·Reverb 처럼 프로세스가 상주하는 환경에서는 저장 후에도 그 프로세스가 옛 값을 영원히 읽는다. 새 저장 경로를 만들면 그 자리에서 미러 재채움을 함께 호출한다.
+
+> 다중 상주 워커 간 브로드캐스트 동기화는 범위 밖이다 — 저장을 수행한 프로세스와 이후 새로 부팅되는 프로세스가 정합하면 충분하고, 워커 재기동은 드라이버 탭의 큐 재시작이 담당한다.
+
+### 미러는 민감 항목을 담지 않는다 — 민감값은 전용 게터로
+
+스키마에 `sensitive: true` 로 선언된 필드는 미러에서 **키 자체가 제거**된다 (암호문도 싣지 않는다).
+
+미러는 봇 전용 화면 생성기가 레이아웃 표현식에서 참조한 키를 **제한 없이** 조회하는 경로다. 민감값이 실려 있으면 레이아웃이 그 키를 참조하는 순간 평문이 봇 HTML 로 나간다. 브라우저용 설정 전달 경로는 애초에 민감 항목을 제외하므로 화면만 봐서는 드러나지 않는 비대칭이다.
+
+민감값이 필요한 서버 코드는 전용 게터를 쓴다.
+
+```php
+// 표시·분기용 (민감 항목 제외)
+g7_plugin_settings('sirsoft-gdpr', 'duplicate_block_enabled');
+
+// 민감값 (복호화 포함)
+plugin_setting('sirsoft-pay_kginicis', 'api_key');
+```
+
+---
+
 ## 새 admin 환경설정 키 추가 시 점검
 
 새 카테고리/키를 `storage/app/settings/*.json` 에 추가할 때:

@@ -5,6 +5,15 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.58.4] - 2026-08-14
+
+### Fixed
+
+#### 레이아웃 렌더링 테스트 하네스가 `named_actions` 를 등록하지 않던 문제
+
+- `__tests__/utils/layoutTestUtils.ts::createLayoutTest` — 레이아웃 최상위 `named_actions` 를 `ActionDispatcher.setNamedActions()` 로 등록한다. 기존에는 등록 단계가 없어 `actionRef` 참조가 해석되지 않았고, 그 액션은 **경고만 남기고 아무 일도 하지 않은 채** 테스트가 통과했다.
+- 하네스 자신이 검사 대상의 일부라, 이 누락은 `named_actions` 를 쓰는 레이아웃의 테스트를 통째로 무력화한다 — 액션이 붙지 않았는데도 렌더 단언은 전부 초록이므로 결함이 드러날 통로가 없다.
+- `setNamedActions` 는 선택 호출(`?.`)이다 — 이 API 가 없는 디스패처 스텁으로 만든 기존 테스트가 깨지지 않게 한다.
 ## [engine-v1.58.3] - 2026-08-14
 
 ### Fixed

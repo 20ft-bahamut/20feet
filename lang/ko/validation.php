@@ -1146,7 +1146,8 @@ return [
 
     // 검증 속성명 (validation.attributes)
     'attributes' => [
-        'ids' => '사용자 ID 목록',
+        'ids' => 'ID 목록',
+        'user_ids' => '사용자 ID 목록',
         'user_id' => '사용자 ID',
         'status' => '상태',
         // 일반 설정 필드
@@ -1155,7 +1156,8 @@ return [
         'site_description' => '사이트 설명',
         'admin_email' => '관리자 이메일',
         'timezone' => '시간대',
-        'language' => '기본 언어',
+        'language' => '언어',
+        'default_language' => '기본 언어',
         // 본인인증(IDV) 필드
         'identity_default_provider' => '기본 프로바이더',
         'identity_purpose_providers' => '목적별 프로바이더',
@@ -1173,10 +1175,14 @@ return [
         'identity_policy_fail_mode' => '실패 모드',
         // 메일 설정 필드
         'mailer' => '메일러',
-        'host' => 'SMTP 호스트',
-        'port' => 'SMTP 포트',
-        'username' => 'SMTP 사용자명',
-        'password' => 'SMTP 비밀번호',
+        'host' => '호스트',
+        'port' => '포트',
+        'username' => '사용자명',
+        'password' => '비밀번호',
+        'smtp_host' => 'SMTP 호스트',
+        'smtp_port' => 'SMTP 포트',
+        'smtp_username' => 'SMTP 사용자명',
+        'smtp_password' => 'SMTP 비밀번호',
         'encryption' => '암호화',
         'from_address' => '발신자 이메일',
         'from_name' => '발신자 이름',
@@ -1230,8 +1236,10 @@ return [
         'ses_region' => 'SES 리전',
         'mailgun_endpoint' => 'Mailgun 엔드포인트',
         // 일반 설정 (추가)
-        'channels' => '알림 채널',
-        'currency' => '기본 통화',
+        'channels' => '채널',
+        'notification_channels' => '알림 채널',
+        'currency' => '통화',
+        'default_currency' => '기본 통화',
         'maintenance_mode' => '점검 모드',
         'asset_url_mode' => '자산 주소 방식',
         'site_logo' => '사이트 로고',
@@ -1245,7 +1253,8 @@ return [
         'twitter_default_card' => '트위터 기본 카드 유형',
         'twitter_default_site' => '트위터 기본 계정',
         'seo_page_cache_enabled' => 'SEO 페이지 캐시 사용',
-        'cache_ttl' => 'SEO 페이지 캐시 유지시간',
+        'cache_ttl' => '캐시 유지시간',
+        'seo_page_cache_ttl' => 'SEO 페이지 캐시 유지시간',
         'sitemap_enabled' => '사이트맵 사용',
         'sitemap_cache_ttl' => '사이트맵 캐시 유지시간',
         'sitemap_urls_per_file' => '사이트맵 파일당 URL 수',
