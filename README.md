@@ -75,7 +75,7 @@ Everything a modern web platform needs, built in.
 
 | Layer | Technology |
 |-------|------------|
-| **Backend** | PHP 8.2+, Laravel 12.x, MySQL 8.0+, Redis 6.0+ |
+| **Backend** | PHP 8.2+, Laravel 12.x, MySQL 8.0+ / MariaDB 10.3+, Redis 6.0+ |
 | **Frontend** | React 19, Vite, Tailwind CSS 4 (dark mode supported) |
 | **Authentication** | Laravel Sanctum (Bearer tokens) |
 | **Testing** | PHPUnit 11.x, Vitest |
@@ -359,7 +359,7 @@ Every verification point — signup, password reset, sensitive operations, the m
 
 ### System requirements
 
-- PHP 8.2+ with the required extensions (30 in total), including `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `gd`, `intl`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, and `zip`
+- PHP 8.2+ with the required extensions (16 in total), including `ctype`, `curl`, `dom`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`, `xml`, and `zip`. Additional extensions (`gd`/`imagick`, `intl`, `redis`, `bcmath`, and others) are optional and only needed for the features that use them — see [docs/requirements.md](docs/requirements.md)
 - MySQL 8.0+ or MariaDB 10.3+ (utf8mb4)
 - Composer 2.x
 - Node.js 20+ (only needed when building frontend assets)
