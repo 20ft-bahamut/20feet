@@ -43,6 +43,8 @@ effects:
   - settings_load_recursion_free
   - global_setting_injects_core_config_with_none_normalized
   - seo_guard_passes_absolute_cdn_url_unmodified
+  - cross_origin_asset_request_omits_session_token
+  - s3_credentials_visible_when_public_asset_disk_is_s3
 
 test_files:
   - tests/Unit/Extension/Storage/CoreStorageDriverTest.php
@@ -75,6 +77,10 @@ test_files:
   - templates/_bundled/sirsoft-admin_basic/__tests__/layouts/admin-settings-public-asset-storage.test.tsx
   - modules/_bundled/sirsoft-ecommerce/resources/js/__tests__/layouts/adminEcommerceSettingsPublicAssetDisk.test.tsx
   - plugins/_bundled/sirsoft-ckeditor5/resources/js/__tests__/layouts/pluginSettingsPublicAssetDisk.test.tsx
+  - resources/js/core/api/__tests__/ApiClient.test.ts
+  - templates/_bundled/sirsoft-admin_basic/__tests__/components/assetOrigin.crossOriginAuth.test.tsx
+  - templates/_bundled/sirsoft-basic/__tests__/components/assetOrigin.crossOriginAuth.test.tsx
+  - templates/_bundled/sirsoft-admin_basic/__tests__/layouts/admin-settings-drivers-s3-visibility.test.tsx
 
 rules_layer_coverage:
   - rule: no-storage-disk-direct
