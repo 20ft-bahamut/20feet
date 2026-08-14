@@ -52,6 +52,26 @@ class SettingsService
     }
 
     /**
+     * 큐 워커에 정상 종료 후 재시작 신호를 보냅니다.
+     *
+     * drivers 카테고리(queue/broadcasting/cache 등)는 long-running worker 에 영향을 준다.
+     * SettingsServiceProvider 는 worker boot 시점에 한 번만 config 를 적용하므로, 재시작
+     * 신호가 없으면 워커가 부팅 시점의 옛 드라이버로 계속 동작한다.
+     *
+     * 신호 전송 실패가 설정 저장을 되돌리지는 않는다 (경고 로깅 후 계속).
+     */
+    private function restartQueueWorkers(): void
+    {
+        try {
+            Artisan::call('queue:restart');
+        } catch (\Throwable $e) {
+            Log::warning('queue:restart 실행 실패', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
      * 자산 URL 방식 변경에 따라 SEO 프리렌더 캐시를 비웁니다.
      *
      * SEO 캐시에는 생성 시점의 자산 URL 이 문자열로 구워져 있어, 모드가 바뀌면
@@ -528,13 +548,7 @@ class SettingsService
                 // SettingsServiceProvider는 worker boot 시점에 한 번만 config 적용하므로
                 // 워커가 정상 종료 후 재시작되도록 신호 전송 (cache 기반, 즉시 종료 X)
                 if ($tab === 'drivers') {
-                    try {
-                        Artisan::call('queue:restart');
-                    } catch (\Throwable $e) {
-                        Log::warning('queue:restart 실행 실패', [
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
+                    $this->restartQueueWorkers();
                 }
             }
 
@@ -696,6 +710,18 @@ class SettingsService
     /**
      * 단일 설정 값을 저장합니다.
      *
+     * 벌크 저장(saveSettings)이 수행하는 부수효과 중 저장 키에 해당하는 것을 함께 수행한다
+     * (공개 #114 동종). 예전에는 값만 쓰고 SEO 프리렌더 캐시 삭제·큐 워커 재시작 신호를
+     * 건너뛰어, 같은 값을 어느 경로로 바꾸느냐에 따라 시스템 상태가 달라졌다.
+     *
+     * 키는 **원본 저장소 키**로 받는다 — 벌크 저장의 `reverseFrontendKeys()`(화면 키 → 저장소
+     * 키 역변환)를 적용하지 않는다. 이 경로의 프로그램 호출자(본인인증 플러그인 설치/삭제의
+     * `identity.purpose_providers.*`)가 저장소 키를 직접 넘기고 있어, 역변환을 끼우면 그
+     * 호출들이 엉뚱한 키에 저장된다.
+     *
+     * 벌크 위임도 하지 않는다 — 벌크의 shallow `array_merge` 로는 깊은 키를 저장할 때
+     * 형제 매핑이 통째로 소실된다.
+     *
      * @param  string  $key  설정 키 (예: 'general.site_name')
      * @param  mixed  $value  저장할 값
      * @return bool 저장 성공 여부
@@ -706,12 +732,25 @@ class SettingsService
         HookManager::doAction('core.settings.before_set', $key, $value);
 
         try {
+            // 자산 URL 방식이 바뀌는지 저장 **전에** 판정한다 (이슈 #486 동형).
+            // 저장 후에는 이전 값을 알 수 없어 변경 여부를 판별할 수 없다.
+            $assetUrlModeChanged = $key === 'general.asset_url_mode'
+                && $this->configRepository->get($key) !== $value;
+
             $result = $this->configRepository->set($key, $value);
 
             if ($result) {
                 // 인라인 무효화 대신 공통 경로를 탄다 — saveSettings/saveAdvancedSettings 와
                 // 같은 처리를 받아야 미러 재채움·디스크 config 캐시 재생성이 빠지지 않는다.
                 $this->invalidateSettingsCache();
+
+                if ($assetUrlModeChanged) {
+                    $this->clearSeoCacheForAssetUrlMode();
+                }
+
+                if (str_starts_with($key, 'drivers.') || $key === 'drivers') {
+                    $this->restartQueueWorkers();
+                }
             }
 
             // After 훅

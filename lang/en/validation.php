@@ -825,9 +825,13 @@ return [
     // Setting value validation messages
     'setting' => [
         'value' => [
-            'required' => 'Setting value is required.',
-            'string' => 'Setting value must be a string.',
+            'present' => 'The value field must be present in the request.',
+            'boolean' => 'This setting only accepts an on/off value.',
+            'integer' => 'This setting only accepts an integer.',
+            'numeric' => 'This setting only accepts a number.',
+            'type' => 'The setting value has an unsupported format.',
             'max' => 'Setting value may not be greater than :max characters.',
+            'array_max' => 'Setting value may not be larger than :max characters.',
         ],
     ],
 

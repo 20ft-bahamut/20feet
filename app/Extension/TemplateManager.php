@@ -52,6 +52,14 @@ class TemplateManager implements TemplateManagerInterface
     protected array $templates = [];
 
     /**
+     * 템플릿 디렉토리 스캔이 1회 이상 수행되었는지 여부
+     *
+     * `ensureLoaded()` 의 멱등 판정에만 쓴다 — 명시적 `loadTemplates()` 는 이 값과 무관하게
+     * 항상 재스캔한다(설치/삭제 직후 갱신 계약).
+     */
+    protected bool $templatesLoaded = false;
+
+    /**
      * _pending 디렉토리의 템플릿 메타데이터 배열
      *
      * @var array<string, array>
@@ -99,12 +107,32 @@ class TemplateManager implements TemplateManagerInterface
     }
 
     /**
+     * 템플릿이 아직 로드되지 않았을 때만 로드합니다. (멱등)
+     *
+     * 소비자가 "템플릿 맵이 채워져 있음" 만 필요로 할 때 쓴다. `loadTemplates()` 는 맵을
+     * 리셋하고 디렉토리를 통째로 재스캔하므로, 그것을 무조건 호출하면 공유 인스턴스의
+     * 상태를 매번 갈아엎으면서 풀스캔 비용까지 반복된다.
+     */
+    public function ensureLoaded(): void
+    {
+        if ($this->templatesLoaded) {
+            return;
+        }
+
+        $this->loadTemplates();
+    }
+
+    /**
      * 모든 템플릿을 로드하고 초기화합니다.
+     *
+     * 항상 재스캔한다 — 설치/삭제/업데이트 직후 갱신을 보장하는 계약이다.
+     * 단순히 "채워져 있으면 됨" 인 호출자는 `ensureLoaded()` 를 쓴다.
      */
     public function loadTemplates(): void
     {
         // 기존 템플릿 캐시 초기화 (테스트 환경에서 재로드 지원)
         $this->templates = [];
+        $this->templatesLoaded = true;
 
         if (! File::exists($this->templatesPath)) {
             return;

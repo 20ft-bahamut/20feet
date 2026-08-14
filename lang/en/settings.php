@@ -74,6 +74,9 @@ return [
             'mailgun' => 'Mailgun',
             'ses' => 'SES (Amazon)',
         ],
+        'search' => [
+            'mysql-fulltext' => 'MySQL Full-Text',
+        ],
     ],
 
     // Driver connection test messages

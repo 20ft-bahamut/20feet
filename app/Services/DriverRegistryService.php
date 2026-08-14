@@ -34,6 +34,9 @@ class DriverRegistryService
         'log' => ['single', 'daily'],
         'websocket' => ['reverb'],
         'mail' => ['smtp', 'mailgun', 'ses'],
+        // 검색엔진도 저장 가능한 드라이버 선택이다. 레지스트리에 등재해야 폴백 가드
+        // (플러그인 제거 후 죽은 값 → 기본 드라이버)가 이 카테고리에도 적용된다.
+        'search' => ['mysql-fulltext'],
     ];
 
     /**
@@ -50,6 +53,7 @@ class DriverRegistryService
         'log' => 'daily',
         'websocket' => '',
         'mail' => 'smtp',
+        'search' => 'mysql-fulltext',
     ];
 
     /**
@@ -69,6 +73,8 @@ class DriverRegistryService
         'log' => 'logging.channels.stack.channels',
         'websocket' => 'broadcasting.default',
         'mail' => 'mail.default',
+        // SettingsServiceProvider::applyDriverConfig() 가 기록하는 키와 동일해야 폴백이 실효한다
+        'search' => 'scout.driver',
     ];
 
     /**
@@ -87,6 +93,7 @@ class DriverRegistryService
         // 종전의 'websocket_driver' 는 어떤 저장 경로에도 없는 유령 키라 항상 skip 이었다.
         // 카테고리 제외로 같은 동작을 명시화한다 (getSettingsKey('websocket') === null).
         'mail' => ['category' => 'mail', 'key' => 'mailer'],
+        'search' => ['category' => 'drivers', 'key' => 'search_engine_driver'],
     ];
 
     /**
@@ -113,9 +120,51 @@ class DriverRegistryService
     {
         $coreDrivers = $this->buildCoreDrivers($category);
 
+        // 검색엔진은 Scout 엔진 등록 훅이 SSoT 다 — 플러그인에 제2의 등록 훅을 요구하지 않고
+        // 그 훅을 함께 읽는다. 일반 드라이버 훅도 그대로 유지해 양쪽 등록 방식을 모두 인식한다.
+        if ($category === 'search') {
+            $coreDrivers = $this->mergeSearchEngineDrivers($coreDrivers);
+        }
+
         $hookName = self::HOOK_PREFIX.$category.self::HOOK_SUFFIX;
 
         return HookManager::applyFilters($hookName, $coreDrivers);
+    }
+
+    /**
+     * Scout 엔진 등록 훅의 드라이버를 카탈로그 형태로 병합합니다.
+     *
+     * `core.search.engine_drivers` 는 `[id => EngineClass]` 맵이므로 키만 취해
+     * `{id, label}` 형태로 변환한다. 이미 코어 목록에 있는 ID 는 중복 추가하지 않는다.
+     *
+     * @param  array<array{id: string, label: array<string, string>}>  $coreDrivers  코어 드라이버 목록
+     * @return array<array{id: string, label: array<string, string>}> 병합된 목록
+     */
+    private function mergeSearchEngineDrivers(array $coreDrivers): array
+    {
+        $engines = HookManager::applyFilters('core.search.engine_drivers', []);
+
+        if (! is_array($engines)) {
+            return $coreDrivers;
+        }
+
+        $existing = array_map(fn ($driver) => $driver['id'] ?? null, $coreDrivers);
+        $locales = config('app.translatable_locales', ['ko', 'en']);
+
+        foreach (array_keys($engines) as $id) {
+            if (! is_string($id) || $id === '' || in_array($id, $existing, true)) {
+                continue;
+            }
+
+            $label = [];
+            foreach ($locales as $locale) {
+                $label[$locale] = Lang::get("settings.drivers.search.{$id}", [], $locale) ?: $id;
+            }
+
+            $coreDrivers[] = ['id' => $id, 'label' => $label];
+        }
+
+        return $coreDrivers;
     }
 
     /**

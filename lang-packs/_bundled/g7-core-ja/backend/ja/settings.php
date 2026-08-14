@@ -67,6 +67,9 @@ return [
             'mailgun' => 'Mailgun',
             'ses' => 'SES (Amazon)',
         ],
+        'search' => [
+            'mysql-fulltext' => 'MySQL 全文検索',
+        ],
     ],
     'driver_test_success' => 'すべてのドライバ接続テストが成功しました。',
     'driver_test_partial' => '一部のドライバ接続テストが失敗しました。',

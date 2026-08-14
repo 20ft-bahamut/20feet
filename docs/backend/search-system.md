@@ -313,7 +313,20 @@ public function boot(): void
 }
 ```
 
-등록 후 `.env`에서 `SCOUT_DRIVER=meilisearch`로 전환하면 해당 엔진이 사용됩니다.
+등록 후 `.env`에서 `SCOUT_DRIVER=meilisearch`로 전환하거나, 관리자 환경설정 > 드라이버의
+검색엔진 항목에서 선택할 수 있습니다.
+
+#### 드라이버 폴백 가드
+
+검색엔진은 다른 드라이버 카테고리(스토리지·캐시·세션·큐·로그·메일 등)와 같은 폴백 가드를
+받습니다. 저장된 엔진을 제공하던 플러그인이 삭제되면, 부팅 시 그 값이 사용 불가로 판정되어
+기본 엔진(`mysql-fulltext`)으로 되돌아갑니다. 이 가드가 없으면 `scout.driver` 가 죽은 값으로
+남아 공개 검색이 오류로 멈춥니다.
+
+카탈로그 조회는 **두 훅을 함께 읽습니다** — 위의 `core.search.engine_drivers`(Scout 엔진 맵)와
+일반 드라이버 훅 `core.settings.available_search_drivers`(`{id, label}` 목록). 그래서 검색엔진
+플러그인은 Scout 등록 훅 하나만 구현하면 되고, 관리자 화면 선택지에도 자동으로 나타납니다.
+라벨은 `settings.drivers.search.{id}` 다국어 키에서 조회하며, 키가 없으면 ID 를 그대로 씁니다.
 
 ### ScoutServiceProvider 동작 흐름
 

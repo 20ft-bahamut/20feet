@@ -1628,7 +1628,9 @@
     },
     "drivers": {
       "common": {
-        "optional": "オプション"
+        "optional": "オプション",
+        "unavailable_saved_value_prefix": "保存された値 ",
+        "unavailable_saved_value_suffix": " は現在使用できません。利用可能な値を選択して保存してください。"
       },
       "storage": {
         "title": "ファイルストレージ",
@@ -1747,9 +1749,6 @@
         "desc": "統合検索および管理者検索に使用する検索エンジンドライバーを設定します。",
         "driver": "検索エンジンドライバー",
         "driver_desc": "デフォルト提供のMySQL FULLTEXT（ngram）エンジンは、追加設定なしで日本語検索をサポートしています。",
-        "options": {
-          "mysql_fulltext": "MySQL FULLTEXT (ngram)"
-        },
         "plugin_notice": "検索エンジンプラグイン（Meilisearch、Elasticsearchなど）をインストールすると、追加ドライバーが表示されます。"
       },
       "test_connection": "接続テスト",

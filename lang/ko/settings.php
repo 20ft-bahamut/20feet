@@ -74,6 +74,9 @@ return [
             'mailgun' => 'Mailgun',
             'ses' => 'SES (Amazon)',
         ],
+        'search' => [
+            'mysql-fulltext' => 'MySQL 전문검색',
+        ],
     ],
 
     // 드라이버 연결 테스트 메시지

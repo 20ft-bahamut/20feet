@@ -8,10 +8,12 @@
 
 ### Added
 
+- 검색엔진 드라이버 라벨 일본어 번역을 추가했습니다 (`settings.drivers.search.*`) — 환경설정 > 드라이버 탭의 검색엔진 선택지가 일본어 로케일에서 표시됩니다.
 - S3 호환 스토리지 설정 신설 항목(엔드포인트 URL·Path-style 주소)과 리전 형식 안내의 검증 메시지 일본어 번역 추가 (`validation.settings.s3_endpoint_*`, `s3_use_path_style_boolean`, `s3_region_*`) — 드라이버 설정 저장 시 오류 안내가 일본어 로케일에서 자연스럽게 표시됩니다. (#99 @lyg-kaban 님께서 제보해주셨습니다.)
 - 드라이버 사용 불능 안내 문구 일본어 번역 추가 (`validation.settings.driver_unusable`, `settings.driver_unusable_*`, `settings.s3_adapter_missing`) — 필요한 라이브러리·PHP 확장이 없는 드라이버를 저장·테스트할 때의 사유 안내가 일본어 로케일에서 표시됩니다.
 - 웹소켓 서버(백엔드 발송용) endpoint 연결 실패 안내 일본어 번역 추가 (`settings.websocket_server_test_failed`).
 - 공개 자산 스토리지(공개 이미지 직접 URL 서빙) 설정의 드라이버 라벨과 검증 메시지 일본어 번역을 추가했습니다. 환경설정 > 드라이버 탭의 새 설정이 일본어 로케일에서 자연스럽게 표시됩니다.
+- 설정 항목 단위 저장의 값 형식 안내 일본어 번역을 추가했습니다 (`validation.setting.value.*`) — 켜기/끄기·숫자 설정에 맞지 않는 값을 저장할 때의 안내가 일본어 로케일에서 표시됩니다.
 
 ### Changed
 

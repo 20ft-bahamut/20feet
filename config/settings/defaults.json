@@ -348,7 +348,7 @@
             "expose": true,
             "_comment": "본인인증 인프라 provider 기술 파라미터 — signup/enabled 등 정책 분기 키는 IdentityPolicy 로 흡수됨",
             "fields": {
-                "default_provider": { "type": "string", "sensitive": false },
+                "default_provider": { "type": "string", "sensitive": false, "expose": false, "_comment": "저장값을 그대로 SSR 로 내보내면 제거된 플러그인의 provider ID 가 전 공개 페이지에 남는다. 소비처 0 이므로 미노출 — 프론트가 provider 를 알아야 하는 지점(428 응답 / 정책 프리페치)은 레지스트리 대조를 거친 값을 따로 받는다" },
                 "purpose_providers": { "type": "array", "sensitive": false, "expose": false },
                 "challenge_ttl_minutes": { "type": "integer", "sensitive": false, "expose": false },
                 "max_attempts": { "type": "integer", "sensitive": false, "expose": false }

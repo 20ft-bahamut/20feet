@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\Admin;
 
 use App\Enums\ExtensionOwnerType;
+use App\Extension\HookManager;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -130,6 +131,10 @@ class SettingsControllerDriverOptionsTest extends TestCase
 
     /**
      * available_drivers의 각 드라이버에 id와 label 필드가 있는지 검증합니다.
+     *
+     * @scenario engine_source=core
+     *
+     * @effects admin_driver_options_include_search_category
      */
     #[Test]
     public function available_drivers_have_correct_structure(): void
@@ -140,8 +145,8 @@ class SettingsControllerDriverOptionsTest extends TestCase
 
         $data = $response->json('data.available_drivers');
 
-        // 8개 카테고리 존재
-        $this->assertCount(8, $data);
+        // 9개 카테고리 존재 (search 는 폴백 가드 편입으로 추가 — A5b)
+        $this->assertCount(9, $data);
 
         // 각 카테고리에 최소 1개 이상의 드라이버 존재
         foreach ($data as $category => $drivers) {
@@ -184,6 +189,55 @@ class SettingsControllerDriverOptionsTest extends TestCase
         $this->assertContains('smtp', $ids);
         $this->assertContains('mailgun', $ids);
         $this->assertContains('ses', $ids);
+    }
+
+    /**
+     * search 카테고리에 코어 검색엔진이 포함되는지 검증합니다.
+     *
+     * 카테고리 개수만 세면 어떤 카테고리가 늘었는지 알 수 없다 — search 가 빠진 채
+     * 다른 카테고리가 하나 늘어도 개수 단언은 통과한다.
+     *
+     * @scenario engine_source=core
+     *
+     * @effects admin_driver_options_include_search_category
+     */
+    #[Test]
+    public function search_drivers_include_core_engine(): void
+    {
+        $response = $this->authRequest()->getJson('/api/admin/settings');
+
+        $response->assertStatus(200);
+
+        $drivers = $response->json('data.available_drivers.search');
+
+        $this->assertIsArray($drivers, 'search 카테고리가 응답에 없습니다.');
+        $this->assertContains('mysql-fulltext', array_column($drivers, 'id'));
+    }
+
+    /**
+     * 플러그인이 Scout 엔진 등록 훅으로 추가한 검색엔진이 카탈로그에 나타납니다.
+     *
+     * 관리자 화면 셀렉트가 이 카탈로그를 그대로 바인딩하므로, 여기 없으면 플러그인이
+     * 등록한 검색엔진을 운영자가 고를 수 없다.
+     *
+     * @scenario engine_source=plugin
+     *
+     * @effects admin_driver_options_include_search_category
+     */
+    #[Test]
+    public function search_drivers_include_plugin_registered_engine(): void
+    {
+        HookManager::addFilter(
+            'core.search.engine_drivers',
+            fn (array $drivers) => array_merge($drivers, ['meilisearch' => \stdClass::class])
+        );
+
+        $response = $this->authRequest()->getJson('/api/admin/settings');
+
+        $ids = array_column($response->json('data.available_drivers.search'), 'id');
+
+        $this->assertContains('meilisearch', $ids, '플러그인이 등록한 검색엔진이 카탈로그에 없습니다.');
+        $this->assertContains('mysql-fulltext', $ids, '코어 검색엔진이 사라졌습니다.');
     }
 
     /**
