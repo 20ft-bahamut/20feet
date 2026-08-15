@@ -181,6 +181,7 @@ return [
         'permission_denied' => '権限がありません。',
         'validation_failed' => '入力値が正しくありません。',
         'duplicate_report' => '既に通報された履歴があります。',
+        'operation_failed' => '処理中にエラーが発生しました。',
     ],
     'warnings' => [
         'category_removal_attempted' => '使用中のカテゴリーの削除が試みられました。',

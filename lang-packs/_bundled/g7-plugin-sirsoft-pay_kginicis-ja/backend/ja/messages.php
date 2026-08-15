@@ -5,6 +5,7 @@ return [
         'cash_receipt_issue_failed' => '現金領収書の発行に失敗しました。',
         'order_not_found' => '注文が見つかりません。',
         'cbt_failed' => '海外決済の処理に失敗しました。',
+        'payment_failed' => '決済処理に失敗しました。しばらく後にもう一度お試しください。',
     ],
     'refund' => [
         'missing_tid' => 'トランザクション ID（TID）がないため、返金を進めることができません。',
