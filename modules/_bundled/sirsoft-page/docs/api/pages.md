@@ -270,7 +270,7 @@ HTTP/1.1 201
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`sirsoft-page.pages.create`)이 없는 경우 |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). 대표 케이스: `slug` 중복/형식 위반(소문자·숫자·하이픈만), `title` 누락 또는 기본 로케일 값 누락, `content_mode` 가 html/text 이외 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). 대표 케이스: `slug` 중복/형식 위반(소문자·숫자·하이픈만), `title` 누락 또는 기본 로케일 값 누락, `content_mode` 가 html/text 이외. 첨부 개수 상한 초과 시에도 422 이며 `errors.code = attachment_limit_exceeded` 와 함께 허용/시도 개수를 담은 안내 문구가 응답 시점의 언어로 내려갑니다 |
 | 500 | Internal Server Error | 생성 처리 중 예외 (`페이지 생성에 실패했습니다.`) |
 
 <!-- @generated:end -->
@@ -715,7 +715,7 @@ HTTP/1.1 200
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`sirsoft-page.pages.update`)이 없거나, 스코프 밖 리소스인 경우 (`auth.scope_denied`) |
 | 404 | Not Found | `{page}` ID 에 해당하는 페이지가 없는 경우 (`페이지를 찾을 수 없습니다.`) |
-| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). 대표 케이스: `title` 누락, `slug` 중복(자기 자신은 제외)/형식 위반, `content_mode` 가 html/text 이외 |
+| 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지). 대표 케이스: `title` 누락, `slug` 중복(자기 자신은 제외)/형식 위반, `content_mode` 가 html/text 이외. 첨부 개수 상한 초과 시에도 422 이며 `errors.code = attachment_limit_exceeded` 와 함께 허용/시도 개수를 담은 안내 문구가 응답 시점의 언어로 내려갑니다 |
 | 500 | Internal Server Error | 수정 처리 중 예외 (`페이지 수정에 실패했습니다.`) |
 
 <!-- @generated:end -->
