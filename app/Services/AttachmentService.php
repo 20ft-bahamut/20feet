@@ -165,14 +165,93 @@ class AttachmentService
     }
 
     /**
-     * 첨부파일 삭제
+     * 소유자 없이 방치된 고아 첨부를 정리합니다.
+     *
+     * 폼 저장 전에 즉시 업로드되는 첨부(FileUploader 등)는 소유자 없이 먼저 만들어지므로,
+     * 폼을 저장하지 않고 이탈하면 파일과 기록이 그대로 남습니다.
+     *
+     * 오탐을 막기 위해 아래 조건을 모두 만족하는 행만 대상으로 삼습니다.
+     *
+     *   1. 소유자(attachmentable_type/id)가 없다
+     *   2. 업로드 후 보존기간이 지났다 (폼 작성 중 유예)
+     *   3. 확장 소유가 아니다 (source_identifier 없음 — 확장 라이프사이클 소관)
+     *   4. 현역으로 쓰이는 첨부가 아니다 (현재 사이트 로고 등)
+     *
+     * 4번 보호 조건은 이 메서드가 직접 해석합니다. 호출자가 넘기는 값으로 두면 그 인자를
+     * 빠뜨린 호출 하나가 운영 중인 로고를 파기하는데, 나머지 세 조건은 조회의 불변식이라
+     * 보호 조건만 규약으로 남는 비대칭이 생깁니다.
+     *
+     * 삭제는 단건 삭제 경로(delete)를 그대로 재사용하므로 파일 삭제·훅·로그가 동일합니다.
+     *
+     * @param  int  $days  보존기간(일)
+     * @param  int  $limit  한 회차에 처리할 최대 건수
+     * @param  bool  $dryRun  true 면 대상만 세고 삭제하지 않음
+     * @return array{scanned: int, deleted: int, failed: int} 처리 결과
+     */
+    public function pruneOrphans(int $days, int $limit, bool $dryRun = false): array
+    {
+        $threshold = now()->subDays($days);
+        $candidates = $this->repository->findOrphanCandidates(
+            $threshold,
+            $limit,
+            $this->protectedAttachmentIds(),
+        );
+
+        $result = ['scanned' => $candidates->count(), 'deleted' => 0, 'failed' => 0];
+
+        if ($dryRun) {
+            return $result;
+        }
+
+        foreach ($candidates as $candidate) {
+            $this->delete($candidate->id) ? $result['deleted']++ : $result['failed']++;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 고아 정리에서 보호할 첨부 ID 목록을 반환합니다.
+     *
+     * 사이트 로고는 소유자(attachmentable) 없이 설정값이 직접 참조하는 첨부라 판정식만으로는
+     * 고아와 구분되지 않습니다. 현역으로 설정에 실린 ID 를 명시적으로 제외합니다.
+     *
+     * @return array<int, int> 보호할 첨부 ID 목록
+     */
+    private function protectedAttachmentIds(): array
+    {
+        $siteLogo = g7_core_settings('general.site_logo', []);
+
+        if (! is_array($siteLogo)) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($siteLogo as $item) {
+            $id = is_array($item) ? ($item['id'] ?? null) : $item;
+
+            if (is_numeric($id)) {
+                $ids[] = (int) $id;
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * 첨부파일 삭제 (파일 + 기록 영구 삭제)
+     *
+     * 대상 조회는 소프트삭제된 행까지 포함한다. 이 메서드가 수행하는 것은 forceDelete 이므로
+     * 이미 소프트삭제된 행도 정당한 대상이고, 기본 조회로 찾으면 고아 정리가 그 행을 영원히
+     * 회수하지 못한 채 실패만 반복한다.
      *
      * @param  int  $id  첨부파일 ID
      * @return bool 삭제 성공 여부
      */
     public function delete(int $id): bool
     {
-        $attachment = $this->repository->findById($id);
+        $attachment = $this->repository->findByIdWithTrashed($id);
 
         if (! $attachment) {
             return false;

@@ -148,7 +148,14 @@ sirsoft-page.attachment.filter_upload_file              # 페이지 첨부
 sirsoft-ecommerce.product-image.filter_upload_file      # 상품 이미지
 sirsoft-ecommerce.category-image.filter_upload_file     # 카테고리 이미지
 sirsoft-ecommerce.review-image.filter_upload_file       # 리뷰 이미지 (공개 #96)
+sirsoft-ckeditor5.image.before_upload                   # 에디터 이미지
 sirsoft-ckeditor5.image.filter_upload_file              # 에디터 이미지
+sirsoft-ckeditor5.image.after_upload                    # 에디터 이미지
+
+# 업로드 잔존물 회수 — 어떤 콘텐츠에서도 쓰이지 않는 에디터 이미지의 참조 판정 대상 선언 (필터)
+# 자기 콘텐츠를 가진 확장이 이 훅으로 테이블/컬럼을 등록하지 않으면, 그 확장에서만 쓰이는
+# 이미지가 "미참조" 로 판정돼 자동 정리 대상이 된다.
+sirsoft-ckeditor5.image.filter_reference_sources        # 에디터 이미지 참조 소스
 
 # FormRequest Validation Rules 훅 (Filter)
 core.user.create_validation_rules
@@ -237,6 +244,41 @@ core.seo.sitemap.after_regenerate_failed # 재생성 실패 시 (['status'=>'fai
 | `provider` | string | 공급 플러그인 식별자 — 비활성화 시 "사용 중 드라이버" 경고 판정에 사용 (코어 기본 항목에는 없음) |
 
 `core.settings.available_public_asset_drivers` 로 등록하는 디스크는 플러그인 ServiceProvider 에서 `filesystems.disks.{id}` 정의가 함께 있어야 하며, 그 정의에 `url` 키가 있어야 직접 URL 이 생성됩니다(없으면 스트리밍 폴백). 플러그인이 비활성화되어 디스크 정의가 사라지면 저장값은 보존된 채 스트리밍으로 자동 폴백합니다.
+
+#### `sirsoft-ckeditor5.image.filter_reference_sources`
+
+에디터 업로드 이미지가 "어디선가 쓰이고 있는지" 판정할 때 훑을 테이블/컬럼 목록을 확장합니다. 첫 인자인 소스 배열에 다음 구조의 항목을 append 합니다.
+
+| 키 | 타입 | 값 |
+| --- | --- | --- |
+| `table` | string | 테이블명 — **프리픽스 제외 원시 이름** (`board_posts`) |
+| `columns` | list\<string\> | 본문이 담긴 컬럼명 목록 (`['content']`) |
+
+자기 콘텐츠에 에디터를 노출하는 확장은 이 훅을 반드시 구독해야 합니다. 등록하지 않으면 그 확장에서만 쓰이는 이미지가 "미참조" 로 판정돼 자동 정리 대상이 됩니다.
+
+리스너는 테이블명 문자열만 덧붙이고 DB 에 접근하지 않습니다 — 실재 검증(테이블·컬럼 존재)과 조회는 플러그인이 수행하며, 존재하지 않는 선언은 경고만 남기고 건너뜁니다(한 확장의 잘못된 선언이 판정 전체를 멈추지 않습니다).
+
+로그 사본 테이블(발송 이력·신고 스냅샷 등)은 등록하지 않습니다. 이들은 자체 보존기간으로 삭제되므로 참조 소스로 삼으면 "로그가 지워지는 순간 이미지가 고아가 되는" 역전이 생깁니다.
+
+```php
+public static function getSubscribedHooks(): array
+{
+    return [
+        'sirsoft-ckeditor5.image.filter_reference_sources' => [
+            'method' => 'addSources',
+            'priority' => 10,
+            'type' => 'filter',
+        ],
+    ];
+}
+
+public function addSources(array $sources): array
+{
+    $sources[] = ['table' => 'my_documents', 'columns' => ['body']];
+
+    return $sources;
+}
+```
 
 ---
 

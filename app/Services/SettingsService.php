@@ -29,7 +29,8 @@ class SettingsService
     public function __construct(
         private ConfigRepositoryInterface $configRepository,
         private AttachmentRepositoryInterface $attachmentRepository,
-        private CacheInterface $cache
+        private CacheInterface $cache,
+        private AttachmentService $attachmentService
     ) {}
 
     /**
@@ -515,9 +516,18 @@ class SettingsService
                 return $result;
             }
 
-            // general 탭인 경우 site_logo 첨부파일 연결
-            if ($tab === 'general') {
-                $tabSettings['site_logo'] = $this->collectSiteLogoIds();
+            // general 탭인 경우 site_logo 첨부파일 연결.
+            // site_logo 를 제출하지 않은 저장(다른 필드만 변경)은 기존 저장값을 그대로 둔다 —
+            // 이때 컬렉션을 다시 훑으면 미참조 첨부가 설정으로 딸려 들어온다.
+            $removedSiteLogoIds = [];
+
+            if ($tab === 'general' && is_array($tabSettings['site_logo'] ?? null)) {
+                // 파기 대상 판정은 저장 **전에** 한다 — 저장 후에는 직전 저장값을 알 수 없다.
+                // 실제 파기는 저장이 성공한 뒤에 수행한다: 저장이 실패했는데 파일만 사라지면
+                // 설정에는 이미 없는 첨부 id 가 남아 로고가 깨진다.
+                $removedSiteLogoIds = $this->resolveRemovedSiteLogoIds($tabSettings['site_logo']);
+
+                $tabSettings['site_logo'] = $this->resolveSiteLogoIds($tabSettings['site_logo']);
             }
 
             // 기존 설정과 병합 (탭별로 일부 필드만 전송되어도 기존 설정 유지)
@@ -535,6 +545,9 @@ class SettingsService
 
             if ($result) {
                 $this->invalidateSettingsCache();
+
+                // 저장이 확정된 뒤에야 파일을 파기한다 (위 판정 시점 주석 참조).
+                $this->purgeSiteLogoAttachments($removedSiteLogoIds);
 
                 // SEO 프리렌더 캐시에는 생성 시점의 자산 URL 이 그대로 구워져 있다.
                 // 모드가 바뀌면 그 URL 들이 전부 어긋나는데, 봇은 JavaScript 를 실행하지
@@ -684,15 +697,111 @@ class SettingsService
     }
 
     /**
-     * site_logo 컬렉션의 첨부파일 ID 목록을 수집합니다.
+     * 저장할 사이트 로고 첨부 ID 목록을 결정합니다.
      *
-     * @return array<int> 첨부파일 ID 배열
+     * 기준은 **이번 저장 요청이 제출한 목록**입니다. 컬렉션 전체를 다시 훑으면, 저장에 실패했거나
+     * 작성 중 이탈해 남은 미참조 첨부까지 설정에 다시 편입되어(운영자가 올린 적 없는 로고가
+     * 되살아나는) 누적이 발생합니다.
+     *
+     * 제출값에 있더라도 실제로 존재하지 않는 첨부(다른 경로로 이미 삭제된 id)는 걸러냅니다.
+     *
+     * @param  array<int, mixed>  $submitted  제출된 site_logo 값 (첨부 객체 배열 또는 ID 배열)
+     * @return array<int, int> 저장할 첨부파일 ID 배열
      */
-    private function collectSiteLogoIds(): array
+    private function resolveSiteLogoIds(array $submitted): array
     {
-        $attachments = $this->attachmentRepository->getByCollection('site_logo');
+        $submittedIds = $this->extractAttachmentIds($submitted);
 
-        return $attachments->pluck('id')->toArray();
+        if ($submittedIds === []) {
+            return [];
+        }
+
+        $existingIds = $this->attachmentRepository->getByCollection('site_logo')
+            ->pluck('id')
+            ->all();
+
+        return array_values(array_intersect($submittedIds, $existingIds));
+    }
+
+    /**
+     * 저장 요청에서 빠진(= 운영자가 화면에서 제거한) 사이트 로고 첨부 ID 를 가려냅니다.
+     *
+     * 판정 기준은 **직전 저장값**입니다. 직전에 저장돼 있었는데 이번 제출에서 빠진 id 만
+     * 운영자가 명시적으로 뺀 것이고, 직전 저장값에도 없던 id 는 이번에 새로 올라온 첨부입니다.
+     * 그래서 이 판정은 저장으로 값이 덮이기 **전에** 수행해야 합니다.
+     *
+     * 저장할 목록 자체는 제출값이 정합니다(resolveSiteLogoIds) — 컬렉션 전체를 훑으면 저장에
+     * 실패했거나 이탈로 남은 미참조 첨부가 설정에 되살아납니다.
+     *
+     * @param  mixed  $submitted  제출된 site_logo 값 (첨부 객체 배열 또는 ID 배열, 미제출이면 null)
+     * @return array<int, int> 파기 대상 첨부 ID 목록
+     */
+    private function resolveRemovedSiteLogoIds(mixed $submitted): array
+    {
+        // site_logo 를 아예 제출하지 않은 저장(다른 필드만 변경)은 판정 대상이 아니다.
+        if (! is_array($submitted)) {
+            return [];
+        }
+
+        $previousIds = $this->extractAttachmentIds(
+            $this->configRepository->getCategory('general')['site_logo'] ?? []
+        );
+
+        if ($previousIds === []) {
+            return [];
+        }
+
+        $keptIds = $this->extractAttachmentIds($submitted);
+
+        return array_values(array_diff($previousIds, $keptIds));
+    }
+
+    /**
+     * 제거가 확정된 사이트 로고 첨부를 파일까지 파기합니다.
+     *
+     * 설정 저장이 성공한 뒤에만 호출합니다 — 저장이 실패했는데 파일이 먼저 사라지면 설정에는
+     * 이미 없는 첨부 id 가 남아 로고가 깨집니다.
+     *
+     * @param  array<int, int>  $removedIds  파기 대상 첨부 ID 목록
+     */
+    private function purgeSiteLogoAttachments(array $removedIds): void
+    {
+        if ($removedIds === []) {
+            return;
+        }
+
+        foreach ($removedIds as $removedId) {
+            $this->attachmentService->delete($removedId);
+        }
+
+        Log::info('사이트 로고 첨부 제거', ['attachment_ids' => $removedIds]);
+    }
+
+    /**
+     * 첨부 목록 값에서 첨부 ID 만 추출합니다.
+     *
+     * 저장값은 ID 배열이지만 화면 제출값은 첨부 객체 배열이라 두 형태를 모두 받습니다.
+     *
+     * @param  mixed  $value  첨부 목록 값
+     * @return array<int, int> 첨부 ID 목록
+     */
+    private function extractAttachmentIds(mixed $value): array
+    {
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $ids = [];
+
+        foreach ($value as $item) {
+            $id = is_array($item) ? ($item['id'] ?? null) : $item;
+
+            if (is_numeric($id)) {
+                $ids[] = (int) $id;
+            }
+        }
+
+        return array_values(array_unique($ids));
     }
 
     /**

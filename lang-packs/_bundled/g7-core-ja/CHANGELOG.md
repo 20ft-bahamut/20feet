@@ -16,6 +16,8 @@
 - 설정 항목 단위 저장의 값 형식 안내 일본어 번역을 추가했습니다 (`validation.setting.value.*`) — 켜기/끄기·숫자 설정에 맞지 않는 값을 저장할 때의 안내가 일본어 로케일에서 표시됩니다.
 - 슈퍼 관리자 계정·역할 수정 상한 및 권한 부여 상한 위반 시 표시되는 예외 메시지(`cannot_modify_super_admin`, `cannot_grant_unheld_permission`, `cannot_modify_protected_role`)의 일본어 번역을 추가했습니다.
 - 레이아웃 저장 시 위험 표현식·외부 리소스 URL 거부 안내(`layout.dangerous_expression`, `layout.external_resource_url`)의 일본어 번역을 추가했습니다.
+- 고아 첨부 정리 설정의 검증 메시지와 항목명 일본어 번역을 추가했습니다 (`validation.settings.orphan_*`) — 환경설정 > 업로드의 자동 정리·보존기간을 잘못 저장할 때의 안내가 일본어 로케일에서 항목 이름과 함께 표시됩니다.
+- 데이터베이스 백업 미제공 안내 문구의 일본어 번역을 추가했습니다 (`settings.database_backup_unavailable`).
 
 ### Changed
 

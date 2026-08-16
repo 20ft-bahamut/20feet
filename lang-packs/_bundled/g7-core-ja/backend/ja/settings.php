@@ -20,6 +20,7 @@ return [
     'backup_success' => 'データベースバックアップが正常に開始されました。',
     'backup_failed' => 'データベースバックアップに失敗しました。',
     'backup_error' => 'データベースバックアップ中にエラーが発生しました。',
+    'database_backup_unavailable' => 'データベースバックアップ機能はまだ提供されていません。設定のバックアップは設定バックアップ機能をご利用ください。',
     'backup_path_required' => 'バックアップパスを入力してください。',
     'restore_success' => '設定が正常に復元されました。',
     'restore_failed' => '設定の復元に失敗しました。',

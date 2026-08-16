@@ -10,6 +10,7 @@ use App\Models\Attachment;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AttachmentService;
 use App\Services\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -1497,6 +1498,7 @@ class SettingsControllerTest extends TestCase
                     $app->make(ConfigRepositoryInterface::class),
                     $app->make(AttachmentRepositoryInterface::class),
                     $app->make(CacheInterface::class),
+                    $app->make(AttachmentService::class),
                 );
             }
 
@@ -1596,6 +1598,7 @@ class SettingsControllerTest extends TestCase
                     $app->make(ConfigRepositoryInterface::class),
                     $app->make(AttachmentRepositoryInterface::class),
                     $app->make(CacheInterface::class),
+                    $app->make(AttachmentService::class),
                 );
                 $this->stub = $stub;
             }
@@ -1650,6 +1653,7 @@ class SettingsControllerTest extends TestCase
                     $app->make(ConfigRepositoryInterface::class),
                     $app->make(AttachmentRepositoryInterface::class),
                     $app->make(CacheInterface::class),
+                    $app->make(AttachmentService::class),
                 );
             }
 

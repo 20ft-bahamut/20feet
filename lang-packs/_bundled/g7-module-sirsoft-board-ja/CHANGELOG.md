@@ -10,6 +10,7 @@
 
 - 게시판 유형 삭제 등 관리 작업이 서버 오류로 실패했을 때 표시되는 안내 문구의 일본어 번역을 추가했습니다.
 - 비공개(비밀) 게시글 목록 마스킹 시 표시되는 제목 플레이스홀더(`secret_post_title`)의 일본어 번역을 추가했습니다.
+- 첨부 영구 정리 설정의 라벨·도움말과 검증 항목명 일본어 번역을 추가했습니다 (`admin/settings.attachment_purge_*`, `validation.attributes.attachment_settings.*`) — 게시판 환경설정 > 기본 설정의 새 항목과 저장 시 오류 안내가 일본어 로케일에서 표시됩니다.
 
 ### Changed
 

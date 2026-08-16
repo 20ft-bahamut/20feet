@@ -912,7 +912,7 @@ return [
         's3_endpoint_invalid' => '正しいS3エンドポイントURL形式ではありません。',
         's3_endpoint_max' => 'S3エンドポイントURLは500字を超えることはできません。',
         's3_use_path_style_boolean' => 'Path-styleアドレス使用の設定はtrueまたはfalseである必要があります。',
-        'driver_unusable' => "':driver' ドライバーはこのサーバーでは使用できません。:reason",
+        'driver_unusable' => '\':driver\' ドライバーはこのサーバーでは使用できません。:reason',
         'cache_driver_required' => 'キャッシュドライバーを選択してください。',
         'cache_driver_invalid' => '正しいキャッシュドライバーを選択してください。',
         'redis_host_max' => 'Redisホストは255字を超えることはできません。',
@@ -994,6 +994,10 @@ return [
         'pagination_max_page_integer' => 'ページ番号上限は数値である必要があります。',
         'pagination_max_page_min' => 'ページ番号上限は:min以上である必要があります。(0 = 無制限)',
         'pagination_max_page_max' => 'ページ番号上限は:maxを超えることはできません。',
+        'orphan_cleanup_enabled_boolean' => '孤立した添付ファイルの自動クリーンアップは有効化または無効化のいずれかである必要があります。',
+        'orphan_retention_days_integer' => '孤立した添付ファイルの保持期間は整数である必要があります。',
+        'orphan_retention_days_min' => '孤立した添付ファイルの保持期間は1日以上である必要があります。',
+        'orphan_retention_days_max' => '孤立した添付ファイルの保持期間は3650日を超えることはできません。',
     ],
     'identity_policy' => [
         'key_required' => 'ポリシーキーを入力してください。',
@@ -1174,6 +1178,8 @@ return [
         'log_level' => 'ログレベル',
         'log_days' => 'ログ保持日数',
         'public_asset_disk' => '公開アセットディスク',
+        'orphan_cleanup_enabled' => '孤立した添付ファイルの自動クリーンアップ',
+        'orphan_retention_days' => '孤立した添付ファイルの保持期間',
     ],
     'layout_version' => [
         'limit' => [
