@@ -62,9 +62,15 @@ _단건 응답: `data` 객체의 필드._
 | next_cursor | string\|null | `null` | 다음 페이지 커서. 커서 방식으로 응답했을 때만 채워지며, `page` 방식 응답에서는 `null` 입니다 |
 | prev_cursor | string\|null | `null` | 이전 페이지 커서. 위와 같습니다 |
 | counts_are_exact | object | `{}` | 카테고리별 총 건수 정확도 (`{"posts": true, "products": false}`). 탭 배지가 카테고리마다 그려지므로 정확도도 카테고리마다 제공됩니다 — 정확하지 않은 배지는 화면에서 "이상" 으로 표기됩니다 |
+| categories_failed | object | `{}` | 카테고리별 검색 실패 여부 (`{"posts": true, "products": false}`). 카테고리 검색이 서버 예외로 실패하면 그 카테고리만 `true` 가 되며, 화면은 이 값으로 "검색 결과 없음" 과 구분되는 오류 안내를 그립니다. 실패해도 HTTP 는 200 입니다 (다른 카테고리 결과는 정상 전달) |
+| search_failed | boolean | `false` | 하나 이상의 카테고리가 실패했는지 여부 (`categories_failed` 의 논리합) |
 
 카테고리(탭) 중 하나라도 상한에 걸리면 합계도 정확하지 않습니다 — 정확한 카테고리 몇 개를
 더해 봐야 전체가 정확해지지 않기 때문입니다. 그 경우 `total_is_exact` 는 `false` 가 됩니다.
+
+실패한 카테고리의 페이로드는 `failed: true` 와 함께 `total: 0`, `total_is_exact: false`
+(`total_relation: at_least`) 로 내려갑니다 — 실패한 0건을 "정확한 0건" 으로 말하지 않기
+위함입니다. 배지·건수 표기는 이 정확도를 그대로 따릅니다.
 
 > 상한·페이지 이동 규약 상세: [pagination.md](../pagination.md)
 

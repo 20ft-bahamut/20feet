@@ -10,7 +10,8 @@
 ```text
 1. Laravel Scout + DatabaseFulltextEngine: MySQL FULLTEXT + ngram 기반 검색 (기본 드라이버)
 2. FulltextSearchable 인터페이스: searchableColumns() + searchableWeights() 구현 필수
-3. LIKE fallback 자동 적용: FULLTEXT 미지원 DBMS(SQLite, PostgreSQL)에서 자동 전환
+3. LIKE fallback 자동 적용: FULLTEXT 미지원 DBMS(SQLite, PostgreSQL) + 대상 테이블·컬럼
+   조합의 FULLTEXT 인덱스 부재 시 (후자는 설치 결함 신호라 조합당 프로세스 1회 기록)
 4. 확장 포인트: core.search.engine_drivers(엔진) + core.search.index_maintainers(인덱스 점검) 필터 훅
 5. 인덱스 재생성은 언제나 선택 사항 — 자동 트리거 없음 (테이블 잠금·전체 재색인 비용)
 6. AsUnicodeJson 캐스트: JSON 컬럼 FULLTEXT 검색 시 한글 \uXXXX 이스케이프 방지 필수
@@ -175,6 +176,39 @@ DatabaseFulltextEngine::supportsFulltext();
 // ngram 파서 지원 여부 (MySQL만 true, MariaDB는 false)
 DatabaseFulltextEngine::supportsNgramParser();
 ```
+
+### 인덱스 커버 판정 — MATCH 는 인덱스가 있어야만 조립한다
+
+드라이버가 FULLTEXT 를 지원해도, MySQL 의 `MATCH(a, b)` 는 어떤 FULLTEXT 인덱스의
+컬럼 **집합과 정확히 일치**(순서 무관)해야 실행된다. 복합 `(title, content)` 인덱스는
+`MATCH(title)` 단독을 커버하지 못한다. 인덱스가 없는 채 MATCH 를 실행하면
+`1191 Can't find FULLTEXT index` 가 되고, 그 오류가 소비처의 catch 에 삼켜지면
+화면에는 "검색 결과 0건" 으로만 나타난다 (부분 실패 설치에서 실제 발생 — 공개 #103).
+
+그래서 엔진은 MATCH 조립 전에 `fulltextIndexCoversColumns($table, $columns)` 로
+커버 여부를 판정한다:
+
+- 판정은 컬럼 한정자 제거·소문자·정렬 정규화 후 **집합 동등 비교**다. 순서가 달라도
+  같은 집합이면 커버한다 (`['content','title']` ≡ `['title','content']`).
+- Scout 경로(`performSearch`)는 컬럼마다 단일 `MATCH(col)` 를 조립하므로, **각 컬럼이
+  개별 단일 인덱스로** 커버될 때만 MATCH 를 쓴다. 복합 인덱스만 있는 테이블은 LIKE 로
+  내려간다.
+- `applyAny()` 는 컬럼별 `apply(단일)` 재귀라 게이트도 단일 컬럼으로 판정한다 — 한 OR
+  그룹 안에 MATCH 와 LIKE 가 혼재할 수 있으며, 유효한 SQL 이고 의도된 동작이다.
+- 커버되지 않아 내려가는 폴백은 **설치 결함의 신호**이므로 테이블+컬럼 조합당 프로세스
+  1회 `Log::warning` 을 남긴다 (복구 안내 포함). 드라이버 미지원 폴백은
+  종전대로 무경고다 — 그 DBMS 에서는 부분일치가 정상 경로다.
+- 이 경고의 복구 경로는 **해당 확장의 인덱스 생성 마이그레이션 재실행**이다.
+  `search:index` 를 안내하지 않는다 — 그 점검은 `INFORMATION_SCHEMA` 에 **이미 존재하는**
+  FULLTEXT 인덱스만 열거하고 `--repair` 는 그중 색인이 낡은 것만 재생성하므로, 인덱스가
+  아예 없는 이 상황은 목록에 나타나지도 재생성 대상이 되지도 않는다. 안내가 그쪽을
+  가리키면 운영자는 "이상 없음" 을 보고 원인 추적이 거기서 끊긴다.
+
+인덱스 카탈로그는 `INFORMATION_SCHEMA.STATISTICS` 에서 lazy 적재하는 **프로세스(static)
+캐시**다. 적재 실패(Throwable)는 캐시하지 않고 그 요청만 LIKE 로 내려간다 — 일시 장애가
+워커 수명 내내 강등으로 굳지 않게 하기 위함이다. `addFulltextIndex()` 성공 직후에는
+카탈로그를 무효화해 같은 프로세스에서 바로 반영된다. 그 외의 인덱스 변경(배포 등)은
+FPM 워커 재시작 시점에 반영된다.
 
 ### SCOUT_DRIVER 전환
 
