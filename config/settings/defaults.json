@@ -49,7 +49,9 @@
             "allowed_extensions": ["jpg", "jpeg", "png", "gif", "webp", "pdf", "doc", "docx", "xls", "xlsx", "zip"],
             "image_max_width": 2000,
             "image_max_height": 2000,
-            "image_quality": 85
+            "image_quality": 85,
+            "orphan_cleanup_enabled": false,
+            "orphan_retention_days": 30
         },
         "seo": {
             "meta_title_suffix": "",
@@ -202,7 +204,9 @@
                 "allowed_extensions_formatted": { "type": "string", "sensitive": false, "computed": true, "source": "allowed_extensions", "transform": "format_extensions" },
                 "image_max_width": { "type": "integer", "sensitive": false },
                 "image_max_height": { "type": "integer", "sensitive": false },
-                "image_quality": { "type": "integer", "sensitive": false, "expose": false }
+                "image_quality": { "type": "integer", "sensitive": false, "expose": false },
+                "orphan_cleanup_enabled": { "type": "boolean", "sensitive": false, "expose": false },
+                "orphan_retention_days": { "type": "integer", "sensitive": false, "expose": false }
             }
         },
         "seo": {

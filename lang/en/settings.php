@@ -21,6 +21,7 @@ return [
     'backup_success' => 'Database backup started successfully.',
     'backup_failed' => 'Failed to start database backup.',
     'backup_error' => 'An error occurred while backing up database.',
+    'database_backup_unavailable' => 'Database backup is not available yet. Use the settings backup feature to back up your settings.',
     'backup_path_required' => 'Please enter a backup path.',
     'restore_success' => 'Settings restored successfully.',
     'restore_failed' => 'Failed to restore settings.',

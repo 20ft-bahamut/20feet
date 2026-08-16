@@ -19,7 +19,8 @@ use ReflectionClass;
  * getIdentifier(), getVendor()는 디렉토리명에서 자동 추론됩니다.
  * getName(), getVersion(), getDescription()은 plugin.json에서 자동 파싱됩니다.
  *
- * 참고: 플러그인은 모듈과 달리 관리자 메뉴(getAdminMenus)를 추가할 수 없습니다.
+ * 참고: 플러그인도 관리자 메뉴(getAdminMenus)를 선언할 수 있습니다. 설치·업데이트·활성화가
+ * 공통으로 지나는 선언형 산출물 동기화에서 PluginManager 가 자동으로 반영합니다.
  */
 abstract class AbstractPlugin implements CacheableExtensionInterface, PluginInterface
 {

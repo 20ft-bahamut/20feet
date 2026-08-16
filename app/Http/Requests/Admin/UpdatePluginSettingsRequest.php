@@ -162,4 +162,40 @@ class UpdatePluginSettingsRequest extends FormRequest
             'min' => __('validation.min'),
         ];
     }
+
+    /**
+     * 검증 오류에 쓸 필드 표시명을 반환합니다.
+     *
+     * 설정 스키마의 `label` 을 그대로 씁니다. 이 값이 없으면 Laravel 이 원시 키를 풀어쓴
+     * 이름("unused image retention days")을 그대로 노출하는데, 같은 화면의 입력 라벨은
+     * 한국어인 상태라 운영자에게는 어느 항목을 고치라는 말인지 닿지 않습니다.
+     *
+     * @return array<string, string> 필드 => 표시명
+     */
+    public function attributes(): array
+    {
+        $plugin = app(PluginManager::class)->getPlugin($this->route('identifier'));
+
+        if (! $plugin) {
+            return [];
+        }
+
+        $locale = app()->getLocale();
+        $fallback = config('app.fallback_locale', 'en');
+        $attributes = [];
+
+        foreach ($plugin->getSettingsSchema() as $field => $config) {
+            $label = $config['label'] ?? null;
+
+            if (is_array($label)) {
+                $label = $label[$locale] ?? $label[$fallback] ?? reset($label);
+            }
+
+            if (is_string($label) && $label !== '') {
+                $attributes[$field] = $label;
+            }
+        }
+
+        return $attributes;
+    }
 }

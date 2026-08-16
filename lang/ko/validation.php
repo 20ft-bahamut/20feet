@@ -899,6 +899,10 @@ return [
         'image_quality_integer' => '이미지 품질은 정수여야 합니다.',
         'image_quality_min' => '이미지 품질은 1 이상이어야 합니다.',
         'image_quality_max' => '이미지 품질은 100을 초과할 수 없습니다.',
+        'orphan_cleanup_enabled_boolean' => '고아 첨부 자동 정리는 사용/사용 안 함 중 하나여야 합니다.',
+        'orphan_retention_days_integer' => '고아 첨부 보존기간은 정수여야 합니다.',
+        'orphan_retention_days_min' => '고아 첨부 보존기간은 1일 이상이어야 합니다.',
+        'orphan_retention_days_max' => '고아 첨부 보존기간은 3650일을 초과할 수 없습니다.',
 
         // SEO 설정
         'meta_title_suffix_max' => '타이틀 접미사는 100자를 초과할 수 없습니다.',
@@ -1198,6 +1202,8 @@ return [
         'image_max_width' => '이미지 최대 너비',
         'image_max_height' => '이미지 최대 높이',
         'image_quality' => '이미지 품질',
+        'orphan_cleanup_enabled' => '고아 첨부 자동 정리',
+        'orphan_retention_days' => '고아 첨부 보존기간',
         // SEO 설정 필드
         'meta_title_suffix' => '메타 타이틀 접미사',
         'meta_description' => '메타 설명',

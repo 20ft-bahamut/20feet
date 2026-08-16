@@ -57,6 +57,8 @@ Schedule::command('schedules:prune-history')->dailyAt('04:35')->onOneServer();
 Schedule::command('identity:prune-logs')->dailyAt('04:40')->onOneServer();
 Schedule::command('activity-log:prune')->dailyAt('04:45')->onOneServer();
 Schedule::command('notification-log:prune')->dailyAt('04:50')->onOneServer();
+// 사용자 파일을 파기하므로 기본 꺼짐 — 커맨드가 `--scheduled` 에서 설정을 false 폴백으로 재확인한다.
+Schedule::command('attachments:prune-orphans --scheduled')->dailyAt('04:55')->onOneServer();
 
 // 만료 시각이 지난 본인인증 challenge 상태 전환 (비파괴 — 물리 파기는 identity:prune-logs)
 Schedule::command('identity:expire-challenges')->hourly()->onOneServer();

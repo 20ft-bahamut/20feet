@@ -226,6 +226,9 @@ class SaveSettingsRequest extends FormRequest
             'upload.image_max_width' => ['nullable', 'integer', 'min:'.config('core.settings_limits.upload_image_max_width_min', 100), 'max:'.config('core.settings_limits.upload_image_max_width_max', 10000)],
             'upload.image_max_height' => ['nullable', 'integer', 'min:'.config('core.settings_limits.upload_image_max_height_min', 100), 'max:'.config('core.settings_limits.upload_image_max_height_max', 10000)],
             'upload.image_quality' => ['nullable', 'integer', 'min:'.config('core.settings_limits.upload_image_quality_min', 1), 'max:'.config('core.settings_limits.upload_image_quality_max', 100)],
+            // 고아 첨부 정리 — 사용자 파일을 파기하므로 보존기간 하한을 서버가 강제한다.
+            'upload.orphan_cleanup_enabled' => ['nullable', 'boolean'],
+            'upload.orphan_retention_days' => ['nullable', 'integer', 'min:'.config('core.settings_limits.upload_orphan_retention_days_min', 1), 'max:'.config('core.settings_limits.upload_orphan_retention_days_max', 3650)],
 
             // SEO 설정
             'seo.meta_title_suffix' => ['nullable', 'string', 'max:100'],
@@ -678,6 +681,10 @@ class SaveSettingsRequest extends FormRequest
             'upload.image_quality.integer' => __('validation.settings.image_quality_integer'),
             'upload.image_quality.min' => __('validation.settings.image_quality_min'),
             'upload.image_quality.max' => __('validation.settings.image_quality_max'),
+            'upload.orphan_cleanup_enabled.boolean' => __('validation.settings.orphan_cleanup_enabled_boolean'),
+            'upload.orphan_retention_days.integer' => __('validation.settings.orphan_retention_days_integer'),
+            'upload.orphan_retention_days.min' => __('validation.settings.orphan_retention_days_min'),
+            'upload.orphan_retention_days.max' => __('validation.settings.orphan_retention_days_max'),
 
             // SEO 설정
             'seo.meta_title_suffix.max' => __('validation.settings.meta_title_suffix_max'),
@@ -914,6 +921,8 @@ class SaveSettingsRequest extends FormRequest
             'upload.image_max_width' => __('validation.attributes.image_max_width'),
             'upload.image_max_height' => __('validation.attributes.image_max_height'),
             'upload.image_quality' => __('validation.attributes.image_quality'),
+            'upload.orphan_cleanup_enabled' => __('validation.attributes.orphan_cleanup_enabled'),
+            'upload.orphan_retention_days' => __('validation.attributes.orphan_retention_days'),
             // seo
             'seo.meta_title_suffix' => __('validation.attributes.meta_title_suffix'),
             'seo.meta_description' => __('validation.attributes.meta_description'),

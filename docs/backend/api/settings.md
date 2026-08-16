@@ -202,6 +202,8 @@ HTTP/1.1 200
 | upload.image_max_width | body | integer | 아니오 | min 100, max 10000 | 이미지 리사이즈 최대 너비 (px) |
 | upload.image_max_height | body | integer | 아니오 | min 100, max 10000 | 이미지 리사이즈 최대 높이 (px) |
 | upload.image_quality | body | integer | 아니오 | min 1, max 100 | 이미지 리사이즈 시 압축 품질 (1~100) |
+| upload.orphan_cleanup_enabled | body | boolean | 아니오 | — | 고아 첨부(소유자 없이 남은 첨부) 자동 정리 활성화 여부. **기본 false** — 사용자 파일을 실제로 파기하므로 운영자가 직접 켜야 동작하며, 예약 작업(`attachments:prune-orphans --scheduled`)이 이 값을 false 폴백으로 재확인한다 |
+| upload.orphan_retention_days | body | integer | 아니오 | min 1, max 3650 | 고아 첨부 보존기간(일, 기본 30). 폼 작성 중 이탈을 감안한 유예 기간이다. 하한·상한은 `config('core.settings_limits.upload_orphan_retention_days_*')` 가 정하며 화면 입력도 같은 값을 읽는다 |
 | seo.meta_title_suffix | body | string | 아니오 | max 100 | 모든 페이지 SEO 제목 뒤에 붙는 접미 문구 |
 | seo.meta_description | body | string | 아니오 | max 160 | SEO 메타 설명 (검색엔진/소셜 공유 표시 요약) |
 | seo.meta_keywords | body | string | 아니오 | max 255 | SEO 메타 키워드 (검색엔진 노출 키워드, 쉼표 구분) |
@@ -654,14 +656,14 @@ Authorization: Bearer {YOUR_TOKEN}
 
 **응답 필드** (`data` 내부)
 
-_이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지만). 컨트롤러가 `ResponseHelper::success('settings.backup_success')` 를 데이터 없이 호출하므로 `data` 는 `null` 입니다._
+_이 엔드포인트는 성공 응답을 반환하지 않습니다. 데이터베이스 백업 기능이 아직 제공되지 않아 항상 501 로 응답합니다._
 
 **응답 예시**
 
 ```json
 {
-    "success": true,
-    "message": "데이터베이스 백업이 성공적으로 시작되었습니다.",
+    "success": false,
+    "message": "데이터베이스 백업 기능은 아직 제공하지 않습니다. 설정 백업은 설정 백업 기능을 이용해 주세요.",
     "data": null
 }
 ```
@@ -670,16 +672,17 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
-| 400 | Bad Request | 백업이 수행되지 않은 경우 (`settings.backup_failed`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
 | 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
-| 500 | Internal Server Error | 백업 처리 중 예외가 발생한 경우 (`settings.backup_error`) |
+| 501 | Not Implemented | 항상 (데이터베이스 백업 미제공, `settings.database_backup_unavailable`) |
 
 <!-- @generated:end -->
 
 **설명**
 
-데이터베이스를 백업합니다. SettingsService 에 위임하며, 성공/실패를 메시지로 반환합니다. 설정 백업(`POST /backup`)이 설정 파일만 다루는 것과 달리, 이 엔드포인트는 DB 데이터를 백업 대상으로 합니다.
+**데이터베이스 백업은 아직 제공하지 않습니다.** 이 엔드포인트는 라우트만 존재하며 호출하면 항상 501(Not Implemented)로 응답합니다. 코어에는 데이터베이스 덤프 수단이 없어 구현된 적이 없으며, 관리자 화면에도 이 기능을 호출하는 지점이 없습니다.
+
+설정 파일 백업이 필요하면 `POST /api/admin/settings/backup` 을 사용하십시오 — 그쪽은 정상 동작하며 생성된 백업 경로를 `data.backup_path` 로 돌려줍니다.
 
 
 ### POST /api/admin/settings/clear-cache

@@ -25,6 +25,8 @@ return [
         'upload_image_max_height_max' => 10000,
         'upload_image_quality_min' => 1,
         'upload_image_quality_max' => 100,
+        'upload_orphan_retention_days_min' => 1,
+        'upload_orphan_retention_days_max' => 3650,
 
         // SEO
         'seo_og_image_default_width_min' => 0,

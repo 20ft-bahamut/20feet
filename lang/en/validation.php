@@ -960,6 +960,10 @@ return [
         'image_quality_integer' => 'Image quality must be an integer.',
         'image_quality_min' => 'Image quality must be at least 1.',
         'image_quality_max' => 'Image quality may not be greater than 100.',
+        'orphan_cleanup_enabled_boolean' => 'Orphan attachment cleanup must be enabled or disabled.',
+        'orphan_retention_days_integer' => 'Orphan attachment retention period must be an integer.',
+        'orphan_retention_days_min' => 'Orphan attachment retention period must be at least 1 day.',
+        'orphan_retention_days_max' => 'Orphan attachment retention period may not be greater than 3650 days.',
 
         // SEO settings
         'meta_title_suffix_max' => 'Meta title suffix may not be greater than 100 characters.',
@@ -1205,6 +1209,8 @@ return [
         'image_max_width' => 'max image width',
         'image_max_height' => 'max image height',
         'image_quality' => 'image quality',
+        'orphan_cleanup_enabled' => 'orphan attachment cleanup',
+        'orphan_retention_days' => 'orphan attachment retention period',
         // SEO settings
         'meta_title_suffix' => 'meta title suffix',
         'meta_description' => 'meta description',

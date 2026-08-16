@@ -349,6 +349,8 @@ return [
             'override_values.max_file_size' => '最大ファイルサイズ',
             'override_values.max_file_count' => '最大ファイル個数',
             'override_values.new_display_hours' => '新規表示時間',
+            'attachment_settings.purge_enabled' => '削除添付の永久クリーンアップ',
+            'attachment_settings.purge_retention_days' => '削除添付の保持期間',
         ],
     ],
     'blind' => [
