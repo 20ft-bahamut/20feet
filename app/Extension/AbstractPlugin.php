@@ -772,6 +772,31 @@ abstract class AbstractPlugin implements CacheableExtensionInterface, PluginInte
     }
 
     /**
+     * 신뢰하는 외부 스크립트 호스트 목록을 반환합니다.
+     *
+     * plugin.json 의 `trusted_script_hosts` 배열에서 읽습니다. 이 플러그인이 레이아웃
+     * `scripts[].src` 로 로드하는 외부 CDN 호스트(예: `cdn.ckeditor.com`)를 선언합니다.
+     * 코어는 이 목록을 집계(AbstractPlugin/AbstractModule → TrustedScriptHosts)해 런타임
+     * 스크립트 로더·저장측 검증·정적 검사가 same-origin 이 아닌 스크립트 중 **선언된
+     * 호스트만** 허용하도록 합니다 (KVE-2026-1915 신뢰 출처 허용목록).
+     *
+     * @return array<int, string> 신뢰 호스트명 목록 (예: ['cdn.ckeditor.com'])
+     */
+    public function getTrustedScriptHosts(): array
+    {
+        $hosts = $this->loadManifest()['trusted_script_hosts'] ?? [];
+
+        if (! is_array($hosts)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map(fn ($host) => is_string($host) ? trim($host) : '', $hosts),
+            fn ($host) => $host !== ''
+        ));
+    }
+
+    /**
      * 레이아웃 확장 파일 경로 반환
      *
      * @return string extensions 디렉토리 경로

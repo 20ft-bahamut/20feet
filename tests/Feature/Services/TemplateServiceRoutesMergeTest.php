@@ -108,6 +108,9 @@ class TemplateServiceRoutesMergeTest extends TestCase
         $this->assertIsArray($result['data']['routes']);
     }
 
+    /**
+     * @effects code_editor_restores_layout_from_route_query
+     */
     #[Test]
     public function get_layout_route_path_map_maps_layout_name_to_route_path(): void
     {

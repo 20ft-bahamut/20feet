@@ -461,7 +461,7 @@ class ExtensionPendingHelperTest extends TestCase
      * 스테이징 디렉토리의 rename(_updating_ → 활성)이 차단될 때
      * 파일 단위 복사로 폴백하여 교체가 완료되는지 확인합니다.
      *
-     * PO 실사용 로그의 실패 지점: 활성 → _old 는 성공했으나, 방금 복사된 스테이징
+     * 실사용 로그의 실패 지점: 활성 → _old 는 성공했으나, 방금 복사된 스테이징
      * 트리를 워처가 이미 열어 _updating_ → 활성 rename 이 차단된 케이스.
      */
     public function test_copy_to_active_copies_per_file_when_staging_rename_is_blocked(): void

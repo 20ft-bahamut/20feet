@@ -6,6 +6,7 @@ use App\Contracts\Extension\StorageInterface;
 use App\Contracts\Repositories\AttachmentRepositoryInterface;
 use App\Enums\AttachmentSourceType;
 use App\Extension\HookManager;
+use App\Helpers\PermissionHelper;
 use App\Models\Attachment;
 use App\Models\User;
 use App\Support\ImageResizer;
@@ -231,6 +232,8 @@ class AttachmentService
      */
     public function reorder(array $orderData): void
     {
+        $this->assertReorderWithinScope($orderData);
+
         // Before 훅
         HookManager::doAction('core.attachment.before_reorder', $orderData);
 
@@ -238,6 +241,44 @@ class AttachmentService
 
         // After 훅
         HookManager::doAction('core.attachment.after_reorder', $orderData);
+    }
+
+    /**
+     * 순서 변경 대상이 액터의 스코프 안에 있는지 검사합니다.
+     *
+     * `PATCH admin/attachments/reorder` 는 라우트 모델이 없는 정적 경로다. PermissionMiddleware
+     * 는 `$request->route('attachment')` 가 Model 일 때만 스코프를 검사하고 없으면 목록
+     * 엔드포인트로 보아 건너뛰므로(`PermissionMiddleware`), 상세 경로(`DELETE {attachment}`)가
+     * 미들웨어로 강제하는 스코프 축이 이 경로에서만 비어 있었다. 배포 기본 역할 `manager` 가
+     * `core.attachments.update` 를 `self` 스코프로 보유하므로 이론 구성이 아니라 기본값에서
+     * 성립한다 — 타인 소유 첨부의 순서를 바꿀 수 있었다.
+     *
+     * 대상 일부만 걸러내지 않고 **전체를 거부**한다. 순서는 집합 전체에 대한 하나의 배열이라
+     * 일부만 반영하면 나머지와 어긋난 순서가 저장되기 때문이다(사용자 일괄 상태변경이
+     * "제외" 를 택한 것과 의미론이 다르다).
+     *
+     * @param  array<int, array{id: int, order: int}>  $orderData  순서 데이터
+     *
+     * @throws AuthorizationException 스코프 밖 첨부가 하나라도 포함된 경우
+     */
+    private function assertReorderWithinScope(array $orderData): void
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn ($item): int => (int) ($item['id'] ?? 0), $orderData)
+        )));
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $attachments = $this->repository->findByIds($ids);
+
+        // 판정은 상세 경로와 같은 SSoT 에 위임한다 — 여기서 재구현하면 두 경로의 강도가 갈린다.
+        $permitted = PermissionHelper::filterByScope($attachments, 'core.attachments.update');
+
+        if (count($permitted) !== $attachments->count()) {
+            throw new AuthorizationException(__('auth.scope_denied'));
+        }
     }
 
     /**

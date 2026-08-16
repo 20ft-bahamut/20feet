@@ -190,6 +190,8 @@ return [
         ],
         'invalid_json' => '無効な JSON 形式です。',
         'must_be_array' => 'レイアウトデータは配列である必要があります。',
+        'dangerous_expression' => '許可されていない式が含まれています: :snippet',
+        'external_resource_url' => '外部リソース URL は許可されていません(同一オリジンのパスのみ): :url',
         'required_field_missing' => '必須フィールド \':field\' がありません。',
         'version_must_be_string' => 'version フィールドは文字列である必要があります。',
         'layout_name_must_be_string' => 'layout_name フィールドは文字列である必要があります。',

@@ -378,7 +378,7 @@ HTTP/1.1 201
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.users.create`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | 사용자 생성 중 예외 발생 (`user.create_failed`, `errors.error` 에 예외 메시지) |
 
@@ -456,7 +456,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.users.update`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — 예: 요청자 본인 UUID 포함 시 `ExcludeCurrentUser` 위반) |
 | 500 | Internal Server Error | 일괄 변경 중 예외 발생 (`user.bulk_update_status_failed`) |
 
@@ -1018,17 +1018,19 @@ HTTP/1.1 200
 ```json
 {
     "success": true,
-    "message": "사용자가 삭제되었습니다.",
+    "message": "사용자가 성공적으로 삭제되었습니다.",
     "data": null
 }
 ```
+
+> 슈퍼 관리자 계정을 대상으로 하면 삭제되지 않고 `422`(`exceptions.cannot_delete_super_admin`)로 거부된다. 삭제는 CASCADE 에 의존하지 않고 연관 데이터를 명시적으로 정리한 뒤 수행되며, 정리 단계에서 실패하면 `422` 와 함께 `error.errors.general[0]` 에 상세 사유가 담긴다.
 
 **에러 응답**
 
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.users.delete`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
@@ -1111,7 +1113,7 @@ _단건 응답: `data` 객체의 필드._
 | withdrawn_at | null | `null` | withdrawn 일시 |
 | blocked_at | null | `null` | blocked 일시 |
 | failed_login_attempts | integer | `0` | 연속 로그인 실패 횟수 |
-| locked_permanently | boolean | `false` | 무기한 잠금 여부 (보안 설정의 잠금 시간이 `0` 이면 자동 해제 없이 관리자가 직접 풀어야 한다) |
+| locked_permanently | boolean | `false` | 영구 잠금 여부. true 면 `locked_until` 과 무관하게 잠금이 유지되며, 해제는 성공 로그인 또는 관리자의 잠금 해제로만 이뤄진다 (잠금 시간 설정이 `0`= 무기한일 때 세워진다) |
 | locked_until | null | `null` | 계정 잠금 해제 시각 (NULL = 잠금 없음) |
 | is_locked | boolean | `false` | locked 여부 |
 | notify_post_complete | boolean | `false` | 게시글 작성 완료 알림 수신 여부 (게시판 모듈 알림 설정) |
@@ -1446,7 +1448,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.users.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.users.update`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지 — 마지막 관리자 본인의 admin 역할 제거 시도 시 `user.last_admin_role_cannot_remove` 포함) |
 | 500 | Internal Server Error | 수정 중 예외 발생 (`user.update_failed`, `errors.error` 에 예외 메시지) |

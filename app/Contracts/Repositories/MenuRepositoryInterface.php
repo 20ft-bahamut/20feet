@@ -41,6 +41,17 @@ interface MenuRepositoryInterface
     public function findById(int $id): ?Menu;
 
     /**
+     * 여러 ID로 메뉴를 한 번에 조회합니다.
+     *
+     * 정적 라우트(`PUT menus/order`)에서 스코프 게이트를 재적용할 때 대상 전체를 한 번에
+     * 확인하기 위한 조회입니다. 관계는 로드하지 않습니다(소유자 판정에 불필요).
+     *
+     * @param  array<int, int>  $ids  메뉴 ID 목록
+     * @return Collection 메뉴 컬렉션
+     */
+    public function findByIds(array $ids): Collection;
+
+    /**
      * 슬러그로 메뉴를 찾습니다.
      *
      * @param  string  $slug  메뉴 슬러그
