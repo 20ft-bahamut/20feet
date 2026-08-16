@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Contracts\Repositories\RoleRepositoryInterface;
+use App\Exceptions\CannotModifyProtectedRoleException;
 use App\Exceptions\ExtensionOwnedRoleDeleteException;
 use App\Exceptions\SystemRoleDeleteException;
 use App\Extension\HookManager;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\PermissionEscalationGuard;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +19,8 @@ use Illuminate\Support\Str;
 class RoleService
 {
     public function __construct(
-        private RoleRepositoryInterface $roleRepository
+        private RoleRepositoryInterface $roleRepository,
+        private PermissionEscalationGuard $escalationGuard
     ) {}
 
     /**
@@ -105,6 +108,12 @@ class RoleService
         $permissions = $data['permissions'] ?? [];
         unset($data['permissions']);
 
+        // 권한 상승 상한을 **역할 생성 전에** 검사한다. 생성 뒤에 검사하면 거부된 요청이
+        // 권한 0개짜리 고아 역할 행을 남긴다(사용자 경로와 동일한 "가드 → 쓰기" 순서).
+        if (! empty($permissions)) {
+            $this->escalationGuard->assertGrantWithinActorCeiling($permissions);
+        }
+
         // 훅: 생성 전
         HookManager::doAction('core.role.before_create', $data);
 
@@ -134,9 +143,19 @@ class RoleService
      */
     public function updateRole(Role $role, array $data): Role
     {
+        // 보호된 역할(코어/확장 소유) 수정 상한: 삭제 경로와 대칭.
+        // 비-슈퍼관리자 액터는 admin 등 코어/확장 소유 역할을 변경할 수 없다.
+        $this->assertActorMayModifyRole($role);
+
         // 권한 목록 분리
         $permissions = $data['permissions'] ?? null;
         unset($data['permissions']);
+
+        // 권한 상승 상한을 **속성 업데이트 전에** 검사한다. update 뒤에 검사하면
+        // 403 을 받은 요청이 name/is_active 변경만 반영된 상태를 남긴다.
+        if ($permissions !== null) {
+            $this->escalationGuard->assertGrantWithinActorCeiling($permissions);
+        }
 
         // 훅: 업데이트 전 (원본 data 전달)
         HookManager::doAction('core.role.before_update', $role, $data);
@@ -213,6 +232,15 @@ class RoleService
      */
     public function syncPermissions(Role $role, array $permissions): void
     {
+        // 보호된 역할(코어/확장 소유) 수정 상한: updateRole·toggleRoleStatus 와 대칭.
+        // 이 메서드는 public 이므로 서비스를 주입한 확장이 직접 호출할 수 있다 —
+        // 형제 경로에만 가드를 두면 여기가 코어 역할 보호의 우회로가 된다.
+        $this->assertActorMayModifyRole($role);
+
+        // 권한 상승 상한(ceiling): 비-슈퍼관리자 액터는 자신이 보유하지 않았거나
+        // 자신의 범위(scope)보다 넓은 범위의 권한을 부여할 수 없다(SSoT 가드에 위임).
+        $this->escalationGuard->assertGrantWithinActorCeiling($permissions);
+
         // 동기화 전 현재 권한 식별자 캡처 (Listener diff 계산용)
         $previousPermIdentifiers = $role->permissions()->pluck('identifier')->toArray();
 
@@ -244,6 +272,9 @@ class RoleService
      */
     public function toggleRoleStatus(Role $role): bool
     {
+        // 보호된 역할(코어/확장 소유) 상태변경 상한: 삭제 경로와 대칭.
+        $this->assertActorMayModifyRole($role);
+
         $newStatus = ! $role->is_active;
 
         // 훅: 상태 변경 전
@@ -257,6 +288,37 @@ class RoleService
         HookManager::doAction('core.role.after_toggle_status', $role);
 
         return $result;
+    }
+
+    /**
+     * 액터가 보호된 역할(코어/확장 소유)을 수정할 수 있는지 확인합니다.
+     *
+     * 인증 액터가 없으면(Artisan/내부 시더) 신뢰 경로로 간주해 통과시킵니다.
+     * 슈퍼 관리자는 모든 역할을 수정할 수 있고, 그 외 액터는 삭제 경로와 동일하게
+     * 코어/확장 소유 역할을 수정할 수 없습니다.
+     *
+     * @param  Role  $role  대상 역할
+     *
+     * @throws CannotModifyProtectedRoleException 상한 위반 시
+     */
+    private function assertActorMayModifyRole(Role $role): void
+    {
+        $actor = Auth::user();
+
+        // 인증 액터 부재 = 내부/Artisan 신뢰 경로 → 가드 미적용
+        if (! $actor instanceof User) {
+            return;
+        }
+
+        // 슈퍼 관리자는 모든 역할 수정 가능
+        if ($actor->isSuperAdmin()) {
+            return;
+        }
+
+        // 비-슈퍼관리자는 코어/확장 소유 역할 수정 불가
+        if ($role->isCore() || $role->isExtensionOwned()) {
+            throw new CannotModifyProtectedRoleException;
+        }
     }
 
     /**

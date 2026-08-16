@@ -4,6 +4,7 @@ namespace Modules\Sirsoft\Page\Services;
 
 use App\Contracts\Extension\StorageInterface;
 use App\Extension\HookManager;
+use App\Helpers\PermissionHelper;
 use App\Support\ImageResizer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,6 +15,7 @@ use Modules\Sirsoft\Page\Exceptions\AttachmentLimitExceededException;
 use Modules\Sirsoft\Page\Models\PageAttachment;
 use Modules\Sirsoft\Page\Repositories\Contracts\PageAttachmentRepositoryInterface;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * 페이지 첨부파일 서비스
@@ -191,6 +193,8 @@ class PageAttachmentService
      */
     public function deleteAttachment(PageAttachment $attachment): bool
     {
+        $this->assertPageScope($attachment);
+
         HookManager::doAction('sirsoft-page.attachment.before_delete', $attachment);
 
         // 물리 파일 삭제
@@ -212,6 +216,8 @@ class PageAttachmentService
      */
     public function reorder(array $orders): bool
     {
+        $this->assertReorderScope($orders);
+
         HookManager::doAction('sirsoft-page.attachment.before_reorder', $orders);
 
         $result = $this->attachmentRepository->reorder($orders);
@@ -219,6 +225,52 @@ class PageAttachmentService
         HookManager::doAction('sirsoft-page.attachment.after_reorder', $orders);
 
         return $result;
+    }
+
+    /**
+     * 첨부의 부모 페이지가 액터의 스코프 안에 있는지 검사합니다.
+     *
+     * 첨부 라우트는 `{id}`(정수)로 선언돼 있어 라우트 모델 바인딩이 일어나지 않고,
+     * 순서 변경은 아예 정적 경로다. 두 경우 모두 PermissionMiddleware 의 스코프 검사가
+     * 스킵되므로(모델이 resolve 되지 않으면 목록 엔드포인트로 간주) 서비스가 재적용한다.
+     * 스코프 대상은 첨부가 아니라 **부모 페이지**다 — `sirsoft-page.pages.update` 의
+     * owner_key 가 페이지의 `created_by` 이기 때문이다.
+     *
+     * @param  PageAttachment  $attachment  대상 첨부
+     *
+     * @throws AccessDeniedHttpException 부모 페이지가 스코프 밖인 경우
+     */
+    private function assertPageScope(PageAttachment $attachment): void
+    {
+        $page = $attachment->page;
+
+        // 부모를 못 읽으면 막는다(fail-closed) — 첨부에 page_id 가 있는데 페이지를 못 찾는
+        // 것은 정상 상태가 아니고, 통과시키면 게이트가 있어야 할 자리가 비어 버린다.
+        if (! $page || ! PermissionHelper::checkScopeAccess($page, 'sirsoft-page.pages.update')) {
+            throw new AccessDeniedHttpException(__('auth.scope_denied'));
+        }
+    }
+
+    /**
+     * 순서 변경 대상 첨부 전체가 액터의 스코프 안에 있는지 검사합니다.
+     *
+     * 순서는 집합 전체에 대한 하나의 배열이라 일부만 반영하면 나머지와 어긋난다 —
+     * 걸러내지 않고 전량 거부한다(코어 첨부/메뉴 순서 변경과 같은 의미론).
+     *
+     * @param  array<int, array{id: int, order: int}>  $orders  순서 데이터
+     *
+     * @throws AccessDeniedHttpException 스코프 밖 첨부가 하나라도 포함된 경우
+     */
+    private function assertReorderScope(array $orders): void
+    {
+        $ids = array_values(array_unique(array_filter(
+            array_map(static fn ($item): int => (int) ($item['id'] ?? 0), $orders)
+        )));
+
+        foreach ($ids as $id) {
+            // 존재하지 않는 id 는 findOrFail 이 404 로 끊는다 — 통과시키면 안 된다.
+            $this->assertPageScope($this->attachmentRepository->findOrFail($id));
+        }
     }
 
     /**

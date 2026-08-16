@@ -210,6 +210,8 @@ return [
 
         'invalid_json' => '유효하지 않은 JSON 형식입니다.',
         'must_be_array' => '레이아웃 데이터는 배열이어야 합니다.',
+        'dangerous_expression' => '허용되지 않는 표현식이 포함되어 있습니다: :snippet',
+        'external_resource_url' => '외부 리소스 URL은 허용되지 않습니다(동일 출처 경로만 허용): :url',
         'required_field_missing' => "필수 필드 ':field'가 누락되었습니다.",
         'version_must_be_string' => 'version 필드는 문자열이어야 합니다.',
         'layout_name_must_be_string' => 'layout_name 필드는 문자열이어야 합니다.',

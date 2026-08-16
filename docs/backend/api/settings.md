@@ -72,7 +72,7 @@ _단건 응답: `data` 객체의 필드._
 | notifications | object | `{"channels":[{"id":"mail","is_active":true,"sort_order":1…` | 알림 탭 설정 그룹. channels 는 알림 채널 목록으로 각 원소가 id(채널 식별자)·is_active(활성 여부)·sort_order(표시 순서)를 가짐 |
 | identity | object | `{"default_provider":"g7:core.mail","purpose_providers":{"…` | 본인인증(IDV) 탭 설정 그룹 (기본 provider·목적별 provider 매핑(purpose_providers)·챌린지 유효시간(분)·최대 시도 횟수) |
 | available_drivers | object | `{"storage":[{"id":"local","label":{"ko":"로컬","en":"Local"…` | 드라이버 선택지 카탈로그 (DriverRegistryService 산물). 종류별(storage/public_asset/cache/session/queue 등) 선택 가능한 드라이버 목록을 id/다국어 label 형태로 제공. `public_asset` 은 공개 자산 직접 URL 서빙 디스크 선택지 (코어 none/public/s3 + 플러그인 훅 등록분) |
-| _meta | object | `{"limits":{"upload_max_file_size_min":1,"upload_max_file_…` | 화면 검증 메타 — `limits` 는 각 설정 항목의 min/max 경계값 맵 (`config/core.php` 의 `settings_limits` 가 SSoT, 화면 입력 힌트와 FormRequest 검증이 같은 값을 공유) |
+| _meta | object | `{"limits":{"upload_max_file_size_min":1,"upload_max_file_…` | 설정값이 아니라 화면이 쓰는 메타. `limits` 는 각 설정 항목의 min/max 경계값 맵 (`config/core.php` 의 `settings_limits` 가 SSoT, 화면 입력 힌트와 FormRequest 검증이 같은 값을 공유) |
 | abilities | object | `{"can_update":true}` | 현재 사용자가 이 리소스에 수행 가능한 작업 불리언 맵 (can_update, can_delete 등 — 권한 맵 기반) |
 
 **응답 예시**
@@ -510,7 +510,7 @@ _단건 응답: `data` 객체의 필드._
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 
 <!-- @generated:end -->
@@ -623,7 +623,7 @@ _단건 응답: `data` 객체의 필드._
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 500 | Internal Server Error | 백업 파일 생성에 실패한 경우 (`settings.backup_failed`) |
 
 <!-- @generated:end -->
@@ -672,7 +672,7 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 | --- | --- | --- |
 | 400 | Bad Request | 백업이 수행되지 않은 경우 (`settings.backup_failed`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 500 | Internal Server Error | 백업 처리 중 예외가 발생한 경우 (`settings.backup_error`) |
 
 <!-- @generated:end -->
@@ -721,7 +721,7 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 | --- | --- | --- |
 | 400 | Bad Request | 캐시 정리가 수행되지 않은 경우 (`settings.cache_clear_failed`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 500 | Internal Server Error | 캐시 정리 중 예외가 발생한 경우 (`settings.cache_clear_error`) |
 
 <!-- @generated:end -->
@@ -782,7 +782,7 @@ _단건 응답: `data` 객체의 필드 (GeoIpDatabaseService::updateDatabase() 
 | --- | --- | --- |
 | 400 | Bad Request | MaxMind 라이선스 키가 설정되지 않은 경우 (`missing_license_key`) |
 | 401 | Unauthorized | MaxMind 라이선스 키가 유효하지 않은 경우 (`unauthorized`) |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 500 | Internal Server Error | MaxMind 연결 실패(`connection_failed`) 또는 다운로드·압축 해제 실패 |
 
 <!-- @generated:end -->
@@ -836,7 +836,7 @@ HTTP/1.1 200
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 
 <!-- @generated:end -->
 
@@ -898,7 +898,7 @@ _단건 응답: `data` 객체의 필드._
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthorized | 본문 `password` 가 요청자 본인의 비밀번호와 일치하지 않는 경우 (`settings.invalid_password`) |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없거나, FormRequest 가 `super_admin` 역할이 아닌 사용자를 거부한 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없거나, FormRequest 가 `super_admin` 역할이 아닌 사용자를 거부한 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | `.env` 기록/config 캐시 재생성 실패 (`settings.app_key_regenerate_failed`) |
 
@@ -957,7 +957,7 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 | --- | --- | --- |
 | 400 | Bad Request | 복원이 수행되지 않은 경우 (`settings.restore_failed`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | 백업 파일을 읽을 수 없는 등 복원 중 예외 발생 (`settings.restore_error`) |
 
@@ -1007,7 +1007,7 @@ _단건 응답: `data` 객체의 필드._
 | php_memory_limit | string | `512M` | PHP `memory_limit` ini 값 |
 | max_execution_time | string | `36000초` | PHP `max_execution_time` ini 값 (초 단위 접미사 부착) |
 | upload_max_filesize | string | `2G` | PHP `upload_max_filesize` ini 값 |
-| opcache | object | `{"loaded":true,"enabled":true}` | PHP OPcache 상태 — `loaded`(확장 로드 여부) / `enabled`(런타임 활성화 여부, `opcache.enable` 설정 기준) |
+| opcache | object | `{"loaded":true,"enabled":true}` | OPcache 상태 (`OpcacheStatus::probe()`). `loaded` 는 확장 적재 여부, `enabled` 는 `opcache.enable` 지시자 값이며 `ini_get` 이 차단·미정의인 환경에서는 **확인 불가를 뜻하는 `null`** 이 된다 (false 와 구분된다) |
 | install_path | string | `C:\Users\HeuJung\htdocs\g7_2` | 애플리케이션 설치 루트 경로 (`base_path()`) |
 | config_path | string | `C:\Users\HeuJung\htdocs\g7_2\storage\…` | 설정 파일 저장 경로 (`storage/app/settings`) |
 | log_path | string | `C:\Users\HeuJung\htdocs\g7_2\storage\…` | 로그 파일 저장 경로 (`storage/logs`) |
@@ -1236,7 +1236,7 @@ _단건 응답: `data` 객체의 필드 (DriverConnectionTester::testAll() 산�
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | 테스트 실행 중 예외가 발생한 경우 (`settings.driver_test_error`) |
 
@@ -1330,7 +1330,7 @@ _단건 응답: `data` 객체의 필드 (발송 성공 시에만 반환)._
 | 상태코드 | 의미 | 발생 조건 |
 | --- | --- | --- |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | 발송 실패 시 — `message` 는 `테스트 메일 발송에 실패했습니다.`, `error` 에 원본 예외 메시지(SMTP 인증 실패·연결 거부 등)가 담김 |
 
@@ -1449,7 +1449,7 @@ _이 엔드포인트는 `data` 를 반환하지 않습니다 (성공 메시지�
 | --- | --- | --- |
 | 400 | Bad Request | 저장이 수행되지 않은 경우 (`settings.update_failed`) |
 | 401 | Unauthenticated | 유효한 Bearer 토큰이 없거나 만료된 경우 |
-| 403 | Forbidden | 요구 권한(`core.settings.read`)이 없는 경우 |
+| 403 | Forbidden | 요구 권한(`core.settings.update`)이 없는 경우 |
 | 404 | Not Found | path 파라미터에 해당하는 리소스가 없는 경우 |
 | 422 | Unprocessable Entity | 요청 파라미터가 검증 규칙을 위반한 경우 (`error.errors` 에 필드별 메시지) |
 | 500 | Internal Server Error | 저장 중 예외가 발생한 경우 (`settings.update_error`) |

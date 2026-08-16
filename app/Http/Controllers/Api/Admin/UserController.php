@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Exceptions\CannotDeleteSuperAdminException;
+use App\Exceptions\CannotModifySuperAdminException;
+use App\Exceptions\PermissionEscalationException;
 use App\Http\Controllers\Api\Base\AdminBaseController;
 use App\Http\Requests\User\BulkUpdateUserStatusRequest;
 use App\Http\Requests\User\CheckEmailRequest;
@@ -74,6 +76,8 @@ class UserController extends AdminBaseController
                 new UserResource($user),
                 201
             );
+        } catch (PermissionEscalationException $e) {
+            return $this->error('exceptions.cannot_grant_unheld_permission', 403);
         } catch (ValidationException $e) {
             return $this->error('user.create_failed', 422, $e->errors());
         } catch (Exception $e) {
@@ -122,6 +126,10 @@ class UserController extends AdminBaseController
                 'user.update_success',
                 new UserResource($updatedUser)
             );
+        } catch (CannotModifySuperAdminException $e) {
+            return $this->error('exceptions.cannot_modify_super_admin', 403);
+        } catch (PermissionEscalationException $e) {
+            return $this->error('exceptions.cannot_grant_unheld_permission', 403);
         } catch (ValidationException $e) {
             return $this->error('user.update_failed', 422, $e->errors());
         } catch (Exception $e) {
@@ -148,6 +156,8 @@ class UserController extends AdminBaseController
                 'auth.account_unlocked',
                 new UserResource($unlocked)
             );
+        } catch (CannotModifySuperAdminException $e) {
+            return $this->error('exceptions.cannot_modify_super_admin', 403);
         } catch (Exception $e) {
             return $this->error('user.update_failed', 500, $e, ['error' => $e->getMessage()]);
         }

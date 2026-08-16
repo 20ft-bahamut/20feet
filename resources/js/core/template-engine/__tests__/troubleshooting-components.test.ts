@@ -1605,8 +1605,8 @@ describe('트러블슈팅 회귀 테스트 - DataGrid cellChildren 파이프', (
    * 사례: cellChildren 단일 바인딩의 파이프가 적용되지 않아 셀이 비어 보임
    *
    * 단일 바인딩 판정 후 `|` 가 복잡 표현식 문자로 분류되어 evaluateExpression 으로
-   * 라우팅되면 JS 비트 OR 로 평가된다. 인자 있는 파이프는 예외(값 소실),
-   * 인자 없는 파이프는 조용한 오답이 된다. 라우팅 판정 자체를 고정한다.
+   * 라우팅되면 안 된다. engine-v1.59.0 의 안전 평가기는 비트 연산자를 거부하므로
+   * raw 파이프가 흘러들면 예외가 된다(종전엔 조용한 비트 OR 오답이었다). 라우팅 판정 자체를 고정한다.
    *
    * @see docs/frontend/troubleshooting-components-datagrid.md "DataGrid cellChildren 파이프 이슈"
    * @see resources/js/core/template-engine/__tests__/renderItemChildren-pipe.test.ts (렌더 결과 검증)
@@ -1624,11 +1624,15 @@ describe('트러블슈팅 회귀 테스트 - DataGrid cellChildren 파이프', (
       expect(hasPipes("row.flag ? '$t:common.badge|count=1' : ''")).toBe(false);
     });
 
-    it('파이프를 evaluateExpression 으로 보내면 비트 OR 오답이 된다 (수정 전 동작 고정)', () => {
+    it('파이프를 evaluateExpression 으로 보내면 거부된다 (라우팅 판정 고정)', () => {
       const engine = new DataBindingEngine();
-      // 인자 없는 파이프: 문자열이 0 으로 붕괴
-      expect(engine.evaluateExpression('row.code | uppercase', { row: { code: 'abc' } })).toBe(0);
-      // 인자 있는 파이프: 함수 호출 실패로 예외
+      // engine-v1.59.0: 표현식은 화이트리스트 AST 평가기로 실행되며 비트 연산자(`|`)를
+      // 거부한다. 종전 `new Function` 기반에서는 인자 없는 파이프가 비트 OR 로 조용히
+      // 0 이 되고 인자 있는 파이프는 예외였다 — 이제 둘 다 명확히 예외로 거부된다.
+      // (파이프는 hasPipes 로 먼저 분리되어야 하며 evaluateExpression 에 raw 로 오면 안 됨)
+      expect(() =>
+        engine.evaluateExpression('row.code | uppercase', { row: { code: 'abc' } })
+      ).toThrow();
       expect(() =>
         engine.evaluateExpression("row.created_at | datetime('YYYY-MM-DD')", {
           row: { created_at: '2024-01-15T14:30:00' },

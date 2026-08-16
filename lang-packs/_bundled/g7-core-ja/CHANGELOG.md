@@ -4,7 +4,7 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
-## [1.0.6] - 2026-08-12
+## [1.0.6] - 2026-08-13
 
 ### Added
 
@@ -14,6 +14,8 @@
 - 웹소켓 서버(백엔드 발송용) endpoint 연결 실패 안내 일본어 번역 추가 (`settings.websocket_server_test_failed`).
 - 공개 자산 스토리지(공개 이미지 직접 URL 서빙) 설정의 드라이버 라벨과 검증 메시지 일본어 번역을 추가했습니다. 환경설정 > 드라이버 탭의 새 설정이 일본어 로케일에서 자연스럽게 표시됩니다.
 - 설정 항목 단위 저장의 값 형식 안내 일본어 번역을 추가했습니다 (`validation.setting.value.*`) — 켜기/끄기·숫자 설정에 맞지 않는 값을 저장할 때의 안내가 일본어 로케일에서 표시됩니다.
+- 슈퍼 관리자 계정·역할 수정 상한 및 권한 부여 상한 위반 시 표시되는 예외 메시지(`cannot_modify_super_admin`, `cannot_grant_unheld_permission`, `cannot_modify_protected_role`)의 일본어 번역을 추가했습니다.
+- 레이아웃 저장 시 위험 표현식·외부 리소스 URL 거부 안내(`layout.dangerous_expression`, `layout.external_resource_url`)의 일본어 번역을 추가했습니다.
 
 ### Changed
 

@@ -369,7 +369,7 @@ _단건 응답: `data` 객체의 필드 (`UserResource::toArray()` 산물 — GE
 | created_at | string | `2026-07-08 10:41:24` | 생성 일시 (사용자 시간대 기준 문자열) |
 | updated_at | string | `2026-07-08 11:02:10` | 수정 일시 (사용자 시간대 기준 문자열) |
 | is_owner | boolean | `true` | 현재 인증 사용자가 이 리소스의 소유자인지 여부 (BaseApiResource 표준 메타) |
-| abilities | object | `{"can_read":false,"can_create":false,"can_update":false,"can_delete":false,"can_assign_roles":false}` | 현재 사용자의 이 리소스에 대한 권한 맵 (core.users.read/create/update/delete, core.permissions.update 기준. 슈퍼관리자 계정은 `can_delete` 가 항상 false) |
+| abilities | object | `{"can_read":false,"can_create":false,"can_update":false,"can_delete":false,"can_assign_roles":false}` | 현재 사용자의 이 리소스에 대한 권한 맵 (core.users.read/create/update/delete 기준. `can_assign_roles` 는 `core.users.update` — 역할 부여는 사용자 관리의 일부. 슈퍼관리자 계정은 `can_delete` 가 항상 false) |
 
 관계형 필드(`modules`, `plugins`, `menus`, `roles`, `permissions`, `consents`, `terms_consent`, `privacy_consent`)와 카운트 필드(`modules_count`, `plugins_count`, `menus_count`)는 해당 관계가 로드된 경우에만 응답에 포함된다 (프로필 수정 응답에서는 로드하지 않으므로 나타나지 않는다).
 

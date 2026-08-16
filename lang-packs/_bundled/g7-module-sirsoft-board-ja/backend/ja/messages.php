@@ -34,6 +34,7 @@ return [
         'secret_password_required' => '非公開投稿のパスワードが必要です。',
         'secret_password_incorrect' => '非公開投稿のパスワードが一致しません。',
         'secret_post_content' => '非公開投稿です。内容を表示するにはパスワードを入力してください。',
+        'secret_post_title' => '非公開投稿',
         'deleted_post_title' => '削除された投稿',
         'deleted_post_content' => '削除された投稿です。',
         'blinded_post_content' => '管理者によってブロック処理された投稿です。',

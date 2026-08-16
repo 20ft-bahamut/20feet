@@ -6,12 +6,15 @@ use App\Contracts\Repositories\RoleRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Enums\UserStatus;
 use App\Exceptions\CannotDeleteSuperAdminException;
+use App\Exceptions\PermissionEscalationException;
 use App\Extension\HookManager;
 use App\Helpers\PermissionHelper;
 use App\Helpers\TimezoneHelper;
 use App\Models\ActivityLog;
 use App\Models\Attachment;
 use App\Models\User;
+use App\Support\PermissionEscalationGuard;
+use App\Support\UserGradeGuard;
 use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,7 +29,8 @@ class UserService
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private RoleRepositoryInterface $roleRepository,
-        private AttachmentService $attachmentService
+        private AttachmentService $attachmentService,
+        private PermissionEscalationGuard $escalationGuard
     ) {}
 
     /**
@@ -79,10 +83,19 @@ class UserService
             }
             unset($data['roles']);
 
-            // 역할 할당 권한 체크: core.permissions.update 권한 없으면 기본 역할 자동 할당
-            if (! PermissionHelper::check('core.permissions.update')) {
+            // 역할 할당: 요청 역할이 없으면 기본 역할('user')을 자동 배정하고, 요청 역할이
+            // 있으면 액터 상한(ceiling) 검사만 받는다.
+            //
+            // 역할 부여는 "사용자 관리"(core.users.create — 이 경로는 라우트에서 이미 강제됨)의
+            // 일부이지, "역할 정의 수정"(core.permissions.update — 역할에 권한을 가감하는 권한)을
+            // 요구하지 않는다. 권한 상승 방지는 오직 상한(ceiling)이 담당한다: 액터가 보유하지
+            // 않았거나 자신의 범위보다 넓은 권한을 담은 역할은 부여할 수 없다(KVE-2026-1919).
+            // 신규 사용자는 기존 역할이 없으므로 요청 역할 전부가 새로 부여되는 역할이다.
+            if ($roleIds === null || count($roleIds) === 0) {
                 $defaultRoleId = $this->roleRepository->findByIdentifier('user')?->id;
                 $roleIds = $defaultRoleId ? [$defaultRoleId] : null;
+            } else {
+                $this->escalationGuard->assertRoleAssignmentWithinActorCeiling($roleIds);
             }
 
             $user = $this->userRepository->create($data);
@@ -99,6 +112,11 @@ class UserService
             return $user->fresh(['modules', 'plugins', 'menus', 'roles']);
         } catch (Exception $e) {
             if ($e instanceof ValidationException) {
+                throw $e;
+            }
+
+            // 권한 상승 상한 위반은 그대로 전파해 컨트롤러가 403 으로 매핑하도록 한다.
+            if ($e instanceof PermissionEscalationException) {
                 throw $e;
             }
 
@@ -119,6 +137,10 @@ class UserService
      */
     public function updateUser(User $user, array $data): User
     {
+        // 등급 상한 가드: 비-슈퍼관리자 액터는 슈퍼 관리자 계정을 수정할 수 없다.
+        // (비밀번호·status(withdrawn/blocked)·email 등 모든 수정 경로를 한 지점에서 차단)
+        UserGradeGuard::assertActorMayModify($user);
+
         try {
             // 원본 데이터 보관 (after_update 훅에서 사용)
             $originalData = $data;
@@ -148,17 +170,35 @@ class UserService
             }
             unset($data['roles']);
 
-            // 역할 할당 권한 체크
+            // 역할 할당
             if ($roleIds !== null) {
                 $authUser = Auth::user();
 
-                // core.permissions.update 권한 없으면 역할 변경 불가
-                if (! PermissionHelper::check('core.permissions.update', $authUser)) {
-                    $roleIds = null;
+                // 역할 조작 상한(ceiling): 이번 변경으로 붙거나 떨어지는 역할이 액터가 전부
+                // 부여할 수 있는 권한만 담고 있는지 확인한다(KVE-2026-1919). 역할 부여는
+                // "사용자 관리"(core.users.update — 이 경로는 라우트에서 이미 강제됨)의 일부이며,
+                // "역할 정의 수정"(core.permissions.update — 역할에 권한을 가감하는 권한)을
+                // 요구하지 않는다. 권한 상승 방지는 오직 상한이 담당한다: 액터가 보유하지
+                // 않았거나 자신의 범위보다 넓은 권한을 담은 역할은 부여할 수 없고, 위반 시
+                // PermissionEscalationException 이 전파되어 403 으로 명시 거부된다(과거처럼 조용히
+                // 무시하지 않는다).
+                //
+                // 검사 대상은 **추가·제거 양방향의 변경분**이다. 추가는 그 역할의 권한을
+                // 부여하는 것이고, 제거는 상위 역할의 권한 구성을 박탈하는 하향 조작이므로 —
+                // 액터가 스스로 부여할 수 없는(상한 밖) 역할은 붙이지도 떼지도 못한다. 추가만
+                // 검사하면 core.users.update 만 가진 하위 관리자가 다른 관리자의 상위 역할을
+                // 박탈하는 경로가 상한 없이 뚫린다. 기존 유지 역할은 변경이 아니므로 제외한다.
+                $currentRoleIds = $user->roles->pluck('id')->all();
+                $changedRoleIds = array_values(array_unique(array_merge(
+                    array_diff($roleIds, $currentRoleIds),        // 추가되는 역할
+                    array_diff($currentRoleIds, $roleIds),        // 제거되는 역할
+                )));
+                if (! empty($changedRoleIds)) {
+                    $this->escalationGuard->assertRoleAssignmentWithinActorCeiling($changedRoleIds);
                 }
 
                 // 자기잠금 방지: 마지막 admin 역할 사용자가 자기 admin 역할을 제거하려는 경우 차단
-                if ($roleIds !== null && $authUser && $authUser->id === $user->id) {
+                if ($authUser && $authUser->id === $user->id) {
                     $adminRole = $this->roleRepository->findByIdentifier('admin');
                     if ($adminRole && $user->roles->contains('id', $adminRole->id) && ! in_array($adminRole->id, $roleIds)) {
                         // admin 역할을 가진 다른 사용자가 있는지 확인
@@ -258,6 +298,12 @@ class UserService
             }
 
             if ($e instanceof CannotDeleteSuperAdminException) {
+                throw $e;
+            }
+
+            // 권한 상승 상한 위반은 그대로 전파해 컨트롤러가 403 으로 매핑하도록 한다
+            // (일반 실패로 감싸면 422 로 잘못 내려간다).
+            if ($e instanceof PermissionEscalationException) {
                 throw $e;
             }
 
@@ -590,22 +636,6 @@ class UserService
     }
 
     /**
-     * 사용자 활성화 상태를 업데이트합니다.
-     * 현재는 구현되지 않음 - 필요시 확장 가능
-     *
-     * @param  User  $user  대상 사용자 모델
-     * @param  bool  $isActive  활성화 상태
-     * @return User 사용자 모델
-     */
-    public function updateUserStatus(User $user, bool $isActive): User
-    {
-        // 현재 User 모델에 is_active 필드가 없으므로 필요시 추가
-        // $this->userRepository->update($user, ['is_active' => $isActive]);
-
-        return $user;
-    }
-
-    /**
      * 사용자의 활동 로그를 조회합니다.
      *
      * @param  int  $userId  사용자 ID
@@ -640,6 +670,9 @@ class UserService
      */
     public function unlockAccount(User $user): User
     {
+        // 등급 상한 가드: 비-슈퍼관리자 액터는 슈퍼 관리자 계정을 조작할 수 없다(정합성).
+        UserGradeGuard::assertActorMayModify($user);
+
         HookManager::doAction('core.user.before_unlock', $user);
 
         $this->userRepository->resetLoginAttempts($user);
@@ -651,19 +684,6 @@ class UserService
         ]);
 
         return $user;
-    }
-
-    /**
-     * 사용자의 마지막 로그인 시간을 현재 시간으로 업데이트합니다.
-     *
-     * @param  User  $user  대상 사용자 모델
-     * @return User 업데이트된 사용자 모델
-     */
-    public function updateLastLogin(User $user): User
-    {
-        $this->userRepository->update($user, ['last_login_at' => now()]);
-
-        return $user->fresh();
     }
 
     /**
@@ -698,14 +718,38 @@ class UserService
 
         $statusEnum = UserStatus::from($status);
 
+        // 정적 라우트(`PATCH users/bulk-status`)는 라우트 모델이 없어 PermissionMiddleware 의
+        // 스코프 검사가 통째로 건너뛰어진다. 따라서 상세 경로(`PUT users/{user}`)가 미들웨어로
+        // 강제하는 두 축을 서비스 계층에서 재적용한다 — 어느 한 축만 막으면 나머지가 우회로다.
+        // 탈퇴 분기보다 먼저 적용해야 한다 — 뒤에 두면 탈퇴 경로가 스코프 검사를 건너뛰는
+        // 우회로가 된다(KVE-1919).
+        $targets = $this->userRepository->findManyByUuids($uuids);
+
+        // ① 등급 축: 비-슈퍼관리자 액터가 포함시킨 슈퍼 관리자 대상은 제외한다
+        // (슈퍼 관리자 무력화 차단 — 슈퍼 세션 유지).
+        $modifiable = UserGradeGuard::filterModifiable($targets);
+
+        // ② 스코프 축: 액터의 유효 스코프(self/role/글로벌) 밖 대상은 제외한다.
+        // 판정은 상세 경로와 동일한 SSoT(PermissionHelper::checkScopeAccess)에 위임한다 —
+        // 여기서 재구현하면 role 분기만 빠지는 식으로 두 경로의 강도가 갈린다.
+        $modifiable = PermissionHelper::filterByScope($modifiable, 'core.users.update');
+
         // 일괄 '탈퇴'는 건별 정식 탈퇴로 전환한다 — 상태 컬럼만 바꾸면 익명화와
         // before/after_withdraw 훅이 통째로 생략되어, 본인 탈퇴와 결과가 달라진다.
+        // 위에서 등급·스코프로 걸러낸 대상에 한해서만 수행한다.
         if ($statusEnum === UserStatus::Withdrawn) {
-            return $this->bulkWithdraw($uuids, $status);
+            $modifiableUuids = array_map(static fn (User $u): string => $u->uuid, $modifiable);
+
+            return $this->bulkWithdraw($modifiableUuids, $status);
         }
 
-        // UUID → 정수 ID 변환 (내부 쿼리용)
-        $userIds = $this->userRepository->getIdsByUuids($uuids);
+        $userIds = array_map(static fn (User $u): int => $u->id, $modifiable);
+
+        if (empty($userIds)) {
+            HookManager::doAction('sirsoft-core.user.after_bulk_update', $uuids, $status, 0);
+
+            return ['updated_count' => 0];
+        }
 
         // DB 트랜잭션으로 일괄 업데이트
         $updatedCount = DB::transaction(function () use ($userIds, $statusEnum) {

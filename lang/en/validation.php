@@ -211,6 +211,8 @@ return [
 
         'invalid_json' => 'Invalid JSON format.',
         'must_be_array' => 'Layout data must be an array.',
+        'dangerous_expression' => 'The layout contains a disallowed expression: :snippet',
+        'external_resource_url' => 'External resource URLs are not allowed (same-origin paths only): :url',
         'required_field_missing' => "Required field ':field' is missing.",
         'version_must_be_string' => 'The version field must be a string.',
         'layout_name_must_be_string' => 'The layout_name field must be a string.',
