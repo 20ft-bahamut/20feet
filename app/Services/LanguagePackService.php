@@ -1498,9 +1498,11 @@ class LanguagePackService
     public function checkUpdates(?string $identifier = null): array
     {
         // 요구사항 #4: 모듈 패턴 — 모든 source_type 점검 (GitHub 1순위, 실패 시 bundled 폴백)
+        // 전량 순회는 allForUpdateCheck() — paginate 는 HTTP page 파라미터를 암묵 해석해
+        // `?page=2` 요청에서 순회가 0건이 된다 (공개 이슈 #102 동형)
         $packs = $identifier
             ? collect([$this->repository->findByIdentifier($identifier)])->filter()
-            : $this->repository->paginate([], 1000)->getCollection();
+            : $this->repository->allForUpdateCheck();
 
         $checked = 0;
         $updates = 0;
@@ -1675,8 +1677,9 @@ class LanguagePackService
             return $updates;
         }
 
-        // DB 에 설치된 모든 언어팩 (보호 가상 행 제외 — protected 로 필터됨)
-        $packs = $this->repository->paginate([], 1000)->getCollection();
+        // DB 에 설치된 모든 언어팩 (보호 가상 행 제외 — protected 로 필터됨).
+        // 전량 순회는 allForUpdateCheck() — paginate 의 암묵 page 해석 회피 (#102 동형)
+        $packs = $this->repository->allForUpdateCheck();
 
         foreach ($packs as $pack) {
             if (! $this->hasBundledManifest($pack->identifier)) {
