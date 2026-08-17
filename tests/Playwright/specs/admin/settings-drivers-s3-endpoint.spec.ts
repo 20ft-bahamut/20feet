@@ -1,8 +1,8 @@
 /**
  * E2E: 환경설정 > 드라이버 — S3 리전 자유입력·엔드포인트·path-style (#99/#563)
  *
- * 시나리오 매니페스트: tests/scenarios/s3-storage-driver.yaml (마킹은 각 테스트의
- * @scenario k=v 조합 + @effects 가 담당 — 헤더 요약 마킹은 파서 형식이 아님)
+ * 시나리오 매니페스트: tests/scenarios/s3-storage-driver.yaml — 마킹은 각 테스트의
+ * scenario(k=v 조합)·effects 주석이 담당하며, 헤더 요약 마킹은 파서 형식이 아니다
  *
  * 배경: S3 리전이 5개 하드코딩 Select 라 Cloudflare R2(auto)·신규 AWS 리전을 입력할 수
  * 없었고, S3 호환 스토리지의 API 주소(endpoint)를 넣을 자리가 없어 s3_url(공개 URL)에

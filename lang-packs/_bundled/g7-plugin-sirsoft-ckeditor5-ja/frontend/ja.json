@@ -93,7 +93,8 @@
         "button": "削除",
         "confirm_title": "画像を削除しますか?",
         "confirm_message": "選択した画像のファイルと記録が一緒に削除されます。この操作は取り消せません。",
-        "success": "画像を削除しました。"
+        "success": "画像を削除しました。",
+        "failed": "画像の削除に失敗しました。"
       },
       "bulk_delete": {
         "button": "選択削除",

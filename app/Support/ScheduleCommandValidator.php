@@ -126,7 +126,7 @@ class ScheduleCommandValidator
             return self::shellVerdict(false, self::SHELL_REASON_NOT_ALLOWED);
         }
 
-        $normalized = strtolower($binary);
+        $normalized = self::normalizeShellBinary($binary);
 
         // 완전 거부형 — 화이트리스트에 등재돼 있어도 실행하지 않는다.
         if (in_array($normalized, self::shellList('reject_binaries'), true)) {
@@ -224,6 +224,29 @@ class ScheduleCommandValidator
      * @param  string  $key  `schedule_security.shell` 하위 키
      * @return array<int, string>
      */
+    /**
+     * 인터프리터/거부형 분류용으로 바이너리 이름을 정규화합니다.
+     *
+     * 분류 목록(`script_interpreters`/`reject_binaries`)은 기본 이름만 담는다.
+     * 운영자가 Windows 관례(`python.exe`)나 버전 접미사(`python3.12`, `php8.2`)로
+     * 화이트리스트에 등재하면 정확 일치 분류가 비켜가 인터프리터가 "일반 스크립트 —
+     * 통과" 분기를 타고, `-c` 인라인 코드 차단(KVE-2026-1653)이 무력화된다.
+     * 화이트리스트 대조 자체는 운영자가 적은 원문 그대로 유지한다 — 여기서 접는
+     * 것은 위험 분류뿐이다.
+     *
+     * @param  string  $binary  첫 토큰의 basename
+     * @return string 소문자 + 실행 확장자(.exe/.bat/.cmd/.com) 제거 + 후행 버전 숫자 제거
+     */
+    private static function normalizeShellBinary(string $binary): string
+    {
+        $name = strtolower($binary);
+        $name = (string) preg_replace('/\.(exe|bat|cmd|com)$/', '', $name);
+
+        // 후행 버전 접미사(python3.12 → python, php8.2 → php)를 접는다.
+        // python3 이 python 으로 접혀도 두 이름 모두 분류 목록에 있어 판정은 동일하다.
+        return (string) preg_replace('/[0-9][0-9.]*$/', '', $name);
+    }
+
     private static function shellList(string $key): array
     {
         return array_values(array_filter(array_map(

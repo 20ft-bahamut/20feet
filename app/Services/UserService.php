@@ -760,7 +760,11 @@ class UserService
         if (empty($userIds)) {
             HookManager::doAction('sirsoft-core.user.after_bulk_update', $uuids, $status, 0);
 
-            return ['updated_count' => 0];
+            return [
+                'updated_count' => 0,
+                'failed_count' => 0,
+                'failed_reasons' => [],
+            ];
         }
 
         // DB 트랜잭션으로 일괄 업데이트

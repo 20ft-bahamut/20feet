@@ -168,6 +168,51 @@ class ScheduleCommandValidatorTest extends TestCase
     }
 
     /**
+     * 변형 표기(Windows `.exe` / 버전 접미사)로 등재된 인터프리터도 분류를 비켜가지 못한다.
+     *
+     * 분류 목록(`script_interpreters`/`reject_binaries`)은 기본 이름만 담으므로,
+     * 정확 일치 분류 시절에는 운영자가 `python.exe`·`python3.12` 로 등재하면
+     * "일반 스크립트 — 통과" 분기를 타 인라인 코드 차단이 통째로 무력화됐다.
+     *
+     * @param  string  $command  변형 표기 인터프리터로 인라인 코드를 넘기는 command
+     * @param  string  $binary  화이트리스트에 등재한 변형 표기
+     * @param  string  $expectedReason  기대 거부 사유
+     *
+     * @scenario command_class=inline_code, enforcement_point=validator_unit
+     *
+     * @effects inline_code_flags_rejected
+     */
+    #[Test]
+    #[DataProvider('variantInterpreterShellCommandProvider')]
+    public function it_classifies_variant_interpreter_names_before_gating(string $command, string $binary, string $expectedReason): void
+    {
+        $this->enableShell([$binary]);
+
+        $verdict = ScheduleCommandValidator::inspectShellCommand($command);
+
+        $this->assertFalse($verdict['allowed'], "변형 표기 인터프리터가 통과함: {$command}");
+        $this->assertSame($expectedReason, $verdict['reason']);
+    }
+
+    /**
+     * 변형 표기로 등재된 인터프리터의 절대경로 스크립트 실행은 그대로 통과한다 (과차단 회귀 가드).
+     *
+     * @scenario command_class=script_ok, enforcement_point=validator_unit
+     *
+     * @effects interpreter_script_files_still_run
+     */
+    #[Test]
+    public function it_allows_variant_named_interpreters_running_absolute_scripts(): void
+    {
+        $this->enableShell(['python.exe']);
+
+        $verdict = ScheduleCommandValidator::inspectShellCommand('python.exe /opt/scripts/job.py');
+
+        $this->assertTrue($verdict['allowed'], '변형 표기 인터프리터의 정상 스크립트 실행이 차단됨');
+        $this->assertNull($verdict['reason']);
+    }
+
+    /**
      * 인터프리터 + 절대경로 스크립트 파일은 통과한다 (범용 크론 기능 회귀 가드).
      *
      * @param  string  $command  스크립트 파일을 실행하는 command
@@ -917,6 +962,32 @@ class ScheduleCommandValidatorTest extends TestCase
      *
      * @return array<string, array{string}>
      */
+    /**
+     * 변형 표기 인터프리터로 인라인 코드/감싼 명령을 넘기는 command 목록 (전부 차단).
+     *
+     * @return array<string, array{0: string, 1: string, 2: string}>
+     */
+    public static function variantInterpreterShellCommandProvider(): array
+    {
+        return [
+            'python.exe -c 코드 (Windows 확장자)' => [
+                'python.exe -c import_os', 'python.exe', ScheduleCommandValidator::SHELL_REASON_INLINE_CODE,
+            ],
+            'python3.12 -c 코드 (버전 접미사)' => [
+                'python3.12 -c import_os', 'python3.12', ScheduleCommandValidator::SHELL_REASON_INLINE_CODE,
+            ],
+            'php8.2 -r 코드 (버전 접미사)' => [
+                'php8.2 -r phpinfo', 'php8.2', ScheduleCommandValidator::SHELL_REASON_INLINE_CODE,
+            ],
+            'powershell.exe -Command (Windows 확장자)' => [
+                'powershell.exe -Command Get-Process', 'powershell.exe', ScheduleCommandValidator::SHELL_REASON_INLINE_CODE,
+            ],
+            'sudo.exe 감싼 명령 (거부형 + 확장자)' => [
+                'sudo.exe /usr/bin/id', 'sudo.exe', ScheduleCommandValidator::SHELL_REASON_INTERPRETER,
+            ],
+        ];
+    }
+
     public static function inlineCodeShellCommandProvider(): array
     {
         return [

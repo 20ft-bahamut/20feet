@@ -1044,6 +1044,14 @@ return [
         'can_write_checked' => 'レビュー作成可否を確認しました。',
         'can_write_check_failed' => 'レビュー作成可否の確認に失敗しました。',
         'cannot_write' => 'レビューを作成できません。(理由: :reason)',
+        // 作成不可理由ラベル — :reason 置換子に生の識別子ではなく翻訳文を載せる
+        'reasons' => [
+            'order_option_not_found' => '注文内容が見つかりません',
+            'not_own_order' => 'ご本人の注文ではありません',
+            'not_confirmed' => '購入確定前です',
+            'deadline_passed' => '作成期限が過ぎています',
+            'already_written' => 'すでに作成済みのレビューです',
+        ],
         'forbidden' => '権限がありません。',
         'deleted' => 'レビューが削除されました。',
         'delete_failed' => 'レビュー削除に失敗しました。',

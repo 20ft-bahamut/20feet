@@ -296,6 +296,10 @@ class GdprConsentService
         $activeConsents = $this->statusRepository->getActiveByUserId($userId);
 
         // 루프 중간에 실패하면 일부 항목만 철회된 채 남는다 — 전부 철회되거나 전부 취소되게 한다.
+        // updateConsent 내부의 consent.before/after_update 훅도 이 트랜잭션 안에서
+        // 발화된다(의도): 리스너 예외 시 철회 전체가 롤백되는 것이 "전부 또는 전무"
+        // 계약이며, 외부 부수효과(알림 등)를 내는 리스너는 롤백 불가를 감안해
+        // 멱등하게 작성해야 한다.
         DB::transaction(function () use ($userId, $activeConsents) {
             foreach ($activeConsents as $consent) {
                 $this->updateConsent($userId, null, $consent->consent_key, false, 'withdraw');

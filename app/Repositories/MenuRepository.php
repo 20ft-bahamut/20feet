@@ -140,7 +140,7 @@ class MenuRepository implements MenuRepositoryInterface
     public function findByIds(array $ids): Collection
     {
         if (empty($ids)) {
-            return Menu::query()->whereRaw('1 = 0')->get();
+            return new Collection;
         }
 
         return Menu::whereIn('id', $ids)->get();

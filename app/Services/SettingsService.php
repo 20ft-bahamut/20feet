@@ -771,7 +771,16 @@ class SettingsService
         }
 
         foreach ($removedIds as $removedId) {
-            $this->attachmentService->delete($removedId);
+            // 설정 저장은 이미 확정된 뒤다 — 파기 실패가 저장 실패(422)로 위장되면
+            // 운영자는 성공한 저장을 실패로 오인한다. 실패 파일은 로그로만 남긴다.
+            try {
+                $this->attachmentService->delete($removedId);
+            } catch (\Exception $e) {
+                Log::warning('사이트 로고 첨부 파기 실패 — 저장은 확정됨', [
+                    'attachment_id' => $removedId,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         Log::info('사이트 로고 첨부 제거', ['attachment_ids' => $removedIds]);

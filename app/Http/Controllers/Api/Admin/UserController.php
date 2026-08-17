@@ -1,5 +1,7 @@
 <?php
 
+// audit:allow api-doc-coverage reason: 응답 계약 불변 — lang 키에서 :error 플레이스홀더가 제거되어 사문화된 messageParams 인자만 정리 (키·상태코드·payload 형태 무변경)
+
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Exceptions\CannotDeleteSuperAdminException;
@@ -133,7 +135,7 @@ class UserController extends AdminBaseController
         } catch (ValidationException $e) {
             return $this->error('user.update_failed', 422, $e->errors());
         } catch (Exception $e) {
-            return $this->error('user.update_failed', 500, $e, ['error' => $e->getMessage()]);
+            return $this->error('user.update_failed', 500, $e);
         }
     }
 
@@ -159,7 +161,7 @@ class UserController extends AdminBaseController
         } catch (CannotModifySuperAdminException $e) {
             return $this->error('exceptions.cannot_modify_super_admin', 403);
         } catch (Exception $e) {
-            return $this->error('user.update_failed', 500, $e, ['error' => $e->getMessage()]);
+            return $this->error('user.update_failed', 500, $e);
         }
     }
 

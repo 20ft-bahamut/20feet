@@ -4,10 +4,11 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
-## [1.1.1] - 2026-08-17
+## [1.1.1] - 2026-08-18
 
 ### Added
 
+- 리뷰 작성 불가 안내의 사유 라벨(`messages.reviews.reasons.*` — 주문 내역 없음·본인 주문 아님·구매확정 전·기한 경과·중복 작성) 일본어 번역을 추가했습니다.
 - 확정 불가 상태의 주문 옵션 구매확정 시도 안내(`exceptions.order_option_not_confirmable`)의 일본어 번역을 추가했습니다.
 - 이미 답변된 상품 문의에 답변을 재등록할 때의 거절 안내(`inquiries.reply_already_exists`) 일본어 번역을 추가했습니다.
 - 이용할 수 없는 결제수단 선택 시의 주문 거절 안내 일본어 번역을 추가했습니다 (`validation.order.payment_method_unavailable`).
