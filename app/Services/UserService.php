@@ -120,8 +120,11 @@ class UserService
                 throw $e;
             }
 
+            // 원본 예외는 로그로만 남기고, 사용자 응답에는 원문을 싣지 않는다.
+            Log::error('User create failed', ['exception' => $e]);
+
             throw ValidationException::withMessages([
-                'general' => [__('user.create_failed', ['error' => $e->getMessage()])],
+                'general' => [__('user.create_failed')],
             ]);
         }
     }
@@ -307,8 +310,11 @@ class UserService
                 throw $e;
             }
 
+            // 원본 예외는 로그로만 남기고, 사용자 응답에는 원문을 싣지 않는다.
+            Log::error('User update failed', ['user_id' => $user->id, 'exception' => $e]);
+
             throw ValidationException::withMessages([
-                'general' => [__('user.update_failed', ['error' => $e->getMessage()])],
+                'general' => [__('user.update_failed')],
             ]);
         }
     }
@@ -430,8 +436,11 @@ class UserService
                 throw $e;
             }
 
+            // 원본 예외는 로그로만 남기고, 사용자 응답에는 원문(SQL 상태코드·경로 등)을 싣지 않는다.
+            Log::error('User withdraw failed', ['user_id' => $user->id, 'exception' => $e]);
+
             throw ValidationException::withMessages([
-                'general' => [__('user.withdraw_failed', ['error' => $e->getMessage()])],
+                'general' => [__('user.withdraw_failed')],
             ]);
         }
     }
@@ -509,8 +518,11 @@ class UserService
                 throw $e;
             }
 
+            // 원본 예외는 로그로만 남기고, 사용자 응답에는 원문을 싣지 않는다.
+            Log::error('User delete failed', ['user_id' => $user->id, 'exception' => $e]);
+
             throw ValidationException::withMessages([
-                'general' => [__('user.delete_failed', ['error' => $e->getMessage()])],
+                'general' => [__('user.delete_failed')],
             ]);
         }
     }

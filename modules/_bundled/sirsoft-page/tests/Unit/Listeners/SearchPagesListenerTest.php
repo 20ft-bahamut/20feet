@@ -347,6 +347,61 @@ class SearchPagesListenerTest extends ModuleTestCase
     }
 
     /**
+     * 제목에 삽입된 태그가 하이라이트 필드에서 이스케이프되는지 확인 (⑧)
+     *
+     * @scenario case=search_highlight_escape
+     *
+     * @effects highlighted_fields_escaped
+     */
+    public function test_search_pages_escapes_markup_in_highlighted_title(): void
+    {
+        $fakePage = $this->makeFakePage('<img src=x onerror=alert(1)> 이용약관', 'terms', '');
+
+        $this->pageServiceMock
+            ->shouldReceive('searchByKeyword')
+            ->once()
+            ->andReturn($this->boundedPage(new Collection([$fakePage]), 1));
+
+        $result = $this->listener->searchPages([], [
+            'q' => '이용',
+            'type' => 'all',
+            'all_tab_limit' => 5,
+        ]);
+
+        $item = $result['pages']['items'][0];
+        $this->assertStringNotContainsString('<img', $item['title_highlighted']);
+        $this->assertStringContainsString('&lt;img', $item['title_highlighted']);
+        $this->assertStringContainsString('<mark>이용</mark>', $item['title_highlighted']);
+    }
+
+    /**
+     * 엔티티로 인코딩된 태그가 본문 프리뷰에서 부활하지 않는지 확인 (N-8)
+     *
+     * @scenario case=preview_entity_no_resurrect
+     *
+     * @effects preview_does_not_resurrect_entities
+     */
+    public function test_search_pages_does_not_resurrect_entity_encoded_tags_in_preview(): void
+    {
+        $fakePage = $this->makeFakePage('약관', 'terms', '&lt;script&gt;alert(1)&lt;/script&gt; 약관 본문입니다.');
+
+        $this->pageServiceMock
+            ->shouldReceive('searchByKeyword')
+            ->once()
+            ->andReturn($this->boundedPage(new Collection([$fakePage]), 1));
+
+        $result = $this->listener->searchPages([], [
+            'q' => '약관',
+            'type' => 'all',
+            'all_tab_limit' => 5,
+        ]);
+
+        $item = $result['pages']['items'][0];
+        $this->assertStringNotContainsString('<script>', $item['content_preview']);
+        $this->assertStringNotContainsString('<script>', $item['content_preview_highlighted']);
+    }
+
+    /**
      * PageService 예외 발생 시 다른 카테고리는 보존하고 pages 는 failed 로 표면화하는지 확인
      *
      * 종전에는 키 미설정으로 삼켜 화면이 "검색 결과 없음" 을 그렸다 (#103).

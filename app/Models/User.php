@@ -640,6 +640,9 @@ class User extends Authenticatable implements HasLocalePreference
         // 닉네임에 suffix 추가 (있는 경우만, 날짜 없이)
         if ($this->nickname) {
             // nickname 은 마이그레이션에서 길이를 명시(50)한 컬럼이다.
+            // 이 접미사는 유일성 토큰(id)이 없다 — 현재 nickname/name 에 unique 인덱스가
+            // 없어 무해하지만, 향후 unique 인덱스를 추가하면 email 과 동일한 충돌
+            // (같은 값 재가입 후 재탈퇴 실패)이 재발하므로 그때 id 부착으로 전환할 것.
             $this->nickname = $this->appendWithdrawnSuffix($this->nickname, '_탈퇴', self::NICKNAME_MAX_LENGTH);
         }
 
