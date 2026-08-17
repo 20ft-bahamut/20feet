@@ -80,6 +80,7 @@
     "max_content_length": "最大投稿文字数",
     "use_reply": "回答投稿の使用",
     "max_reply_depth": "回答投稿の最大深さ",
+    "reply_delete_policy": "返信の削除方式",
     "use_comment": "コメントの使用",
     "comment_order": "コメント並べ替え順序",
     "min_comment_length": "最小コメント文字数",
@@ -168,6 +169,7 @@
       "max_content_length": "投稿本文の最大文字数を設定します ({{min}}~{{max}})",
       "use_reply": "ON に設定する必要があります。新規掲示板に返信投稿機能が適用されます。",
       "max_reply_depth": "返信投稿の最大ネスト深さを設定します ({{min}}~{{max}})",
+      "reply_delete_policy": "返信が付いた投稿を削除するときの動作を設定します",
       "blocked_keywords": "登録されたキーワードを含む投稿/コメントは作成がブロックされます",
       "use_comment": "ON に設定する必要があります。新規掲示板にコメント機能が適用されます。以下のコメント詳細設定も一緒に適用されます。",
       "comment_order": "コメントのデフォルト並べ替え方向を設定します",
@@ -202,6 +204,10 @@
       "disabled": "使用しない",
       "enabled": "選択可能",
       "always": "常に非公開"
+    },
+    "reply_delete_policy": {
+      "block": "削除をブロック",
+      "cascade": "一緒に削除"
     },
     "order_by": {
       "created_at": "最新順",
@@ -286,6 +292,7 @@
       "use_comment": "コメント使用",
       "use_reply": "返信コメント使用",
       "max_reply_depth": "返信コメント最大深さ",
+      "reply_delete_policy": "返信の削除方式",
       "max_comment_depth": "返信の返信最大深さ",
       "comment_order": "コメント並べ替え順序",
       "show_view_count": "閲覧数表示",

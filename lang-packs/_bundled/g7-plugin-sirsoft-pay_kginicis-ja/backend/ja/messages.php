@@ -40,6 +40,11 @@ return [
     'cash_receipt' => [
         'provider_name' => 'KGイニシス',
     ],
+    'escrow' => [
+        'invoice_required' => '送り状番号を入力してください。',
+        'courier_required' => '配送業者を選択してください。',
+        'default_confirmer' => '管理者',
+    ],
     'cbt_cvs' => [
         'simulate_success' => '入金シミュレーションが完了しました。',
         'simulate_failed' => '入金シミュレーションに失敗しました。',
