@@ -8,6 +8,7 @@
 
 ### Added
 
+- 확정 불가 상태의 주문 옵션 구매확정 시도 안내(`exceptions.order_option_not_confirmable`)의 일본어 번역을 추가했습니다.
 - 이용할 수 없는 결제수단 선택 시의 주문 거절 안내 일본어 번역을 추가했습니다 (`validation.order.payment_method_unavailable`).
 - 관리자 주문설정 결제수단 목록의 「지정 PG 삭제됨」 배지 일본어 번역을 추가했습니다.
 - 배송지 변경 처리 중 서버 오류가 발생했을 때 표시되는 안내 문구의 일본어 번역을 추가했습니다.

@@ -6,6 +6,10 @@
 
 ## [1.0.6] - 2026-08-13
 
+### Changed
+
+- 회원 관리(생성·수정·삭제·탈퇴) 실패 안내에서 오류 원문 노출(`:error`)이 제거된 것에 맞춰, 해당 실패 문구의 일본어 번역을 재시도 안내 문구로 갱신했습니다 (`user.create_failed`, `user.update_failed`, `user.delete_failed`, `user.withdraw_failed`).
+
 ### Added
 
 - 검색엔진 드라이버 라벨 일본어 번역을 추가했습니다 (`settings.drivers.search.*`) — 환경설정 > 드라이버 탭의 검색엔진 선택지가 일본어 로케일에서 표시됩니다.

@@ -158,6 +158,17 @@ class MenuRepository implements MenuRepositoryInterface
     }
 
     /**
+     * URL 로 메뉴를 찾습니다.
+     *
+     * @param  string  $url  메뉴 URL
+     * @return Menu|null 찾은 메뉴 모델 또는 null
+     */
+    public function findByUrl(string $url): ?Menu
+    {
+        return Menu::where('url', $url)->first();
+    }
+
+    /**
      * 새로운 메뉴를 생성합니다.
      *
      * @param  array  $data  메뉴 생성 데이터

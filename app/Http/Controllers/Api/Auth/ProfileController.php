@@ -16,6 +16,7 @@ use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -321,7 +322,10 @@ class ProfileController extends AuthBaseController
                 'user.withdraw_failed'
             );
         } catch (\Exception $e) {
-            return $this->error('user.withdraw_failed', 500, null, ['error' => $e->getMessage()]);
+            // 원본 예외는 로그로만 남기고, 사용자 응답에는 원문을 싣지 않는다.
+            Log::error('User withdraw failed (profile)', ['exception' => $e]);
+
+            return $this->error('user.withdraw_failed', 500);
         }
     }
 }
