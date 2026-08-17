@@ -22,6 +22,7 @@
 - 레이아웃 저장 시 위험 표현식·외부 리소스 URL 거부 안내(`layout.dangerous_expression`, `layout.external_resource_url`)의 일본어 번역을 추가했습니다.
 - 고아 첨부 정리 설정의 검증 메시지와 항목명 일본어 번역을 추가했습니다 (`validation.settings.orphan_*`) — 환경설정 > 업로드의 자동 정리·보존기간을 잘못 저장할 때의 안내가 일본어 로케일에서 항목 이름과 함께 표시됩니다.
 - 데이터베이스 백업 미제공 안내 문구의 일본어 번역을 추가했습니다 (`settings.database_backup_unavailable`).
+- 셸 예약 작업 허용목록에 인터프리터를 등록했을 때 인라인 명령 실행·안전하지 않은 스크립트 경로를 거부하는 안내 문구의 일본어 번역을 추가했습니다 (`validation.schedule_command.shell_interpreter_denied`).
 
 ### Changed
 

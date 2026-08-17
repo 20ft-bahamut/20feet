@@ -514,6 +514,7 @@ return [
     // 서버에서 실행되는 스케줄 command(쉘·Artisan) 검증 메시지
     'schedule_command' => [
         'shell_not_allowed' => '허용되지 않은 쉘 명령입니다. 서버에 등록된 실행 파일만 사용할 수 있으며, 파이프(|)·세미콜론(;) 등 특수문자는 쓸 수 없습니다.',
+        'shell_interpreter_denied' => '인터프리터로 인라인 명령/코드를 실행하거나 안전하지 않은 경로를 지정할 수 없습니다. 인터프리터 뒤에는 절대경로 스크립트 파일만 지정하세요.',
         'artisan_denied' => '이 Artisan 명령은 보안상 스케줄로 실행할 수 없습니다.',
         'artisan_not_allowlisted' => '예약 실행이 허용된 Artisan 명령이 아닙니다. 캐시 정리·큐 처리 등 유지보수 명령만 등록할 수 있습니다.',
         'artisan_malformed' => 'Artisan 명령 형식이 올바르지 않습니다. 따옴표·역슬래시·단축 옵션(-v)은 쓸 수 없고 "명령명 --옵션[=값]" 형태만 등록할 수 있습니다.',

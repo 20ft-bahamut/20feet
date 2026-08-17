@@ -515,6 +515,7 @@ return [
     // Schedule command (shell/Artisan) validation messages — these run on the server
     'schedule_command' => [
         'shell_not_allowed' => 'This shell command is not allowed. Only executables registered on the server may be used, and special characters such as pipes (|) or semicolons (;) are not permitted.',
+        'shell_interpreter_denied' => 'You cannot run inline commands/code through an interpreter or point it at an unsafe path. After an interpreter, specify only an absolute-path script file.',
         'artisan_denied' => 'This Artisan command cannot be run as a schedule for security reasons.',
         'artisan_not_allowlisted' => 'This Artisan command is not allowed to run on a schedule. Only maintenance commands such as cache clearing and queue processing can be registered.',
         'artisan_malformed' => 'The Artisan command format is invalid. Quotes, backslashes, and short options (-v) are not allowed; use "command --option[=value]" only.',
