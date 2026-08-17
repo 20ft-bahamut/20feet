@@ -29,7 +29,7 @@ use Tests\TestCase;
  *
  * 축 요약(마커 아님 — 평문): actor 는 sub_admin·super_admin, operation 은 modify·status·
  * unlock·grant_permission·assign_role·remove_role·update_role·toggle_role, outcome 은 blocked·allowed 다.
- * 이 요약을 클래스 레벨 `@scenario` 로 적으면 파서(.claude/scripts/lib/test-scenario.cjs)가
+ * 이 요약을 클래스 레벨 `@scenario` 로 적으면 시나리오 마커 파서가
  * `=` 없는 토큰을 버리고 첫 값만 취해 **실재하지 않는 조합 1건**으로 집계한다 — 커버리지를
  * 부풀리는 방향이라 요약은 반드시 평문으로 둔다. 실제 커버는 메서드 레벨 마커가 담당한다.
  */

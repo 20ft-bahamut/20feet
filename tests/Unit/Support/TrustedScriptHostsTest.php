@@ -29,7 +29,7 @@ use Tests\TestCase;
  * 교차하지 않는 별개 관심사라 축으로 올리면 어떤 조합도 관측 지점을 갖지 못합니다 —
  * 그래서 축이 아니라 sub_flow 이고, 커버는 아래 메서드들의 효과 마커가 담당합니다.
  *
- * 주의: 산문에 마커 문법을 그대로 인용하면 파서(.claude/scripts/lib/test-scenario.cjs)가
+ * 주의: 산문에 마커 문법을 그대로 인용하면 시나리오 마커 파서가
  * 그 문장을 마커로 읽어 실재하지 않는 조합을 만듭니다. 마커 이름은 평문으로만 언급합니다.
  *
  * 효과 요약(마커 아님 — 평문): every_extension_type_declaration_is_collected,

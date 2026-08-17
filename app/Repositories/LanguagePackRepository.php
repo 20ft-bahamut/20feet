@@ -150,7 +150,8 @@ class LanguagePackRepository implements LanguagePackRepositoryInterface
     public function allForUpdateCheck(): Collection
     {
         // audit:allow query-unbounded-get reason: 언어팩은 운영자가 설치한 팩 수만큼만 존재하는
-        // 설정성 테이블이다 (사용량과 무관) — CLAUDE.md pagination 예외 조항
+        // 설정성 테이블이다 (사용량과 무관) — 대용량 목록 페이지네이션 규정의 설정성
+        // 테이블 예외 조항 (docs/backend/pagination.md)
         return LanguagePack::query()->orderBy('identifier')->get();
     }
 
