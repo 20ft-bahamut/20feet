@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests\Admin;
 
+// audit:allow api-doc-coverage 요청 파라미터·응답 구조 무변경 — 검증 안내의 항목 표시명 로케일 정합만 수정 (attributes 우선순위)
+
 use App\Extension\HookManager;
 use App\Extension\PluginManager;
 use App\Services\DriverRegistryService;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Lang;
 
 /**
  * 플러그인 설정 업데이트 요청 검증
@@ -185,6 +188,17 @@ class UpdatePluginSettingsRequest extends FormRequest
         $attributes = [];
 
         foreach ($plugin->getSettingsSchema() as $field => $config) {
+            // 플러그인이 요청 시점에 번역선(validation.attributes.{field})을 현재 로케일로
+            // 등록했다면 그것이 우선이다. 스키마 label 은 보통 ko/en 만 들고 있어, 여기서
+            // 폴백 라벨을 세우면 언어팩/리스너가 제공한 로케일별 라벨(ja 등)을 customAttributes
+            // 우선순위로 덮는다 — 검증 안내의 항목 이름만 다른 언어로 남는 회귀가 된다.
+            $translationKey = "validation.attributes.{$field}";
+            if (Lang::has($translationKey, $locale, false)) {
+                $attributes[$field] = Lang::get($translationKey, [], $locale);
+
+                continue;
+            }
+
             $label = $config['label'] ?? null;
 
             if (is_array($label)) {

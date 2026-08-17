@@ -1100,6 +1100,7 @@ return [
         'board_changed' => '掲示板設定が変更されたため、該当する投稿が見つかりません。管理者にお問い合わせください。',
         'reply_created' => '返信が登録されました。',
         'reply_failed' => '返信登録に失敗しました。',
+        'reply_already_exists' => 'すでに登録された回答があります。既存の回答を修正または削除してから再度登録してください。',
         'reply_updated' => '返信が編集されました。',
         'reply_update_failed' => '回答の編集に失敗しました。',
         'reply_deleted' => '回答が削除されました。',
