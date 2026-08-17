@@ -42,6 +42,7 @@ class CoreScheduleRegistrationTest extends TestCase
     public function test_core_gc_schedules_are_registered(): void
     {
         $expected = [
+            'layout-previews:cleanup' => '*/30 * * * *',
             'sanctum:prune-expired' => '0 4 * * *',
             'auth:clear-resets' => '5 4 * * *',
             'queue:prune-failed' => '10 4 * * *',
@@ -53,6 +54,8 @@ class CoreScheduleRegistrationTest extends TestCase
             'identity:prune-logs' => '40 4 * * *',
             'activity-log:prune' => '45 4 * * *',
             'notification-log:prune' => '50 4 * * *',
+            'attachments:prune-orphans' => '55 4 * * *',
+            'storage:prune-leftovers' => '0 5 * * *',
             'identity:expire-challenges' => '0 * * * *',
         ];
 
@@ -194,6 +197,7 @@ class CoreScheduleRegistrationTest extends TestCase
      *
      * 손으로 적은 목록은 예약이 늘어도 그대로라 전수를 증명하지 못합니다 —
      * 다중 서버 1대 실행(`onOneServer`)으로 선언된 artisan 예약을 그대로 읽습니다.
+     * 예약 문자열의 옵션은 런타임 validator(`parseArtisanCommand`)와 동일하게 명령명만 남깁니다.
      *
      * @return array<int, string> 커맨드 이름 목록
      */
@@ -213,7 +217,10 @@ class CoreScheduleRegistrationTest extends TestCase
 
         preg_match_all("/Schedule::command\(\s*'([^']+)'/", $region, $matches);
 
-        return array_values(array_unique($matches[1] ?? []));
+        return array_values(array_unique(array_map(
+            static fn (string $command): string => (string) strtok($command, ' '),
+            $matches[1] ?? []
+        )));
     }
 
     /**

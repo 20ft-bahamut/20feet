@@ -29,11 +29,8 @@ Schedule::command('dashboard:broadcast-resources')
     ->withoutOverlapping(5)
     ->runInBackground();
 
-// 만료된 레이아웃 미리보기 정리 (30분마다)
-Schedule::command('layout-previews:cleanup')->everyThirtyMinutes();
-
 /*
-| 만료 데이터 정리 (일 1회 새벽 배치, 다중 서버 1대만)
+| 만료 데이터 정리 예약 (주기는 항목별, 다중 서버 1대만)
 |
 | 시각 해석 기준은 사이트 설정 시간대(`general.timezone`)다 —
 | SettingsServiceProvider 가 `app.schedule_timezone` 을 세팅하고,
@@ -46,6 +43,9 @@ Schedule::command('layout-previews:cleanup')->everyThirtyMinutes();
 | 읽어 대상 목록을 도출하므로, 정리 예약을 추가할 때는 반드시 이 안에 둔다.
 */
 // gc-schedules:begin
+// 만료된 레이아웃 미리보기 정리 (30분마다)
+Schedule::command('layout-previews:cleanup')->everyThirtyMinutes()->onOneServer();
+
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->dailyAt('04:00')->onOneServer();
 Schedule::command('auth:clear-resets')->dailyAt('04:05')->onOneServer();
 Schedule::command('queue:prune-failed')->dailyAt('04:10')->onOneServer();
@@ -59,6 +59,8 @@ Schedule::command('activity-log:prune')->dailyAt('04:45')->onOneServer();
 Schedule::command('notification-log:prune')->dailyAt('04:50')->onOneServer();
 // 사용자 파일을 파기하므로 기본 꺼짐 — 커맨드가 `--scheduled` 에서 설정을 false 폴백으로 재확인한다.
 Schedule::command('attachments:prune-orphans --scheduled')->dailyAt('04:55')->onOneServer();
+// 중단된 업데이트·설치가 남긴 임시 산출물 + 오래된 백업본(최신 1개 보존) 정리
+Schedule::command('storage:prune-leftovers')->dailyAt('05:00')->onOneServer();
 
 // 만료 시각이 지난 본인인증 challenge 상태 전환 (비파괴 — 물리 파기는 identity:prune-logs)
 Schedule::command('identity:expire-challenges')->hourly()->onOneServer();

@@ -724,8 +724,11 @@ class LanguagePackService
             return $this->finalizeInstall($extractPath, 'github', $githubUrl, $autoActivate, $installedBy, $force);
         } catch (Throwable $e) {
             $this->cleanupPending($extractPath);
-            File::deleteDirectory($tempPath);
             throw $e;
+        } finally {
+            // 다운로드 임시 디렉토리는 성공/실패와 무관하게 소비가 끝난 시점에 정리한다.
+            // catch 에만 두면 설치가 성공할 때마다 ZIP 사본이 storage/app/temp 에 잔존한다.
+            File::deleteDirectory($tempPath);
         }
     }
 
@@ -776,8 +779,11 @@ class LanguagePackService
             return $this->finalizeInstall($extractPath, 'url', $url, $autoActivate, $installedBy, $force);
         } catch (Throwable $e) {
             $this->cleanupPending($extractPath);
-            File::deleteDirectory($tempPath);
             throw $e;
+        } finally {
+            // 다운로드 임시 디렉토리는 성공/실패와 무관하게 소비가 끝난 시점에 정리한다.
+            // catch 에만 두면 설치가 성공할 때마다 ZIP 사본이 storage/app/temp 에 잔존한다.
+            File::deleteDirectory($tempPath);
         }
     }
 
