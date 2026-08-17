@@ -261,6 +261,8 @@
 | Form 내 `Button` type 없음 | `type="button"` 명시 (submit 방지) |
 | `options={{options}}` | `options={{options ?? []}}` (fallback) |
 | boolean 필드를 `RadioGroup`/`Select` 의 `name` 자동바인딩만으로 폼에 묶기 | `autoBinding: false` + `value: "{{String(_local.form?.필드 ?? 기본값)}}"` + `change` 액션 `"{{$event.target.value === 'true'}}"` 캐스팅. 자동바인딩 value 경로는 `e.target.value` 문자열을 그대로 저장해 서버 `boolean` 규칙에서 422 가 된다 (표시만 보면 정상이라 저장 시점에야 드러남) |
+| `options` 지정 커스텀 `Select`(composite) 에 `defaultValue` | `value: "{{상태 ?? 기본값}}"` + `change` 액션 + 열기 지점 상태 시드 — 커스텀 Select 는 value-제어 전용이라 `defaultValue` 는 렌더되지 않고(빈 표시) 숨은 input 도 없어 값이 조용히 미전송된다 (options 없는 네이티브 렌더 경로만 defaultValue 유효) |
+| 폼 밖 제출 버튼 `props.form: "X"` 만 선언 | 참조 대상 `Form` 에 `props.id: "X"` 동반 필수 — id 가 없으면 버튼이 어떤 폼에도 연결되지 않아 클릭이 무반응이 된다 (오류 없음) |
 
 Icon 은 `<i>` 글리프라 박스 크기가 곧 `font-size` 다. `w-N h-N` 은 박스만 정하고 글리프는 부모 `font-size` 를 상속하므로 어긋난다. 기존 `w-N h-N` 을 옮길 때는 아래 등가표를 쓴다 (Chrome 실측).
 

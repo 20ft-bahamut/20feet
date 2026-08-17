@@ -44,6 +44,16 @@ axes:
   row_age: [within_retention, beyond_retention]
   schedule_axis: [code_registered, admin_registered]
   timezone_setting: [configured, empty]
+  # 스토리지 잔존물 GC (#120 후속 — storage:prune-leftovers): 대상군 × dry-run × 보존 가드
+  leftover_target:
+    - update_staging
+    - core_temp
+    - vendor_bundle_staging
+    - extension_backups
+    - core_backups
+    - legacy_browser_log
+  leftover_mode: [real_delete, dry_run]
+  leftover_guard: [aged_out, fresh_kept, latest_backup_kept, normal_pending_untouched, idempotent_second_run]
 
 exclusions:
   - { target: identity_challenges, row_age: beyond_retention, reason: "상태 전환만 수행하며 삭제하지 않음 — 만료 여부는 expires_at 이 판정" }
@@ -65,11 +75,29 @@ effects:
   - automated_prune_emits_its_own_hooks
   - retention_floor_is_owned_by_the_domain_layer
   - large_purge_is_split_into_batches
+  # 스토리지 잔존물 GC (#120 후속)
+  - aged_leftovers_are_pruned_after_retention
+  - fresh_leftovers_are_kept
+  - latest_backup_is_always_kept
+  - normal_pending_extension_dirs_are_untouched
+  - dry_run_deletes_nothing
+  - leftover_prune_is_idempotent
+  - legacy_browser_log_is_removed
+  - browser_logs_rotate_daily_with_finite_retention
+  - successful_install_leaves_no_temp_directory
+
+# E2E axis 없음 (스토리지 잔존물 GC): 브라우저 표면은 dev-dashboard 의 실행 버튼뿐이고
+# blade 는 frontend-change-requires-e2e 룰 대상 경로가 아니다. 판정(패턴 매칭·mtime·
+# 보존 가드)은 전부 서버측 파일시스템 연산이라 서버측 단위 테스트가 같은 것을 더 촘촘히
+# 고정한다. 대시보드 버튼 노출 자체는 CoreScheduleRegistrationTest 가 소스 대조로 단언한다.
 
 test_files:
   - tests/Feature/Console/CoreScheduleRegistrationTest.php
   - tests/Feature/Console/DataRetentionCommandsTest.php
   - tests/Unit/Repositories/DeletesInBatchesTest.php
+  - tests/Unit/Services/StorageLeftoverPruneServiceTest.php
+  - tests/Feature/DevTools/BrowserLogRotationTest.php
+  - tests/Unit/Services/LanguagePack/LanguagePackServiceTest.php
   - modules/_bundled/sirsoft-ecommerce/tests/Feature/Console/PruneExpiredTempOrdersCommandTest.php
 
 rules_layer_coverage:
