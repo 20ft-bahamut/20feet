@@ -27,6 +27,11 @@ description: |
   유효 서명을 무인증 허용한다. 무서명 게이트는 종전과 동일하며, 발행 페이지는 무서명
   공개 URL 을 유지한다(SEO·캐시 안정성).
 
+  review_image 도 같은 결로 관리자 리뷰 화면(목록·상세)의 숨김 리뷰 썸네일이 깨졌다.
+  숨김 리뷰가 이미지와 함께 직렬화되는 경로는 관리자 응답뿐이므로(공개 목록은 VISIBLE
+  필터), ProductReviewResource 가 숨김 리뷰의 download_url 을 한시 서명 URL 로 직렬화하고
+  서빙 엔드포인트가 유효 서명을 허용한다. 전시중 리뷰는 무서명 URL(직접 URL/CDN 포함) 유지.
+
 axes:
   resource: [page_attachment, review_image]
   parent_state: [public, restricted]
@@ -49,7 +54,15 @@ effects:
   - published_page_serializes_plain_preview_url
   - hidden_review_image_download_blocked
   - visible_review_image_download_still_served
+  # 리뷰 이미지 서명 download URL 축 — 숨김 리뷰의 관리자 화면 <img> 렌더 경로 (페이지·게시판과 동일 설계)
+  - hidden_review_image_download_allowed_with_valid_signature
+  - hidden_review_image_download_blocked_with_tampered_signature
+  - hidden_review_image_download_blocked_with_expired_signature
+  - admin_review_serializes_signed_download_url_for_hidden_review
+  - visible_review_serializes_plain_download_url
 
 test_files:
   - modules/_bundled/sirsoft-page/tests/Feature/User/PublicPageAttachmentAccessTest.php
   - modules/_bundled/sirsoft-ecommerce/tests/Feature/Http/Controllers/User/ReviewImageControllerTest.php
+  # 숨김 리뷰 이미지 서명 download URL 의 직렬화 축 (관리자 상세 응답)
+  - modules/_bundled/sirsoft-ecommerce/tests/Feature/Http/Controllers/Admin/ProductReviewControllerTest.php
