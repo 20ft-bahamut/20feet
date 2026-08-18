@@ -378,21 +378,17 @@ class SeoMetaResolverTest extends TestCase
     }
 
     /**
-     * 구조화 데이터의 문자열 값이 `</script>` 를 담아도 JSON-LD `<script>` 블록을
-     * 조기 종료시키지 못한다 — 봇 화면(서버 렌더)에서만 노출되는 저장형 XSS 차단.
-     *
-     * 검색어·게시글 제목·상품명 등 사용자 입력이 structured_data 의 name 으로 흘러
-     * 들어가는데, `json_encode` 가 `<`/`>` 를 이스케이프하지 않으면 문자열 안의
-     * `</script>` 가 ld+json 스크립트 태그를 닫고 그 뒤 `<script>` 가 실행된다.
-     * HTML meta 경로(og/twitter/title)는 stripHtml 로 태그를 지우지만 JSON-LD 는
-     * 별도 경로라 함께 지켜야 한다.
+     * JSON-LD 는 `<script type="application/ld+json">` 안에 임베드되므로, 사용자
+     * 제어 값(검색어 등)의 `</script>` 가 스크립트 컨텍스트를 조기 종료해 실행 가능한
+     * script 요소를 재생성하지 못하도록 `<`·`>` 를 유니코드 이스케이프해야 한다.
+     * (봇 렌더는 _escaped_fragment_ 로 일반 UA 도 강제되므로 반사형 XSS 벡터가 된다.)
      */
-    public function test_structured_data_json_ld_escapes_script_breakout(): void
+    public function test_structured_data_escapes_script_breakout_in_json_ld(): void
     {
         $seoConfig = [
             'structured_data' => [
                 '@type' => 'SearchResultsPage',
-                'name' => '{{query.q}}',
+                'name' => 'G7 - {{query.q}}',
             ],
         ];
 
@@ -400,13 +396,14 @@ class SeoMetaResolverTest extends TestCase
 
         $result = $this->resolver->resolve($seoConfig, $context, null, null, []);
 
-        $this->assertNotNull($result['jsonLd']);
-        // 원문 `<script>` / `</script>` 시퀀스가 출력에 그대로 있으면 안 된다.
-        $this->assertStringNotContainsString('<script', $result['jsonLd']);
-        $this->assertStringNotContainsString('</script', $result['jsonLd']);
-        // 값 자체는 보존되어야 한다(디코드하면 원문 그대로).
+        // 원문 태그가 그대로 실리면 스크립트 컨텍스트가 조기 종료돼 실행 가능한 script 요소가
+        // 재생성된다(반사형 XSS). JSON_HEX_TAG 가 태그 문자를 유니코드 이스케이프하므로 산출물에는
+        // 리터럴 태그 열림/닫힘 문자가 없어야 한다.
+        $this->assertDoesNotMatchRegularExpression('#</?script#', $result['jsonLd']);
+        $this->assertStringContainsString(chr(0x5C).'u003C', $result['jsonLd']);
+        // 이스케이프에도 불구하고 JSON 파싱 시 원래 값이 복원된다(구조화 데이터 의미 보존).
         $decoded = json_decode($result['jsonLd'], true);
-        $this->assertSame('</script><script>alert(1)</script>', $decoded['name']);
+        $this->assertSame('G7 - </script><script>alert(1)</script>', $decoded['name']);
     }
 
     /**
@@ -1597,7 +1594,7 @@ class SeoMetaResolverTest extends TestCase
             'page_type' => 'product',
             'vars' => [
                 // 표현식이 다국어 객체를 직접 반환 — substituteVars 까지 array 전달
-                'product_name' => "{{product.data.name}}",
+                'product_name' => '{{product.data.name}}',
                 'commerce_name' => '$module_settings:basic_info.shop_name',
             ],
         ];
@@ -1672,5 +1669,33 @@ class SeoMetaResolverTest extends TestCase
         $this->assertSame('에어맥스', $result['og']['title']);
         $this->assertSame('운동화', $result['og']['description']);
         $this->assertSame('https://e.co/ko.jpg', $result['og']['image']);
+    }
+
+    /**
+     * 접미사 조립: 저장 시 TrimStrings 가 선행 공백을 제거하므로("| 그누보드7"),
+     * 제목이 있으면 공백을 복원해 잇고, 제목이 비면 매달린 구분자를 떼어낸다.
+     * (blade 는 title.titleSuffix 단순 연결 — 조립 규칙은 이 메서드가 SSoT)
+     */
+    public function test_compose_title_suffix_restores_space_between_title_and_trimmed_suffix(): void
+    {
+        $this->assertSame(' | 그누보드7', SeoMetaResolver::composeTitleSuffix('가죽 크로스백', '| 그누보드7'));
+    }
+
+    public function test_compose_title_suffix_keeps_explicit_leading_space_as_is(): void
+    {
+        $this->assertSame(' | 그누보드7', SeoMetaResolver::composeTitleSuffix('가죽 크로스백', ' | 그누보드7'));
+    }
+
+    public function test_compose_title_suffix_strips_dangling_separator_when_title_is_empty(): void
+    {
+        $this->assertSame('그누보드7', SeoMetaResolver::composeTitleSuffix('', '| 그누보드7'));
+        $this->assertSame('그누보드7', SeoMetaResolver::composeTitleSuffix('', ' - 그누보드7'));
+    }
+
+    public function test_compose_title_suffix_returns_empty_when_suffix_is_blank(): void
+    {
+        $this->assertSame('', SeoMetaResolver::composeTitleSuffix('가죽 크로스백', ''));
+        $this->assertSame('', SeoMetaResolver::composeTitleSuffix('', '  '));
+        $this->assertSame('', SeoMetaResolver::composeTitleSuffix('', '| '));
     }
 }

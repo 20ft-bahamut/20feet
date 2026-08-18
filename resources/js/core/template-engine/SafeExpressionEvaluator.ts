@@ -248,10 +248,11 @@ type Node =
 /**
  * 함수/화살표 파라미터 (기본값 지원).
  *
- * 배열 구조 분해 패턴(`([key]) => …`, `([, v]) => …`)은 `name: null` +
- * `elements` 로 표현한다. `elements` 의 `null` 항목은 엘리전 홀(`[, v]`)이다.
- * 레이아웃 실사용 형태(`Object.entries(...).map(([k, v]) => …)`)가 이 문법에
- * 의존하므로 평문 식별자와 동급으로 지원한다. (engine-v1.60.5)
+ * `name` 이 null 이면 배열 구조분해 패턴 — `elements` 가 요소 이름 목록이며
+ * null 요소는 홀(elision)이다 (`([, vid]) =>` → elements: [null, 'vid']).
+ * 구 평가기(new Function)가 허용하던 형태로, 레이아웃 전반에서 사용된다.
+ *
+ * @since engine-v1.60.5
  */
 interface Param {
     name: string | null;
@@ -766,8 +767,8 @@ class Parser {
     }
 
     /**
-     * 파라미터 목록을 파싱한다: `ident (= 기본값)?` 를 `,` 로 구분. 열림 `(` 는 호출부가
-     * 이미 소비한 상태이며, 닫힘 `)` 는 소비하지 않는다(호출부가 검사).
+     * 파라미터 목록을 파싱한다: `(ident | [배열패턴]) (= 기본값)?` 를 `,` 로 구분.
+     * 열림 `(` 는 호출부가 이미 소비한 상태이며, 닫힘 `)` 는 소비하지 않는다(호출부가 검사).
      *
      * @return 파싱된 파라미터 배열, 또는 파라미터 형태가 아니면 null(arrow 아님)
      */
@@ -779,16 +780,14 @@ class Parser {
             let name: string | null = null;
             let elements: (string | null)[] | undefined;
             if (p && p.type === 'punct' && p.value === '[') {
-                // 배열 구조 분해 패턴: [a, b] / [, v] / [a,] — 평탄한 식별자만 허용
-                this.pos += 1; // [
-                elements = this.tryParseArrayPatternElements();
-                if (!elements) return null;
-            } else {
-                if (!p || p.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(p.value))) {
-                    return null;
-                }
+                const pattern = this.tryParseArrayPattern();
+                if (!pattern) return null;
+                elements = pattern;
+            } else if (p && p.type === 'ident' && !FORBIDDEN_KEYWORDS.has(String(p.value))) {
                 name = String(p.value);
                 this.pos += 1;
+            } else {
+                return null;
             }
             let def: Node | null = null;
             if (this.isPunct('=')) {
@@ -808,27 +807,30 @@ class Parser {
     }
 
     /**
-     * 배열 구조 분해 패턴의 요소를 파싱한다. 열림 `[` 는 호출부가 소비했고,
-     * 닫힘 `]` 까지 소비한다. 엘리전 홀(`[, v]`)은 null 로 표현한다.
-     * 중첩 패턴·rest·기본값 등 평탄한 식별자 외의 형태는 지원하지 않는다
-     * (레이아웃 실사용 형태가 전부 평탄 — 형태가 어긋나면 null 로 arrow 판정 자체를 되돌린다).
+     * 파라미터 위치의 배열 구조분해 패턴 `[a, , b]` 를 파싱한다.
+     * 요소는 식별자 또는 홀(elision)만 허용 — 중첩 패턴·rest·요소별 기본값은
+     * 레이아웃 표현식에서 쓰이지 않으므로 지원하지 않는다(발견 시 arrow 아님으로 되돌림).
      *
-     * @return 요소 이름 배열(홀은 null), 또는 패턴 형태가 아니면 null
+     * @return 요소 이름 배열 (홀은 null), 패턴 형태가 아니면 null
+     * @since engine-v1.60.5
      */
-    private tryParseArrayPatternElements(): (string | null)[] | null {
+    private tryParseArrayPattern(): (string | null)[] | null {
+        const save = this.pos;
+        this.pos += 1; // [
         const elements: (string | null)[] = [];
         for (;;) {
             if (this.isPunct(']')) {
-                this.pos += 1; // ]
+                this.pos += 1;
                 return elements;
             }
             if (this.isPunct(',')) {
-                this.pos += 1; // 엘리전 홀
-                elements.push(null);
+                elements.push(null); // 홀 (elision)
+                this.pos += 1;
                 continue;
             }
             const t = this.peek();
             if (!t || t.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(t.value))) {
+                this.pos = save;
                 return null;
             }
             elements.push(String(t.value));
@@ -838,9 +840,10 @@ class Parser {
                 continue;
             }
             if (this.isPunct(']')) {
-                this.pos += 1; // ]
+                this.pos += 1;
                 return elements;
             }
+            this.pos = save;
             return null;
         }
     }
@@ -1558,18 +1561,18 @@ function bindParams(params: Param[], args: unknown[], local: Scope): void {
             v = evalNode(p.default, local);
         }
         if (p.elements) {
-            // 배열 구조 분해 패턴: 홀(null)은 건너뛰고 각 이름을 인덱스 값으로 바인딩.
-            // 대상이 배열/문자열이 아니어도(undefined 포함) 예외 없이 undefined 바인딩 —
-            // 표현식 평가 실패로 화면이 통째로 비는 것보다 관대한 해석이 낫다.
-            const src = v as Record<number, unknown> | null | undefined;
-            for (let ei = 0; ei < p.elements.length; ei++) {
-                const name = p.elements[ei];
-                if (name === null) continue;
-                local.vars[name] = src == null ? undefined : src[ei];
+            // 배열 구조분해 패턴 — JS iterator 시맨틱과 동일하게 null/undefined 는 예외
+            if (v == null) {
+                throw new TypeError(`Cannot destructure ${String(v)}: value is not iterable`);
             }
-            continue;
+            const arr = Array.isArray(v) ? v : Array.from(v as Iterable<unknown>);
+            for (let e = 0; e < p.elements.length; e++) {
+                const name = p.elements[e];
+                if (name !== null) local.vars[name] = arr[e];
+            }
+        } else if (p.name !== null) {
+            local.vars[p.name] = v;
         }
-        local.vars[p.name as string] = v;
     }
 }
 
