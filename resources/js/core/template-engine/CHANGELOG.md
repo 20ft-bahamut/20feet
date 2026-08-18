@@ -5,6 +5,16 @@
 >
 > 형식: [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)
 
+## [engine-v1.60.5] - 2026-08-18
+
+### Fixed
+
+#### 화살표 파라미터 배열 구조분해 미지원 회귀 (장바구니/바로구매 불능)
+
+- engine-v1.60.0 의 SafeExpressionEvaluator 교체가 구 평가기(`new Function`)가 허용하던 **화살표 함수 파라미터의 배열 구조분해**(`([k, v]) =>`, `([, vid]) =>`)를 수용하지 않아, 해당 문법을 쓰는 표현식이 전부 파싱 실패했다. 액션 params 는 미평가 원문 문자열 그대로 서버에 전송되어 422 가 되며(스토어프론트 장바구니 담기·바로 구매가 전 상품에서 불능), 저장소 레이아웃 54개 파일 104곳이 이 문법을 사용 중이었다.
+- `tryParseParamList` 에 배열 패턴(식별자 + 홀/elision, 파라미터 기본값 조합 포함)을 추가하고 `bindParams` 가 JS iterator 시맨틱(비-iterable 은 TypeError)으로 분해 바인딩하도록 했다. 중첩 패턴·rest·객체 패턴은 배포 레이아웃 사용 0건이라 지원하지 않는다(발견 시 arrow 아님으로 안전 되돌림).
+- 회귀 잠금: 사용 형태 전수(단일/쌍/홀/기본값/실전 `_purchase_card.json` 본문) 단위 테스트 추가.
+
 ## [engine-v1.60.4] - 2026-08-14
 
 ### Security
