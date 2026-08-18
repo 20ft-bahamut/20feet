@@ -20,6 +20,13 @@ description: |
   (review_image 에는 대응하는 권한 분기가 없어, viewer 를 축으로 세우면 실재하지 않는 조합이
   cross product 에 생긴다).
 
+  브라우저 <img src> 는 Authorization 헤더를 실을 수 없어, 게이트 도입 후 관리자
+  상세·미발행 미리보기 화면의 첨부 썸네일이 무인증 요청 → 404 로 깨졌다(7.0.7 사전점검
+  브라우저 실측으로 발견). 게이트를 통과한 응답의 직렬화 시점(PageResource /
+  PublicPageResource 미발행 분기)에 한시 서명 preview URL 을 발급하고, 서빙 엔드포인트가
+  유효 서명을 무인증 허용한다. 무서명 게이트는 종전과 동일하며, 발행 페이지는 무서명
+  공개 URL 을 유지한다(SEO·캐시 안정성).
+
 axes:
   resource: [page_attachment, review_image]
   parent_state: [public, restricted]
@@ -34,6 +41,12 @@ effects:
   - unpublished_page_attachment_download_allowed_with_pages_read
   - published_page_attachment_download_still_public
   - published_page_attachment_preview_still_public
+  # 서명 preview URL 축 — <img> 무인증 렌더 경로 (게이트 약화 없는 자격 위임)
+  - unpublished_page_attachment_preview_allowed_with_valid_signature
+  - unpublished_page_attachment_preview_blocked_with_tampered_signature
+  - unpublished_page_attachment_preview_blocked_with_expired_signature
+  - admin_response_serializes_signed_preview_url_for_unpublished_page
+  - published_page_serializes_plain_preview_url
   - hidden_review_image_download_blocked
   - visible_review_image_download_still_served
 

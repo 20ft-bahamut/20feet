@@ -329,9 +329,13 @@ class UserController extends AdminBaseController
             $validated = $request->validated();
             $result = $this->userService->bulkUpdateStatus($validated['ids'], $validated['status']);
 
+            // 메시지 키(user.bulk_status_updated)가 :count 플레이스홀더를 가지므로
+            // 치환 파라미터를 함께 전달한다 (생략 시 원문 ":count명의 …" 이 그대로 노출)
             return $this->success(
                 'user.bulk_status_updated',
-                $result
+                $result,
+                200,
+                ['count' => $result['updated_count'] ?? 0]
             );
         } catch (ValidationException $e) {
             return $this->error('user.bulk_update_status_failed', 422, $e->errors());

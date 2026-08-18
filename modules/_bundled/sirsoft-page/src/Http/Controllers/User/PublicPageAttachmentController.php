@@ -80,14 +80,18 @@ class PublicPageAttachmentController extends PublicBaseController
             return $this->notFound('sirsoft-page::messages.attachment.not_found');
         }
 
-        // 미발행 페이지의 첨부는 페이지 조회 권한 관리자만 미리보기 가능 (download 와 동일 게이트)
+        // 미발행 페이지의 첨부는 페이지 조회 권한 관리자만 미리보기 가능 (download 와 동일 게이트).
+        // 브라우저 <img> 는 Authorization 헤더를 실을 수 없으므로, 게이트를 통과한 응답
+        // (관리자 상세 직렬화)이 발급한 한시 서명 URL 도 동등한 자격으로 허용한다 —
+        // 서명은 발급 시점에 게이트를 통과한 요청에만 실리므로 무서명 게이트는 약화되지 않는다.
         $published = $attachment->page && $attachment->page->published;
         $canReadUnpublished = $request->user()?->hasPermission(
             'sirsoft-page.pages.read',
             PermissionType::Admin
         ) ?? false;
+        $hasValidSignature = $request->hasValidSignature(absolute: false);
 
-        if (! $published && ! $canReadUnpublished) {
+        if (! $published && ! $canReadUnpublished && ! $hasValidSignature) {
             return $this->notFound('sirsoft-page::messages.attachment.not_found');
         }
 
