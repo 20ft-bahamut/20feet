@@ -9,6 +9,7 @@
 ### Changed
 
 - 회원 관리(생성·수정·삭제·탈퇴) 실패 안내에서 오류 원문 노출(`:error`)이 제거된 것에 맞춰, 해당 실패 문구의 일본어 번역을 재시도 안내 문구로 갱신했습니다 (`user.create_failed`, `user.update_failed`, `user.delete_failed`, `user.withdraw_failed`).
+- S3 리전 검증 메시지를 목록 선택 안내에서 형식 안내(소문자 영숫자·하이픈, R2 는 `auto`)로 개정했습니다.
 
 ### Added
 
@@ -23,10 +24,6 @@
 - 고아 첨부 정리 설정의 검증 메시지와 항목명 일본어 번역을 추가했습니다 (`validation.settings.orphan_*`) — 환경설정 > 업로드의 자동 정리·보존기간을 잘못 저장할 때의 안내가 일본어 로케일에서 항목 이름과 함께 표시됩니다.
 - 데이터베이스 백업 미제공 안내 문구의 일본어 번역을 추가했습니다 (`settings.database_backup_unavailable`).
 - 셸 예약 작업 허용목록에 인터프리터를 등록했을 때 인라인 명령 실행·안전하지 않은 스크립트 경로를 거부하는 안내 문구의 일본어 번역을 추가했습니다 (`validation.schedule_command.shell_interpreter_denied`).
-
-### Changed
-
-- S3 리전 검증 메시지를 목록 선택 안내에서 형식 안내(소문자 영숫자·하이픈, R2 는 `auto`)로 개정했습니다.
 
 ### Removed
 
