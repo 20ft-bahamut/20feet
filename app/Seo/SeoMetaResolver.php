@@ -691,7 +691,15 @@ class SeoMetaResolver
 
         $resolved = array_merge(['@context' => 'https://schema.org'], $structuredData);
 
-        return json_encode($resolved, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        // JSON_HEX_TAG: `<`/`>` 를 `<`/`>` 로 이스케이프한다. 이 블록은
+        // `<script type="application/ld+json">` 안에 그대로 삽입되므로, 사용자 입력
+        // (검색어·게시글 제목·상품명 등)이 값에 들어올 때 `</script>` 시퀀스가 스크립트
+        // 태그를 조기 종료시켜 저장형 XSS 로 이어지는 것을 막는다. 값 자체는 JSON 이스케이프
+        // 형태라 파서가 원문으로 복원한다.
+        return json_encode(
+            $resolved,
+            JSON_HEX_TAG | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT,
+        );
     }
 
     /**

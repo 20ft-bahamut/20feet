@@ -676,6 +676,40 @@ class ScheduleCommandValidatorTest extends TestCase
     }
 
     /**
+     * Artisan 에 커맨드가 등록되지 않은 문맥(HTTP 요청)에서도, 활성 프로바이더가
+     * `$commands` 로 선언한 확장 소유 명령은 자동 허용된다.
+     *
+     * 실제 확장 프로바이더는 `runningInConsole()` 일 때만 커맨드를 등록하므로,
+     * 관리자 화면의 스케줄 저장 검증(HTTP)에서는 `Artisan::all()` 에 확장 커맨드가
+     * 없다. 등록 인스턴스가 없으면 프로바이더 선언(클래스 네임스페이스 + 실제 명령명
+     * 대조)을 폴백으로 해석해야 한다 — 없으면 "설치된 확장 명령 자동 허용" 약속이
+     * 웹 저장 경로에서 통째로 동작하지 않는다 (7.0.7 검수 발견).
+     *
+     * @scenario command_class=extension_owned, enforcement_point=validator_unit
+     *
+     * @effects extension_owned_commands_resolved_without_console_registration
+     */
+    #[Test]
+    public function it_allows_provider_declared_extension_commands_without_console_registration(): void
+    {
+        require_once __DIR__.'/../../Fixtures/Extension/FakeExtensionScheduleCommand.php';
+        require_once __DIR__.'/../../Fixtures/Extension/FakeExtensionScheduleServiceProvider.php';
+
+        // Artisan::registerCommand 를 호출하지 않는다 — HTTP 문맥 재현.
+        $this->app->register(\Modules\G7Testing\Providers\FakeExtensionScheduleServiceProvider::class);
+
+        $verdict = ScheduleCommandValidator::inspectArtisanCommand('g7-testing-fake-extension-command --scope=all');
+
+        $this->assertTrue($verdict['allowed'], '프로바이더 선언 확장 명령이 HTTP 문맥에서 거부됨');
+        $this->assertSame('g7-testing-fake-extension-command', $verdict['name']);
+
+        // 자기 정의에 없는 옵션은 같은 폴백 경로에서도 거부되어야 한다.
+        $optionVerdict = ScheduleCommandValidator::inspectArtisanCommand('g7-testing-fake-extension-command --g7-not-a-real-option');
+        $this->assertFalse($optionVerdict['allowed']);
+        $this->assertSame(ScheduleCommandValidator::ARTISAN_REASON_OPTION, $optionVerdict['reason']);
+    }
+
+    /**
      * 확장 네임스페이스를 비워도 코어 허용목록은 그대로 동작한다 (계층 독립성).
      *
      * @scenario command_class=core_allowlisted, enforcement_point=validator_unit

@@ -33,6 +33,9 @@ class SeoMetaResolverTest extends TestCase
         Config::set('g7_settings.core.seo.google_analytics_id', 'GA-12345');
         Config::set('g7_settings.core.seo.google_site_verification', '');
         Config::set('g7_settings.core.seo.naver_site_verification', '');
+        // 운영자가 로컬에 저장한 값(storage/app/settings/seo.json)이 부팅 시 config 로
+        // 실려 들어오므로, 미고정 시 og site_name fallback 단언이 환경에 좌우된다.
+        Config::set('g7_settings.core.seo.og_default_site_name', '');
         Config::set('g7_settings.core.general.site_name', '그누보드7 쇼핑몰');
     }
 
@@ -372,6 +375,38 @@ class SeoMetaResolverTest extends TestCase
         $this->assertSame('Product', $jsonLd['@type']);
         $this->assertSame('에어맥스', $jsonLd['name']);
         $this->assertSame('나이키 에어맥스', $jsonLd['description']);
+    }
+
+    /**
+     * 구조화 데이터의 문자열 값이 `</script>` 를 담아도 JSON-LD `<script>` 블록을
+     * 조기 종료시키지 못한다 — 봇 화면(서버 렌더)에서만 노출되는 저장형 XSS 차단.
+     *
+     * 검색어·게시글 제목·상품명 등 사용자 입력이 structured_data 의 name 으로 흘러
+     * 들어가는데, `json_encode` 가 `<`/`>` 를 이스케이프하지 않으면 문자열 안의
+     * `</script>` 가 ld+json 스크립트 태그를 닫고 그 뒤 `<script>` 가 실행된다.
+     * HTML meta 경로(og/twitter/title)는 stripHtml 로 태그를 지우지만 JSON-LD 는
+     * 별도 경로라 함께 지켜야 한다.
+     */
+    public function test_structured_data_json_ld_escapes_script_breakout(): void
+    {
+        $seoConfig = [
+            'structured_data' => [
+                '@type' => 'SearchResultsPage',
+                'name' => '{{query.q}}',
+            ],
+        ];
+
+        $context = ['query' => ['q' => '</script><script>alert(1)</script>']];
+
+        $result = $this->resolver->resolve($seoConfig, $context, null, null, []);
+
+        $this->assertNotNull($result['jsonLd']);
+        // 원문 `<script>` / `</script>` 시퀀스가 출력에 그대로 있으면 안 된다.
+        $this->assertStringNotContainsString('<script', $result['jsonLd']);
+        $this->assertStringNotContainsString('</script', $result['jsonLd']);
+        // 값 자체는 보존되어야 한다(디코드하면 원문 그대로).
+        $decoded = json_decode($result['jsonLd'], true);
+        $this->assertSame('</script><script>alert(1)</script>', $decoded['name']);
     }
 
     /**

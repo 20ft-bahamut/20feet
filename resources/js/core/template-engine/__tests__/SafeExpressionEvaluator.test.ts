@@ -147,6 +147,52 @@ describe('SafeExpressionEvaluator', () => {
         });
     });
 
+    describe('arrow-function 배열 구조 분해 파라미터 (7.0.7 회귀 — 게시판 환경설정 권한 computed)', () => {
+        it('([key]) => — Object.entries 필터/맵 (admin_board_settings 실사용 형태)', () => {
+            const ctx = {
+                settings: {
+                    data: {
+                        basic_defaults: {
+                            default_board_permissions: { 'admin.manage': true, read: true, write: false },
+                        },
+                    },
+                },
+            };
+            expect(
+                evalx(
+                    "Object.entries(settings?.data?.basic_defaults?.default_board_permissions ?? {}).filter(([key]) => !key.startsWith('admin.')).map(([key]) => key)",
+                    ctx,
+                ),
+            ).toEqual(['read', 'write']);
+        });
+
+        it('([k, v]) => — 키·값 동시 바인딩', () => {
+            expect(evalx("Object.entries(o).map(([k, v]) => k + '=' + v).join(',')", { o: { a: 1, b: 2 } })).toBe(
+                'a=1,b=2',
+            );
+        });
+
+        it('([field, messages]) => — 검증 오류 표시 형태 (플러그인 설정 onError 실사용)', () => {
+            const ctx = { errors: { name: ['이름은 필수입니다'], email: ['형식 오류'] } };
+            expect(evalx("Object.entries(errors ?? {}).map(([field, messages]) => field + ': ' + messages[0])", ctx)).toEqual([
+                'name: 이름은 필수입니다',
+                'email: 형식 오류',
+            ]);
+        });
+
+        it('([,v]) => — 엘리전(홀) 패턴 (_bank_management_modal 실사용)', () => {
+            expect(evalx('Object.entries(o).map(([,v]) => v)', { o: { a: 10, b: 20 } })).toEqual([10, 20]);
+        });
+
+        it('function 선언 파라미터의 배열 구조 분해', () => {
+            expect(evalx('(function f([a, b]) { return a + b; })([3, 4])')).toBe(7);
+        });
+
+        it('구조 분해 대상이 아닌 값(undefined)은 각 이름에 undefined 바인딩', () => {
+            expect(evalx('[undefined].map(([a]) => a === undefined)[0]')).toBe(true);
+        });
+    });
+
     describe('spread (array / object / call)', () => {
         it('배열 스프레드', () => {
             expect(evalx('[...a, ...b, 3]', { a: [1], b: [2] })).toEqual([1, 2, 3]);

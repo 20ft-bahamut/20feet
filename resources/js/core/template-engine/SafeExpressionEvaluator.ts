@@ -245,9 +245,17 @@ type Node =
     | { type: 'Empty' }
     | { type: 'Try'; block: Node; handlerParam: string | null; handler: Node | null; finalizer: Node | null };
 
-/** 함수/화살표 파라미터 (기본값 지원) */
+/**
+ * 함수/화살표 파라미터 (기본값 지원).
+ *
+ * 배열 구조 분해 패턴(`([key]) => …`, `([, v]) => …`)은 `name: null` +
+ * `elements` 로 표현한다. `elements` 의 `null` 항목은 엘리전 홀(`[, v]`)이다.
+ * 레이아웃 실사용 형태(`Object.entries(...).map(([k, v]) => …)`)가 이 문법에
+ * 의존하므로 평문 식별자와 동급으로 지원한다. (engine-v1.60.5)
+ */
 interface Param {
-    name: string;
+    name: string | null;
+    elements?: (string | null)[];
     default: Node | null;
 }
 
@@ -768,11 +776,20 @@ class Parser {
         if (this.isPunct(')')) return params; // 빈 목록
         for (;;) {
             const p = this.peek();
-            if (!p || p.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(p.value))) {
-                return null;
+            let name: string | null = null;
+            let elements: (string | null)[] | undefined;
+            if (p && p.type === 'punct' && p.value === '[') {
+                // 배열 구조 분해 패턴: [a, b] / [, v] / [a,] — 평탄한 식별자만 허용
+                this.pos += 1; // [
+                elements = this.tryParseArrayPatternElements();
+                if (!elements) return null;
+            } else {
+                if (!p || p.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(p.value))) {
+                    return null;
+                }
+                name = String(p.value);
+                this.pos += 1;
             }
-            const name = String(p.value);
-            this.pos += 1;
             let def: Node | null = null;
             if (this.isPunct('=')) {
                 this.pos += 1; // =
@@ -780,7 +797,7 @@ class Parser {
                 // 콤마를 소비하지 않으므로 다음 파라미터 구분자 ',' 는 그대로 남는다.
                 def = this.parseExpression();
             }
-            params.push({ name, default: def });
+            params.push(elements ? { name, elements, default: def } : { name, default: def });
             if (this.isPunct(',')) {
                 this.pos += 1;
                 continue;
@@ -788,6 +805,44 @@ class Parser {
             break;
         }
         return params;
+    }
+
+    /**
+     * 배열 구조 분해 패턴의 요소를 파싱한다. 열림 `[` 는 호출부가 소비했고,
+     * 닫힘 `]` 까지 소비한다. 엘리전 홀(`[, v]`)은 null 로 표현한다.
+     * 중첩 패턴·rest·기본값 등 평탄한 식별자 외의 형태는 지원하지 않는다
+     * (레이아웃 실사용 형태가 전부 평탄 — 형태가 어긋나면 null 로 arrow 판정 자체를 되돌린다).
+     *
+     * @return 요소 이름 배열(홀은 null), 또는 패턴 형태가 아니면 null
+     */
+    private tryParseArrayPatternElements(): (string | null)[] | null {
+        const elements: (string | null)[] = [];
+        for (;;) {
+            if (this.isPunct(']')) {
+                this.pos += 1; // ]
+                return elements;
+            }
+            if (this.isPunct(',')) {
+                this.pos += 1; // 엘리전 홀
+                elements.push(null);
+                continue;
+            }
+            const t = this.peek();
+            if (!t || t.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(t.value))) {
+                return null;
+            }
+            elements.push(String(t.value));
+            this.pos += 1;
+            if (this.isPunct(',')) {
+                this.pos += 1;
+                continue;
+            }
+            if (this.isPunct(']')) {
+                this.pos += 1; // ]
+                return elements;
+            }
+            return null;
+        }
     }
 
     private parseArrowBody(): { body: Node; isBlock: boolean } {
@@ -1502,7 +1557,19 @@ function bindParams(params: Param[], args: unknown[], local: Scope): void {
         if (v === undefined && p.default) {
             v = evalNode(p.default, local);
         }
-        local.vars[p.name] = v;
+        if (p.elements) {
+            // 배열 구조 분해 패턴: 홀(null)은 건너뛰고 각 이름을 인덱스 값으로 바인딩.
+            // 대상이 배열/문자열이 아니어도(undefined 포함) 예외 없이 undefined 바인딩 —
+            // 표현식 평가 실패로 화면이 통째로 비는 것보다 관대한 해석이 낫다.
+            const src = v as Record<number, unknown> | null | undefined;
+            for (let ei = 0; ei < p.elements.length; ei++) {
+                const name = p.elements[ei];
+                if (name === null) continue;
+                local.vars[name] = src == null ? undefined : src[ei];
+            }
+            continue;
+        }
+        local.vars[p.name as string] = v;
     }
 }
 

@@ -591,15 +591,88 @@ class ScheduleCommandValidator
 
         $command = self::findRegisteredCommand($name);
 
-        if ($command === null) {
+        if ($command !== null) {
+            $class = get_class($command);
+
+            foreach ($namespaces as $namespace) {
+                if (str_starts_with($class, $namespace)) {
+                    return $command->getDefinition();
+                }
+            }
+
             return null;
         }
 
-        $class = get_class($command);
+        // 레지스트리에 없으면 프로바이더 선언 폴백 — HTTP 요청에서는 확장 프로바이더가
+        // `runningInConsole()` 게이트로 커맨드 등록을 건너뛰어 `Artisan::all()` 에
+        // 확장 커맨드가 존재하지 않는다. 관리자 화면의 스케줄 저장 검증이 바로 이
+        // 문맥이므로, 등록 인스턴스가 없을 때는 활성 프로바이더의 `$commands` 선언을
+        // 같은 기준(클래스 네임스페이스 + 실제 명령명 대조)으로 해석한다.
+        return self::resolveProviderDeclaredCommandDefinition($name, $namespaces);
+    }
 
-        foreach ($namespaces as $namespace) {
-            if (str_starts_with($class, $namespace)) {
-                return $command->getDefinition();
+    /**
+     * 활성 서비스 프로바이더가 `$commands` 프로퍼티로 선언한 확장 커맨드에서
+     * 명령명을 해석해 정의를 돌려줍니다.
+     *
+     * 판정 기준은 레지스트리 경로와 동일하다 — 커맨드 **클래스**의 네임스페이스가
+     * 확장 네임스페이스여야 하고, 요청된 이름은 그 클래스를 실제 인스턴스화해 얻은
+     * 선언 명령명과 일치해야 한다(이름만으로 위조할 수 없다). 프로바이더가 커맨드
+     * 목록을 생성자에서 동적으로 만들면 기본값이 비므로 이 폴백에는 걸리지 않는다
+     * (fail-closed 유지).
+     *
+     * @param  string  $name  명령명
+     * @param  array<int, string>  $namespaces  허용 확장 네임스페이스 접두사
+     * @return InputDefinition|null 해석 불가하면 null
+     */
+    private static function resolveProviderDeclaredCommandDefinition(string $name, array $namespaces): ?InputDefinition
+    {
+        try {
+            $providers = app()->getLoadedProviders();
+        } catch (Throwable) {
+            return null;
+        }
+
+        foreach (array_keys($providers) as $providerClass) {
+            if (! class_exists($providerClass)) {
+                continue;
+            }
+
+            try {
+                $defaults = (new \ReflectionClass($providerClass))->getDefaultProperties();
+            } catch (Throwable) {
+                continue;
+            }
+
+            foreach ((array) ($defaults['commands'] ?? []) as $commandClass) {
+                if (! is_string($commandClass) || ! class_exists($commandClass)) {
+                    continue;
+                }
+
+                $owned = false;
+                foreach ($namespaces as $namespace) {
+                    if (str_starts_with($commandClass, $namespace)) {
+                        $owned = true;
+                        break;
+                    }
+                }
+
+                if (! $owned) {
+                    continue;
+                }
+
+                try {
+                    /** @var SymfonyCommand $instance */
+                    $instance = app()->make($commandClass);
+                } catch (Throwable) {
+                    continue;
+                }
+
+                if (! $instance instanceof SymfonyCommand || $instance->getName() !== $name) {
+                    continue;
+                }
+
+                return $instance->getDefinition();
             }
         }
 

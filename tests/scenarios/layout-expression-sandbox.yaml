@@ -10,7 +10,7 @@ description: |
   미실행(전역 canary `window.__g7jsi` 미설정) 양면을 잠근다.
 
 axes:
-  case: [safe_expression, arrow_template_literal, constructor_escape, nonstring_key_escape, object_facade_safe]
+  case: [safe_expression, arrow_template_literal, arrow_destructured_params, constructor_escape, nonstring_key_escape, object_facade_safe]
 
 effects:
   - same_expression_same_value_across_paths
