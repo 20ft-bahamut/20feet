@@ -147,6 +147,99 @@ describe('SafeExpressionEvaluator', () => {
         });
     });
 
+    describe('arrow param 배열 구조분해 (engine-v1.60.5 회귀 — 장바구니/바로구매 불능)', () => {
+        // 구 평가기(new Function)가 허용하던 형태 전수: 저장소 레이아웃 54파일 104곳 사용
+        // (`([code])` 35 · `([field, messages])` 34 · `([k, v])` 등 — _purchase_card.json 이 대표)
+        it('단일 요소 ([k])', () => {
+            expect(evalx('Object.entries({ a: 1, b: 2 }).map(([k]) => k)')).toEqual(['a', 'b']);
+        });
+
+        it('두 요소 ([k, v])', () => {
+            expect(evalx('Object.entries({ a: 1, b: 2 }).map(([k, v]) => k + v)')).toEqual(['a1', 'b2']);
+        });
+
+        it('선행 홀 ([, v])', () => {
+            expect(evalx('Object.entries({ a: 1, b: null }).filter(([, v]) => v != null).length')).toBe(1);
+        });
+
+        it('배열 인자 직접 분해', () => {
+            expect(evalx('[[1, 2], [3, 4]].map(([a, b]) => a * b)')).toEqual([2, 12]);
+        });
+
+        it('파라미터 기본값 조합 (([a, b] = []) =>)', () => {
+            expect(evalx('[undefined].map(([a, b] = [7, 8]) => (a ?? 0) + (b ?? 0))')).toEqual([15]);
+        });
+
+        it('null/undefined 인자 분해는 JS 와 동일하게 예외', () => {
+            expect(() => evalx('[null].map(([a]) => a)')).toThrow();
+        });
+
+        it('실전 회귀: _purchase_card.json 장바구니 담기 본문 표현식', () => {
+            const ctx = {
+                product: { data: { id: 98, has_options: true, options: [{ id: 1 }, { id: 2 }] } },
+                _local: {
+                    selectedOptionItems: [
+                        {
+                            optionId: 11,
+                            quantity: 2,
+                            additionalOptionSelections: { 5: 50, 6: null },
+                            additionalOptionCustomTexts: { 5: '각인 문구' },
+                        },
+                    ],
+                    noOptionQuantity: 1,
+                },
+            };
+            const expr =
+                'product.data?.has_options && (product.data?.options?.length ?? 0) > 1 ? ' +
+                '{ product_id: product.data?.id, items: (_local.selectedOptionItems ?? []).map(item => ({ ' +
+                'product_option_id: item.optionId, quantity: item.quantity, ' +
+                'additional_option_selections: Object.entries(item.additionalOptionSelections ?? {})' +
+                '.filter(([, vid]) => vid != null)' +
+                '.map(([gid, vid]) => ({ additional_option_id: Number(gid), value_id: Number(vid), custom_text: item.additionalOptionCustomTexts?.[Number(gid)] })) ' +
+                '})) } : { product_id: product.data?.id, items: [{ quantity: _local.noOptionQuantity ?? 1 }] }';
+            expect(evalx(expr, ctx)).toEqual({
+                product_id: 98,
+                items: [
+                    {
+                        product_option_id: 11,
+                        quantity: 2,
+                        additional_option_selections: [{ additional_option_id: 5, value_id: 50, custom_text: '각인 문구' }],
+                    },
+                ],
+            });
+        });
+
+        it('실전 회귀: 게시판 환경설정 권한 computed (filter([key]) + startsWith)', () => {
+            const ctx = {
+                settings: {
+                    data: {
+                        basic_defaults: {
+                            default_board_permissions: { 'admin.manage': true, read: true, write: false },
+                        },
+                    },
+                },
+            };
+            expect(
+                evalx(
+                    "Object.entries(settings?.data?.basic_defaults?.default_board_permissions ?? {}).filter(([key]) => !key.startsWith('admin.')).map(([key]) => key)",
+                    ctx,
+                ),
+            ).toEqual(['read', 'write']);
+        });
+
+        it('실전 회귀: 검증 오류 표시 ([field, messages]) — 플러그인 설정 onError 형태', () => {
+            const ctx = { errors: { name: ['이름은 필수입니다'], email: ['형식 오류'] } };
+            expect(evalx("Object.entries(errors ?? {}).map(([field, messages]) => field + ': ' + messages[0])", ctx)).toEqual([
+                'name: 이름은 필수입니다',
+                'email: 형식 오류',
+            ]);
+        });
+
+        it('function 선언 파라미터의 배열 구조분해', () => {
+            expect(evalx('(function f([a, b]) { return a + b; })([3, 4])')).toBe(7);
+        });
+    });
+
     describe('spread (array / object / call)', () => {
         it('배열 스프레드', () => {
             expect(evalx('[...a, ...b, 3]', { a: [1], b: [2] })).toEqual([1, 2, 3]);

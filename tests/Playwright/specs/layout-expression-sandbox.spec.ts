@@ -71,6 +71,41 @@ test.describe('레이아웃 표현식 평가 샌드박스', () => {
     expect(result.date).toBe(true);
   });
 
+  // @scenario case=destructuring_param
+  // @effects same_expression_same_value_across_paths
+  test('화살표 파라미터 배열 구조분해(([k, v])·홀)가 배포 번들에서 동작한다 (engine-v1.60.5 회귀)', async ({ page }) => {
+    const result = await page.evaluate(() => {
+      const g7 = (window as any).G7Core;
+      const ctx = {
+        sel: { 5: 50, 6: null },
+        perms: { 'admin.manage': true, read: true, write: false },
+        errors: { name: ['이름은 필수입니다'] },
+      };
+      return {
+        // _purchase_card.json 장바구니/바로구매 본문 형태 — 홀 + 쌍 분해
+        hole: g7.evaluateCondition('{{Object.entries(sel ?? {}).filter(([, vid]) => vid != null).length === 1}}', ctx),
+        pair: g7.evaluateCondition('{{Object.entries(sel ?? {}).filter(([, v]) => v != null).map(([gid, vid]) => Number(gid) + Number(vid)).includes(55)}}', ctx),
+        single: g7.evaluateCondition('{{Object.entries(sel ?? {}).map(([k]) => k).includes("5")}}', ctx),
+        // 게시판 환경설정 권한 computed 형태: filter([key]) + startsWith + map([key])
+        entriesFilterMap: g7.evaluateCondition(
+          "{{Object.entries(perms ?? {}).filter(([key]) => !key.startsWith('admin.')).map(([key]) => key).length === 2}}",
+          ctx,
+        ),
+        // 검증 오류 표시 형태: ([field, messages])
+        fieldMessages: g7.evaluateCondition(
+          "{{Object.entries(errors ?? {}).map(([field, messages]) => field + ':' + messages[0])[0] === 'name:이름은 필수입니다'}}",
+          ctx,
+        ),
+      };
+    });
+
+    expect(result.hole).toBe(true);
+    expect(result.pair).toBe(true);
+    expect(result.single).toBe(true);
+    expect(result.entriesFilterMap).toBe(true);
+    expect(result.fieldMessages).toBe(true);
+  });
+
   // @scenario case=constructor_escape
   // @effects sandbox_escape_blocked, dangerous_payload_does_not_set_global
   test('constructor 체인 샌드박스 탈출이 코드를 실행하지 못한다', async ({ page }) => {

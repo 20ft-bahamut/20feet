@@ -245,9 +245,18 @@ type Node =
     | { type: 'Empty' }
     | { type: 'Try'; block: Node; handlerParam: string | null; handler: Node | null; finalizer: Node | null };
 
-/** 함수/화살표 파라미터 (기본값 지원) */
+/**
+ * 함수/화살표 파라미터 (기본값 지원).
+ *
+ * `name` 이 null 이면 배열 구조분해 패턴 — `elements` 가 요소 이름 목록이며
+ * null 요소는 홀(elision)이다 (`([, vid]) =>` → elements: [null, 'vid']).
+ * 구 평가기(new Function)가 허용하던 형태로, 레이아웃 전반에서 사용된다.
+ *
+ * @since engine-v1.60.5
+ */
 interface Param {
-    name: string;
+    name: string | null;
+    elements?: (string | null)[];
     default: Node | null;
 }
 
@@ -758,8 +767,8 @@ class Parser {
     }
 
     /**
-     * 파라미터 목록을 파싱한다: `ident (= 기본값)?` 를 `,` 로 구분. 열림 `(` 는 호출부가
-     * 이미 소비한 상태이며, 닫힘 `)` 는 소비하지 않는다(호출부가 검사).
+     * 파라미터 목록을 파싱한다: `(ident | [배열패턴]) (= 기본값)?` 를 `,` 로 구분.
+     * 열림 `(` 는 호출부가 이미 소비한 상태이며, 닫힘 `)` 는 소비하지 않는다(호출부가 검사).
      *
      * @return 파싱된 파라미터 배열, 또는 파라미터 형태가 아니면 null(arrow 아님)
      */
@@ -768,11 +777,18 @@ class Parser {
         if (this.isPunct(')')) return params; // 빈 목록
         for (;;) {
             const p = this.peek();
-            if (!p || p.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(p.value))) {
+            let name: string | null = null;
+            let elements: (string | null)[] | undefined;
+            if (p && p.type === 'punct' && p.value === '[') {
+                const pattern = this.tryParseArrayPattern();
+                if (!pattern) return null;
+                elements = pattern;
+            } else if (p && p.type === 'ident' && !FORBIDDEN_KEYWORDS.has(String(p.value))) {
+                name = String(p.value);
+                this.pos += 1;
+            } else {
                 return null;
             }
-            const name = String(p.value);
-            this.pos += 1;
             let def: Node | null = null;
             if (this.isPunct('=')) {
                 this.pos += 1; // =
@@ -780,7 +796,7 @@ class Parser {
                 // 콤마를 소비하지 않으므로 다음 파라미터 구분자 ',' 는 그대로 남는다.
                 def = this.parseExpression();
             }
-            params.push({ name, default: def });
+            params.push(elements ? { name, elements, default: def } : { name, default: def });
             if (this.isPunct(',')) {
                 this.pos += 1;
                 continue;
@@ -788,6 +804,48 @@ class Parser {
             break;
         }
         return params;
+    }
+
+    /**
+     * 파라미터 위치의 배열 구조분해 패턴 `[a, , b]` 를 파싱한다.
+     * 요소는 식별자 또는 홀(elision)만 허용 — 중첩 패턴·rest·요소별 기본값은
+     * 레이아웃 표현식에서 쓰이지 않으므로 지원하지 않는다(발견 시 arrow 아님으로 되돌림).
+     *
+     * @return 요소 이름 배열 (홀은 null), 패턴 형태가 아니면 null
+     * @since engine-v1.60.5
+     */
+    private tryParseArrayPattern(): (string | null)[] | null {
+        const save = this.pos;
+        this.pos += 1; // [
+        const elements: (string | null)[] = [];
+        for (;;) {
+            if (this.isPunct(']')) {
+                this.pos += 1;
+                return elements;
+            }
+            if (this.isPunct(',')) {
+                elements.push(null); // 홀 (elision)
+                this.pos += 1;
+                continue;
+            }
+            const t = this.peek();
+            if (!t || t.type !== 'ident' || FORBIDDEN_KEYWORDS.has(String(t.value))) {
+                this.pos = save;
+                return null;
+            }
+            elements.push(String(t.value));
+            this.pos += 1;
+            if (this.isPunct(',')) {
+                this.pos += 1;
+                continue;
+            }
+            if (this.isPunct(']')) {
+                this.pos += 1;
+                return elements;
+            }
+            this.pos = save;
+            return null;
+        }
     }
 
     private parseArrowBody(): { body: Node; isBlock: boolean } {
@@ -1502,7 +1560,19 @@ function bindParams(params: Param[], args: unknown[], local: Scope): void {
         if (v === undefined && p.default) {
             v = evalNode(p.default, local);
         }
-        local.vars[p.name] = v;
+        if (p.elements) {
+            // 배열 구조분해 패턴 — JS iterator 시맨틱과 동일하게 null/undefined 는 예외
+            if (v == null) {
+                throw new TypeError(`Cannot destructure ${String(v)}: value is not iterable`);
+            }
+            const arr = Array.isArray(v) ? v : Array.from(v as Iterable<unknown>);
+            for (let e = 0; e < p.elements.length; e++) {
+                const name = p.elements[e];
+                if (name !== null) local.vars[name] = arr[e];
+            }
+        } else if (p.name !== null) {
+            local.vars[p.name] = v;
+        }
     }
 }
 
