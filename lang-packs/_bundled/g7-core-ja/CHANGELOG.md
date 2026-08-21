@@ -10,6 +10,7 @@
 
 - 아웃바운드 프록시 설정의 검증 메시지와 항목명 일본어 번역을 추가했습니다 (`settings.outbound_proxy_*`, `attributes.outbound_proxy*`).
 - 아웃바운드 프록시 연결 테스트 결과 안내 문구의 일본어 번역을 추가했습니다 (`settings.outbound_proxy_test_*`).
+- 브라우저가 지원 범위보다 오래되어 화면 구성 스크립트를 실행하지 못한 경우의 안내 문구 일본어 번역을 추가했습니다 (`errors.bootstrap.incompatible_title`, `errors.bootstrap.incompatible_message`).
 
 ### Changed
 
