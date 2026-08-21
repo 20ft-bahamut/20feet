@@ -11,6 +11,10 @@
 - 아웃바운드 프록시 설정의 검증 메시지와 항목명 일본어 번역을 추가했습니다 (`settings.outbound_proxy_*`, `attributes.outbound_proxy*`).
 - 아웃바운드 프록시 연결 테스트 결과 안내 문구의 일본어 번역을 추가했습니다 (`settings.outbound_proxy_test_*`).
 
+### Changed
+
+- 언어팩 관리(조회·설치·활성화·비활성화·제거·업데이트 확인·업데이트·캐시 갱신·manifest 미리보기) 실패 안내에서 오류 원문 노출(`:error`)이 제거된 것에 맞춰, 해당 실패 문구의 일본어 번역을 갱신했습니다 (`language_packs.*_failed`).
+
 ## [1.0.6] - 2026-08-19
 
 ### Changed

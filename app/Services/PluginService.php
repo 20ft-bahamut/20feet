@@ -115,6 +115,7 @@ class PluginService
      * @param  string  $pluginName  플러그인 식별자
      * @param  VendorMode  $vendorMode  vendor 설치 모드 (Auto/Composer/Bundled)
      * @param  bool  $force  Updating/Failed 등 진행 중 상태도 무시하고 강제 설치 여부
+     * @param  string|null  $failureReason  실패 시 사유가 담기는 out 파라미터 (성공 시 null)
      * @return array|null 설치된 플러그인 정보 또는 설치 실패 시 null
      *
      * @throws ValidationException 플러그인 설치 실패 시
@@ -123,12 +124,15 @@ class PluginService
         string $pluginName,
         VendorMode $vendorMode = VendorMode::Auto,
         bool $force = false,
+        ?string &$failureReason = null,
     ): ?array {
+        $failureReason = null;
+
         HookManager::doAction('core.plugins.before_install', $pluginName);
 
         try {
             $this->pluginManager->loadPlugins();
-            $result = $this->pluginManager->installPlugin($pluginName, null, $vendorMode, $force);
+            $result = $this->pluginManager->installPlugin($pluginName, null, $vendorMode, $force, $failureReason);
 
             if ($result) {
                 // 설치 후 플러그인 정보 반환
@@ -182,7 +186,9 @@ class PluginService
                 ];
             }
 
-            return ['success' => false];
+            // 실패 사유(reason)를 그대로 전달한다 — 여기서 떨어뜨리면 관리자 화면의
+            // 실패 문구에 원인 자리가 비어 자리표시자가 그대로 노출된다.
+            return $result;
         } catch (\Exception $e) {
             throw ValidationException::withMessages([
                 'plugin_name' => [__('plugins.activation_failed', ['error' => $e->getMessage()])],
@@ -236,18 +242,21 @@ class PluginService
      *
      * @param  string  $pluginName  플러그인 식별자
      * @param  bool  $deleteData  플러그인이 생성한 DB 데이터/스토리지 디렉토리까지 삭제 여부
+     * @param  string|null  $failureReason  실패 시 사유가 담기는 out 파라미터 (성공 시 null)
      * @return bool 제거 성공 여부
      *
      * @throws ValidationException 제거 실패 시
      */
-    public function uninstallPlugin(string $pluginName, bool $deleteData = false): bool
+    public function uninstallPlugin(string $pluginName, bool $deleteData = false, ?string &$failureReason = null): bool
     {
+        $failureReason = null;
+
         HookManager::doAction('core.plugins.before_uninstall', $pluginName, $deleteData);
 
         try {
             $this->pluginManager->loadPlugins();
 
-            $result = $this->pluginManager->uninstallPlugin($pluginName, $deleteData);
+            $result = $this->pluginManager->uninstallPlugin($pluginName, $deleteData, null, $failureReason);
 
             HookManager::doAction('core.plugins.after_uninstall', $pluginName, $deleteData, $result);
 
@@ -983,10 +992,14 @@ class PluginService
     private function executePluginInstall(string $identifier): array
     {
         $this->pluginManager->loadPlugins();
-        $result = $this->pluginManager->installPlugin($identifier);
+        $result = $this->pluginManager->installPlugin($identifier, null, VendorMode::Auto, false, $failureReason);
 
         if (! $result) {
-            throw new PluginOperationException('plugins.errors.install_failed');
+            // 사유를 실어 올리지 않으면 'plugins.errors.install_failed' 의 치환 자리가
+            // 비어 관리자 화면에 리터럴 ':error' 가 그대로 노출된다.
+            throw new PluginOperationException('plugins.errors.install_failed', [
+                'error' => $failureReason ?? __('plugins.errors.unknown_error'),
+            ]);
         }
 
         return $this->pluginManager->getPluginInfo($identifier);
