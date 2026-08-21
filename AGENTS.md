@@ -1126,6 +1126,21 @@ php artisan language-pack:update g7-core-ja --force
 
 번들 언어팩도 `_bundled` 는 배포 원본일 뿐이다. 설치본(`lang-packs/{id}/`)을 갱신하지 않으면 새로 추가한 번역 키가 런타임에 존재하지 않아 해당 로케일이 조용히 기준 로케일로 폴백한다.
 
+### 배포 산출물의 브라우저 하한
+
+선언 하한은 **Chrome 111 / Safari 16.4 / Firefox 128** 이다 ([requirements.md §7](docs/requirements.md)). 빌드 타깃(`target: 'es2020'`)은 이 하한을 강제하지 못한다 — **ES 연도와 브라우저 지원 연도가 다르기 때문**이다. ES2018 인 정규식 lookbehind 를 WebKit 은 Safari 16.4 에서야 구현했고, 타깃 검사는 그대로 통과시킨다.
+
+정규식 **리터럴** 문법은 그중에서도 다운레벨이 원리상 불가능하다. 번들러는 lookbehind 를 `new RegExp(...)` 로 옮길 뿐이라 파싱 오류가 **런타임 오류로 이동**할 뿐 사라지지 않는다. 따라서 타깃 하향은 해법이 아니다.
+
+| ❌ 금지 | ✅ 올바른 사용 |
+|--------|---------------|
+| 배포 JS 산출물에 선언 하한 **초과** 문법·API (`Object.groupBy`·`Promise.withResolvers`·`Array.fromAsync`·`RegExp.escape`·정규식 `v` 플래그) | 하한 이하 문법으로 작성 |
+| **부팅 임계 번들**(`public/build/core/template-engine.min.js`, `templates/_bundled/*/dist/js/components.iife.js`)에 정규식 리터럴 전용 문법(lookbehind `(?<!` `(?<=`, `v` 플래그) — 하한과 같은 버전이어도 | 그 두 파일만은 하한 미만 브라우저에서도 **파싱**돼야 한다 |
+| 빌드 타깃을 낮춰 해결 시도 | 소스에서 그 문법을 쓰지 않는다 |
+| 바이트 길이 비교식 번들러 검출기로 판정 | 문법·API 표 기반 검사 (프린터 표기 차이가 오탐을 낸다) |
+
+부팅 임계 번들 둘은 `async`/`defer` 없는 동기 classic 스크립트다. 파싱에 실패하면 **폴백 안내 화면조차 렌더되지 않아** 사용자에게는 백지 또는 거짓 진단만 남는다. 하한 미만 브라우저에 "지원 범위 밖" 안내를 띄우려면 이 두 파일은 파싱에 성공해야 하므로, 하한과 **정확히 같은** 버전을 요구하는 문법(lookbehind = Safari 16.4)도 금지한다 — 하한 초과만 보는 검사로는 영원히 잡히지 않는 지점이다. 정적 검사가 이 규칙을 강제한다.
+
 ### 코어 3-번들 구조 + 공유 런타임 (engine-v1.51.0+)
 
 `core:build` 는 코어 프론트엔드를 3개 IIFE 번들로 빌드한다:
