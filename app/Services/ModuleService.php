@@ -242,6 +242,7 @@ class ModuleService
      * @param  string  $moduleName  설치할 모듈명
      * @param  VendorMode  $vendorMode  Vendor 설치 모드
      * @param  bool  $force  Updating/Failed 등 진행 중 상태도 무시하고 강제 설치 여부
+     * @param  string|null  $failureReason  실패 시 사유가 담기는 out 파라미터 (성공 시 null)
      * @return array|null 설치된 모듈 정보 또는 null
      *
      * @throws ValidationException 모듈 설치 실패 시
@@ -250,12 +251,15 @@ class ModuleService
         string $moduleName,
         VendorMode $vendorMode = VendorMode::Auto,
         bool $force = false,
+        ?string &$failureReason = null,
     ): ?array {
+        $failureReason = null;
+
         HookManager::doAction('core.modules.before_install', $moduleName);
 
         try {
             $this->moduleManager->loadModules();
-            $result = $this->moduleManager->installModule($moduleName, null, $vendorMode, $force);
+            $result = $this->moduleManager->installModule($moduleName, null, $vendorMode, $force, $failureReason);
 
             if ($result) {
                 // 설치 후 모듈 정보 반환
@@ -307,7 +311,9 @@ class ModuleService
                 ];
             }
 
-            return ['success' => false];
+            // 실패 사유(reason)를 그대로 전달한다 — 여기서 떨어뜨리면 관리자 화면의
+            // 실패 문구에 원인 자리가 비어 자리표시자가 그대로 노출된다.
+            return $result;
         } catch (\Exception $e) {
             throw ValidationException::withMessages([
                 'module_name' => [__('modules.activation_failed', ['error' => $e->getMessage()])],
@@ -359,12 +365,15 @@ class ModuleService
      *
      * @param  string  $moduleName  제거할 모듈명
      * @param  bool  $deleteData  모듈 데이터(테이블) 삭제 여부
+     * @param  string|null  $failureReason  실패 시 사유가 담기는 out 파라미터 (성공 시 null)
      * @return bool 제거 성공 여부
      *
      * @throws ValidationException 모듈 제거 실패 시
      */
-    public function uninstallModule(string $moduleName, bool $deleteData = false): bool
+    public function uninstallModule(string $moduleName, bool $deleteData = false, ?string &$failureReason = null): bool
     {
+        $failureReason = null;
+
         HookManager::doAction('core.modules.before_uninstall', $moduleName, $deleteData);
 
         try {
@@ -372,7 +381,7 @@ class ModuleService
             $this->moduleManager->loadModules();
             $moduleInfo = $this->moduleManager->getModuleInfo($moduleName);
 
-            $result = $this->moduleManager->uninstallModule($moduleName, $deleteData);
+            $result = $this->moduleManager->uninstallModule($moduleName, $deleteData, null, $failureReason);
 
             if ($result) {
                 $module = $this->moduleRepository->findByName($moduleName);
@@ -867,10 +876,14 @@ class ModuleService
     private function executeModuleInstall(string $identifier): array
     {
         $this->moduleManager->loadModules();
-        $result = $this->moduleManager->installModule($identifier);
+        $result = $this->moduleManager->installModule($identifier, null, VendorMode::Auto, false, $failureReason);
 
         if (! $result) {
-            throw new ModuleOperationException('modules.errors.install_failed');
+            // 사유를 실어 올리지 않으면 'modules.errors.install_failed' 의 치환 자리가
+            // 비어 관리자 화면에 리터럴 ':error' 가 그대로 노출된다.
+            throw new ModuleOperationException('modules.errors.install_failed', [
+                'error' => $failureReason ?? __('modules.errors.unknown_error'),
+            ]);
         }
 
         return $this->moduleManager->getModuleInfo($identifier);

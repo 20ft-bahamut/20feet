@@ -143,6 +143,28 @@
 | `getMetadata()` | `[]` | 메타데이터 |
 | `getMiddleware()` | `[]` | 확장 미들웨어 선언 (self-gate targets) — `{class, groups, timing?, targets}` ([middleware.md](../backend/middleware.md)) |
 | `getBenchmarkProfiles()` | `[]` | 성능 계측 대상 선언 (`g7:bench` 가 수집) — 목록/화면/쓰기/배치 4축 ([benchmark.md](../backend/benchmark.md)) |
+
+#### 수명주기 훅이 실패를 알리는 방법
+
+`install()` / `activate()` / `deactivate()` / `uninstall()` 은 bool 만 돌려주므로, 그냥 `false` 를
+반환하면 **왜 거부했는지가 코어에 전달되지 않는다.** 그 결과 운영자는 원인이 빠진 실패 문구만 본다.
+
+사유를 남기려면 `failWith()` 로 반환한다. 코어가 그 사유를 응답 문구의 원인 자리에 싣는다.
+
+```php
+public function activate(): bool
+{
+    if (! extension_loaded('gd')) {
+        return $this->failWith(__('my-module::messages.gd_required'));
+    }
+
+    return true;
+}
+```
+
+- 사유는 **이미 번역된 문장**이어야 한다 — 확장의 언어 파일 키는 코어가 해석할 수 없다.
+- 사유를 남기지 않고 `false` 만 돌려주면 코어가 일반 문구로 대체한다(동작은 그대로).
+- 같은 규칙이 플러그인(`AbstractPlugin`)에도 동일하게 적용된다.
 | `upgrades()` | `[]` | 업그레이드 스텝 (`upgrades/` 디렉토리 자동 발견). **`g7_version >= 7.0.0-beta.5` 인 모듈은 신규 step 이 `AbstractUpgradeStep` 상속 의무** ([upgrade-step-guide §13](upgrade-step-guide.md)) — 미상속 시 `ModuleManager::runUpgradeSteps` 가 `RuntimeException` throw |
 
 #### 동적 권한/역할/메뉴 보존 규칙
