@@ -1936,6 +1936,13 @@ class TemplateService
                 }
                 throw $e;
             }
+        } catch (TemplateOperationException $e) {
+            throw $e;
+        } catch (\RuntimeException $e) {
+            // ZipInstallHelper 등 설치 원본 처리의 raw RuntimeException(깨진 zip·manifest
+            // 누락 같은 사용자 입력 오류)을 도메인 예외로 승격한다 — 컨트롤러의 좁혀진
+            // catch 가 인프라 예외와 구분해 종전 422 계약을 유지하고, 사유는 :error 로 보존.
+            throw new TemplateOperationException('templates.errors.install_failed', ['error' => $e->getMessage()], $e);
         } finally {
             if (File::exists($extractPath)) {
                 File::deleteDirectory($extractPath);
@@ -1989,6 +1996,12 @@ class TemplateService
                 }
                 throw $e;
             }
+        } catch (TemplateOperationException $e) {
+            throw $e;
+        } catch (\RuntimeException $e) {
+            // GithubHelper·ZipInstallHelper 의 raw RuntimeException(잘못된 URL·다운로드
+            // 실패·manifest 오류)을 도메인 예외로 승격한다 — 종전 422 계약 유지, 사유 보존.
+            throw new TemplateOperationException('templates.errors.install_failed', ['error' => $e->getMessage()], $e);
         } finally {
             if (File::exists($extractPath)) {
                 File::deleteDirectory($extractPath);

@@ -570,6 +570,40 @@ class ModuleControllerTest extends TestCase
     }
 
     /**
+     * 실제 서비스 경로: module.json 없는 ZIP 업로드는 422 를 유지한다.
+     *
+     * ZipInstallHelper 는 이런 사용자 입력 오류를 raw `\RuntimeException` 으로 던진다.
+     * 컨트롤러 catch 가 도메인 예외로 좁혀지면서 서비스가 이를 승격하지 않으면, 종전
+     * 422 였던 실패가 500(인프라 장애)으로 위장된다 — 서비스 계층의 승격을 고정한다.
+     * (mock 이 아닌 실제 ZIP 으로 서비스 실경로를 태운다.)
+     */
+    public function test_install_from_file_with_zip_missing_manifest_returns_422(): void
+    {
+        $zipPath = tempnam(sys_get_temp_dir(), 'g7zip').'.zip';
+        $zip = new \ZipArchive;
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        $zip->addFromString('readme.txt', 'manifest 없는 ZIP');
+        $zip->close();
+
+        try {
+            $file = new UploadedFile($zipPath, 'module.zip', 'application/zip', null, true);
+
+            $response = $this->authRequest()->postJson('/api/admin/modules/install-from-file', [
+                'file' => $file,
+            ]);
+
+            $response->assertStatus(422);
+            $this->assertStringContainsString(
+                __('modules.errors.module_json_not_found'),
+                (string) $response->json('message'),
+                '실패 사유(:error 자리)가 응답 메시지에 보존되지 않았습니다.'
+            );
+        } finally {
+            @unlink($zipPath);
+        }
+    }
+
+    /**
      * ModuleService에서 일반 Exception 발생 시 500 반환
      */
     public function test_install_from_file_returns_500_on_general_exception(): void

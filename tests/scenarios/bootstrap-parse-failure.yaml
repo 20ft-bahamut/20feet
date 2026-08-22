@@ -30,13 +30,11 @@ effects:
   - incompatible_strings_defined_per_locale
   - core_source_has_no_lookbehind
   - variable_extraction_contract_unchanged
-  - shipped_bundle_lookbehind_blocked_by_static_check
 
 test_files:
   - tests/Playwright/specs/smoke/bootstrap-parse-failure.spec.ts
   - tests/Feature/View/BootstrapFallbackDiagnosisTest.php
   - resources/js/core/template-engine/__tests__/DataBindingEngine.test.ts
-  - .claude/scripts/audit/__tests__/shipped-bundle-browser-baseline.test.cjs
 
 notes: |
   로케일 축은 E2E cross product 에 넣지 않는다 — 화면 문구는 서버가 렌더한 문자열을
@@ -46,3 +44,6 @@ notes: |
 
   하한 미만 실기기(iOS 15) 에서 "깨진 채로 이용 가능한가" 는 재현 수단이 없어 이 매니페스트
   범위 밖이다 — 최신 WebKit(Playwright) 도 lookbehind 를 지원해 결함 자체가 재현되지 않는다.
+
+  배포 번들에 lookbehind 등 파싱 하한 초과 문법이 재유입되는 회귀는 위 테스트와 별개로
+  저장소의 정적 검사가 차단한다 (이 매니페스트의 검증 범위 밖).
