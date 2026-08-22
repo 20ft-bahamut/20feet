@@ -604,6 +604,8 @@ G7 은 **기본 통화**(상품·쿠폰·배송비 저장 기준), **표시 통�
 | Listener 생성자에 구체 Repository 직접 주입 | Repository Interface 주입 |
 | Listener 에서 `request()` / `$_POST` 직접 접근 | Service 가 검증 후 도메인 객체로 전달 받기 |
 | Filter 훅에 `'type' => 'filter'` 누락 | type 명시 필수 (반환값 무시 회귀 차단) |
+| 실패 시 호출자 트랜잭션을 되돌려야 하는 Action 훅에 `'sync' => true` 누락 | 금전 이동(쿠폰 차감·복원, 적립금 차감·복원)은 `sync` 필수. 기본값은 큐 래핑 + `afterCommit` 이라 **커밋 뒤에** 실행되어, 예외를 던져도 롤백되지 않고 오류 응답만 나간 채 데이터가 남는다 (큐 드라이버가 `sync` 여도 동일) |
+| 훅 회귀 테스트에서 리스너를 손으로 `addAction` 등록 | `HookListenerRegistrar::register()` 로 **실제 등록 경로**를 태운다 — 손으로 등록하면 큐 래핑을 건너뛰어 커밋 이후 실행 문제를 통과시킨다 |
 | Listener 가 `HookListenerInterface` 미구현 (auto-discovery 대상) | implements + `getSubscribedHooks()` 정적 메서드 |
 
 > 상세: [hooks.md "Listener 데이터 접근 규정"](docs/extension/hooks.md), [service-repository.md](docs/backend/service-repository.md)
