@@ -1,0 +1,113 @@
+{
+    "twentyft": {
+        "base_layout_title": "20ft Studio",
+        "base_layout_description": "20ft 공식 Website User Template (Portfolio / SuperBify / Project Inquiry)",
+        "routes": {
+            "home": {
+                "title": "20ft Studio",
+                "description": "20ft는 지속 가능한 웹 제품, 커머스 경험, 그누보드 7 확장을 설계하고 개발합니다."
+            },
+            "portfolio": {
+                "title": "Portfolio — 20ft Studio",
+                "description": "20ft가 공유할 준비가 된 프로젝트 포트폴리오입니다."
+            },
+            "portfolio_detail": {
+                "title": "Portfolio — 20ft Studio",
+                "description": "프로젝트 상세 정보입니다."
+            },
+            "superbify": {
+                "title": "SuperBify — 20ft Studio",
+                "description": "그누보드 7용 재사용 가능한 확장 기능 목록입니다."
+            },
+            "superbify_detail": {
+                "title": "SuperBify — 20ft Studio",
+                "description": "SuperBify 제품 상세 정보입니다."
+            },
+            "inquiry": {
+                "title": "Project Inquiry — 20ft Studio",
+                "description": "프로젝트 문의 페이지입니다. 현재는 레이아웃 미리보기 상태입니다."
+            }
+        },
+        "data_source": {
+            "portfolio_preview": "Portfolio 미리보기 데이터",
+            "superbify_preview": "SuperBify 미리보기 데이터",
+            "portfolio_items": "Portfolio 목록 데이터",
+            "portfolio_item": "Portfolio 상세 데이터",
+            "superbify_items": "SuperBify 목록 데이터",
+            "superbify_item": "SuperBify 상세 데이터"
+        },
+        "errors": {
+            "not_found_title": "페이지를 찾을 수 없습니다",
+            "not_found_description": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.",
+            "forbidden_title": "접근 권한이 없습니다",
+            "forbidden_description": "이 페이지에 접근할 수 있는 권한이 없습니다.",
+            "server_error_title": "문제가 발생했습니다",
+            "server_error_description": "잠시 후 다시 시도해 주세요."
+        },
+        "inquiry": {
+            "eyebrow": "PROJECT INQUIRY",
+            "heading": "만들고 싶은 것을 이야기해주세요.",
+            "notice": "현재 온라인 문의 접수 기능을 준비 중입니다.",
+            "label_name": "이름",
+            "label_email": "이메일",
+            "label_project_type": "프로젝트 유형",
+            "label_message": "문의 내용",
+            "placeholder_name": "이름을 입력해주세요",
+            "placeholder_email": "이메일 주소",
+            "placeholder_message": "만들고 싶은 것과 현재 상황을 간단히 적어주세요",
+            "option_web_commerce": "웹 / 커머스",
+            "option_software_system": "소프트웨어 / 시스템",
+            "option_gnuboard": "그누보드 7 확장",
+            "option_other": "기타 협업",
+            "submit": "프로젝트 문의 보내기"
+        },
+        "nav": {
+            "portfolio": "Portfolio",
+            "superbify": "SuperBify",
+            "inquiry": "프로젝트 문의"
+        },
+        "home": {
+            "hero": {
+                "eyebrow": "20FT / SOFTWARE STUDIO",
+                "headline": "작은 공간에서, 큰 가능성을 만듭니다.",
+                "sub": "웹사이트와 쇼핑몰, 웹서비스와 그누보드 7 확장까지. 필요한 것을 이해하고, 실제로 운영되는 결과물로 만듭니다.",
+                "cta_primary": "프로젝트 문의",
+                "cta_secondary": "Portfolio 보기"
+            },
+            "portfolio": {
+                "eyebrow": "SELECTED PORTFOLIO",
+                "heading": "만든 것들.",
+                "lead": "어떤 일을 하는지는 결과물로 보여주는 편이 가장 정확하다고 생각합니다.",
+                "empty_title": "공개할 수 있는 프로젝트를 준비하고 있습니다.",
+                "empty_message": "전체 Portfolio는 곧 보여드릴 수 있을 것 같습니다."
+            },
+            "superbify": {
+                "eyebrow": "OPEN SOURCE / G7",
+                "heading": "SuperBify",
+                "lead": "사용하는 도구가 부족하면 직접 만들기도 합니다.",
+                "body": "SuperBify는 Gnuboard 7을 더 편하게 확장하고 활용하기 위한 Extension, Developer Tool, Experiment를 만드는 20ft의 프로젝트입니다.",
+                "cta": "SuperBify 보기",
+                "empty_title": "첫 프로젝트를 만들고 있습니다.",
+                "empty_message": "실제로 쓸 수 있을 때 공개합니다."
+            },
+            "about": {
+                "eyebrow": "ABOUT 20FT",
+                "heading": "작은 공간에서 계속 만듭니다.",
+                "body": "20ft라는 이름은 작은 20피트 공간에서 시작했습니다. 지금은 웹과 소프트웨어, 필요한 도구와 아이디어를 만드는 Digital Garage로 이어가고 있습니다.",
+                "proof": "20+ YEARS / WEB DEVELOPMENT",
+                "cta": "20ft에 대하여"
+            },
+            "inquiry_cta": {
+                "eyebrow": "JUST FOR FUN.",
+                "motto": "재미있는 문제를 발견하고, 직접 만들어보고, 실제로 작동하게 만드는 것. 그게 20ft가 계속 만드는 이유입니다.",
+                "heading": "만들고 싶은 것이 있으신가요?",
+                "sub": "홈페이지, 쇼핑몰, 웹서비스, 그누보드 7 개발이나 기존 시스템 개선까지. 필요한 것을 편하게 이야기해주세요.",
+                "cta": "프로젝트 문의"
+            },
+            "common": {
+                "capability_line": "WEB / COMMERCE / SOFTWARE / GNUBOARD 7",
+                "signature": "A SMALL SPACE. INFINITE POSSIBILITIES."
+            }
+        }
+    }
+}

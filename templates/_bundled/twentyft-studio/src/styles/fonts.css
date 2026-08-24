@@ -1,0 +1,49 @@
+/**
+ * 20ft Studio Font Faces
+ *
+ * Typography:
+ *   Display: Paperlogy (700/800/900), fallback to generic serif/sans stack
+ *   Body: SUIT Variable (400-700), fallback to system-ui, -apple-system, sans-serif
+ *
+ * NOTE: Official font hosting paths are not confirmed yet.
+ * Until confirmed, we rely on generic fallbacks declared in design-tokens.css.
+ * Do NOT recreate the 20ft wordmark as a webfont.
+ */
+
+@font-face {
+    font-family: 'Paperlogy';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local('Paperlogy');
+    /* Placeholder for verified hosted woff2 source: */
+    /* src: local('Paperlogy'), url('PATH_TO_VERIFY.woff2') format('woff2'); */
+}
+
+@font-face {
+    font-family: 'Paperlogy';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: local('Paperlogy');
+    /* src: local('Paperlogy'), url('PATH_TO_VERIFY.woff2') format('woff2'); */
+}
+
+@font-face {
+    font-family: 'Paperlogy';
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: local('Paperlogy');
+    /* src: local('Paperlogy'), url('PATH_TO_VERIFY.woff2') format('woff2'); */
+}
+
+@font-face {
+    font-family: 'SUIT Variable';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: local('SUIT Variable');
+    /* Placeholder for verified hosted woff2 source: */
+    /* src: local('SUIT Variable'), url('PATH_TO_VERIFY.woff2') format('woff2'); */
+}

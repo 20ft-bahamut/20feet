@@ -1,0 +1,108 @@
+{
+    "identifier": "twentyft-studio",
+    "vendor": "20ft",
+    "name": {
+        "ko": "20ft Studio",
+        "en": "20ft Studio"
+    },
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": {
+        "ko": "20ft 공식 Website User Template (Portfolio / SuperBify / Project Inquiry)",
+        "en": "20ft official website user template (Portfolio / SuperBify / Project Inquiry)"
+    },
+    "type": "user",
+    "locales": ["ko", "en"],
+    "author": {
+        "name": "20ft",
+        "email": "contact@20ft.io",
+        "url": "https://20ft.io"
+    },
+    "release_date": "2026-08-24",
+    "g7_version": ">=7.0.0",
+    "dependencies": {
+        "modules": {},
+        "plugins": {}
+    },
+    "assets": {
+        "css": ["dist/css/components.css"],
+        "js": ["dist/js/components.iife.js"],
+        "fonts": [],
+        "images": [
+            "assets/brand/20ft/logo/full.svg",
+            "assets/brand/20ft/logo/full-white.svg",
+            "assets/brand/20ft/logo/compact.svg",
+            "assets/brand/20ft/logo/compact-white.svg",
+            "assets/brand/20ft/logo/symbol.svg",
+            "assets/brand/20ft/logo/symbol-white.svg",
+            "assets/brand/20ft/logo/badge-light.svg",
+            "assets/brand/20ft/logo/badge-dark.svg"
+        ]
+    },
+    "components": {
+        "basic": [
+            "A",
+            "Article",
+            "Aside",
+            "Button",
+            "Div",
+            "Form",
+            "Footer",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "Header",
+            "Img",
+            "Input",
+            "Label",
+            "Li",
+            "Main",
+            "Nav",
+            "Ol",
+            "Option",
+            "P",
+            "Section",
+            "Select",
+            "Span",
+            "Textarea",
+            "Ul"
+        ],
+        "composite": [
+            "SiteHeader",
+            "SiteFooter",
+            "BrandLogo",
+            "SectionEyebrow",
+            "PrimaryButton",
+            "TextLink",
+            "Tag",
+            "Status",
+            "HomeHero",
+            "SelectedPortfolio",
+            "SuperBifyPreview",
+            "AboutPreview",
+            "InquiryMottoCTA",
+            "PortfolioList",
+            "PortfolioDetail",
+            "SuperBifyList",
+            "SuperBifyDetail",
+            "InquiryForm"
+        ],
+        "layout": [
+            "Container"
+        ]
+    },
+    "error_config": {
+        "layouts": {
+            "404": "errors/404",
+            "403": "errors/403",
+            "500": "errors/500"
+        }
+    },
+    "features": {
+        "dark_mode": false,
+        "responsive": true,
+        "multi_language": true,
+        "multi_currency": false
+    }
+}

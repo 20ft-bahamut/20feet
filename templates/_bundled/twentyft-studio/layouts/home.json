@@ -1,0 +1,63 @@
+{
+    "version": "1.0.0",
+    "layout_name": "home",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.home.title",
+        "description": "$t:twentyft.routes.home.description"
+    },
+    "data_sources": [
+        {
+            "id": "portfolio_preview",
+            "label_key": "$t:twentyft.data_source.portfolio_preview",
+            "type": "static",
+            "data": [],
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "superbify_preview",
+            "label_key": "$t:twentyft.data_source.superbify_preview",
+            "type": "static",
+            "data": [],
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "home_hero",
+                "type": "composite",
+                "name": "HomeHero"
+            },
+            {
+                "id": "home_selected_portfolio",
+                "type": "composite",
+                "name": "SelectedPortfolio",
+                "props": {
+                    "items": "{{portfolio_preview?.data ?? []}}"
+                }
+            },
+            {
+                "id": "home_superbify_preview",
+                "type": "composite",
+                "name": "SuperBifyPreview",
+                "props": {
+                    "items": "{{superbify_preview?.data ?? []}}"
+                }
+            },
+            {
+                "id": "home_about_preview",
+                "type": "composite",
+                "name": "AboutPreview"
+            },
+            {
+                "id": "home_inquiry_motto_cta",
+                "type": "composite",
+                "name": "InquiryMottoCTA"
+            }
+        ]
+    }
+}

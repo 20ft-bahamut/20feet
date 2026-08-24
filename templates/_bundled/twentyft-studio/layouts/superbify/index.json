@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "layout_name": "superbify/index",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.superbify.title",
+        "description": "$t:twentyft.routes.superbify.description"
+    },
+    "data_sources": [
+        {
+            "id": "superbify_items",
+            "label_key": "$t:twentyft.data_source.superbify_items",
+            "type": "static",
+            "data": [],
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "superbify_list",
+                "type": "composite",
+                "name": "SuperBifyList",
+                "props": {
+                    "items": "{{superbify_items?.data ?? []}}"
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,45 @@
+{
+    "name": "@20ft/twentyft-studio",
+    "version": "0.1.0",
+    "description": "20ft Studio Gnuboard7 User Template (Portfolio / SuperBify / Project Inquiry)",
+    "type": "module",
+    "main": "dist/js/components.iife.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "components.json"
+    ],
+    "scripts": {
+        "build": "vite build",
+        "dev": "vite build --watch",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "type-check": "tsc --noEmit"
+    },
+    "keywords": [
+        "g7",
+        "template",
+        "user",
+        "20ft",
+        "portfolio",
+        "superbify"
+    ],
+    "author": "20ft",
+    "license": "MIT",
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^5.1.0",
+        "happy-dom": "^20.0.10",
+        "typescript": "^5.7.0",
+        "vite": "^7.0.4",
+        "vite-plugin-dts": "^4.5.4",
+        "vitest": "^4.0.6"
+    }
+}

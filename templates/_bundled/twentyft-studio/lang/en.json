@@ -1,0 +1,113 @@
+{
+    "twentyft": {
+        "base_layout_title": "20ft Studio",
+        "base_layout_description": "20ft official website user template (Portfolio / SuperBify / Project Inquiry)",
+        "routes": {
+            "home": {
+                "title": "20ft Studio",
+                "description": "20ft designs and ships durable web products, commerce experiences, and Gnuboard 7 extensions."
+            },
+            "portfolio": {
+                "title": "Portfolio — 20ft Studio",
+                "description": "Selected projects 20ft is ready to share."
+            },
+            "portfolio_detail": {
+                "title": "Portfolio — 20ft Studio",
+                "description": "Project details."
+            },
+            "superbify": {
+                "title": "SuperBify — 20ft Studio",
+                "description": "Reusable Gnuboard 7 extensions."
+            },
+            "superbify_detail": {
+                "title": "SuperBify — 20ft Studio",
+                "description": "SuperBify product details."
+            },
+            "inquiry": {
+                "title": "Project Inquiry — 20ft Studio",
+                "description": "Project inquiry page. Currently a layout preview only."
+            }
+        },
+        "data_source": {
+            "portfolio_preview": "Portfolio preview data",
+            "superbify_preview": "SuperBify preview data",
+            "portfolio_items": "Portfolio list data",
+            "portfolio_item": "Portfolio detail data",
+            "superbify_items": "SuperBify list data",
+            "superbify_item": "SuperBify detail data"
+        },
+        "errors": {
+            "not_found_title": "Page not found",
+            "not_found_description": "The page you're looking for may have moved or no longer exists.",
+            "forbidden_title": "Access denied",
+            "forbidden_description": "You don't have permission to access this page.",
+            "server_error_title": "Something went wrong",
+            "server_error_description": "Please try again in a moment."
+        },
+        "inquiry": {
+            "eyebrow": "PROJECT INQUIRY",
+            "heading": "Tell us about your project",
+            "notice": "Online inquiry submission is currently being prepared.",
+            "label_name": "Name",
+            "label_email": "Email",
+            "label_project_type": "Project type",
+            "label_message": "Message",
+            "placeholder_name": "Your name",
+            "placeholder_email": "your@email.com",
+            "placeholder_message": "Briefly describe what you are building",
+            "option_web_commerce": "Web / Commerce",
+            "option_software_system": "Software / System",
+            "option_gnuboard": "Gnuboard 7 extension",
+            "option_other": "Other collaboration",
+            "submit": "Send Inquiry"
+        },
+        "nav": {
+            "portfolio": "Portfolio",
+            "superbify": "SuperBify",
+            "inquiry": "Project Inquiry"
+        },
+        "home": {
+            "hero": {
+                "eyebrow": "20FT / SOFTWARE STUDIO",
+                "headline": "We make big possibilities from a small space.",
+                "sub": "Websites, commerce, web services, and Gnuboard 7 extensions. We understand what is needed and turn it into something that actually runs.",
+                "cta_primary": "Project Inquiry",
+                "cta_secondary": "View Portfolio"
+            },
+            "portfolio": {
+                "eyebrow": "SELECTED PORTFOLIO",
+                "heading": "Things we have made.",
+                "lead": "We think the most accurate way to show what we do is through the work itself.",
+                "empty_title": "We are preparing projects that can be shared publicly.",
+                "empty_message": "The full portfolio will be available soon."
+            },
+            "superbify": {
+                "eyebrow": "OPEN SOURCE / G7",
+                "heading": "SuperBify",
+                "lead": "When the tools we use fall short, we sometimes build our own.",
+                "body": "SuperBify is a 20ft project that creates Extensions, Developer Tools, and Experiments to make Gnuboard 7 easier to extend and use.",
+                "cta": "View SuperBify",
+                "empty_title": "We are building the first project.",
+                "empty_message": "It will be shared once it is ready to use."
+            },
+            "about": {
+                "eyebrow": "ABOUT 20FT",
+                "heading": "We keep making things in a small space.",
+                "body": "The name 20ft started with a small 20-foot space. Today it continues as a Digital Garage where we build web and software, tools, and ideas.",
+                "proof": "20+ YEARS / WEB DEVELOPMENT",
+                "cta": "About 20ft"
+            },
+            "inquiry_cta": {
+                "eyebrow": "JUST FOR FUN.",
+                "motto": "We find interesting problems, build them ourselves, and make them actually work. That is why 20ft keeps making things.",
+                "heading": "Do you have something you want to build?",
+                "sub": "Homepage, shopping mall, web service, Gnuboard 7 development, or improving an existing system. Tell us what you need.",
+                "cta": "Project Inquiry"
+            },
+            "common": {
+                "capability_line": "WEB / COMMERCE / SOFTWARE / GNUBOARD 7",
+                "signature": "A SMALL SPACE. INFINITE POSSIBILITIES."
+            }
+        }
+    }
+}

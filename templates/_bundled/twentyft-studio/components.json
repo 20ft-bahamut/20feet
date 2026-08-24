@@ -1,0 +1,283 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "templateId": "twentyft-studio",
+    "version": "0.1.0",
+    "components": {
+        "basic": [
+            {
+                "name": "A",
+                "type": "basic",
+                "description": "HTML anchor element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Article",
+                "type": "basic",
+                "description": "HTML article element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Aside",
+                "type": "basic",
+                "description": "HTML aside element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Button",
+                "type": "basic",
+                "description": "HTML button element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Div",
+                "type": "basic",
+                "description": "HTML div element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Form",
+                "type": "basic",
+                "description": "HTML form element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Footer",
+                "type": "basic",
+                "description": "HTML footer element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H1",
+                "type": "basic",
+                "description": "HTML h1 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H2",
+                "type": "basic",
+                "description": "HTML h2 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H3",
+                "type": "basic",
+                "description": "HTML h3 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H4",
+                "type": "basic",
+                "description": "HTML h4 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Header",
+                "type": "basic",
+                "description": "HTML header element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Img",
+                "type": "basic",
+                "description": "HTML img element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Input",
+                "type": "basic",
+                "description": "HTML input element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Label",
+                "type": "basic",
+                "description": "HTML label element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Li",
+                "type": "basic",
+                "description": "HTML li element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Main",
+                "type": "basic",
+                "description": "HTML main element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Nav",
+                "type": "basic",
+                "description": "HTML nav element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Ol",
+                "type": "basic",
+                "description": "HTML ol element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Option",
+                "type": "basic",
+                "description": "HTML option element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "P",
+                "type": "basic",
+                "description": "HTML p element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Section",
+                "type": "basic",
+                "description": "HTML section element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Select",
+                "type": "basic",
+                "description": "HTML select element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Span",
+                "type": "basic",
+                "description": "HTML span element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Textarea",
+                "type": "basic",
+                "description": "HTML textarea element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Ul",
+                "type": "basic",
+                "description": "HTML ul element wrapper",
+                "path": "src/components/basic/index.tsx"
+            }
+        ],
+        "composite": [
+            {
+                "name": "SiteHeader",
+                "type": "composite",
+                "description": "Top navigation with Portfolio, SuperBify, Project Inquiry links",
+                "path": "src/components/SiteHeader.tsx"
+            },
+            {
+                "name": "SiteFooter",
+                "type": "composite",
+                "description": "Site footer with brand logo, signature, capability line, navigation, and copyright (About link removed in v1)",
+                "path": "src/components/SiteFooter.tsx"
+            },
+            {
+                "name": "BrandLogo",
+                "type": "composite",
+                "description": "20ft brand logo rendered from official SVG assets (full, compact, symbol, badge)",
+                "path": "src/components/BrandLogo.tsx"
+            },
+            {
+                "name": "SectionEyebrow",
+                "type": "composite",
+                "description": "Small uppercase section label",
+                "path": "src/components/SectionEyebrow.tsx"
+            },
+            {
+                "name": "PrimaryButton",
+                "type": "composite",
+                "description": "Primary CTA button",
+                "path": "src/components/PrimaryButton.tsx"
+            },
+            {
+                "name": "TextLink",
+                "type": "composite",
+                "description": "Text-only anchor link",
+                "path": "src/components/TextLink.tsx"
+            },
+            {
+                "name": "Tag",
+                "type": "composite",
+                "description": "Pill tag for categories or product types",
+                "path": "src/components/Tag.tsx"
+            },
+            {
+                "name": "Status",
+                "type": "composite",
+                "description": "Status badge / empty state notice",
+                "path": "src/components/Status.tsx"
+            },
+            {
+                "name": "HomeHero",
+                "type": "composite",
+                "description": "Home hero section with capability line",
+                "path": "src/components/HomeHero.tsx"
+            },
+            {
+                "name": "SelectedPortfolio",
+                "type": "composite",
+                "description": "Home selected portfolio preview",
+                "path": "src/components/SelectedPortfolio.tsx"
+            },
+            {
+                "name": "SuperBifyPreview",
+                "type": "composite",
+                "description": "Home SuperBify product preview",
+                "path": "src/components/SuperBifyPreview.tsx"
+            },
+            {
+                "name": "AboutPreview",
+                "type": "composite",
+                "description": "Home about section with id=about",
+                "path": "src/components/AboutPreview.tsx"
+            },
+            {
+                "name": "InquiryMottoCTA",
+                "type": "composite",
+                "description": "Home bottom inquiry motto and CTA",
+                "path": "src/components/InquiryMottoCTA.tsx"
+            },
+            {
+                "name": "PortfolioList",
+                "type": "composite",
+                "description": "Portfolio list page",
+                "path": "src/components/PortfolioList.tsx"
+            },
+            {
+                "name": "PortfolioDetail",
+                "type": "composite",
+                "description": "Portfolio detail page",
+                "path": "src/components/PortfolioDetail.tsx"
+            },
+            {
+                "name": "SuperBifyList",
+                "type": "composite",
+                "description": "SuperBify list page",
+                "path": "src/components/SuperBifyList.tsx"
+            },
+            {
+                "name": "SuperBifyDetail",
+                "type": "composite",
+                "description": "SuperBify detail page",
+                "path": "src/components/SuperBifyDetail.tsx"
+            },
+            {
+                "name": "InquiryForm",
+                "type": "composite",
+                "description": "Disabled project inquiry form",
+                "path": "src/components/InquiryForm.tsx"
+            }
+        ],
+        "layout": [
+            {
+                "name": "Container",
+                "type": "layout",
+                "description": "Max-width content container",
+                "path": "src/components/Container.tsx"
+            }
+        ]
+    }
+}

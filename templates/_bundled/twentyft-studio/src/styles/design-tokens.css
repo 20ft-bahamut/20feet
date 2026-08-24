@@ -1,0 +1,50 @@
+/**
+ * 20ft Studio Design Tokens
+ *
+ * Colors:
+ *   Deep Indigo  : #102A4C
+ *   Indigo       : #183B6B
+ *   Heritage Gold: #B69B5F
+ *   Warm Ivory   : #F4F0E6
+ *   Paper White  : #FAF8F3
+ *   Charcoal     : #1A1A1A
+ *   Signal Red   : #E7482D
+ */
+
+:root {
+    --20ft-deep-indigo: #102A4C;
+    --20ft-indigo: #183B6B;
+    --20ft-heritage-gold: #B69B5F;
+    --20ft-warm-ivory: #F4F0E6;
+    --20ft-paper-white: #FAF8F3;
+    --20ft-charcoal: #1A1A1A;
+    --20ft-signal-red: #E7482D;
+
+    --20ft-text-primary: var(--20ft-charcoal);
+    --20ft-text-inverse: var(--20ft-paper-white);
+    --20ft-text-muted: #5E6063;
+
+    --20ft-bg-primary: var(--20ft-paper-white);
+    --20ft-bg-secondary: var(--20ft-warm-ivory);
+    --20ft-bg-accent: var(--20ft-indigo);
+
+    --20ft-border: rgba(16, 42, 76, 0.12);
+    --20ft-border-strong: var(--20ft-indigo);
+
+    --20ft-radius: 6px;
+    --20ft-radius-sm: 2px;
+
+    --20ft-spacing-xs: 0.25rem;
+    --20ft-spacing-sm: 0.5rem;
+    --20ft-spacing-md: 1rem;
+    --20ft-spacing-lg: 1.5rem;
+    --20ft-spacing-xl: 2.5rem;
+    --20ft-spacing-2xl: 4rem;
+    --20ft-spacing-3xl: 6rem;
+
+    --20ft-font-display: 'Paperlogy', 'Georgia', 'Times New Roman', serif;
+    --20ft-font-body: 'SUIT Variable', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+    --20ft-max-width: 1280px;
+    --20ft-header-height: 4rem;
+}

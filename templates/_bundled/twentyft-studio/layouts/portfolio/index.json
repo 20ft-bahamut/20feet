@@ -1,0 +1,32 @@
+{
+    "version": "1.0.0",
+    "layout_name": "portfolio/index",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.portfolio.title",
+        "description": "$t:twentyft.routes.portfolio.description"
+    },
+    "data_sources": [
+        {
+            "id": "portfolio_items",
+            "label_key": "$t:twentyft.data_source.portfolio_items",
+            "type": "static",
+            "data": [],
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "portfolio_list",
+                "type": "composite",
+                "name": "PortfolioList",
+                "props": {
+                    "items": "{{portfolio_items?.data ?? []}}"
+                }
+            }
+        ]
+    }
+}

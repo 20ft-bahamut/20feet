@@ -1,0 +1,85 @@
+{
+    "version": "1.0.0",
+    "description": "twentyft-studio 사용자 템플릿 라우트 정의 (Portfolio / SuperBify / Project Inquiry)",
+    "routes": [
+        {
+            "_comment": "=== 홈 ===",
+            "path": "/",
+            "layout": "home",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.home.title"
+            }
+        },
+        {
+            "_comment": "=== 포트폴리오 목록 ===",
+            "path": "/portfolio",
+            "layout": "portfolio/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.portfolio.title"
+            }
+        },
+        {
+            "_comment": "=== 포트폴리오 상세 ===",
+            "path": "/portfolio/:slug",
+            "layout": "portfolio/detail",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.portfolio_detail.title"
+            }
+        },
+        {
+            "_comment": "=== SuperBify 목록 ===",
+            "path": "/superbify",
+            "layout": "superbify/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.superbify.title"
+            }
+        },
+        {
+            "_comment": "=== SuperBify 상세 ===",
+            "path": "/superbify/:slug",
+            "layout": "superbify/detail",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.superbify_detail.title"
+            }
+        },
+        {
+            "_comment": "=== 프로젝트 문의 ===",
+            "path": "/inquiry",
+            "layout": "inquiry",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.inquiry.title"
+            }
+        },
+        {
+            "_comment": "=== 에러 페이지 ===",
+            "path": "/404",
+            "layout": "errors/404",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.errors.not_found_title"
+            }
+        },
+        {
+            "path": "/403",
+            "layout": "errors/403",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.errors.forbidden_title"
+            }
+        },
+        {
+            "path": "/500",
+            "layout": "errors/500",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.errors.server_error_title"
+            }
+        }
+    ]
+}
