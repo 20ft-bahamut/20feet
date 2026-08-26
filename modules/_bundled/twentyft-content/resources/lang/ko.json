@@ -55,7 +55,7 @@
             "types": "유형",
             "status": "상태",
             "visibility": "공개",
-            "featured": "Featured",
+            "featured": "메인 노출",
             "sort_order": "정렬 순서",
             "summary": "요약",
             "summary_ko": "요약 (한국어)",

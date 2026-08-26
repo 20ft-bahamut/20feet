@@ -170,7 +170,11 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                                 }}
                             >
                                 <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Project Story</H2>
-                                <P style={{ margin: 0 }}>{item.description}</P>
+                                <div
+                                    style={{ margin: 0 }}
+                                    // eslint-disable-next-line react/no-danger
+                                    dangerouslySetInnerHTML={{ __html: item.description }}
+                                />
                             </Div>
                         )}
 
