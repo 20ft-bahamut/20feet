@@ -154,6 +154,8 @@ class PortfolioController extends Controller
             $coverAttachmentId = $post->attachments()->first()?->id ?? $post->thumbnailAttachment?->id;
         }
 
+        $firstAttachment = $post->attachments()->first();
+
         return [
             'public_id' => $this->publicId($post),
             'slug' => $meta['slug'] ?? $this->slugFromTitle($post->title),
@@ -166,6 +168,11 @@ class PortfolioController extends Controller
             '_sort_order' => (int) ($meta['sort_order'] ?? 0),
             'created_at' => $post->created_at?->toIso8601String(),
             'cover_image_url' => $this->attachmentUrl($coverAttachmentId),
+            '_debug_cover_attachment_id' => $coverAttachmentId,
+            '_debug_first_attachment_id' => $firstAttachment?->id,
+            '_debug_first_attachment_post_id' => $firstAttachment?->post_id,
+            '_debug_post_id' => $post->id,
+            '_debug_attachments_count' => $post->attachments()->count(),
         ];
     }
 
