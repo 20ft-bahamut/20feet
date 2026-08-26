@@ -151,7 +151,7 @@ class PortfolioController extends Controller
     {
         $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
         if (! $coverAttachmentId) {
-            $coverAttachmentId = $post->thumbnailAttachment?->id;
+            $coverAttachmentId = $post->attachments()->first()?->id ?? $post->thumbnailAttachment?->id;
         }
 
         return [
@@ -176,7 +176,7 @@ class PortfolioController extends Controller
     {
         $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
         if (! $coverAttachmentId) {
-            $coverAttachmentId = $post->thumbnailAttachment?->id;
+            $coverAttachmentId = $post->attachments()->first()?->id ?? $post->thumbnailAttachment?->id;
         }
 
         return [
