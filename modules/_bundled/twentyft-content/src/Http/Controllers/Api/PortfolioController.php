@@ -149,6 +149,11 @@ class PortfolioController extends Controller
      */
     private function mapListItem(Post $post, array $meta): array
     {
+        $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
+        if (! $coverAttachmentId) {
+            $coverAttachmentId = $post->thumbnailAttachment?->id;
+        }
+
         return [
             'public_id' => $this->publicId($post),
             'slug' => $meta['slug'] ?? $this->slugFromTitle($post->title),
@@ -160,7 +165,7 @@ class PortfolioController extends Controller
             'is_featured' => (bool) $meta['is_featured'],
             '_sort_order' => (int) ($meta['sort_order'] ?? 0),
             'created_at' => $post->created_at?->toIso8601String(),
-            'cover_image_url' => $this->attachmentUrl($meta['cover_image_attachment_id'] ?? null),
+            'cover_image_url' => $this->attachmentUrl($coverAttachmentId),
         ];
     }
 
@@ -169,6 +174,11 @@ class PortfolioController extends Controller
      */
     private function mapDetailItem(Post $post, array $meta): array
     {
+        $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
+        if (! $coverAttachmentId) {
+            $coverAttachmentId = $post->thumbnailAttachment?->id;
+        }
+
         return [
             'public_id' => $this->publicId($post),
             'slug' => $meta['slug'] ?? $this->slugFromTitle($post->title),
@@ -184,7 +194,7 @@ class PortfolioController extends Controller
             'tech_stack' => $meta['tech_stack'],
             'related_url' => $meta['related_url'],
             'github_url' => $meta['github_url'],
-            'cover_image_url' => $this->attachmentUrl($meta['cover_image_attachment_id'] ?? null),
+            'cover_image_url' => $this->attachmentUrl($coverAttachmentId),
             'gallery_image_urls' => $this->galleryUrls($meta['gallery_attachment_ids'] ?? []),
         ];
     }
