@@ -1,0 +1,65 @@
+{
+  "package": "20ftdocs",
+  "version": "1.2.0-final",
+  "purpose": "20ft Software Studio 신규 G7 템플릿 구축용 IA/Brand/Design/Content/Implementation Harness",
+  "entry": "README.md",
+  "read_order": [
+    "README.md",
+    "00_AI_HARNESS.md",
+    "01_IA.md",
+    "02_BRAND.md",
+    "03_DESIGN_SYSTEM.md",
+    "04_CONTENT.md",
+    "05_HOME.md",
+    "06_PORTFOLIO.md",
+    "07_SUPERBIFY.md",
+    "08_ABOUT.md",
+    "09_PROJECT_INQUIRY.md",
+    "10_COMPONENTS.md",
+    "11_DATA_MODELS.md",
+    "12_G7_TEMPLATE_RULES.md",
+    "13_RESPONSIVE_ACCESSIBILITY_SEO.md",
+    "14_IMPLEMENTATION_PLAN.md",
+    "15_ACCEPTANCE.md",
+    "16_EXTERNAL_REVIEW_GUIDE.md",
+    "17_ASSETS.md",
+    "18_RELEASE_NOTES.md"
+  ],
+  "navigation": [
+    "Portfolio",
+    "SuperBify",
+    "About",
+    "프로젝트 문의"
+  ],
+  "non_negotiables": [
+    "No Services top-level page",
+    "Portfolio is the primary proof of work",
+    "SuperBify is a project-board style hub",
+    "No cafe/caravan photos",
+    "No fake projects, metrics, downloads, clients",
+    "No G7 Core modifications",
+    "Git commit + DB snapshot before destructive runtime template updates"
+  ],
+  "official_assets": {
+    "root": "assets/brand/20ft/logo",
+    "guide": "17_ASSETS.md",
+    "checksum": "assets/brand/20ft/logo/checksums.sha256",
+    "files": [
+      "badge-dark.svg",
+      "badge-light.svg",
+      "compact-white.svg",
+      "compact.svg",
+      "full-white.svg",
+      "full.svg",
+      "symbol-white.svg",
+      "symbol.svg"
+    ]
+  },
+  "status": "FINAL_IMPLEMENTATION_HARNESS",
+  "accepted_major_review_changes": [
+    "Capability line is mandatory in Home Hero and Footer because Services is intentionally absent",
+    "SuperBify may launch with zero public projects and must use the official Empty State instead of fabricated seeds",
+    "Unconfirmed portfolio candidates such as PurePol default to private until explicit publication scope is approved",
+    "Final visual quality gate must be approved by the user or an independent reviewer, not solely by the implementing AI"
+  ]
+}

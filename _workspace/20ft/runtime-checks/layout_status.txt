@@ -1,0 +1,10 @@
+200 home
+200 portfolio/index
+200 portfolio/detail
+200 superbify/index
+200 superbify/detail
+200 inquiry
+200 errors/404
+200 errors/403
+200 errors/500
+200 _user_base

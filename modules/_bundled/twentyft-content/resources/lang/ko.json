@@ -1,0 +1,104 @@
+{
+    "common": {
+        "edit": "수정",
+        "edit_meta": "메타 수정",
+        "edit_board": "본문 수정",
+        "save": "저장",
+        "saving": "저장 중…",
+        "cancel": "취소"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "20ft 콘텐츠",
+            "description": "Portfolio / SuperBify / 프로젝트 문의를 한 곳에서 관리합니다."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "description": "Portfolio 프로젝트 목록입니다.",
+            "edit_title": "Portfolio 메타 수정",
+            "edit_description": "Portfolio 프로젝트의 메타 정보를 수정합니다. 제목/슬러그/요약/연도/유형/상태/대표이미지/연결 링크 등을 변경할 수 있습니다.",
+            "actions": {
+                "manage_in_board": "게시판 관리에서 수정",
+                "create": "새 프로젝트"
+            }
+        },
+        "superbify": {
+            "title": "SuperBify",
+            "description": "SuperBify 제품 목록입니다.",
+            "edit_title": "SuperBify 메타 수정",
+            "edit_description": "SuperBify 제품의 메타 정보를 수정합니다. 제목/슬러그/요약/유형/상태/버전/호환성/라이선스/링크 등을 변경할 수 있습니다.",
+            "actions": {
+                "manage_in_board": "게시판 관리에서 수정",
+                "create": "새 제품"
+            }
+        },
+        "inquiries": {
+            "title": "프로젝트 문의",
+            "description": "프로젝트 문의 목록입니다.",
+            "actions": {
+                "manage_in_board": "게시판 관리에서 수정"
+            }
+        },
+        "sections": {
+            "basic_info": "기본 정보",
+            "meta_info": "메타 정보",
+            "project_details": "프로젝트 상세",
+            "product_details": "제품 상세"
+        },
+        "fields": {
+            "title": "제목",
+            "title_ko": "제목 (한국어)",
+            "title_en": "제목 (영어)",
+            "slug": "슬러그",
+            "year": "연도",
+            "type": "유형",
+            "types": "유형",
+            "status": "상태",
+            "visibility": "공개",
+            "featured": "Featured",
+            "sort_order": "정렬 순서",
+            "summary": "요약",
+            "summary_ko": "요약 (한국어)",
+            "summary_en": "요약 (영어)",
+            "client_name": "클라이언트",
+            "role": "역할",
+            "tech_stack": "기술 스택",
+            "version": "버전",
+            "g7_compatibility": "G7 호환",
+            "license": "라이선스",
+            "cover_image_attachment_id": "대표 이미지 첨부 ID",
+            "github_url": "GitHub",
+            "related_url": "관련 링크",
+            "sir_url": "SIR 링크",
+            "docs_url": "문서 링크",
+            "release_url": "릴리즈 링크",
+            "demo_url": "데모 링크",
+            "name": "문의자",
+            "email": "이메일",
+            "phone": "연락처",
+            "company": "회사",
+            "project_type": "프로젝트 유형",
+            "budget_range": "예산 범위",
+            "internal_status": "처리 상태",
+            "created_at": "작성일"
+        },
+        "hints": {
+            "attachment_id": "첨부파일 관리에서 ID를 확인하세요",
+            "comma_separated": "쉼표로 구분하여 입력하세요"
+        },
+        "status": {
+            "update": "상태 변경"
+        },
+        "messages": {
+            "save_success": "저장되었습니다.",
+            "save_failed": "저장에 실패했습니다."
+        }
+    },
+    "editor": {
+        "data_source": {
+            "portfolio_admin": "Portfolio 관리 데이터",
+            "superbify_admin": "SuperBify 관리 데이터",
+            "inquiry_admin": "프로젝트 문의 관리 데이터"
+        }
+    }
+}

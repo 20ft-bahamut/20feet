@@ -1,0 +1,165 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_inquiry_index",
+    "permissions": [
+        "twentyft-content.inquiries.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:twentyft-content.admin.inquiries.title",
+        "description": "$t:twentyft-content.admin.inquiries.description"
+    },
+    "data_sources": [
+        {
+            "id": "inquiries",
+            "label_key": "$t:twentyft-content.editor.data_source.inquiry_admin",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/admin/inquiries",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "params": {
+                "page": "{{query.page || 1}}",
+                "per_page": "{{query.per_page || 20}}",
+                "status": "{{query.status}}",
+                "project_type": "{{query.project_type}}",
+                "keyword": "{{query.keyword}}"
+            },
+            "fallback": {
+                "data": {
+                    "data": [],
+                    "pagination": {
+                        "current_page": 1,
+                        "last_page": 1,
+                        "per_page": 20,
+                        "total": 0
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "inquiry_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:twentyft-content.admin.inquiries.title",
+                            "description": "$t:twentyft-content.admin.inquiries.description"
+                        },
+                        "children": [
+                            {
+                                "id": "board_admin_link",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/board/project-inquiry",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.admin.inquiries.actions.manage_in_board"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "inquiry_table",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl"
+                        },
+                        "children": [
+                            {
+                                "id": "inquiry_header",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700"
+                                },
+                                "children": [
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-3" }, "text": "$t:twentyft-content.admin.fields.title" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.name" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.company" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.project_type" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.internal_status" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-1" }, "text": "$t:twentyft-content.admin.fields.created_at" }
+                                ]
+                            },
+                            {
+                                "id": "inquiry_row_{{idx}}",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/board/project-inquiry/{{item.postId}}/edit",
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors no-underline items-center"
+                                },
+                                "iteration": {
+                                    "source": "{{inquiries?.data?.data ?? []}}",
+                                    "item_var": "item",
+                                    "index_var": "idx"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-3 font-medium text-gray-900 dark:text-white" },
+                                        "text": "{{item.title}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.name ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.company ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.projectType ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.internalStatus ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-1 text-gray-500 dark:text-gray-400" },
+                                        "text": "{{item.createdAt ?? '-'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "empty_state",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-8 p-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                        },
+                        "if": "{{(inquiries?.data?.data ?? []).length === 0}}",
+                        "text": "접수된 프로젝트 문의가 없습니다."
+                    }
+                ]
+            }
+        ]
+    }
+}

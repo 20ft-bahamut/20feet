@@ -269,6 +269,12 @@
                 "type": "composite",
                 "description": "Disabled project inquiry form",
                 "path": "src/components/InquiryForm.tsx"
+            },
+            {
+                "name": "AboutPage",
+                "type": "composite",
+                "description": "About page brand story",
+                "path": "src/components/AboutPage.tsx"
             }
         ],
         "layout": [

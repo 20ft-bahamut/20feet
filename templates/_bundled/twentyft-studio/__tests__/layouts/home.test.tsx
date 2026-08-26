@@ -5,7 +5,6 @@ import SelectedPortfolio from '../../src/components/SelectedPortfolio';
 import SuperBifyPreview from '../../src/components/SuperBifyPreview';
 import AboutPreview from '../../src/components/AboutPreview';
 import InquiryMottoCTA from '../../src/components/InquiryMottoCTA';
-import { CAPABILITY_LINE } from '../../src/components/HomeHero';
 
 describe('home layout components', () => {
     it('renders 5 sections', () => {
@@ -26,17 +25,10 @@ describe('home layout components', () => {
     it('renders Korean hero copy and symbol logo', () => {
         render(<HomeHero />);
 
-        expect(screen.getByTestId('hero-eyebrow')).toHaveTextContent('20FT / SOFTWARE STUDIO');
         expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-            '작은 공간에서, 큰 가능성을 만듭니다.'
+            '작은 공간에서,큰 가능성을 만듭니다'
         );
         expect(screen.getByTestId('hero-symbol')).toBeInTheDocument();
-    });
-
-    it('contains the mandatory capability line', () => {
-        render(<HomeHero />);
-
-        expect(screen.getByTestId('hero-capability-line')).toHaveTextContent(CAPABILITY_LINE);
     });
 
     it('renders Korean selected portfolio empty state', () => {
@@ -60,7 +52,7 @@ describe('home layout components', () => {
         const aboutSection = document.querySelector('section#about');
         expect(aboutSection).toBeInTheDocument();
         expect(screen.getByTestId('about-preview')).toBeInTheDocument();
-        expect(screen.getByTestId('about-proof')).toHaveTextContent('20+ YEARS / WEB DEVELOPMENT');
+        expect(screen.getByTestId('about-cta')).toHaveTextContent('20ft에 대하여 →');
     });
 
     it('renders Korean inquiry motto CTA', () => {

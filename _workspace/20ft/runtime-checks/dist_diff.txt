@@ -1,0 +1,7 @@
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/css/components.css and /home/bahamut/20feet/templates/twentyft-studio/dist/css/components.css differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/js/components.iife.js and /home/bahamut/20feet/templates/twentyft-studio/dist/js/components.iife.js differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/js/components.iife.js.map and /home/bahamut/20feet/templates/twentyft-studio/dist/js/components.iife.js.map differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/src/components/BrandLogo.d.ts and /home/bahamut/20feet/templates/twentyft-studio/dist/src/components/BrandLogo.d.ts differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/src/components/HomeHero.d.ts and /home/bahamut/20feet/templates/twentyft-studio/dist/src/components/HomeHero.d.ts differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/src/components/PrimaryButton.d.ts and /home/bahamut/20feet/templates/twentyft-studio/dist/src/components/PrimaryButton.d.ts differ
+Files /home/bahamut/20feet/templates/_bundled/twentyft-studio/dist/src/components/SiteFooter.d.ts and /home/bahamut/20feet/templates/twentyft-studio/dist/src/components/SiteFooter.d.ts differ

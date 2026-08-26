@@ -1,0 +1,23 @@
+{
+    "name": "modules/20ft-content",
+    "description": "20ft Website content bridge module for Gnuboard7",
+    "type": "library",
+    "version": "0.1.0",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Twentyft\\Content\\": "src/",
+            "Modules\\Twentyft\\Content\\Database\\Seeders\\": "database/seeders/",
+            "Modules\\Twentyft\\Content\\Database\\Factories\\": "database/factories/",
+            "Modules\\Twentyft\\Content\\Upgrades\\": "upgrades/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Twentyft\\Content\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.2"
+    }
+}

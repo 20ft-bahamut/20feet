@@ -1,0 +1,50 @@
+[
+  {
+    "key": "home",
+    "path": "/",
+    "status": 200,
+    "title": "그누보드7",
+    "htmlLength": 64134,
+    "hasLogoImg": true,
+    "missingTranslations": [],
+    "consoleErrors": [],
+    "checks": {
+      "20ft logo image": true,
+      "Korean tagline": false,
+      "Capability line": true
+    }
+  },
+  {
+    "key": "portfolio",
+    "path": "/portfolio",
+    "status": 200,
+    "title": "그누보드7",
+    "htmlLength": 57374,
+    "hasLogoImg": true,
+    "missingTranslations": [],
+    "consoleErrors": [],
+    "checks": {}
+  },
+  {
+    "key": "superbify",
+    "path": "/superbify",
+    "status": 200,
+    "title": "그누보드7",
+    "htmlLength": 57381,
+    "hasLogoImg": true,
+    "missingTranslations": [],
+    "consoleErrors": [],
+    "checks": {}
+  },
+  {
+    "key": "inquiry",
+    "path": "/inquiry",
+    "status": 200,
+    "title": "그누보드7",
+    "htmlLength": 60843,
+    "hasLogoImg": true,
+    "missingTranslations": [],
+    "consoleErrors": [],
+    "checks": {}
+  }
+]

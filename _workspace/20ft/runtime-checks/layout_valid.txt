@@ -1,0 +1,10 @@
+VALID layout_errors_403
+VALID layout_errors_404
+VALID layout_errors_500
+VALID layout_home
+VALID layout_inquiry
+VALID layout_portfolio_detail
+VALID layout_portfolio_index
+VALID layout_superbify_detail
+VALID layout_superbify_index
+VALID layout__user_base

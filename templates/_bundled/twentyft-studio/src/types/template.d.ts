@@ -18,15 +18,45 @@ export type SuperBifyType =
     | 'DEVELOPER_TOOL'
     | 'OPEN_SOURCE';
 
+export type PortfolioStatus =
+    | 'BUILDING'
+    | 'OPERATING'
+    | 'RELEASED'
+    | 'RESEARCH'
+    | 'ARCHIVED';
+
+export type PortfolioType =
+    | 'WEB'
+    | 'COMMERCE'
+    | 'SOFTWARE'
+    | 'OPEN_SOURCE';
+
+export type SuperBifyStatus =
+    | 'IDEA'
+    | 'RESEARCH'
+    | 'BUILDING'
+    | 'RELEASED'
+    | 'MAINTENANCE'
+    | 'ARCHIVED';
+
 export interface PortfolioItem {
     id: string;
     slug: string;
     title: string;
     summary?: string;
     description?: string;
-    services?: string[];
-    screenshotUrl?: string;
-    externalUrl?: string;
+    types?: PortfolioType[];
+    year?: string;
+    status?: PortfolioStatus;
+    featured?: boolean;
+    clientName?: string;
+    role?: string[];
+    techStack?: string[];
+    relatedUrl?: string;
+    coverImageUrl?: string;
+    galleryImageUrls?: string[];
+    /** Development-only fixture marker. Must not be exposed as production data. */
+    isFixture?: boolean;
 }
 
 export interface SuperBifyItem {
@@ -36,10 +66,11 @@ export interface SuperBifyItem {
     type: SuperBifyType;
     summary?: string;
     description?: string;
+    status?: SuperBifyStatus;
+    version?: string;
     compatibility?: string;
-    installation?: string;
-    usage?: string;
-    changelog?: string;
+    license?: string;
+    featured?: boolean;
     links?: {
         download?: string;
         github?: string;
@@ -47,7 +78,12 @@ export interface SuperBifyItem {
         docs?: string;
         release?: string;
         purchase?: string;
+        demo?: string;
     };
+    coverImageUrl?: string;
+    screenshotImageUrls?: string[];
+    /** Development-only fixture marker. Must not be exposed as production data. */
+    isFixture?: boolean;
 }
 
 export interface RouteContext {
@@ -59,3 +95,4 @@ export interface DataSourceResponse<T> {
     loading?: boolean;
     error?: Error | null;
 }
+

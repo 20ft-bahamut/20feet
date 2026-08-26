@@ -6,10 +6,11 @@ export interface ContainerProps {
     id?: string;
     children?: React.ReactNode;
     className?: string;
+    wide?: boolean;
     editorAttrs?: EditorAttrs;
 }
 
-export function Container({ id, children, className, editorAttrs }: ContainerProps): React.ReactElement {
+export function Container({ id, children, className, wide = false, editorAttrs }: ContainerProps): React.ReactElement {
     return (
         <Div
             id={id}
@@ -17,9 +18,10 @@ export function Container({ id, children, className, editorAttrs }: ContainerPro
             {...editorAttrs}
             style={{
                 width: '100%',
-                maxWidth: 'var(--20ft-max-width, 1280px)',
+                maxWidth: wide ? 'none' : 'var(--20ft-max-width, 1360px)',
                 marginInline: 'auto',
-                paddingInline: 'var(--20ft-spacing-md, 1rem)',
+                paddingInline: 'var(--20ft-gutter, 1rem)',
+                boxSizing: 'border-box',
             }}
             data-testid="container"
         >

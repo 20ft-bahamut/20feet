@@ -5,7 +5,7 @@
         "ko": "20ft Studio",
         "en": "20ft Studio"
     },
-    "version": "0.1.0",
+    "version": "0.1.1",
     "license": "MIT",
     "description": {
         "ko": "20ft 공식 Website User Template (Portfolio / SuperBify / Project Inquiry)",
@@ -21,7 +21,10 @@
     "release_date": "2026-08-24",
     "g7_version": ">=7.0.0",
     "dependencies": {
-        "modules": {},
+        "modules": {
+            "twentyft-content": ">=0.1.2",
+            "sirsoft-board": ">=1.0.0"
+        },
         "plugins": {}
     },
     "assets": {
@@ -86,7 +89,8 @@
             "PortfolioDetail",
             "SuperBifyList",
             "SuperBifyDetail",
-            "InquiryForm"
+            "InquiryForm",
+            "AboutPage"
         ],
         "layout": [
             "Container"
@@ -99,6 +103,20 @@
             "500": "errors/500"
         }
     },
+    "externals": [
+        {
+            "id": "paperlogy",
+            "type": "webfont",
+            "url": "https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/Paperlogy.css",
+            "preconnect": "https://cdn.jsdelivr.net"
+        },
+        {
+            "id": "suit-variable",
+            "type": "webfont",
+            "url": "https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css",
+            "preconnect": "https://cdn.jsdelivr.net"
+        }
+    ],
     "features": {
         "dark_mode": false,
         "responsive": true,

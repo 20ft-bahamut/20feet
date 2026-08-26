@@ -11,10 +11,11 @@
         {
             "id": "superbify_item",
             "label_key": "$t:twentyft.data_source.superbify_item",
-            "type": "static",
-            "data": null,
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/superbify/projects/{{route.slug}}",
+            "method": "GET",
             "auto_fetch": true,
-            "loading_strategy": "progressive"
+            "loading_strategy": "blocking"
         }
     ],
     "slots": {
@@ -24,7 +25,10 @@
                 "type": "composite",
                 "name": "SuperBifyDetail",
                 "props": {
-                    "item": "{{superbify_item?.data ?? null}}"
+                    "item": "{{superbify_item?.data ?? null}}",
+                    "context": {
+                        "slug": "{{route.slug}}"
+                    }
                 }
             }
         ]

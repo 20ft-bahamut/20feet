@@ -1,0 +1,467 @@
+<!DOCTYPE html><html lang="en"><head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="fQzqgC4M0txBcBwHLiwndveskoWNyzObJ9KQ2KYH">
+        <meta name="generator" content="GnuBoard7 7.0.8">
+
+        <title>그누보드7</title>
+
+        <!-- 템플릿 외부 리소스 (template.json의 externals) -->
+        
+        <!-- Fallback UI 스타일 -->
+        
+        
+        <script>
+(function () {
+    'use strict';
+
+    var MODE_EXTENSIONLESS = 'extensionless';
+    var FILE_QUERY_PARAM = 'file';
+    var STORAGE_TTL_MS = 24 * 60 * 60 * 1000;
+
+    // cache_version 은 blade 에서 직접 주입한다. 이 파샬은 <head> 에서 실행되어
+    // window.G7Config(<body> 에서 정의) 가 아직 없기 때문 — 참조하면 항상 0 이 되어
+    // 캐시 키가 어긋난다.
+    var CACHE_VERSION = 1787563499;
+
+    function storageKey() {
+        return 'g7_asset_url_mode:' + CACHE_VERSION;
+    }
+
+    /**
+     * 확장자 형태 API URL 을 확장자 없는 형태로 변환한다.
+     *
+     * `resources/js/core/support/assetUrl.ts::convertToCurrentMode` 와 **동일 규칙**이어야
+     * 한다. 여기는 코어 번들 로드 전이라 import 가 불가능해 인라인으로 둔다 — 드리프트는
+     * `assetUrl.test.ts` 의 대조 케이스가 잡는다.
+     *
+     * 변환 대상이 아니면 null. 코어 엔진 번들(`/build/...`)은 public/ 의 실물 정적
+     * 파일이라 변환하면 오히려 깨지므로 대상에서 제외된다.
+     *
+     * @param url 원본 URL
+     * @returns 변환된 URL 또는 null
+     */
+    function toExtensionless(url) {
+        if (!url) return null;
+
+        // `<script>.src` / `<link>.href` 는 **절대 URL** 을 돌려준다
+        // (`https://host/api/...`). same-origin 이면 경로만 남긴다 — 이 정규화를
+        // 빠뜨리면 부트스트랩 재시도 경로에서 변환이 항상 null 이 되어 자가 복구가
+        // 통째로 죽는다(외형은 "3회 재시도 후 폴백 UI" 라 원인이 드러나지 않는다).
+        var origin = window.location && window.location.origin;
+        if (origin && url.indexOf(origin) === 0) {
+            url = url.slice(origin.length);
+        }
+
+        if (url.indexOf('/api/') !== 0) return null;
+
+        var qi = url.indexOf('?');
+        var path = qi === -1 ? url : url.slice(0, qi);
+        var query = qi === -1 ? '' : url.slice(qi + 1);
+
+        var bundle = path.match(/^\/api\/(modules|plugins)\/bundle\.(js|css)$/);
+        if (bundle) {
+            return '/api/' + bundle[1] + '/bundle/' + bundle[2] + (query ? '?' + query : '');
+        }
+
+        var asset = path.match(/^\/api\/(templates|modules|plugins)\/assets\/([^/]+)\/(.+)$/);
+        if (asset) {
+            return '/api/' + asset[1] + '/assets/' + asset[2] +
+                '?' + FILE_QUERY_PARAM + '=' + encodeURIComponent(decodeURIComponent(asset[3])) +
+                (query ? '&' + query : '');
+        }
+
+        var suffixed = path.match(/^(\/api\/.+)\.(json|js|css)$/);
+        if (suffixed) {
+            return suffixed[1] + (query ? '?' + query : '');
+        }
+
+        return null;
+    }
+
+    /**
+     * 모드 전환을 1회 확정한다 (L1 — 단방향 1회).
+     *
+     * 서버 설정은 바꾸지 않는다(L5). 전역 플래그와 localStorage 캐시만 갱신하며,
+     * 이후 엔진의 모든 fetch 가 이 값을 읽어 올바른 형태를 쓴다.
+     *
+     * @returns 이번 호출로 전환되었으면 true
+     */
+    function switchToExtensionless() {
+        if (window.__g7AssetUrlMode === MODE_EXTENSIONLESS) return false;
+
+        // 독립 전역에 기록한다. <body> 의 `window.G7Config = {...}` 대입이 이 파샬보다
+        // 나중에 실행되어 객체를 통째로 교체하므로, G7Config 에만 쓰면 덮여 사라진다.
+        // G7Config 는 이 값을 초기값으로 읽어간다(app/admin blade 참조).
+        window.__g7AssetUrlMode = MODE_EXTENSIONLESS;
+        if (window.G7Config) window.G7Config.assetUrlMode = MODE_EXTENSIONLESS;
+
+        try {
+            window.localStorage.setItem(storageKey(), JSON.stringify({
+                mode: MODE_EXTENSIONLESS,
+                at: Date.now()
+            }));
+        } catch (e) { /* 저장 실패는 치명적이지 않다 */ }
+
+        return true;
+    }
+
+    /**
+     * 이전 방문에서 확정된 모드를 복원한다 (L7).
+     *
+     * cache_version 을 키에 포함하고 TTL 을 둬서 서버가 정상화된 뒤에도
+     * 클라이언트가 옛 모드에 영구 고착되지 않도록 한다.
+     */
+    function restoreCachedMode() {
+        try {
+            var raw = window.localStorage.getItem(storageKey());
+            if (!raw) return false;
+
+            var parsed = JSON.parse(raw);
+            if (!parsed || parsed.mode !== MODE_EXTENSIONLESS) return false;
+
+            if (typeof parsed.at !== 'number' || Date.now() - parsed.at > STORAGE_TTL_MS) {
+                window.localStorage.removeItem(storageKey());
+                return false;
+            }
+
+            window.__g7AssetUrlMode = MODE_EXTENSIONLESS;
+            if (window.G7Config) window.G7Config.assetUrlMode = MODE_EXTENSIONLESS;
+
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * CSS `<link>` 로드 실패 시 확장자 없는 형태로 1회 교체한다.
+     *
+     * 스타일 부재는 앱을 죽이지 않으므로(엔진의 CSS 로더도 실패를 resolve 로 처리)
+     * 재교체가 실패해도 조용히 끝낸다 — 폴백 UI 를 띄우지 않는다(과잉 적용 경계).
+     * 교체는 링크당 1회만 (`data-g7-recovered` 마킹).
+     *
+     * @param link 실패한 <link> 요소
+     */
+    function recoverStylesheet(link) {
+        if (!link || link.getAttribute('data-g7-recovered') === '1') return;
+        link.setAttribute('data-g7-recovered', '1');
+
+        var converted = toExtensionless(link.getAttribute('href') || '');
+        if (!converted) return;
+
+        switchToExtensionless();
+        link.href = converted;
+    }
+
+    restoreCachedMode();
+
+    window.__g7AssetUrl = {
+        MODE_EXTENSIONLESS: MODE_EXTENSIONLESS,
+        toExtensionless: toExtensionless,
+        switchToExtensionless: switchToExtensionless,
+        restoreCachedMode: restoreCachedMode,
+        recoverStylesheet: recoverStylesheet
+    };
+})();
+</script>
+
+        <!-- 템플릿 컴포넌트 스타일 -->
+                
+        <link rel="stylesheet" href="/api/templates/assets/twentyft-studio/css/components.css?v=1787563499" onerror="window.__g7AssetUrl &amp;&amp; window.__g7AssetUrl.recoverStylesheet(this);">
+            <link rel="stylesheet" href="/api/modules/bundle.css?v=1787563499" id="ext-bundle-css-module"><script src="/api/modules/bundle.js?v=1787563499" id="ext-bundle-js-module"></script><script src="/api/plugins/bundle.js?v=1787563499" id="ext-bundle-js-plugin"></script></head>
+    <body>
+        <!-- React 렌더링 루트 -->
+        <div id="app" data-template-id="twentyft-studio"><div class="user-layout-root" id="user_layout_root" style="min-height: 100vh; display: flex; flex-direction: column; background-color: var(--20ft-paper-white, #FAF8F3); color: var(--20ft-text-primary, #1A1A1A);"><header data-testid="site-header" style="position: sticky; top: 0px; z-index: 50; height: var(--20ft-header-height, 4rem); background-color: var(--20ft-paper-white, #FAF8F3); border-bottom: 1px solid var(--20ft-border, rgba(16, 42, 76, 0.12));"><div style="width: 100%; max-width: var(--20ft-max-width, 1200px); height: 100%; margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem); display: flex; align-items: center; justify-content: space-between;"><a href="/" data-testid="header-logo-link" style="display: inline-flex; align-items: center; text-decoration: none;"><span data-testid="brand-logo" style="font-family: var(--20ft-font-display, Georgia, serif); font-weight: 900; font-size: 1.25rem; color: var(--20ft-indigo, #183B6B); letter-spacing: -0.02em; line-height: 1;">20ft</span></a><nav data-testid="header-nav" style="display: flex; align-items: center; gap: var(--20ft-spacing-xl, 2.5rem);"><a href="/portfolio" data-testid="header-nav-portfolio" style="color: var(--20ft-text-primary, #1A1A1A); text-decoration: none; font-weight: 500; transition: color 150ms;">Portfolio</a><a href="/superbify" data-testid="header-nav-superbify" style="color: var(--20ft-text-primary, #1A1A1A); text-decoration: none; font-weight: 500; transition: color 150ms;">SuperBify</a></nav><a href="/inquiry" data-testid="header-cta" style="padding: 0.625rem 1.25rem; border-radius: var(--20ft-radius, 0.5rem); border: 1px solid var(--20ft-indigo, #183B6B); background-color: var(--20ft-indigo, #183B6B); color: var(--20ft-paper-white, #FAF8F3); font-family: var(--20ft-font-body, sans-serif); font-weight: 600; font-size: 0.875rem; text-decoration: none;">Project Inquiry</a></div></header><main id="main_content_area" style="flex: 1 1 auto;"><div id="main_content"><section data-testid="home-hero" style="min-height: calc(100vh - var(--20ft-header-height, 4rem)); display: flex; align-items: center; background-color: var(--20ft-paper-white, #FAF8F3);"><div data-testid="container" style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem);"><div style="max-width: 800px; display: flex; flex-direction: column; gap: var(--20ft-spacing-lg, 1.5rem);"><span data-testid="hero-capability-line" style="font-family: var(--20ft-font-body, sans-serif); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--20ft-heritage-gold, #B69B5F);">WEB / COMMERCE / SOFTWARE / GNUBOARD 7</span><h1 style="margin: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-weight: 800; font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.08; color: var(--20ft-deep-indigo, #102A4C);">Build software that lasts.</h1><p style="margin: 0px; font-family: var(--20ft-font-body, sans-serif); font-size: clamp(1rem, 1.8vw, 1.25rem); line-height: 1.6; color: var(--20ft-text-muted, #5A5A5A); max-width: 640px;">20ft designs and ships web products, commerce experiences, and Gnuboard 7 extensions for teams that care about craft.</p><div style="margin-top: var(--20ft-spacing-sm, 0.5rem);"><a href="/inquiry" data-testid="hero-cta" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.875rem 1.5rem; border-radius: var(--20ft-radius, 0.5rem); border: 1px solid var(--20ft-indigo, #183B6B); background-color: var(--20ft-indigo, #183B6B); color: var(--20ft-paper-white, #FAF8F3); font-family: var(--20ft-font-body, sans-serif); font-weight: 600; font-size: 0.875rem; cursor: pointer; opacity: 1; transition: opacity 150ms; text-decoration: none;">Start a Project Inquiry</a></div></div></div></section><section data-testid="selected-portfolio" style="padding-block: var(--20ft-spacing-3xl, 6rem); background-color: var(--20ft-paper-white, #FAF8F3);"><div data-testid="container" style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem);"><span data-testid="section-eyebrow" style="display: block; font-family: var(--20ft-font-body, sans-serif); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--20ft-heritage-gold, #B69B5F); margin-bottom: var(--20ft-spacing-md, 1rem);">Selected Portfolio</span><h2 style="margin-top: 0px; margin-right: 0px; margin-bottom: var(--20ft-spacing-xl, 2.5rem); margin-left: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-weight: 700; font-size: clamp(1.75rem, 3.5vw, 2.5rem); color: var(--20ft-deep-indigo, #102A4C);">Work we are proud to share</h2><div data-testid="status" style="padding: var(--20ft-spacing-xl, 2.5rem); border-radius: var(--20ft-radius, 0.5rem); border: 1px dashed var(--20ft-border-strong, #183B6B); background-color: var(--20ft-bg-secondary, #F4F0E6); text-align: center;"><h3 style="margin-top: 0px; margin-right: 0px; margin-bottom: var(--20ft-spacing-sm, 0.5rem); margin-left: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-size: 1.125rem; color: var(--20ft-indigo, #183B6B);">No public projects yet</h3><p style="margin: 0px; font-family: var(--20ft-font-body, sans-serif); font-size: 0.875rem; color: var(--20ft-text-muted, #5A5A5A);">Selected portfolio projects will appear here once they are ready to be shared.</p></div></div></section><section data-testid="superbify-preview" style="padding-block: var(--20ft-spacing-3xl, 6rem); background-color: var(--20ft-bg-secondary, #F4F0E6);"><div data-testid="container" style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem);"><span data-testid="section-eyebrow" style="display: block; font-family: var(--20ft-font-body, sans-serif); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--20ft-heritage-gold, #B69B5F); margin-bottom: var(--20ft-spacing-md, 1rem);">SuperBify</span><h2 style="margin-top: 0px; margin-right: 0px; margin-bottom: var(--20ft-spacing-xl, 2.5rem); margin-left: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-weight: 700; font-size: clamp(1.75rem, 3.5vw, 2.5rem); color: var(--20ft-deep-indigo, #102A4C);">Reusable Gnuboard 7 extensions</h2><div data-testid="status" style="padding: var(--20ft-spacing-xl, 2.5rem); border-radius: var(--20ft-radius, 0.5rem); border: 1px dashed var(--20ft-border-strong, #183B6B); background-color: var(--20ft-bg-secondary, #F4F0E6); text-align: center;"><h3 style="margin-top: 0px; margin-right: 0px; margin-bottom: var(--20ft-spacing-sm, 0.5rem); margin-left: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-size: 1.125rem; color: var(--20ft-indigo, #183B6B);">Coming soon</h3><p style="margin: 0px; font-family: var(--20ft-font-body, sans-serif); font-size: 0.875rem; color: var(--20ft-text-muted, #5A5A5A);">SuperBify products will be listed here once they are published.</p></div></div></section><section id="about" data-testid="about-preview" style="padding-block: var(--20ft-spacing-3xl, 6rem); background-color: var(--20ft-paper-white, #FAF8F3);"><div data-testid="container" style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem);"><span data-testid="section-eyebrow" style="display: block; font-family: var(--20ft-font-body, sans-serif); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--20ft-heritage-gold, #B69B5F); margin-bottom: var(--20ft-spacing-md, 1rem);">About 20ft</span><div style="display: grid; gap: var(--20ft-spacing-xl, 2.5rem); max-width: 720px;"><h2 style="margin: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-weight: 700; font-size: clamp(1.75rem, 3.5vw, 2.5rem); color: var(--20ft-deep-indigo, #102A4C);">Software Studio &amp; Digital Garage</h2><div style="display: flex; flex-direction: column; gap: var(--20ft-spacing-md, 1rem); font-family: var(--20ft-font-body, sans-serif); color: var(--20ft-text-muted, #5A5A5A); line-height: 1.7;"><p style="margin: 0px;">20ft is a small software studio that builds durable web products, commerce experiences, and Gnuboard 7 extensions. We work in short, focused iterations and ship only what we would use ourselves.</p><p style="margin: 0px;">The name comes from the humble length of a standard shipping container — a practical unit that moves real things across the world. We like the idea that software, at its best, is just as reliable and just as unpretentious.</p></div></div></div></section><section data-testid="inquiry-motto-cta" style="padding-block: var(--20ft-spacing-3xl, 6rem); background-color: var(--20ft-indigo, #183B6B); color: var(--20ft-paper-white, #FAF8F3);"><div data-testid="container" style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem);"><div style="display: flex; flex-direction: column; align-items: flex-start; gap: var(--20ft-spacing-lg, 1.5rem); max-width: 720px;"><span style="font-family: var(--20ft-font-body, sans-serif); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--20ft-heritage-gold, #B69B5F);">Just for fun</span><h2 style="margin: 0px; font-family: var(--20ft-font-display, Georgia, serif); font-weight: 700; font-size: clamp(1.75rem, 3.5vw, 2.5rem);">Have a project in mind?</h2><p style="margin: 0px; font-family: var(--20ft-font-body, sans-serif); line-height: 1.7; opacity: 0.9;">Tell us what you are building. We will get back to you with honest feedback and a clear next step.</p><a href="/inquiry" data-testid="inquiry-motto-button" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.875rem 1.5rem; border-radius: var(--20ft-radius, 0.5rem); border: 1px solid var(--20ft-indigo, #183B6B); background-color: var(--20ft-indigo, #183B6B); color: var(--20ft-paper-white, #FAF8F3); font-family: var(--20ft-font-body, sans-serif); font-weight: 600; font-size: 0.875rem; cursor: pointer; opacity: 1; transition: opacity 150ms; text-decoration: none;">Project Inquiry</a></div></div></section></div></main><footer data-testid="site-footer" style="background-color: var(--20ft-deep-indigo, #102A4C); color: var(--20ft-paper-white, #FAF8F3); padding-block: var(--20ft-spacing-2xl, 4rem);"><div style="width: 100%; max-width: var(--20ft-max-width, 1200px); margin-inline: auto; padding-inline: var(--20ft-spacing-md, 1rem); display: flex; flex-direction: column; gap: var(--20ft-spacing-lg, 1.5rem);"><div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--20ft-spacing-lg, 1.5rem);"><div style="display: flex; flex-direction: column; gap: var(--20ft-spacing-md, 1rem);"><span data-testid="brand-logo" style="font-family: var(--20ft-font-display, Georgia, serif); font-weight: 900; font-size: 1.25rem; color: var(--20ft-indigo, #183B6B); letter-spacing: -0.02em; line-height: 1;">20ft</span><span data-testid="footer-capability-line" style="font-family: var(--20ft-font-body, sans-serif); font-size: 0.875rem; letter-spacing: 0.08em; color: var(--20ft-heritage-gold, #B69B5F);">WEB / COMMERCE / SOFTWARE / GNUBOARD 7</span></div><nav data-testid="footer-nav" style="display: flex; flex-direction: column; gap: var(--20ft-spacing-sm, 0.5rem);"><a href="/#about" data-testid="footer-link-about" style="color: var(--20ft-paper-white, #FAF8F3); text-decoration: none; font-size: 0.875rem;">About</a><a href="/portfolio" style="color: var(--20ft-paper-white, #FAF8F3); text-decoration: none; font-size: 0.875rem;">Portfolio</a><a href="/superbify" style="color: var(--20ft-paper-white, #FAF8F3); text-decoration: none; font-size: 0.875rem;">SuperBify</a><a href="/inquiry" style="color: var(--20ft-paper-white, #FAF8F3); text-decoration: none; font-size: 0.875rem;">Project Inquiry</a></nav></div><div style="border-top: 1px solid rgba(244, 240, 230, 0.12); padding-top: var(--20ft-spacing-md, 1rem);"><p data-testid="footer-copyright" style="margin: 0px; font-size: 0.75rem; color: rgba(244, 240, 230, 0.6);">© 2026 20ft. All rights reserved.</p></div></div></footer></div></div>
+
+                <!-- G7 설정 전역 변수 -->
+        <script>
+            window.G7Config = {
+                settings: {"general":{"site_name":"\uadf8\ub204\ubcf4\ub4dc7","site_description":"","site_logo":[],"site_logo_url":null,"asset_url_mode":"extension"},"upload":{"max_file_size":10,"allowed_extensions_formatted":".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.zip","image_max_width":2000,"image_max_height":2000},"advanced":{"debug_mode":false,"geoip_enabled":false,"geoip_auto_update_enabled":true,"geoip_last_updated_at":"","pagination_result_cap":10000,"pagination_max_page":1000},"notifications":{"channels":[{"id":"mail","is_active":true,"sort_order":1},{"id":"database","is_active":true,"sort_order":2}]},"identity":[]},
+                plugins: {"sirsoft-ckeditor5":{"imageUpload":true,"imageMaxSizeMb":2,"editorHeight":400,"toolbar":"standard"},"sirsoft-daum_postcode":{"display_mode":"layer","popup_width":500,"popup_height":600,"theme_color":"#1D4ED8"}},
+                modules: {"sirsoft-ecommerce":{"basic_info":{"route_path":"shop","no_route":false},"language_currency":{"default_currency":"KRW","currencies":[{"code":"KRW","name":{"ko":"KRW (\uc6d0)","en":"KRW (Won)"},"symbol":"\u20a9","exchange_rate":null,"base_unit":1000,"rounding_unit":"1","rounding_method":"floor","decimal_places":0,"is_default":true,"locales":["ko"],"flag":"\ud83c\uddf0\ud83c\uddf7"},{"code":"USD","name":{"ko":"USD (\ub2ec\ub7ec)","en":"USD (Dollar)"},"symbol":"$","exchange_rate":0.85,"base_unit":1,"rounding_unit":"0.01","rounding_method":"round","decimal_places":2,"is_default":false,"locales":["en"],"flag":"\ud83c\uddfa\ud83c\uddf8"},{"code":"JPY","name":{"ko":"JPY (\uc5d4)","en":"JPY (Yen)"},"symbol":"\u00a5","exchange_rate":115,"base_unit":100,"rounding_unit":"1","rounding_method":"floor","decimal_places":0,"is_default":false,"locales":["en"],"flag":"\ud83c\uddef\ud83c\uddf5"},{"code":"CNY","name":{"ko":"CNY (\uc704\uc548)","en":"CNY (Yuan)"},"symbol":"\u5143","exchange_rate":5.8,"base_unit":1,"rounding_unit":"0.01","rounding_method":"round","decimal_places":2,"is_default":false,"locales":["en"],"flag":"\ud83c\udde8\ud83c\uddf3"},{"code":"EUR","name":{"ko":"EUR (\uc720\ub85c)","en":"EUR (Euro)"},"symbol":"\u20ac","exchange_rate":0.78,"base_unit":1,"rounding_unit":"0.01","rounding_method":"round","decimal_places":2,"is_default":false,"locales":["en"],"flag":"\ud83c\uddea\ud83c\uddfa"}]},"shipping":{"international_shipping_enabled":false,"available_countries":[{"code":"KR","name":{"ko":"\ub300\ud55c\ubbfc\uad6d","en":"South Korea"},"is_active":true},{"code":"US","name":{"ko":"\ubbf8\uad6d","en":"United States"},"is_active":false},{"code":"JP","name":{"ko":"\uc77c\ubcf8","en":"Japan"},"is_active":false},{"code":"CN","name":{"ko":"\uc911\uad6d","en":"China"},"is_active":false},{"code":"SG","name":{"ko":"\uc2f1\uac00\ud3ec\ub974","en":"Singapore"},"is_active":false},{"code":"HK","name":{"ko":"\ud64d\ucf69","en":"Hong Kong"},"is_active":false},{"code":"TW","name":{"ko":"\ub300\ub9cc","en":"Taiwan"},"is_active":false},{"code":"VN","name":{"ko":"\ubca0\ud2b8\ub0a8","en":"Vietnam"},"is_active":false},{"code":"TH","name":{"ko":"\ud0dc\uad6d","en":"Thailand"},"is_active":false},{"code":"MY","name":{"ko":"\ub9d0\ub808\uc774\uc2dc\uc544","en":"Malaysia"},"is_active":false}],"default_country":"KR"}}},
+                moduleAssets: {"sirsoft-ecommerce":{"priority":100,"js":"\/api\/modules\/assets\/sirsoft-ecommerce\/dist\/js\/module.iife.js?v=1787563499","css":"\/api\/modules\/assets\/sirsoft-ecommerce\/dist\/css\/module.css?v=1787563499"}},
+                pluginAssets: {"sirsoft-ckeditor5":{"priority":100,"js":"\/api\/plugins\/assets\/sirsoft-ckeditor5\/dist\/js\/plugin.iife.js?v=1787563499"},"sirsoft-daum_postcode":{"priority":100,"js":"\/api\/plugins\/assets\/sirsoft-daum_postcode\/dist\/js\/plugin.iife.js?v=1787563499"}},
+                bundleUrls: {"moduleJs":"\/api\/modules\/bundle.js?v=1787563499","moduleCss":"\/api\/modules\/bundle.css?v=1787563499","pluginJs":"\/api\/plugins\/bundle.js?v=1787563499","pluginCss":null},
+                activeModules: [{"identifier":"sirsoft-board","display_name":{"ko":"\uac8c\uc2dc\ud310","en":"Board"},"version":"1.0.5"},{"identifier":"sirsoft-ecommerce","display_name":{"ko":"\uc774\ucee4\uba38\uc2a4","en":"Ecommerce"},"version":"1.1.2"},{"identifier":"sirsoft-page","display_name":{"ko":"\ud398\uc774\uc9c0","en":"Page"},"version":"1.0.3"}],
+                activePlugins: [{"identifier":"sirsoft-ckeditor5","display_name":{"ko":"CKEditor 5 WYSIWYG \uc5d0\ub514\ud130","en":"CKEditor 5 WYSIWYG Editor"},"version":"1.0.2"},{"identifier":"sirsoft-daum_postcode","display_name":{"ko":"Daum \uc6b0\ud3b8\ubc88\ud638","en":"Daum Postcode"},"version":"1.0.2"}],
+                trustedScriptHosts: ["cdn.ckeditor.com","t1.daumcdn.net"],
+                appConfig: {"supportedTimezones":[{"value":"Pacific\/Midway","label":"(UTC-11:00) Pacific\/Midway"},{"value":"Pacific\/Niue","label":"(UTC-11:00) Pacific\/Niue"},{"value":"Pacific\/Pago_Pago","label":"(UTC-11:00) Pacific\/Pago_Pago"},{"value":"Pacific\/Honolulu","label":"(UTC-10:00) Pacific\/Honolulu"},{"value":"Pacific\/Rarotonga","label":"(UTC-10:00) Pacific\/Rarotonga"},{"value":"Pacific\/Tahiti","label":"(UTC-10:00) Pacific\/Tahiti"},{"value":"Pacific\/Marquesas","label":"(UTC-09:30) Pacific\/Marquesas"},{"value":"America\/Adak","label":"(UTC-09:00) America\/Adak"},{"value":"Pacific\/Gambier","label":"(UTC-09:00) Pacific\/Gambier"},{"value":"America\/Anchorage","label":"(UTC-08:00) America\/Anchorage"},{"value":"America\/Juneau","label":"(UTC-08:00) America\/Juneau"},{"value":"America\/Metlakatla","label":"(UTC-08:00) America\/Metlakatla"},{"value":"America\/Nome","label":"(UTC-08:00) America\/Nome"},{"value":"America\/Sitka","label":"(UTC-08:00) America\/Sitka"},{"value":"America\/Yakutat","label":"(UTC-08:00) America\/Yakutat"},{"value":"Pacific\/Pitcairn","label":"(UTC-08:00) Pacific\/Pitcairn"},{"value":"America\/Creston","label":"(UTC-07:00) America\/Creston"},{"value":"America\/Dawson","label":"(UTC-07:00) America\/Dawson"},{"value":"America\/Dawson_Creek","label":"(UTC-07:00) America\/Dawson_Creek"},{"value":"America\/Fort_Nelson","label":"(UTC-07:00) America\/Fort_Nelson"},{"value":"America\/Hermosillo","label":"(UTC-07:00) America\/Hermosillo"},{"value":"America\/Los_Angeles","label":"(UTC-07:00) America\/Los_Angeles"},{"value":"America\/Mazatlan","label":"(UTC-07:00) America\/Mazatlan"},{"value":"America\/Phoenix","label":"(UTC-07:00) America\/Phoenix"},{"value":"America\/Tijuana","label":"(UTC-07:00) America\/Tijuana"},{"value":"America\/Vancouver","label":"(UTC-07:00) America\/Vancouver"},{"value":"America\/Whitehorse","label":"(UTC-07:00) America\/Whitehorse"},{"value":"America\/Bahia_Banderas","label":"(UTC-06:00) America\/Bahia_Banderas"},{"value":"America\/Belize","label":"(UTC-06:00) America\/Belize"},{"value":"America\/Boise","label":"(UTC-06:00) America\/Boise"},{"value":"America\/Cambridge_Bay","label":"(UTC-06:00) America\/Cambridge_Bay"},{"value":"America\/Chihuahua","label":"(UTC-06:00) America\/Chihuahua"},{"value":"America\/Ciudad_Juarez","label":"(UTC-06:00) America\/Ciudad_Juarez"},{"value":"America\/Costa_Rica","label":"(UTC-06:00) America\/Costa_Rica"},{"value":"America\/Denver","label":"(UTC-06:00) America\/Denver"},{"value":"America\/Edmonton","label":"(UTC-06:00) America\/Edmonton"},{"value":"America\/El_Salvador","label":"(UTC-06:00) America\/El_Salvador"},{"value":"America\/Guatemala","label":"(UTC-06:00) America\/Guatemala"},{"value":"America\/Inuvik","label":"(UTC-06:00) America\/Inuvik"},{"value":"America\/Managua","label":"(UTC-06:00) America\/Managua"},{"value":"America\/Merida","label":"(UTC-06:00) America\/Merida"},{"value":"America\/Mexico_City","label":"(UTC-06:00) America\/Mexico_City"},{"value":"America\/Monterrey","label":"(UTC-06:00) America\/Monterrey"},{"value":"America\/Regina","label":"(UTC-06:00) America\/Regina"},{"value":"America\/Swift_Current","label":"(UTC-06:00) America\/Swift_Current"},{"value":"America\/Tegucigalpa","label":"(UTC-06:00) America\/Tegucigalpa"},{"value":"Pacific\/Easter","label":"(UTC-06:00) Pacific\/Easter"},{"value":"Pacific\/Galapagos","label":"(UTC-06:00) Pacific\/Galapagos"},{"value":"America\/Atikokan","label":"(UTC-05:00) America\/Atikokan"},{"value":"America\/Bogota","label":"(UTC-05:00) America\/Bogota"},{"value":"America\/Cancun","label":"(UTC-05:00) America\/Cancun"},{"value":"America\/Cayman","label":"(UTC-05:00) America\/Cayman"},{"value":"America\/Chicago","label":"(UTC-05:00) America\/Chicago"},{"value":"America\/Eirunepe","label":"(UTC-05:00) America\/Eirunepe"},{"value":"America\/Guayaquil","label":"(UTC-05:00) America\/Guayaquil"},{"value":"America\/Indiana\/Knox","label":"(UTC-05:00) America\/Indiana\/Knox"},{"value":"America\/Indiana\/Tell_City","label":"(UTC-05:00) America\/Indiana\/Tell_City"},{"value":"America\/Jamaica","label":"(UTC-05:00) America\/Jamaica"},{"value":"America\/Lima","label":"(UTC-05:00) America\/Lima"},{"value":"America\/Matamoros","label":"(UTC-05:00) America\/Matamoros"},{"value":"America\/Menominee","label":"(UTC-05:00) America\/Menominee"},{"value":"America\/North_Dakota\/Beulah","label":"(UTC-05:00) America\/North_Dakota\/Beulah"},{"value":"America\/North_Dakota\/Center","label":"(UTC-05:00) America\/North_Dakota\/Center"},{"value":"America\/North_Dakota\/New_Salem","label":"(UTC-05:00) America\/North_Dakota\/New_Salem"},{"value":"America\/Ojinaga","label":"(UTC-05:00) America\/Ojinaga"},{"value":"America\/Panama","label":"(UTC-05:00) America\/Panama"},{"value":"America\/Rankin_Inlet","label":"(UTC-05:00) America\/Rankin_Inlet"},{"value":"America\/Resolute","label":"(UTC-05:00) America\/Resolute"},{"value":"America\/Rio_Branco","label":"(UTC-05:00) America\/Rio_Branco"},{"value":"America\/Winnipeg","label":"(UTC-05:00) America\/Winnipeg"},{"value":"America\/Anguilla","label":"(UTC-04:00) America\/Anguilla"},{"value":"America\/Antigua","label":"(UTC-04:00) America\/Antigua"},{"value":"America\/Aruba","label":"(UTC-04:00) America\/Aruba"},{"value":"America\/Barbados","label":"(UTC-04:00) America\/Barbados"},{"value":"America\/Blanc-Sablon","label":"(UTC-04:00) America\/Blanc-Sablon"},{"value":"America\/Boa_Vista","label":"(UTC-04:00) America\/Boa_Vista"},{"value":"America\/Campo_Grande","label":"(UTC-04:00) America\/Campo_Grande"},{"value":"America\/Caracas","label":"(UTC-04:00) America\/Caracas"},{"value":"America\/Cuiaba","label":"(UTC-04:00) America\/Cuiaba"},{"value":"America\/Curacao","label":"(UTC-04:00) America\/Curacao"},{"value":"America\/Detroit","label":"(UTC-04:00) America\/Detroit"},{"value":"America\/Dominica","label":"(UTC-04:00) America\/Dominica"},{"value":"America\/Grand_Turk","label":"(UTC-04:00) America\/Grand_Turk"},{"value":"America\/Grenada","label":"(UTC-04:00) America\/Grenada"},{"value":"America\/Guadeloupe","label":"(UTC-04:00) America\/Guadeloupe"},{"value":"America\/Guyana","label":"(UTC-04:00) America\/Guyana"},{"value":"America\/Havana","label":"(UTC-04:00) America\/Havana"},{"value":"America\/Indiana\/Indianapolis","label":"(UTC-04:00) America\/Indiana\/Indianapolis"},{"value":"America\/Indiana\/Marengo","label":"(UTC-04:00) America\/Indiana\/Marengo"},{"value":"America\/Indiana\/Petersburg","label":"(UTC-04:00) America\/Indiana\/Petersburg"},{"value":"America\/Indiana\/Vevay","label":"(UTC-04:00) America\/Indiana\/Vevay"},{"value":"America\/Indiana\/Vincennes","label":"(UTC-04:00) America\/Indiana\/Vincennes"},{"value":"America\/Indiana\/Winamac","label":"(UTC-04:00) America\/Indiana\/Winamac"},{"value":"America\/Iqaluit","label":"(UTC-04:00) America\/Iqaluit"},{"value":"America\/Kentucky\/Louisville","label":"(UTC-04:00) America\/Kentucky\/Louisville"},{"value":"America\/Kentucky\/Monticello","label":"(UTC-04:00) America\/Kentucky\/Monticello"},{"value":"America\/Kralendijk","label":"(UTC-04:00) America\/Kralendijk"},{"value":"America\/La_Paz","label":"(UTC-04:00) America\/La_Paz"},{"value":"America\/Lower_Princes","label":"(UTC-04:00) America\/Lower_Princes"},{"value":"America\/Manaus","label":"(UTC-04:00) America\/Manaus"},{"value":"America\/Marigot","label":"(UTC-04:00) America\/Marigot"},{"value":"America\/Martinique","label":"(UTC-04:00) America\/Martinique"},{"value":"America\/Montserrat","label":"(UTC-04:00) America\/Montserrat"},{"value":"America\/Nassau","label":"(UTC-04:00) America\/Nassau"},{"value":"America\/New_York","label":"(UTC-04:00) America\/New_York"},{"value":"America\/Port-au-Prince","label":"(UTC-04:00) America\/Port-au-Prince"},{"value":"America\/Port_of_Spain","label":"(UTC-04:00) America\/Port_of_Spain"},{"value":"America\/Porto_Velho","label":"(UTC-04:00) America\/Porto_Velho"},{"value":"America\/Puerto_Rico","label":"(UTC-04:00) America\/Puerto_Rico"},{"value":"America\/Santiago","label":"(UTC-04:00) America\/Santiago"},{"value":"America\/Santo_Domingo","label":"(UTC-04:00) America\/Santo_Domingo"},{"value":"America\/St_Barthelemy","label":"(UTC-04:00) America\/St_Barthelemy"},{"value":"America\/St_Kitts","label":"(UTC-04:00) America\/St_Kitts"},{"value":"America\/St_Lucia","label":"(UTC-04:00) America\/St_Lucia"},{"value":"America\/St_Thomas","label":"(UTC-04:00) America\/St_Thomas"},{"value":"America\/St_Vincent","label":"(UTC-04:00) America\/St_Vincent"},{"value":"America\/Toronto","label":"(UTC-04:00) America\/Toronto"},{"value":"America\/Tortola","label":"(UTC-04:00) America\/Tortola"},{"value":"America\/Araguaina","label":"(UTC-03:00) America\/Araguaina"},{"value":"America\/Argentina\/Buenos_Aires","label":"(UTC-03:00) America\/Argentina\/Buenos_Aires"},{"value":"America\/Argentina\/Catamarca","label":"(UTC-03:00) America\/Argentina\/Catamarca"},{"value":"America\/Argentina\/Cordoba","label":"(UTC-03:00) America\/Argentina\/Cordoba"},{"value":"America\/Argentina\/Jujuy","label":"(UTC-03:00) America\/Argentina\/Jujuy"},{"value":"America\/Argentina\/La_Rioja","label":"(UTC-03:00) America\/Argentina\/La_Rioja"},{"value":"America\/Argentina\/Mendoza","label":"(UTC-03:00) America\/Argentina\/Mendoza"},{"value":"America\/Argentina\/Rio_Gallegos","label":"(UTC-03:00) America\/Argentina\/Rio_Gallegos"},{"value":"America\/Argentina\/Salta","label":"(UTC-03:00) America\/Argentina\/Salta"},{"value":"America\/Argentina\/San_Juan","label":"(UTC-03:00) America\/Argentina\/San_Juan"},{"value":"America\/Argentina\/San_Luis","label":"(UTC-03:00) America\/Argentina\/San_Luis"},{"value":"America\/Argentina\/Tucuman","label":"(UTC-03:00) America\/Argentina\/Tucuman"},{"value":"America\/Argentina\/Ushuaia","label":"(UTC-03:00) America\/Argentina\/Ushuaia"},{"value":"America\/Asuncion","label":"(UTC-03:00) America\/Asuncion"},{"value":"America\/Bahia","label":"(UTC-03:00) America\/Bahia"},{"value":"America\/Belem","label":"(UTC-03:00) America\/Belem"},{"value":"America\/Cayenne","label":"(UTC-03:00) America\/Cayenne"},{"value":"America\/Coyhaique","label":"(UTC-03:00) America\/Coyhaique"},{"value":"America\/Fortaleza","label":"(UTC-03:00) America\/Fortaleza"},{"value":"America\/Glace_Bay","label":"(UTC-03:00) America\/Glace_Bay"},{"value":"America\/Goose_Bay","label":"(UTC-03:00) America\/Goose_Bay"},{"value":"America\/Halifax","label":"(UTC-03:00) America\/Halifax"},{"value":"America\/Maceio","label":"(UTC-03:00) America\/Maceio"},{"value":"America\/Moncton","label":"(UTC-03:00) America\/Moncton"},{"value":"America\/Montevideo","label":"(UTC-03:00) America\/Montevideo"},{"value":"America\/Paramaribo","label":"(UTC-03:00) America\/Paramaribo"},{"value":"America\/Punta_Arenas","label":"(UTC-03:00) America\/Punta_Arenas"},{"value":"America\/Recife","label":"(UTC-03:00) America\/Recife"},{"value":"America\/Santarem","label":"(UTC-03:00) America\/Santarem"},{"value":"America\/Sao_Paulo","label":"(UTC-03:00) America\/Sao_Paulo"},{"value":"America\/Thule","label":"(UTC-03:00) America\/Thule"},{"value":"Antarctica\/Palmer","label":"(UTC-03:00) Antarctica\/Palmer"},{"value":"Antarctica\/Rothera","label":"(UTC-03:00) Antarctica\/Rothera"},{"value":"Atlantic\/Bermuda","label":"(UTC-03:00) Atlantic\/Bermuda"},{"value":"Atlantic\/Stanley","label":"(UTC-03:00) Atlantic\/Stanley"},{"value":"America\/St_Johns","label":"(UTC-02:30) America\/St_Johns"},{"value":"America\/Miquelon","label":"(UTC-02:00) America\/Miquelon"},{"value":"America\/Noronha","label":"(UTC-02:00) America\/Noronha"},{"value":"Atlantic\/South_Georgia","label":"(UTC-02:00) Atlantic\/South_Georgia"},{"value":"America\/Nuuk","label":"(UTC-01:00) America\/Nuuk"},{"value":"America\/Scoresbysund","label":"(UTC-01:00) America\/Scoresbysund"},{"value":"Atlantic\/Cape_Verde","label":"(UTC-01:00) Atlantic\/Cape_Verde"},{"value":"Africa\/Abidjan","label":"(UTC+00:00) Africa\/Abidjan"},{"value":"Africa\/Accra","label":"(UTC+00:00) Africa\/Accra"},{"value":"Africa\/Bamako","label":"(UTC+00:00) Africa\/Bamako"},{"value":"Africa\/Banjul","label":"(UTC+00:00) Africa\/Banjul"},{"value":"Africa\/Bissau","label":"(UTC+00:00) Africa\/Bissau"},{"value":"Africa\/Conakry","label":"(UTC+00:00) Africa\/Conakry"},{"value":"Africa\/Dakar","label":"(UTC+00:00) Africa\/Dakar"},{"value":"Africa\/Freetown","label":"(UTC+00:00) Africa\/Freetown"},{"value":"Africa\/Lome","label":"(UTC+00:00) Africa\/Lome"},{"value":"Africa\/Monrovia","label":"(UTC+00:00) Africa\/Monrovia"},{"value":"Africa\/Nouakchott","label":"(UTC+00:00) Africa\/Nouakchott"},{"value":"Africa\/Ouagadougou","label":"(UTC+00:00) Africa\/Ouagadougou"},{"value":"Africa\/Sao_Tome","label":"(UTC+00:00) Africa\/Sao_Tome"},{"value":"America\/Danmarkshavn","label":"(UTC+00:00) America\/Danmarkshavn"},{"value":"Atlantic\/Azores","label":"(UTC+00:00) Atlantic\/Azores"},{"value":"Atlantic\/Reykjavik","label":"(UTC+00:00) Atlantic\/Reykjavik"},{"value":"Atlantic\/St_Helena","label":"(UTC+00:00) Atlantic\/St_Helena"},{"value":"UTC","label":"(UTC+00:00) UTC"},{"value":"Africa\/Algiers","label":"(UTC+01:00) Africa\/Algiers"},{"value":"Africa\/Bangui","label":"(UTC+01:00) Africa\/Bangui"},{"value":"Africa\/Brazzaville","label":"(UTC+01:00) Africa\/Brazzaville"},{"value":"Africa\/Casablanca","label":"(UTC+01:00) Africa\/Casablanca"},{"value":"Africa\/Douala","label":"(UTC+01:00) Africa\/Douala"},{"value":"Africa\/El_Aaiun","label":"(UTC+01:00) Africa\/El_Aaiun"},{"value":"Africa\/Kinshasa","label":"(UTC+01:00) Africa\/Kinshasa"},{"value":"Africa\/Lagos","label":"(UTC+01:00) Africa\/Lagos"},{"value":"Africa\/Libreville","label":"(UTC+01:00) Africa\/Libreville"},{"value":"Africa\/Luanda","label":"(UTC+01:00) Africa\/Luanda"},{"value":"Africa\/Malabo","label":"(UTC+01:00) Africa\/Malabo"},{"value":"Africa\/Ndjamena","label":"(UTC+01:00) Africa\/Ndjamena"},{"value":"Africa\/Niamey","label":"(UTC+01:00) Africa\/Niamey"},{"value":"Africa\/Porto-Novo","label":"(UTC+01:00) Africa\/Porto-Novo"},{"value":"Africa\/Tunis","label":"(UTC+01:00) Africa\/Tunis"},{"value":"Atlantic\/Canary","label":"(UTC+01:00) Atlantic\/Canary"},{"value":"Atlantic\/Faroe","label":"(UTC+01:00) Atlantic\/Faroe"},{"value":"Atlantic\/Madeira","label":"(UTC+01:00) Atlantic\/Madeira"},{"value":"Europe\/Dublin","label":"(UTC+01:00) Europe\/Dublin"},{"value":"Europe\/Guernsey","label":"(UTC+01:00) Europe\/Guernsey"},{"value":"Europe\/Isle_of_Man","label":"(UTC+01:00) Europe\/Isle_of_Man"},{"value":"Europe\/Jersey","label":"(UTC+01:00) Europe\/Jersey"},{"value":"Europe\/Lisbon","label":"(UTC+01:00) Europe\/Lisbon"},{"value":"Europe\/London","label":"(UTC+01:00) Europe\/London"},{"value":"Africa\/Blantyre","label":"(UTC+02:00) Africa\/Blantyre"},{"value":"Africa\/Bujumbura","label":"(UTC+02:00) Africa\/Bujumbura"},{"value":"Africa\/Ceuta","label":"(UTC+02:00) Africa\/Ceuta"},{"value":"Africa\/Gaborone","label":"(UTC+02:00) Africa\/Gaborone"},{"value":"Africa\/Harare","label":"(UTC+02:00) Africa\/Harare"},{"value":"Africa\/Johannesburg","label":"(UTC+02:00) Africa\/Johannesburg"},{"value":"Africa\/Juba","label":"(UTC+02:00) Africa\/Juba"},{"value":"Africa\/Khartoum","label":"(UTC+02:00) Africa\/Khartoum"},{"value":"Africa\/Kigali","label":"(UTC+02:00) Africa\/Kigali"},{"value":"Africa\/Lubumbashi","label":"(UTC+02:00) Africa\/Lubumbashi"},{"value":"Africa\/Lusaka","label":"(UTC+02:00) Africa\/Lusaka"},{"value":"Africa\/Maputo","label":"(UTC+02:00) Africa\/Maputo"},{"value":"Africa\/Maseru","label":"(UTC+02:00) Africa\/Maseru"},{"value":"Africa\/Mbabane","label":"(UTC+02:00) Africa\/Mbabane"},{"value":"Africa\/Tripoli","label":"(UTC+02:00) Africa\/Tripoli"},{"value":"Africa\/Windhoek","label":"(UTC+02:00) Africa\/Windhoek"},{"value":"Antarctica\/Troll","label":"(UTC+02:00) Antarctica\/Troll"},{"value":"Arctic\/Longyearbyen","label":"(UTC+02:00) Arctic\/Longyearbyen"},{"value":"Europe\/Amsterdam","label":"(UTC+02:00) Europe\/Amsterdam"},{"value":"Europe\/Andorra","label":"(UTC+02:00) Europe\/Andorra"},{"value":"Europe\/Belgrade","label":"(UTC+02:00) Europe\/Belgrade"},{"value":"Europe\/Berlin","label":"(UTC+02:00) Europe\/Berlin"},{"value":"Europe\/Bratislava","label":"(UTC+02:00) Europe\/Bratislava"},{"value":"Europe\/Brussels","label":"(UTC+02:00) Europe\/Brussels"},{"value":"Europe\/Budapest","label":"(UTC+02:00) Europe\/Budapest"},{"value":"Europe\/Busingen","label":"(UTC+02:00) Europe\/Busingen"},{"value":"Europe\/Copenhagen","label":"(UTC+02:00) Europe\/Copenhagen"},{"value":"Europe\/Gibraltar","label":"(UTC+02:00) Europe\/Gibraltar"},{"value":"Europe\/Kaliningrad","label":"(UTC+02:00) Europe\/Kaliningrad"},{"value":"Europe\/Ljubljana","label":"(UTC+02:00) Europe\/Ljubljana"},{"value":"Europe\/Luxembourg","label":"(UTC+02:00) Europe\/Luxembourg"},{"value":"Europe\/Madrid","label":"(UTC+02:00) Europe\/Madrid"},{"value":"Europe\/Malta","label":"(UTC+02:00) Europe\/Malta"},{"value":"Europe\/Monaco","label":"(UTC+02:00) Europe\/Monaco"},{"value":"Europe\/Oslo","label":"(UTC+02:00) Europe\/Oslo"},{"value":"Europe\/Paris","label":"(UTC+02:00) Europe\/Paris"},{"value":"Europe\/Podgorica","label":"(UTC+02:00) Europe\/Podgorica"},{"value":"Europe\/Prague","label":"(UTC+02:00) Europe\/Prague"},{"value":"Europe\/Rome","label":"(UTC+02:00) Europe\/Rome"},{"value":"Europe\/San_Marino","label":"(UTC+02:00) Europe\/San_Marino"},{"value":"Europe\/Sarajevo","label":"(UTC+02:00) Europe\/Sarajevo"},{"value":"Europe\/Skopje","label":"(UTC+02:00) Europe\/Skopje"},{"value":"Europe\/Stockholm","label":"(UTC+02:00) Europe\/Stockholm"},{"value":"Europe\/Tirane","label":"(UTC+02:00) Europe\/Tirane"},{"value":"Europe\/Vaduz","label":"(UTC+02:00) Europe\/Vaduz"},{"value":"Europe\/Vatican","label":"(UTC+02:00) Europe\/Vatican"},{"value":"Europe\/Vienna","label":"(UTC+02:00) Europe\/Vienna"},{"value":"Europe\/Warsaw","label":"(UTC+02:00) Europe\/Warsaw"},{"value":"Europe\/Zagreb","label":"(UTC+02:00) Europe\/Zagreb"},{"value":"Europe\/Zurich","label":"(UTC+02:00) Europe\/Zurich"},{"value":"Africa\/Addis_Ababa","label":"(UTC+03:00) Africa\/Addis_Ababa"},{"value":"Africa\/Asmara","label":"(UTC+03:00) Africa\/Asmara"},{"value":"Africa\/Cairo","label":"(UTC+03:00) Africa\/Cairo"},{"value":"Africa\/Dar_es_Salaam","label":"(UTC+03:00) Africa\/Dar_es_Salaam"},{"value":"Africa\/Djibouti","label":"(UTC+03:00) Africa\/Djibouti"},{"value":"Africa\/Kampala","label":"(UTC+03:00) Africa\/Kampala"},{"value":"Africa\/Mogadishu","label":"(UTC+03:00) Africa\/Mogadishu"},{"value":"Africa\/Nairobi","label":"(UTC+03:00) Africa\/Nairobi"},{"value":"Antarctica\/Syowa","label":"(UTC+03:00) Antarctica\/Syowa"},{"value":"Asia\/Aden","label":"(UTC+03:00) Asia\/Aden"},{"value":"Asia\/Amman","label":"(UTC+03:00) Asia\/Amman"},{"value":"Asia\/Baghdad","label":"(UTC+03:00) Asia\/Baghdad"},{"value":"Asia\/Bahrain","label":"(UTC+03:00) Asia\/Bahrain"},{"value":"Asia\/Beirut","label":"(UTC+03:00) Asia\/Beirut"},{"value":"Asia\/Damascus","label":"(UTC+03:00) Asia\/Damascus"},{"value":"Asia\/Famagusta","label":"(UTC+03:00) Asia\/Famagusta"},{"value":"Asia\/Gaza","label":"(UTC+03:00) Asia\/Gaza"},{"value":"Asia\/Hebron","label":"(UTC+03:00) Asia\/Hebron"},{"value":"Asia\/Jerusalem","label":"(UTC+03:00) Asia\/Jerusalem"},{"value":"Asia\/Kuwait","label":"(UTC+03:00) Asia\/Kuwait"},{"value":"Asia\/Nicosia","label":"(UTC+03:00) Asia\/Nicosia"},{"value":"Asia\/Qatar","label":"(UTC+03:00) Asia\/Qatar"},{"value":"Asia\/Riyadh","label":"(UTC+03:00) Asia\/Riyadh"},{"value":"Europe\/Athens","label":"(UTC+03:00) Europe\/Athens"},{"value":"Europe\/Bucharest","label":"(UTC+03:00) Europe\/Bucharest"},{"value":"Europe\/Chisinau","label":"(UTC+03:00) Europe\/Chisinau"},{"value":"Europe\/Helsinki","label":"(UTC+03:00) Europe\/Helsinki"},{"value":"Europe\/Istanbul","label":"(UTC+03:00) Europe\/Istanbul"},{"value":"Europe\/Kirov","label":"(UTC+03:00) Europe\/Kirov"},{"value":"Europe\/Kyiv","label":"(UTC+03:00) Europe\/Kyiv"},{"value":"Europe\/Mariehamn","label":"(UTC+03:00) Europe\/Mariehamn"},{"value":"Europe\/Minsk","label":"(UTC+03:00) Europe\/Minsk"},{"value":"Europe\/Moscow","label":"(UTC+03:00) Europe\/Moscow"},{"value":"Europe\/Riga","label":"(UTC+03:00) Europe\/Riga"},{"value":"Europe\/Simferopol","label":"(UTC+03:00) Europe\/Simferopol"},{"value":"Europe\/Sofia","label":"(UTC+03:00) Europe\/Sofia"},{"value":"Europe\/Tallinn","label":"(UTC+03:00) Europe\/Tallinn"},{"value":"Europe\/Vilnius","label":"(UTC+03:00) Europe\/Vilnius"},{"value":"Europe\/Volgograd","label":"(UTC+03:00) Europe\/Volgograd"},{"value":"Indian\/Antananarivo","label":"(UTC+03:00) Indian\/Antananarivo"},{"value":"Indian\/Comoro","label":"(UTC+03:00) Indian\/Comoro"},{"value":"Indian\/Mayotte","label":"(UTC+03:00) Indian\/Mayotte"},{"value":"Asia\/Tehran","label":"(UTC+03:30) Asia\/Tehran"},{"value":"Asia\/Baku","label":"(UTC+04:00) Asia\/Baku"},{"value":"Asia\/Dubai","label":"(UTC+04:00) Asia\/Dubai"},{"value":"Asia\/Muscat","label":"(UTC+04:00) Asia\/Muscat"},{"value":"Asia\/Tbilisi","label":"(UTC+04:00) Asia\/Tbilisi"},{"value":"Asia\/Yerevan","label":"(UTC+04:00) Asia\/Yerevan"},{"value":"Europe\/Astrakhan","label":"(UTC+04:00) Europe\/Astrakhan"},{"value":"Europe\/Samara","label":"(UTC+04:00) Europe\/Samara"},{"value":"Europe\/Saratov","label":"(UTC+04:00) Europe\/Saratov"},{"value":"Europe\/Ulyanovsk","label":"(UTC+04:00) Europe\/Ulyanovsk"},{"value":"Indian\/Mahe","label":"(UTC+04:00) Indian\/Mahe"},{"value":"Indian\/Mauritius","label":"(UTC+04:00) Indian\/Mauritius"},{"value":"Indian\/Reunion","label":"(UTC+04:00) Indian\/Reunion"},{"value":"Asia\/Kabul","label":"(UTC+04:30) Asia\/Kabul"},{"value":"Antarctica\/Mawson","label":"(UTC+05:00) Antarctica\/Mawson"},{"value":"Antarctica\/Vostok","label":"(UTC+05:00) Antarctica\/Vostok"},{"value":"Asia\/Almaty","label":"(UTC+05:00) Asia\/Almaty"},{"value":"Asia\/Aqtau","label":"(UTC+05:00) Asia\/Aqtau"},{"value":"Asia\/Aqtobe","label":"(UTC+05:00) Asia\/Aqtobe"},{"value":"Asia\/Ashgabat","label":"(UTC+05:00) Asia\/Ashgabat"},{"value":"Asia\/Atyrau","label":"(UTC+05:00) Asia\/Atyrau"},{"value":"Asia\/Dushanbe","label":"(UTC+05:00) Asia\/Dushanbe"},{"value":"Asia\/Karachi","label":"(UTC+05:00) Asia\/Karachi"},{"value":"Asia\/Oral","label":"(UTC+05:00) Asia\/Oral"},{"value":"Asia\/Qostanay","label":"(UTC+05:00) Asia\/Qostanay"},{"value":"Asia\/Qyzylorda","label":"(UTC+05:00) Asia\/Qyzylorda"},{"value":"Asia\/Samarkand","label":"(UTC+05:00) Asia\/Samarkand"},{"value":"Asia\/Tashkent","label":"(UTC+05:00) Asia\/Tashkent"},{"value":"Asia\/Yekaterinburg","label":"(UTC+05:00) Asia\/Yekaterinburg"},{"value":"Indian\/Kerguelen","label":"(UTC+05:00) Indian\/Kerguelen"},{"value":"Indian\/Maldives","label":"(UTC+05:00) Indian\/Maldives"},{"value":"Asia\/Colombo","label":"(UTC+05:30) Asia\/Colombo"},{"value":"Asia\/Kolkata","label":"(UTC+05:30) Asia\/Kolkata"},{"value":"Asia\/Kathmandu","label":"(UTC+05:45) Asia\/Kathmandu"},{"value":"Asia\/Bishkek","label":"(UTC+06:00) Asia\/Bishkek"},{"value":"Asia\/Dhaka","label":"(UTC+06:00) Asia\/Dhaka"},{"value":"Asia\/Omsk","label":"(UTC+06:00) Asia\/Omsk"},{"value":"Asia\/Thimphu","label":"(UTC+06:00) Asia\/Thimphu"},{"value":"Asia\/Urumqi","label":"(UTC+06:00) Asia\/Urumqi"},{"value":"Indian\/Chagos","label":"(UTC+06:00) Indian\/Chagos"},{"value":"Asia\/Yangon","label":"(UTC+06:30) Asia\/Yangon"},{"value":"Indian\/Cocos","label":"(UTC+06:30) Indian\/Cocos"},{"value":"Antarctica\/Davis","label":"(UTC+07:00) Antarctica\/Davis"},{"value":"Asia\/Bangkok","label":"(UTC+07:00) Asia\/Bangkok"},{"value":"Asia\/Barnaul","label":"(UTC+07:00) Asia\/Barnaul"},{"value":"Asia\/Ho_Chi_Minh","label":"(UTC+07:00) Asia\/Ho_Chi_Minh"},{"value":"Asia\/Hovd","label":"(UTC+07:00) Asia\/Hovd"},{"value":"Asia\/Jakarta","label":"(UTC+07:00) Asia\/Jakarta"},{"value":"Asia\/Krasnoyarsk","label":"(UTC+07:00) Asia\/Krasnoyarsk"},{"value":"Asia\/Novokuznetsk","label":"(UTC+07:00) Asia\/Novokuznetsk"},{"value":"Asia\/Novosibirsk","label":"(UTC+07:00) Asia\/Novosibirsk"},{"value":"Asia\/Phnom_Penh","label":"(UTC+07:00) Asia\/Phnom_Penh"},{"value":"Asia\/Pontianak","label":"(UTC+07:00) Asia\/Pontianak"},{"value":"Asia\/Tomsk","label":"(UTC+07:00) Asia\/Tomsk"},{"value":"Asia\/Vientiane","label":"(UTC+07:00) Asia\/Vientiane"},{"value":"Indian\/Christmas","label":"(UTC+07:00) Indian\/Christmas"},{"value":"Antarctica\/Casey","label":"(UTC+08:00) Antarctica\/Casey"},{"value":"Asia\/Brunei","label":"(UTC+08:00) Asia\/Brunei"},{"value":"Asia\/Hong_Kong","label":"(UTC+08:00) Asia\/Hong_Kong"},{"value":"Asia\/Irkutsk","label":"(UTC+08:00) Asia\/Irkutsk"},{"value":"Asia\/Kuala_Lumpur","label":"(UTC+08:00) Asia\/Kuala_Lumpur"},{"value":"Asia\/Kuching","label":"(UTC+08:00) Asia\/Kuching"},{"value":"Asia\/Macau","label":"(UTC+08:00) Asia\/Macau"},{"value":"Asia\/Makassar","label":"(UTC+08:00) Asia\/Makassar"},{"value":"Asia\/Manila","label":"(UTC+08:00) Asia\/Manila"},{"value":"Asia\/Shanghai","label":"(UTC+08:00) Asia\/Shanghai"},{"value":"Asia\/Singapore","label":"(UTC+08:00) Asia\/Singapore"},{"value":"Asia\/Taipei","label":"(UTC+08:00) Asia\/Taipei"},{"value":"Asia\/Ulaanbaatar","label":"(UTC+08:00) Asia\/Ulaanbaatar"},{"value":"Australia\/Perth","label":"(UTC+08:00) Australia\/Perth"},{"value":"Australia\/Eucla","label":"(UTC+08:45) Australia\/Eucla"},{"value":"Asia\/Chita","label":"(UTC+09:00) Asia\/Chita"},{"value":"Asia\/Dili","label":"(UTC+09:00) Asia\/Dili"},{"value":"Asia\/Jayapura","label":"(UTC+09:00) Asia\/Jayapura"},{"value":"Asia\/Khandyga","label":"(UTC+09:00) Asia\/Khandyga"},{"value":"Asia\/Pyongyang","label":"(UTC+09:00) Asia\/Pyongyang"},{"value":"Asia\/Seoul","label":"(UTC+09:00) Asia\/Seoul"},{"value":"Asia\/Tokyo","label":"(UTC+09:00) Asia\/Tokyo"},{"value":"Asia\/Yakutsk","label":"(UTC+09:00) Asia\/Yakutsk"},{"value":"Pacific\/Palau","label":"(UTC+09:00) Pacific\/Palau"},{"value":"Australia\/Adelaide","label":"(UTC+09:30) Australia\/Adelaide"},{"value":"Australia\/Broken_Hill","label":"(UTC+09:30) Australia\/Broken_Hill"},{"value":"Australia\/Darwin","label":"(UTC+09:30) Australia\/Darwin"},{"value":"Antarctica\/DumontDUrville","label":"(UTC+10:00) Antarctica\/DumontDUrville"},{"value":"Antarctica\/Macquarie","label":"(UTC+10:00) Antarctica\/Macquarie"},{"value":"Asia\/Ust-Nera","label":"(UTC+10:00) Asia\/Ust-Nera"},{"value":"Asia\/Vladivostok","label":"(UTC+10:00) Asia\/Vladivostok"},{"value":"Australia\/Brisbane","label":"(UTC+10:00) Australia\/Brisbane"},{"value":"Australia\/Hobart","label":"(UTC+10:00) Australia\/Hobart"},{"value":"Australia\/Lindeman","label":"(UTC+10:00) Australia\/Lindeman"},{"value":"Australia\/Melbourne","label":"(UTC+10:00) Australia\/Melbourne"},{"value":"Australia\/Sydney","label":"(UTC+10:00) Australia\/Sydney"},{"value":"Pacific\/Chuuk","label":"(UTC+10:00) Pacific\/Chuuk"},{"value":"Pacific\/Guam","label":"(UTC+10:00) Pacific\/Guam"},{"value":"Pacific\/Port_Moresby","label":"(UTC+10:00) Pacific\/Port_Moresby"},{"value":"Pacific\/Saipan","label":"(UTC+10:00) Pacific\/Saipan"},{"value":"Australia\/Lord_Howe","label":"(UTC+10:30) Australia\/Lord_Howe"},{"value":"Asia\/Magadan","label":"(UTC+11:00) Asia\/Magadan"},{"value":"Asia\/Sakhalin","label":"(UTC+11:00) Asia\/Sakhalin"},{"value":"Asia\/Srednekolymsk","label":"(UTC+11:00) Asia\/Srednekolymsk"},{"value":"Pacific\/Bougainville","label":"(UTC+11:00) Pacific\/Bougainville"},{"value":"Pacific\/Efate","label":"(UTC+11:00) Pacific\/Efate"},{"value":"Pacific\/Guadalcanal","label":"(UTC+11:00) Pacific\/Guadalcanal"},{"value":"Pacific\/Kosrae","label":"(UTC+11:00) Pacific\/Kosrae"},{"value":"Pacific\/Norfolk","label":"(UTC+11:00) Pacific\/Norfolk"},{"value":"Pacific\/Noumea","label":"(UTC+11:00) Pacific\/Noumea"},{"value":"Pacific\/Pohnpei","label":"(UTC+11:00) Pacific\/Pohnpei"},{"value":"Antarctica\/McMurdo","label":"(UTC+12:00) Antarctica\/McMurdo"},{"value":"Asia\/Anadyr","label":"(UTC+12:00) Asia\/Anadyr"},{"value":"Asia\/Kamchatka","label":"(UTC+12:00) Asia\/Kamchatka"},{"value":"Pacific\/Auckland","label":"(UTC+12:00) Pacific\/Auckland"},{"value":"Pacific\/Fiji","label":"(UTC+12:00) Pacific\/Fiji"},{"value":"Pacific\/Funafuti","label":"(UTC+12:00) Pacific\/Funafuti"},{"value":"Pacific\/Kwajalein","label":"(UTC+12:00) Pacific\/Kwajalein"},{"value":"Pacific\/Majuro","label":"(UTC+12:00) Pacific\/Majuro"},{"value":"Pacific\/Nauru","label":"(UTC+12:00) Pacific\/Nauru"},{"value":"Pacific\/Tarawa","label":"(UTC+12:00) Pacific\/Tarawa"},{"value":"Pacific\/Wake","label":"(UTC+12:00) Pacific\/Wake"},{"value":"Pacific\/Wallis","label":"(UTC+12:00) Pacific\/Wallis"},{"value":"Pacific\/Chatham","label":"(UTC+12:45) Pacific\/Chatham"},{"value":"Pacific\/Apia","label":"(UTC+13:00) Pacific\/Apia"},{"value":"Pacific\/Fakaofo","label":"(UTC+13:00) Pacific\/Fakaofo"},{"value":"Pacific\/Kanton","label":"(UTC+13:00) Pacific\/Kanton"},{"value":"Pacific\/Tongatapu","label":"(UTC+13:00) Pacific\/Tongatapu"},{"value":"Pacific\/Kiritimati","label":"(UTC+14:00) Pacific\/Kiritimati"}],"supportedLocales":["ko","en"],"localeNames":{"ko":"\ud55c\uad6d\uc5b4","en":"English"},"releaseYear":"2026","version":"7.0.8","isIos":false},
+                // 레이아웃 편집기 lazy 번들 URL — `/admin/layout-editor/*` 진입 시에만 런타임
+                // <script> 주입으로 로드된다(초기 접속 payload 에 미포함). filemtime 캐시버스팅,
+                // 미빌드 상태 대비 file_exists 가드.
+                coreEditorAsset: 'http://127.0.0.1:8000/build/core/layout-editor.min.js?v=1787544079',
+                // DevTools lazy 번들 URL — 디버그 모드에서만 런타임 <script> 주입으로 로드.
+                coreDevToolsAsset: 'http://127.0.0.1:8000/build/core/devtools.min.js?v=1787544079',
+                // 확장 캐시 버전 SSoT — 클라이언트 fetch (`?v=`) 동반 필수.
+                // 자세한 설명은 admin.blade.php 참조.
+                cache_version: 1787563499,
+                // 자산 URL 모드 — 'extension'(기본) | 'extensionless'.
+                // 정적 최적화 블록(location ~* \.(js|css|json)$)이 동적 응답을 가로채는
+                // 서버에서 확장자 없는 형태로 전환한다. 부트스트랩 자가 복구가 실패 시
+                // 이 값을 런타임에 뒤집으므로 최상위 키로 노출한다(설정값 SSoT 는
+                // G7Config.settings.general.asset_url_mode).
+                // 자가 복구가 <head> 에서 이미 전환을 확정했다면 그 값을 잇는다.
+                // 이 대입은 G7Config 객체를 통째로 교체하므로, 독립 전역을 읽지 않으면
+                // 복원/전환 결과가 여기서 덮여 사라진다.
+                assetUrlMode: window.__g7AssetUrlMode || 'extension'
+            };
+                    </script>
+
+        
+        
+        <script>
+(function () {
+    'use strict';
+
+    var MAX_ATTEMPTS = 3;    // 총 3시도 (재시도 2회)
+    var BASE_DELAY_MS = 300; // 지수 백오프 기준 (모바일 커넥션 재수립 시간 고려)
+
+    var LABEL = "[User]";
+
+    // 문서 이탈 추적 — 버려지는 문서에 에러 화면을 그리지 않기 위함
+    window.__g7Unloading = false;
+    window.addEventListener('pagehide', function () { window.__g7Unloading = true; });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) window.__g7Unloading = false; });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // 자산 URL 모드 자가 복구 (이슈 #486)
+    //
+    // nginx 의 정적 최적화 블록(`location ~* \.(js|css|json)$`)은 정규식 location 이라
+    // 프리픽스 location 보다 먼저 매칭되고, 그 안에 PHP 핸들러가 없으면 확장자 붙은
+    // 동적 엔드포인트가 PHP 에 도달하지 못한 채 404 가 된다. 이 경우 관리자 화면조차
+    // 뜨지 않으므로 "설정을 바꾸세요" 안내는 순환 참조다 — 브라우저가 스스로 복구한다.
+    //
+    // 불변식 (계획서 §12):
+    //   L1 전환은 단방향(extension → extensionless) 1회. 역방향 폴백을 만들지 않는다.
+    //      양쪽 다 실패하는 상황(PHP 다운·WAF)에서 무한 왕복이 되기 때문.
+    //   L2 전환 시도는 기존 MAX_ATTEMPTS 예산 안에서 소비한다(별도 예산 신설 금지).
+    //   L3 자동 location.reload() 금지. 새로고침은 폴백 UI 의 사용자 클릭만.
+    //   L4 모든 실패 경로는 renderFallback() 으로 수렴하고 종료한다.
+    //   L5 서버 설정은 건드리지 않는다(미인증 클라이언트의 전역 설정 변경 금지).
+    //   L8 pending 카운터 — 실패 element 제거 후 교체, onload 는 정확히 1회만 감소.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    // 자산 URL 모드 자가 복구 헬퍼 — `partials/asset-url-recovery` 가 <head> 에서
+    // 미리 정의한다(CSS <link> 의 onerror 가 그것을 먼저 쓰기 때문). 여기서는 재사용만 한다.
+    // 헬퍼가 없으면(부분 include 등) 자가 복구 없이 기존 재시도 로직으로만 동작한다.
+    var assetUrl = window.__g7AssetUrl || null;
+
+    // URL 을 문서 기준 절대 URL 로 정규화한다 (ES5 — `new URL` 은 구형 브라우저에 없다).
+    function absoluteUrl(src) {
+        var a = document.createElement('a');
+        a.href = src;
+        return a.href;
+    }
+
+    // 부트스트랩 상태 — 정적 <script> 의 onerror/onload 가 여기에 기록한다
+    var bootstrap = window.__g7Bootstrap = {
+        failed: false,
+        pending: 0,
+
+        /**
+         * 번들이 파싱 단계에서 거부됐는지 (SyntaxError 관측 결과).
+         *
+         * 다운로드는 성공했는데 전역이 없는 상황은 두 가지다 — ① 브라우저가 번들 문법을
+         * 모른다(지원 범위 밖) ② 번들 자체가 손상됐다. 둘은 안내 문구가 달라야 하므로
+         * 실제 오류를 관측해 가른다.
+         */
+        syntaxError: false,
+
+        /** 부팅에 필요한 번들 URL (절대 URL). 재시도로 바뀐 URL 도 여기에 누적된다. */
+        bundleSrcs: [absoluteUrl("http:\/\/127.0.0.1:8000\/build\/core\/template-engine.min.js?v=1787544079"), absoluteUrl("\/api\/templates\/assets\/twentyft-studio\/js\/components.iife.js?v=1787563499")],
+
+        /** 재시도·모드전환으로 새 URL 을 쓰게 되면 관측 대상에 추가한다. */
+        trackBundleSrc: function (src) {
+            var abs = absoluteUrl(src);
+            if (bootstrap.bundleSrcs.indexOf(abs) === -1) bootstrap.bundleSrcs.push(abs);
+        },
+
+        /** 모드 전환을 이미 시도했는지 (L1 — 페이지 수명당 1회) */
+        modeSwitched: false,
+
+        /**
+         * 정적 <script> 로드 실패 시 동적 재시도를 시작한다.
+         *
+         * <script> 의 onerror 는 실패 사유를 주지 않으므로(404 인지 네트워크 유실인지
+         * 구분 불가) 모든 실패를 재시도한다. 404 라면 3회 후 실패로 끝나므로 안전하다.
+         *
+         * @param src      재시도할 스크립트 URL
+         * @param attempt  현재 시도 번호 (1부터)
+         */
+        retry: function (src, attempt) {
+            attempt = attempt || 1;
+
+            if (window.__g7Unloading) return;
+
+            if (attempt >= MAX_ATTEMPTS) {
+                console.error(LABEL + ' Failed to load after ' + MAX_ATTEMPTS + ' attempts: ' + src);
+                bootstrap.failed = true;
+                bootstrap.renderFallback('network');
+                return;
+            }
+
+            // 자산 URL 모드 전환 (L1·L2) — 확장자 형태가 실패했고 아직 전환 전이라면,
+            // 지연 재시도 대신 확장자 없는 형태로 **즉시 1회** 시도한다.
+            // 이 시도는 기존 예산(attempt)을 그대로 소비하므로 총 시도 횟수는 불변이다.
+            var converted = (bootstrap.modeSwitched || !assetUrl) ? null : assetUrl.toExtensionless(src);
+            if (converted && converted !== src) {
+                bootstrap.modeSwitched = true;
+                assetUrl.switchToExtensionless();
+                console.warn(LABEL + ' Retrying with extensionless URL: ' + converted);
+
+                bootstrap.replaceScript(converted, attempt);
+                return;
+            }
+
+            var delay = BASE_DELAY_MS * Math.pow(2, attempt - 1);
+            console.warn(LABEL + ' Script load failed (attempt ' + attempt + '/' + MAX_ATTEMPTS + '), retrying in ' + delay + 'ms: ' + src);
+
+            bootstrap.trackBundleSrc(src);
+
+            setTimeout(function () {
+                var script = document.createElement('script');
+                script.src = src;
+                script.async = false; // 삽입 순서대로 실행 (코어 → 컴포넌트 순서 보장)
+                script.onload = function () {
+                    bootstrap.pending -= 1;
+                    bootstrap.tryInit();
+                };
+                script.onerror = function () {
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                    bootstrap.retry(src, attempt + 1);
+                };
+                document.head.appendChild(script);
+            }, delay);
+        },
+
+        /**
+         * 스크립트를 지연 없이 즉시 교체 삽입한다 (모드 전환 재시도용).
+         *
+         * L8 — onload 는 pending 을 정확히 1회만 감소시키고, 실패한 element 는
+         * 제거한 뒤 다음 경로로 넘어간다. 실패 시에도 attempt 를 증가시켜
+         * MAX_ATTEMPTS 예산을 공유하므로 총 네트워크 시도 횟수가 늘지 않는다(L2).
+         *
+         * @param src      삽입할 스크립트 URL
+         * @param attempt  현재 시도 번호
+         */
+        replaceScript: function (src, attempt) {
+            if (window.__g7Unloading) return;
+
+            bootstrap.trackBundleSrc(src);
+
+            var script = document.createElement('script');
+            script.src = src;
+            script.async = false; // 삽입 순서대로 실행 (코어 → 컴포넌트 순서 보장)
+            script.onload = function () {
+                bootstrap.pending -= 1;
+                bootstrap.tryInit();
+            };
+            script.onerror = function () {
+                if (script.parentNode) script.parentNode.removeChild(script);
+                bootstrap.retry(src, attempt + 1);
+            };
+            document.head.appendChild(script);
+        },
+
+        /**
+         * 부트스트랩 최종 실패 시 사용자에게 보이는 정적 폴백을 심는다.
+         *
+         * 코어 번들이 없을 수 있으므로 템플릿 엔진에 의존하지 않는 순수 DOM + 인라인 스타일.
+         * 종전에는 콘솔에만 기록되어 사용자에게는 영구 백지로 보였다.
+         *
+         * 사유별로 문구가 갈린다 — 새로고침이 도움이 되는 실패와 그렇지 않은 실패를
+         * 같은 문구로 안내하면 사용자가 자기 회선을 탓하며 영원히 새로고침하게 된다.
+         *
+         * @param reason 'network'(다운로드 실패) | 'incompatible'(브라우저가 실행 못 함)
+         *               | 'corrupt'(받았으나 전역 부재, 사유 미상). 미지정 시 'network'.
+         */
+        renderFallback: function (reason) {
+            if (window.__g7Unloading) return;
+
+            var app = document.getElementById('app');
+            if (!app) return;
+            if (app.childElementCount > 0) return; // 이미 렌더된 화면은 덮지 않는다
+
+            var incompatible = reason === 'incompatible';
+
+            var title = incompatible
+                ? "This browser cannot display the page"                : "Failed to load the page";
+            var message = incompatible
+                ? "Your browser is too old to run this site. Please update it to the latest version, or try a different browser."                : "Your network connection may be unstable. Please refresh and try again.";
+
+            // 새로고침해도 낫지 않는 상황에서 버튼을 두면 그것 자체가 다시 거짓 안내가 된다.
+            var button = incompatible
+                ? ''
+                : '<button type="button" onclick="window.location.reload()" ' +
+                  'style="border:0;border-radius:6px;background:#2563eb;color:#fff;font-size:14px;font-weight:500;' +
+                  'padding:10px 20px;cursor:pointer;">' +
+                  "Refresh" +
+                  '</button>';
+
+            app.innerHTML =
+                '<div data-g7-bootstrap-fallback="' + (incompatible ? 'incompatible' : 'network') + '" ' +
+                'style="min-height:60vh;display:flex;align-items:center;justify-content:center;padding:24px;' +
+                'font-family:system-ui,-apple-system,\'Segoe UI\',sans-serif;">' +
+                '<div style="text-align:center;max-width:420px;">' +
+                '<div style="font-size:40px;line-height:1;margin-bottom:16px;">&#9888;&#65039;</div>' +
+                '<h1 style="font-size:18px;font-weight:600;margin:0 0 8px;color:#111827;">' +
+                title +
+                '</h1>' +
+                '<p style="font-size:14px;line-height:1.6;margin:0 0 20px;color:#6b7280;">' +
+                message +
+                '</p>' +
+                button +
+                '</div></div>';
+        },
+
+        /**
+         * 두 번들이 모두 로드된 뒤 엔진을 초기화한다.
+         *
+         * 재시도로 늦게 도착한 경우에도 정확히 1회만 초기화되도록 pending 카운터로 게이트한다.
+         */
+        tryInit: function () {
+            if (bootstrap.pending > 0 || bootstrap.failed || bootstrap.initialized) return;
+            bootstrap.initialized = true;
+
+            if (window.G7Core && window.G7Core.initTemplateApp) {
+                window.G7Core.initTemplateApp({"templateId":"twentyft-studio","templateType":"user","locale":"en","debug":false});
+                return;
+            }
+
+            // 번들은 받았으나 전역이 없다 = 실행되지 않았다.
+            // SyntaxError 를 관측했다면 브라우저가 문법을 모르는 것(지원 범위 밖)이고,
+            // 그렇지 않으면 사유 미상(번들 손상 등)이므로 기존 문구를 유지한다.
+            console.error(LABEL + ' G7Core.initTemplateApp is not available'
+                + (bootstrap.syntaxError ? ' (bundle rejected at parse time)' : ''));
+            bootstrap.renderFallback(bootstrap.syntaxError ? 'incompatible' : 'corrupt');
+        },
+    };
+
+    // 번들의 파싱 실패 관측 (ES5) — 파싱 오류는 <script> 의 error 가 아니라 load 를
+    // 발생시키므로 element 이벤트로는 구분할 수 없다. window 의 error 이벤트로만 보인다.
+    window.addEventListener('error', function (e) {
+        if (!e || !e.filename) return;
+        if (bootstrap.bundleSrcs.indexOf(absoluteUrl(e.filename)) === -1) return;
+
+        var message = e.message ? String(e.message) : '';
+        if (message.indexOf('SyntaxError') !== -1 || (e.error && e.error.name === 'SyntaxError')) {
+            bootstrap.syntaxError = true;
+        }
+    }, true);
+
+    // 정적 <script> 2개(코어 + 컴포넌트)가 완료돼야 초기화한다
+    bootstrap.pending = 2;
+})();
+</script>
+
+
+<script src="http://127.0.0.1:8000/build/core/template-engine.min.js?v=1787544079" onload="window.__g7Bootstrap.pending -= 1; window.__g7Bootstrap.tryInit();" onerror="window.__g7Bootstrap.retry(this.src, 1);"></script>
+
+
+
+<script src="/api/templates/assets/twentyft-studio/js/components.iife.js?v=1787563499" onload="window.__g7Bootstrap.pending -= 1; window.__g7Bootstrap.tryInit();" onerror="window.__g7Bootstrap.retry(this.src, 1);"></script>
+
+                    
+
+</body></html>

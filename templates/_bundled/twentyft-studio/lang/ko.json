@@ -23,6 +23,10 @@
                 "title": "SuperBify — 20ft Studio",
                 "description": "SuperBify 제품 상세 정보입니다."
             },
+            "about": {
+                "title": "About — 20ft Studio",
+                "description": "20ft의 이름과 Software Studio, Digital Garage에 대한 이야기입니다."
+            },
             "inquiry": {
                 "title": "Project Inquiry — 20ft Studio",
                 "description": "프로젝트 문의 페이지입니다. 현재는 레이아웃 미리보기 상태입니다."
@@ -92,9 +96,8 @@
             },
             "about": {
                 "eyebrow": "ABOUT 20FT",
-                "heading": "작은 공간에서 계속 만듭니다.",
+                "heading": "작은 공간에서 가능성을 만듭니다.",
                 "body": "20ft라는 이름은 작은 20피트 공간에서 시작했습니다. 지금은 웹과 소프트웨어, 필요한 도구와 아이디어를 만드는 Digital Garage로 이어가고 있습니다.",
-                "proof": "20+ YEARS / WEB DEVELOPMENT",
                 "cta": "20ft에 대하여"
             },
             "inquiry_cta": {

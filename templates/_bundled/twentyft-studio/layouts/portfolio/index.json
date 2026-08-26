@@ -11,8 +11,13 @@
         {
             "id": "portfolio_items",
             "label_key": "$t:twentyft.data_source.portfolio_items",
-            "type": "static",
-            "data": [],
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/portfolio/projects",
+            "method": "GET",
+            "params": {
+                "page": "{{query.page ?? 1}}",
+                "per_page": "{{query.per_page ?? 12}}"
+            },
             "auto_fetch": true,
             "loading_strategy": "progressive"
         }

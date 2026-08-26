@@ -67,6 +67,7 @@ export { PortfolioDetail, type PortfolioDetailProps } from './components/Portfol
 export { SuperBifyList, type SuperBifyListProps } from './components/SuperBifyList';
 export { SuperBifyDetail, type SuperBifyDetailProps } from './components/SuperBifyDetail';
 export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
+export { AboutPage, type AboutPageProps } from './components/AboutPage';
 
 // Template metadata
 import templateMetadata from '../template.json';
@@ -120,6 +121,7 @@ import { PortfolioDetail } from './components/PortfolioDetail';
 import { SuperBifyList } from './components/SuperBifyList';
 import { SuperBifyDetail } from './components/SuperBifyDetail';
 import { InquiryForm } from './components/InquiryForm';
+import { AboutPage } from './components/AboutPage';
 
 const registry = (window as any).G7Core?.templateEngine?.ComponentRegistry?.getInstance?.();
 if (registry) {
@@ -173,6 +175,7 @@ if (registry) {
     registry.register({ component: SuperBifyList, metadata: { name: 'SuperBifyList', type: 'composite' } });
     registry.register({ component: SuperBifyDetail, metadata: { name: 'SuperBifyDetail', type: 'composite' } });
     registry.register({ component: InquiryForm, metadata: { name: 'InquiryForm', type: 'composite' } });
+    registry.register({ component: AboutPage, metadata: { name: 'AboutPage', type: 'composite' } });
     logger.log('Registered 20ft Studio components');
 } else {
     logger.warn('ComponentRegistry not available — skipping auto-registration');

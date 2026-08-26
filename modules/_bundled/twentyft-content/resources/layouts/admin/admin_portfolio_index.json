@@ -1,0 +1,189 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_portfolio_index",
+    "permissions": [
+        "twentyft-content.portfolio.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:twentyft-content.admin.portfolio.title",
+        "description": "$t:twentyft-content.admin.portfolio.description"
+    },
+    "data_sources": [
+        {
+            "id": "portfolio",
+            "label_key": "$t:twentyft-content.editor.data_source.portfolio_admin",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/admin/portfolio/projects",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "params": {
+                "page": "{{query.page || 1}}",
+                "per_page": "{{query.per_page || 15}}",
+                "status": "{{query.status}}",
+                "type": "{{query.type}}",
+                "keyword": "{{query.keyword}}"
+            },
+            "fallback": {
+                "data": {
+                    "data": [],
+                    "pagination": {
+                        "current_page": 1,
+                        "last_page": 1,
+                        "per_page": 15,
+                        "total": 0
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "portfolio_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:twentyft-content.admin.portfolio.title",
+                            "description": "$t:twentyft-content.admin.portfolio.description"
+                        },
+                        "children": [
+                            {
+                                "id": "board_admin_link",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/board/portfolio",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.admin.portfolio.actions.manage_in_board"
+                            },
+                            {
+                                "id": "create_button",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/board/portfolio/create",
+                                    "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.admin.portfolio.actions.create"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "portfolio_table",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl"
+                        },
+                        "children": [
+                            {
+                                "id": "portfolio_header",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700"
+                                },
+                                "children": [
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-4" }, "text": "$t:twentyft-content.admin.fields.title" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.year" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.types" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.status" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.created_at" }
+                                ]
+                            },
+                            {
+                                "id": "portfolio_row_{{idx}}",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors items-center"
+                                },
+                                "iteration": {
+                                    "source": "{{portfolio?.data?.data ?? []}}",
+                                    "item_var": "item",
+                                    "index_var": "idx"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/board/portfolio/{{item.postId}}/edit",
+                                            "className": "col-span-4 font-medium text-gray-900 dark:text-white no-underline hover:underline"
+                                        },
+                                        "text": "{{item.title}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.year ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.types}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.status ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "col-span-2 flex items-center justify-end gap-2" },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "props": {
+                                                    "href": "/admin/20ft-content/portfolio/{{item.postId}}/edit",
+                                                    "className": "px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 no-underline"
+                                                },
+                                                "text": "$t:twentyft-content.common.edit_meta"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "props": {
+                                                    "href": "/admin/board/portfolio/{{item.postId}}/edit",
+                                                    "className": "px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded hover:bg-gray-200 dark:hover:bg-gray-600 no-underline"
+                                                },
+                                                "text": "$t:twentyft-content.common.edit_board"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "empty_state",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-8 p-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                        },
+                        "if": "{{(portfolio?.data?.data ?? []).length === 0}}",
+                        "text": "등록된 Portfolio 프로젝트가 없습니다."
+                    }
+                ]
+            }
+        ]
+    }
+}

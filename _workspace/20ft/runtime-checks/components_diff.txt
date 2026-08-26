@@ -1,0 +1,8 @@
+174c174
+<                 "description": "Site footer with brand logo, signature, capability line, navigation, and copyright (About link removed in v1)",
+---
+>                 "description": "Site footer with capability line and about anchor",
+180c180
+<                 "description": "20ft brand logo rendered from official SVG assets (full, compact, symbol, badge)",
+---
+>                 "description": "20ft brand logo text fallback",

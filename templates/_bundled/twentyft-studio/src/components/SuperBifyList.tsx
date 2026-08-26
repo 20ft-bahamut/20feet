@@ -1,5 +1,5 @@
 import React from 'react';
-import { A, Div, H1, H2, Li, P, Ul } from './basic';
+import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
 import SectionEyebrow from './SectionEyebrow';
 import Status from './Status';
@@ -58,34 +58,70 @@ export function SuperBifyList({ items = [], className, editorAttrs }: SuperBifyL
                     >
                         {items.map((item) => (
                             <Li key={item.id}>
-                                <A
-                                    href={`/superbify/${item.slug}`}
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: 'var(--20ft-spacing-sm, 0.5rem)',
-                                        padding: 'var(--20ft-spacing-lg, 1.5rem)',
-                                        borderRadius: 'var(--20ft-radius, 0.5rem)',
-                                        border: '1px solid var(--20ft-border, rgba(16, 42, 76, 0.12))',
-                                        backgroundColor: 'var(--20ft-bg-secondary, #F4F0E6)',
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    <Tag label={item.type} />
-                                    <H2
+                                <Article>
+                                    <A
+                                        href={`/superbify/${item.slug}`}
                                         style={{
-                                            margin: 0,
-                                            fontFamily: 'var(--20ft-font-display, Georgia, serif)',
-                                            fontSize: '1.5rem',
-                                            color: 'var(--20ft-indigo, #183B6B)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                                            padding: 'var(--20ft-spacing-lg, 1.5rem)',
+                                            borderRadius: 'var(--20ft-radius, 0.5rem)',
+                                            border: '1px solid var(--20ft-border, rgba(16, 42, 76, 0.12))',
+                                            backgroundColor: 'var(--20ft-bg-secondary, #F4F0E6)',
+                                            textDecoration: 'none',
                                         }}
                                     >
-                                        {item.title}
-                                    </H2>
-                                    {item.summary && (
-                                        <P style={{ margin: 0, color: 'var(--20ft-text-muted, #5A5A5A)' }}>{item.summary}</P>
-                                    )}
-                                </A>
+                                        <Div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between',
+                                                gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                                                flexWrap: 'wrap',
+                                            }}
+                                        >
+                                            <Tag label={item.type} />
+                                            {item.status && <Tag label={item.status} />}
+                                        </Div>
+                                        {item.coverImageUrl && (
+                                            <Img
+                                                src={item.coverImageUrl}
+                                                alt={`${item.title} cover`}
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: '21 / 9',
+                                                    objectFit: 'cover',
+                                                    borderRadius: 'var(--20ft-radius-sm, 0.25rem)',
+                                                }}
+                                            />
+                                        )}
+                                        <H2
+                                            style={{
+                                                margin: 0,
+                                                fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                                                fontSize: '1.5rem',
+                                                color: 'var(--20ft-indigo, #183B6B)',
+                                            }}
+                                        >
+                                            {item.title}
+                                        </H2>
+                                        {item.summary && (
+                                            <P style={{ margin: 0, color: 'var(--20ft-text-muted, #5A5A5A)' }}>{item.summary}</P>
+                                        )}
+                                        {item.compatibility && (
+                                            <Span
+                                                style={{
+                                                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                    fontSize: '0.8125rem',
+                                                    color: 'var(--20ft-gray-500, #777A7D)',
+                                                }}
+                                            >
+                                                Compatibility: {item.compatibility}
+                                            </Span>
+                                        )}
+                                    </A>
+                                </Article>
                             </Li>
                         ))}
                     </Ul>

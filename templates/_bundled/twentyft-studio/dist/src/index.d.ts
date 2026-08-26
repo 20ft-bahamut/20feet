@@ -19,4 +19,5 @@ export { PortfolioDetail, type PortfolioDetailProps } from './components/Portfol
 export { SuperBifyList, type SuperBifyListProps } from './components/SuperBifyList';
 export { SuperBifyDetail, type SuperBifyDetailProps } from './components/SuperBifyDetail';
 export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
+export { AboutPage, type AboutPageProps } from './components/AboutPage';
 export { templateMetadata };

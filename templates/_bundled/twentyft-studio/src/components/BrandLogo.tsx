@@ -1,6 +1,24 @@
 import React from 'react';
 import { Img } from './basic';
 
+// Official 20ft logo SVGs are bundled as raw strings so they render without
+// relying on the runtime asset endpoint. This avoids G7's `dist/`-only static
+// asset serving limit and guarantees the logo works immediately after
+// template:install/template:activate.
+const logoModules = import.meta.glob<string>(
+    '../../assets/brand/20ft/logo/*.svg',
+    { query: '?raw', import: 'default', eager: true }
+);
+
+function resolveSvg(name: string): string {
+    const path = `../../assets/brand/20ft/logo/${name}.svg`;
+    const svg = logoModules[path];
+    if (typeof svg !== 'string') {
+        throw new Error(`BrandLogo: missing SVG asset for ${name}`);
+    }
+    return svg;
+}
+
 export type LogoVariant = 'full' | 'compact' | 'symbol' | 'badge';
 export type LogoSurface = 'dark' | 'light';
 
@@ -15,23 +33,20 @@ export interface BrandLogoProps {
     'data-testid'?: string;
 }
 
-const ASSET_BASE = 'assets/brand/20ft/logo';
-
 // Surface-driven asset selection: dark surfaces need light logos, light surfaces need dark logos.
 const LOGO_FILE_MAP: Record<LogoVariant, Record<LogoSurface, string>> = {
-    full: { dark: 'full-white.svg', light: 'full.svg' },
-    compact: { dark: 'compact-white.svg', light: 'compact.svg' },
-    symbol: { dark: 'symbol-white.svg', light: 'symbol.svg' },
-    badge: { dark: 'badge-dark.svg', light: 'badge-light.svg' },
+    full: { dark: 'full-white', light: 'full' },
+    compact: { dark: 'compact-white', light: 'compact' },
+    symbol: { dark: 'symbol-white', light: 'symbol' },
+    badge: { dark: 'badge-dark', light: 'badge-light' },
 };
 
-function resolveAssetUrl(relativePath: string): string {
-    const g7 = (window as any).G7Core;
-    const resolved = g7?.templateEngine?.getAssetUrl?.(relativePath);
-    if (typeof resolved === 'string' && resolved.length > 0) {
-        return resolved;
-    }
-    return relativePath;
+function svgToDataUri(svg: string): string {
+    const cleaned = svg
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    return `data:image/svg+xml,${encodeURIComponent(cleaned)}`;
 }
 
 export function BrandLogo({
@@ -43,13 +58,15 @@ export function BrandLogo({
     style,
     'data-testid': dataTestId = 'brand-logo',
 }: BrandLogoProps): React.ReactElement {
-    const file = LOGO_FILE_MAP[variant][surface];
-    const src = resolveAssetUrl(`${ASSET_BASE}/${file}`);
+    const name = LOGO_FILE_MAP[variant][surface];
+    const svg = resolveSvg(name);
+    const src = svgToDataUri(svg);
 
     const logoStyle: React.CSSProperties = {
         display: 'block',
         height: height ?? (variant === 'badge' ? '3rem' : '1.5rem'),
         width: 'auto',
+        maxWidth: '100%',
         ...style,
     };
 

@@ -1,0 +1,8 @@
+404 assets/brand/20ft/logo/full.svg
+404 assets/brand/20ft/logo/full-white.svg
+404 assets/brand/20ft/logo/compact.svg
+404 assets/brand/20ft/logo/compact-white.svg
+404 assets/brand/20ft/logo/symbol.svg
+404 assets/brand/20ft/logo/symbol-white.svg
+404 assets/brand/20ft/logo/badge-light.svg
+404 assets/brand/20ft/logo/badge-dark.svg

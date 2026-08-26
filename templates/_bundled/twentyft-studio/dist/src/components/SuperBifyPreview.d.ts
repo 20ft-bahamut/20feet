@@ -5,5 +5,5 @@ export interface SuperBifyPreviewProps {
     className?: string;
     editorAttrs?: EditorAttrs;
 }
-export declare function SuperBifyPreview({ items, className, editorAttrs }: SuperBifyPreviewProps): React.ReactElement;
+export declare function SuperBifyPreview({ items, className, editorAttrs, }: SuperBifyPreviewProps): React.ReactElement;
 export default SuperBifyPreview;

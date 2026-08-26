@@ -1,0 +1,59 @@
+{
+    "version": "1.0.0",
+    "routes": [
+        {
+            "path": "*/admin/20ft-content",
+            "layout": "admin_20ft_content_dashboard",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.dashboard.title",
+                "permission": "twentyft-content.portfolio.read"
+            }
+        },
+        {
+            "path": "*/admin/20ft-content/portfolio",
+            "layout": "admin_portfolio_index",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.portfolio.title",
+                "permission": "twentyft-content.portfolio.read"
+            }
+        },
+        {
+            "path": "*/admin/20ft-content/portfolio/:post_id/edit",
+            "layout": "admin_portfolio_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.portfolio.edit_title",
+                "permission": "twentyft-content.portfolio.update"
+            }
+        },
+        {
+            "path": "*/admin/20ft-content/superbify",
+            "layout": "admin_superbify_index",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.superbify.title",
+                "permission": "twentyft-content.superbify.read"
+            }
+        },
+        {
+            "path": "*/admin/20ft-content/superbify/:post_id/edit",
+            "layout": "admin_superbify_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.superbify.edit_title",
+                "permission": "twentyft-content.superbify.update"
+            }
+        },
+        {
+            "path": "*/admin/20ft-content/inquiries",
+            "layout": "admin_inquiry_index",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.inquiries.title",
+                "permission": "twentyft-content.inquiries.read"
+            }
+        }
+    ]
+}

@@ -3,6 +3,8 @@ import { Div, H1, P, Section, Span } from './basic';
 import BrandLogo from './BrandLogo';
 import Container from './Container';
 import PrimaryButton from './PrimaryButton';
+import { useReducedMotion } from '../hooks/useReducedMotion';
+import { useInView } from '../hooks/useInView';
 import type { EditorAttrs } from '../types/template';
 
 export interface HomeHeroProps {
@@ -10,117 +12,134 @@ export interface HomeHeroProps {
     editorAttrs?: EditorAttrs;
 }
 
-export const CAPABILITY_LINE = 'WEB / COMMERCE / SOFTWARE / GNUBOARD 7';
-
 export function HomeHero({ className, editorAttrs }: HomeHeroProps): React.ReactElement {
+    const prefersReducedMotion = useReducedMotion();
+    const { ref: revealRef, isInView } = useInView({ threshold: 0.12, once: true });
+
     return (
         <Section
             className={className}
             {...editorAttrs}
             style={{
-                minHeight: '80vh',
-                display: 'flex',
-                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden',
                 backgroundColor: 'var(--20ft-paper-white, #FAF8F3)',
             }}
             data-testid="home-hero"
         >
             <Container>
-                <Div
+                <div
+                    ref={revealRef}
+                    className={['reveal', isInView ? 'is-visible' : 'is-hidden'].join(' ')}
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: 'var(--20ft-spacing-lg, 1.5rem)',
-                        maxWidth: '840px',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                        minWidth: 0,
+                        paddingTop: 'var(--20ft-hero-py, 5rem)',
+                        paddingBottom: 'var(--20ft-hero-pb, 4rem)',
+                        gap: 'var(--20ft-content-gap-xl, 2.5rem)',
                     }}
                 >
-                    <Span
+                    <Div
                         style={{
-                            fontFamily: 'var(--20ft-font-body, sans-serif)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            letterSpacing: '0.12em',
-                            textTransform: 'uppercase',
-                            color: 'var(--20ft-heritage-gold, #B69B5F)',
-                        }}
-                        data-testid="hero-eyebrow"
-                    >
-                        20FT / SOFTWARE STUDIO
-                    </Span>
-
-                    <BrandLogo
-                        variant="symbol"
-                        surface="light"
-                        height="6rem"
-                        data-testid="hero-symbol"
-                    />
-
-                    <H1
-                        style={{
-                            margin: 0,
-                            fontFamily: 'var(--20ft-font-display, Georgia, serif)',
-                            fontWeight: 800,
-                            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
-                            lineHeight: 1.08,
-                            color: 'var(--20ft-deep-indigo, #102A4C)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--20ft-content-gap-md, 1.25rem)',
+                            width: '100%',
+                            minWidth: 0,
                         }}
                     >
-                        작은 공간에서, 큰 가능성을 만듭니다.
-                    </H1>
+                        <H1
+                            style={{
+                                fontFamily: 'var(--20ft-font-display, serif)',
+                                fontSize: 'var(--20ft-hero-heading-size, clamp(2rem, 8vw, 4.5rem))',
+                                fontWeight: 500,
+                                lineHeight: 1.08,
+                                letterSpacing: '-0.028em',
+                                color: 'var(--20ft-deep-indigo, #102A4C)',
+                                width: '100%',
+                                minWidth: 0,
+                                maxWidth: 'var(--20ft-hero-heading-max, 100%)',
+                                wordBreak: 'keep-all',
+                                overflowWrap: 'break-word',
+                            }}
+                            data-testid="hero-heading"
+                        >
+                            작은 공간에서,
+                            <br />
+                            큰 가능성을 만듭니다
+                        </H1>
 
-                    <P
-                        style={{
-                            margin: 0,
-                            fontFamily: 'var(--20ft-font-body, sans-serif)',
-                            fontSize: 'clamp(1rem, 1.8vw, 1.25rem)',
-                            lineHeight: 1.6,
-                            color: 'var(--20ft-text-muted, #5E6063)',
-                            maxWidth: '640px',
-                        }}
-                    >
-                        웹사이트와 쇼핑몰, 웹서비스와 그누보드 7 확장까지. 필요한 것을 이해하고, 실제로 운영되는 결과물로 만듭니다.
-                    </P>
+                        <P
+                            style={{
+                                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                fontSize: 'clamp(1rem, 4vw, 1.25rem)',
+                                lineHeight: 1.7,
+                                letterSpacing: '-0.01em',
+                                color: 'var(--20ft-text-secondary, rgba(26, 26, 26, 0.72))',
+                                width: '100%',
+                                minWidth: 0,
+                                maxWidth: 'var(--20ft-hero-body-max, 100%)',
+                            }}
+                            data-testid="hero-description"
+                        >
+                            웹사이트와 커머스, 웹서비스와 그누보드 7 확장까지.
+                            <br />
+                            필요한 것을 이해하고, 실제로 운영되는 결과물로 만듭니다.
+                        </P>
+                    </Div>
 
                     <Div
                         style={{
                             display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 'var(--20ft-spacing-md, 1rem)',
-                            marginTop: 'var(--20ft-spacing-sm, 0.5rem)',
+                            flexDirection: 'column',
+                            gap: 'var(--20ft-content-gap-sm, 0.75rem)',
+                            width: '100%',
+                            minWidth: 0,
+                            alignItems: 'flex-start',
                         }}
                     >
-                        <PrimaryButton
-                            href="/portfolio"
-                            variant="secondary"
-                            data-testid="hero-cta-portfolio"
-                        >
-                            Portfolio 보기 →
+                        <PrimaryButton href="/portfolio" variant="primary" size="medium" data-testid="hero-cta">
+                            포트폴리오 보기
                         </PrimaryButton>
-                        <PrimaryButton
-                            href="/inquiry"
-                            variant="primary"
-                            data-testid="hero-cta-inquiry"
-                        >
-                            프로젝트 문의
-                        </PrimaryButton>
-                    </Div>
 
-                    <Span
-                        style={{
-                            fontFamily: 'var(--20ft-font-body, sans-serif)',
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            letterSpacing: '0.12em',
-                            textTransform: 'uppercase',
-                            color: 'var(--20ft-heritage-gold, #B69B5F)',
-                            marginTop: 'var(--20ft-spacing-md, 1rem)',
-                        }}
-                        data-testid="hero-capability-line"
-                    >
-                        {CAPABILITY_LINE}
-                    </Span>
-                </Div>
+                        <Span
+                            style={{
+                                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                fontSize: '0.8125rem',
+                                lineHeight: 1.5,
+                                color: 'var(--20ft-text-tertiary, rgba(26, 26, 26, 0.48))',
+                                letterSpacing: '0.01em',
+                                maxWidth: '100%',
+                                wordBreak: 'keep-all',
+                            }}
+                        >
+                            20ft / Software Studio
+                        </Span>
+                    </Div>
+                </div>
             </Container>
+
+            <BrandLogo
+                variant="symbol"
+                surface="light"
+                aria-hidden="true"
+                data-testid="hero-symbol"
+                style={{
+                    position: 'absolute',
+                    top: '55%',
+                    right: 'var(--20ft-hero-symbol-right, var(--20ft-gutter, 1rem))',
+                    transform: `translateY(-50%) ${prefersReducedMotion ? 'scale(1)' : 'scale(1.05)'}`,
+                    height: 'var(--20ft-hero-symbol-size, min(36vw, 10rem))',
+                    width: 'auto',
+                    opacity: 0.06,
+                    color: 'var(--20ft-deep-indigo, #102A4C)',
+                    pointerEvents: 'none',
+                    display: 'var(--20ft-hero-symbol-display, block)',
+                }}
+            />
         </Section>
     );
 }

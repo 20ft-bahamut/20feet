@@ -1,0 +1,1 @@
+.gitignore:68:templates/*/	/home/bahamut/20feet/templates/twentyft-studio

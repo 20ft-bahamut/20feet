@@ -48,6 +48,15 @@
             }
         },
         {
+            "_comment": "=== About ===",
+            "path": "/about",
+            "layout": "about",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.about.title"
+            }
+        },
+        {
             "_comment": "=== 프로젝트 문의 ===",
             "path": "/inquiry",
             "layout": "inquiry",

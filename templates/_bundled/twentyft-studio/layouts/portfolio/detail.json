@@ -11,10 +11,11 @@
         {
             "id": "portfolio_item",
             "label_key": "$t:twentyft.data_source.portfolio_item",
-            "type": "static",
-            "data": null,
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/portfolio/projects/{{route.slug}}",
+            "method": "GET",
             "auto_fetch": true,
-            "loading_strategy": "progressive"
+            "loading_strategy": "blocking"
         }
     ],
     "slots": {
@@ -24,7 +25,10 @@
                 "type": "composite",
                 "name": "PortfolioDetail",
                 "props": {
-                    "item": "{{portfolio_item?.data ?? null}}"
+                    "item": "{{portfolio_item?.data ?? null}}",
+                    "context": {
+                        "slug": "{{route.slug}}"
+                    }
                 }
             }
         ]

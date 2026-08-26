@@ -1,0 +1,104 @@
+{
+    "common": {
+        "edit": "Edit",
+        "edit_meta": "Edit Meta",
+        "edit_board": "Edit Post",
+        "save": "Save",
+        "saving": "Saving…",
+        "cancel": "Cancel"
+    },
+    "admin": {
+        "dashboard": {
+            "title": "20ft Content",
+            "description": "Manage Portfolio / SuperBify / Project Inquiries in one place."
+        },
+        "portfolio": {
+            "title": "Portfolio",
+            "description": "Portfolio project list.",
+            "edit_title": "Edit Portfolio Meta",
+            "edit_description": "Edit Portfolio project metadata: title, slug, summaries, year, type, status, cover image, and related links.",
+            "actions": {
+                "manage_in_board": "Manage in Board Admin",
+                "create": "New Project"
+            }
+        },
+        "superbify": {
+            "title": "SuperBify",
+            "description": "SuperBify product list.",
+            "edit_title": "Edit SuperBify Meta",
+            "edit_description": "Edit SuperBify product metadata: title, slug, summaries, type, status, version, compatibility, license, and links.",
+            "actions": {
+                "manage_in_board": "Manage in Board Admin",
+                "create": "New Product"
+            }
+        },
+        "inquiries": {
+            "title": "Project Inquiries",
+            "description": "Project inquiry list.",
+            "actions": {
+                "manage_in_board": "Manage in Board Admin"
+            }
+        },
+        "sections": {
+            "basic_info": "Basic Info",
+            "meta_info": "Meta Info",
+            "project_details": "Project Details",
+            "product_details": "Product Details"
+        },
+        "fields": {
+            "title": "Title",
+            "title_ko": "Title (Korean)",
+            "title_en": "Title (English)",
+            "slug": "Slug",
+            "year": "Year",
+            "type": "Type",
+            "types": "Types",
+            "status": "Status",
+            "visibility": "Visibility",
+            "featured": "Featured",
+            "sort_order": "Sort Order",
+            "summary": "Summary",
+            "summary_ko": "Summary (Korean)",
+            "summary_en": "Summary (English)",
+            "client_name": "Client",
+            "role": "Role",
+            "tech_stack": "Tech Stack",
+            "version": "Version",
+            "g7_compatibility": "G7 Compatibility",
+            "license": "License",
+            "cover_image_attachment_id": "Cover Image Attachment ID",
+            "github_url": "GitHub",
+            "related_url": "Related Link",
+            "sir_url": "SIR Link",
+            "docs_url": "Docs Link",
+            "release_url": "Release Link",
+            "demo_url": "Demo Link",
+            "name": "Contact",
+            "email": "Email",
+            "phone": "Phone",
+            "company": "Company",
+            "project_type": "Project Type",
+            "budget_range": "Budget Range",
+            "internal_status": "Status",
+            "created_at": "Created"
+        },
+        "hints": {
+            "attachment_id": "Find the attachment ID in file management",
+            "comma_separated": "Separate values with commas"
+        },
+        "status": {
+            "update": "Update Status"
+        },
+        "messages": {
+            "save_success": "Saved.",
+            "save_failed": "Save failed."
+        }
+    },
+    "editor": {
+        "data_source": {
+            "portfolio_admin": "Portfolio Admin Data",
+            "superbify_admin": "SuperBify Admin Data",
+            "inquiry_admin": "Project Inquiry Admin Data"
+        }
+    }
+}

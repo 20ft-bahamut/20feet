@@ -23,6 +23,10 @@
                 "title": "SuperBify — 20ft Studio",
                 "description": "SuperBify product details."
             },
+            "about": {
+                "title": "About — 20ft Studio",
+                "description": "The story behind the name 20ft, Software Studio, and Digital Garage."
+            },
             "inquiry": {
                 "title": "Project Inquiry — 20ft Studio",
                 "description": "Project inquiry page. Currently a layout preview only."
@@ -92,9 +96,8 @@
             },
             "about": {
                 "eyebrow": "ABOUT 20FT",
-                "heading": "We keep making things in a small space.",
+                "heading": "We make possibilities from a small space.",
                 "body": "The name 20ft started with a small 20-foot space. Today it continues as a Digital Garage where we build web and software, tools, and ideas.",
-                "proof": "20+ YEARS / WEB DEVELOPMENT",
                 "cta": "About 20ft"
             },
             "inquiry_cta": {

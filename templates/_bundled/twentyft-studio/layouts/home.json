@@ -11,16 +11,26 @@
         {
             "id": "portfolio_preview",
             "label_key": "$t:twentyft.data_source.portfolio_preview",
-            "type": "static",
-            "data": [],
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/portfolio/projects",
+            "method": "GET",
+            "params": {
+                "featured": "1",
+                "per_page": "3"
+            },
             "auto_fetch": true,
             "loading_strategy": "progressive"
         },
         {
             "id": "superbify_preview",
             "label_key": "$t:twentyft.data_source.superbify_preview",
-            "type": "static",
-            "data": [],
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/superbify/projects",
+            "method": "GET",
+            "params": {
+                "featured": "1",
+                "per_page": "3"
+            },
             "auto_fetch": true,
             "loading_strategy": "progressive"
         }

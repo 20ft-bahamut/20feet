@@ -1,0 +1,10 @@
+import pkg from '/home/bahamut/.npm/_npx/e41f203b7505f1fb/node_modules/playwright/index.js';
+const { chromium } = pkg;
+const browser = await chromium.launch({ headless: true, executablePath: '/home/bahamut/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome' });
+const page = await browser.newPage();
+await page.goto('http://127.0.0.1:8000/', { waitUntil: 'networkidle', timeout: 30000 });
+await page.waitForTimeout(2000);
+const html = await page.content();
+await page.screenshot({ path: '/home/bahamut/20feet/_workspace/20ft/runtime-checks/home.png' });
+await browser.close();
+console.log(html);

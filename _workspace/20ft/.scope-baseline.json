@@ -1,0 +1,216 @@
+{
+  "entries": {
+    ".claude/INSTALL.md": {
+      "status": "??",
+      "sha256": "9061635c213454d48af539d54e3bcdb53882597f9bfcaaf6ee3a1877d025d23d"
+    },
+    ".claude/PROMPTS.md": {
+      "status": "??",
+      "sha256": "35b9f5ecbf1963899bd637d4213ed61d429c82b38de3bafe15e9d20a316b008a"
+    },
+    ".claude/README.md": {
+      "status": "??",
+      "sha256": "ff23af3862e54df0e9b0b03a75afa4555b07beb5d3fbf28b765f4f579a7bba4e"
+    },
+    ".claude/agents/twentyft-gnuboard-researcher.md": {
+      "status": "??",
+      "sha256": "fc49b5be98d3175669151215aef8fd21755247be9749f8b1440138eca7f11b67"
+    },
+    ".claude/agents/twentyft-product-researcher.md": {
+      "status": "??",
+      "sha256": "6f837814941292846169c7547ae72e813ff27844b880ebd98490805560ea3b72"
+    },
+    ".claude/agents/twentyft-qa-reviewer.md": {
+      "status": "??",
+      "sha256": "67e7e8e46f8d6b9edd7144ab4655efb5df3c15d29732310059c3ab64f1afb87a"
+    },
+    ".claude/agents/twentyft-runtime-verifier.md": {
+      "status": "??",
+      "sha256": "0b638f683fa28275b3d9954b66ba4d189bbfd55f3b0556b4734cff0ad39cae5c"
+    },
+    ".claude/agents/twentyft-template-architect.md": {
+      "status": "??",
+      "sha256": "316430f4df8ae969dc4e829eb6449cecabc3123df7ae71d617612b687bd74408"
+    },
+    ".claude/agents/twentyft-template-engineer.md": {
+      "status": "??",
+      "sha256": "20052728554639693c4d9b026fd18781f6cae7f41e255322997b4fc2163c69e3"
+    },
+    ".claude/hooks/capture-baseline.py": {
+      "status": "??",
+      "sha256": "8b680ee59235169815ce2ae69a78023d8b09934d2f52b67499bc129d2b0794c5"
+    },
+    ".claude/hooks/check-scope.py": {
+      "status": "??",
+      "sha256": "6deb2e098da6dceffddd5a7df06dcd46783f45d8d5fad8acbc21ca904907a476"
+    },
+    ".claude/hooks/protect-bash.py": {
+      "status": "??",
+      "sha256": "6758c27b59b92b36d5285a6a53fc89b45dd88ff319b59cc93d4336a57f2109b8"
+    },
+    ".claude/hooks/protect-writes.py": {
+      "status": "??",
+      "sha256": "b8f7ed4da311d8380f393f716a7460687393c215f725595613ea0ee8531ab78f"
+    },
+    ".claude/reference/doc-map.md": {
+      "status": "??",
+      "sha256": "0710a70ff29ac873ab2a1d73f850cf6935c4a1d4b483128e57c2d254b0ddfaff"
+    },
+    ".claude/settings.json": {
+      "status": "??",
+      "sha256": "b526d35e3d76c8e7ad677adaba7b22b9ce8910d243c81fc3749fc082c586a430"
+    },
+    ".claude/skills/twentyft-gnuboard-research/SKILL.md": {
+      "status": "??",
+      "sha256": "122a6a7f53367339b41820796f7138c9b2939946692c03ae2776e0a70627f684"
+    },
+    ".claude/skills/twentyft-product-research/SKILL.md": {
+      "status": "??",
+      "sha256": "6abb2b5df68504472605851ae834d4a2bd1bbcdafcaf9f28b37ffb791ed4ff17"
+    },
+    ".claude/skills/twentyft-review/SKILL.md": {
+      "status": "??",
+      "sha256": "2f64189a1dacf1ae8938451b9e6a8f159fe3a1fb6cfbaa34be02a5fba64f544e"
+    },
+    ".claude/skills/twentyft-runtime-sync/SKILL.md": {
+      "status": "??",
+      "sha256": "88efa2eb579749e6527861c8d677b6c9d68331c5953b914e08b7235bda62d71e"
+    },
+    ".claude/skills/twentyft-template/SKILL.md": {
+      "status": "??",
+      "sha256": "5bb617f7fad2902e11f027317506fee601aee1e441bb6ac27a01fa7e5c2f08ee"
+    },
+    "20ftdocs/00_AI_HARNESS.md": {
+      "status": "??",
+      "sha256": "a18065bb35e70097152b04afca7ea63991a97595347c241f8563cdbd4ac5299d"
+    },
+    "20ftdocs/01_IA.md": {
+      "status": "??",
+      "sha256": "85610bd24460263b5ebb860b296cb29f397e56fe7c74d93909aa2d4da901ad6e"
+    },
+    "20ftdocs/02_BRAND.md": {
+      "status": "??",
+      "sha256": "a1d286eaaa2065918b14f7e8c81c01fccda337d804e8b568b9613e42ee358688"
+    },
+    "20ftdocs/03_DESIGN_SYSTEM.md": {
+      "status": "??",
+      "sha256": "f1566c8b14a127501bc9081efffe5dd7f31051bbe91194da6b31a6b3209aaa03"
+    },
+    "20ftdocs/04_CONTENT.md": {
+      "status": "??",
+      "sha256": "3eb21d769a6e38535112ee8704ac0903e9ae33387ae294cd44c5e3c83b114afc"
+    },
+    "20ftdocs/05_HOME.md": {
+      "status": "??",
+      "sha256": "d80e8c19d1644cbc3b3322d8296eb8290ab7a7554d5295cfb17c5f288bde2cee"
+    },
+    "20ftdocs/06_PORTFOLIO.md": {
+      "status": "??",
+      "sha256": "88fe7b49c7d2ed17d1602fb73c3135fb32758094588e8f6233c5c1ad9acee8d5"
+    },
+    "20ftdocs/07_SUPERBIFY.md": {
+      "status": "??",
+      "sha256": "e674b51a3425b860a6e28a5d2c1154bff2687945c066cab3f5c5b9a06c65c6d8"
+    },
+    "20ftdocs/08_ABOUT.md": {
+      "status": "??",
+      "sha256": "b1e55ce94ce822b4c5cb5632fdbf2dfc9b91a7f1b3c92f886b67ffc1ae38f928"
+    },
+    "20ftdocs/09_PROJECT_INQUIRY.md": {
+      "status": "??",
+      "sha256": "4008bd6391e292e4f9222240df90bd36a157c0679c181ba7e756ee8410e75224"
+    },
+    "20ftdocs/10_COMPONENTS.md": {
+      "status": "??",
+      "sha256": "831cec064762574f334cc112bc012772dbcd34c14d9a33082fa791122d5e18cf"
+    },
+    "20ftdocs/11_DATA_MODELS.md": {
+      "status": "??",
+      "sha256": "0a5e606c76f1e469481c39eee26b2cef6624ca8f106b9577482bfa8a0d008c92"
+    },
+    "20ftdocs/12_G7_TEMPLATE_RULES.md": {
+      "status": "??",
+      "sha256": "22cce06186d237bd9a06f37cfc43a228b4b6a500d081b620dcf149d545da19c9"
+    },
+    "20ftdocs/13_RESPONSIVE_ACCESSIBILITY_SEO.md": {
+      "status": "??",
+      "sha256": "916d0312d30e0bd540a59869139f9a9b1c45fbcf6e05cb9a477db3cda85fafff"
+    },
+    "20ftdocs/14_IMPLEMENTATION_PLAN.md": {
+      "status": "??",
+      "sha256": "3ff10c51e0d06b2570dc41f2e00b43f217225cd0c9e1f01c4c9a1b352b89ebae"
+    },
+    "20ftdocs/15_ACCEPTANCE.md": {
+      "status": "??",
+      "sha256": "d918bef33c7208e8047d72c3be9123ea2de822178fd1f6b2d1f62386fd63f380"
+    },
+    "20ftdocs/16_EXTERNAL_REVIEW_GUIDE.md": {
+      "status": "??",
+      "sha256": "b72528ec3af00c3b81c1c082688a02bf9eb81485c31b43221253f2ff493ec217"
+    },
+    "20ftdocs/17_ASSETS.md": {
+      "status": "??",
+      "sha256": "191195850f86e88adfd86ea816f080fbe706742dc914a4edd366a9990cbc8b87"
+    },
+    "20ftdocs/18_RELEASE_NOTES.md": {
+      "status": "??",
+      "sha256": "bfd0928aa3663cf7f4a860fff90f7b8e639000723124b93ebd2b8522b776ceb6"
+    },
+    "20ftdocs/19_CURRENT_DECISIONS.md": {
+      "status": "??",
+      "sha256": "5776a7fd680784e8675fef65a2f042c438b2a666e7a29c3f701084678d07330c"
+    },
+    "20ftdocs/README.md": {
+      "status": "??",
+      "sha256": "bc0b443795edebc52b2444c91a4d4628157bf70aca92ea0ae19d6d2057232f6b"
+    },
+    "20ftdocs/assets/brand/20ft/logo/badge-dark.svg": {
+      "status": "??",
+      "sha256": "15ffd6b3cb4ef05cbec5d7384603f9ea1feb4edc0a990a10dc102d48da5cd10f"
+    },
+    "20ftdocs/assets/brand/20ft/logo/badge-light.svg": {
+      "status": "??",
+      "sha256": "243988dc7433d6f7decc37590934c0bf1555dc01788b2dc7e296e0007877e459"
+    },
+    "20ftdocs/assets/brand/20ft/logo/checksums.sha256": {
+      "status": "??",
+      "sha256": "286f5aa8a085dc71c3c81b45c29508834a877440aa445024f185bae33c8c7283"
+    },
+    "20ftdocs/assets/brand/20ft/logo/compact-white.svg": {
+      "status": "??",
+      "sha256": "206c7089db8cc875ac8074cf0e5e45d6b7c5d0dc4c4c1b0045dae638453c9149"
+    },
+    "20ftdocs/assets/brand/20ft/logo/compact.svg": {
+      "status": "??",
+      "sha256": "d01789a1f56593370a8c807b91fe97a30cac98e776f5bf871bbd590d3018f966"
+    },
+    "20ftdocs/assets/brand/20ft/logo/full-white.svg": {
+      "status": "??",
+      "sha256": "9cd45a1930b44ff044d1d8827b2c422a01b431194aa9dcfb38349e2cd91d58c6"
+    },
+    "20ftdocs/assets/brand/20ft/logo/full.svg": {
+      "status": "??",
+      "sha256": "735697b256238c7a2495dbdefe0b2e087e76a0ecb0c21bb2efe0e69dceac1486"
+    },
+    "20ftdocs/assets/brand/20ft/logo/symbol-white.svg": {
+      "status": "??",
+      "sha256": "9d66bd9dd0a2e7396ad8674ca47fcb63e46f1478af7c6dfc51724cc46b8e430d"
+    },
+    "20ftdocs/assets/brand/20ft/logo/symbol.svg": {
+      "status": "??",
+      "sha256": "daa0956433fe225b695c2f220f89bdd0d10543ee012bbda3f958981ced72f069"
+    },
+    "20ftdocs/manifest.json": {
+      "status": "??",
+      "sha256": "a5c4d69d1fcd567b5aafbc7542f36548a12b3324556e5bfa0059dddcb99aa77b"
+    },
+    "CLAUDE.md": {
+      "status": "??",
+      "sha256": "e8df175f5189d4fd03ffc242717975c010b91cba4d26da2109ee77276e9b12db"
+    },
+    "_workspace/20ft/README.md": {
+      "status": "??",
+      "sha256": "ddd040922bf8c32dec9d6d58cbd4898debd0b099cc235100cd8000134a2fa3b9"
+    }
+  }
+}

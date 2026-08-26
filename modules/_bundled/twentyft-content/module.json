@@ -1,0 +1,26 @@
+{
+    "identifier": "twentyft-content",
+    "vendor": "twentyft",
+    "name": {
+        "ko": "20ft 콘텐츠",
+        "en": "20ft Content"
+    },
+    "version": "0.1.2",
+    "license": "MIT",
+    "description": {
+        "ko": "20ft Website용 Portfolio / SuperBify / 프로젝트 문의 메타 및 API 브릿지",
+        "en": "Portfolio / SuperBify / Project Inquiry metadata and API bridge for 20ft Website"
+    },
+    "g7_version": ">=7.0.0",
+    "internal": true,
+    "dependencies": {
+        "modules": {
+            "sirsoft-board": ">=1.0.0"
+        },
+        "plugins": {}
+    },
+    "assets": {
+        "js": [],
+        "css": []
+    }
+}

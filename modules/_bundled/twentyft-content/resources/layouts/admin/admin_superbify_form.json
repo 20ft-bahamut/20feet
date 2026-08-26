@@ -1,0 +1,456 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_superbify_form",
+    "permissions": [
+        "twentyft-content.superbify.update"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:twentyft-content.admin.superbify.edit_title",
+        "description": "$t:twentyft-content.admin.superbify.edit_description"
+    },
+    "state": {
+        "isSaving": false,
+        "errors": null
+    },
+    "data_sources": [
+        {
+            "id": "project",
+            "label_key": "$t:twentyft-content.editor.data_source.superbify_admin",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/admin/superbify/projects/{{route.post_id}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "initLocal": "form",
+            "loading_strategy": "blocking",
+            "errorHandling": {
+                "404": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                },
+                "403": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "form_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "dataKey": "form",
+                "trackChanges": true,
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:twentyft-content.admin.superbify.edit_title",
+                            "description": "$t:twentyft-content.admin.superbify.edit_description"
+                        },
+                        "children": [
+                            {
+                                "id": "cancel_button",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/20ft-content/superbify",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.common.cancel"
+                            },
+                            {
+                                "id": "save_button",
+                                "type": "basic",
+                                "name": "Button",
+                                "props": {
+                                    "disabled": "{{_local.isSaving}}",
+                                    "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                },
+                                "actions": [
+                                    {
+                                        "type": "click",
+                                        "handler": "sequence",
+                                        "params": {
+                                            "actions": [
+                                                {
+                                                    "handler": "setState",
+                                                    "params": {
+                                                        "target": "local",
+                                                        "isSaving": true,
+                                                        "errors": null
+                                                    }
+                                                },
+                                                {
+                                                    "handler": "apiCall",
+                                                    "auth_required": true,
+                                                    "target": "/api/modules/twentyft-content/admin/superbify/projects/{{route.post_id}}",
+                                                    "params": {
+                                                        "method": "PUT",
+                                                        "body": "{{_local.form}}"
+                                                    },
+                                                    "onSuccess": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "isSaving": false,
+                                                                "errors": null
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "toast",
+                                                            "params": {
+                                                                "type": "success",
+                                                                "message": "$t:twentyft-content.admin.messages.save_success"
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "navigate",
+                                                            "params": {
+                                                                "path": "/admin/20ft-content/superbify",
+                                                                "mergeQuery": true,
+                                                                "query": {}
+                                                            }
+                                                        }
+                                                    ],
+                                                    "onError": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "isSaving": false,
+                                                                "errors": "{{error.errors}}"
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "toast",
+                                                            "params": {
+                                                                "type": "error",
+                                                                "message": "{{error.message ?? '$t:twentyft-content.admin.messages.save_failed'}}"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "text": "{{_local.isSaving ? '$t:twentyft-content.common.saving' : '$t:twentyft-content.common.save'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "basic_info_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.basic_info"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1 md:col-span-2" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.title" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "title", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.slug" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "slug", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.year" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "year", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": { "className": "space-y-1" },
+                                "children": [
+                                    { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.summary" },
+                                    { "type": "basic", "name": "Textarea", "props": { "name": "summary", "rows": 3, "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "meta_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.meta_info"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-3 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.type" },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "type",
+                                                    "options": [
+                                                        { "value": "MODULE", "label": "MODULE" },
+                                                        { "value": "PLUGIN", "label": "PLUGIN" },
+                                                        { "value": "TEMPLATE", "label": "TEMPLATE" },
+                                                        { "value": "INTEGRATION", "label": "INTEGRATION" },
+                                                        { "value": "DEVELOPER_TOOL", "label": "DEVELOPER_TOOL" },
+                                                        { "value": "OPEN_SOURCE", "label": "OPEN_SOURCE" }
+                                                    ],
+                                                    "className": "w-full"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.status" },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "status",
+                                                    "options": [
+                                                        { "value": "RELEASED", "label": "RELEASED" },
+                                                        { "value": "OPERATING", "label": "OPERATING" },
+                                                        { "value": "RESEARCH", "label": "RESEARCH" },
+                                                        { "value": "BUILDING", "label": "BUILDING" }
+                                                    ],
+                                                    "className": "w-full"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.visibility" },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "visibility",
+                                                    "options": [
+                                                        { "value": "PUBLIC", "label": "PUBLIC" },
+                                                        { "value": "PRIVATE", "label": "PRIVATE" }
+                                                    ],
+                                                    "className": "w-full"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-3 gap-4 items-center"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.sort_order" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "number", "name": "sortOrder", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Label",
+                                        "props": { "className": "flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer" },
+                                        "children": [
+                                            { "type": "basic", "name": "Input", "props": { "type": "checkbox", "name": "isFeatured", "className": "w-4 h-4" } },
+                                            { "type": "basic", "name": "Span", "text": "$t:twentyft-content.admin.fields.featured" }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "product_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.product_details"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.version" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "version", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.g7_compatibility" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "g7Compatibility", "placeholder": "7.0.0+", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.license" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "license", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.cover_image_attachment_id" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "number", "name": "coverImageAttachmentId", "placeholder": "$t:twentyft-content.admin.hints.attachment_id", "className": "w-full px-3 py-2 border border-gray-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.github_url" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "githubUrl", "placeholder": "https://github.com/...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.sir_url" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "sirUrl", "placeholder": "https://sir.kr/...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.docs_url" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "docsUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.release_url" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "releaseUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": { "className": "space-y-1" },
+                                        "children": [
+                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.demo_url" },
+                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "demoUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

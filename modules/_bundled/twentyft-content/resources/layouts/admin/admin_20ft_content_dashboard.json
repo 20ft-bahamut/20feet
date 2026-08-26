@@ -1,0 +1,183 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_20ft_content_dashboard",
+    "permissions": [
+        "twentyft-content.portfolio.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:twentyft-content.admin.dashboard.title",
+        "description": "$t:twentyft-content.admin.dashboard.description"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "dashboard_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:twentyft-content.admin.dashboard.title",
+                            "description": "$t:twentyft-content.admin.dashboard.description"
+                        }
+                    },
+                    {
+                        "id": "section_cards",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "grid grid-cols-1 md:grid-cols-3 gap-6 mt-8"
+                        },
+                        "children": [
+                            {
+                                "id": "portfolio_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "portfolio_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:twentyft-content.admin.portfolio.title"
+                                    },
+                                    {
+                                        "id": "portfolio_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:twentyft-content.admin.portfolio.description"
+                                    },
+                                    {
+                                        "id": "portfolio_card_button",
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "className": "mt-4 w-full px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/20ft-content/portfolio"
+                                                }
+                                            }
+                                        ],
+                                        "text": "$t:twentyft-content.admin.portfolio.title"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "superbify_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "superbify_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:twentyft-content.admin.superbify.title"
+                                    },
+                                    {
+                                        "id": "superbify_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:twentyft-content.admin.superbify.description"
+                                    },
+                                    {
+                                        "id": "superbify_card_button",
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "className": "mt-4 w-full px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/20ft-content/superbify"
+                                                }
+                                            }
+                                        ],
+                                        "text": "$t:twentyft-content.admin.superbify.title"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "inquiry_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "inquiry_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:twentyft-content.admin.inquiries.title"
+                                    },
+                                    {
+                                        "id": "inquiry_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:twentyft-content.admin.inquiries.description"
+                                    },
+                                    {
+                                        "id": "inquiry_card_button",
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "className": "mt-4 w-full px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition-colors"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/admin/20ft-content/inquiries"
+                                                }
+                                            }
+                                        ],
+                                        "text": "$t:twentyft-content.admin.inquiries.title"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

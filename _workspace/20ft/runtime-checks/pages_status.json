@@ -1,0 +1,51 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/portfolio",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/superbify",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/inquiry",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/portfolio/test-slug",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/superbify/test-slug",
+    "status": 200,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  },
+  {
+    "path": "/nonexistent",
+    "status": 404,
+    "title": "그누보드7",
+    "has20ftTemplate": true,
+    "hasHeader": true
+  }
+]

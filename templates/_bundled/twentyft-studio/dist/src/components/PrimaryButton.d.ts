@@ -8,7 +8,7 @@ export interface PrimaryButtonProps {
     type?: 'button' | 'submit' | 'reset';
     className?: string;
     variant?: 'primary' | 'secondary';
-    size?: 'default' | 'small';
+    size?: 'default' | 'medium' | 'small';
     'data-testid'?: string;
     editorAttrs?: EditorAttrs;
 }

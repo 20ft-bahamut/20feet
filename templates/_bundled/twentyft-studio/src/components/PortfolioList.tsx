@@ -1,5 +1,5 @@
 import React from 'react';
-import { A, Div, H1, H2, Li, P, Ul } from './basic';
+import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
 import SectionEyebrow from './SectionEyebrow';
 import Status from './Status';
@@ -57,28 +57,76 @@ export function PortfolioList({ items = [], className, editorAttrs }: PortfolioL
                     >
                         {items.map((item) => (
                             <Li key={item.id}>
-                                <A
-                                    href={`/portfolio/${item.slug}`}
-                                    style={{
-                                        display: 'grid',
-                                        gap: 'var(--20ft-spacing-sm, 0.5rem)',
-                                        textDecoration: 'none',
-                                    }}
-                                >
-                                    <H2
+                                <Article>
+                                    <A
+                                        href={`/portfolio/${item.slug}`}
                                         style={{
-                                            margin: 0,
-                                            fontFamily: 'var(--20ft-font-display, Georgia, serif)',
-                                            fontSize: '1.5rem',
-                                            color: 'var(--20ft-indigo, #183B6B)',
+                                            display: 'grid',
+                                            gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                                            textDecoration: 'none',
                                         }}
                                     >
-                                        {item.title}
-                                    </H2>
-                                    {item.summary && (
-                                        <P style={{ margin: 0, color: 'var(--20ft-text-muted, #5A5A5A)' }}>{item.summary}</P>
-                                    )}
-                                </A>
+                                        {item.coverImageUrl && (
+                                            <Img
+                                                src={item.coverImageUrl}
+                                                alt={`${item.title} cover`}
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: '21 / 9',
+                                                    objectFit: 'cover',
+                                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
+                                                }}
+                                            />
+                                        )}
+                                        <Div
+                                            style={{
+                                                display: 'flex',
+                                                flexWrap: 'wrap',
+                                                alignItems: 'baseline',
+                                                justifyContent: 'space-between',
+                                                gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                                            }}
+                                        >
+                                            <H2
+                                                style={{
+                                                    margin: 0,
+                                                    fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                                                    fontSize: '1.5rem',
+                                                    color: 'var(--20ft-indigo, #183B6B)',
+                                                }}
+                                            >
+                                                {item.title}
+                                            </H2>
+                                            {item.year && (
+                                                <Span
+                                                    style={{
+                                                        fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                        fontSize: '0.8125rem',
+                                                        color: 'var(--20ft-gray-500, #777A7D)',
+                                                    }}
+                                                >
+                                                    {item.year}
+                                                </Span>
+                                            )}
+                                        </Div>
+                                        {item.summary && (
+                                            <P style={{ margin: 0, color: 'var(--20ft-text-muted, #5A5A5A)' }}>{item.summary}</P>
+                                        )}
+                                        {item.types && item.types.length > 0 && (
+                                            <Span
+                                                style={{
+                                                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                    fontSize: '0.8125rem',
+                                                    letterSpacing: '0.06em',
+                                                    textTransform: 'uppercase',
+                                                    color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                                }}
+                                            >
+                                                {item.types.join(' / ')}
+                                            </Span>
+                                        )}
+                                    </A>
+                                </Article>
                             </Li>
                         ))}
                     </Ul>

@@ -1,0 +1,6 @@
+---
+{
+  "dependencies": {
+    "caveman-installer": "github:JuliusBrussee/caveman"
+  }
+}

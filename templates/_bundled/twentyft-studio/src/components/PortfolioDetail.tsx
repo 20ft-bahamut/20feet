@@ -1,5 +1,5 @@
 import React from 'react';
-import { Article, Div, H1, P, Span } from './basic';
+import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
 import Status from './Status';
 import type { PortfolioItem, RouteContext, EditorAttrs } from '../types/template';
@@ -60,6 +60,18 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                             Portfolio
                         </Span>
 
+                        {item.types && item.types.length > 0 && item.year && (
+                            <Span
+                                style={{
+                                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                                    fontSize: '0.8125rem',
+                                    color: 'var(--20ft-gray-500, #777A7D)',
+                                }}
+                            >
+                                {item.types.join(' / ')} / {item.year}
+                            </Span>
+                        )}
+
                         <H1
                             style={{
                                 margin: 0,
@@ -85,17 +97,112 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                             </P>
                         )}
 
-                        {item.description && (
-                            <P
+                        {item.coverImageUrl && (
+                            <Img
+                                src={item.coverImageUrl}
+                                alt={`${item.title} hero`}
                                 style={{
-                                    margin: 0,
+                                    width: '100%',
+                                    aspectRatio: '21 / 9',
+                                    objectFit: 'cover',
+                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
+                                }}
+                            />
+                        )}
+
+                        {(item.clientName || item.role?.length || item.techStack?.length || item.status || item.relatedUrl) && (
+                            <Div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                                    gap: 'var(--20ft-spacing-md, 1rem)',
+                                    padding: 'var(--20ft-spacing-md, 1rem)',
+                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
+                                    backgroundColor: 'var(--20ft-bg-secondary, #F4F0E6)',
+                                }}
+                            >
+                                {item.clientName && (
+                                    <MetaRow label="Client" value={item.clientName} />
+                                )}
+                                {item.role && item.role.length > 0 && (
+                                    <MetaRow label="Role" value={item.role.join(', ')} />
+                                )}
+                                {item.techStack && item.techStack.length > 0 && (
+                                    <MetaRow label="Tech" value={item.techStack.join(', ')} />
+                                )}
+                                {item.status && <MetaRow label="Status" value={item.status} />}
+                                {item.relatedUrl && (
+                                    <Div>
+                                        <Span
+                                            style={{
+                                                display: 'block',
+                                                fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                fontSize: '0.75rem',
+                                                color: 'var(--20ft-gray-500, #777A7D)',
+                                            }}
+                                        >
+                                            Related URL
+                                        </Span>
+                                        <A
+                                            href={item.relatedUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            style={{
+                                                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                                fontSize: '0.9375rem',
+                                                color: 'var(--20ft-indigo, #183B6B)',
+                                                textDecoration: 'underline',
+                                            }}
+                                        >
+                                            {item.relatedUrl}
+                                        </A>
+                                    </Div>
+                                )}
+                            </Div>
+                        )}
+
+                        {item.description && (
+                            <Div
+                                style={{
                                     fontFamily: 'var(--20ft-font-body, sans-serif)',
                                     lineHeight: 1.7,
                                     color: 'var(--20ft-text-primary, #1A1A1A)',
                                 }}
                             >
-                                {item.description}
-                            </P>
+                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Project Story</H2>
+                                <P style={{ margin: 0 }}>{item.description}</P>
+                            </Div>
+                        )}
+
+                        {item.galleryImageUrls && item.galleryImageUrls.length > 0 && (
+                            <Div>
+                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Gallery</H2>
+                                <Ul
+                                    style={{
+                                        listStyle: 'none',
+                                        margin: 0,
+                                        padding: 0,
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                                        gap: 'var(--20ft-spacing-md, 1rem)',
+                                    }}
+                                >
+                                    {item.galleryImageUrls.map((url, index) => (
+                                        <Li key={index}>
+                                            <Img
+                                                src={url}
+                                                alt={`${item.title} gallery ${index + 1}`}
+                                                style={{
+                                                    width: '100%',
+                                                    aspectRatio: '16 / 9',
+                                                    objectFit: 'cover',
+                                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
+                                                }}
+                                            />
+                                        </Li>
+                                    ))}
+                                </Ul>
+                            </Div>
                         )}
 
                         {context?.slug && (
@@ -114,6 +221,32 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                 )}
             </Container>
         </Article>
+    );
+}
+
+function MetaRow({ label, value }: { label: string; value: string }): React.ReactElement {
+    return (
+        <Div>
+            <Span
+                style={{
+                    display: 'block',
+                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                    fontSize: '0.75rem',
+                    color: 'var(--20ft-gray-500, #777A7D)',
+                }}
+            >
+                {label}
+            </Span>
+            <Span
+                style={{
+                    fontFamily: 'var(--20ft-font-body, sans-serif)',
+                    fontSize: '0.9375rem',
+                    color: 'var(--20ft-text-primary, #1A1A1A)',
+                }}
+            >
+                {value}
+            </Span>
+        </Div>
     );
 }
 

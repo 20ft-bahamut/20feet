@@ -1,6 +1,7 @@
 import React from 'react';
-import { A, Div, Footer, Nav, P, Span } from './basic';
+import { A, Div, Footer as FooterEl, Nav, Span } from './basic';
 import BrandLogo from './BrandLogo';
+import Container from './Container';
 import type { EditorAttrs } from '../types/template';
 
 export interface SiteFooterProps {
@@ -8,129 +9,148 @@ export interface SiteFooterProps {
     editorAttrs?: EditorAttrs;
 }
 
-export const CAPABILITY_LINE = 'WEB / COMMERCE / SOFTWARE / GNUBOARD 7';
-const SIGNATURE = 'A SMALL SPACE. INFINITE POSSIBILITIES.';
+const navLinks = [
+    { label: 'Portfolio', href: '/portfolio' },
+    { label: 'SuperBify', href: '/superbify' },
+    { label: 'About', href: '/about' },
+    { label: 'Project Inquiry', href: '/inquiry' },
+];
+
+function FooterLink({ label, href }: { label: string; href: string }): React.ReactElement {
+    const [isHovered, setIsHovered] = React.useState(false);
+
+    return (
+        <A
+            href={href}
+            style={{
+                color: isHovered ? 'var(--20ft-heritage-gold, #B69B5F)' : 'inherit',
+                textDecoration: 'none',
+                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                lineHeight: 1.5,
+                transition: `color var(--20ft-duration-base) var(--20ft-ease-out)`,
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {label}
+        </A>
+    );
+}
 
 export function SiteFooter({ className, editorAttrs }: SiteFooterProps): React.ReactElement {
     return (
-        <Footer
+        <FooterEl
             className={className}
             {...editorAttrs}
             style={{
-                backgroundColor: 'var(--20ft-deep-indigo, #102A4C)',
+                paddingBlock: 'var(--20ft-section-py-md, 4rem)',
+                backgroundColor: 'var(--20ft-charcoal, #1A1A1A)',
                 color: 'var(--20ft-paper-white, #FAF8F3)',
-                paddingBlock: 'var(--20ft-spacing-2xl, 4rem)',
             }}
             data-testid="site-footer"
         >
-            <Div
-                style={{
-                    width: '100%',
-                    maxWidth: 'var(--20ft-max-width, 1280px)',
-                    marginInline: 'auto',
-                    paddingInline: 'var(--20ft-spacing-md, 1rem)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 'var(--20ft-spacing-lg, 1.5rem)',
-                }}
-            >
+            <Container>
                 <Div
                     style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        alignItems: 'flex-start',
-                        justifyContent: 'space-between',
-                        gap: 'var(--20ft-spacing-lg, 1.5rem)',
+                        display: 'grid',
+                        gridTemplateColumns: 'var(--20ft-footer-columns, 1fr)',
+                        gap: 'var(--20ft-spacing-xl, 2.5rem)',
+                        alignItems: 'start',
+                        width: '100%',
+                        minWidth: 0,
                     }}
                 >
-                    <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-sm, 0.5rem)' }}>
-                        <BrandLogo variant="compact" surface="dark" height="1.25rem" />
+                    <Div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                            width: '100%',
+                            minWidth: 0,
+                        }}
+                    >
+                        <BrandLogo variant="compact" surface="dark" height="1.75rem" />
+
+                        <Span
+                            style={{
+                                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                fontSize: '0.9375rem',
+                                opacity: 0.72,
+                                lineHeight: 1.65,
+                                letterSpacing: '-0.005em',
+                            }}
+                        >
+                            Software Studio / Digital Garage
+                        </Span>
+
+                        <Span
+                            style={{
+                                fontFamily: 'var(--20ft-font-mono, monospace)',
+                                fontSize: '0.75rem',
+                                fontWeight: 600,
+                                letterSpacing: '0.04em',
+                                textTransform: 'uppercase',
+                                color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                opacity: 0.85,
+                            }}
+                            data-testid="footer-tagline"
+                        >
+                            A SMALL SPACE. INFINITE POSSIBILITIES.
+                        </Span>
+
                         <Span
                             style={{
                                 fontFamily: 'var(--20ft-font-body, sans-serif)',
                                 fontSize: '0.75rem',
-                                letterSpacing: '0.08em',
-                                color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                opacity: 0.5,
+                                letterSpacing: '-0.005em',
                             }}
                             data-testid="footer-signature"
                         >
-                            {SIGNATURE}
-                        </Span>
-                        <Span
-                            style={{
-                                fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                fontSize: '0.75rem',
-                                letterSpacing: '0.08em',
-                                color: 'var(--20ft-heritage-gold, #B69B5F)',
-                            }}
-                            data-testid="footer-capability-line"
-                        >
-                            {CAPABILITY_LINE}
+                            © {new Date().getFullYear()} 20ft. All rights reserved.
                         </Span>
                     </Div>
 
                     <Nav
+                        aria-label="Footer navigation"
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                            gap: 'var(--20ft-spacing-xs, 0.5rem)',
+                            alignItems: 'var(--20ft-footer-nav-align, flex-start)',
                         }}
-                        data-testid="footer-nav"
                     >
-                        <A
-                            href="/portfolio"
-                            style={{
-                                color: 'var(--20ft-paper-white, #FAF8F3)',
-                                textDecoration: 'none',
-                                fontSize: '0.875rem',
-                            }}
-                        >
-                            Portfolio
-                        </A>
-                        <A
-                            href="/superbify"
-                            style={{
-                                color: 'var(--20ft-paper-white, #FAF8F3)',
-                                textDecoration: 'none',
-                                fontSize: '0.875rem',
-                            }}
-                        >
-                            SuperBify
-                        </A>
-                        <A
-                            href="/inquiry"
-                            style={{
-                                color: 'var(--20ft-paper-white, #FAF8F3)',
-                                textDecoration: 'none',
-                                fontSize: '0.875rem',
-                            }}
-                        >
-                            Project Inquiry
-                        </A>
+                        {navLinks.map((link) => (
+                            <FooterLink key={link.href} label={link.label} href={link.href} />
+                        ))}
                     </Nav>
                 </Div>
 
                 <Div
                     style={{
-                        borderTop: '1px solid rgba(244, 240, 230, 0.12)',
-                        paddingTop: 'var(--20ft-spacing-md, 1rem)',
+                        marginTop: 'var(--20ft-spacing-xl, 2.5rem)',
+                        paddingTop: 'var(--20ft-spacing-lg, 1.5rem)',
+                        borderTop: '1px solid var(--20ft-border-inverse, rgba(244, 240, 230, 0.12))',
                     }}
                 >
-                    <P
+                    <Span
                         style={{
-                            margin: 0,
+                            display: 'block',
+                            fontFamily: 'var(--20ft-font-mono, monospace)',
                             fontSize: '0.75rem',
-                            color: 'rgba(244, 240, 230, 0.6)',
+                            letterSpacing: '0.08em',
+                            opacity: 0.5,
                         }}
-                        data-testid="footer-copyright"
+                        data-testid="footer-capability"
                     >
-                        © {new Date().getFullYear()} 20ft. All rights reserved.
-                    </P>
+                        WEB / COMMERCE / SOFTWARE / GNUBOARD 7
+                    </Span>
                 </Div>
-            </Div>
-        </Footer>
+            </Container>
+        </FooterEl>
     );
 }
 
-export { SIGNATURE };
 export default SiteFooter;

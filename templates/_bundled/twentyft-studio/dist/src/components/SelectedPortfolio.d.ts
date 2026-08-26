@@ -5,5 +5,5 @@ export interface SelectedPortfolioProps {
     className?: string;
     editorAttrs?: EditorAttrs;
 }
-export declare function SelectedPortfolio({ items, className, editorAttrs }: SelectedPortfolioProps): React.ReactElement;
+export declare function SelectedPortfolio({ items, className, editorAttrs, }: SelectedPortfolioProps): React.ReactElement;
 export default SelectedPortfolio;
