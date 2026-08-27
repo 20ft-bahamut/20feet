@@ -1,0 +1,143 @@
+/**
+ * SuperBify Commerce Minimal — Design Tokens
+ *
+ * Warm-neutral commerce variant. Minimal D2C (no signal red).
+ *
+ * Palette
+ *   Paper    : #FAF8F3   bg primary
+ *   Ivory    : #F4F0E6   bg secondary
+ *   Wood     : #C9B08D   wood accent
+ *   Charcoal : #26221E   text dark / CTA
+ *   Warm Gray: #4A4643   body text
+ *   Line     : #E4DCCE   hairlines / borders
+ *   Muted    : #8A837B   secondary text
+ *   Accent   : #2E3A48   subtle navy point (links, focus)
+ */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Base palette */
+    --scm-paper: #FAF8F3;
+    --scm-ivory: #F4F0E6;
+    --scm-wood: #C9B08D;
+    --scm-wood-dark: #A8916F;
+    --scm-charcoal: #26221E;
+    --scm-warm-gray: #4A4643;
+    --scm-line: #E4DCCE;
+    --scm-muted: #8A837B;
+    --scm-accent: #2E3A48;
+
+    /* Semantic surfaces */
+    --scm-bg-primary: var(--scm-paper);
+    --scm-bg-secondary: var(--scm-ivory);
+    --scm-bg-surface-dark: var(--scm-charcoal);
+
+    --scm-text-primary: var(--scm-charcoal);
+    --scm-text-body: var(--scm-warm-gray);
+    --scm-text-muted: var(--scm-muted);
+    --scm-text-inverse: var(--scm-paper);
+
+    --scm-border: var(--scm-line);
+    --scm-border-strong: var(--scm-charcoal);
+    --scm-hairline: 1px solid var(--scm-line);
+    --scm-hairline-strong: 1px solid var(--scm-charcoal);
+
+    --scm-focus-ring: 0 0 0 3px rgba(46, 58, 72, 0.30);
+
+    /* Radius */
+    --scm-radius: 8px;
+    --scm-radius-sm: 4px;
+    --scm-radius-pill: 9999px;
+
+    /* Motion */
+    --scm-duration-fast: 180ms;
+    --scm-duration-base: 220ms;
+    --scm-ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Spacing scale (rem) */
+    --scm-spacing-3xs: 0.125rem;
+    --scm-spacing-2xs: 0.25rem;
+    --scm-spacing-xs: 0.5rem;
+    --scm-spacing-sm: 0.75rem;
+    --scm-spacing-md: 1rem;
+    --scm-spacing-lg: 1.5rem;
+    --scm-spacing-xl: 2.5rem;
+    --scm-spacing-2xl: 4rem;
+    --scm-spacing-3xl: 6rem;
+
+    /* Layout */
+    --scm-max-width: 1200px;
+    --scm-gutter: 1rem;
+
+    /* Typography */
+    --scm-font-display: 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --scm-font-body: 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont,
+        'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --scm-font-mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
+
+    /* Touch target minimum */
+    --scm-touch-min: 44px;
+
+    /* Section vertical rhythm */
+    --scm-section-py-sm: 2rem;
+    --scm-section-py-md: 3rem;
+    --scm-section-py-lg: 4.5rem;
+
+    /* Hero */
+    --scm-hero-py: 3.5rem;
+    --scm-hero-pb: 2.5rem;
+    --scm-hero-heading-size: clamp(1.875rem, 6vw, 3rem);
+
+    /* Product grid */
+    --scm-grid-columns: 1fr;
+    --scm-grid-gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    :root {
+        --scm-gutter: 1.5rem;
+        --scm-section-py-md: 3.5rem;
+        --scm-section-py-lg: 5rem;
+        --scm-grid-columns: repeat(2, 1fr);
+        --scm-grid-gap: 1.25rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --scm-gutter: 2rem;
+        --scm-grid-columns: repeat(3, 1fr);
+        --scm-grid-gap: 1.5rem;
+    }
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --scm-gutter: 2.5rem;
+        --scm-grid-columns: repeat(4, 1fr);
+        --scm-grid-gap: 1.75rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

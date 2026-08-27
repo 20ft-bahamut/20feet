@@ -1,0 +1,44 @@
+{
+    "version": "1.0.0",
+    "layout_name": "errors/403",
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.errors.forbidden_title",
+        "description": "$t:superbify.errors.forbidden_description"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "error_403",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-lg, 4.5rem)"
+                },
+                "children": [
+                    {
+                        "id": "error_403_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "error_403_state",
+                                "type": "composite",
+                                "name": "EmptyState",
+                                "props": {
+                                    "title": "$t:superbify.errors.forbidden_title",
+                                    "message": "$t:superbify.errors.forbidden_description"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

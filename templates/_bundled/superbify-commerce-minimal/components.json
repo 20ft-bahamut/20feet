@@ -1,0 +1,259 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "templateId": "superbify-commerce-minimal",
+    "version": "0.1.0",
+    "components": {
+        "basic": [
+            {
+                "name": "A",
+                "type": "basic",
+                "description": "HTML anchor element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Article",
+                "type": "basic",
+                "description": "HTML article element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Aside",
+                "type": "basic",
+                "description": "HTML aside element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Button",
+                "type": "basic",
+                "description": "HTML button element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Div",
+                "type": "basic",
+                "description": "HTML div element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Form",
+                "type": "basic",
+                "description": "HTML form element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Footer",
+                "type": "basic",
+                "description": "HTML footer element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H1",
+                "type": "basic",
+                "description": "HTML h1 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H2",
+                "type": "basic",
+                "description": "HTML h2 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H3",
+                "type": "basic",
+                "description": "HTML h3 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "H4",
+                "type": "basic",
+                "description": "HTML h4 element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Header",
+                "type": "basic",
+                "description": "HTML header element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Img",
+                "type": "basic",
+                "description": "HTML img element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Input",
+                "type": "basic",
+                "description": "HTML input element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Label",
+                "type": "basic",
+                "description": "HTML label element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Li",
+                "type": "basic",
+                "description": "HTML li element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Main",
+                "type": "basic",
+                "description": "HTML main element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Nav",
+                "type": "basic",
+                "description": "HTML nav element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Ol",
+                "type": "basic",
+                "description": "HTML ol element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Option",
+                "type": "basic",
+                "description": "HTML option element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "P",
+                "type": "basic",
+                "description": "HTML p element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Section",
+                "type": "basic",
+                "description": "HTML section element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Select",
+                "type": "basic",
+                "description": "HTML select element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Span",
+                "type": "basic",
+                "description": "HTML span element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Textarea",
+                "type": "basic",
+                "description": "HTML textarea element wrapper",
+                "path": "src/components/basic/index.tsx"
+            },
+            {
+                "name": "Ul",
+                "type": "basic",
+                "description": "HTML ul element wrapper",
+                "path": "src/components/basic/index.tsx"
+            }
+        ],
+        "composite": [
+            {
+                "name": "StoreHeader",
+                "type": "composite",
+                "description": "Top navigation with Shop, Story, Notice, Cart links and brand wordmark",
+                "path": "src/components/StoreHeader.tsx"
+            },
+            {
+                "name": "StoreFooter",
+                "type": "composite",
+                "description": "Site footer with brand name, navigation, and demo copyright",
+                "path": "src/components/StoreFooter.tsx"
+            },
+            {
+                "name": "HeroBanner",
+                "type": "composite",
+                "description": "Hero section with eyebrow, headline, body, and dual CTAs",
+                "path": "src/components/HeroBanner.tsx"
+            },
+            {
+                "name": "PromoBanner",
+                "type": "composite",
+                "description": "Dark promo banner with eyebrow, title, and optional CTA",
+                "path": "src/components/PromoBanner.tsx"
+            },
+            {
+                "name": "CategoryNav",
+                "type": "composite",
+                "description": "Vertical category navigation list (mobile/desktop) with active state",
+                "path": "src/components/CategoryNav.tsx"
+            },
+            {
+                "name": "CategoryCard",
+                "type": "composite",
+                "description": "Category card linking to /shop/category/{slug}",
+                "path": "src/components/CategoryCard.tsx"
+            },
+            {
+                "name": "ProductCard",
+                "type": "composite",
+                "description": "Product card with image, name, price, and status badge",
+                "path": "src/components/ProductCard.tsx"
+            },
+            {
+                "name": "ProductGrid",
+                "type": "composite",
+                "description": "Responsive product grid with loading skeleton and empty state",
+                "path": "src/components/ProductGrid.tsx"
+            },
+            {
+                "name": "ProductGallery",
+                "type": "composite",
+                "description": "Product detail image gallery with thumbnails",
+                "path": "src/components/ProductGallery.tsx"
+            },
+            {
+                "name": "Price",
+                "type": "composite",
+                "description": "Selling/list price with optional strike-through and discount badge",
+                "path": "src/components/Price.tsx"
+            },
+            {
+                "name": "Badge",
+                "type": "composite",
+                "description": "Tone-based badge (default / discount / soldout / stopped / new)",
+                "path": "src/components/Badge.tsx"
+            },
+            {
+                "name": "RelatedProducts",
+                "type": "composite",
+                "description": "Related products section using ProductGrid",
+                "path": "src/components/RelatedProducts.tsx"
+            },
+            {
+                "name": "BrandStorySection",
+                "type": "composite",
+                "description": "Image + text brand story block",
+                "path": "src/components/BrandStorySection.tsx"
+            },
+            {
+                "name": "EmptyState",
+                "type": "composite",
+                "description": "Generic empty state with title, message, and optional CTA",
+                "path": "src/components/EmptyState.tsx"
+            }
+        ],
+        "layout": [
+            {
+                "name": "Container",
+                "type": "layout",
+                "description": "Centered max-width container with responsive gutter",
+                "path": "src/components/Container.tsx"
+            }
+        ]
+    }
+}

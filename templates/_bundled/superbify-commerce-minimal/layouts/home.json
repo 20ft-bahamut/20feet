@@ -1,0 +1,399 @@
+{
+    "version": "1.0.0",
+    "layout_name": "home",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.home.title",
+        "description": "$t:superbify.routes.home.description"
+    },
+    "data_sources": [
+        {
+            "id": "new_arrivals",
+            "label_key": "$t:superbify.data_source.new_arrivals",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/new",
+            "method": "GET",
+            "params": {
+                "limit": 8
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "popular_products",
+            "label_key": "$t:superbify.data_source.popular_products",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/popular",
+            "method": "GET",
+            "params": {
+                "limit": 8
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "featured_categories",
+            "label_key": "$t:superbify.data_source.featured_categories",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/categories",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "home_hero",
+                "type": "composite",
+                "name": "HeroBanner",
+                "props": {
+                    "eyebrow": "$t:superbify.home.hero.eyebrow",
+                    "headline": "$t:superbify.home.hero.headline",
+                    "sub": "$t:superbify.home.hero.sub",
+                    "primaryCtaLabel": "$t:superbify.home.hero.cta_primary",
+                    "primaryCtaHref": "/shop",
+                    "secondaryCtaLabel": "$t:superbify.home.hero.cta_secondary",
+                    "secondaryCtaHref": "/shop/story",
+                    "mediaSlot": "hero-mood-1"
+                }
+            },
+            {
+                "id": "home_featured_categories",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "home_featured_categories_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "home_featured_categories_eyebrow",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.75rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.08em",
+                                    "textTransform": "uppercase"
+                                },
+                                "text": "$t:superbify.home.featured_categories.eyebrow"
+                            },
+                            {
+                                "id": "home_featured_categories_heading",
+                                "type": "basic",
+                                "name": "H2",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.5rem",
+                                    "fontWeight": "600",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.home.featured_categories.heading"
+                            },
+                            {
+                                "id": "home_featured_categories_grid",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "display": "grid",
+                                    "gridTemplateColumns": "var(--scm-grid-columns, 1fr)",
+                                    "gap": "var(--scm-grid-gap, 1rem)"
+                                },
+                                "children": [
+                                    {
+                                        "id": "home_featured_categories_loading",
+                                        "type": "composite",
+                                        "name": "EmptyState",
+                                        "if": "{{!featured_categories?.data || (featured_categories.data?.length ?? featured_categories.data?.data?.length ?? 0) === 0}}",
+                                        "props": {
+                                            "title": "No categories yet",
+                                            "message": "Add categories in admin and they will appear here."
+                                        }
+                                    },
+                                    {
+                                        "_comment": "첫 7개 카테고리 표시 (featured_categories.data.data 또는 .data 자체가 배열)",
+                                        "id": "home_featured_categories_item_cups",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[0] ?? featured_categories?.data?.[0])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[0] ?? featured_categories.data[0]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_lighting",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[1] ?? featured_categories?.data?.[1])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[1] ?? featured_categories.data[1]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_trays",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[2] ?? featured_categories?.data?.[2])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[2] ?? featured_categories.data[2]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_fabric",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[3] ?? featured_categories?.data?.[3])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[3] ?? featured_categories.data[3]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_scent",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[4] ?? featured_categories?.data?.[4])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[4] ?? featured_categories.data[4]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_furniture",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[5] ?? featured_categories?.data?.[5])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[5] ?? featured_categories.data[5]}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "home_featured_categories_item_desk",
+                                        "type": "composite",
+                                        "name": "CategoryCard",
+                                        "if": "{{(featured_categories?.data?.data?.[6] ?? featured_categories?.data?.[6])}}",
+                                        "props": {
+                                            "item": "{{featured_categories.data.data?.[6] ?? featured_categories.data[6]}}"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "home_new_arrivals",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)",
+                    "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)"
+                },
+                "children": [
+                    {
+                        "id": "home_new_arrivals_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "home_new_arrivals_eyebrow",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.75rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.08em",
+                                    "textTransform": "uppercase"
+                                },
+                                "text": "$t:superbify.home.new_arrivals.eyebrow"
+                            },
+                            {
+                                "id": "home_new_arrivals_heading",
+                                "type": "basic",
+                                "name": "H2",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.5rem",
+                                    "fontWeight": "600",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.home.new_arrivals.heading"
+                            },
+                            {
+                                "id": "home_new_arrivals_grid",
+                                "type": "composite",
+                                "name": "ProductGrid",
+                                "props": {
+                                    "items": "{{(new_arrivals?.data?.data ?? new_arrivals?.data ?? [])}}",
+                                    "limit": 8,
+                                    "loading": "{{new_arrivals?.loading ?? false}}",
+                                    "emptyTitle": "$t:superbify.shop.empty_title",
+                                    "emptyMessage": "$t:superbify.shop.empty_message"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "home_popular",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "home_popular_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "home_popular_eyebrow",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.75rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.08em",
+                                    "textTransform": "uppercase"
+                                },
+                                "text": "$t:superbify.home.popular.eyebrow"
+                            },
+                            {
+                                "id": "home_popular_heading",
+                                "type": "basic",
+                                "name": "H2",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.5rem",
+                                    "fontWeight": "600",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.home.popular.heading"
+                            },
+                            {
+                                "id": "home_popular_grid",
+                                "type": "composite",
+                                "name": "ProductGrid",
+                                "props": {
+                                    "items": "{{(popular_products?.data?.data ?? popular_products?.data ?? [])}}",
+                                    "limit": 8,
+                                    "loading": "{{popular_products?.loading ?? false}}",
+                                    "emptyTitle": "$t:superbify.shop.empty_title",
+                                    "emptyMessage": "$t:superbify.shop.empty_message"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "home_brand_story",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)",
+                    "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)"
+                },
+                "children": [
+                    {
+                        "id": "home_brand_story_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "home_brand_story_component",
+                                "type": "composite",
+                                "name": "BrandStorySection",
+                                "props": {
+                                    "eyebrow": "$t:superbify.home.story.eyebrow",
+                                    "heading": "$t:superbify.home.story.heading",
+                                    "body": "$t:superbify.home.story.body",
+                                    "ctaLabel": "$t:superbify.home.hero.cta_secondary",
+                                    "ctaHref": "/shop/story",
+                                    "mediaSlot": "hero-mood-2"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "home_promo",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "home_promo_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "home_promo_banner",
+                                "type": "composite",
+                                "name": "PromoBanner",
+                                "props": {
+                                    "eyebrow": "$t:superbify.home.promo.eyebrow",
+                                    "title": "$t:superbify.home.promo.title",
+                                    "description": "$t:superbify.home.promo.description",
+                                    "ctaLabel": "$t:superbify.home.hero.cta_primary",
+                                    "ctaHref": "/shop",
+                                    "mediaSlot": "promo-fallback"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

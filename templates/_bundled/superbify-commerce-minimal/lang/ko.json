@@ -1,0 +1,138 @@
+{
+    "superbify": {
+        "base_layout_title": "Still Form",
+        "base_layout_description": "데모 홈 & 라이프스타일 스토어 — SuperBify Commerce Minimal",
+        "brand": {
+            "name": "Still Form",
+            "tagline": "조용한 일상의 물건들"
+        },
+        "routes": {
+            "home": {
+                "title": "Still Form — 조용한 일상의 물건들",
+                "description": "데모 홈 & 라이프스타일 스토어입니다."
+            },
+            "shop": {
+                "title": "Shop — Still Form",
+                "description": "전체 상품 목록"
+            },
+            "category": {
+                "title": "Category — Still Form",
+                "description": "카테고리별 상품"
+            },
+            "product": {
+                "title": "Product — Still Form",
+                "description": "상품 상세"
+            },
+            "notice": {
+                "title": "Notice — Still Form",
+                "description": "공지사항"
+            },
+            "story": {
+                "title": "Story — Still Form",
+                "description": "브랜드 소개"
+            },
+            "cart": {
+                "title": "Cart — Still Form",
+                "description": "장바구니"
+            }
+        },
+        "data_source": {
+            "new_arrivals": "신상품",
+            "popular_products": "인기 상품",
+            "featured_categories": "추천 카테고리",
+            "categories": "카테고리",
+            "products": "상품 목록",
+            "category_detail": "카테고리 상세",
+            "category_products": "카테고리 상품",
+            "product_detail": "상품 상세",
+            "product_reviews": "상품 리뷰",
+            "cart": "장바구니",
+            "cart_count": "장바구니 수량"
+        },
+        "errors": {
+            "not_found_title": "페이지를 찾을 수 없습니다",
+            "not_found_description": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.",
+            "forbidden_title": "접근 권한이 없습니다",
+            "forbidden_description": "이 페이지에 접근할 수 있는 권한이 없습니다.",
+            "server_error_title": "문제가 발생했습니다",
+            "server_error_description": "잠시 후 다시 시도해 주세요."
+        },
+        "nav": {
+            "shop": "Shop",
+            "story": "Story",
+            "notice": "Notice",
+            "cart": "Cart"
+        },
+        "home": {
+            "hero": {
+                "eyebrow": "DEMO STORE",
+                "headline": "조용한 일상의 물건들",
+                "sub": "데모 홈 & 라이프스타일 스토어. 작은 디테일에서 시작된 물건들을 천천히 모아봅니다.",
+                "cta_primary": "Shop 둘러보기",
+                "cta_secondary": "Brand Story"
+            },
+            "featured_categories": {
+                "eyebrow": "CATEGORIES",
+                "heading": "카테고리"
+            },
+            "new_arrivals": {
+                "eyebrow": "NEW",
+                "heading": "새로 들어온 것들"
+            },
+            "popular": {
+                "eyebrow": "POPULAR",
+                "heading": "많이 찾는 것들"
+            },
+            "story": {
+                "eyebrow": "BRAND STORY",
+                "heading": "데모 스토어를 소개합니다",
+                "body": "이 템플릿은 Gnuboard 7 + sirsoft-ecommerce로 구성한 데모용 미니멀 커머스 UI입니다. 가짜 주문·가짜 결제 없이 데이터 흐름과 컴포넌트만 살펴볼 수 있도록 만들었습니다."
+            },
+            "promo": {
+                "eyebrow": "DEMO",
+                "title": "데모용 안내",
+                "description": "실제 결제는 발생하지 않습니다. 상품 데이터·이미지는 데모용으로 교체될 수 있습니다."
+            }
+        },
+        "shop": {
+            "title": "Shop",
+            "empty_title": "아직 등록된 상품이 없습니다",
+            "empty_message": "관리자에서 상품을 등록하면 이 자리에 표시됩니다."
+        },
+        "category": {
+            "count_label": "{{count}}개 상품",
+            "empty_title": "이 카테고리에 등록된 상품이 없습니다",
+            "empty_message": "다른 카테고리를 둘러보거나, 잠시 후 다시 확인해 주세요."
+        },
+        "product": {
+            "short_description_label": "상세 설명",
+            "related_title": "함께 보면 좋은 것들",
+            "related_eyebrow": "RELATED",
+            "status_soldout": "품절",
+            "status_stopped": "판매중지",
+            "status_onsale": "판매중"
+        },
+        "story": {
+            "title": "Brand Story",
+            "eyebrow": "STORY",
+            "body": "데모 스토어 Still Form은 작은 일상용품을 차분하게 다루는 가상의 브랜드입니다. 실서비스 데모가 아니므로 가짜 리뷰·주문·다운로드 링크는 포함되어 있지 않습니다."
+        },
+        "notice": {
+            "title": "Notice",
+            "eyebrow": "NOTICE",
+            "empty_title": "등록된 공지가 없습니다",
+            "empty_message": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다."
+        },
+        "cart": {
+            "title": "Cart",
+            "empty_title": "장바구니가 비어 있습니다",
+            "empty_message": "Shop 페이지에서 상품을 담아보세요.",
+            "cta_shop": "Shop으로 이동"
+        },
+        "common": {
+            "all": "전체",
+            "view_all": "전체 보기",
+            "demo_marker": "demo"
+        }
+    }
+}

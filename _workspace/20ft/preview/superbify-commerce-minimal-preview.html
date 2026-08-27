@@ -1,0 +1,610 @@
+<title>SuperBify Commerce Minimal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
+<style>
+  /* ── Preview chrome tokens (frame only) ── */
+  :root {
+    --frame-bg: #EDE9E0;
+    --frame-ink: #26221E;
+    --frame-muted: #8A837B;
+    --frame-line: #DDD5C4;
+    --frame-accent: #2E3A48;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--frame-bg);
+    color: var(--frame-ink);
+    font-family: 'Noto Sans KR', system-ui, -apple-system, 'Malgun Gothic', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Storefront tokens — mirror src/styles/design-tokens.css ── */
+  .store {
+    --scm-paper: #FAF8F3;
+    --scm-ivory: #F4F0E6;
+    --scm-wood: #C9B08D;
+    --scm-wood-dark: #A8916F;
+    --scm-charcoal: #26221E;
+    --scm-warm-gray: #4A4643;
+    --scm-line: #E4DCCE;
+    --scm-muted: #8A837B;
+    --scm-accent: #2E3A48;
+    --scm-radius: 8px;
+    --scm-radius-sm: 4px;
+    --scm-max-width: 1200px;
+  }
+
+  /* ── Preview frame ── */
+  .frame { max-width: 1280px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  .frame-note {
+    display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: baseline;
+    padding: .6rem 1rem; margin-bottom: 1rem;
+    background: #26221E; color: #F4F0E6; border-radius: 6px;
+    font-size: .78rem; letter-spacing: .01em;
+  }
+  .frame-note strong { font-weight: 700; }
+  .frame-note span { color: #B8AE9C; }
+  .page-tabs { display: flex; gap: .375rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .page-tabs button {
+    font: inherit; font-size: .82rem; font-weight: 500; cursor: pointer;
+    padding: .5rem 1.1rem; min-height: 44px; border-radius: 999px;
+    border: 1px solid var(--frame-line); background: transparent; color: var(--frame-muted);
+    transition: all 180ms cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .page-tabs button:hover { border-color: var(--frame-accent); color: var(--frame-accent); }
+  .page-tabs button[aria-pressed="true"] {
+    background: var(--frame-accent); border-color: var(--frame-accent); color: #FAF8F3;
+  }
+  .page-tabs button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(46,58,72,.30); }
+
+  /* ── Storefront chrome ── */
+  .store {
+    background: var(--scm-paper);
+    border: 1px solid var(--scm-line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .store-header {
+    display: flex; align-items: center; gap: 2rem;
+    padding: 1rem 2.5rem;
+    border-bottom: 1px solid var(--scm-line);
+    background: var(--scm-paper);
+  }
+  .logo { font-size: 1.05rem; font-weight: 700; letter-spacing: .22em; color: var(--scm-charcoal); }
+  .logo em { font-style: normal; color: var(--scm-wood-dark); }
+  .store-nav { display: flex; gap: 1.5rem; margin-left: auto; align-items: center; }
+  .store-nav a {
+    font-size: .84rem; color: var(--scm-warm-gray); text-decoration: none;
+    letter-spacing: .06em; padding: .5rem 0;
+  }
+  .store-nav a:hover { color: var(--scm-charcoal); }
+  .cart-link {
+    display: inline-flex; align-items: center; gap: .4rem;
+    font-size: .84rem; color: var(--scm-charcoal); text-decoration: none;
+  }
+  .cart-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.25rem; height: 1.25rem; padding: 0 .3rem;
+    background: var(--scm-charcoal); color: var(--scm-paper);
+    font-size: .68rem; border-radius: 999px; font-weight: 500;
+  }
+
+  /* ── Shared store layout ── */
+  .store main { background: var(--scm-paper); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .wrap { max-width: var(--scm-max-width); margin: 0 auto; padding: 0 2.5rem; }
+  .eyebrow {
+    font-size: .7rem; font-weight: 500; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--scm-wood-dark); margin: 0 0 .6rem;
+  }
+  .section-title { font-size: 1.45rem; font-weight: 700; letter-spacing: -.01em; color: var(--scm-charcoal); margin: 0; }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.5rem; }
+  .section-head a { font-size: .8rem; color: var(--scm-muted); text-decoration: none; }
+  .section-head a:hover { color: var(--scm-charcoal); }
+  section { padding: 3rem 0; }
+  section + section { border-top: 1px solid var(--scm-line); }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--scm-ivory);
+    padding: 4.5rem 0 4rem;
+    border-bottom: 1px solid var(--scm-line);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 3rem; align-items: center; }
+  .hero h1 {
+    font-size: clamp(1.875rem, 4vw, 2.75rem); font-weight: 700; line-height: 1.25;
+    letter-spacing: -.02em; color: var(--scm-charcoal); margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+  .hero p { font-size: .95rem; line-height: 1.75; color: var(--scm-warm-gray); margin: 0 0 1.75rem; max-width: 34em; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 44px; padding: 0 1.75rem; border-radius: var(--scm-radius-sm);
+    font: inherit; font-size: .88rem; font-weight: 500; cursor: pointer; text-decoration: none;
+    transition: background 180ms cubic-bezier(0.25,0.46,0.45,0.94), color 180ms cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .btn-primary { background: var(--scm-charcoal); color: var(--scm-paper); border: 1px solid var(--scm-charcoal); }
+  .btn-primary:hover { background: #3A342E; }
+  .btn-ghost { background: transparent; color: var(--scm-charcoal); border: 1px solid var(--scm-charcoal); }
+  .btn-ghost:hover { background: rgba(38,34,30,.06); }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(46,58,72,.30); }
+
+  /* ── Image slot placeholder tile ── */
+  .tile {
+    position: relative; width: 100%; aspect-ratio: 1; display: block;
+    background: var(--scm-ivory); border: 1px solid var(--scm-line); border-radius: var(--scm-radius-sm);
+    overflow: hidden;
+  }
+  .tile svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .slot-tag {
+    position: absolute; left: .5rem; bottom: .5rem;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: .58rem; letter-spacing: .04em; color: var(--scm-muted);
+    background: rgba(250,248,243,.85); padding: .15rem .4rem; border-radius: 3px;
+  }
+
+  /* ── Category row ── */
+  .cat-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1rem; }
+  .cat-card { text-decoration: none; display: block; }
+  .cat-card .tile { aspect-ratio: 1; border-radius: 999px; border-color: var(--scm-line); }
+  .cat-card span {
+    display: block; text-align: center; margin-top: .6rem;
+    font-size: .78rem; color: var(--scm-warm-gray); letter-spacing: .04em;
+  }
+  .cat-card:hover span { color: var(--scm-charcoal); }
+
+  /* ── Product grid ── */
+  .product-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.75rem; }
+  .product-card { display: block; text-decoration: none; }
+  .product-card .tile { margin-bottom: .75rem; transition: border-color 180ms cubic-bezier(0.25,0.46,0.45,0.94); }
+  .product-card:hover .tile { border-color: var(--scm-wood); }
+  .p-name { font-size: .88rem; font-weight: 500; color: var(--scm-charcoal); margin: 0 0 .25rem; }
+  .p-cats { font-size: .7rem; color: var(--scm-muted); letter-spacing: .05em; margin: 0 0 .4rem; }
+  .p-price-row { display: flex; align-items: baseline; gap: .5rem; }
+  .p-price { font-size: .9rem; font-weight: 700; color: var(--scm-charcoal); font-variant-numeric: tabular-nums; }
+  .p-list-price { font-size: .75rem; color: var(--scm-muted); text-decoration: line-through; font-variant-numeric: tabular-nums; }
+  .p-discount { font-size: .75rem; font-weight: 700; color: #8A5A2B; font-variant-numeric: tabular-nums; }
+  .badge-row { display: flex; gap: .375rem; margin-bottom: .5rem; }
+  .badge {
+    display: inline-flex; align-items: center; padding: .15rem .5rem;
+    font-size: .62rem; font-weight: 700; letter-spacing: .08em; border-radius: 3px;
+  }
+  .badge-new { background: var(--scm-accent); color: #FAF8F3; }
+  .badge-sale { background: var(--scm-wood); color: #3A2F1E; }
+  .badge-soldout { background: transparent; color: var(--scm-muted); border: 1px solid var(--scm-line); }
+
+  /* ── Promo banner ── */
+  .promo {
+    background: var(--scm-charcoal); border-radius: var(--scm-radius);
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    padding: 2.25rem 2.5rem;
+  }
+  .promo h3 { color: #FAF8F3; font-size: 1.15rem; font-weight: 700; margin: 0 0 .35rem; letter-spacing: -.01em; }
+  .promo p { color: #B8AE9C; font-size: .84rem; margin: 0; }
+  .promo .btn-primary { background: #FAF8F3; color: #26221E; border-color: #FAF8F3; flex-shrink: 0; }
+  .promo .btn-primary:hover { background: #EDE9E0; }
+
+  /* ── Brand story ── */
+  .story { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .story .frame-quote { font-size: 1.25rem; font-weight: 300; line-height: 1.7; color: var(--scm-charcoal); letter-spacing: -.01em; }
+  .story p { font-size: .88rem; line-height: 1.85; color: var(--scm-warm-gray); margin: 0; }
+
+  /* ── Footer ── */
+  .store-footer {
+    border-top: 1px solid var(--scm-line); background: var(--scm-ivory);
+    padding: 2rem 2.5rem;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+  }
+  .store-footer .logo { font-size: .85rem; }
+  .store-footer small { font-size: .72rem; color: var(--scm-muted); letter-spacing: .04em; }
+
+  /* ── Shop page ── */
+  .page-head { padding: 2.5rem 0 0; }
+  .page-head h1 { font-size: 1.6rem; font-weight: 700; margin: 0 0 .35rem; color: var(--scm-charcoal); }
+  .page-head p { font-size: .84rem; color: var(--scm-muted); margin: 0; }
+  .filter-bar {
+    display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+    padding: 1.25rem 0 1.5rem; border-bottom: 1px solid var(--scm-line); margin-bottom: 1.75rem;
+  }
+  .chip {
+    font: inherit; font-size: .78rem; cursor: pointer; min-height: 44px; padding: 0 1rem;
+    border-radius: 999px; border: 1px solid var(--scm-line); background: transparent; color: var(--scm-warm-gray);
+    transition: all 180ms cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .chip[aria-pressed="true"] { background: var(--scm-charcoal); border-color: var(--scm-charcoal); color: var(--scm-paper); }
+  .chip:hover:not([aria-pressed="true"]) { border-color: var(--scm-charcoal); color: var(--scm-charcoal); }
+  .chip:focus-visible, .page-tabs button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(46,58,72,.30); }
+  .sort-label { margin-left: auto; font-size: .78rem; color: var(--scm-muted); }
+  .sort-label select {
+    font: inherit; font-size: .78rem; margin-left: .5rem; padding: .4rem .6rem;
+    border: 1px solid var(--scm-line); border-radius: var(--scm-radius-sm); background: var(--scm-paper); color: var(--scm-charcoal);
+  }
+
+  /* ── Product detail ── */
+  .crumbs { font-size: .74rem; color: var(--scm-muted); padding: 1.25rem 0 0; letter-spacing: .03em; }
+  .crumbs a { color: inherit; text-decoration: none; }
+  .crumbs a:hover { color: var(--scm-charcoal); }
+  .detail-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 3rem; padding: 1.75rem 0 3rem; }
+  .gallery { display: grid; gap: .75rem; }
+  .gallery .tile { aspect-ratio: 4/3; }
+  .gallery-thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+  .gallery-thumbs .tile { aspect-ratio: 1; cursor: pointer; }
+  .gallery-thumbs .tile[aria-current="true"] { border-color: var(--scm-charcoal); }
+  .detail h1 { font-size: 1.5rem; font-weight: 700; margin: .5rem 0 .5rem; color: var(--scm-charcoal); letter-spacing: -.01em; }
+  .detail .code { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: .68rem; color: var(--scm-muted); letter-spacing: .05em; }
+  .detail .desc { font-size: .9rem; line-height: 1.8; color: var(--scm-warm-gray); margin: 1.25rem 0; }
+  .detail .price-line { display: flex; align-items: baseline; gap: .75rem; padding: 1.25rem 0; border-top: 1px solid var(--scm-line); border-bottom: 1px solid var(--scm-line); }
+  .detail .price-line .p-price { font-size: 1.35rem; }
+  .kv { width: 100%; border-collapse: collapse; margin: 1.25rem 0 1.75rem; font-size: .82rem; }
+  .kv th { text-align: left; font-weight: 500; color: var(--scm-muted); width: 38%; padding: .55rem 0; border-bottom: 1px solid var(--scm-line); }
+  .kv td { color: var(--scm-warm-gray); padding: .55rem 0; border-bottom: 1px solid var(--scm-line); }
+  .kv tr:last-child th, .kv tr:last-child td { border-bottom: 0; }
+  .cta-row { display: flex; gap: .75rem; }
+  .cta-note { font-size: .72rem; color: var(--scm-muted); margin-top: .75rem; line-height: 1.6; }
+
+  /* ── Cart ── */
+  .cart-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 2.5rem; padding: 1.75rem 0 3rem; align-items: start; }
+  .cart-row { display: grid; grid-template-columns: 84px 1fr auto; gap: 1.25rem; padding: 1.25rem 0; border-bottom: 1px solid var(--scm-line); align-items: center; }
+  .cart-row .tile { aspect-ratio: 1; }
+  .cart-row .p-name { margin-bottom: .2rem; }
+  .cart-row .qty { display: inline-flex; align-items: center; gap: .75rem; font-size: .82rem; color: var(--scm-warm-gray); font-variant-numeric: tabular-nums; }
+  .cart-row .qty button {
+    font: inherit; width: 28px; height: 28px; border-radius: var(--scm-radius-sm);
+    border: 1px solid var(--scm-line); background: var(--scm-paper); color: var(--scm-charcoal); cursor: pointer;
+  }
+  .cart-row .qty button:hover { border-color: var(--scm-charcoal); }
+  .cart-row .line-price { font-weight: 700; font-size: .9rem; font-variant-numeric: tabular-nums; color: var(--scm-charcoal); }
+  .summary { background: var(--scm-ivory); border: 1px solid var(--scm-line); border-radius: var(--scm-radius); padding: 1.5rem 1.75rem; }
+  .summary h2 { font-size: .95rem; font-weight: 700; margin: 0 0 1rem; color: var(--scm-charcoal); }
+  .summary dl { margin: 0 0 1rem; }
+  .summary .row { display: flex; justify-content: space-between; font-size: .84rem; color: var(--scm-warm-gray); padding: .4rem 0; font-variant-numeric: tabular-nums; }
+  .summary .row.total { border-top: 1px solid var(--scm-line); margin-top: .5rem; padding-top: .85rem; font-weight: 700; color: var(--scm-charcoal); font-size: 1rem; }
+  .summary .btn { width: 100%; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1024px) {
+    .product-grid { grid-template-columns: repeat(3, 1fr); }
+    .cat-grid { grid-template-columns: repeat(7, 1fr); gap: .6rem; }
+  }
+  @media (max-width: 860px) {
+    .hero-grid, .story, .detail-grid, .cart-layout { grid-template-columns: 1fr; }
+    .product-grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-grid { grid-template-columns: repeat(4, 1fr); }
+    .store-header { padding: 1rem 1.25rem; gap: 1rem; }
+    .store-nav { gap: 1rem; }
+    .wrap { padding: 0 1.25rem; }
+    .store-footer { padding: 1.5rem 1.25rem; }
+    .promo { flex-direction: column; align-items: flex-start; padding: 1.75rem 1.5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+</style>
+
+<div class="frame">
+  <div class="frame-note">
+    <strong>SuperBify Commerce Minimal — 정적 디자인 프리뷰</strong>
+    <span>데모 브랜드: Still Form (가상) · fixture 데모 데이터 · 이미지는 manifest 슬롯 placeholder · 실제 G7 runtime 렌더링 아님</span>
+  </div>
+
+  <div class="page-tabs" role="group" aria-label="페이지 전환">
+    <button data-page="home" aria-pressed="true">HOME</button>
+    <button data-page="shop" aria-pressed="false">SHOP</button>
+    <button data-page="product" aria-pressed="false">PRODUCT DETAIL</button>
+    <button data-page="cart" aria-pressed="false">CART</button>
+  </div>
+
+  <div class="store">
+    <header class="store-header">
+      <div class="logo">STILL<em>·</em>FORM</div>
+      <nav class="store-nav" aria-label="스토어 메뉴">
+        <a href="#" onclick="return false;">Shop</a>
+        <a href="#" onclick="return false;">Story</a>
+        <a href="#" onclick="return false;">Notice</a>
+        <a class="cart-link" href="#" onclick="return false;">Cart <span class="cart-count">3</span></a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ══════════ HOME ══════════ -->
+      <div class="page active" id="page-home">
+        <div class="hero">
+          <div class="wrap hero-grid">
+            <div>
+              <p class="eyebrow">Home &amp; Lifestyle</p>
+              <h1>조용한 일상의 물건들</h1>
+              <p>쉼표가 필요한 순간을 위한 소품. 손에 잡히는 무게와 온도를 고려해 골라낸 리빙 오브제를 소개합니다.</p>
+              <a class="btn btn-primary" href="#" onclick="switchPage('shop'); return false;">Shop Now</a>
+            </div>
+            <div class="tile" role="img" aria-label="히어로 이미지 슬롯 placeholder">
+              <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <rect width="400" height="300" fill="#F4F0E6"/>
+                <rect x="40" y="120" width="150" height="120" rx="8" fill="#E4DCCE"/>
+                <rect x="210" y="80" width="110" height="160" rx="8" fill="#E4DCCE" opacity=".7"/>
+                <circle cx="330" cy="70" r="34" fill="#C9B08D" opacity=".55"/>
+                <line x1="40" y1="240" x2="360" y2="240" stroke="#A8916F" stroke-width="1"/>
+              </svg>
+              <span class="slot-tag">hero-mood-1</span>
+            </div>
+          </div>
+        </div>
+
+        <section>
+          <div class="wrap">
+            <div class="section-head">
+              <div><p class="eyebrow">Browse</p><h2 class="section-title">카테고리</h2></div>
+            </div>
+            <div class="cat-grid" id="cat-grid"></div>
+          </div>
+        </section>
+
+        <section>
+          <div class="wrap">
+            <div class="section-head">
+              <div><p class="eyebrow">New</p><h2 class="section-title">신상품</h2></div>
+              <a href="#" onclick="switchPage('shop'); return false;">전체 보기</a>
+            </div>
+            <div class="product-grid" id="grid-new"></div>
+          </div>
+        </section>
+
+        <section>
+          <div class="wrap">
+            <div class="section-head">
+              <div><p class="eyebrow">Best</p><h2 class="section-title">인기 상품</h2></div>
+              <a href="#" onclick="switchPage('shop'); return false;">전체 보기</a>
+            </div>
+            <div class="product-grid" id="grid-best"></div>
+          </div>
+        </section>
+
+        <section>
+          <div class="wrap story">
+            <div>
+              <p class="eyebrow">Brand Story</p>
+              <p class="frame-quote">물건이 적을수록,<br>하나하나는 더 단단해집니다.</p>
+            </div>
+            <div>
+              <p>Still Form은 좁은 책상과 작은 방에 맞는 물건을 만듭니다. 크지 않은 크기, 담백한 재질, 오래 쓸 수 있는 형태. 매일 손이 닿는 자리에 두고 싶은 소품을 고민합니다.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div class="wrap">
+            <div class="promo">
+              <div>
+                <h3>이번 시즌의 테이블 오브제</h3>
+                <p>우드 트레이와 머그컵으로 꾸리는 작은 차 타임 세팅</p>
+              </div>
+              <a class="btn btn-primary" href="#" onclick="switchPage('shop'); return false;">보러가기</a>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ══════════ SHOP ══════════ -->
+      <div class="page" id="page-shop">
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Shop</h1>
+            <p>전체 상품 <span id="shop-count">8</span>개</p>
+          </div>
+          <div class="filter-bar" id="filter-bar" role="group" aria-label="카테고리 필터"></div>
+          <div class="product-grid" id="grid-shop" style="padding-bottom: 3rem;"></div>
+        </div>
+      </div>
+
+      <!-- ══════════ PRODUCT DETAIL ══════════ -->
+      <div class="page" id="page-product">
+        <div class="wrap">
+          <nav class="crumbs" aria-label="브레드크럼"><a href="#" onclick="switchPage('shop'); return false;">Shop</a> · 컵 · 머그컵</nav>
+          <div class="detail-grid">
+            <div class="gallery">
+              <div class="tile" role="img" aria-label="상품 대표 이미지 슬롯 placeholder" id="detail-main"></div>
+              <div class="gallery-thumbs" id="detail-thumbs"></div>
+            </div>
+            <div class="detail">
+              <div class="badge-row"><span class="badge badge-sale">SALE 14%</span><span class="badge badge-new">NEW</span></div>
+              <p class="code">STLMUG0001AB12CD</p>
+              <h1>머그컵</h1>
+              <p class="desc">Heavyweight stoneware mug for daily coffee and tea. 매일의 커피와 차를 위한 묵직한 스톤웨어 머그컵.</p>
+              <div class="price-line">
+                <span class="p-price">24,000원</span>
+                <span class="p-list-price">28,000원</span>
+                <span class="p-discount">14%</span>
+              </div>
+              <table class="kv">
+                <tr><th>분류</th><td>컵</td></tr>
+                <tr><th>상태</th><td>판매중</td></tr>
+                <tr><th>배송</th><td>기본 배송</td></tr>
+              </table>
+              <div class="cta-row">
+                <a class="btn btn-primary" href="#" onclick="switchPage('cart'); return false;">장바구니 담기</a>
+                <a class="btn btn-ghost" href="#" onclick="switchPage('shop'); return false;">목록으로</a>
+              </div>
+              <p class="cta-note">프리뷰 화면 — 실제 구현에서는 상품 옵션 확정 후 구매 CTA가 G7 장바구니 API에 연결됩니다.</p>
+            </div>
+          </div>
+
+          <section style="border-top: 1px solid var(--scm-line); padding-bottom: 3rem;">
+            <div class="section-head">
+              <div><p class="eyebrow">Related</p><h2 class="section-title">함께 보면 좋은 상품</h2></div>
+            </div>
+            <div class="product-grid" id="grid-related"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ══════════ CART ══════════ -->
+      <div class="page" id="page-cart">
+        <div class="wrap">
+          <div class="page-head">
+            <h1>Cart</h1>
+            <p>담긴 상품 3개</p>
+          </div>
+          <div class="cart-layout">
+            <div id="cart-rows"></div>
+            <aside class="summary" aria-label="주문 요약">
+              <h2>주문 요약</h2>
+              <dl>
+                <div class="row"><dt>상품 금액</dt><dd>132,000원</dd></div>
+                <div class="row"><dt>배송비</dt><dd>3,000원</dd></div>
+                <div class="row total"><dt>총 결제 금액</dt><dd>135,000원</dd></div>
+              </dl>
+              <a class="btn btn-primary" href="#" onclick="return false;">주문하기</a>
+              <p class="cta-note">프리뷰 화면 — 실제 구현에서는 G7 checkout API(POST /checkout)에 연결됩니다.</p>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="store-footer">
+      <div class="logo">STILL<em>·</em>FORM</div>
+      <small>© 2026 Still Form — demo store built on Gnuboard 7 · SuperBify Commerce Minimal</small>
+    </footer>
+  </div>
+</div>
+
+<script>
+  // ── Demo fixture data (mirror src/components/fixtures/products.json) ──
+  var CATS = [
+    { slug: "cups",     ko: "컵",           icon: "mug" },
+    { slug: "lighting", ko: "조명",         icon: "lamp" },
+    { slug: "trays",    ko: "트레이",       icon: "tray" },
+    { slug: "fabric",   ko: "패브릭",       icon: "cushion" },
+    { slug: "scent",    ko: "향",           icon: "diffuser" },
+    { slug: "furniture",ko: "소형 가구",    icon: "shelf" },
+    { slug: "desk",     ko: "데스크",       icon: "pen" }
+  ];
+  var PRODUCTS = [
+    { name: "머그컵",     cat: "cups",     price: "24,000원", list: "28,000원", disc: 14, badge: "sale", icon: "mug" },
+    { name: "글라스 컵",  cat: "cups",     price: "18,000원", list: null,       disc: 0,  badge: "new",  icon: "glass" },
+    { name: "테이블 램프", cat: "lighting", price: "84,000원", list: "96,000원", disc: 12, badge: null,   icon: "lamp" },
+    { name: "우드 트레이", cat: "trays",    price: "36,000원", list: "42,000원", disc: 14, badge: "sale", icon: "tray" },
+    { name: "쿠션 커버",  cat: "fabric",   price: "29,000원", list: "32,000원", disc: 9,  badge: null,   icon: "cushion" },
+    { name: "리드 디퓨저", cat: "scent",    price: "38,000원", list: null,       disc: 0,  badge: "new",  icon: "diffuser" },
+    { name: "펜 스탠드",  cat: "desk",     price: "19,000원", list: "22,000원", disc: 13, badge: null,   icon: "pen" },
+    { name: "북 스탠드",  cat: "desk",     price: "31,000원", list: "34,000원", disc: 8,  badge: null,   icon: "book" }
+  ];
+
+  // ── Line icons for image-slot placeholders (stroke, warm-neutral) ──
+  var ICONS = {
+    mug:      '<rect x="60" y="55" width="55" height="60" rx="8"/><path d="M115 70 h14 a12 12 0 0 1 0 26 h-14"/>',
+    glass:    '<path d="M65 50 h45 l-6 65 h-33 z"/>',
+    lamp:     '<path d="M60 70 L87 42 L114 70 Z"/><line x1="87" y1="70" x2="87" y2="112"/><line x1="66" y1="112" x2="108" y2="112"/>',
+    tray:     '<rect x="45" y="72" width="85" height="34" rx="17"/><circle cx="52" cy="89" r="5"/><circle cx="123" cy="89" r="5"/>',
+    cushion:  '<rect x="52" y="52" width="70" height="70" rx="14"/><path d="M52 87 h70 M87 52 v70" opacity=".5"/>',
+    diffuser: '<rect x="68" y="72" width="38" height="42" rx="5"/><line x1="80" y1="72" x2="76" y2="40"/><line x1="94" y1="72" x2="98" y2="40"/>',
+    pen:      '<rect x="58" y="72" width="58" height="42" rx="4"/><line x1="72" y1="72" x2="72" y2="45"/><line x1="87" y1="72" x2="87" y2="38"/><line x1="102" y1="72" x2="102" y2="48"/>',
+    book:     '<path d="M55 60 L110 48 L118 100 L63 112 Z"/><line x1="72" y1="64" x2="80" y2="106" opacity=".5"/>',
+    shelf:    '<rect x="50" y="55" width="74" height="60" rx="4"/><line x1="50" y1="85" x2="124" y2="85"/><line x1="87" y1="55" x2="87" y2="115"/>'
+  };
+  function tileSVG(icon, slot, ratio) {
+    return '<svg viewBox="0 0 175 175" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+      + '<rect width="175" height="175" fill="#F4F0E6"/>'
+      + '<g fill="none" stroke="#A8916F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" '
+      + 'transform="translate(0,6)">' + ICONS[icon] + '</g></svg>'
+      + '<span class="slot-tag">' + slot + '</span>';
+  }
+  function badgeHTML(b) {
+    if (b === "sale") return '<span class="badge badge-sale">SALE</span>';
+    if (b === "new") return '<span class="badge badge-new">NEW</span>';
+    if (b === "soldout") return '<span class="badge badge-soldout">SOLD OUT</span>';
+    return "";
+  }
+  function cardHTML(p, i) {
+    return '<a class="product-card" href="#" onclick="switchPage(\'product\'); return false;">'
+      + '<div class="tile">' + tileSVG(p.icon, "product-" + (i + 1)) + '</div>'
+      + '<div class="badge-row">' + badgeHTML(p.badge) + '</div>'
+      + '<p class="p-cats">' + catName(p.cat) + '</p>'
+      + '<p class="p-name">' + p.name + '</p>'
+      + '<div class="p-price-row"><span class="p-price">' + p.price + '</span>'
+      + (p.list ? '<span class="p-list-price">' + p.list + '</span><span class="p-discount">' + p.disc + '%</span>' : '')
+      + '</div></a>';
+  }
+  function catName(slug) { for (var c in CATS) if (CATS[c].slug === slug) return CATS[c].ko; return ""; }
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+
+  // Categories
+  document.getElementById("cat-grid").innerHTML = CATS.map(function (c, i) {
+    return '<a class="cat-card" href="#" onclick="switchPage(\'shop\'); return false;">'
+      + '<div class="tile">' + tileSVG(c.icon, "category-" + c.slug) + '</div><span>' + esc(c.ko) + '</span></a>';
+  }).join("");
+
+  // Grids
+  document.getElementById("grid-new").innerHTML = [PRODUCTS[1], PRODUCTS[5], PRODUCTS[0], PRODUCTS[6]].map(function (p) {
+    return cardHTML(p, PRODUCTS.indexOf(p));
+  }).join("");
+  document.getElementById("grid-best").innerHTML = [PRODUCTS[2], PRODUCTS[3], PRODUCTS[7], PRODUCTS[4]].map(function (p) {
+    return cardHTML(p, PRODUCTS.indexOf(p));
+  }).join("");
+  document.getElementById("grid-shop").innerHTML = PRODUCTS.map(cardHTML).join("");
+
+  // Filter chips
+  var bar = document.getElementById("filter-bar");
+  bar.innerHTML = '<button class="chip" aria-pressed="true" data-cat="all">전체</button>'
+    + CATS.map(function (c) {
+      return '<button class="chip" aria-pressed="false" data-cat="' + c.slug + '">' + esc(c.ko) + '</button>';
+    }).join("");
+  bar.addEventListener("click", function (e) {
+    var b = e.target.closest(".chip"); if (!b) return;
+    bar.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+    b.setAttribute("aria-pressed", "true");
+    var cat = b.getAttribute("data-cat"), n = 0;
+    document.querySelectorAll("#grid-shop .product-card").forEach(function (card, i) {
+      var show = cat === "all" || PRODUCTS[i].cat === cat;
+      card.style.display = show ? "" : "none";
+      if (show) n++;
+    });
+    document.getElementById("shop-count").textContent = n;
+  });
+
+  // Detail gallery
+  document.getElementById("detail-main").innerHTML = tileSVG("mug", "product-1");
+  document.getElementById("detail-thumbs").innerHTML = ["product-1", "product-2", "product-3"].map(function (s, i) {
+    return '<div class="tile" role="button" tabindex="0" aria-current="' + (i === 0) + '" aria-label="상세 이미지 ' + (i + 1) + '">'
+      + tileSVG(i === 0 ? "mug" : i === 1 ? "glass" : "tray", s) + '</div>';
+  }).join("");
+
+  // Related
+  document.getElementById("grid-related").innerHTML = [PRODUCTS[1], PRODUCTS[3], PRODUCTS[5], PRODUCTS[6]].map(function (p) {
+    return cardHTML(p, PRODUCTS.indexOf(p));
+  }).join("");
+
+  // Cart rows
+  var CART = [
+    { p: PRODUCTS[0], qty: 2, slot: "product-1", line: "48,000원" },
+    { p: PRODUCTS[2], qty: 1, slot: "product-3", line: "84,000원" }
+  ];
+  document.getElementById("cart-rows").innerHTML = CART.map(function (c) {
+    return '<div class="cart-row">'
+      + '<div class="tile">' + tileSVG(c.p.icon, c.slot) + '</div>'
+      + '<div><p class="p-name">' + esc(c.p.name) + '</p>'
+      + '<div class="qty"><button aria-label="수량 감소">−</button><span>' + c.qty + '개</span><button aria-label="수량 증가">+</button></div></div>'
+      + '<span class="line-price">' + c.line + '</span></div>';
+  }).join("");
+
+  // ── Page switch (remembers tab per viewer) ──
+  function switchPage(name) {
+    document.querySelectorAll(".page").forEach(function (el) { el.classList.remove("active"); });
+    var target = document.getElementById("page-" + name);
+    if (target) target.classList.add("active");
+    document.querySelectorAll(".page-tabs button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-page") === name));
+    });
+    try { sessionStorage.setItem("scm-preview-tab", name); } catch (e) {}
+    document.querySelector(".store").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.querySelector(".page-tabs").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-page]"); if (b) switchPage(b.getAttribute("data-page"));
+  });
+  try {
+    var saved = sessionStorage.getItem("scm-preview-tab");
+    if (saved && document.getElementById("page-" + saved)) switchPage(saved);
+  } catch (e) {}
+</script>

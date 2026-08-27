@@ -1,0 +1,94 @@
+{
+    "version": "1.0.0",
+    "description": "SuperBify Commerce Minimal 라우트 정의 (Demo D2C store)",
+    "routes": [
+        {
+            "_comment": "=== 홈 ===",
+            "path": "/",
+            "layout": "home",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.home.title"
+            }
+        },
+        {
+            "_comment": "=== Shop 목록 ===",
+            "path": "/shop",
+            "layout": "shop/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.shop.title"
+            }
+        },
+        {
+            "_comment": "=== 카테고리 ===",
+            "path": "/shop/category/:slug",
+            "layout": "shop/category",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.category.title"
+            }
+        },
+        {
+            "_comment": "=== 상품 상세 ===",
+            "path": "/shop/product/:slug",
+            "layout": "shop/product",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.product.title"
+            }
+        },
+        {
+            "_comment": "=== 공지 ===",
+            "path": "/shop/notice",
+            "layout": "shop/notice",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.notice.title"
+            }
+        },
+        {
+            "_comment": "=== 브랜드 스토리 ===",
+            "path": "/shop/story",
+            "layout": "shop/story",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.story.title"
+            }
+        },
+        {
+            "_comment": "=== 장바구니 ===",
+            "path": "/cart",
+            "layout": "cart",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.cart.title"
+            }
+        },
+        {
+            "_comment": "=== 에러 페이지 ===",
+            "path": "/404",
+            "layout": "errors/404",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.errors.not_found_title"
+            }
+        },
+        {
+            "path": "/403",
+            "layout": "errors/403",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.errors.forbidden_title"
+            }
+        },
+        {
+            "path": "/500",
+            "layout": "errors/500",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.errors.server_error_title"
+            }
+        }
+    ]
+}

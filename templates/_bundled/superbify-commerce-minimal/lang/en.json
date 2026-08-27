@@ -1,0 +1,138 @@
+{
+    "superbify": {
+        "base_layout_title": "Still Form",
+        "base_layout_description": "Demo home & lifestyle store — SuperBify Commerce Minimal",
+        "brand": {
+            "name": "Still Form",
+            "tagline": "Quiet objects for everyday life"
+        },
+        "routes": {
+            "home": {
+                "title": "Still Form — Quiet objects for everyday life",
+                "description": "Demo home & lifestyle store."
+            },
+            "shop": {
+                "title": "Shop — Still Form",
+                "description": "All products"
+            },
+            "category": {
+                "title": "Category — Still Form",
+                "description": "Products in this category"
+            },
+            "product": {
+                "title": "Product — Still Form",
+                "description": "Product detail"
+            },
+            "notice": {
+                "title": "Notice — Still Form",
+                "description": "Notices"
+            },
+            "story": {
+                "title": "Story — Still Form",
+                "description": "About the brand"
+            },
+            "cart": {
+                "title": "Cart — Still Form",
+                "description": "Shopping cart"
+            }
+        },
+        "data_source": {
+            "new_arrivals": "New arrivals",
+            "popular_products": "Popular products",
+            "featured_categories": "Featured categories",
+            "categories": "Categories",
+            "products": "Products",
+            "category_detail": "Category detail",
+            "category_products": "Category products",
+            "product_detail": "Product detail",
+            "product_reviews": "Product reviews",
+            "cart": "Cart",
+            "cart_count": "Cart count"
+        },
+        "errors": {
+            "not_found_title": "Page not found",
+            "not_found_description": "The page you requested does not exist or has been moved.",
+            "forbidden_title": "Access denied",
+            "forbidden_description": "You don't have permission to access this page.",
+            "server_error_title": "Something went wrong",
+            "server_error_description": "Please try again in a moment."
+        },
+        "nav": {
+            "shop": "Shop",
+            "story": "Story",
+            "notice": "Notice",
+            "cart": "Cart"
+        },
+        "home": {
+            "hero": {
+                "eyebrow": "DEMO STORE",
+                "headline": "Quiet objects for everyday life",
+                "sub": "A demo home & lifestyle store. A small collection of objects for slow, ordinary days.",
+                "cta_primary": "Browse Shop",
+                "cta_secondary": "Brand Story"
+            },
+            "featured_categories": {
+                "eyebrow": "CATEGORIES",
+                "heading": "Categories"
+            },
+            "new_arrivals": {
+                "eyebrow": "NEW",
+                "heading": "New arrivals"
+            },
+            "popular": {
+                "eyebrow": "POPULAR",
+                "heading": "Popular right now"
+            },
+            "story": {
+                "eyebrow": "BRAND STORY",
+                "heading": "About this demo store",
+                "body": "This template is a minimal commerce UI built on Gnuboard 7 + sirsoft-ecommerce. No fake orders, no fake checkouts — only real data flow and real components."
+            },
+            "promo": {
+                "eyebrow": "DEMO",
+                "title": "Demo notice",
+                "description": "No real purchases. Product data and images are for demonstration only."
+            }
+        },
+        "shop": {
+            "title": "Shop",
+            "empty_title": "No products yet",
+            "empty_message": "Add products in admin and they will appear here."
+        },
+        "category": {
+            "count_label": "{{count}} items",
+            "empty_title": "No products in this category",
+            "empty_message": "Try another category or check back later."
+        },
+        "product": {
+            "short_description_label": "Description",
+            "related_title": "You might also like",
+            "related_eyebrow": "RELATED",
+            "status_soldout": "Sold out",
+            "status_stopped": "Stopped",
+            "status_onsale": "On sale"
+        },
+        "story": {
+            "title": "Brand Story",
+            "eyebrow": "STORY",
+            "body": "Still Form is a fictional brand used by this demo template. No real reviews, orders, or download links are included."
+        },
+        "notice": {
+            "title": "Notice",
+            "eyebrow": "NOTICE",
+            "empty_title": "No notices yet",
+            "empty_message": "This is a demo template. Real notice data can be added from admin."
+        },
+        "cart": {
+            "title": "Cart",
+            "empty_title": "Your cart is empty",
+            "empty_message": "Browse the shop and add something you like.",
+            "cta_shop": "Go to Shop"
+        },
+        "common": {
+            "all": "All",
+            "view_all": "View all",
+            "demo_marker": "demo"
+        }
+    }
+}

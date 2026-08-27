@@ -1,0 +1,108 @@
+{
+    "version": "1.0.0",
+    "layout_name": "cart",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.cart.title",
+        "description": "$t:superbify.routes.cart.description"
+    },
+    "data_sources": [
+        {
+            "id": "cart",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/cart",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "optional",
+            "loading_strategy": "blocking",
+            "fallback": { "data": { "items": [] } }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "cart_page",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "cart_page_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "cart_page_title",
+                                "type": "basic",
+                                "name": "H1",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.75rem",
+                                    "fontWeight": "700",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.cart.title"
+                            },
+                            {
+                                "id": "cart_page_empty",
+                                "type": "composite",
+                                "name": "EmptyState",
+                                "if": "{{!cart?.data?.items || (cart.data.items?.length ?? 0) === 0}}",
+                                "props": {
+                                    "title": "$t:superbify.cart.empty_title",
+                                    "message": "$t:superbify.cart.empty_message",
+                                    "ctaLabel": "$t:superbify.cart.cta_shop",
+                                    "ctaHref": "/shop"
+                                }
+                            },
+                            {
+                                "id": "cart_page_items",
+                                "type": "basic",
+                                "name": "Ul",
+                                "if": "{{cart?.data?.items && (cart.data.items?.length ?? 0) > 0}}",
+                                "style": {
+                                    "listStyle": "none",
+                                    "margin": "0",
+                                    "padding": "0",
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                },
+                                "children": [
+                                    {
+                                        "id": "cart_page_summary_note",
+                                        "type": "basic",
+                                        "name": "Li",
+                                        "style": {
+                                            "padding": "var(--scm-spacing-md, 1rem)",
+                                            "border": "1px solid var(--scm-line, #E4DCCE)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
+                                            "backgroundColor": "var(--scm-paper, #FAF8F3)",
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.875rem",
+                                            "color": "var(--scm-text-body, #4A4643)"
+                                        },
+                                        "text": "{{(cart.data.items?.length ?? 0) + ' item(s) in cart'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

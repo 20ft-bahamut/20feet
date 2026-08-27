@@ -1,0 +1,120 @@
+{
+    "identifier": "superbify-commerce-minimal",
+    "vendor": "superbify",
+    "name": {
+        "ko": "SuperBify Commerce Minimal",
+        "en": "SuperBify Commerce Minimal"
+    },
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": {
+        "ko": "미니멀 D2C 데모 스토어용 사용자 템플릿 (sirsoft-ecommerce 기반)",
+        "en": "Minimal D2C demo store user template (built on sirsoft-ecommerce)"
+    },
+    "type": "user",
+    "locales": ["ko", "en"],
+    "author": {
+        "name": "SuperBify"
+    },
+    "release_date": "2026-08-27",
+    "g7_version": ">=7.0.0",
+    "dependencies": {
+        "modules": {
+            "sirsoft-ecommerce": ">=1.1.0"
+        },
+        "plugins": {}
+    },
+    "assets": {
+        "css": ["dist/css/components.css"],
+        "js": ["dist/js/components.iife.js"],
+        "fonts": [],
+        "images": [
+            "assets/images/logo.svg",
+            "assets/images/hero-fallback.svg",
+            "assets/images/hero-mood-1.svg",
+            "assets/images/hero-mood-2.svg",
+            "assets/images/hero-mood-3.svg",
+            "assets/images/promo-fallback.svg",
+            "assets/images/product-fallback.svg",
+            "assets/images/product-1.svg",
+            "assets/images/product-2.svg",
+            "assets/images/product-3.svg",
+            "assets/images/product-4.svg",
+            "assets/images/product-5.svg",
+            "assets/images/product-6.svg",
+            "assets/images/product-7.svg",
+            "assets/images/product-8.svg",
+            "assets/images/category-fallback.svg",
+            "assets/images/category-cups.svg",
+            "assets/images/category-lighting.svg",
+            "assets/images/category-trays.svg",
+            "assets/images/category-fabric.svg",
+            "assets/images/category-scent.svg",
+            "assets/images/category-furniture.svg",
+            "assets/images/category-desk.svg"
+        ]
+    },
+    "components": {
+        "basic": [
+            "A",
+            "Article",
+            "Aside",
+            "Button",
+            "Div",
+            "Form",
+            "Footer",
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "Header",
+            "Img",
+            "Input",
+            "Label",
+            "Li",
+            "Main",
+            "Nav",
+            "Ol",
+            "Option",
+            "P",
+            "Section",
+            "Select",
+            "Span",
+            "Textarea",
+            "Ul"
+        ],
+        "composite": [
+            "Container",
+            "StoreHeader",
+            "StoreFooter",
+            "HeroBanner",
+            "PromoBanner",
+            "CategoryNav",
+            "CategoryCard",
+            "ProductCard",
+            "ProductGrid",
+            "ProductGallery",
+            "Price",
+            "Badge",
+            "RelatedProducts",
+            "BrandStorySection",
+            "EmptyState"
+        ],
+        "layout": [
+            "Container"
+        ]
+    },
+    "error_config": {
+        "layouts": {
+            "404": "errors/404",
+            "403": "errors/403",
+            "500": "errors/500"
+        }
+    },
+    "features": {
+        "dark_mode": false,
+        "responsive": true,
+        "multi_language": true,
+        "multi_currency": false
+    }
+}

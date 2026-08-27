@@ -1,0 +1,84 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/index",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.shop.title",
+        "description": "$t:superbify.routes.shop.description"
+    },
+    "data_sources": [
+        {
+            "id": "categories",
+            "label_key": "$t:superbify.data_source.categories",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/categories",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "products",
+            "label_key": "$t:superbify.data_source.products",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products",
+            "method": "GET",
+            "params": {
+                "page": "{{query.page ?? 1}}",
+                "per_page": "{{query.per_page ?? 12}}"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "shop_index",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "shop_index_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "grid",
+                            "gridTemplateColumns": "1fr",
+                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_index_categories",
+                                "type": "composite",
+                                "name": "CategoryNav",
+                                "props": {
+                                    "title": "$t:superbify.home.featured_categories.heading",
+                                    "allLabel": "$t:superbify.common.all",
+                                    "items": "{{categories?.data?.data ?? categories?.data ?? []}}"
+                                }
+                            },
+                            {
+                                "id": "shop_index_products",
+                                "type": "composite",
+                                "name": "ProductGrid",
+                                "props": {
+                                    "items": "{{products?.data?.data ?? products?.data ?? []}}",
+                                    "loading": "{{products?.loading ?? false}}",
+                                    "emptyTitle": "$t:superbify.shop.empty_title",
+                                    "emptyMessage": "$t:superbify.shop.empty_message"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,119 @@
+{
+    "slots": {
+        "logo": {
+            "file": "logo.svg",
+            "usage": "Header brand logo",
+            "status": "placeholder"
+        },
+        "hero-fallback": {
+            "file": "hero-fallback.svg",
+            "usage": "Home hero background fallback when no mediaSlot provided",
+            "status": "placeholder"
+        },
+        "hero-mood-1": {
+            "file": "hero-mood-1.svg",
+            "usage": "Home hero primary mood image (warm paper tone)",
+            "status": "placeholder"
+        },
+        "hero-mood-2": {
+            "file": "hero-mood-2.svg",
+            "usage": "Home hero secondary mood image",
+            "status": "placeholder"
+        },
+        "hero-mood-3": {
+            "file": "hero-mood-3.svg",
+            "usage": "Home hero tertiary mood image",
+            "status": "placeholder"
+        },
+        "product-fallback": {
+            "file": "product-fallback.svg",
+            "usage": "Product card / detail image fallback",
+            "status": "placeholder"
+        },
+        "product-1": {
+            "file": "product-1.svg",
+            "usage": "Product 1 (Stoneware Mug) image slot",
+            "status": "placeholder"
+        },
+        "product-2": {
+            "file": "product-2.svg",
+            "usage": "Product 2 (Clear Glass Cup) image slot",
+            "status": "placeholder"
+        },
+        "product-3": {
+            "file": "product-3.svg",
+            "usage": "Product 3 (Table Lamp) image slot",
+            "status": "placeholder"
+        },
+        "product-4": {
+            "file": "product-4.svg",
+            "usage": "Product 4 (Wooden Tray) image slot",
+            "status": "placeholder"
+        },
+        "product-5": {
+            "file": "product-5.svg",
+            "usage": "Product 5 (Linen Cushion Cover) image slot",
+            "status": "placeholder"
+        },
+        "product-6": {
+            "file": "product-6.svg",
+            "usage": "Product 6 (Reed Diffuser) image slot",
+            "status": "placeholder"
+        },
+        "product-7": {
+            "file": "product-7.svg",
+            "usage": "Product 7 (Pen Stand) image slot",
+            "status": "placeholder"
+        },
+        "product-8": {
+            "file": "product-8.svg",
+            "usage": "Product 8 (Book Stand) image slot",
+            "status": "placeholder"
+        },
+        "category-fallback": {
+            "file": "category-fallback.svg",
+            "usage": "Category card fallback",
+            "status": "placeholder"
+        },
+        "category-cups": {
+            "file": "category-cups.svg",
+            "usage": "Cups category image slot",
+            "status": "placeholder"
+        },
+        "category-lighting": {
+            "file": "category-lighting.svg",
+            "usage": "Lighting category image slot",
+            "status": "placeholder"
+        },
+        "category-trays": {
+            "file": "category-trays.svg",
+            "usage": "Trays category image slot",
+            "status": "placeholder"
+        },
+        "category-fabric": {
+            "file": "category-fabric.svg",
+            "usage": "Fabric category image slot",
+            "status": "placeholder"
+        },
+        "category-scent": {
+            "file": "category-scent.svg",
+            "usage": "Scent category image slot",
+            "status": "placeholder"
+        },
+        "category-furniture": {
+            "file": "category-furniture.svg",
+            "usage": "Furniture (소형 가구) category image slot",
+            "status": "placeholder"
+        },
+        "category-desk": {
+            "file": "category-desk.svg",
+            "usage": "Desk accessories (데스크 액세서리) category image slot",
+            "status": "placeholder"
+        },
+        "promo-fallback": {
+            "file": "promo-fallback.svg",
+            "usage": "PromoBanner background fallback",
+            "status": "placeholder"
+        }
+    }
+}

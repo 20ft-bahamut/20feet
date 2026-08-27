@@ -1,0 +1,99 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/category",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.category.title",
+        "description": "$t:superbify.routes.category.description"
+    },
+    "data_sources": [
+        {
+            "id": "category_detail",
+            "label_key": "$t:superbify.data_source.category_detail",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/categories/{{route.slug}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "blocking"
+        },
+        {
+            "id": "category_products",
+            "label_key": "$t:superbify.data_source.category_products",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products",
+            "method": "GET",
+            "params": {
+                "category_slug": "{{route.slug}}",
+                "page": "{{query.page ?? 1}}",
+                "per_page": "{{query.per_page ?? 12}}"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "shop_category",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "shop_category_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_category_title",
+                                "type": "basic",
+                                "name": "H1",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.75rem",
+                                    "fontWeight": "700",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "{{category_detail?.data?.name_localized ?? category_detail?.data?.name ?? route.slug}}"
+                            },
+                            {
+                                "id": "shop_category_count",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.875rem",
+                                    "color": "var(--scm-text-muted, #8A837B)"
+                                },
+                                "text": "{{((category_products?.data?.data ?? category_products?.data ?? []).length) + ' items'}}"
+                            },
+                            {
+                                "id": "shop_category_grid",
+                                "type": "composite",
+                                "name": "ProductGrid",
+                                "props": {
+                                    "items": "{{category_products?.data?.data ?? category_products?.data ?? []}}",
+                                    "loading": "{{category_products?.loading ?? false}}",
+                                    "emptyTitle": "$t:superbify.category.empty_title",
+                                    "emptyMessage": "$t:superbify.category.empty_message"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

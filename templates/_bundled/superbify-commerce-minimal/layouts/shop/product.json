@@ -1,0 +1,166 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/product",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.product.title",
+        "description": "$t:superbify.routes.product.description"
+    },
+    "data_sources": [
+        {
+            "id": "product_detail",
+            "label_key": "$t:superbify.data_source.product_detail",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "blocking"
+        },
+        {
+            "id": "product_reviews",
+            "label_key": "$t:superbify.data_source.product_reviews",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}/reviews",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "related_products",
+            "label_key": "$t:superbify.data_source.products",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products",
+            "method": "GET",
+            "params": {
+                "category_slug": "{{product_detail?.data?.categories?.[0]?.path?.[0]?.slug ?? product_detail?.data?.categories?.[0]?.slug ?? ''}}",
+                "per_page": 4
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "shop_product",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "shop_product_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "grid",
+                            "gridTemplateColumns": "1fr",
+                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_product_gallery",
+                                "type": "composite",
+                                "name": "ProductGallery",
+                                "props": {
+                                    "images": "{{product_detail?.data?.images ?? []}}",
+                                    "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
+                                    "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? 'product-1'}}"
+                                }
+                            },
+                            {
+                                "id": "shop_product_summary",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                },
+                                "children": [
+                                    {
+                                        "id": "shop_product_title",
+                                        "type": "basic",
+                                        "name": "H1",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-display, system-ui)",
+                                            "fontSize": "1.5rem",
+                                            "fontWeight": "700",
+                                            "color": "var(--scm-text-primary, #26221E)",
+                                            "margin": "0"
+                                        },
+                                        "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
+                                    },
+                                    {
+                                        "id": "shop_product_price",
+                                        "type": "composite",
+                                        "name": "Price",
+                                        "props": {
+                                            "sellingPrice": "{{product_detail?.data?.selling_price}}",
+                                            "listPrice": "{{product_detail?.data?.list_price}}",
+                                            "sellingPriceFormatted": "{{product_detail?.data?.selling_price_formatted}}",
+                                            "listPriceFormatted": "{{product_detail?.data?.list_price_formatted}}",
+                                            "discountRate": "{{product_detail?.data?.discount_rate}}"
+                                        }
+                                    },
+                                    {
+                                        "id": "shop_product_status",
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.875rem",
+                                            "color": "var(--scm-text-muted, #8A837B)"
+                                        },
+                                        "text": "{{product_detail?.data?.sales_status_label ?? ''}}"
+                                    },
+                                    {
+                                        "id": "shop_product_description",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.9375rem",
+                                            "lineHeight": "1.7",
+                                            "color": "var(--scm-text-body, #4A4643)",
+                                            "margin": "0"
+                                        },
+                                        "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "shop_product_related",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_product_related_component",
+                                "type": "composite",
+                                "name": "RelatedProducts",
+                                "props": {
+                                    "title": "$t:superbify.product.related_title",
+                                    "eyebrow": "$t:superbify.product.related_eyebrow",
+                                    "items": "{{related_products?.data?.data ?? related_products?.data ?? []}}",
+                                    "limit": 4
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

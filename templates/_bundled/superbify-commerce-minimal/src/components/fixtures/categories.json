@@ -1,0 +1,74 @@
+{
+    "categories": [
+        {
+            "id": "fix-c-001",
+            "name": "Cups",
+            "name_localized": "컵",
+            "slug": "cups",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 2,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-002",
+            "name": "Lighting",
+            "name_localized": "조명",
+            "slug": "lighting",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 1,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-003",
+            "name": "Trays",
+            "name_localized": "트레이",
+            "slug": "trays",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 1,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-004",
+            "name": "Fabric",
+            "name_localized": "패브릭",
+            "slug": "fabric",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 1,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-005",
+            "name": "Scent",
+            "name_localized": "향",
+            "slug": "scent",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 1,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-006",
+            "name": "Furniture",
+            "name_localized": "소형 가구",
+            "slug": "furniture",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 0,
+            "isFixture": true
+        },
+        {
+            "id": "fix-c-007",
+            "name": "Desk",
+            "name_localized": "데스크 액세서리",
+            "slug": "desk",
+            "depth": 1,
+            "parent_id": null,
+            "products_count": 2,
+            "isFixture": true
+        }
+    ]
+}
