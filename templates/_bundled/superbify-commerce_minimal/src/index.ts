@@ -112,6 +112,9 @@ import { RelatedProducts } from './components/RelatedProducts';
 import { StoreFooter } from './components/StoreFooter';
 import { StoreHeader } from './components/StoreHeader';
 
+// Custom action handlers (sirsoft-basic 패턴 단순화 포크)
+import { handlerMap } from './handlers/storageHandlers';
+
 const registry = (window as any).G7Core?.templateEngine?.ComponentRegistry?.getInstance?.();
 if (registry) {
     // Basic wrappers
@@ -164,4 +167,41 @@ if (registry) {
     logger.log('Registered SuperBify Commerce Minimal components');
 } else {
     logger.warn('ComponentRegistry not available — skipping auto-registration');
+}
+
+// Custom handler registration (initCartKey 등)
+// G7Core 가 로드되기 전 모듈이 평가될 수 있으므로, window.load 이후 폴링으로
+// ActionDispatcher 가 잡힐 때마다 핸들러를 등록한다. sirsoft-basic 패턴 단순화 포크.
+if (typeof window !== 'undefined') {
+    (window as any).G7TemplateHandlers = handlerMap;
+
+    const registerHandlers = () => {
+        const actionDispatcher = (window as any).G7Core?.getActionDispatcher?.();
+        if (actionDispatcher && typeof actionDispatcher.registerHandler === 'function') {
+            Object.entries(handlerMap).forEach(([name, handler]) => {
+                actionDispatcher.registerHandler(name, handler);
+            });
+            logger.log(`Registered ${Object.keys(handlerMap).length} custom handler(s):`, Object.keys(handlerMap));
+            return true;
+        }
+        return false;
+    };
+
+    let retries = 0;
+    const maxRetries = 50;
+    const tryRegister = () => {
+        if (registerHandlers()) return;
+        retries += 1;
+        if (retries <= maxRetries) {
+            setTimeout(tryRegister, 100);
+        } else {
+            logger.error('ActionDispatcher not available after maximum retries');
+        }
+    };
+
+    if (document.readyState === 'complete') {
+        tryRegister();
+    } else {
+        window.addEventListener('load', tryRegister);
+    }
 }

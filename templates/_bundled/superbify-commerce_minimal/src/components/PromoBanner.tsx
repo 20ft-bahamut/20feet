@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, Span } from './basic';
+import { resolveSlotImage } from './imageSlots';
 
 export interface PromoBannerProps {
     eyebrow?: string;
@@ -20,6 +21,7 @@ export function PromoBanner({
     className,
     mediaSlot = 'promo-fallback',
 }: PromoBannerProps): React.ReactElement {
+    const mediaSrc = resolveSlotImage(mediaSlot);
     return (
         <Div
             className={className}
@@ -46,7 +48,7 @@ export function PromoBanner({
                 }}
             >
                 <img
-                    src={`/assets/images/${mediaSlot}.svg`}
+                    src={mediaSrc}
                     alt=""
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />

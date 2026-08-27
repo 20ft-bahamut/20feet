@@ -15,7 +15,7 @@
             "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}",
             "method": "GET",
             "auto_fetch": true,
-            "loading_strategy": "blocking"
+            "loading_strategy": "progressive"
         },
         {
             "id": "product_reviews",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, H1, P, Span } from './basic';
+import { resolveSlotImage } from './imageSlots';
 
 export interface HeroBannerProps {
     eyebrow?: string;
@@ -25,6 +26,7 @@ export function HeroBanner({
     className,
     mediaSlot = 'hero-mood-1',
 }: HeroBannerProps): React.ReactElement {
+    const mediaSrc = resolveSlotImage(mediaSlot);
     return (
         <Div
             className={className}
@@ -51,7 +53,7 @@ export function HeroBanner({
                 }}
             >
                 <img
-                    src={`/assets/images/${mediaSlot}.svg`}
+                    src={mediaSrc}
                     alt=""
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />

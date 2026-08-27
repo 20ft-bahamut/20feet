@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Div, Img, Ul, Li } from './basic';
+import { resolveSlotImage } from './imageSlots';
 
 export interface ProductGalleryImage {
     id?: number | string;
@@ -18,22 +19,16 @@ export interface ProductGalleryProps {
 }
 
 // Image source resolution strategy:
-//  - Use a non-http URL (i.e. an uploaded relative path) when the API returns one.
-//  - When the API returns an http(s) URL, ignore it and resolve to a local
-//    asset slot to comply with the NoExternalUrls rule.
-//  - When the API returns no URL at all, resolve to the caller's fallbackSlot
-//    or to a numbered detail slot.
+//  - Server-provided relative URL: keep it (real uploaded asset).
+//  - External http(s) URL: ignored (NoExternalUrls rule).
+//  - No URL at all: resolve to the bundled slot data-URI — never 404.
 
 function pickSrc(img: ProductGalleryImage, idx: number, fallbackSlot?: string): { src: string; isFallback: boolean } {
-    if (img.url && !/^https?:\/\//.test(img.url)) {
+    if (img.url && img.url.startsWith('/') && /^https?:\/\//.test(img.url) === false) {
         return { src: img.url, isFallback: false };
     }
-    if (img.url && /^https?:\/\//.test(img.url)) {
-        const slot = img.slot ?? fallbackSlot ?? `detail-${idx + 1}`;
-        return { src: `/assets/images/${slot}.svg`, isFallback: true };
-    }
     const slot = img.slot ?? fallbackSlot ?? (idx === 0 ? 'product-1' : `detail-${idx + 1}`);
-    return { src: `/assets/images/${slot}.svg`, isFallback: true };
+    return { src: resolveSlotImage(slot), isFallback: true };
 }
 
 export function ProductGallery({ images, productName, className, fallbackSlot }: ProductGalleryProps): React.ReactElement {

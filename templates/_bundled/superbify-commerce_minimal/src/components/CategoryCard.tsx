@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, Img, Span } from './basic';
+import { resolveSlotImage } from './imageSlots';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryCardProps {
@@ -8,23 +9,14 @@ export interface CategoryCardProps {
     fallbackSlot?: string;
 }
 
-// Local category-card assets live under /assets/images/. The component
-// resolves to `category-{slug}.svg` and falls back to the caller-provided
-// `fallbackSlot` when no slug-specific asset exists.
-
-const CATEGORY_FALLBACK = 'category-fallback.svg';
-
 function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: string; isFallback: boolean } {
-    const localSlot = fallbackSlot ?? `category-${item.slug}`;
     const imageUrl = (item as { image_url?: string | null }).image_url;
-    if (imageUrl && /^https?:\/\//.test(imageUrl) === false && imageUrl.startsWith('/')) {
+    // Server-provided relative URL: keep it.
+    if (imageUrl && imageUrl.startsWith('/') && /^https?:\/\//.test(imageUrl) === false) {
         return { src: imageUrl, isFallback: false };
     }
-    if (imageUrl && /^https?:\/\//.test(imageUrl)) {
-        // External URL detected — prefer local fallback per NoExternalUrls rule.
-        return { src: `/assets/images/${localSlot}.svg`, isFallback: true };
-    }
-    return { src: `/assets/images/${localSlot}.svg`, isFallback: true };
+    // External http(s) or no URL: use bundled slot data-URI (never 404).
+    return { src: resolveSlotImage(fallbackSlot), isFallback: true };
 }
 
 export function CategoryCard({ item, className, fallbackSlot }: CategoryCardProps): React.ReactElement | null {
@@ -34,17 +26,12 @@ export function CategoryCard({ item, className, fallbackSlot }: CategoryCardProp
     const initial = resolveImageSrc(item, slot);
     const [src, setSrc] = React.useState(initial.src);
 
-    // If the local asset is missing/broken, fall back to category-fallback.svg
-    // (the same external-URL/local-slot fallback pattern ProductCard uses).
-    const onError = React.useCallback(
-        (e: React.SyntheticEvent<HTMLImageElement>) => {
-            const fallback = `/assets/images/${CATEGORY_FALLBACK}`;
-            if (e.currentTarget.src !== fallback) {
-                setSrc(fallback);
-            }
-        },
-        []
-    );
+    // If the asset somehow fails, swap to the kind default. resolveSlotImage
+    // returns data URIs so this branch is rare — but keep it as a safety net.
+    const onError = React.useCallback(() => {
+        const fallback = resolveSlotImage('category-fallback');
+        setSrc((prev) => (prev === fallback ? prev : fallback));
+    }, []);
 
     return (
         <A

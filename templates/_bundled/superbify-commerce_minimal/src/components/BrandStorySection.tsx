@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, H2, P, Span } from './basic';
+import { resolveSlotImage } from './imageSlots';
 
 export interface BrandStorySectionProps {
     eyebrow?: string;
@@ -21,6 +22,7 @@ export function BrandStorySection({
     className,
     mediaSlot = 'hero-mood-1',
 }: BrandStorySectionProps): React.ReactElement {
+    const mediaSrc = resolveSlotImage(mediaSlot);
     return (
         <Div
             className={className}
@@ -43,7 +45,7 @@ export function BrandStorySection({
                 aria-hidden
             >
                 <img
-                    src={`/assets/images/${mediaSlot}.svg`}
+                    src={mediaSrc}
                     alt=""
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />

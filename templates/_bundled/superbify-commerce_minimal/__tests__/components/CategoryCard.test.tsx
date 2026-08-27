@@ -30,13 +30,14 @@ describe('CategoryCard', () => {
         expect(container.firstChild).toBeNull();
     });
 
-    it('falls back to category-fallback.svg when the local image errors', () => {
+    it('falls back to a category-fallback data URI when the local image errors', () => {
         const { container } = render(<CategoryCard item={cat} />);
         const img = container.querySelector('img');
         expect(img).not.toBeNull();
         fireEvent.error(img!);
-        // After onError, the <img> src should be the category-fallback path.
+        // After onError, the <img> src should still be a data URI (category-fallback).
         const imgAfter = container.querySelector('img');
-        expect(imgAfter?.getAttribute('src')).toBe('/assets/images/category-fallback.svg');
+        const src = imgAfter?.getAttribute('src') ?? '';
+        expect(src.startsWith('data:image/svg+xml')).toBe(true);
     });
 });

@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, Header, Img, Li, Nav, Span, Ul } from './basic';
+import { resolveSlotImage } from './imageSlots';
 
 export interface StoreHeaderProps {
     brandName?: string;
@@ -28,6 +29,7 @@ export function StoreHeader({
     cartCount,
     className,
 }: StoreHeaderProps): React.ReactElement {
+    const logoSrc = resolveSlotImage('logo');
     return (
         <Header
             className={className}
@@ -64,7 +66,7 @@ export function StoreHeader({
                     }}
                 >
                     <Img
-                        src="/assets/images/logo.svg"
+                        src={logoSrc}
                         alt=""
                         width={32}
                         height={32}

@@ -29,10 +29,11 @@ describe('ProductCard', () => {
         expect(card).toHaveTextContent('24,000원');
     });
 
-    it('renders fallback image when no thumbnail_url is present', () => {
+    it('renders fallback image (data URI) when no thumbnail_url is present', () => {
         render(<ProductCard item={baseItem} />);
         const img = screen.getByRole('img', { hidden: true });
-        expect(img).toHaveAttribute('src', '/assets/images/product-1.svg');
+        const src = img.getAttribute('src') ?? '';
+        expect(src.startsWith('data:image/svg+xml')).toBe(true);
         expect(img).toHaveAttribute('data-fallback', 'true');
     });
 

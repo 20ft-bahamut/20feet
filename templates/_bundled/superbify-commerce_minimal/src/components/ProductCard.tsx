@@ -2,6 +2,7 @@ import React from 'react';
 import { A, Div, Span, Img } from './basic';
 import { Price } from './Price';
 import { Badge } from './Badge';
+import { resolveSlotImage } from './imageSlots';
 import type { ProductItem } from '../types/template';
 
 export interface ProductCardProps {
@@ -10,8 +11,6 @@ export interface ProductCardProps {
     href?: string;
     className?: string;
 }
-
-const PRODUCT_FALLBACK = 'product-fallback.svg';
 
 function isStopStatus(sales_status?: string | null): boolean {
     if (!sales_status) return false;
@@ -25,17 +24,19 @@ function isOnSale(sales_status?: string | null): boolean {
 }
 
 function resolveThumbnail(item: ProductItem): { src: string; isFallback: boolean } {
-    if (item.thumbnail_url && /^https?:\/\//.test(item.thumbnail_url) === false && item.thumbnail_url.startsWith('/')) {
+    // Server-provided relative URL: keep it (real uploaded asset).
+    if (item.thumbnail_url && item.thumbnail_url.startsWith('/') && /^https?:\/\//.test(item.thumbnail_url) === false) {
         return { src: item.thumbnail_url, isFallback: false };
     }
+    // External http(s): reject per NoExternalUrls; use bundled slot data-URI instead.
     if (item.thumbnail_url && /^https?:\/\//.test(item.thumbnail_url)) {
-        // External URL detected — prefer local fallback per NoExternalUrls rule.
-        return { src: `/assets/images/${item.thumbnail_slot ? `${item.thumbnail_slot}.svg` : PRODUCT_FALLBACK}`, isFallback: true };
+        const slot = item.thumbnail_slot ?? 'product';
+        return { src: resolveSlotImage(slot), isFallback: true };
     }
     if (item.thumbnail_slot) {
-        return { src: `/assets/images/${item.thumbnail_slot}.svg`, isFallback: true };
+        return { src: resolveSlotImage(item.thumbnail_slot), isFallback: true };
     }
-    return { src: `/assets/images/${PRODUCT_FALLBACK}`, isFallback: true };
+    return { src: resolveSlotImage('product-fallback'), isFallback: true };
 }
 
 export function ProductCard({ item, href, className }: ProductCardProps): React.ReactElement | null {
