@@ -8,10 +8,10 @@
 
 import './styles/design-tokens.css';
 
-const logger = ((window as any).G7Core?.createLogger?.('Template:superbify-commerce-minimal')) ?? {
-    log: (...args: unknown[]) => console.log('[Template:superbify-commerce-minimal]', ...args),
-    warn: (...args: unknown[]) => console.warn('[Template:superbify-commerce-minimal]', ...args),
-    error: (...args: unknown[]) => console.error('[Template:superbify-commerce-minimal]', ...args),
+const logger = ((window as any).G7Core?.createLogger?.('Template:superbify-commerce_minimal')) ?? {
+    log: (...args: unknown[]) => console.log('[Template:superbify-commerce_minimal]', ...args),
+    warn: (...args: unknown[]) => console.warn('[Template:superbify-commerce_minimal]', ...args),
+    error: (...args: unknown[]) => console.error('[Template:superbify-commerce_minimal]', ...args),
 };
 
 // Basic HTML wrappers
