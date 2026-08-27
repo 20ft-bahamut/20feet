@@ -5,16 +5,15 @@ namespace Modules\Twentyft\Content\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Modules\Twentyft\Content\Enums\PortfolioStatus;
-use Modules\Twentyft\Content\Enums\PortfolioType;
+use Modules\Sirsoft\Board\Enums\PostStatus;
+use Modules\Sirsoft\Board\Models\Attachment;
+use Modules\Sirsoft\Board\Models\Board;
+use Modules\Sirsoft\Board\Models\Post;
 use Modules\Twentyft\Content\Enums\Visibility;
 use Modules\Twentyft\Content\Http\Requests\PortfolioListRequest;
 use Modules\Twentyft\Content\Http\Resources\PortfolioDetailResource;
 use Modules\Twentyft\Content\Http\Resources\PortfolioListResource;
 use Modules\Twentyft\Content\Services\PostMetaService;
-use Modules\Sirsoft\Board\Models\Attachment;
-use Modules\Sirsoft\Board\Models\Board;
-use Modules\Sirsoft\Board\Models\Post;
 
 /**
  * Portfolio 공개 API
@@ -25,8 +24,7 @@ class PortfolioController extends Controller
 
     public function __construct(
         private readonly PostMetaService $metaService
-    ) {
-    }
+    ) {}
 
     /**
      * Portfolio 목록
@@ -41,17 +39,21 @@ class PortfolioController extends Controller
         $page = $request->integer('page', 1);
         $perPage = $request->integer('per_page', 12);
 
-        $query = Post::where('board_id', $board->id)
-            ->where('status', '!=', 'trash')
-            ->orderByDesc('created_at');
+        // 공개 목록은 published 상태만. (blinded/deleted 노출 방지)
+        $posts = Post::where('board_id', $board->id)
+            ->where('status', PostStatus::Published->value)
+            ->with('attachments')
+            ->orderByDesc('created_at')
+            ->get();
 
-        $posts = $query->get();
+        // 메타를 게시글 수와 무관하게 1회 조회 (N+1 방지)
+        $metaByPost = $this->metaService->allByBoard($board->id, 'portfolio');
 
         $items = [];
         foreach ($posts as $post) {
-            $meta = $this->metaService->portfolioMeta($board->id, $post->id);
+            $meta = PostMetaService::portfolioMetaFromArray($metaByPost[$post->id] ?? []);
 
-            if (($meta['visibility'] ?? 'PRIVATE') !== Visibility::PUBLIC->value) {
+            if (($meta['visibility'] ?? Visibility::PRIVATE->value) !== Visibility::PUBLIC->value) {
                 continue;
             }
 
@@ -77,6 +79,7 @@ class PortfolioController extends Controller
             if ($orderA !== $orderB) {
                 return $orderA <=> $orderB;
             }
+
             return strtotime($b['created_at'] ?? 'now') <=> strtotime($a['created_at'] ?? 'now');
         });
 
@@ -114,17 +117,20 @@ class PortfolioController extends Controller
         }
 
         $posts = Post::where('board_id', $board->id)
-            ->where('status', '!=', 'trash')
+            ->where('status', PostStatus::Published->value)
+            ->with('attachments')
             ->get();
 
-        foreach ($posts as $post) {
-            $meta = $this->metaService->portfolioMeta($board->id, $post->id);
+        $metaByPost = $this->metaService->allByBoard($board->id, 'portfolio');
 
-            if (($meta['visibility'] ?? 'PRIVATE') !== Visibility::PUBLIC->value) {
+        foreach ($posts as $post) {
+            $meta = PostMetaService::portfolioMetaFromArray($metaByPost[$post->id] ?? []);
+
+            if (($meta['visibility'] ?? Visibility::PRIVATE->value) !== Visibility::PUBLIC->value) {
                 continue;
             }
 
-            if (($meta['slug'] ?? '') !== $slug) {
+            if (($meta['slug'] ?? '') !== $slug && $this->slugFromTitle($post) !== $slug) {
                 continue;
             }
 
@@ -146,19 +152,14 @@ class PortfolioController extends Controller
 
     /**
      * 목록용 아이템 매핑
+     *
+     * @return array<string, mixed>
      */
     private function mapListItem(Post $post, array $meta): array
     {
-        $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
-        if (! $coverAttachmentId) {
-            $coverAttachmentId = $post->attachments()->first()?->id ?? $post->thumbnailAttachment?->id;
-        }
-
-        $firstAttachment = $post->attachments()->first();
-
         return [
             'public_id' => $this->publicId($post),
-            'slug' => $meta['slug'] ?? $this->slugFromTitle($post->title),
+            'slug' => $meta['slug'] ?? $this->slugFromTitle($post),
             'title' => $post->title,
             'summary' => $meta['summary'],
             'year' => $meta['year'],
@@ -167,28 +168,20 @@ class PortfolioController extends Controller
             'is_featured' => (bool) $meta['is_featured'],
             '_sort_order' => (int) ($meta['sort_order'] ?? 0),
             'created_at' => $post->created_at?->toIso8601String(),
-            'cover_image_url' => $this->attachmentUrl($coverAttachmentId),
-            '_debug_cover_attachment_id' => $coverAttachmentId,
-            '_debug_first_attachment_id' => $firstAttachment?->id,
-            '_debug_first_attachment_post_id' => $firstAttachment?->post_id,
-            '_debug_post_id' => $post->id,
-            '_debug_attachments_count' => $post->attachments()->count(),
+            'cover_image_url' => $this->coverImageUrl($post, $meta),
         ];
     }
 
     /**
      * 상세용 아이템 매핑
+     *
+     * @return array<string, mixed>
      */
     private function mapDetailItem(Post $post, array $meta): array
     {
-        $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
-        if (! $coverAttachmentId) {
-            $coverAttachmentId = $post->attachments()->first()?->id ?? $post->thumbnailAttachment?->id;
-        }
-
         return [
             'public_id' => $this->publicId($post),
-            'slug' => $meta['slug'] ?? $this->slugFromTitle($post->title),
+            'slug' => $meta['slug'] ?? $this->slugFromTitle($post),
             'title' => $post->title,
             'summary' => $meta['summary'],
             'description' => $post->content,
@@ -201,9 +194,34 @@ class PortfolioController extends Controller
             'tech_stack' => $meta['tech_stack'],
             'related_url' => $meta['related_url'],
             'github_url' => $meta['github_url'],
-            'cover_image_url' => $this->attachmentUrl($coverAttachmentId),
-            'gallery_image_urls' => $this->galleryUrls($meta['gallery_attachment_ids'] ?? []),
+            'cover_image_url' => $this->coverImageUrl($post, $meta),
+            'gallery_image_urls' => $this->galleryUrls($meta['gallery_attachment_ids'] ?? [], $post),
         ];
+    }
+
+    /**
+     * 커버 이미지 URL — 메타 지정 attachment 우선, 없으면 게시글 첨부 중 첫 이미지.
+     * 이미지가 아닌 첨부파일(preview_url 미제공)이 <img> 를 깨지 않도록 is_image 로 필터합니다.
+     */
+    private function coverImageUrl(Post $post, array $meta): ?string
+    {
+        $attachment = null;
+
+        $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
+        if ($coverAttachmentId) {
+            $attachment = $post->attachments->firstWhere('id', (int) $coverAttachmentId)
+                ?? Attachment::find((int) $coverAttachmentId);
+        }
+
+        if (! $attachment) {
+            $attachment = $post->attachments->first(fn (Attachment $a): bool => $a->is_image);
+        }
+
+        if (! $attachment || ! $attachment->is_image) {
+            return null;
+        }
+
+        return $attachment->preview_url ?? $attachment->download_url;
     }
 
     /**
@@ -215,43 +233,42 @@ class PortfolioController extends Controller
     }
 
     /**
-     * 제목에서 slug fallback 생성
+     * 제목에서 slug fallback 생성 (유니코드 허용 — 한글 제목도 slug 유지)
+     *
+     * 빈 값인 경우 post id 접미사로 고유성을 확보합니다.
      */
-    private function slugFromTitle(string $title): string
+    private function slugFromTitle(Post $post): string
     {
-        $slug = preg_replace('/[^a-z0-9-]+/i', '-', strtolower(trim($title)));
-        $slug = trim($slug, '-');
+        $slug = preg_replace('/[^\p{L}\p{N}-]+/u', '-', mb_strtolower(trim((string) $post->title)));
+        $slug = trim((string) $slug, '-');
 
-        return $slug === '' ? 'untitled' : $slug;
-    }
-
-    /**
-     * 첨부파일 URL 조회
-     */
-    private function attachmentUrl(?int $attachmentId): ?string
-    {
-        if (! $attachmentId) {
-            return null;
-        }
-
-        $attachment = Attachment::find($attachmentId);
-        if (! $attachment) {
-            return null;
-        }
-
-        return $attachment->preview_url ?? $attachment->download_url;
+        return $slug === '' ? 'post-'.$post->id : $slug;
     }
 
     /**
      * 갤러리 URL 목록 조회
      */
-    private function galleryUrls(array $attachmentIds): array
+    private function galleryUrls(array $attachmentIds, Post $post): array
     {
+        // 메타 미지정 시 게시글의 이미지 첨부 전체를 순서대로 사용합니다.
+        if (empty($attachmentIds)) {
+            return $post->attachments
+                ->filter(fn (Attachment $a): bool => $a->is_image)
+                ->sortBy('order')
+                ->map(fn (Attachment $a): ?string => $a->preview_url ?? $a->download_url)
+                ->filter()
+                ->values()
+                ->all();
+        }
+
         $urls = [];
         foreach ($attachmentIds as $id) {
-            $url = $this->attachmentUrl((int) $id);
-            if ($url) {
-                $urls[] = $url;
+            $attachment = Attachment::find((int) $id);
+            if ($attachment) {
+                $url = $attachment->preview_url ?? $attachment->download_url;
+                if ($url) {
+                    $urls[] = $url;
+                }
             }
         }
 

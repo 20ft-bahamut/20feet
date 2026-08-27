@@ -21,8 +21,7 @@ class InquiryAdminController extends Controller
 
     public function __construct(
         private readonly PostMetaService $metaService
-    ) {
-    }
+    ) {}
 
     /**
      * 프로젝트 문의 목록 (관리자용)
@@ -38,7 +37,7 @@ class InquiryAdminController extends Controller
         $perPage = $request->integer('per_page', 20);
 
         $query = Post::where('board_id', $board->id)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->orderByDesc('created_at');
 
         $posts = $query->get();
@@ -58,8 +57,7 @@ class InquiryAdminController extends Controller
             if ($request->filled('keyword')) {
                 $keyword = mb_strtolower($request->input('keyword'));
                 $haystack = mb_strtolower(implode(' ', [
-                    $post->title['ko'] ?? '',
-                    $post->title['en'] ?? '',
+                    (string) $post->title,
                     $meta['name'] ?? '',
                     $meta['email'] ?? '',
                     $meta['company'] ?? '',
@@ -108,7 +106,7 @@ class InquiryAdminController extends Controller
 
         $post = Post::where('board_id', $board->id)
             ->where('id', $postId)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->first();
 
         if (! $post) {

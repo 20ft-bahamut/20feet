@@ -43,7 +43,8 @@
             "basic_info": "Basic Info",
             "meta_info": "Meta Info",
             "project_details": "Project Details",
-            "product_details": "Product Details"
+            "product_details": "Product Details",
+            "attachments": "Project Images"
         },
         "fields": {
             "title": "Title",
@@ -80,11 +81,15 @@
             "project_type": "Project Type",
             "budget_range": "Budget Range",
             "internal_status": "Status",
-            "created_at": "Created"
+            "created_at": "Created",
+            "cover_image": "Cover Image"
         },
         "hints": {
             "attachment_id": "Find the attachment ID in file management",
-            "comma_separated": "Separate values with commas"
+            "comma_separated": "Separate values with commas",
+            "cover_image": "Choose the image to use as the cover",
+            "attachments_desc": "Upload images. If no cover is selected, the first image is used.",
+            "cover_none": "None (use first image)"
         },
         "status": {
             "update": "Update Status"

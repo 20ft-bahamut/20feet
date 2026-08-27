@@ -43,6 +43,23 @@ class PostMetaRepository implements PostMetaRepositoryInterface
     }
 
     /**
+     * 게시판 단위로 모든 게시글의 메타를 한 번에 조회합니다.
+     */
+    public function getAllByBoard(int $boardId, string $domain): array
+    {
+        $rows = PostMeta::where('board_id', $boardId)
+            ->where('domain', $domain)
+            ->get(['post_id', 'key', 'value']);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row->post_id][$row->key] = $row->value;
+        }
+
+        return $result;
+    }
+
+    /**
      * 메타 저장/갱신
      */
     public function set(int $boardId, int $postId, string $domain, string $key, mixed $value): void

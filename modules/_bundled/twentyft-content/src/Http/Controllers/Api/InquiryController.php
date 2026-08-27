@@ -5,12 +5,12 @@ namespace Modules\Twentyft\Content\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Modules\Sirsoft\Board\Models\Board;
+use Modules\Sirsoft\Board\Services\PostService;
 use Modules\Twentyft\Content\Enums\InquiryProjectType;
 use Modules\Twentyft\Content\Enums\InquiryStatus;
 use Modules\Twentyft\Content\Http\Requests\InquiryStoreRequest;
 use Modules\Twentyft\Content\Services\PostMetaService;
-use Modules\Sirsoft\Board\Models\Board;
-use Modules\Sirsoft\Board\Models\Post;
 
 /**
  * Project Inquiry API
@@ -24,8 +24,7 @@ class InquiryController extends Controller
 
     public function __construct(
         private readonly PostMetaService $metaService
-    ) {
-    }
+    ) {}
 
     /**
      * 문의 등록
@@ -45,16 +44,18 @@ class InquiryController extends Controller
 
         try {
             $post = DB::transaction(function () use ($board, $title, $validated, $request) {
-                $post = Post::create([
-                    'board_id' => $board->id,
-                    'title' => $title,
-                    'content' => $validated['description'],
-                    'content_mode' => 'text',
-                    'author_name' => $validated['name'],
-                    'ip_address' => $request->ip(),
-                    'is_secret' => true,
-                    'status' => 'published',
-                ]);
+                // PostService 경유 — before/after_create 훅, 알림(notify_admin_on_post),
+                // 캐시 무효화가 정상 발화되도록 보드의 공식 쓰기 경로를 사용합니다.
+                $post = app(PostService::class)
+                    ->createPost(self::BOARD_SLUG, [
+                        'title' => $title,
+                        'content' => $validated['description'],
+                        'content_mode' => 'text',
+                        'author_name' => $validated['name'],
+                        'ip_address' => $request->ip(),
+                        'is_secret' => true,
+                        'status' => 'published',
+                    ]);
 
                 $this->storeInquiryMeta($board->id, $post->id, $validated);
 

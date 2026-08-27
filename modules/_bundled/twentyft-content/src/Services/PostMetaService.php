@@ -13,15 +13,14 @@ class PostMetaService
 {
     public function __construct(
         private readonly PostMetaRepositoryInterface $repository
-    ) {
-    }
+    ) {}
 
     /**
      * 특정 도메인+게시글의 메타를 모두 조회합니다.
      *
-     * @param int $boardId
-     * @param int $postId
-     * @param string $domain
+     * @param  int  $boardId
+     * @param  int  $postId
+     * @param  string  $domain
      * @return array<string, mixed>
      */
     public function all(int $boardId, int $postId, string $domain): array
@@ -46,16 +45,39 @@ class PostMetaService
     }
 
     /**
+     * 게시판 단위로 도메인 메타를 일괄 조회합니다. (N+1 방지)
+     *
+     * @param  int  $boardId
+     * @param  string  $domain
+     * @return array<int, array<string, mixed>> post_id => meta
+     */
+    public function allByBoard(int $boardId, string $domain): array
+    {
+        return $this->repository->getAllByBoard($boardId, $domain);
+    }
+
+    /**
      * Portfolio 메타 기본 구조를 반환합니다.
      *
-     * @param int $boardId
-     * @param int $postId
+     * @param  int  $boardId
+     * @param  int  $postId
      * @return array<string, mixed>
      */
     public function portfolioMeta(int $boardId, int $postId): array
     {
-        $meta = $this->repository->getAll($boardId, $postId, 'portfolio');
+        return self::portfolioMetaFromArray(
+            $this->repository->getAll($boardId, $postId, 'portfolio')
+        );
+    }
 
+    /**
+     * 일괄 조회된 Portfolio 메타 배열을 기본 구조로 정규화합니다.
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    public static function portfolioMetaFromArray(array $meta): array
+    {
         return [
             'slug' => $meta['slug'] ?? null,
             'summary' => $meta['summary'] ?? null,
@@ -80,8 +102,19 @@ class PostMetaService
      */
     public function superbifyMeta(int $boardId, int $postId): array
     {
-        $meta = $this->repository->getAll($boardId, $postId, 'superbify');
+        return self::superbifyMetaFromArray(
+            $this->repository->getAll($boardId, $postId, 'superbify')
+        );
+    }
 
+    /**
+     * 일괄 조회된 SuperBify 메타 배열을 기본 구조로 정규화합니다.
+     *
+     * @param  array<string, mixed>  $meta
+     * @return array<string, mixed>
+     */
+    public static function superbifyMetaFromArray(array $meta): array
+    {
         return [
             'slug' => $meta['slug'] ?? null,
             'summary' => $meta['summary'] ?? null,
@@ -98,6 +131,8 @@ class PostMetaService
             'docs_url' => $meta['docs_url'] ?? null,
             'release_url' => $meta['release_url'] ?? null,
             'demo_url' => $meta['demo_url'] ?? null,
+            'download_url' => $meta['download_url'] ?? null,
+            'purchase_url' => $meta['purchase_url'] ?? null,
             'cover_image_attachment_id' => $meta['cover_image_attachment_id'] ?? null,
             'screenshot_attachment_ids' => $meta['screenshot_attachment_ids'] ?? [],
         ];

@@ -33,7 +33,7 @@ Route::prefix('portfolio')
             ->name('projects.index');
 
         Route::get('/projects/{slug}', [PortfolioController::class, 'show'])
-            ->where('slug', '^[a-z][a-z0-9-]*$')
+            ->where('slug', '[^/]+')
             ->name('projects.show');
     });
 
@@ -48,7 +48,7 @@ Route::prefix('superbify')
             ->name('projects.index');
 
         Route::get('/projects/{slug}', [SuperBifyController::class, 'show'])
-            ->where('slug', '^[a-z][a-z0-9-]*$')
+            ->where('slug', '[^/]+')
             ->name('projects.show');
     });
 
@@ -56,7 +56,7 @@ Route::prefix('superbify')
 | Project Inquiry — backend ready, UI disabled until privacy copy finalized
 */
 Route::prefix('inquiries')
-    ->middleware(['optional.sanctum', 'throttle:60,1'])
+    ->middleware(['optional.sanctum', 'throttle:10,1'])
     ->name('inquiries.')
     ->group(function () {
         Route::post('/', [InquiryController::class, 'store'])

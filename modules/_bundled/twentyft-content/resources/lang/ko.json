@@ -43,7 +43,8 @@
             "basic_info": "기본 정보",
             "meta_info": "메타 정보",
             "project_details": "프로젝트 상세",
-            "product_details": "제품 상세"
+            "product_details": "제품 상세",
+            "attachments": "프로젝트 이미지"
         },
         "fields": {
             "title": "제목",
@@ -80,11 +81,15 @@
             "project_type": "프로젝트 유형",
             "budget_range": "예산 범위",
             "internal_status": "처리 상태",
-            "created_at": "작성일"
+            "created_at": "작성일",
+            "cover_image": "대표 이미지"
         },
         "hints": {
             "attachment_id": "첨부파일 관리에서 ID를 확인하세요",
-            "comma_separated": "쉼표로 구분하여 입력하세요"
+            "comma_separated": "쉼표로 구분하여 입력하세요",
+            "cover_image": "업로드한 이미지 중 대표로 사용할 이미지를 선택하세요",
+            "attachments_desc": "이미지를 업로드하세요. 대표 이미지를 지정하지 않으면 첫 번째 이미지가 사용됩니다.",
+            "cover_none": "선택 안 함 (첫 번째 이미지 사용)"
         },
         "status": {
             "update": "상태 변경"

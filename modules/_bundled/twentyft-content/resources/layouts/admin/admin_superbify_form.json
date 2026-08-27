@@ -94,12 +94,18 @@
                                                     }
                                                 },
                                                 {
+                                                    "handler": "emitEvent",
+                                                    "params": {
+                                                        "event": "upload:post_attachments"
+                                                    }
+                                                },
+                                                {
                                                     "handler": "apiCall",
                                                     "auth_required": true,
                                                     "target": "/api/modules/twentyft-content/admin/superbify/projects/{{route.post_id}}",
                                                     "params": {
                                                         "method": "PUT",
-                                                        "body": "{{_local.form}}"
+                                                        "body": "{{Object.assign({}, _local.form, { temp_key: _local.tempKey })}}"
                                                     },
                                                     "onSuccess": [
                                                         {
@@ -184,28 +190,79 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1 md:col-span-2" },
+                                        "props": {
+                                            "className": "space-y-1 md:col-span-2"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.title" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "title", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.title"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "title",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.slug" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "slug", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.slug"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "slug",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.year" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "year", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.year"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "year",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     }
                                 ]
@@ -213,10 +270,27 @@
                             {
                                 "type": "basic",
                                 "name": "Div",
-                                "props": { "className": "space-y-1" },
+                                "props": {
+                                    "className": "space-y-1"
+                                },
                                 "children": [
-                                    { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.summary" },
-                                    { "type": "basic", "name": "Textarea", "props": { "name": "summary", "rows": 3, "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                    {
+                                        "type": "basic",
+                                        "name": "Label",
+                                        "props": {
+                                            "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        },
+                                        "text": "$t:twentyft-content.admin.fields.summary"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Textarea",
+                                        "props": {
+                                            "name": "summary",
+                                            "rows": 3,
+                                            "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                        }
+                                    }
                                 ]
                             }
                         ]
@@ -247,21 +321,48 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.type" },
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.type"
+                                            },
                                             {
                                                 "type": "composite",
                                                 "name": "Select",
                                                 "props": {
                                                     "name": "type",
                                                     "options": [
-                                                        { "value": "MODULE", "label": "MODULE" },
-                                                        { "value": "PLUGIN", "label": "PLUGIN" },
-                                                        { "value": "TEMPLATE", "label": "TEMPLATE" },
-                                                        { "value": "INTEGRATION", "label": "INTEGRATION" },
-                                                        { "value": "DEVELOPER_TOOL", "label": "DEVELOPER_TOOL" },
-                                                        { "value": "OPEN_SOURCE", "label": "OPEN_SOURCE" }
+                                                        {
+                                                            "value": "MODULE",
+                                                            "label": "MODULE"
+                                                        },
+                                                        {
+                                                            "value": "PLUGIN",
+                                                            "label": "PLUGIN"
+                                                        },
+                                                        {
+                                                            "value": "TEMPLATE",
+                                                            "label": "TEMPLATE"
+                                                        },
+                                                        {
+                                                            "value": "INTEGRATION",
+                                                            "label": "INTEGRATION"
+                                                        },
+                                                        {
+                                                            "value": "DEVELOPER_TOOL",
+                                                            "label": "DEVELOPER_TOOL"
+                                                        },
+                                                        {
+                                                            "value": "OPEN_SOURCE",
+                                                            "label": "OPEN_SOURCE"
+                                                        }
                                                     ],
                                                     "className": "w-full"
                                                 }
@@ -271,19 +372,40 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.status" },
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.status"
+                                            },
                                             {
                                                 "type": "composite",
                                                 "name": "Select",
                                                 "props": {
                                                     "name": "status",
                                                     "options": [
-                                                        { "value": "RELEASED", "label": "RELEASED" },
-                                                        { "value": "OPERATING", "label": "OPERATING" },
-                                                        { "value": "RESEARCH", "label": "RESEARCH" },
-                                                        { "value": "BUILDING", "label": "BUILDING" }
+                                                        {
+                                                            "value": "RELEASED",
+                                                            "label": "RELEASED"
+                                                        },
+                                                        {
+                                                            "value": "OPERATING",
+                                                            "label": "OPERATING"
+                                                        },
+                                                        {
+                                                            "value": "RESEARCH",
+                                                            "label": "RESEARCH"
+                                                        },
+                                                        {
+                                                            "value": "BUILDING",
+                                                            "label": "BUILDING"
+                                                        }
                                                     ],
                                                     "className": "w-full"
                                                 }
@@ -293,17 +415,32 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.visibility" },
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.visibility"
+                                            },
                                             {
                                                 "type": "composite",
                                                 "name": "Select",
                                                 "props": {
                                                     "name": "visibility",
                                                     "options": [
-                                                        { "value": "PUBLIC", "label": "PUBLIC" },
-                                                        { "value": "PRIVATE", "label": "PRIVATE" }
+                                                        {
+                                                            "value": "PUBLIC",
+                                                            "label": "PUBLIC"
+                                                        },
+                                                        {
+                                                            "value": "PRIVATE",
+                                                            "label": "PRIVATE"
+                                                        }
                                                     ],
                                                     "className": "w-full"
                                                 }
@@ -322,19 +459,50 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.sort_order" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "number", "name": "sortOrder", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.sort_order"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "number",
+                                                    "name": "sortOrder",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Label",
-                                        "props": { "className": "flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer" },
+                                        "props": {
+                                            "className": "flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Input", "props": { "type": "checkbox", "name": "isFeatured", "className": "w-4 h-4" } },
-                                            { "type": "basic", "name": "Span", "text": "$t:twentyft-content.admin.fields.featured" }
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "checkbox",
+                                                    "name": "isFeatured",
+                                                    "className": "w-4 h-4"
+                                                }
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "text": "$t:twentyft-content.admin.fields.featured"
+                                            }
                                         ]
                                     }
                                 ]
@@ -367,83 +535,325 @@
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.version" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "version", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.version"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "version",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.g7_compatibility" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "g7Compatibility", "placeholder": "7.0.0+", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.g7_compatibility"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "g7Compatibility",
+                                                    "placeholder": "7.0.0+",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.license" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "license", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.license"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "license",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.cover_image_attachment_id" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "number", "name": "coverImageAttachmentId", "placeholder": "$t:twentyft-content.admin.hints.attachment_id", "className": "w-full px-3 py-2 border border-gray-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.cover_image"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "coverImageAttachmentId",
+                                                    "value": "{{_local.form?.coverImageAttachmentId ?? ''}}",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "type": "basic",
+                                                        "name": "Option",
+                                                        "props": {
+                                                            "value": ""
+                                                        },
+                                                        "text": "$t:twentyft-content.admin.hints.cover_none"
+                                                    },
+                                                    {
+                                                        "type": "basic",
+                                                        "name": "Option",
+                                                        "iteration": {
+                                                            "source": "project?.data?.attachments ?? []",
+                                                            "item_var": "att"
+                                                        },
+                                                        "props": {
+                                                            "value": "{{att.id}}"
+                                                        },
+                                                        "text": "{{att.original_filename}}"
+                                                    }
+                                                ]
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.github_url" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "githubUrl", "placeholder": "https://github.com/...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.github_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "githubUrl",
+                                                    "placeholder": "https://github.com/...",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.sir_url" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "sirUrl", "placeholder": "https://sir.kr/...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.sir_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "sirUrl",
+                                                    "placeholder": "https://sir.kr/...",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.docs_url" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "docsUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.docs_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "docsUrl",
+                                                    "placeholder": "https://...",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.release_url" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "releaseUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.release_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "releaseUrl",
+                                                    "placeholder": "https://...",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "space-y-1" },
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
                                         "children": [
-                                            { "type": "basic", "name": "Label", "props": { "className": "text-sm font-medium text-gray-700 dark:text-gray-300" }, "text": "$t:twentyft-content.admin.fields.demo_url" },
-                                            { "type": "basic", "name": "Input", "props": { "type": "text", "name": "demoUrl", "placeholder": "https://...", "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm" } }
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.demo_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "name": "demoUrl",
+                                                    "placeholder": "https://...",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
                                         ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "attachments_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.attachments"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "P",
+                                "props": {
+                                    "className": "text-xs text-gray-500 dark:text-gray-400 mb-2"
+                                },
+                                "text": "$t:twentyft-content.admin.hints.attachments_desc"
+                            },
+                            {
+                                "type": "composite",
+                                "name": "FileUploader",
+                                "props": {
+                                    "collection": "attachments",
+                                    "maxFiles": 10,
+                                    "maxSize": 10,
+                                    "accept": ".jpg,.jpeg,.png,.gif,.webp",
+                                    "initialFiles": "{{project?.data?.attachments ?? []}}",
+                                    "autoUpload": false,
+                                    "uploadTriggerEvent": "upload:post_attachments",
+                                    "compact": true,
+                                    "confirmBeforeRemove": true,
+                                    "uploadParams": {
+                                        "temp_key": "{{_local.tempKey}}"
+                                    },
+                                    "apiEndpoints": {
+                                        "upload": "/api/modules/sirsoft-board/admin/board/superbify/attachments",
+                                        "delete": "/api/modules/sirsoft-board/admin/board/superbify/attachments/:id",
+                                        "reorder": "/api/modules/sirsoft-board/admin/board/superbify/attachments/reorder"
+                                    }
+                                },
+                                "actions": [
+                                    {
+                                        "event": "onUploadError",
+                                        "type": "change",
+                                        "handler": "toast",
+                                        "params": {
+                                            "type": "error",
+                                            "message": "{{$args[0]}}",
+                                            "icon": "triangle-exclamation"
+                                        }
                                     }
                                 ]
                             }
@@ -452,5 +862,17 @@
                 ]
             }
         ]
-    }
+    },
+    "init_actions": [
+        {
+            "comment": "tempKey 생성 (취소 시 안전을 위해 항상 생성)",
+            "handler": "setState",
+            "params": {
+                "target": "global",
+                "_local": {
+                    "tempKey": "{{('temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))}}"
+                }
+            }
+        }
+    ]
 }

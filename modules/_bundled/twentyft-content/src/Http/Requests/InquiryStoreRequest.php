@@ -33,6 +33,8 @@ class InquiryStoreRequest extends FormRequest
             'description' => ['required', 'string', 'max:5000'],
             'reference_url' => ['sometimes', 'nullable', 'url', 'max:500'],
             'privacy_consent' => ['required', 'accepted'],
+            // honeypot — 정상 폼은 전송하지 않는 필드. 값이 있으면 봇으로 간주합니다.
+            'website' => ['prohibited'],
         ];
     }
 

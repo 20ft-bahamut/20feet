@@ -2,6 +2,7 @@
 
 namespace Modules\Twentyft\Content\Http\Resources;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -10,7 +11,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class PortfolioAdminListResource extends JsonResource
 {
     /**
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array<string, mixed>
      */
     public function toArray($request): array

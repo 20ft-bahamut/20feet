@@ -32,6 +32,8 @@ class SuperBifyDetailResource extends JsonResource
                 'sir' => $this->resource['sir_url'],
                 'docs' => $this->resource['docs_url'],
                 'release' => $this->resource['release_url'],
+                'download' => $this->resource['download_url'] ?? null,
+                'purchase' => $this->resource['purchase_url'] ?? null,
                 'demo' => $this->resource['demo_url'],
             ],
             'coverImageUrl' => $this->resource['cover_image_url'],

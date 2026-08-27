@@ -3,6 +3,9 @@
 namespace Modules\Twentyft\Content;
 
 use App\Extension\AbstractModule;
+use Illuminate\Database\Seeder;
+use Modules\Twentyft\Content\Database\Seeders\TwentyftContentSeeder;
+use Modules\Twentyft\Content\Listeners\ContentMetaCleanupListener;
 
 /**
  * 20ft Content 모듈
@@ -234,12 +237,12 @@ class Module extends AbstractModule
     /**
      * 모듈 설치 시 실행할 시더 목록 반환
      *
-     * @return array<class-string<\Illuminate\Database\Seeder>>
+     * @return array<class-string<Seeder>>
      */
     public function getSeeders(): array
     {
         return [
-            \Modules\Twentyft\Content\Database\Seeders\TwentyftContentSeeder::class,
+            TwentyftContentSeeder::class,
         ];
     }
 
@@ -250,7 +253,9 @@ class Module extends AbstractModule
      */
     public function getHookListeners(): array
     {
-        return [];
+        return [
+            ContentMetaCleanupListener::class,
+        ];
     }
 
     /**

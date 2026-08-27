@@ -6,11 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Sirsoft\Board\Http\Resources\AttachmentResource;
 use Modules\Sirsoft\Board\Models\Board;
 use Modules\Sirsoft\Board\Models\Post;
+use Modules\Sirsoft\Board\Services\PostService;
 use Modules\Twentyft\Content\Enums\PortfolioStatus;
 use Modules\Twentyft\Content\Http\Resources\PortfolioAdminListResource;
+use Modules\Twentyft\Content\Models\PostMeta;
 use Modules\Twentyft\Content\Services\PostMetaService;
 
 /**
@@ -22,8 +26,7 @@ class PortfolioAdminController extends Controller
 
     public function __construct(
         private readonly PostMetaService $metaService
-    ) {
-    }
+    ) {}
 
     /**
      * Portfolio 목록 (관리자용 — 공개/비공개 구분 없음)
@@ -39,7 +42,7 @@ class PortfolioAdminController extends Controller
         $perPage = $request->integer('per_page', 15);
 
         $query = Post::where('board_id', $board->id)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->orderByDesc('created_at');
 
         $posts = $query->get();
@@ -59,8 +62,7 @@ class PortfolioAdminController extends Controller
             if ($request->filled('keyword')) {
                 $keyword = mb_strtolower($request->input('keyword'));
                 $haystack = mb_strtolower(implode(' ', [
-                    $post->title['ko'] ?? '',
-                    $post->title['en'] ?? '',
+                    (string) $post->title,
                     $meta['slug'] ?? '',
                     $meta['client_name'] ?? '',
                 ]));
@@ -78,6 +80,7 @@ class PortfolioAdminController extends Controller
             if ($orderA !== $orderB) {
                 return $orderA <=> $orderB;
             }
+
             return strtotime($b['created_at'] ?? 'now') <=> strtotime($a['created_at'] ?? 'now');
         });
 
@@ -117,7 +120,7 @@ class PortfolioAdminController extends Controller
 
         $post = Post::where('board_id', $board->id)
             ->where('id', $postId)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->first();
 
         if (! $post) {
@@ -125,6 +128,8 @@ class PortfolioAdminController extends Controller
         }
 
         $meta = $this->metaService->portfolioMeta($board->id, $post->id);
+
+        $post->load(['attachments' => fn ($query) => $query->orderBy('order')]);
 
         return response()->json([
             'data' => [
@@ -144,6 +149,8 @@ class PortfolioAdminController extends Controller
                 'relatedUrl' => $meta['related_url'] ?? null,
                 'githubUrl' => $meta['github_url'] ?? null,
                 'coverImageAttachmentId' => $meta['cover_image_attachment_id'] ?? null,
+                // FileUploader initialFiles / 대표 이미지 선택 옵션
+                'attachments' => AttachmentResource::collectionFor($post->attachments),
             ],
         ]);
     }
@@ -160,52 +167,81 @@ class PortfolioAdminController extends Controller
 
         $post = Post::where('board_id', $board->id)
             ->where('id', $postId)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->first();
 
         if (! $post) {
             return response()->json(['message' => 'Post not found'], 404);
         }
 
-        if ($request->has('title')) {
-            $post->title = $request->input('title');
-            $post->save();
+        // slug 중복 검증 — 같은 게시판 내 다른 글과 slug가 겹치면 상세 조회가 섀도잉됩니다.
+        $newSlug = $request->input('slug');
+        if ($newSlug !== null) {
+            $currentSlug = $this->metaService->get($board->id, $post->id, 'portfolio', 'slug');
+            if ($newSlug !== $currentSlug && $this->slugExists($board->id, 'portfolio', (string) $newSlug, $post->id)) {
+                return response()->json([
+                    'message' => '이미 사용 중인 slug 입니다.',
+                    'errors' => ['slug' => ['이미 사용 중인 slug 입니다.']],
+                ], 422);
+            }
         }
 
-        $metaFields = [
-            'slug' => 'scalar',
-            'summary' => 'json',
-            'year' => 'scalar',
-            'types' => 'json',
-            'status' => 'scalar',
-            'visibility' => 'scalar',
-            'is_featured' => 'bool',
-            'sort_order' => 'int',
-            'client_name' => 'scalar',
-            'role' => 'json',
-            'tech_stack' => 'json',
-            'related_url' => 'scalar',
-            'github_url' => 'scalar',
-            'cover_image_attachment_id' => 'int',
-        ];
+        // 제목 저장 + 첨부 연결 + 메타 갱신을 원자적으로 처리
+        DB::transaction(function () use ($board, $post, $request): void {
+            $tempKey = $request->input('tempKey') ?? $request->input('temp_key');
 
-        foreach ($metaFields as $key => $type) {
-            if (! $request->has(Str::camel($key)) && ! $request->has($key)) {
-                continue;
+            if ($request->has('title') || $tempKey !== null) {
+                // PostService 경유 — 첨부(temp_key) 연결 + update 훅 + 캐시 무효화
+                app(PostService::class)
+                    ->updatePost(self::BOARD_SLUG, $post->id, [
+                        'title' => $request->input('title', $post->title),
+                        'temp_key' => $tempKey,
+                    ]);
+            } elseif ($request->has('title')) {
+                $post->title = $request->input('title');
+                $post->save();
             }
 
-            $value = $request->input(Str::camel($key)) ?? $request->input($key);
+            $metaFields = [
+                'slug' => 'scalar',
+                'summary' => 'json',
+                'year' => 'scalar',
+                'types' => 'json',
+                'status' => 'scalar',
+                'visibility' => 'scalar',
+                'is_featured' => 'bool',
+                'sort_order' => 'int',
+                'client_name' => 'scalar',
+                'role' => 'json',
+                'tech_stack' => 'json',
+                'related_url' => 'scalar',
+                'github_url' => 'scalar',
+                'cover_image_attachment_id' => 'int',
+                'gallery_attachment_ids' => 'json',
+            ];
 
-            if ($key === 'types') {
-                $value = is_array($value) ? array_values($value) : [$value];
+            foreach ($metaFields as $key => $type) {
+                if (! $request->has(Str::camel($key)) && ! $request->has($key)) {
+                    continue;
+                }
+
+                $value = $request->input(Str::camel($key)) ?? $request->input($key);
+
+                if ($key === 'types') {
+                    $value = is_array($value) ? array_values($value) : [$value];
+                }
+
+                if ($key === 'gallery_attachment_ids') {
+                    $value = is_array($value) ? array_values(array_map('intval', $value)) : [];
+                }
+
+                if (in_array($key, ['role', 'tech_stack'], true) && is_string($value)) {
+                    $value = array_values(array_filter(array_map('trim', explode(',', $value))));
+                }
+
+                $this->metaService->set($board->id, $post->id, 'portfolio', $key, $this->coerceMetaValue($value, $type));
             }
-
-            if (in_array($key, ['role', 'tech_stack'], true) && is_string($value)) {
-                $value = array_values(array_filter(array_map('trim', explode(',', $value))));
-            }
-
-            $this->metaService->set($board->id, $post->id, 'portfolio', $key, $this->coerceMetaValue($value, $type));
-        }
+        });
 
         return response()->json([
             'message' => 'Portfolio updated',
@@ -213,6 +249,21 @@ class PortfolioAdminController extends Controller
                 'post_id' => $post->id,
             ],
         ]);
+    }
+
+    /**
+     * 같은 게시판 내 slug 중복 여부 (자기 자신 제외)
+     */
+    private function slugExists(int $boardId, string $domain, string $slug, int $excludePostId): bool
+    {
+        // value 컬럼은 JSON cast 이므로 디코딩 후 비교합니다.
+        return PostMeta::query()
+            ->where('board_id', $boardId)
+            ->where('domain', $domain)
+            ->where('key', 'slug')
+            ->where('post_id', '!=', $excludePostId)
+            ->get()
+            ->contains(fn (PostMeta $row): bool => (string) $row->value === $slug);
     }
 
     /**
@@ -227,7 +278,7 @@ class PortfolioAdminController extends Controller
 
         $post = Post::where('board_id', $board->id)
             ->where('id', $postId)
-            ->where('status', '!=', 'trash')
+            ->where('status', '!=', 'deleted')
             ->first();
 
         if (! $post) {
@@ -274,8 +325,8 @@ class PortfolioAdminController extends Controller
     private function slugFromTitle(array|string $title): string
     {
         $text = is_array($title) ? ($title['ko'] ?? $title['en'] ?? '') : $title;
-        $slug = preg_replace('/[^a-z0-9-]+/i', '-', strtolower(trim($text)));
-        $slug = trim($slug, '-');
+        $slug = preg_replace('/[^\p{L}\p{N}-]+/u', '-', mb_strtolower(trim((string) $text)));
+        $slug = trim((string) $slug, '-');
 
         return $slug === '' ? 'untitled' : $slug;
     }

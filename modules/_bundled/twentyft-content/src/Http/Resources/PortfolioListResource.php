@@ -29,11 +29,6 @@ class PortfolioListResource extends JsonResource
             'status' => $this->resource['status'],
             'featured' => $this->resource['is_featured'],
             'coverImageUrl' => $this->resource['cover_image_url'],
-            '_debug_cover_attachment_id' => $this->resource['_debug_cover_attachment_id'] ?? null,
-            '_debug_first_attachment_id' => $this->resource['_debug_first_attachment_id'] ?? null,
-            '_debug_first_attachment_post_id' => $this->resource['_debug_first_attachment_post_id'] ?? null,
-            '_debug_post_id' => $this->resource['_debug_post_id'] ?? null,
-            '_debug_attachments_count' => $this->resource['_debug_attachments_count'] ?? null,
         ];
     }
 }
