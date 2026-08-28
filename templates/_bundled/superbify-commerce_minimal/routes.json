@@ -66,6 +66,15 @@
             }
         },
         {
+            "_comment": "=== 결제 ===",
+            "path": "/shop/checkout",
+            "layout": "shop/checkout",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.checkout.title"
+            }
+        },
+        {
             "_comment": "=== 에러 페이지 ===",
             "path": "/404",
             "layout": "errors/404",

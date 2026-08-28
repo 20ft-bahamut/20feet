@@ -34,6 +34,10 @@
             "cart": {
                 "title": "Cart — Still Form",
                 "description": "Shopping cart"
+            },
+            "checkout": {
+                "title": "Checkout — Still Form",
+                "description": "Checkout"
             }
         },
         "data_source": {
@@ -127,7 +131,32 @@
             "title": "Cart",
             "empty_title": "Your cart is empty",
             "empty_message": "Browse the shop and add something you like.",
-            "cta_shop": "Go to Shop"
+            "cta_shop": "Go to Shop",
+            "add_to_cart": "Add to cart",
+            "buy_now": "Buy now",
+            "quantity": "Quantity",
+            "sold_out": "Sold out",
+            "stopped": "Stopped",
+            "added_toast": "Added to cart.",
+            "buy_now_toast": "Added to cart. Redirecting to checkout.",
+            "summary_title": "Order summary",
+            "summary_items": "Items",
+            "summary_subtotal": "Subtotal",
+            "summary_shipping": "Shipping",
+            "summary_total": "Total",
+            "summary_checkout": "Checkout",
+            "summary_continue_shopping": "Continue shopping",
+            "delete": "Delete",
+            "delete_confirm_title": "Delete this item?",
+            "delete_confirm_single": "The selected item will be removed from your cart.",
+            "delete_confirm_multiple": "The selected items will be removed from your cart.",
+            "delete_cancel": "Cancel",
+            "items_deleted": "Removed from cart.",
+            "checkout_title": "Checkout",
+            "checkout_placeholder_title": "Checkout step in progress",
+            "checkout_placeholder_message": "Payment / shipping / coupon steps are limited in the demo environment. This is a demo template — no real payment is processed.",
+            "update_failed": "Failed to update quantity.",
+            "delete_failed": "Failed to delete item."
         },
         "common": {
             "all": "All",

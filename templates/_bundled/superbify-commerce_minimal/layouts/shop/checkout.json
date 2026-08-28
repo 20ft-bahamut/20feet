@@ -1,11 +1,11 @@
 {
     "version": "1.0.0",
-    "layout_name": "cart",
+    "layout_name": "shop/checkout",
     "permissions": [],
     "extends": "_user_base",
     "meta": {
-        "title": "$t:superbify.routes.cart.title",
-        "description": "$t:superbify.routes.cart.description"
+        "title": "$t:superbify.routes.checkout.title",
+        "description": "$t:superbify.routes.checkout.description"
     },
     "data_sources": [
         {
@@ -22,14 +22,13 @@
     ],
     "init_actions": [
         {
-            "comment": "CartItemRow 가 발생시키는 scm:cart-qty-change / scm:cart-delete 이벤트 리스너 부착",
             "handler": "scmBindCartPageListeners"
         }
     ],
     "slots": {
         "content": [
             {
-                "id": "cart_page",
+                "id": "checkout_page",
                 "type": "basic",
                 "name": "Section",
                 "style": {
@@ -37,11 +36,11 @@
                 },
                 "children": [
                     {
-                        "id": "cart_page_inner",
+                        "id": "checkout_page_inner",
                         "type": "basic",
                         "name": "Div",
                         "style": {
-                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "maxWidth": "var(--scm-max-width, 960px)",
                             "marginInline": "auto",
                             "paddingInline": "var(--scm-gutter, 1rem)",
                             "display": "flex",
@@ -50,7 +49,7 @@
                         },
                         "children": [
                             {
-                                "id": "cart_page_title",
+                                "id": "checkout_page_title",
                                 "type": "basic",
                                 "name": "H1",
                                 "style": {
@@ -60,10 +59,10 @@
                                     "color": "var(--scm-text-primary, #26221E)",
                                     "margin": "0"
                                 },
-                                "text": "$t:superbify.cart.title"
+                                "text": "$t:superbify.cart.checkout_title"
                             },
                             {
-                                "id": "cart_page_empty",
+                                "id": "checkout_page_empty",
                                 "type": "composite",
                                 "name": "EmptyState",
                                 "if": "{{!cart?.data?.items || (cart.data.items?.length ?? 0) === 0}}",
@@ -75,7 +74,7 @@
                                 }
                             },
                             {
-                                "id": "cart_page_layout",
+                                "id": "checkout_page_layout",
                                 "if": "{{cart?.data?.items && (cart.data.items?.length ?? 0) > 0}}",
                                 "type": "basic",
                                 "name": "Div",
@@ -91,33 +90,49 @@
                                 },
                                 "children": [
                                     {
-                                        "id": "cart_page_items",
+                                        "id": "checkout_page_placeholder",
                                         "type": "basic",
                                         "name": "Div",
                                         "style": {
+                                            "padding": "var(--scm-spacing-lg, 1.5rem)",
+                                            "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                            "border": "1px dashed var(--scm-line, #E4DCCE)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
                                             "display": "flex",
                                             "flexDirection": "column",
-                                            "border": "1px solid var(--scm-line, #E4DCCE)",
-                                            "borderRadius": "var(--scm-radius, 8px)",
-                                            "backgroundColor": "var(--scm-paper, #FAF8F3)",
-                                            "padding": "0 var(--scm-spacing-md, 1rem)"
+                                            "gap": "var(--scm-spacing-sm, 0.75rem)"
                                         },
                                         "children": [
                                             {
-                                                "id": "cart_page_items_iter",
-                                                "type": "composite",
-                                                "name": "CartItemRow",
-                                                "iteration": { "source": "{{cart.data.items ?? []}}", "item_var": "item" },
-                                                "props": {
-                                                    "item": "{{item}}",
-                                                    "quantityLabel": "$t:superbify.cart.quantity",
-                                                    "deleteLabel": "$t:superbify.cart.delete"
-                                                }
+                                                "id": "checkout_page_placeholder_title",
+                                                "type": "basic",
+                                                "name": "H3",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.05rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "margin": 0
+                                                },
+                                                "text": "$t:superbify.cart.checkout_placeholder_title"
+                                            },
+                                            {
+                                                "id": "checkout_page_placeholder_message",
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9rem",
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "margin": 0,
+                                                    "lineHeight": 1.6
+                                                },
+                                                "text": "$t:superbify.cart.checkout_placeholder_message"
                                             }
                                         ]
                                     },
                                     {
-                                        "id": "cart_page_summary",
+                                        "id": "checkout_page_summary",
                                         "type": "composite",
                                         "name": "CartSummary",
                                         "props": {
@@ -130,7 +145,8 @@
                                             "shippingLabel": "$t:superbify.cart.summary_shipping",
                                             "totalLabel": "$t:superbify.cart.summary_total",
                                             "checkoutLabel": "$t:superbify.cart.summary_checkout",
-                                            "continueShoppingLabel": "$t:superbify.cart.summary_continue_shopping"
+                                            "continueShoppingLabel": "$t:superbify.cart.summary_continue_shopping",
+                                            "isOrdering": true
                                         }
                                     }
                                 ]

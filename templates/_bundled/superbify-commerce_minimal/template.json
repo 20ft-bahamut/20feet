@@ -98,7 +98,11 @@
             "Badge",
             "RelatedProducts",
             "BrandStorySection",
-            "EmptyState"
+            "EmptyState",
+            "AddToCartPanel",
+            "CartItemRow",
+            "CartSummary",
+            "ConfirmDialog"
         ],
         "layout": [
             "Container"

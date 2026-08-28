@@ -94,9 +94,273 @@ export async function initCartKeyHandler(
 }
 
 /**
+ * addToCart 핸들러 — `window` CustomEvent `scm:add-to-cart` 를 받아
+ * `/api/modules/sirsoft-ecommerce/cart` 로 POST 한다.
+ *
+ * - detail: { productId, quantity, mode: 'add' | 'buy', productName? }
+ * - 성공 시 `_global.cartCount` 갱신 + 토스트 + (mode === 'buy' 일 때) `/cart` 로 navigate.
+ * - 실패 시 에러 토스트.
+ *
+ * 컴포넌트(AddToCartPanel)가 직접 fetch 를 알면 안 된다 — 액션 디스패처
+ * 패턴을 보존하기 위해 G7 `custom` 액션이 이 핸들러를 호출하도록 레이아웃이
+ * 한 번만 window.addEventListener 를 부착한다.
+ */
+export async function addToCartHandler(
+    action?: unknown,
+    _context?: unknown
+): Promise<void> {
+    const detail = (action as { params?: { detail?: { productId?: number | string; quantity?: number; mode?: 'add' | 'buy'; productName?: string } } } | undefined)?.params?.detail;
+    if (!detail || (detail.productId === undefined || detail.productId === null)) {
+        logger.warn('addToCart handler called without detail.productId');
+        return;
+    }
+    const productId = detail.productId;
+    const quantity = Math.max(1, Math.min(99, Number(detail.quantity ?? 1)));
+    const mode = detail.mode === 'buy' ? 'buy' : 'add';
+
+    const G7Core = (window as any).G7Core;
+    const readCartKey = (): string | null => {
+        const k = G7Core?.state?.get?.()?.cartKey;
+        return typeof k === 'string' && k.startsWith('ck_') ? k : null;
+    };
+    let liveCartKey = readCartKey();
+    if (!liveCartKey) {
+        logger.warn('addToCart handler: cartKey missing, re-init');
+        await initCartKeyHandler();
+        liveCartKey = readCartKey();
+    }
+
+    try {
+        const response = await fetch('/api/modules/sirsoft-ecommerce/cart', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                ...(liveCartKey ? { 'X-Cart-Key': liveCartKey } : {}),
+            },
+            body: JSON.stringify({
+                product_id: typeof productId === 'string' ? parseInt(productId, 10) : productId,
+                items: [{ quantity }],
+            }),
+        });
+
+        if (!response.ok) {
+            let errMsg = `HTTP ${response.status}`;
+            try {
+                const errBody = await response.json();
+                errMsg = errBody?.errors?.message ?? errBody?.message ?? errMsg;
+            } catch { /* keep status */ }
+            logger.error('addToCart failed:', errMsg);
+            showToast('error', errMsg);
+            return;
+        }
+
+        const body = await response.json();
+        const cartCount = body?.data?.cart_count ?? null;
+        if (cartCount !== null && G7Core?.state?.set) {
+            // Merge with existing global state — `state.set` shallow-merges by default
+            G7Core.state.set({ cartCount });
+        }
+        showToast(
+            'success',
+            mode === 'buy'
+                ? '장바구니에 담고 결제 페이지로 이동합니다.'
+                : '장바구니에 담았습니다.'
+        );
+
+        if (mode === 'buy') {
+            window.location.assign('/cart');
+        }
+    } catch (error) {
+        logger.error('addToCart network error:', error);
+        showToast('error', (error as Error)?.message ?? 'Network error');
+    }
+}
+
+function showToast(type: 'success' | 'error' | 'info' | 'warning', message: string): void {
+    const G7Core = (window as any).G7Core;
+    try {
+        const fn = G7Core?.toast?.[type];
+        if (typeof fn === 'function') {
+            fn(message);
+            return;
+        }
+        if (typeof G7Core?.toast?.show === 'function') {
+            G7Core.toast.show(message, { type });
+            return;
+        }
+    } catch { /* fallthrough */ }
+    // Last resort — G7 미로드 시에도 UX 안 죽게
+    if (typeof window !== 'undefined' && type === 'error') {
+        logger.warn('[toast:error]', message);
+    }
+}
+
+/**
+ * scm:bind-add-to-cart 핸들러 — 제품 상세 레이아웃 init_actions 에서
+ * 1회 호출되어 window.addEventListener('scm:add-to-cart', ...) 를 부착한다.
+ * 이후 AddToCartPanel 컴포넌트가 디스패치한 이벤트를 addToCartHandler 가 처리.
+ * 중복 부착 방지 가드 포함.
+ */
+let addToCartListenerBound = false;
+export async function bindAddToCartListenerHandler(): Promise<void> {
+    if (addToCartListenerBound) return;
+    if (typeof window === 'undefined') return;
+    addToCartListenerBound = true;
+    window.addEventListener('scm:add-to-cart', (evt: Event) => {
+        const ce = evt as CustomEvent<{
+            productId: number | string;
+            quantity: number;
+            mode: 'add' | 'buy';
+            productName?: string;
+        }>;
+        addToCartHandler({ params: { detail: ce.detail } });
+    });
+    logger.log('addToCart window listener bound');
+}
+
+// Cart page event handlers ------------------------------------------------
+
+/**
+ * Update quantity: PATCH /api/modules/sirsoft-ecommerce/cart/{id}/quantity
+ */
+async function patchCartItemQuantity(id: string | number, quantity: number): Promise<{ ok: boolean; data?: unknown; error?: string }> {
+    const G7Core = (window as any).G7Core;
+    const readCartKey = (): string | null => {
+        const k = G7Core?.state?.get?.()?.cartKey;
+        return typeof k === 'string' && k.startsWith('ck_') ? k : null;
+    };
+    let liveCartKey = readCartKey();
+    if (!liveCartKey) {
+        await initCartKeyHandler();
+        liveCartKey = readCartKey();
+    }
+    try {
+        const res = await fetch(`/api/modules/sirsoft-ecommerce/cart/${encodeURIComponent(String(id))}/quantity`, {
+            method: 'PATCH',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Cart-Key': liveCartKey ?? '',
+            },
+            body: JSON.stringify({
+                quantity: Math.max(1, Math.min(99, Number(quantity))),
+            }),
+        });
+        if (!res.ok) {
+            let msg = `HTTP ${res.status}`;
+            try {
+                const body = await res.json();
+                msg = body?.errors?.message ?? body?.message ?? msg;
+            } catch { /* ignore */ }
+            return { ok: false, error: msg };
+        }
+        const body = await res.json();
+        return { ok: true, data: body?.data ?? body };
+    } catch (err) {
+        return { ok: false, error: (err as Error).message };
+    }
+}
+
+/**
+ * Delete items: DELETE /api/modules/sirsoft-ecommerce/cart with { ids: [...] }
+ */
+async function deleteCartItems(ids: Array<string | number>): Promise<{ ok: boolean; data?: unknown; error?: string }> {
+    const G7Core = (window as any).G7Core;
+    const readCartKey = (): string | null => {
+        const k = G7Core?.state?.get?.()?.cartKey;
+        return typeof k === 'string' && k.startsWith('ck_') ? k : null;
+    };
+    let liveCartKey = readCartKey();
+    if (!liveCartKey) {
+        await initCartKeyHandler();
+        liveCartKey = readCartKey();
+    }
+    try {
+        const res = await fetch('/api/modules/sirsoft-ecommerce/cart', {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Cart-Key': liveCartKey ?? '',
+            },
+            body: JSON.stringify({ ids: ids.map((i) => Number(i)) }),
+        });
+        if (!res.ok) {
+            let msg = `HTTP ${res.status}`;
+            try {
+                const body = await res.json();
+                msg = body?.errors?.message ?? body?.message ?? msg;
+            } catch { /* ignore */ }
+            return { ok: false, error: msg };
+        }
+        const body = await res.json();
+        return { ok: true, data: body?.data ?? body };
+    } catch (err) {
+        return { ok: false, error: (err as Error).message };
+    }
+}
+
+/**
+ * Refetch cart data sources by calling G7 dataSource.refetch.
+ * Falls back silently if a source isn't registered on the current page.
+ */
+function refetchAllCartSources(): void {
+    const G7Core = (window as any).G7Core;
+    const refetch = G7Core?.dataSource?.refetch;
+    if (typeof refetch !== 'function') return;
+    for (const id of ['cartItems', 'cart', 'cart_count']) {
+        try {
+            void refetch(id, { skipCache: true });
+        } catch {
+            /* source may not exist on this page */
+        }
+    }
+}
+
+let cartListenersBound = false;
+export async function bindCartPageListenersHandler(): Promise<void> {
+    if (cartListenersBound) return;
+    if (typeof window === 'undefined') return;
+    cartListenersBound = true;
+
+    window.addEventListener('scm:cart-qty-change', async (evt: Event) => {
+        const ce = evt as CustomEvent<{ id: string | number; quantity: number }>;
+        if (!ce.detail) return;
+        const result = await patchCartItemQuantity(ce.detail.id, ce.detail.quantity);
+        if (!result.ok) {
+            showToast('error', `수량 변경 실패: ${result.error}`);
+            return;
+        }
+        refetchAllCartSources();
+        showToast('success', '수량을 변경했습니다.');
+    });
+
+    window.addEventListener('scm:cart-delete', async (evt: Event) => {
+        const ce = evt as CustomEvent<{ ids: Array<string | number> }>;
+        if (!ce.detail || !Array.isArray(ce.detail.ids) || ce.detail.ids.length === 0) return;
+        const result = await deleteCartItems(ce.detail.ids);
+        if (!result.ok) {
+            showToast('error', `삭제 실패: ${result.error}`);
+            return;
+        }
+        refetchAllCartSources();
+        showToast('success', '장바구니에서 삭제했습니다.');
+    });
+
+    logger.log('cart page event listeners bound');
+}
+
+/**
  * initCartKey 핸들러 맵.
  * `_user_base.json` 의 init_actions 가 `{ handler: "initCartKey" }` 형태로 호출한다.
  */
 export const handlerMap: Record<string, (action?: unknown, context?: unknown) => void | Promise<void>> = {
     initCartKey: initCartKeyHandler,
+    addToCart: addToCartHandler,
+    scmBindAddToCartListener: bindAddToCartListenerHandler,
+    scmBindCartPageListeners: bindCartPageListenersHandler,
 };

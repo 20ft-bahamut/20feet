@@ -1,10 +1,14 @@
 import { default as templateMetadata } from '../template.json';
 export { A, Article, Aside, Button, Div, Form, Footer, H1, H2, H3, H4, Header, Img, Input, Label, Li, Main, Nav, Ol, Option, P, Section, Select, Span, Textarea, Ul, } from './components/basic';
 export { Container, type ContainerProps } from './components/Container';
+export { AddToCartPanel, type AddToCartPanelProps } from './components/AddToCartPanel';
 export { Badge, type BadgeProps, type BadgeTone } from './components/Badge';
 export { BrandStorySection, type BrandStorySectionProps } from './components/BrandStorySection';
+export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './components/CartItemRow';
+export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';
 export { CategoryNav, type CategoryNavProps } from './components/CategoryNav';
+export { ConfirmDialog, type ConfirmDialogProps } from './components/ConfirmDialog';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { HeroBanner, type HeroBannerProps } from './components/HeroBanner';
 export { Price, type PriceProps } from './components/Price';

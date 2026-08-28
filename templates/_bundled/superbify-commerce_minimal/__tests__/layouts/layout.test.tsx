@@ -104,6 +104,71 @@ describe('layout JSONs', () => {
         const matched = gh.find((g) => g.pattern === '/api/modules/sirsoft-ecommerce/*');
         expect(matched?.headers?.['X-Cart-Key']).toBe('{{_global.cartKey}}');
     });
+
+    it('cart.json renders CartItemRow + CartSummary + binds cart-page listener', () => {
+        const cart = JSON.parse(fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/cart.json'), 'utf8'));
+        const collectNames = (node: any): string[] => {
+            if (!node || typeof node !== 'object') return [];
+            const out: string[] = [];
+            if (typeof node.name === 'string') out.push(node.name);
+            if (Array.isArray(node.children)) {
+                for (const child of node.children) out.push(...collectNames(child));
+            }
+            return out;
+        };
+        const names = collectNames({ children: cart.slots?.content });
+        expect(names).toEqual(expect.arrayContaining(['CartItemRow', 'CartSummary']));
+        const init = (cart.init_actions as Array<{ handler: string }>) ?? [];
+        expect(init.map((a) => a.handler)).toContain('scmBindCartPageListeners');
+    });
+
+    it('shop/product.json includes AddToCartPanel + scmBindAddToCartListener init', () => {
+        const prod = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/product.json'), 'utf8')
+        );
+        const collectNames = (node: any): string[] => {
+            if (!node || typeof node !== 'object') return [];
+            const out: string[] = [];
+            if (typeof node.name === 'string') out.push(node.name);
+            if (Array.isArray(node.children)) {
+                for (const child of node.children) out.push(...collectNames(child));
+            }
+            return out;
+        };
+        const names = collectNames({ children: prod.slots?.content });
+        expect(names).toContain('AddToCartPanel');
+        const init = (prod.init_actions as Array<{ handler: string }>) ?? [];
+        expect(init.map((a) => a.handler)).toContain('scmBindAddToCartListener');
+    });
+
+    it('shop/checkout.json renders CartSummary + placeholder when items present', () => {
+        const co = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/checkout.json'), 'utf8')
+        );
+        const collectNames = (node: any): string[] => {
+            if (!node || typeof node !== 'object') return [];
+            const out: string[] = [];
+            if (typeof node.name === 'string') out.push(node.name);
+            if (Array.isArray(node.children)) {
+                for (const child of node.children) out.push(...collectNames(child));
+            }
+            return out;
+        };
+        const names = collectNames({ children: co.slots?.content });
+        expect(names).toContain('CartSummary');
+        expect(names).toContain('EmptyState');
+        const ids = (co.data_sources as Array<{ id: string; endpoint: string }>).map((d) => d.id);
+        expect(ids).toContain('cart');
+    });
+
+    it('routes.json declares /shop/checkout and /cart', () => {
+        const routes = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'routes.json'), 'utf8')
+        );
+        const paths = (routes.routes as Array<{ path: string; layout: string }>).map((r) => r.path);
+        expect(paths).toContain('/cart');
+        expect(paths).toContain('/shop/checkout');
+    });
 });
 
 describe('guard: fixtures never imported from src/index.ts', () => {

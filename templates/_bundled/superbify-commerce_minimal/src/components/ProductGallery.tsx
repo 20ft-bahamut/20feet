@@ -46,12 +46,18 @@ export function ProductGallery({ images, productName, className, fallbackSlot }:
                 display: 'grid',
                 gridTemplateColumns: '1fr',
                 gap: 'var(--scm-spacing-sm, 0.75rem)',
+                width: '100%',
+                maxWidth: '100%',
+                boxSizing: 'border-box',
             }}
             data-testid="product-gallery"
         >
             <Div
                 style={{
                     aspectRatio: '1 / 1',
+                    width: '100%',
+                    maxHeight: 'min(560px, 70vh)',
+                    maxWidth: '100%',
                     backgroundColor: 'var(--scm-ivory, #F4F0E6)',
                     borderRadius: 'var(--scm-radius, 8px)',
                     overflow: 'hidden',

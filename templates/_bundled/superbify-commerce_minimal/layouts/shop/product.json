@@ -40,6 +40,12 @@
             "loading_strategy": "progressive"
         }
     ],
+    "init_actions": [
+        {
+            "comment": "AddToCartPanel 가 발생시키는 CustomEvent 를 잡기 위한 window 리스너 1회 부착",
+            "handler": "scmBindAddToCartListener"
+        }
+    ],
     "slots": {
         "content": [
             {
@@ -131,6 +137,22 @@
                                             "margin": "0"
                                         },
                                         "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
+                                    },
+                                    {
+                                        "id": "shop_product_addtocart",
+                                        "type": "composite",
+                                        "name": "AddToCartPanel",
+                                        "props": {
+                                            "productId": "{{product_detail?.data?.id}}",
+                                            "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
+                                            "salesStatus": "{{product_detail?.data?.sales_status}}",
+                                            "salesStatusLabel": "{{product_detail?.data?.sales_status_label}}",
+                                            "addToCartLabel": "$t:superbify.cart.add_to_cart",
+                                            "buyNowLabel": "$t:superbify.cart.buy_now",
+                                            "quantityLabel": "$t:superbify.cart.quantity",
+                                            "soldOutLabel": "$t:superbify.cart.sold_out",
+                                            "stoppedLabel": "$t:superbify.cart.stopped"
+                                        }
                                     }
                                 ]
                             }

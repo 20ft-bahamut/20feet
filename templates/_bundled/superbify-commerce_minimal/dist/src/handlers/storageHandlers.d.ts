@@ -20,6 +20,21 @@
  */
 export declare function initCartKeyHandler(_action?: unknown, _context?: unknown): Promise<void>;
 /**
+ * addToCart 핸들러 — `window` CustomEvent `scm:add-to-cart` 를 받아
+ * `/api/modules/sirsoft-ecommerce/cart` 로 POST 한다.
+ *
+ * - detail: { productId, quantity, mode: 'add' | 'buy', productName? }
+ * - 성공 시 `_global.cartCount` 갱신 + 토스트 + (mode === 'buy' 일 때) `/cart` 로 navigate.
+ * - 실패 시 에러 토스트.
+ *
+ * 컴포넌트(AddToCartPanel)가 직접 fetch 를 알면 안 된다 — 액션 디스패처
+ * 패턴을 보존하기 위해 G7 `custom` 액션이 이 핸들러를 호출하도록 레이아웃이
+ * 한 번만 window.addEventListener 를 부착한다.
+ */
+export declare function addToCartHandler(action?: unknown, _context?: unknown): Promise<void>;
+export declare function bindAddToCartListenerHandler(): Promise<void>;
+export declare function bindCartPageListenersHandler(): Promise<void>;
+/**
  * initCartKey 핸들러 맵.
  * `_user_base.json` 의 init_actions 가 `{ handler: "initCartKey" }` 형태로 호출한다.
  */

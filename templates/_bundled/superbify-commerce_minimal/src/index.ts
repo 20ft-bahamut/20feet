@@ -48,10 +48,14 @@ export {
 export { Container, type ContainerProps } from './components/Container';
 
 // Composite page components
+export { AddToCartPanel, type AddToCartPanelProps } from './components/AddToCartPanel';
 export { Badge, type BadgeProps, type BadgeTone } from './components/Badge';
 export { BrandStorySection, type BrandStorySectionProps } from './components/BrandStorySection';
+export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './components/CartItemRow';
+export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';
 export { CategoryNav, type CategoryNavProps } from './components/CategoryNav';
+export { ConfirmDialog, type ConfirmDialogProps } from './components/ConfirmDialog';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { HeroBanner, type HeroBannerProps } from './components/HeroBanner';
 export { Price, type PriceProps } from './components/Price';
@@ -97,10 +101,14 @@ import {
     Ul,
 } from './components/basic';
 import { Container } from './components/Container';
+import { AddToCartPanel } from './components/AddToCartPanel';
 import { Badge } from './components/Badge';
 import { BrandStorySection } from './components/BrandStorySection';
+import { CartItemRow } from './components/CartItemRow';
+import { CartSummary } from './components/CartSummary';
 import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import { EmptyState } from './components/EmptyState';
 import { HeroBanner } from './components/HeroBanner';
 import { Price } from './components/Price';
@@ -149,10 +157,14 @@ if (registry) {
     registry.register({ component: Container, metadata: { name: 'Container', type: 'layout' } });
 
     // Composite components
+    registry.register({ component: AddToCartPanel, metadata: { name: 'AddToCartPanel', type: 'composite' } });
     registry.register({ component: Badge, metadata: { name: 'Badge', type: 'composite' } });
     registry.register({ component: BrandStorySection, metadata: { name: 'BrandStorySection', type: 'composite' } });
+    registry.register({ component: CartItemRow, metadata: { name: 'CartItemRow', type: 'composite' } });
+    registry.register({ component: CartSummary, metadata: { name: 'CartSummary', type: 'composite' } });
     registry.register({ component: CategoryCard, metadata: { name: 'CategoryCard', type: 'composite' } });
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });
+    registry.register({ component: ConfirmDialog, metadata: { name: 'ConfirmDialog', type: 'composite' } });
     registry.register({ component: EmptyState, metadata: { name: 'EmptyState', type: 'composite' } });
     registry.register({ component: HeroBanner, metadata: { name: 'HeroBanner', type: 'composite' } });
     registry.register({ component: Price, metadata: { name: 'Price', type: 'composite' } });

@@ -34,6 +34,10 @@
             "cart": {
                 "title": "Cart — Still Form",
                 "description": "장바구니"
+            },
+            "checkout": {
+                "title": "Checkout — Still Form",
+                "description": "결제"
             }
         },
         "data_source": {
@@ -127,7 +131,32 @@
             "title": "Cart",
             "empty_title": "장바구니가 비어 있습니다",
             "empty_message": "Shop 페이지에서 상품을 담아보세요.",
-            "cta_shop": "Shop으로 이동"
+            "cta_shop": "Shop으로 이동",
+            "add_to_cart": "장바구니 담기",
+            "buy_now": "바로구매",
+            "quantity": "수량",
+            "sold_out": "품절",
+            "stopped": "판매중지",
+            "added_toast": "장바구니에 담았습니다.",
+            "buy_now_toast": "장바구니에 담고 결제 페이지로 이동합니다.",
+            "summary_title": "주문 요약",
+            "summary_items": "상품 수",
+            "summary_subtotal": "소계",
+            "summary_shipping": "배송비",
+            "summary_total": "총 결제금액",
+            "summary_checkout": "결제하기",
+            "summary_continue_shopping": "쇼핑 계속하기",
+            "delete": "삭제",
+            "delete_confirm_title": "상품을 삭제할까요?",
+            "delete_confirm_single": "선택한 상품을 장바구니에서 삭제합니다.",
+            "delete_confirm_multiple": "선택한 상품을 장바구니에서 삭제합니다.",
+            "delete_cancel": "취소",
+            "items_deleted": "장바구니에서 삭제했습니다.",
+            "checkout_title": "Checkout",
+            "checkout_placeholder_title": "결제 단계 준비 중",
+            "checkout_placeholder_message": "결제/배송지/쿠폰 단계는 데모 환경에서 제한적으로 동작합니다. 데모용 템플릿이므로 실제 결제는 진행되지 않습니다.",
+            "update_failed": "수량 변경에 실패했습니다.",
+            "delete_failed": "삭제에 실패했습니다."
         },
         "common": {
             "all": "전체",
