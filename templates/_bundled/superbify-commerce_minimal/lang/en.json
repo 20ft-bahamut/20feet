@@ -114,7 +114,12 @@
             "related_eyebrow": "RELATED",
             "status_soldout": "Sold out",
             "status_stopped": "Stopped",
-            "status_onsale": "On sale"
+            "status_onsale": "On sale",
+            "kv": {
+                "category": "Category",
+                "status": "Status",
+                "shipping": "Shipping"
+            }
         },
         "story": {
             "title": "Brand Story",
@@ -147,6 +152,7 @@
             "summary_checkout": "Checkout",
             "summary_continue_shopping": "Continue shopping",
             "delete": "Delete",
+            "apply": "Apply",
             "delete_confirm_title": "Delete this item?",
             "delete_confirm_single": "The selected item will be removed from your cart.",
             "delete_confirm_multiple": "The selected items will be removed from your cart.",

@@ -149,10 +149,34 @@
         "path": "src/components/Span.tsx"
       },
       {
+        "name": "Table",
+        "type": "basic",
+        "description": "HTML table element wrapper",
+        "path": "src/components/Table.tsx"
+      },
+      {
+        "name": "Td",
+        "type": "basic",
+        "description": "HTML td element wrapper",
+        "path": "src/components/Td.tsx"
+      },
+      {
         "name": "Textarea",
         "type": "basic",
         "description": "HTML textarea element wrapper",
         "path": "src/components/Textarea.tsx"
+      },
+      {
+        "name": "Th",
+        "type": "basic",
+        "description": "HTML th element wrapper",
+        "path": "src/components/Th.tsx"
+      },
+      {
+        "name": "Tr",
+        "type": "basic",
+        "description": "HTML tr element wrapper",
+        "path": "src/components/Tr.tsx"
       },
       {
         "name": "Ul",

@@ -64,95 +64,232 @@
                             "maxWidth": "var(--scm-max-width, 1200px)",
                             "marginInline": "auto",
                             "paddingInline": "var(--scm-gutter, 1rem)",
-                            "display": "grid",
-                            "gridTemplateColumns": "1fr",
-                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
                         },
                         "children": [
                             {
-                                "id": "shop_product_gallery",
-                                "type": "composite",
-                                "name": "ProductGallery",
-                                "props": {
-                                    "images": "{{product_detail?.data?.images ?? []}}",
-                                    "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
-                                    "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? 'product-1'}}"
-                                }
+                                "id": "shop_product_crumbs",
+                                "type": "basic",
+                                "name": "Nav",
+                                "aria-label": "breadcrumb",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.8125rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.01em"
+                                },
+                                "text": "Shop · {{product_detail?.data?.categories?.[0]?.name_localized ?? product_detail?.data?.categories?.[0]?.name ?? ''}} · {{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
                             },
                             {
-                                "id": "shop_product_summary",
+                                "id": "shop_product_grid",
                                 "type": "basic",
                                 "name": "Div",
                                 "style": {
-                                    "display": "flex",
-                                    "flexDirection": "column",
-                                    "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                    "display": "grid",
+                                    "gridTemplateColumns": "minmax(0, 1.05fr) minmax(0, .95fr)",
+                                    "gap": "var(--scm-spacing-xl, 3rem)",
+                                    "alignItems": "start"
                                 },
                                 "children": [
                                     {
-                                        "id": "shop_product_title",
-                                        "type": "basic",
-                                        "name": "H1",
-                                        "style": {
-                                            "fontFamily": "var(--scm-font-display, system-ui)",
-                                            "fontSize": "1.5rem",
-                                            "fontWeight": "700",
-                                            "color": "var(--scm-text-primary, #26221E)",
-                                            "margin": "0"
-                                        },
-                                        "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
-                                    },
-                                    {
-                                        "id": "shop_product_price",
+                                        "id": "shop_product_gallery",
                                         "type": "composite",
-                                        "name": "Price",
+                                        "name": "ProductGallery",
                                         "props": {
-                                            "sellingPrice": "{{product_detail?.data?.selling_price}}",
-                                            "listPrice": "{{product_detail?.data?.list_price}}",
-                                            "sellingPriceFormatted": "{{product_detail?.data?.selling_price_formatted}}",
-                                            "listPriceFormatted": "{{product_detail?.data?.list_price_formatted}}",
-                                            "discountRate": "{{product_detail?.data?.discount_rate}}"
-                                        }
-                                    },
-                                    {
-                                        "id": "shop_product_status",
-                                        "type": "basic",
-                                        "name": "Span",
-                                        "style": {
-                                            "fontFamily": "var(--scm-font-body, system-ui)",
-                                            "fontSize": "0.875rem",
-                                            "color": "var(--scm-text-muted, #8A837B)"
-                                        },
-                                        "text": "{{product_detail?.data?.sales_status_label ?? ''}}"
-                                    },
-                                    {
-                                        "id": "shop_product_description",
-                                        "type": "basic",
-                                        "name": "P",
-                                        "style": {
-                                            "fontFamily": "var(--scm-font-body, system-ui)",
-                                            "fontSize": "0.9375rem",
-                                            "lineHeight": "1.7",
-                                            "color": "var(--scm-text-body, #4A4643)",
-                                            "margin": "0"
-                                        },
-                                        "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
-                                    },
-                                    {
-                                        "id": "shop_product_addtocart",
-                                        "type": "composite",
-                                        "name": "AddToCartPanel",
-                                        "props": {
-                                            "productId": "{{product_detail?.data?.id}}",
+                                            "images": "{{product_detail?.data?.images ?? []}}",
                                             "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
-                                            "salesStatus": "{{product_detail?.data?.sales_status}}",
-                                            "salesStatusLabel": "{{product_detail?.data?.sales_status_label}}",
-                                            "addToCartLabel": "$t:superbify.cart.add_to_cart",
-                                            "buyNowLabel": "$t:superbify.cart.buy_now",
-                                            "quantityLabel": "$t:superbify.cart.quantity",
-                                            "soldOutLabel": "$t:superbify.cart.sold_out",
-                                            "stoppedLabel": "$t:superbify.cart.stopped"
+                                            "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? 'product-1'}}"
                                         }
+                                    },
+                                    {
+                                        "id": "shop_product_summary",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_code",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "ui-monospace, SFMono-Regular, Menlo, monospace",
+                                                    "fontSize": "0.68rem",
+                                                    "letterSpacing": "0.04em",
+                                                    "color": "var(--scm-text-muted, #8A837B)"
+                                                },
+                                                "text": "{{product_detail?.data?.product_code ?? product_detail?.data?.sku ?? ''}}"
+                                            },
+                                            {
+                                                "id": "shop_product_title",
+                                                "type": "basic",
+                                                "name": "H1",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.5rem",
+                                                    "fontWeight": 700,
+                                                    "letterSpacing": "-0.01em",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "margin": 0
+                                                },
+                                                "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
+                                            },
+                                            {
+                                                "id": "shop_product_description",
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9375rem",
+                                                    "lineHeight": 1.7,
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "margin": 0
+                                                },
+                                                "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
+                                            },
+                                            {
+                                                "id": "shop_product_price",
+                                                "type": "composite",
+                                                "name": "Price",
+                                                "props": {
+                                                    "sellingPrice": "{{product_detail?.data?.selling_price}}",
+                                                    "listPrice": "{{product_detail?.data?.list_price}}",
+                                                    "sellingPriceFormatted": "{{product_detail?.data?.selling_price_formatted}}",
+                                                    "listPriceFormatted": "{{product_detail?.data?.list_price_formatted}}",
+                                                    "discountRate": "{{product_detail?.data?.discount_rate}}"
+                                                }
+                                            },
+                                            {
+                                                "id": "shop_product_kv",
+                                                "type": "basic",
+                                                "name": "Table",
+                                                "role": "presentation",
+                                                "style": {
+                                                    "width": "100%",
+                                                    "borderCollapse": "collapse",
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.82rem",
+                                                    "margin": "var(--scm-spacing-sm, 0.75rem) 0 var(--scm-spacing-md, 1rem)"
+                                                },
+                                                "children": [
+                                                    {
+                                                        "id": "shop_product_kv_category",
+                                                        "type": "basic",
+                                                        "name": "Tr",
+                                                        "children": [
+                                                            {
+                                                                "id": "shop_product_kv_category_th",
+                                                                "type": "basic",
+                                                                "name": "Th",
+                                                                "style": {
+                                                                    "textAlign": "left",
+                                                                    "fontWeight": 500,
+                                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)",
+                                                                    "width": "38%"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.category"
+                                                            },
+                                                            {
+                                                                "id": "shop_product_kv_category_td",
+                                                                "type": "basic",
+                                                                "name": "Td",
+                                                                "style": {
+                                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "{{product_detail?.data?.categories?.[0]?.name_localized ?? product_detail?.data?.categories?.[0]?.name ?? ''}}"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "id": "shop_product_kv_status",
+                                                        "type": "basic",
+                                                        "name": "Tr",
+                                                        "children": [
+                                                            {
+                                                                "id": "shop_product_kv_status_th",
+                                                                "type": "basic",
+                                                                "name": "Th",
+                                                                "style": {
+                                                                    "textAlign": "left",
+                                                                    "fontWeight": 500,
+                                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.status"
+                                                            },
+                                                            {
+                                                                "id": "shop_product_kv_status_td",
+                                                                "type": "basic",
+                                                                "name": "Td",
+                                                                "style": {
+                                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "{{product_detail?.data?.sales_status_label ?? ''}}"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "id": "shop_product_kv_shipping",
+                                                        "type": "basic",
+                                                        "name": "Tr",
+                                                        "children": [
+                                                            {
+                                                                "id": "shop_product_kv_shipping_th",
+                                                                "type": "basic",
+                                                                "name": "Th",
+                                                                "style": {
+                                                                    "textAlign": "left",
+                                                                    "fontWeight": 500,
+                                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.shipping"
+                                                            },
+                                                            {
+                                                                "id": "shop_product_kv_shipping_td",
+                                                                "type": "basic",
+                                                                "name": "Td",
+                                                                "style": {
+                                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "{{product_detail?.data?.shipping_method_label ?? product_detail?.data?.shipping_label ?? ''}}"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "id": "shop_product_addtocart",
+                                                "type": "composite",
+                                                "name": "AddToCartPanel",
+                                                "props": {
+                                                    "productId": "{{product_detail?.data?.id}}",
+                                                    "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
+                                                    "salesStatus": "{{product_detail?.data?.sales_status}}",
+                                                    "salesStatusLabel": "{{product_detail?.data?.sales_status_label}}",
+                                                    "addToCartLabel": "$t:superbify.cart.add_to_cart",
+                                                    "buyNowLabel": "$t:superbify.cart.buy_now",
+                                                    "quantityLabel": "$t:superbify.cart.quantity",
+                                                    "soldOutLabel": "$t:superbify.cart.sold_out",
+                                                    "stoppedLabel": "$t:superbify.cart.stopped"
+                                                }
+                                            }
+                                        ]
                                     }
                                 ]
                             }

@@ -35,7 +35,7 @@ export function AddToCartPanel({
     productId,
     productName,
     salesStatus,
-    salesStatusLabel,
+    salesStatusLabel: _salesStatusLabel,
     addToCartLabel = '장바구니 담기',
     buyNowLabel = '바로구매',
     quantityLabel = '수량',
@@ -85,7 +85,9 @@ export function AddToCartPanel({
         setQuantity(clamped(v));
     };
 
-    const ctaLabel = isSoldOut ? soldOutLabel : isStopped ? stoppedLabel : (salesStatusLabel ?? null);
+    // CTA label policy: on sale → addToCartLabel; sold_out → soldOutLabel; stopped → stoppedLabel.
+    // `salesStatusLabel` is a small status indicator near the price, NOT a CTA label.
+    const ctaLabel = isSoldOut ? soldOutLabel : isStopped ? stoppedLabel : null;
 
     return (
         <Div
@@ -193,9 +195,10 @@ export function AddToCartPanel({
 
             <Div
                 style={{
-                    display: 'grid',
-                    gridTemplateColumns: isOnSale ? '1fr 1fr' : '1fr',
+                    display: 'inline-flex',
+                    flexWrap: 'wrap',
                     gap: 'var(--scm-spacing-sm, 0.75rem)',
+                    maxWidth: '28rem',
                 }}
             >
                 <Button
@@ -206,16 +209,16 @@ export function AddToCartPanel({
                     data-testid="add-to-cart"
                     data-mode="add"
                     style={{
-                        padding: '0.9rem 1rem',
-                        backgroundColor: isOnSale ? 'var(--scm-surface, #FAF8F3)' : 'var(--scm-bg-secondary, #F4F0E6)',
-                        color: isOnSale ? 'var(--scm-text-body, #4A4643)' : 'var(--scm-text-muted, #8A837B)',
-                        border: isOnSale ? '1px solid var(--scm-charcoal, #26221E)' : '1px solid var(--scm-line, #E4DCCE)',
+                        padding: '0.85rem 1.4rem',
+                        backgroundColor: 'var(--scm-charcoal, #26221E)',
+                        color: 'var(--scm-paper, #FAF8F3)',
+                        border: '1px solid var(--scm-charcoal, #26221E)',
                         borderRadius: 'var(--scm-radius, 8px)',
                         fontWeight: 600,
                         fontFamily: 'var(--scm-font-body, system-ui)',
                         fontSize: '0.95rem',
                         cursor: disabled ? 'not-allowed' : 'pointer',
-                        opacity: disabled ? 0.6 : 1,
+                        opacity: disabled ? 0.55 : 1,
                     }}
                 >
                     {ctaLabel ?? (submitting === 'add' ? '담는 중…' : addToCartLabel)}
@@ -229,16 +232,16 @@ export function AddToCartPanel({
                         data-testid="buy-now"
                         data-mode="buy"
                         style={{
-                            padding: '0.9rem 1rem',
-                            backgroundColor: 'var(--scm-wood, #C9B08D)',
-                            color: 'var(--scm-text-inverse, #FAF8F3)',
-                            border: '1px solid var(--scm-wood, #C9B08D)',
+                            padding: '0.85rem 1.4rem',
+                            backgroundColor: 'transparent',
+                            color: 'var(--scm-charcoal, #26221E)',
+                            border: '1px solid var(--scm-charcoal, #26221E)',
                             borderRadius: 'var(--scm-radius, 8px)',
                             fontWeight: 600,
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.95rem',
                             cursor: disabled ? 'not-allowed' : 'pointer',
-                            opacity: disabled ? 0.6 : 1,
+                            opacity: disabled ? 0.55 : 1,
                         }}
                     >
                         {submitting === 'buy' ? '이동 중…' : buyNowLabel}

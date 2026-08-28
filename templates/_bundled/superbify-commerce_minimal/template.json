@@ -80,7 +80,11 @@
             "Section",
             "Select",
             "Span",
+            "Table",
+            "Td",
             "Textarea",
+            "Th",
+            "Tr",
             "Ul"
         ],
         "composite": [

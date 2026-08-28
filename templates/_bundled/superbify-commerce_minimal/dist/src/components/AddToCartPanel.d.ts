@@ -28,5 +28,5 @@ export interface AddToCartPanelProps {
  *  - Keeps this component reusable in non-purchase contexts (preview, etc.).
  *  - Lets the layout author decide the exact endpoint/headers/messages in JSON.
  */
-export declare function AddToCartPanel({ productId, productName, salesStatus, salesStatusLabel, addToCartLabel, buyNowLabel, quantityLabel, soldOutLabel, stoppedLabel, minQuantity, maxQuantity, className, }: AddToCartPanelProps): React.ReactElement;
+export declare function AddToCartPanel({ productId, productName, salesStatus, salesStatusLabel: _salesStatusLabel, addToCartLabel, buyNowLabel, quantityLabel, soldOutLabel, stoppedLabel, minQuantity, maxQuantity, className, }: AddToCartPanelProps): React.ReactElement;
 export default AddToCartPanel;

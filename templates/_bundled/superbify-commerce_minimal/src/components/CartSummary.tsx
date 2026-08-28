@@ -3,10 +3,17 @@ import { Button, Div, Span } from './basic';
 
 export interface CartSummaryCalc {
     subtotal?: number | string | null;
+    subtotal_formatted?: string | null;
+    /** total_shipping alias — server field */
+    total_shipping?: number | string | null;
+    /** payment_amount / final_amount */
+    payment_amount?: number | string | null;
+    final_amount?: number | string | null;
+    payment_amount_formatted?: string | null;
+    final_amount_formatted?: string | null;
+    /** legacy/optional overrides */
     shipping_fee?: number | string | null;
     total?: number | string | null;
-    /** server-provided formatted strings take precedence */
-    subtotal_formatted?: string | null;
     shipping_fee_formatted?: string | null;
     total_formatted?: string | null;
 }
@@ -28,15 +35,33 @@ export interface CartSummaryProps {
     className?: string;
 }
 
-function formatPrice(value: number | string | null | undefined, formatted?: string | null): string {
-    if (formatted) return formatted;
-    if (value === null || value === undefined) return '—';
+/** Returns the formatted string or null when the value is missing/zero. */
+function pickPrice(
+    value: number | string | null | undefined,
+    formatted: string | null | undefined,
+): string | null {
+    if (formatted && formatted.trim() !== '' && formatted.trim() !== '₩0' && formatted.trim() !== '₩0') {
+        return formatted;
+    }
+    if (value === null || value === undefined) return null;
     if (typeof value === 'string') return value;
     try {
         return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW', maximumFractionDigits: 0 }).format(value);
     } catch {
         return String(value);
     }
+}
+
+/** True when shipping has a non-zero value to display. */
+function hasShipping(c: CartSummaryCalc | null | undefined): boolean {
+    if (!c) return false;
+    const v = c.total_shipping ?? c.shipping_fee;
+    if (typeof v === 'number') return v > 0;
+    if (typeof v === 'string') return parseInt(v, 10) > 0;
+    const f = c.shipping_fee_formatted ?? '';
+    if (!f) return false;
+    const m = f.match(/[\d,]+/);
+    return m ? parseInt(m[0].replace(/,/g, ''), 10) > 0 : false;
 }
 
 export function CartSummary({
@@ -56,9 +81,23 @@ export function CartSummary({
     className,
 }: CartSummaryProps): React.ReactElement {
     const count = itemCount ?? (Array.isArray(items) ? items.length : 0);
-    const subtotal = formatPrice(calculation?.subtotal, calculation?.subtotal_formatted);
-    const shipping = formatPrice(calculation?.shipping_fee, calculation?.shipping_fee_formatted);
-    const total = formatPrice(calculation?.total, calculation?.total_formatted);
+
+    const subtotalStr = pickPrice(
+        calculation?.subtotal,
+        calculation?.subtotal_formatted,
+    ) ?? '—';
+
+    const shippingStr = hasShipping(calculation)
+        ? pickPrice(
+            calculation?.total_shipping ?? calculation?.shipping_fee,
+            calculation?.shipping_fee_formatted,
+          ) ?? '—'
+        : null;
+
+    const totalStr = pickPrice(
+        calculation?.payment_amount ?? calculation?.final_amount ?? calculation?.total,
+        calculation?.payment_amount_formatted ?? calculation?.final_amount_formatted ?? calculation?.total_formatted,
+    ) ?? subtotalStr;
 
     const checkout = onCheckout ?? (() => {
         window.location.assign('/shop/checkout');
@@ -94,9 +133,9 @@ export function CartSummary({
                 {summaryTitle}
             </Span>
 
-            <SummaryRow label={itemsLabel} value={`${count}개`} />
-            <SummaryRow label={subtotalLabel} value={subtotal} />
-            <SummaryRow label={shippingLabel} value={shipping} />
+            <SummaryRow label={itemsLabel} value={`${count}`} />
+            <SummaryRow label={subtotalLabel} value={subtotalStr} />
+            {shippingStr !== null ? <SummaryRow label={shippingLabel} value={shippingStr} /> : null}
 
             <Div
                 style={{
@@ -126,7 +165,7 @@ export function CartSummary({
                         color: 'var(--scm-text-primary, #26221E)',
                     }}
                 >
-                    {total}
+                    {totalStr}
                 </Span>
             </Div>
 

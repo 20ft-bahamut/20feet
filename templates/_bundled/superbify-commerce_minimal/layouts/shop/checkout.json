@@ -80,12 +80,13 @@
                                 "name": "Div",
                                 "style": {
                                     "display": "grid",
-                                    "gridTemplateColumns": "1fr",
-                                    "gap": "var(--scm-spacing-lg, 1.5rem)"
+                                    "gridTemplateColumns": "1.5fr 1fr",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
+                                    "alignItems": "start"
                                 },
                                 "responsive": {
-                                    "tablet": {
-                                        "style": { "gridTemplateColumns": "2fr 1fr" }
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
                                     }
                                 },
                                 "children": [
@@ -138,7 +139,7 @@
                                         "props": {
                                             "items": "{{cart.data.items}}",
                                             "itemCount": "{{cart.data.item_count ?? (cart.data.items?.length ?? 0)}}",
-                                            "calculation": "{{cart.data.calculation}}",
+                                            "calculation": "{{cart.data.calculation?.summary ?? cart.data.calculation}}",
                                             "summaryTitle": "$t:superbify.cart.summary_title",
                                             "itemsLabel": "$t:superbify.cart.summary_items",
                                             "subtotalLabel": "$t:superbify.cart.summary_subtotal",

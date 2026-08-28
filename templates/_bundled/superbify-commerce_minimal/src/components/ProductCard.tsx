@@ -75,6 +75,9 @@ export function ProductCard({ item, href, className }: ProductCardProps): React.
                     aspectRatio: '1 / 1',
                     backgroundColor: 'var(--scm-ivory, #F4F0E6)',
                     overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
             >
                 <Img
@@ -85,7 +88,7 @@ export function ProductCard({ item, href, className }: ProductCardProps): React.
                     style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
                         display: 'block',
                     }}
                 />

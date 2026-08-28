@@ -1,5 +1,5 @@
 import { default as templateMetadata } from '../template.json';
-export { A, Article, Aside, Button, Div, Form, Footer, H1, H2, H3, H4, Header, Img, Input, Label, Li, Main, Nav, Ol, Option, P, Section, Select, Span, Textarea, Ul, } from './components/basic';
+export { A, Article, Aside, Button, Div, Form, Footer, H1, H2, H3, H4, Header, Img, Input, Label, Li, Main, Nav, Ol, Option, P, Section, Select, Span, Table, Td, Textarea, Th, Tr, Ul, } from './components/basic';
 export { Container, type ContainerProps } from './components/Container';
 export { AddToCartPanel, type AddToCartPanelProps } from './components/AddToCartPanel';
 export { Badge, type BadgeProps, type BadgeTone } from './components/Badge';

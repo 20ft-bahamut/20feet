@@ -81,12 +81,13 @@
                                 "name": "Div",
                                 "style": {
                                     "display": "grid",
-                                    "gridTemplateColumns": "1fr",
-                                    "gap": "var(--scm-spacing-lg, 1.5rem)"
+                                    "gridTemplateColumns": "1.5fr 1fr",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
+                                    "alignItems": "start"
                                 },
                                 "responsive": {
-                                    "tablet": {
-                                        "style": { "gridTemplateColumns": "2fr 1fr" }
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
                                     }
                                 },
                                 "children": [
@@ -100,7 +101,7 @@
                                             "border": "1px solid var(--scm-line, #E4DCCE)",
                                             "borderRadius": "var(--scm-radius, 8px)",
                                             "backgroundColor": "var(--scm-paper, #FAF8F3)",
-                                            "padding": "0 var(--scm-spacing-md, 1rem)"
+                                            "padding": "0 var(--scm-spacing-md, 1rem) var(--scm-spacing-md, 1rem)"
                                         },
                                         "children": [
                                             {
@@ -111,7 +112,8 @@
                                                 "props": {
                                                     "item": "{{item}}",
                                                     "quantityLabel": "$t:superbify.cart.quantity",
-                                                    "deleteLabel": "$t:superbify.cart.delete"
+                                                    "deleteLabel": "$t:superbify.cart.delete",
+                                                    "applyLabel": "$t:superbify.cart.apply"
                                                 }
                                             }
                                         ]
@@ -123,7 +125,7 @@
                                         "props": {
                                             "items": "{{cart.data.items}}",
                                             "itemCount": "{{cart.data.item_count ?? (cart.data.items?.length ?? 0)}}",
-                                            "calculation": "{{cart.data.calculation}}",
+                                            "calculation": "{{cart.data.calculation?.summary ?? cart.data.calculation}}",
                                             "summaryTitle": "$t:superbify.cart.summary_title",
                                             "itemsLabel": "$t:superbify.cart.summary_items",
                                             "subtotalLabel": "$t:superbify.cart.summary_subtotal",

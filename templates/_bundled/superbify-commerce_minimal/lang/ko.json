@@ -114,7 +114,12 @@
             "related_eyebrow": "RELATED",
             "status_soldout": "품절",
             "status_stopped": "판매중지",
-            "status_onsale": "판매중"
+            "status_onsale": "판매중",
+            "kv": {
+                "category": "분류",
+                "status": "상태",
+                "shipping": "배송"
+            }
         },
         "story": {
             "title": "Brand Story",
@@ -147,6 +152,7 @@
             "summary_checkout": "결제하기",
             "summary_continue_shopping": "쇼핑 계속하기",
             "delete": "삭제",
+            "apply": "변경",
             "delete_confirm_title": "상품을 삭제할까요?",
             "delete_confirm_single": "선택한 상품을 장바구니에서 삭제합니다.",
             "delete_confirm_multiple": "선택한 상품을 장바구니에서 삭제합니다.",

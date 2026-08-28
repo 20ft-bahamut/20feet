@@ -35,6 +35,8 @@ export function ProductGallery({ images, productName, className, fallbackSlot }:
     const list: ProductGalleryImage[] = Array.isArray(images) && images.length > 0
         ? images
         : [{ slot: fallbackSlot ?? 'product-1' }];
+    // Cap thumbs at 3 to match approved preview rhythm; extra images stay reachable via main only.
+    const thumbCount = Math.min(list.length, 3);
     const [activeIdx, setActiveIdx] = React.useState(0);
     const active = list[Math.min(activeIdx, list.length - 1)];
     const { src } = pickSrc(active ?? list[0], activeIdx, fallbackSlot);
@@ -54,19 +56,22 @@ export function ProductGallery({ images, productName, className, fallbackSlot }:
         >
             <Div
                 style={{
-                    aspectRatio: '1 / 1',
+                    aspectRatio: '4 / 3',
                     width: '100%',
-                    maxHeight: 'min(560px, 70vh)',
+                    maxHeight: '560px',
                     maxWidth: '100%',
                     backgroundColor: 'var(--scm-ivory, #F4F0E6)',
                     borderRadius: 'var(--scm-radius, 8px)',
                     overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
             >
                 <Img
                     src={src}
                     alt={active?.alt_text ?? productName ?? 'product'}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
                 />
             </Div>
             {list.length > 1 ? (
@@ -76,11 +81,11 @@ export function ProductGallery({ images, productName, className, fallbackSlot }:
                         margin: 0,
                         padding: 0,
                         display: 'grid',
-                        gridTemplateColumns: `repeat(${Math.min(list.length, 5)}, 1fr)`,
-                        gap: 'var(--scm-spacing-2xs, 0.25rem)',
+                        gridTemplateColumns: `repeat(${thumbCount}, 1fr)`,
+                        gap: 'var(--scm-spacing-xs, 0.5rem)',
                     }}
                 >
-                    {list.map((img, idx) => {
+                    {list.slice(0, thumbCount).map((img, idx) => {
                         const { src: thumbSrc } = pickSrc(img, idx, fallbackSlot);
                         const isActive = idx === activeIdx;
                         return (
@@ -99,12 +104,15 @@ export function ProductGallery({ images, productName, className, fallbackSlot }:
                                         backgroundColor: 'var(--scm-ivory, #F4F0E6)',
                                         cursor: 'pointer',
                                         overflow: 'hidden',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                     }}
                                 >
                                     <Img
                                         src={thumbSrc}
                                         alt=""
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                        style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
                                     />
                                 </Button>
                             </Li>

@@ -6,7 +6,12 @@ export interface CartItemRowItem {
     id: number | string;
     quantity: number;
     unit_price?: number | string;
+    unit_price_formatted?: string;
     line_total?: number | string;
+    line_total_formatted?: string;
+    /** CartItemResource exposes subtotal/subtotal_formatted directly on the item. */
+    subtotal?: number | string;
+    subtotal_formatted?: string;
     product?: {
         id?: number | string;
         code?: string;
@@ -16,10 +21,18 @@ export interface CartItemRowItem {
         thumbnail_slot?: string | null;
         selling_price?: number | string;
         selling_price_formatted?: string;
+        product_code?: string;
     } | null;
     option?: {
         id?: number | string;
         name?: string;
+    } | null;
+    product_option?: {
+        id?: number | string;
+        option_name?: string;
+        option_name_localized?: string;
+        selling_price?: number | string;
+        selling_price_formatted?: string;
     } | null;
 }
 
@@ -30,6 +43,7 @@ export interface CartItemRowProps {
     deleteLabel?: string;
     decreaseLabel?: string;
     increaseLabel?: string;
+    applyLabel?: string;
     minQuantity?: number;
     maxQuantity?: number;
     className?: string;
@@ -49,6 +63,7 @@ export function CartItemRow({
     deleteLabel = '삭제',
     decreaseLabel = 'decrease quantity',
     increaseLabel = 'increase quantity',
+    applyLabel = '변경',
     minQuantity = 1,
     maxQuantity = 99,
     className,
@@ -88,12 +103,18 @@ export function CartItemRow({
     };
 
     const name = item.product?.name_localized ?? item.product?.name ?? 'Product';
+    const code = item.product?.product_code ?? item.product?.code;
     const thumbSlot = item.product?.thumbnail_slot ?? 'product-1';
     const thumbUrl = item.product?.thumbnail_url ?? null;
     const thumbSrc =
         thumbUrl && thumbUrl.startsWith('/') ? thumbUrl : resolveSlotImage(thumbSlot);
-    const unitPrice = item.unit_price ?? item.product?.selling_price;
-    const lineTotal = item.line_total ?? unitPrice;
+    const unitPrice = item.unit_price ?? item.product_option?.selling_price ?? item.product?.selling_price;
+    const unitPriceFormatted = item.unit_price_formatted
+        ?? item.product_option?.selling_price_formatted
+        ?? item.product?.selling_price_formatted;
+    const lineTotal = item.subtotal ?? item.line_total ?? (unitPrice !== undefined ? Number(unitPrice) * item.quantity : undefined);
+    const lineTotalFormatted = item.subtotal_formatted ?? item.line_total_formatted;
+    const optionName = item.product_option?.option_name_localized || item.product_option?.option_name || item.option?.name;
 
     return (
         <Div
@@ -104,7 +125,7 @@ export function CartItemRow({
                 display: 'grid',
                 gridTemplateColumns: '5rem 1fr auto',
                 gap: 'var(--scm-spacing-md, 1rem)',
-                padding: 'var(--scm-spacing-md, 1rem) 0',
+                padding: 'var(--scm-spacing-lg, 1.5rem) 0',
                 borderBottom: '1px solid var(--scm-line, #E4DCCE)',
                 alignItems: 'flex-start',
             }}
@@ -143,7 +164,7 @@ export function CartItemRow({
                 >
                     {name}
                 </Span>
-                {item.product?.code ? (
+                {code ? (
                     <Span
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
@@ -151,7 +172,18 @@ export function CartItemRow({
                             color: 'var(--scm-text-muted, #8A837B)',
                         }}
                     >
-                        {item.product.code}
+                        {code}
+                    </Span>
+                ) : null}
+                {optionName ? (
+                    <Span
+                        style={{
+                            fontFamily: 'var(--scm-font-body, system-ui)',
+                            fontSize: '0.75rem',
+                            color: 'var(--scm-text-muted, #8A837B)',
+                        }}
+                    >
+                        옵션: {optionName}
                     </Span>
                 ) : null}
                 <Span
@@ -161,7 +193,7 @@ export function CartItemRow({
                         color: 'var(--scm-text-body, #4A4643)',
                     }}
                 >
-                    {formatPrice(unitPrice)}
+                    {unitPriceFormatted ?? formatPrice(unitPrice)}
                 </Span>
                 <Div
                     style={{
@@ -256,7 +288,7 @@ export function CartItemRow({
                             opacity: busy || localQty === item.quantity ? 0.5 : 1,
                         }}
                     >
-                        변경
+                        {applyLabel}
                     </Button>
                 </Div>
             </Div>
@@ -276,7 +308,7 @@ export function CartItemRow({
                         color: 'var(--scm-text-primary, #26221E)',
                     }}
                 >
-                    {formatPrice(lineTotal)}
+                    {lineTotalFormatted ?? formatPrice(lineTotal)}
                 </Span>
                 <Button
                     type="button"

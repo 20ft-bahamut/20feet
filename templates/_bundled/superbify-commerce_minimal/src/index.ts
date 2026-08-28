@@ -40,7 +40,11 @@ export {
     Section,
     Select,
     Span,
+    Table,
+    Td,
     Textarea,
+    Th,
+    Tr,
     Ul,
 } from './components/basic';
 
@@ -97,7 +101,11 @@ import {
     Section,
     Select,
     Span,
+    Table,
+    Td,
     Textarea,
+    Th,
+    Tr,
     Ul,
 } from './components/basic';
 import { Container } from './components/Container';
@@ -150,7 +158,11 @@ if (registry) {
     registry.register({ component: Section, metadata: { name: 'Section', type: 'basic' } });
     registry.register({ component: Select, metadata: { name: 'Select', type: 'basic' } });
     registry.register({ component: Span, metadata: { name: 'Span', type: 'basic' } });
+    registry.register({ component: Table, metadata: { name: 'Table', type: 'basic' } });
+    registry.register({ component: Td, metadata: { name: 'Td', type: 'basic' } });
     registry.register({ component: Textarea, metadata: { name: 'Textarea', type: 'basic' } });
+    registry.register({ component: Th, metadata: { name: 'Th', type: 'basic' } });
+    registry.register({ component: Tr, metadata: { name: 'Tr', type: 'basic' } });
     registry.register({ component: Ul, metadata: { name: 'Ul', type: 'basic' } });
 
     // Layout primitive

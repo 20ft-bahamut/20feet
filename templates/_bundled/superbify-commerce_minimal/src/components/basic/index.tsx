@@ -110,3 +110,19 @@ export function Select(props: React.ComponentPropsWithoutRef<'select'>): React.R
 export function Option(props: React.ComponentPropsWithoutRef<'option'>): React.ReactElement {
     return <option {...props} />;
 }
+
+export function Table(props: React.ComponentPropsWithoutRef<'table'>): React.ReactElement {
+    return <table {...props} />;
+}
+
+export function Tr(props: React.ComponentPropsWithoutRef<'tr'>): React.ReactElement {
+    return <tr {...props} />;
+}
+
+export function Th(props: React.ComponentPropsWithoutRef<'th'>): React.ReactElement {
+    return <th {...props} />;
+}
+
+export function Td(props: React.ComponentPropsWithoutRef<'td'>): React.ReactElement {
+    return <td {...props} />;
+}
