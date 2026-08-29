@@ -53,7 +53,7 @@
                 "type": "basic",
                 "name": "Section",
                 "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                    "paddingBlock": "var(--scm-section-py-md, 4rem)"
                 },
                 "children": [
                     {
@@ -66,7 +66,7 @@
                             "paddingInline": "var(--scm-gutter, 1rem)",
                             "display": "flex",
                             "flexDirection": "column",
-                            "gap": "var(--scm-spacing-md, 1rem)"
+                            "gap": "var(--scm-spacing-lg, 1.5rem)"
                         },
                         "children": [
                             {
@@ -89,8 +89,13 @@
                                 "style": {
                                     "display": "grid",
                                     "gridTemplateColumns": "minmax(0, 1.05fr) minmax(0, .95fr)",
-                                    "gap": "var(--scm-spacing-xl, 3rem)",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
                                     "alignItems": "start"
+                                },
+                                "responsive": {
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
+                                    }
                                 },
                                 "children": [
                                     {
@@ -100,7 +105,8 @@
                                         "props": {
                                             "images": "{{product_detail?.data?.images ?? []}}",
                                             "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
-                                            "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? 'product-1'}}"
+                                            "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? null}}",
+                                            "product": "{{product_detail?.data ?? null}}"
                                         }
                                     },
                                     {
@@ -110,7 +116,7 @@
                                         "style": {
                                             "display": "flex",
                                             "flexDirection": "column",
-                                            "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                            "gap": "var(--scm-spacing-md, 1rem)"
                                         },
                                         "children": [
                                             {
@@ -131,16 +137,17 @@
                                                 "name": "H1",
                                                 "style": {
                                                     "fontFamily": "var(--scm-font-display, system-ui)",
-                                                    "fontSize": "1.5rem",
-                                                    "fontWeight": 700,
-                                                    "letterSpacing": "-0.01em",
+                                                    "fontSize": "1.75rem",
+                                                    "fontWeight": 600,
+                                                    "letterSpacing": "-0.015em",
+                                                    "lineHeight": 1.2,
                                                     "color": "var(--scm-text-primary, #26221E)",
                                                     "margin": 0
                                                 },
                                                 "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
                                             },
                                             {
-                                                "id": "shop_product_description",
+                                                "id": "shop_product_short_description",
                                                 "type": "basic",
                                                 "name": "P",
                                                 "style": {
@@ -148,7 +155,8 @@
                                                     "fontSize": "0.9375rem",
                                                     "lineHeight": 1.7,
                                                     "color": "var(--scm-text-body, #4A4643)",
-                                                    "margin": 0
+                                                    "margin": 0,
+                                                    "maxWidth": "52ch"
                                                 },
                                                 "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
                                             },
@@ -174,7 +182,7 @@
                                                     "borderCollapse": "collapse",
                                                     "fontFamily": "var(--scm-font-body, system-ui)",
                                                     "fontSize": "0.82rem",
-                                                    "margin": "var(--scm-spacing-sm, 0.75rem) 0 var(--scm-spacing-md, 1rem)"
+                                                    "margin": "var(--scm-spacing-xs, 0.5rem) 0 0"
                                                 },
                                                 "children": [
                                                     {
@@ -292,6 +300,367 @@
                                         ]
                                     }
                                 ]
+                            },
+                            {
+                                "id": "shop_product_description_section",
+                                "type": "basic",
+                                "name": "Section",
+                                "aria-label": "description",
+                                "style": {
+                                    "display": "grid",
+                                    "gridTemplateColumns": "minmax(0, .35fr) minmax(0, 1fr)",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
+                                    "paddingTop": "var(--scm-section-py-sm, 2.5rem)",
+                                    "paddingBottom": "var(--scm-spacing-lg, 1.5rem)",
+                                    "borderTop": "1px solid var(--scm-line, #E4DCCE)"
+                                },
+                                "responsive": {
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "id": "shop_product_description_label",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-xs, 0.5rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_description_eyebrow",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-wood-dark, #A8916F)",
+                                                    "letterSpacing": "0.14em",
+                                                    "textTransform": "uppercase",
+                                                    "fontWeight": 600
+                                                },
+                                                "text": "$t:superbify.product.description_label"
+                                            },
+                                            {
+                                                "id": "shop_product_description_title",
+                                                "type": "basic",
+                                                "name": "H2",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.25rem",
+                                                    "fontWeight": 600,
+                                                    "letterSpacing": "-0.005em",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "margin": 0
+                                                },
+                                                "text": "$t:superbify.product.description_title"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "shop_product_description_body",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-sm, 0.75rem)",
+                                            "maxWidth": "65ch"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_description_text",
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9375rem",
+                                                    "lineHeight": 1.85,
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "margin": 0,
+                                                    "whiteSpace": "pre-line"
+                                                },
+                                                "text": "{{product_detail?.data?.description_localized ?? product_detail?.data?.description ?? product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? ''}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "shop_product_info_section",
+                                "type": "basic",
+                                "name": "Section",
+                                "aria-label": "info",
+                                "style": {
+                                    "display": "grid",
+                                    "gridTemplateColumns": "minmax(0, .35fr) minmax(0, 1fr)",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
+                                    "paddingTop": "var(--scm-spacing-lg, 1.5rem)",
+                                    "paddingBottom": "var(--scm-section-py-sm, 2.5rem)",
+                                    "borderTop": "1px solid var(--scm-line, #E4DCCE)"
+                                },
+                                "responsive": {
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "id": "shop_product_info_label",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-xs, 0.5rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_info_eyebrow",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-wood-dark, #A8916F)",
+                                                    "letterSpacing": "0.14em",
+                                                    "textTransform": "uppercase",
+                                                    "fontWeight": 600
+                                                },
+                                                "text": "$t:superbify.product.info_label"
+                                            },
+                                            {
+                                                "id": "shop_product_info_title",
+                                                "type": "basic",
+                                                "name": "H2",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.25rem",
+                                                    "fontWeight": 600,
+                                                    "letterSpacing": "-0.005em",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "margin": 0
+                                                },
+                                                "text": "$t:superbify.product.info_title"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "shop_product_info_list",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "grid",
+                                            "gridTemplateColumns": "minmax(0, 0.45fr) minmax(0, 1fr)",
+                                            "columnGap": "var(--scm-spacing-lg, 1.5rem)",
+                                            "rowGap": 0,
+                                            "maxWidth": "65ch",
+                                            "margin": 0,
+                                            "padding": 0
+                                        },
+                                        "responsive": {
+                                            "mobile": {
+                                                "style": { "gridTemplateColumns": "minmax(0, 0.45fr) minmax(0, 1fr)" }
+                                            }
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_info_material_label",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                    "textTransform": "uppercase",
+                                                    "letterSpacing": "0.08em",
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)",
+                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                },
+                                                "text": "$t:superbify.product.info.material"
+                                            },
+                                            {
+                                                "id": "shop_product_info_material_body",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9375rem",
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "lineHeight": 1.75,
+                                                    "margin": 0,
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)",
+                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                },
+                                                "text": "$t:superbify.product.info.material_body"
+                                            },
+                                            {
+                                                "id": "shop_product_info_size_label",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                    "textTransform": "uppercase",
+                                                    "letterSpacing": "0.08em",
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)",
+                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                },
+                                                "text": "$t:superbify.product.info.size"
+                                            },
+                                            {
+                                                "id": "shop_product_info_size_body",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9375rem",
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "lineHeight": 1.75,
+                                                    "margin": 0,
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)",
+                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                },
+                                                "text": "$t:superbify.product.info.size_body"
+                                            },
+                                            {
+                                                "id": "shop_product_info_care_label",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                    "textTransform": "uppercase",
+                                                    "letterSpacing": "0.08em",
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)"
+                                                },
+                                                "text": "$t:superbify.product.info.care"
+                                            },
+                                            {
+                                                "id": "shop_product_info_care_body",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.9375rem",
+                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                    "lineHeight": 1.75,
+                                                    "margin": 0,
+                                                    "paddingBlock": "var(--scm-spacing-md, 1rem)"
+                                                },
+                                                "text": "$t:superbify.product.info.care_body"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "shop_product_shipping_section",
+                                "type": "basic",
+                                "name": "Section",
+                                "aria-label": "shipping",
+                                "style": {
+                                    "display": "grid",
+                                    "gridTemplateColumns": "minmax(0, .35fr) minmax(0, 1fr)",
+                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
+                                    "paddingTop": "var(--scm-spacing-lg, 1.5rem)",
+                                    "paddingBottom": "var(--scm-section-py-sm, 2.5rem)",
+                                    "borderTop": "1px solid var(--scm-line, #E4DCCE)"
+                                },
+                                "responsive": {
+                                    "mobile": {
+                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                    }
+                                },
+                                "children": [
+                                    {
+                                        "id": "shop_product_shipping_label",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-xs, 0.5rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "id": "shop_product_shipping_eyebrow",
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-wood-dark, #A8916F)",
+                                                    "letterSpacing": "0.14em",
+                                                    "textTransform": "uppercase",
+                                                    "fontWeight": 600
+                                                },
+                                                "text": "$t:superbify.product.shipping_label"
+                                            },
+                                            {
+                                                "id": "shop_product_shipping_title",
+                                                "type": "basic",
+                                                "name": "H2",
+                                                "style": {
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.25rem",
+                                                    "fontWeight": 600,
+                                                    "letterSpacing": "-0.005em",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "margin": 0
+                                                },
+                                                "text": "$t:superbify.product.shipping_title"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "shop_product_shipping_body",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.9375rem",
+                                            "color": "var(--scm-text-body, #4A4643)",
+                                            "lineHeight": 1.85,
+                                            "margin": 0,
+                                            "maxWidth": "65ch",
+                                            "whiteSpace": "pre-line"
+                                        },
+                                        "text": "$t:superbify.product.shipping_body"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "shop_product_brand",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "paddingBlock": "var(--scm-section-py-md, 4rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_product_brand_block",
+                                "type": "composite",
+                                "name": "BrandStorySection",
+                                "props": {
+                                    "eyebrow": "$t:superbify.home.story.eyebrow",
+                                    "heading": "$t:superbify.home.story.heading",
+                                    "body": "$t:superbify.home.story.body",
+                                    "ctaLabel": "$t:superbify.home.hero.cta_secondary",
+                                    "ctaHref": "/shop/story",
+                                    "mediaSlot": "hero-mood-2",
+                                    "layout": "split"
+                                }
                             }
                         ]
                     },

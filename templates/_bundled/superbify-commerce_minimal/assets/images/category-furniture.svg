@@ -1,7 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
-  <rect width="800" height="600" fill="#F4F0E6"/>
-  <rect x="180" y="220" width="440" height="180" rx="18" fill="#C9B08D"/>
-  <rect x="220" y="400" width="40" height="80" fill="#A8916F"/>
-  <rect x="540" y="400" width="40" height="80" fill="#A8916F"/>
-  <rect x="240" y="260" width="320" height="100" rx="10" fill="#A8916F" opacity="0.5"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600"><rect width="800" height="600" fill="#F4F0E6"/>
+     <ellipse cx="400" cy="470" rx="240" ry="8" fill="#E4DCCE"/>
+     <g transform="translate(180,180)">
+       <rect x="0" y="180" width="440" height="60" rx="6" fill="#C9B08D" stroke="#A8916F" stroke-width="2"/>
+       <rect x="0" y="0" width="20" height="240" fill="#A8916F"/>
+       <rect x="420" y="0" width="20" height="240" fill="#A8916F"/>
+       <rect x="6" y="240" width="8" height="50" fill="#A8916F"/>
+       <rect x="426" y="240" width="8" height="50" fill="#A8916F"/>
+       <rect x="40" y="170" width="360" height="20" rx="3" fill="#A8916F" opacity="0.5"/>
+     </g></svg>

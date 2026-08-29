@@ -1,5 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
-  <rect width="600" height="600" fill="#F4F0E6"/>
-  <rect x="180" y="220" width="240" height="240" rx="16" fill="#C9B08D"/>
-  <rect x="210" y="250" width="180" height="180" rx="10" fill="#A8916F" opacity="0.5"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600"><rect width="600" height="600" fill="#F4F0E6"/>
+     <ellipse cx="300" cy="440" rx="90" ry="6" fill="#E4DCCE"/>
+     <!-- glass body (no handle, slightly tapered cylinder) -->
+     <path d="M222 200 L234 410 Q234 422 246 422 L354 422 Q366 422 366 410 L378 200 Z"
+           fill="#F8F4EA" stroke="#26221E" stroke-width="1.5"/>
+     <!-- rim ellipse -->
+     <ellipse cx="300" cy="200" rx="78" ry="10" fill="none" stroke="#26221E" stroke-width="1.5"/>
+     <ellipse cx="300" cy="200" rx="72" ry="7" fill="#F4F0E6" opacity="0.6"/>
+     <!-- water/liquid line -->
+     <line x1="234" y1="270" x2="370" y2="270" stroke="#26221E" stroke-width="1" opacity="0.35"/>
+     <!-- highlight -->
+     <line x1="244" y1="220" x2="240" y2="370" stroke="#F4F0E6" stroke-width="3" opacity="0.85"/></svg>

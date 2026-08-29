@@ -1,63 +1,51 @@
 import React from 'react';
-import { A, Div, H2, P, Span } from './basic';
-import { resolveSlotImage } from './imageSlots';
+import { A, Div, P, Span } from './basic';
 
-export interface BrandStorySectionProps {
+export interface EditorialBannerProps {
     eyebrow?: string;
-    heading?: string;
+    heading: string;
     body?: string;
     ctaLabel?: string;
     ctaHref?: string;
     className?: string;
-    /** Slot id of a side image. */
-    mediaSlot?: string;
-    /** Visual variant. 'split' = image+text 2-col (default). 'stacked' = type only. */
-    layout?: 'split' | 'stacked';
+    /** Toggle: render the body in inverted (charcoal background) style. Defaults to ivory. */
+    inverted?: boolean;
 }
 
-export function BrandStorySection({
+/**
+ * Full-width editorial band: large display heading + thin wood rule + CTA link.
+ * Used on home to break product grids with type.
+ */
+export function EditorialBanner({
     eyebrow,
     heading,
     body,
     ctaLabel,
     ctaHref,
     className,
-    mediaSlot = 'hero-mood-1',
-    layout = 'split',
-}: BrandStorySectionProps): React.ReactElement {
-    const mediaSrc = resolveSlotImage(mediaSlot);
-    const isSplit = layout === 'split';
+    inverted = false,
+}: EditorialBannerProps): React.ReactElement {
+    const dark = inverted;
     return (
         <Div
             className={className}
+            data-testid="editorial-banner"
             style={{
-                display: 'grid',
-                gridTemplateColumns: isSplit ? 'minmax(0, 1fr) minmax(0, 1fr)' : '1fr',
-                gap: 'var(--scm-spacing-xl, 2.5rem)',
-                alignItems: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--scm-spacing-md, 1rem)',
                 paddingBlock: 'var(--scm-section-py-md, 4rem)',
+                paddingInline: 'var(--scm-gutter, 1rem)',
+                backgroundColor: dark ? 'var(--scm-bg-surface-dark, #26221E)' : 'var(--scm-bg-secondary, #F4F0E6)',
+                color: dark ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-primary, #26221E)',
+                borderRadius: 'var(--scm-radius, 8px)',
             }}
-            data-testid="brand-story-section"
         >
-            {isSplit ? (
-                <Div
-                    style={{
-                        aspectRatio: '4 / 5',
-                        backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                        borderRadius: 'var(--scm-radius, 8px)',
-                        overflow: 'hidden',
-                    }}
-                    aria-hidden
-                >
-                    <img
-                        src={mediaSrc}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                </Div>
-            ) : null}
             <Div
                 style={{
+                    maxWidth: 'var(--scm-max-width, 1200px)',
+                    marginInline: 'auto',
+                    width: '100%',
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 'var(--scm-spacing-md, 1rem)',
@@ -68,7 +56,7 @@ export function BrandStorySection({
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.75rem',
-                            color: 'var(--scm-wood-dark, #A8916F)',
+                            color: dark ? 'var(--scm-wood, #C9B08D)' : 'var(--scm-wood-dark, #A8916F)',
                             letterSpacing: '0.14em',
                             textTransform: 'uppercase',
                             fontWeight: 600,
@@ -77,40 +65,46 @@ export function BrandStorySection({
                         {eyebrow}
                     </Span>
                 ) : null}
-                <span
+                <Div
                     style={{
-                        display: 'block',
-                        width: '48px',
-                        height: '1px',
-                        backgroundColor: 'var(--scm-wood, #C9B08D)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 'var(--scm-spacing-sm, 0.75rem)',
+                        maxWidth: '32ch',
                     }}
-                    aria-hidden
-                />
-                {heading ? (
-                    <H2
+                >
+                    <span
+                        style={{
+                            display: 'block',
+                            width: '48px',
+                            height: '1px',
+                            backgroundColor: dark ? 'var(--scm-wood, #C9B08D)' : 'var(--scm-wood, #C9B08D)',
+                        }}
+                        aria-hidden
+                    />
+                    <h2
                         style={{
                             fontFamily: 'var(--scm-font-display, system-ui)',
-                            fontSize: 'clamp(1.5rem, 3.6vw, 2.25rem)',
+                            fontSize: 'clamp(1.875rem, 4.5vw, 2.75rem)',
                             fontWeight: 600,
-                            letterSpacing: '-0.01em',
                             lineHeight: 1.18,
-                            color: 'var(--scm-text-primary, #26221E)',
+                            letterSpacing: '-0.01em',
                             margin: 0,
-                            maxWidth: '22ch',
+                            color: 'inherit',
                         }}
                     >
                         {heading}
-                    </H2>
-                ) : null}
+                    </h2>
+                </Div>
                 {body ? (
                     <P
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.9375rem',
-                            color: 'var(--scm-text-body, #4A4643)',
-                            lineHeight: 1.8,
+                            lineHeight: 1.7,
+                            color: dark ? 'rgba(250, 248, 243, 0.78)' : 'var(--scm-text-body, #4A4643)',
                             margin: 0,
-                            maxWidth: '52ch',
+                            maxWidth: '56ch',
                         }}
                     >
                         {body}
@@ -126,13 +120,14 @@ export function BrandStorySection({
                             alignItems: 'center',
                             gap: 'var(--scm-spacing-2xs, 0.25rem)',
                             paddingBlock: 'var(--scm-spacing-xs, 0.5rem)',
-                            marginTop: 'var(--scm-spacing-xs, 0.5rem)',
-                            color: 'var(--scm-text-primary, #26221E)',
+                            marginTop: 'var(--scm-spacing-2xs, 0.25rem)',
+                            color: 'inherit',
                             textDecoration: 'none',
-                            borderBottom: '1px solid var(--scm-charcoal, #26221E)',
+                            borderBottom: `1px solid ${dark ? 'var(--scm-wood, #C9B08D)' : 'var(--scm-charcoal, #26221E)'}`,
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.9375rem',
                             fontWeight: 600,
+                            letterSpacing: '0.02em',
                         }}
                     >
                         <span>{ctaLabel}</span>
@@ -144,4 +139,4 @@ export function BrandStorySection({
     );
 }
 
-export default BrandStorySection;
+export default EditorialBanner;

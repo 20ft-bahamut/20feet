@@ -82,7 +82,7 @@ export function Price({
                 </Span>
             ) : null}
             {discount && discount > 0 ? (
-                <Badge tone="discount" label={`-${Math.round(discount)}%`} />
+                <Badge tone="discount-soft" label={`-${Math.round(discount)}%`} />
             ) : null}
         </Div>
     );

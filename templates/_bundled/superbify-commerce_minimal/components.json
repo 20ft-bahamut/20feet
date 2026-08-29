@@ -217,6 +217,12 @@
         "path": "src/components/PromoBanner.tsx"
       },
       {
+        "name": "EditorialBanner",
+        "type": "composite",
+        "description": "Editorial typography band with thin wood rule",
+        "path": "src/components/EditorialBanner.tsx"
+      },
+      {
         "name": "CategoryNav",
         "type": "composite",
         "description": "Horizontal category navigation",
@@ -227,6 +233,12 @@
         "type": "composite",
         "description": "Category preview card with image and label",
         "path": "src/components/CategoryCard.tsx"
+      },
+      {
+        "name": "CategoryPreviewStrip",
+        "type": "composite",
+        "description": "Horizontal scrollable category preview strip",
+        "path": "src/components/CategoryPreviewStrip.tsx"
       },
       {
         "name": "ProductCard",
@@ -269,6 +281,12 @@
         "type": "composite",
         "description": "Brand story narrative block",
         "path": "src/components/BrandStorySection.tsx"
+      },
+      {
+        "name": "CrossSellStrip",
+        "type": "composite",
+        "description": "Cross-sell product strip rendered under cart items",
+        "path": "src/components/CrossSellStrip.tsx"
       },
       {
         "name": "EmptyState",

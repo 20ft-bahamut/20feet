@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Div, Img, Input, Span } from './basic';
-import { resolveSlotImage } from './imageSlots';
+import { resolveStillLifeThumb } from './stillLifeSlot';
 
 export interface CartItemRowItem {
     id: number | string;
@@ -104,10 +104,12 @@ export function CartItemRow({
 
     const name = item.product?.name_localized ?? item.product?.name ?? 'Product';
     const code = item.product?.product_code ?? item.product?.code;
-    const thumbSlot = item.product?.thumbnail_slot ?? 'product-1';
-    const thumbUrl = item.product?.thumbnail_url ?? null;
-    const thumbSrc =
-        thumbUrl && thumbUrl.startsWith('/') ? thumbUrl : resolveSlotImage(thumbSlot);
+    const { src: thumbSrc } = resolveStillLifeThumb({
+        id: item.product?.id ?? item.id,
+        product_code: item.product?.product_code ?? item.product?.code ?? code,
+        thumbnail_url: item.product?.thumbnail_url ?? null,
+        thumbnail_slot: item.product?.thumbnail_slot ?? null,
+    });
     const unitPrice = item.unit_price ?? item.product_option?.selling_price ?? item.product?.selling_price;
     const unitPriceFormatted = item.unit_price_formatted
         ?? item.product_option?.selling_price_formatted
@@ -123,7 +125,7 @@ export function CartItemRow({
             data-item-id={item.id}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '5rem 1fr auto',
+                gridTemplateColumns: '5.25rem 1fr auto',
                 gap: 'var(--scm-spacing-md, 1rem)',
                 padding: 'var(--scm-spacing-lg, 1.5rem) 0',
                 borderBottom: '1px solid var(--scm-line, #E4DCCE)',
@@ -132,11 +134,12 @@ export function CartItemRow({
         >
             <Div
                 style={{
-                    width: '5rem',
+                    width: '5.25rem',
                     aspectRatio: '1 / 1',
                     borderRadius: 'var(--scm-radius-sm, 4px)',
                     overflow: 'hidden',
-                    backgroundColor: 'var(--scm-ivory, #F4F0E6)',
+                    backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+                    border: '1px solid var(--scm-line, #E4DCCE)',
                 }}
             >
                 <Img
@@ -153,28 +156,38 @@ export function CartItemRow({
                     minWidth: 0,
                 }}
             >
-                <Span
+                <Div
                     style={{
-                        fontFamily: 'var(--scm-font-body, system-ui)',
-                        fontSize: '0.95rem',
-                        fontWeight: 600,
-                        color: 'var(--scm-text-primary, #26221E)',
-                        wordBreak: 'break-word',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '2px',
                     }}
                 >
-                    {name}
-                </Span>
-                {code ? (
                     <Span
                         style={{
-                            fontFamily: 'var(--scm-font-body, system-ui)',
-                            fontSize: '0.75rem',
-                            color: 'var(--scm-text-muted, #8A837B)',
+                            fontFamily: 'var(--scm-font-display, system-ui)',
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            color: 'var(--scm-text-primary, #26221E)',
+                            wordBreak: 'break-word',
+                            lineHeight: 1.4,
                         }}
                     >
-                        {code}
+                        {name}
                     </Span>
-                ) : null}
+                    {code ? (
+                        <Span
+                            style={{
+                                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                                fontSize: '0.6875rem',
+                                color: 'var(--scm-text-muted, #8A837B)',
+                                letterSpacing: '0.04em',
+                            }}
+                        >
+                            {code}
+                        </Span>
+                    ) : null}
+                </Div>
                 {optionName ? (
                     <Span
                         style={{
@@ -189,8 +202,9 @@ export function CartItemRow({
                 <Span
                     style={{
                         fontFamily: 'var(--scm-font-body, system-ui)',
-                        fontSize: '0.85rem',
+                        fontSize: '0.875rem',
                         color: 'var(--scm-text-body, #4A4643)',
+                        marginTop: '2px',
                     }}
                 >
                     {unitPriceFormatted ?? formatPrice(unitPrice)}
@@ -200,7 +214,7 @@ export function CartItemRow({
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: 'var(--scm-spacing-sm, 0.75rem)',
-                        marginTop: 'var(--scm-spacing-xs, 0.5rem)',
+                        marginTop: 'var(--scm-spacing-sm, 0.75rem)',
                     }}
                 >
                     <Div
@@ -212,7 +226,7 @@ export function CartItemRow({
                             border: '1px solid var(--scm-line, #E4DCCE)',
                             borderRadius: 'var(--scm-radius-sm, 4px)',
                             overflow: 'hidden',
-                            backgroundColor: 'var(--scm-surface, #FAF8F3)',
+                            backgroundColor: 'var(--scm-paper, #FAF8F3)',
                         }}
                     >
                         <Button
@@ -220,13 +234,16 @@ export function CartItemRow({
                             aria-label={decreaseLabel}
                             onClick={() => setLocalQty((q) => clamp(q - 1))}
                             disabled={localQty <= minQuantity}
+                            data-scm-interactive
                             style={{
-                                padding: '0.35rem 0.7rem',
+                                padding: '0 0.6rem',
+                                minHeight: '36px',
                                 background: 'transparent',
                                 border: 'none',
                                 cursor: localQty <= minQuantity ? 'not-allowed' : 'pointer',
-                                color: 'var(--scm-text-body, #4A4643)',
-                                fontSize: '0.9rem',
+                                color: 'var(--scm-text-primary, #26221E)',
+                                fontSize: '0.95rem',
+                                fontFamily: 'var(--scm-font-body, system-ui)',
                             }}
                         >
                             −
@@ -249,9 +266,10 @@ export function CartItemRow({
                                 borderLeft: '1px solid var(--scm-line, #E4DCCE)',
                                 borderRight: '1px solid var(--scm-line, #E4DCCE)',
                                 background: 'transparent',
-                                color: 'var(--scm-text-body, #4A4643)',
+                                color: 'var(--scm-text-primary, #26221E)',
                                 fontFamily: 'var(--scm-font-body, system-ui)',
-                                fontSize: '0.85rem',
+                                fontSize: '0.875rem',
+                                fontWeight: 500,
                                 MozAppearance: 'textfield',
                             }}
                         />
@@ -260,13 +278,16 @@ export function CartItemRow({
                             aria-label={increaseLabel}
                             onClick={() => setLocalQty((q) => clamp(q + 1))}
                             disabled={localQty >= maxQuantity}
+                            data-scm-interactive
                             style={{
-                                padding: '0.35rem 0.7rem',
+                                padding: '0 0.6rem',
+                                minHeight: '36px',
                                 background: 'transparent',
                                 border: 'none',
                                 cursor: localQty >= maxQuantity ? 'not-allowed' : 'pointer',
-                                color: 'var(--scm-text-body, #4A4643)',
-                                fontSize: '0.9rem',
+                                color: 'var(--scm-text-primary, #26221E)',
+                                fontSize: '0.95rem',
+                                fontFamily: 'var(--scm-font-body, system-ui)',
                             }}
                         >
                             +
@@ -277,13 +298,16 @@ export function CartItemRow({
                         onClick={onBlur}
                         disabled={busy || localQty === item.quantity}
                         data-testid="cart-qty-apply"
+                        data-scm-interactive
                         style={{
-                            padding: '0.35rem 0.7rem',
+                            minHeight: '36px',
+                            padding: '0 var(--scm-spacing-sm, 0.75rem)',
                             background: 'transparent',
                             border: '1px solid var(--scm-line, #E4DCCE)',
                             borderRadius: 'var(--scm-radius-sm, 4px)',
-                            color: 'var(--scm-text-body, #4A4643)',
-                            fontSize: '0.8rem',
+                            color: 'var(--scm-text-primary, #26221E)',
+                            fontSize: '0.8125rem',
+                            fontWeight: 500,
                             cursor: busy || localQty === item.quantity ? 'not-allowed' : 'pointer',
                             opacity: busy || localQty === item.quantity ? 0.5 : 1,
                         }}
@@ -297,13 +321,15 @@ export function CartItemRow({
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'flex-end',
+                    justifyContent: 'space-between',
                     gap: 'var(--scm-spacing-sm, 0.75rem)',
+                    minHeight: '5.25rem',
                 }}
             >
                 <Span
                     style={{
-                        fontFamily: 'var(--scm-font-body, system-ui)',
-                        fontSize: '0.95rem',
+                        fontFamily: 'var(--scm-font-display, system-ui)',
+                        fontSize: '1rem',
                         fontWeight: 600,
                         color: 'var(--scm-text-primary, #26221E)',
                     }}
@@ -315,13 +341,15 @@ export function CartItemRow({
                     onClick={onDelete}
                     aria-label={deleteLabel}
                     data-testid="cart-item-delete"
+                    data-scm-interactive
                     style={{
-                        padding: '0.35rem 0.7rem',
+                        minHeight: '36px',
+                        padding: '0 var(--scm-spacing-sm, 0.75rem)',
                         background: 'transparent',
                         border: '1px solid var(--scm-line, #E4DCCE)',
                         borderRadius: 'var(--scm-radius-sm, 4px)',
                         color: 'var(--scm-text-muted, #8A837B)',
-                        fontSize: '0.8rem',
+                        fontSize: '0.8125rem',
                         cursor: 'pointer',
                     }}
                 >

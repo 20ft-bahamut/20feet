@@ -20,7 +20,10 @@ export {
     Article,
     Aside,
     Button,
+    Dd,
     Div,
+    Dl,
+    Dt,
     Form,
     Footer,
     H1,
@@ -59,7 +62,10 @@ export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './comp
 export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';
 export { CategoryNav, type CategoryNavProps } from './components/CategoryNav';
+export { CategoryPreviewStrip, type CategoryPreviewStripProps } from './components/CategoryPreviewStrip';
 export { ConfirmDialog, type ConfirmDialogProps } from './components/ConfirmDialog';
+export { CrossSellStrip, type CrossSellStripProps } from './components/CrossSellStrip';
+export { EditorialBanner, type EditorialBannerProps } from './components/EditorialBanner';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { HeroBanner, type HeroBannerProps } from './components/HeroBanner';
 export { Price, type PriceProps } from './components/Price';
@@ -81,7 +87,10 @@ import {
     Article,
     Aside,
     Button,
+    Dd,
     Div,
+    Dl,
+    Dt,
     Form,
     Footer,
     H1,
@@ -116,7 +125,10 @@ import { CartItemRow } from './components/CartItemRow';
 import { CartSummary } from './components/CartSummary';
 import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
+import { CategoryPreviewStrip } from './components/CategoryPreviewStrip';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { CrossSellStrip } from './components/CrossSellStrip';
+import { EditorialBanner } from './components/EditorialBanner';
 import { EmptyState } from './components/EmptyState';
 import { HeroBanner } from './components/HeroBanner';
 import { Price } from './components/Price';
@@ -138,7 +150,10 @@ if (registry) {
     registry.register({ component: Article, metadata: { name: 'Article', type: 'basic' } });
     registry.register({ component: Aside, metadata: { name: 'Aside', type: 'basic' } });
     registry.register({ component: Button, metadata: { name: 'Button', type: 'basic' } });
+    registry.register({ component: Dd, metadata: { name: 'Dd', type: 'basic' } });
     registry.register({ component: Div, metadata: { name: 'Div', type: 'basic' } });
+    registry.register({ component: Dl, metadata: { name: 'Dl', type: 'basic' } });
+    registry.register({ component: Dt, metadata: { name: 'Dt', type: 'basic' } });
     registry.register({ component: Form, metadata: { name: 'Form', type: 'basic' } });
     registry.register({ component: Footer, metadata: { name: 'Footer', type: 'basic' } });
     registry.register({ component: H1, metadata: { name: 'H1', type: 'basic' } });
@@ -176,7 +191,10 @@ if (registry) {
     registry.register({ component: CartSummary, metadata: { name: 'CartSummary', type: 'composite' } });
     registry.register({ component: CategoryCard, metadata: { name: 'CategoryCard', type: 'composite' } });
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });
+    registry.register({ component: CategoryPreviewStrip, metadata: { name: 'CategoryPreviewStrip', type: 'composite' } });
     registry.register({ component: ConfirmDialog, metadata: { name: 'ConfirmDialog', type: 'composite' } });
+    registry.register({ component: CrossSellStrip, metadata: { name: 'CrossSellStrip', type: 'composite' } });
+    registry.register({ component: EditorialBanner, metadata: { name: 'EditorialBanner', type: 'composite' } });
     registry.register({ component: EmptyState, metadata: { name: 'EmptyState', type: 'composite' } });
     registry.register({ component: HeroBanner, metadata: { name: 'HeroBanner', type: 'composite' } });
     registry.register({ component: Price, metadata: { name: 'Price', type: 'composite' } });

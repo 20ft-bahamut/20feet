@@ -8,8 +8,12 @@ export interface HeroBannerProps {
     secondaryCtaLabel?: string;
     secondaryCtaHref?: string;
     className?: string;
-    /** Slot id of the background image; falls back to a neutral CSS block. */
+    /** Slot id of the visual tile image. */
     mediaSlot?: string;
+    /** When true, render a soft ivory border/veil around the visual tile. */
+    veil?: boolean;
+    /** Visual variant — 'full' (default) bleeds the section edges, 'contained' adds side gutter. */
+    bleed?: 'full' | 'contained';
 }
-export declare function HeroBanner({ eyebrow, headline, sub, primaryCtaLabel, primaryCtaHref, secondaryCtaLabel, secondaryCtaHref, className, mediaSlot, }: HeroBannerProps): React.ReactElement;
+export declare function HeroBanner({ eyebrow, headline, sub, primaryCtaLabel, primaryCtaHref, secondaryCtaLabel, secondaryCtaHref, className, mediaSlot, veil, bleed, }: HeroBannerProps): React.ReactElement;
 export default HeroBanner;

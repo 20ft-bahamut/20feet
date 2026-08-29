@@ -38,7 +38,7 @@
                 "type": "basic",
                 "name": "Section",
                 "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                    "paddingBlock": "var(--scm-section-py-md, 4rem)"
                 },
                 "children": [
                     {
@@ -49,17 +49,57 @@
                             "maxWidth": "var(--scm-max-width, 1200px)",
                             "marginInline": "auto",
                             "paddingInline": "var(--scm-gutter, 1rem)",
-                            "display": "grid",
-                            "gridTemplateColumns": "1fr",
-                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-xl, 2.5rem)"
                         },
                         "children": [
+                            {
+                                "id": "shop_index_header",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-xs, 0.5rem)"
+                                },
+                                "children": [
+                                    {
+                                        "id": "shop_index_eyebrow",
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.75rem",
+                                            "color": "var(--scm-wood-dark, #A8916F)",
+                                            "letterSpacing": "0.14em",
+                                            "textTransform": "uppercase",
+                                            "fontWeight": 600
+                                        },
+                                        "text": "$t:superbify.home.featured_categories.eyebrow"
+                                    },
+                                    {
+                                        "id": "shop_index_heading",
+                                        "type": "basic",
+                                        "name": "H1",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-display, system-ui)",
+                                            "fontSize": "2rem",
+                                            "fontWeight": 600,
+                                            "letterSpacing": "-0.01em",
+                                            "color": "var(--scm-text-primary, #26221E)",
+                                            "margin": 0
+                                        },
+                                        "text": "$t:superbify.shop.title"
+                                    }
+                                ]
+                            },
                             {
                                 "id": "shop_index_categories",
                                 "type": "composite",
                                 "name": "CategoryNav",
                                 "props": {
-                                    "title": "$t:superbify.home.featured_categories.heading",
+                                    "title": "$t:superbify.shop.filter_label",
                                     "allLabel": "$t:superbify.common.all",
                                     "items": "{{categories?.data?.data ?? categories?.data ?? []}}"
                                 }
@@ -71,8 +111,10 @@
                                 "props": {
                                     "items": "{{products?.data?.data ?? products?.data ?? []}}",
                                     "loading": "{{products?.loading ?? false}}",
+                                    "variant": "standard",
                                     "emptyTitle": "$t:superbify.shop.empty_title",
-                                    "emptyMessage": "$t:superbify.shop.empty_message"
+                                    "emptyMessage": "$t:superbify.shop.empty_message",
+                                    "quickAddLabel": "$t:superbify.product.quick_add"
                                 }
                             }
                         ]

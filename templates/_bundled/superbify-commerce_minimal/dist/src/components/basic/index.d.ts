@@ -26,6 +26,9 @@ export declare function Textarea(props: React.ComponentPropsWithoutRef<'textarea
 export declare function Select(props: React.ComponentPropsWithoutRef<'select'>): React.ReactElement;
 export declare function Option(props: React.ComponentPropsWithoutRef<'option'>): React.ReactElement;
 export declare function Table(props: React.ComponentPropsWithoutRef<'table'>): React.ReactElement;
+export declare function Dl(props: React.ComponentPropsWithoutRef<'dl'>): React.ReactElement;
+export declare function Dt(props: React.ComponentPropsWithoutRef<'dt'>): React.ReactElement;
+export declare function Dd(props: React.ComponentPropsWithoutRef<'dd'>): React.ReactElement;
 export declare function Tr(props: React.ComponentPropsWithoutRef<'tr'>): React.ReactElement;
 export declare function Th(props: React.ComponentPropsWithoutRef<'th'>): React.ReactElement;
 export declare function Td(props: React.ComponentPropsWithoutRef<'td'>): React.ReactElement;

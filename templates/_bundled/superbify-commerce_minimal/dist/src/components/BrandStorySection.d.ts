@@ -8,6 +8,8 @@ export interface BrandStorySectionProps {
     className?: string;
     /** Slot id of a side image. */
     mediaSlot?: string;
+    /** Visual variant. 'split' = image+text 2-col (default). 'stacked' = type only. */
+    layout?: 'split' | 'stacked';
 }
-export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, }: BrandStorySectionProps): React.ReactElement;
+export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, layout, }: BrandStorySectionProps): React.ReactElement;
 export default BrandStorySection;

@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
-  <rect width="600" height="600" fill="#F4F0E6"/>
-  <rect x="200" y="200" width="260" height="260" rx="16" fill="#C9B08D"/>
-  <rect x="230" y="230" width="200" height="200" rx="10" fill="#A8916F" opacity="0.5"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600"><rect width="600" height="600" fill="#F4F0E6"/>
+     <ellipse cx="300" cy="430" rx="190" ry="8" fill="#E4DCCE"/>
+     <ellipse cx="300" cy="340" rx="170" ry="48" fill="#C9B08D" stroke="#A8916F" stroke-width="2"/>
+     <ellipse cx="300" cy="335" rx="150" ry="36" fill="#A8916F" opacity="0.55"/>
+     <path d="M110 320 Q70 340 110 360" fill="none" stroke="#A8916F" stroke-width="6" stroke-linecap="round"/>
+     <path d="M490 320 Q530 340 490 360" fill="none" stroke="#A8916F" stroke-width="6" stroke-linecap="round"/>
+     <!-- mug sitting on tray -->
+     <path d="M260 290 L260 332 Q260 342 270 342 L330 342 Q340 342 340 332 L340 290 Z" fill="#F4F0E6" stroke="#26221E" stroke-width="1.5"/>
+     <ellipse cx="300" cy="290" rx="40" ry="6" fill="#26221E" opacity="0.6"/></svg>

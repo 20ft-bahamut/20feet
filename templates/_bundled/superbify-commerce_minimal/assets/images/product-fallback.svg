@@ -1,5 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
-  <rect width="600" height="600" fill="#F4F0E6"/>
-  <rect x="180" y="200" width="240" height="240" rx="20" fill="#E4DCCE"/>
-  <rect x="220" y="240" width="160" height="160" rx="12" fill="#C9B08D" opacity="0.7"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600"><rect width="600" height="600" fill="#F4F0E6"/>
+     <ellipse cx="300" cy="430" rx="140" ry="6" fill="#E4DCCE"/>
+     <ellipse cx="300" cy="320" rx="140" ry="38" fill="#C9B08D" stroke="#A8916F" stroke-width="2"/>
+     <ellipse cx="300" cy="312" rx="118" ry="28" fill="#A8916F" opacity="0.55"/></svg>

@@ -18,6 +18,18 @@
             "auth_mode": "optional",
             "loading_strategy": "progressive",
             "fallback": { "data": { "items": [], "item_ids": [], "item_count": 0, "calculation": null } }
+        },
+        {
+            "id": "cart_cross_sell",
+            "label_key": "$t:superbify.data_source.popular_products",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/popular",
+            "method": "GET",
+            "params": {
+                "limit": 4
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
         }
     ],
     "init_actions": [
@@ -33,7 +45,7 @@
                 "type": "basic",
                 "name": "Section",
                 "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                    "paddingBlock": "var(--scm-section-py-md, 4rem)"
                 },
                 "children": [
                     {
@@ -46,21 +58,48 @@
                             "paddingInline": "var(--scm-gutter, 1rem)",
                             "display": "flex",
                             "flexDirection": "column",
-                            "gap": "var(--scm-spacing-md, 1rem)"
+                            "gap": "var(--scm-spacing-lg, 1.5rem)"
                         },
                         "children": [
                             {
-                                "id": "cart_page_title",
+                                "id": "cart_page_header",
                                 "type": "basic",
-                                "name": "H1",
+                                "name": "Div",
                                 "style": {
-                                    "fontFamily": "var(--scm-font-display, system-ui)",
-                                    "fontSize": "1.75rem",
-                                    "fontWeight": "700",
-                                    "color": "var(--scm-text-primary, #26221E)",
-                                    "margin": "0"
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-2xs, 0.25rem)"
                                 },
-                                "text": "$t:superbify.cart.title"
+                                "children": [
+                                    {
+                                        "id": "cart_page_eyebrow",
+                                        "type": "basic",
+                                        "name": "Span",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.75rem",
+                                            "color": "var(--scm-wood-dark, #A8916F)",
+                                            "letterSpacing": "0.14em",
+                                            "textTransform": "uppercase",
+                                            "fontWeight": 600
+                                        },
+                                        "text": "$t:superbify.cart.eyebrow"
+                                    },
+                                    {
+                                        "id": "cart_page_title",
+                                        "type": "basic",
+                                        "name": "H1",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-display, system-ui)",
+                                            "fontSize": "1.875rem",
+                                            "fontWeight": 600,
+                                            "letterSpacing": "-0.01em",
+                                            "color": "var(--scm-text-primary, #26221E)",
+                                            "margin": 0
+                                        },
+                                        "text": "$t:superbify.cart.title"
+                                    }
+                                ]
                             },
                             {
                                 "id": "cart_page_empty",
@@ -81,7 +120,7 @@
                                 "name": "Div",
                                 "style": {
                                     "display": "grid",
-                                    "gridTemplateColumns": "1.5fr 1fr",
+                                    "gridTemplateColumns": "minmax(0, 1.4fr) minmax(0, 1fr)",
                                     "gap": "var(--scm-spacing-xl, 2.5rem)",
                                     "alignItems": "start"
                                 },
@@ -101,7 +140,7 @@
                                             "border": "1px solid var(--scm-line, #E4DCCE)",
                                             "borderRadius": "var(--scm-radius, 8px)",
                                             "backgroundColor": "var(--scm-paper, #FAF8F3)",
-                                            "padding": "0 var(--scm-spacing-md, 1rem) var(--scm-spacing-md, 1rem)"
+                                            "padding": "0 var(--scm-spacing-lg, 1.5rem)"
                                         },
                                         "children": [
                                             {
@@ -114,6 +153,19 @@
                                                     "quantityLabel": "$t:superbify.cart.quantity",
                                                     "deleteLabel": "$t:superbify.cart.delete",
                                                     "applyLabel": "$t:superbify.cart.apply"
+                                                }
+                                            },
+                                            {
+                                                "id": "cart_page_cross_sell",
+                                                "type": "composite",
+                                                "name": "CrossSellStrip",
+                                                "props": {
+                                                    "items": "{{cart_cross_sell?.data?.data ?? cart_cross_sell?.data ?? []}}",
+                                                    "loading": "{{cart_cross_sell?.loading ?? false}}",
+                                                    "eyebrow": "$t:superbify.cart.cross_sell.eyebrow",
+                                                    "title": "$t:superbify.cart.cross_sell.title",
+                                                    "quickAddLabel": "$t:superbify.product.quick_add",
+                                                    "limit": 4
                                                 }
                                             }
                                         ]

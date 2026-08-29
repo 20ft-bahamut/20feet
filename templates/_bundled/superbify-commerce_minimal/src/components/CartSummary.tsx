@@ -113,8 +113,8 @@ export function CartSummary({
             style={{
                 position: 'sticky',
                 top: 'var(--scm-spacing-lg, 1.5rem)',
-                padding: 'var(--scm-spacing-md, 1rem)',
-                backgroundColor: 'var(--scm-surface, #FAF8F3)',
+                padding: 'var(--scm-spacing-lg, 1.5rem)',
+                backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
                 border: '1px solid var(--scm-line, #E4DCCE)',
                 borderRadius: 'var(--scm-radius, 8px)',
                 display: 'flex',
@@ -125,22 +125,31 @@ export function CartSummary({
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-display, system-ui)',
-                    fontSize: '1.05rem',
-                    fontWeight: 700,
+                    fontSize: '1.125rem',
+                    fontWeight: 600,
+                    letterSpacing: '-0.005em',
                     color: 'var(--scm-text-primary, #26221E)',
                 }}
             >
                 {summaryTitle}
             </Span>
 
-            <SummaryRow label={itemsLabel} value={`${count}`} />
-            <SummaryRow label={subtotalLabel} value={subtotalStr} />
-            {shippingStr !== null ? <SummaryRow label={shippingLabel} value={shippingStr} /> : null}
+            <Div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                }}
+            >
+                <SummaryRow label={itemsLabel} value={`${count}`} />
+                <SummaryRow label={subtotalLabel} value={subtotalStr} />
+                {shippingStr !== null ? <SummaryRow label={shippingLabel} value={shippingStr} /> : null}
+            </Div>
 
             <Div
                 style={{
-                    borderTop: '1px solid var(--scm-line, #E4DCCE)',
-                    paddingTop: 'var(--scm-spacing-sm, 0.75rem)',
+                    borderTop: '1px solid var(--scm-charcoal, #26221E)',
+                    paddingTop: 'var(--scm-spacing-md, 1rem)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'baseline',
@@ -160,7 +169,7 @@ export function CartSummary({
                     data-testid="cart-summary-total"
                     style={{
                         fontFamily: 'var(--scm-font-display, system-ui)',
-                        fontSize: '1.25rem',
+                        fontSize: '1.375rem',
                         fontWeight: 700,
                         color: 'var(--scm-text-primary, #26221E)',
                     }}
@@ -174,15 +183,19 @@ export function CartSummary({
                 onClick={checkout}
                 disabled={isOrdering || count === 0}
                 data-testid="cart-summary-checkout"
+                data-scm-interactive
                 style={{
-                    padding: '0.85rem 1rem',
-                    backgroundColor: 'var(--scm-wood, #C9B08D)',
+                    width: '100%',
+                    minHeight: 'var(--scm-touch-min, 44px)',
+                    padding: '0 var(--scm-spacing-md, 1rem)',
+                    backgroundColor: 'var(--scm-charcoal, #26221E)',
                     color: 'var(--scm-text-inverse, #FAF8F3)',
-                    border: '1px solid var(--scm-wood, #C9B08D)',
+                    border: '1px solid var(--scm-charcoal, #26221E)',
                     borderRadius: 'var(--scm-radius, 8px)',
                     fontWeight: 600,
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: '0.95rem',
+                    fontSize: '0.9375rem',
+                    letterSpacing: '0.02em',
                     cursor: isOrdering || count === 0 ? 'not-allowed' : 'pointer',
                     opacity: isOrdering || count === 0 ? 0.6 : 1,
                 }}
@@ -193,15 +206,18 @@ export function CartSummary({
                 type="button"
                 onClick={continueShopping}
                 data-testid="cart-summary-continue"
+                data-scm-interactive
                 style={{
-                    padding: '0.7rem 1rem',
+                    width: '100%',
+                    minHeight: 'var(--scm-touch-min, 44px)',
+                    padding: '0 var(--scm-spacing-md, 1rem)',
                     background: 'transparent',
-                    border: '1px solid var(--scm-line, #E4DCCE)',
+                    border: '1px solid var(--scm-charcoal, #26221E)',
                     borderRadius: 'var(--scm-radius, 8px)',
-                    color: 'var(--scm-text-body, #4A4643)',
+                    color: 'var(--scm-text-primary, #26221E)',
                     fontWeight: 500,
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: '0.85rem',
+                    fontSize: '0.9375rem',
                     cursor: 'pointer',
                 }}
             >
@@ -218,12 +234,14 @@ function SummaryRow({ label, value }: { label: string; value: string }): React.R
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'baseline',
+                paddingBlock: 'var(--scm-spacing-xs, 0.5rem)',
+                borderBottom: '1px solid var(--scm-line, #E4DCCE)',
             }}
         >
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: '0.85rem',
+                    fontSize: '0.875rem',
                     color: 'var(--scm-text-muted, #8A837B)',
                 }}
             >
@@ -232,8 +250,9 @@ function SummaryRow({ label, value }: { label: string; value: string }): React.R
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: '0.9rem',
-                    color: 'var(--scm-text-body, #4A4643)',
+                    fontSize: '0.9375rem',
+                    color: 'var(--scm-text-primary, #26221E)',
+                    fontWeight: 500,
                 }}
             >
                 {value}

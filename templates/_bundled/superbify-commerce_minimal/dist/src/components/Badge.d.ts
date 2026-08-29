@@ -1,5 +1,5 @@
 import { default as React } from 'react';
-export type BadgeTone = 'default' | 'discount' | 'soldout' | 'stopped' | 'new';
+export type BadgeTone = 'default' | 'discount' | 'discount-soft' | 'soldout' | 'stopped' | 'new';
 export interface BadgeProps {
     label: string;
     tone?: BadgeTone;

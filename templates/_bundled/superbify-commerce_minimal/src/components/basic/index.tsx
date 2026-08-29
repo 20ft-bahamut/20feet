@@ -115,6 +115,18 @@ export function Table(props: React.ComponentPropsWithoutRef<'table'>): React.Rea
     return <table {...props} />;
 }
 
+export function Dl(props: React.ComponentPropsWithoutRef<'dl'>): React.ReactElement {
+    return <dl {...props} />;
+}
+
+export function Dt(props: React.ComponentPropsWithoutRef<'dt'>): React.ReactElement {
+    return <dt {...props} />;
+}
+
+export function Dd(props: React.ComponentPropsWithoutRef<'dd'>): React.ReactElement {
+    return <dd {...props} />;
+}
+
 export function Tr(props: React.ComponentPropsWithoutRef<'tr'>): React.ReactElement {
     return <tr {...props} />;
 }

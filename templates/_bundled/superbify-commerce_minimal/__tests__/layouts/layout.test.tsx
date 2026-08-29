@@ -51,9 +51,10 @@ describe('layout JSONs', () => {
         expect(names).toEqual(
             expect.arrayContaining([
                 'HeroBanner',
-                'CategoryCard',
+                'CategoryPreviewStrip',
                 'ProductGrid',
                 'BrandStorySection',
+                'EditorialBanner',
                 'PromoBanner',
             ])
         );

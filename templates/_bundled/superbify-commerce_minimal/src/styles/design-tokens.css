@@ -54,6 +54,8 @@ body {
     --scm-hairline-strong: 1px solid var(--scm-charcoal);
 
     --scm-focus-ring: 0 0 0 3px rgba(46, 58, 72, 0.30);
+    --scm-focus-ring-soft: 0 0 0 2px rgba(46, 58, 72, 0.22);
+    --scm-shadow-card-hover: 0 14px 32px -18px rgba(38, 34, 30, 0.32), 0 2px 8px -4px rgba(38, 34, 30, 0.10);
 
     /* Radius */
     --scm-radius: 8px;
@@ -91,9 +93,9 @@ body {
     --scm-touch-min: 44px;
 
     /* Section vertical rhythm */
-    --scm-section-py-sm: 2rem;
-    --scm-section-py-md: 3rem;
-    --scm-section-py-lg: 4.5rem;
+    --scm-section-py-sm: 2.5rem;
+    --scm-section-py-md: 4rem;
+    --scm-section-py-lg: 6rem;
 
     /* Hero */
     --scm-hero-py: 3.5rem;
@@ -108,8 +110,8 @@ body {
 @media (min-width: 768px) {
     :root {
         --scm-gutter: 1.5rem;
-        --scm-section-py-md: 3.5rem;
-        --scm-section-py-lg: 5rem;
+        --scm-section-py-md: 5rem;
+        --scm-section-py-lg: 7rem;
         --scm-grid-columns: repeat(2, 1fr);
         --scm-grid-gap: 1.25rem;
     }
@@ -140,4 +142,177 @@ body {
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* ------------------------------------------------------------------
+   Global interaction states
+   - Remove default browser focus rings; use --scm-focus-ring on
+     keyboard focus-visible only.
+   - Standardise hover/active transitions across interactive elements
+     rendered inside this template's components.
+   ------------------------------------------------------------------ */
+
+:where(a, button, [role="button"], input, select, textarea, summary, label):focus {
+    outline: none;
+}
+
+:where(a, button, [role="button"], input, select, textarea, summary, label):focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring);
+    border-radius: var(--scm-radius-sm, 4px);
+}
+
+[data-scm-interactive],
+[data-testid^="product-card"],
+[data-testid^="category-card"],
+[data-testid^="cart-qty-"],
+[data-testid^="cart-item-"],
+[data-testid^="cart-summary-"],
+[data-testid="add-to-cart"],
+[data-testid="buy-now"],
+[data-testid="promo-banner"] a,
+[data-testid="hero-banner"] a,
+[data-testid="brand-story-section"] a,
+[data-testid="category-nav"] a {
+    transition:
+        background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        box-shadow var(--scm-duration-base, 220ms) var(--scm-ease-out, ease),
+        transform var(--scm-duration-base, 220ms) var(--scm-ease-out, ease),
+        opacity var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+[data-testid^="product-card"]:hover,
+[data-testid^="category-card"]:hover {
+    box-shadow: var(--scm-shadow-card-hover);
+}
+
+[data-testid^="product-card"]:active,
+[data-testid^="category-card"]:active {
+    transform: scale(0.985);
+}
+
+[data-testid^="product-card"]:focus-visible,
+[data-testid^="category-card"]:focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring);
+}
+
+/* Hero veil helper (used by HeroBanner layout) */
+[data-scm-hero-veil] {
+    background: linear-gradient(
+        to right,
+        rgba(244, 240, 230, 0.92) 0%,
+        rgba(244, 240, 230, 0.7) 38%,
+        rgba(244, 240, 230, 0.05) 72%,
+        rgba(244, 240, 230, 0) 100%
+    );
+}
+
+/* Editorial wood rule (1px thin) */
+[data-scm-wood-rule] {
+    display: block;
+    width: 48px;
+    height: 1px;
+    background-color: var(--scm-wood, #C9B08D);
+    border: 0;
+}
+
+/* ------------------------------------------------------------------
+   ProductCard micro-interactions
+   - Hover/focus scale image and reveal quick-add action
+   - Tile hover applies soft shadow + lifted feel
+   ------------------------------------------------------------------ */
+
+[data-testid^="product-card"]:hover .scm-product-card-image,
+[data-testid^="product-card"]:focus-visible .scm-product-card-image,
+[data-testid^="product-card"]:focus-within .scm-product-card-image {
+    transform: scale(1.03);
+}
+
+[data-testid^="product-card"]:hover .scm-product-card-quickadd,
+[data-testid^="product-card"]:focus-within .scm-product-card-quickadd {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+[data-testid^="product-card"]:focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring);
+}
+
+.scm-product-card-quickadd:focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring);
+}
+
+.scm-product-card-quickadd:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Featured grid: 2 cols mobile (first item spans 2 = full row),
+   4 cols desktop (first item spans 2 = half row). */
+@media (min-width: 768px) {
+    [data-testid="product-grid"][data-variant="featured"] {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+/* Hero 2-col layout (left type, right visual tile) on tablet+. */
+@media (min-width: 768px) {
+    .scm-hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) !important;
+        gap: var(--scm-spacing-2xl, 4rem) !important;
+    }
+}
+
+/* CategoryPreviewStrip: chip container with hairline border,
+   hover promotes to charcoal border, scrollable on mobile.
+   On mobile the strip is a single horizontal scroll row; from 768px
+   upward it wraps so all chips fit without clipping. */
+.scm-category-strip-list {
+    border: 1px solid var(--scm-line, #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    padding: var(--scm-spacing-xs, 0.5rem);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+}
+
+.scm-category-strip-tile {
+    border: 1px solid transparent;
+    transition:
+        border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-category-strip-tile:hover,
+.scm-category-strip-tile:focus-visible {
+    border-color: var(--scm-charcoal, #26221E);
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+}
+
+@media (max-width: 767.98px) {
+    .scm-category-strip-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+    .scm-category-strip-tile {
+        flex: 0 0 auto;
+    }
+}
+
+/* Cross-sell strip inside cart items card: 2-col rhythm.
+   Items column is ~640px on desktop; 4 cards at 1fr makes each card
+   too narrow for price+chip rows. 2-col keeps each card ~300px and
+   stays within the items container. */
+[data-testid="cross-sell-grid"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--scm-spacing-md, 1rem);
+    min-width: 0;
+}
+[data-testid="cross-sell-grid"] > * {
+    min-width: 0;
+    max-width: 100%;
 }
