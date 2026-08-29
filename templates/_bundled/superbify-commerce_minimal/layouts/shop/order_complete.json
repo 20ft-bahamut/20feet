@@ -1,0 +1,51 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/order_complete",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.order_complete.title",
+        "description": "$t:superbify.routes.order_complete.description"
+    },
+    "init_actions": [
+        {
+            "_comment": "비회원 주문 후 페이지 진입 시 query._gtoken 으로 전달된 토큰을 _global.guestOrderToken 으로 시드. 데이터소스의 {{_global.guestOrderToken}} 이 X-Guest-Order-Token 헤더로 사용된다.",
+            "handler": "setState",
+            "params": {
+                "target": "global",
+                "guestOrderToken": "{{query._gtoken ?? ''}}"
+            }
+        }
+    ],
+    "data_sources": [
+        {
+            "_comment": "주문 상세 — member/guest shared. X-Guest-Order-Token 은 data source 자체 headers 에만 주입 (globalHeaders 의 광역 패턴은 회원 라우트에도 토큰 노출되어 보안 우려).",
+            "id": "scmOrder",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/orders/{{route.order_number}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "optional",
+            "loading_strategy": "progressive",
+            "headers": {
+                "X-Guest-Order-Token": "{{_global.guestOrderToken}}"
+            },
+            "fallback": { "data": null }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "order_complete_root",
+                "type": "composite",
+                "name": "OrderCompletePage",
+                "props": {
+                    "orderData": "{{scmOrder}}",
+                    "isLoggedIn": false,
+                    "shopBase": "/shop"
+                }
+            }
+        ]
+    }
+}

@@ -127,7 +127,10 @@
             "AddToCartPanel",
             "CartItemRow",
             "CartSummary",
-            "ConfirmDialog"
+            "ConfirmDialog",
+            "CheckoutForm",
+            "CheckoutPage",
+            "OrderCompletePage"
         ],
         "layout": [
             "Container"

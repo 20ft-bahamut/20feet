@@ -38,6 +38,18 @@
             "checkout": {
                 "title": "Checkout — Still Form",
                 "description": "Checkout"
+            },
+            "order_complete": {
+                "title": "Order Complete — Still Form",
+                "description": "Your order has been placed"
+            },
+            "guest_order_form": {
+                "title": "Guest Order Lookup — Still Form",
+                "description": "Look up your order by order number"
+            },
+            "guest_order_show": {
+                "title": "Guest Order Detail — Still Form",
+                "description": "View your guest order details"
             }
         },
         "data_source": {
@@ -197,6 +209,112 @@
             "all": "All",
             "view_all": "View all",
             "demo_marker": "demo"
+        },
+        "checkout": {
+            "title": "Checkout",
+            "loading": "Loading checkout…",
+            "empty_title": "Cannot create checkout",
+            "back_to_cart": "Back to cart",
+            "submit_error_title": "Something went wrong while placing your order",
+            "order_failed_fallback": "Please try again in a moment.",
+            "orderer": {
+                "title": "Orderer details",
+                "name": "Name",
+                "name_placeholder": "Orderer name",
+                "phone": "Phone",
+                "phone_placeholder": "010-0000-0000",
+                "email": "Email (optional)",
+                "email_placeholder": "you@example.com"
+            },
+            "guest_password": {
+                "title": "Guest lookup password",
+                "password": "Lookup password",
+                "password_placeholder": "4+ characters",
+                "password_confirm": "Confirm lookup password",
+                "password_confirm_placeholder": "Re-enter password",
+                "hint": "Used to look up this order later. Different from your member password."
+            },
+            "shipping": {
+                "title": "Shipping address",
+                "recipient_name": "Recipient",
+                "recipient_name_placeholder": "Recipient name",
+                "recipient_phone": "Phone",
+                "recipient_phone_placeholder": "010-0000-0000",
+                "zipcode": "Postal code",
+                "zipcode_placeholder": "Postal code",
+                "address": "Address",
+                "address_placeholder": "Street address",
+                "address_detail": "Detail",
+                "address_detail_placeholder": "Building / unit / etc.",
+                "memo": "Shipping note",
+                "memo_placeholder": "Special requests"
+            },
+            "payment": {
+                "title": "Payment method",
+                "select_method": "Select a payment method",
+                "dbank_depositor": "Depositor name",
+                "dbank_depositor_placeholder": "Name that will appear on the deposit",
+                "dbank_helper": "Ships after deposit is confirmed."
+            },
+            "items": {
+                "title": "Order items"
+            },
+            "summary": {
+                "items": "Items",
+                "subtotal": "Subtotal",
+                "shipping": "Shipping",
+                "discount": "Discount",
+                "total": "Total"
+            },
+            "submit": "Place order",
+            "submitting": "Processing…",
+            "validation": {
+                "required": "Required",
+                "phone_format": "Invalid phone number",
+                "email_format": "Invalid email",
+                "password_min": "Use at least 4 characters",
+                "password_mismatch": "Passwords do not match"
+            }
+        },
+        "order_complete": {
+            "title": "Order placed",
+            "subtitle": "Your order has been received.",
+            "bank_title": "Deposit information",
+            "bank_message": "Ships once deposit is confirmed. Transfer the amount to the account below before the deadline.",
+            "bank_label": "Bank",
+            "account_label": "Account",
+            "holder_label": "Holder",
+            "depositor_label": "Depositor",
+            "amount_label": "Amount",
+            "due_label": "Due by",
+            "vbank_notice": "Order auto-cancels if not deposited by the deadline.",
+            "guest_notice_title": "Guest order",
+            "guest_notice_lookup": "Look up this order anytime with the order number, your phone, and the lookup password.",
+            "order_number": "Order number",
+            "items_title": "Order items",
+            "shipping_title": "Shipping address",
+            "total_label": "Total",
+            "view_detail": "View order detail",
+            "continue_shopping": "Continue shopping"
+        },
+        "guest_order_form": {
+            "title": "Guest order lookup",
+            "subtitle": "Use your order number, phone, and lookup password to see your order again.",
+            "order_number": "Order number",
+            "order_number_placeholder": "Order number",
+            "orderer_phone": "Orderer phone",
+            "orderer_phone_placeholder": "010-0000-0000",
+            "password": "Lookup password",
+            "password_placeholder": "Password set at checkout",
+            "password_hint": "Set per order at checkout.",
+            "submit": "Look up order",
+            "submitting": "Checking…",
+            "not_found": "Order not found. Please check your details and try again.",
+            "notice": "After lookup, you have 30 minutes to view the order or change the shipping address."
+        },
+        "guest_order_show": {
+            "title": "Guest order detail",
+            "subtitle": "Re-viewing your order."
         }
     }
 }

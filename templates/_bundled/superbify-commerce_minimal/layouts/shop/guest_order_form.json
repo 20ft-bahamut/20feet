@@ -1,0 +1,392 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/guest_order_form",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.guest_order_form.title",
+        "description": "$t:superbify.routes.guest_order_form.description"
+    },
+    "initLocal": {
+        "form": {
+            "order_number": "",
+            "orderer_phone": "",
+            "guest_lookup_password": ""
+        },
+        "isSubmitting": false,
+        "lookupError": false,
+        "errorMessage": ""
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "guest_order_form_root",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 4rem)"
+                },
+                "children": [
+                    {
+                        "id": "guest_order_form_inner",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "480px",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "guest_order_form_header",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-xs, 0.5rem)",
+                                    "textAlign": "center"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "H1",
+                                        "style": {
+                                            "fontFamily": "var(--scm-font-display, system-ui)",
+                                            "fontSize": "1.5rem",
+                                            "fontWeight": 600,
+                                            "margin": 0,
+                                            "color": "var(--scm-text-primary, #26221E)"
+                                        },
+                                        "text": "$t:superbify.guest_order_form.title"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "P",
+                                        "style": {
+                                            "fontSize": "0.875rem",
+                                            "color": "var(--scm-text-body, #4A4643)",
+                                            "margin": 0,
+                                            "lineHeight": 1.6
+                                        },
+                                        "text": "$t:superbify.guest_order_form.subtitle"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "guest_order_form_error",
+                                "type": "basic",
+                                "name": "Div",
+                                "if": "{{_local.lookupError}}",
+                                "style": {
+                                    "padding": "var(--scm-spacing-md, 1rem)",
+                                    "border": "1px solid #E5C2BA",
+                                    "borderRadius": "var(--scm-radius, 8px)",
+                                    "backgroundColor": "#FBEFEC",
+                                    "color": "#A14530",
+                                    "fontSize": "0.875rem",
+                                    "fontWeight": 500
+                                },
+                                "text": "{{_local.errorMessage ?? '$t:superbify.guest_order_form.not_found'}}"
+                            },
+                            {
+                                "id": "guest_order_form_card",
+                                "type": "basic",
+                                "name": "Form",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-md, 1rem)",
+                                    "padding": "var(--scm-spacing-lg, 1.5rem)",
+                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                    "borderRadius": "var(--scm-radius, 8px)",
+                                    "backgroundColor": "var(--scm-paper, #FAF8F3)"
+                                },
+                                "children": [
+                                    {
+                                        "id": "guest_form_order_number",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "0.375rem"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "style": {
+                                                    "fontSize": "0.8125rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "html": "$t:superbify.guest_order_form.order_number"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "text",
+                                                    "value": "{{_local.form?.order_number ?? ''}}",
+                                                    "placeholder": "$t:superbify.guest_order_form.order_number_placeholder",
+                                                    "disabled": "{{_local.isSubmitting}}"
+                                                },
+                                                "style": {
+                                                    "padding": "0.625rem 0.75rem",
+                                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                                    "borderRadius": "var(--scm-radius-sm, 6px)",
+                                                    "backgroundColor": "#FFFFFF",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "fontSize": "0.9375rem",
+                                                    "fontFamily": "ui-monospace, SFMono-Regular, Menlo, monospace"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.order_number": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "guest_form_phone",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "0.375rem"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "style": {
+                                                    "fontSize": "0.8125rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "html": "$t:superbify.guest_order_form.orderer_phone"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "tel",
+                                                    "value": "{{_local.form?.orderer_phone ?? ''}}",
+                                                    "placeholder": "$t:superbify.guest_order_form.orderer_phone_placeholder",
+                                                    "disabled": "{{_local.isSubmitting}}"
+                                                },
+                                                "style": {
+                                                    "padding": "0.625rem 0.75rem",
+                                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                                    "borderRadius": "var(--scm-radius-sm, 6px)",
+                                                    "backgroundColor": "#FFFFFF",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "fontSize": "0.9375rem"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.orderer_phone": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "guest_form_password",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "0.375rem"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "style": {
+                                                    "fontSize": "0.8125rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "html": "$t:superbify.guest_order_form.password"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Input",
+                                                "props": {
+                                                    "type": "password",
+                                                    "value": "{{_local.form?.guest_lookup_password ?? ''}}",
+                                                    "placeholder": "$t:superbify.guest_order_form.password_placeholder",
+                                                    "disabled": "{{_local.isSubmitting}}"
+                                                },
+                                                "style": {
+                                                    "padding": "0.625rem 0.75rem",
+                                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                                    "borderRadius": "var(--scm-radius-sm, 6px)",
+                                                    "backgroundColor": "#FFFFFF",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "fontSize": "0.9375rem"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "change",
+                                                        "handler": "setState",
+                                                        "params": {
+                                                            "target": "local",
+                                                            "form.guest_lookup_password": "{{$event.target.value}}"
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "fontSize": "0.75rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                    "margin": 0
+                                                },
+                                                "text": "$t:superbify.guest_order_form.password_hint"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "guest_form_submit",
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "type": "submit",
+                                            "disabled": "{{_local.isSubmitting || !_local.form?.order_number || !_local.form?.orderer_phone || !_local.form?.guest_lookup_password}}"
+                                        },
+                                        "style": {
+                                            "marginTop": "var(--scm-spacing-sm, 0.75rem)",
+                                            "padding": "0.75rem 1rem",
+                                            "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                            "color": "var(--scm-text-inverse, #FAF8F3)",
+                                            "border": "1px solid var(--scm-charcoal, #26221E)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
+                                            "fontWeight": 600,
+                                            "cursor": "pointer",
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.9375rem",
+                                            "minHeight": "48px"
+                                        },
+                                        "text": "{{_local.isSubmitting ? '$t:superbify.guest_order_form.submitting' : '$t:superbify.guest_order_form.submit'}}"
+                                    }
+                                ],
+                                "actions": [
+                                    {
+                                        "type": "submit",
+                                        "handler": "sequence",
+                                        "params": {
+                                            "actions": [
+                                                {
+                                                    "handler": "setState",
+                                                    "params": {
+                                                        "target": "local",
+                                                        "isSubmitting": true,
+                                                        "lookupError": false,
+                                                        "errorMessage": ""
+                                                    }
+                                                },
+                                                {
+                                                    "comment": "비회원 본인 확인 — 실패 사유는 노출하지 않고 통일된 not_found 메시지 (보안 정책)",
+                                                    "handler": "apiCall",
+                                                    "params": {
+                                                        "method": "POST",
+                                                        "endpoint": "/api/modules/sirsoft-ecommerce/guest/orders/verify",
+                                                        "body": {
+                                                            "order_number": "{{_local.form?.order_number ?? ''}}",
+                                                            "orderer_phone": "{{_local.form?.orderer_phone ?? ''}}",
+                                                            "guest_lookup_password": "{{_local.form?.guest_lookup_password ?? ''}}"
+                                                        }
+                                                    },
+                                                    "onSuccess": [
+                                                        {
+                                                            "comment": "sessionStorage 에 토큰 저장 (탭 종료 시 자동 소실) + _global.guestOrderToken 동기 set → globalHeaders 의 광역 X-Guest-Order-Token 주입 활성",
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "global",
+                                                                "guestOrderToken": "{{response.data?.guest_order_token}}"
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "isSubmitting": false
+                                                            }
+                                                        },
+                                                        {
+                                                            "comment": "비회원 주문 상세로 이동",
+                                                            "handler": "navigate",
+                                                            "params": {
+                                                                "path": "/shop/guest/orders/{{response.data?.order?.order_number}}"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "onError": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "isSubmitting": false,
+                                                                "lookupError": true,
+                                                                "errorMessage": "{{error?.message ?? '$t:superbify.guest_order_form.not_found'}}"
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "guest_order_form_notice",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "padding": "var(--scm-spacing-md, 1rem)",
+                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                    "borderRadius": "var(--scm-radius, 8px)",
+                                    "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                    "fontSize": "0.8125rem",
+                                    "color": "var(--scm-text-body, #4A4643)",
+                                    "lineHeight": 1.6
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "P",
+                                        "style": {
+                                            "margin": 0
+                                        },
+                                        "text": "$t:superbify.guest_order_form.notice"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

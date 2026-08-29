@@ -58,6 +58,25 @@ export { Container, type ContainerProps } from './components/Container';
 export { AddToCartPanel, type AddToCartPanelProps } from './components/AddToCartPanel';
 export { Badge, type BadgeProps, type BadgeTone } from './components/Badge';
 export { BrandStorySection, type BrandStorySectionProps } from './components/BrandStorySection';
+export {
+    CheckoutForm,
+    type CheckoutFormProps,
+    type CheckoutPaymentMethod,
+    type CheckoutItem,
+    type CheckoutFormCheckoutPayload,
+    type CheckoutSubmitPayload,
+} from './components/CheckoutForm';
+export {
+    CheckoutPage,
+    type CheckoutPageProps,
+    type CheckoutPageCheckoutData,
+    type CheckoutPageSettings,
+} from './components/CheckoutPage';
+export {
+    OrderCompletePage,
+    type OrderCompletePageProps,
+    type OrderCompleteOrderData,
+} from './components/OrderCompletePage';
 export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './components/CartItemRow';
 export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';
@@ -122,6 +141,9 @@ import { AddToCartPanel } from './components/AddToCartPanel';
 import { Badge } from './components/Badge';
 import { BrandStorySection } from './components/BrandStorySection';
 import { CartItemRow } from './components/CartItemRow';
+import { CheckoutForm } from './components/CheckoutForm';
+import { CheckoutPage } from './components/CheckoutPage';
+import { OrderCompletePage } from './components/OrderCompletePage';
 import { CartSummary } from './components/CartSummary';
 import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
@@ -188,6 +210,9 @@ if (registry) {
     registry.register({ component: Badge, metadata: { name: 'Badge', type: 'composite' } });
     registry.register({ component: BrandStorySection, metadata: { name: 'BrandStorySection', type: 'composite' } });
     registry.register({ component: CartItemRow, metadata: { name: 'CartItemRow', type: 'composite' } });
+    registry.register({ component: CheckoutForm, metadata: { name: 'CheckoutForm', type: 'composite' } });
+    registry.register({ component: CheckoutPage, metadata: { name: 'CheckoutPage', type: 'composite' } });
+    registry.register({ component: OrderCompletePage, metadata: { name: 'OrderCompletePage', type: 'composite' } });
     registry.register({ component: CartSummary, metadata: { name: 'CartSummary', type: 'composite' } });
     registry.register({ component: CategoryCard, metadata: { name: 'CategoryCard', type: 'composite' } });
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });

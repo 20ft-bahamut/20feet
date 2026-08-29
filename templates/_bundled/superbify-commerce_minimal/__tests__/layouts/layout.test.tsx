@@ -142,7 +142,7 @@ describe('layout JSONs', () => {
         expect(init.map((a) => a.handler)).toContain('scmBindAddToCartListener');
     });
 
-    it('shop/checkout.json renders CartSummary + placeholder when items present', () => {
+    it('shop/checkout.json renders CheckoutPage composite with checkoutData + payment + shipping data sources', () => {
         const co = JSON.parse(
             fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/checkout.json'), 'utf8')
         );
@@ -156,19 +156,70 @@ describe('layout JSONs', () => {
             return out;
         };
         const names = collectNames({ children: co.slots?.content });
-        expect(names).toContain('CartSummary');
-        expect(names).toContain('EmptyState');
+        expect(names).toContain('CheckoutPage');
         const ids = (co.data_sources as Array<{ id: string; endpoint: string }>).map((d) => d.id);
-        expect(ids).toContain('cart');
+        expect(ids).toContain('checkoutData');
+        expect(ids).toContain('paymentSettings');
+        expect(ids).toContain('shippingSettings');
+        const checkoutDs = (co.data_sources as Array<{ id: string; endpoint: string }>).find(
+            (d) => d.id === 'checkoutData'
+        );
+        expect(checkoutDs?.endpoint).toBe('/api/modules/sirsoft-ecommerce/checkout');
     });
 
-    it('routes.json declares /shop/checkout and /cart', () => {
+    it('shop/order_complete.json binds order data source with optional X-Guest-Order-Token header', () => {
+        const oc = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/order_complete.json'), 'utf8')
+        );
+        const ds = (oc.data_sources as Array<{ id: string; endpoint: string; headers?: Record<string, string> }>).find(
+            (d) => d.id === 'scmOrder'
+        );
+        expect(ds?.endpoint).toBe('/api/modules/sirsoft-ecommerce/user/orders/{{route.order_number}}');
+        expect(ds?.headers?.['X-Guest-Order-Token']).toBe('{{_global.guestOrderToken}}');
+    });
+
+    it('shop/guest_order_form.json posts verify to /guest/orders/verify', () => {
+        const gf = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/guest_order_form.json'), 'utf8')
+        );
+        const text = fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/guest_order_form.json'), 'utf8');
+        expect(text).toContain('/api/modules/sirsoft-ecommerce/guest/orders/verify');
+        expect(text).toContain('guest_lookup_password');
+        expect(gf.initLocal?.form?.order_number).toBeDefined();
+    });
+
+    it('shop/guest_order_show.json uses OrderCompletePage composite with guest token header', () => {
+        const gs = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/guest_order_show.json'), 'utf8')
+        );
+        const collectNames = (node: any): string[] => {
+            if (!node || typeof node !== 'object') return [];
+            const out: string[] = [];
+            if (typeof node.name === 'string') out.push(node.name);
+            if (Array.isArray(node.children)) {
+                for (const child of node.children) out.push(...collectNames(child));
+            }
+            return out;
+        };
+        const names = collectNames({ children: gs.slots?.content });
+        expect(names).toContain('OrderCompletePage');
+        const ds = (gs.data_sources as Array<{ id: string; endpoint: string; headers?: Record<string, string> }>).find(
+            (d) => d.id === 'scmGuestOrder'
+        );
+        expect(ds?.endpoint).toBe('/api/modules/sirsoft-ecommerce/user/orders/{{route.order_number}}');
+        expect(ds?.headers?.['X-Guest-Order-Token']).toBe('{{_global.guestOrderToken}}');
+    });
+
+    it('routes.json declares /shop/checkout, /shop/order/complete, /shop/guest/orders, /shop/guest/orders/:order_number', () => {
         const routes = JSON.parse(
             fs.readFileSync(path.join(TEMPLATE_ROOT, 'routes.json'), 'utf8')
         );
         const paths = (routes.routes as Array<{ path: string; layout: string }>).map((r) => r.path);
         expect(paths).toContain('/cart');
         expect(paths).toContain('/shop/checkout');
+        expect(paths).toContain('/shop/order/complete');
+        expect(paths).toContain('/shop/guest/orders');
+        expect(paths).toContain('/shop/guest/orders/:order_number');
     });
 });
 

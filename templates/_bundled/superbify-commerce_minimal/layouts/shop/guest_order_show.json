@@ -1,0 +1,63 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/guest_order_show",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.guest_order_show.title",
+        "description": "$t:superbify.routes.guest_order_show.description"
+    },
+    "data_sources": [
+        {
+            "_comment": "비회원 주문 상세 — user/orders/{N} 통합 엔드포인트. X-Guest-Order-Token 은 이 데이터소스에서만 명시 주입.",
+            "id": "scmGuestOrder",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/orders/{{route.order_number}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "optional",
+            "loading_strategy": "progressive",
+            "headers": {
+                "X-Guest-Order-Token": "{{_global.guestOrderToken}}"
+            },
+            "errorHandling": {
+                "401": {
+                    "handler": "sequence",
+                    "params": {
+                        "actions": [
+                            { "handler": "setState", "params": { "target": "global", "guestOrderToken": "" } },
+                            { "handler": "navigate", "params": { "path": "/shop/guest/orders" } }
+                        ]
+                    }
+                },
+                "404": {
+                    "handler": "sequence",
+                    "params": {
+                        "actions": [
+                            { "handler": "setState", "params": { "target": "global", "guestOrderToken": "" } },
+                            { "handler": "navigate", "params": { "path": "/shop/guest/orders" } }
+                        ]
+                    }
+                }
+            },
+            "fallback": { "data": null }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "guest_order_show_root",
+                "type": "composite",
+                "name": "OrderCompletePage",
+                "props": {
+                    "orderData": "{{scmGuestOrder}}",
+                    "isLoggedIn": false,
+                    "shopBase": "/shop",
+                    "title": "$t:superbify.guest_order_show.title",
+                    "successMessage": "$t:superbify.guest_order_show.subtitle"
+                }
+            }
+        ]
+    }
+}

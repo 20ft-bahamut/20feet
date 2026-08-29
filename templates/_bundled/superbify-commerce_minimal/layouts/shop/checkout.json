@@ -9,152 +9,71 @@
     },
     "data_sources": [
         {
-            "id": "cart",
+            "_comment": "주문 정보 — temp_order_id 가 응답에 포함되어야 CheckoutPage 가 POST /user/orders 시 첨부한다. POST /checkout 호출은 CheckoutPage 내부에서 수행한다.",
+            "id": "checkoutData",
             "label_key": "$t:superbify.data_source.cart",
             "type": "api",
-            "endpoint": "/api/modules/sirsoft-ecommerce/cart",
+            "endpoint": "/api/modules/sirsoft-ecommerce/checkout",
             "method": "GET",
             "auto_fetch": true,
             "auth_mode": "optional",
             "loading_strategy": "progressive",
-            "fallback": { "data": { "items": [], "item_ids": [], "item_count": 0, "calculation": null } }
+            "fallback": { "data": null }
+        },
+        {
+            "_comment": "결제 설정 — 활성 결제 수단 목록 (현재 런타임: dbank 만 활성화됨)",
+            "id": "paymentSettings",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/settings/payment",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "optional",
+            "loading_strategy": "progressive",
+            "fallback": { "data": { "order_settings": { "payment_methods": [], "banks": [], "bank_accounts": [] } } }
+        },
+        {
+            "_comment": "배송 설정 — 기본 국가/해외 배송 가능 여부",
+            "id": "shippingSettings",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/settings/shipping",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "optional",
+            "loading_strategy": "progressive",
+            "fallback": { "data": { "shipping": { "default_country": "KR", "international_shipping_enabled": false } } }
         }
     ],
     "init_actions": [
         {
-            "handler": "scmBindCartPageListeners"
+            "_comment": "카트 키 초기화 (X-Cart-Key globalHeader 주입 패턴). _user_base 의 init_actions 와 중복 실행되지만 멱등.",
+            "handler": "initCartKey"
         }
     ],
     "slots": {
         "content": [
             {
-                "id": "checkout_page",
-                "type": "basic",
-                "name": "Section",
-                "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
-                },
-                "children": [
-                    {
-                        "id": "checkout_page_inner",
-                        "type": "basic",
-                        "name": "Div",
-                        "style": {
-                            "maxWidth": "var(--scm-max-width, 960px)",
-                            "marginInline": "auto",
-                            "paddingInline": "var(--scm-gutter, 1rem)",
-                            "display": "flex",
-                            "flexDirection": "column",
-                            "gap": "var(--scm-spacing-md, 1rem)"
-                        },
-                        "children": [
-                            {
-                                "id": "checkout_page_title",
-                                "type": "basic",
-                                "name": "H1",
-                                "style": {
-                                    "fontFamily": "var(--scm-font-display, system-ui)",
-                                    "fontSize": "1.75rem",
-                                    "fontWeight": "700",
-                                    "color": "var(--scm-text-primary, #26221E)",
-                                    "margin": "0"
-                                },
-                                "text": "$t:superbify.cart.checkout_title"
-                            },
-                            {
-                                "id": "checkout_page_empty",
-                                "type": "composite",
-                                "name": "EmptyState",
-                                "if": "{{!cart?.data?.items || (cart.data.items?.length ?? 0) === 0}}",
-                                "props": {
-                                    "title": "$t:superbify.cart.empty_title",
-                                    "message": "$t:superbify.cart.empty_message",
-                                    "ctaLabel": "$t:superbify.cart.cta_shop",
-                                    "ctaHref": "/shop"
-                                }
-                            },
-                            {
-                                "id": "checkout_page_layout",
-                                "if": "{{cart?.data?.items && (cart.data.items?.length ?? 0) > 0}}",
-                                "type": "basic",
-                                "name": "Div",
-                                "style": {
-                                    "display": "grid",
-                                    "gridTemplateColumns": "1.5fr 1fr",
-                                    "gap": "var(--scm-spacing-xl, 2.5rem)",
-                                    "alignItems": "start"
-                                },
-                                "responsive": {
-                                    "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
-                                    }
-                                },
-                                "children": [
-                                    {
-                                        "id": "checkout_page_placeholder",
-                                        "type": "basic",
-                                        "name": "Div",
-                                        "style": {
-                                            "padding": "var(--scm-spacing-lg, 1.5rem)",
-                                            "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
-                                            "border": "1px dashed var(--scm-line, #E4DCCE)",
-                                            "borderRadius": "var(--scm-radius, 8px)",
-                                            "display": "flex",
-                                            "flexDirection": "column",
-                                            "gap": "var(--scm-spacing-sm, 0.75rem)"
-                                        },
-                                        "children": [
-                                            {
-                                                "id": "checkout_page_placeholder_title",
-                                                "type": "basic",
-                                                "name": "H3",
-                                                "style": {
-                                                    "fontFamily": "var(--scm-font-display, system-ui)",
-                                                    "fontSize": "1.05rem",
-                                                    "fontWeight": 600,
-                                                    "color": "var(--scm-text-primary, #26221E)",
-                                                    "margin": 0
-                                                },
-                                                "text": "$t:superbify.cart.checkout_placeholder_title"
-                                            },
-                                            {
-                                                "id": "checkout_page_placeholder_message",
-                                                "type": "basic",
-                                                "name": "P",
-                                                "style": {
-                                                    "fontFamily": "var(--scm-font-body, system-ui)",
-                                                    "fontSize": "0.9rem",
-                                                    "color": "var(--scm-text-body, #4A4643)",
-                                                    "margin": 0,
-                                                    "lineHeight": 1.6
-                                                },
-                                                "text": "$t:superbify.cart.checkout_placeholder_message"
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        "id": "checkout_page_summary",
-                                        "type": "composite",
-                                        "name": "CartSummary",
-                                        "props": {
-                                            "items": "{{cart.data.items}}",
-                                            "itemCount": "{{cart.data.item_count ?? (cart.data.items?.length ?? 0)}}",
-                                            "calculation": "{{cart.data.calculation?.summary ?? cart.data.calculation}}",
-                                            "summaryTitle": "$t:superbify.cart.summary_title",
-                                            "itemsLabel": "$t:superbify.cart.summary_items",
-                                            "subtotalLabel": "$t:superbify.cart.summary_subtotal",
-                                            "shippingLabel": "$t:superbify.cart.summary_shipping",
-                                            "totalLabel": "$t:superbify.cart.summary_total",
-                                            "checkoutLabel": "$t:superbify.cart.summary_checkout",
-                                            "continueShoppingLabel": "$t:superbify.cart.summary_continue_shopping",
-                                            "isOrdering": true
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
+                "id": "checkout_page_wrapper",
+                "type": "composite",
+                "name": "CheckoutPage",
+                "props": {
+                    "_comment": "data source id 를 prop 이름으로 사용해 엔진이 현재 데이터소스 값을 자동으로 평가한다",
+                    "checkoutData": "{{checkoutData}}",
+                    "paymentSettings": "{{paymentSettings}}",
+                    "shippingSettings": "{{shippingSettings}}",
+                    "isLoggedIn": false,
+                    "currentUserName": "",
+                    "currentUserPhone": "",
+                    "currentUserEmail": "",
+                    "locale": "ko",
+                    "title": "$t:superbify.checkout.title",
+                    "loadingLabel": "$t:superbify.checkout.loading",
+                    "emptyTempOrderTitle": "$t:superbify.checkout.empty_title",
+                    "backToShopLabel": "$t:superbify.checkout.back_to_cart",
+                    "submitErrorTitle": "$t:superbify.checkout.submit_error_title",
+                    "orderFailedFallback": "$t:superbify.checkout.order_failed_fallback"
+                }
             }
         ]
     }

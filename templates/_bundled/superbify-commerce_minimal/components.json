@@ -317,6 +317,24 @@
         "type": "composite",
         "description": "Lightweight confirm modal",
         "path": "src/components/ConfirmDialog.tsx"
+      },
+      {
+        "name": "CheckoutForm",
+        "type": "composite",
+        "description": "Checkout form composite — orderer / shipping / payment sections + summary",
+        "path": "src/components/CheckoutForm.tsx"
+      },
+      {
+        "name": "CheckoutPage",
+        "type": "composite",
+        "description": "Checkout page orchestrator — temp-order creation + submit-to-order flow",
+        "path": "src/components/CheckoutPage.tsx"
+      },
+      {
+        "name": "OrderCompletePage",
+        "type": "composite",
+        "description": "Order complete page — bank deposit info + order details + CTAs",
+        "path": "src/components/OrderCompletePage.tsx"
       }
     ],
     "layout": [

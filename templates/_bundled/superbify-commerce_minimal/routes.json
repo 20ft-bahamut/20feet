@@ -75,6 +75,42 @@
             }
         },
         {
+            "_comment": "=== 주문 완료 ===",
+            "path": "/shop/order/complete",
+            "layout": "shop/order_complete",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.order_complete.title"
+            }
+        },
+        {
+            "_comment": "=== 주문 완료 (ShopPathResolver 경로) — sirsoft-ecommerce 가 응답 redirect_url 로 돌려주는 표준 경로. route.id = order_number ===",
+            "path": "/shop/orders/:order_number/complete",
+            "layout": "shop/order_complete",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.order_complete.title"
+            }
+        },
+        {
+            "_comment": "=== 비회원 주문 조회 폼 ===",
+            "path": "/shop/guest/orders",
+            "layout": "shop/guest_order_form",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.guest_order_form.title"
+            }
+        },
+        {
+            "_comment": "=== 비회원 주문 상세 ===",
+            "path": "/shop/guest/orders/:order_number",
+            "layout": "shop/guest_order_show",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.guest_order_show.title"
+            }
+        },
+        {
             "_comment": "=== 에러 페이지 ===",
             "path": "/404",
             "layout": "errors/404",
