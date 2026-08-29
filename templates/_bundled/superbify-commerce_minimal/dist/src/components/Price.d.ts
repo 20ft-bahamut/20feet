@@ -9,6 +9,9 @@ export interface PriceProps {
     /** 0–100 percent or already-formatted string. */
     discountRate?: number | string | null;
     className?: string;
+    /** When true, suppress the inline discount percent badge (used when
+     *  the parent already renders a discount chip on the image). */
+    hideDiscountBadge?: boolean;
 }
-export declare function Price({ sellingPrice, listPrice, sellingPriceFormatted, listPriceFormatted, discountRate, className, }: PriceProps): React.ReactElement;
+export declare function Price({ sellingPrice, listPrice, sellingPriceFormatted, listPriceFormatted, discountRate, className, hideDiscountBadge, }: PriceProps): React.ReactElement;
 export default Price;

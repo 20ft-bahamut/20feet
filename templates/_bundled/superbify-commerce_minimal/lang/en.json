@@ -115,6 +115,12 @@
                 "eyebrow": "LIFESTYLE",
                 "title": "One piece at a time",
                 "description": "Like a single volume on a shelf — objects earn their place by being used, day after day."
+            },
+            "final_cta": {
+                "eyebrow": "EXPLORE",
+                "heading": "Everyday quiet objects, in one place",
+                "body": "Browse the full Shop and find one piece that will stay with you for years.",
+                "cta": "Browse all of Shop"
             }
         },
         "shop": {
@@ -136,6 +142,8 @@
             "info_title": "Information",
             "shipping_label": "SHIPPING",
             "shipping_title": "Shipping & returns",
+            "view_detail": "View details",
+            "featured_eyebrow": "Featured",
             "info": {
                 "material": "Material",
                 "size": "Size",

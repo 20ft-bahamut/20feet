@@ -20,9 +20,19 @@ export interface ProductGridProps {
     onQuickAdd?: (item: ProductItem, event: React.MouseEvent | React.KeyboardEvent) => void;
     /** Localized label for the quick-add button. */
     quickAddLabel?: string;
+    /** Featured-only: CTA label (e.g. "자세히 보기"). */
+    featuredCtaLabel?: string;
+    /** Featured-only: eyebrow above category (e.g. "대표 상품"). */
+    featuredEyebrow?: string;
 }
 
-function SkeletonCard({ featured = false }: { featured?: boolean }): React.ReactElement {
+function SkeletonCard({
+    featured = false,
+    featuredLayout = false,
+}: {
+    featured?: boolean;
+    featuredLayout?: boolean;
+}): React.ReactElement {
     return (
         <Div
             aria-hidden
@@ -33,12 +43,13 @@ function SkeletonCard({ featured = false }: { featured?: boolean }): React.React
                 borderRadius: 'var(--scm-radius, 8px)',
                 overflow: 'hidden',
                 backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                gridColumn: featured ? 'span 2' : undefined,
+                gridColumn: featuredLayout ? '1' : featured ? 'span 2' : undefined,
+                gridRow: featuredLayout ? '1 / span 3' : undefined,
             }}
         >
             <Div
                 style={{
-                    aspectRatio: featured ? '16 / 11' : '1 / 1',
+                    aspectRatio: featuredLayout ? '3 / 4' : featured ? '16 / 11' : '1 / 1',
                     backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
                 }}
             />
@@ -90,6 +101,8 @@ export function ProductGrid({
     variant = 'standard',
     onQuickAdd,
     quickAddLabel,
+    featuredCtaLabel,
+    featuredEyebrow,
 }: ProductGridProps): React.ReactElement {
     const safeItems = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const visible = typeof limit === 'number' ? safeItems.slice(0, limit) : safeItems;
@@ -105,35 +118,89 @@ export function ProductGrid({
     return (
         <Div
             className={className}
-            style={{
-                display: 'grid',
-                gridTemplateColumns: variant === 'featured'
-                    ? 'repeat(2, minmax(0, 1fr))'
-                    : 'var(--scm-grid-columns, 1fr)',
-                gap: 'var(--scm-grid-gap, 1rem)',
-            }}
+            style={
+                variant === 'featured'
+                    ? {
+                          display: 'grid',
+                          gridTemplateColumns: 'minmax(0, 1.05fr) minmax(0, 1fr)',
+                          gap: 'var(--scm-grid-gap, 1.25rem)',
+                          alignItems: 'start',
+                      }
+                    : {
+                          display: 'grid',
+                          gridTemplateColumns: 'var(--scm-grid-columns, 1fr)',
+                          gap: 'var(--scm-grid-gap, 1rem)',
+                      }
+            }
             data-testid="product-grid"
             data-loading={loading ? 'true' : 'false'}
             data-variant={variant}
         >
             {loading
-                ? Array.from({ length: 4 }).map((_, idx) => (
-                      <SkeletonCard key={`skeleton-${idx}`} featured={variant === 'featured' && idx === 0} />
-                  ))
-                : visible.map((item, idx) => {
-                      const isFeatured = variant === 'featured' && idx === 0;
-                      return (
-                          <ProductCard
-                              key={String(item.id)}
-                              item={item}
-                              href={itemHrefBuilder ? itemHrefBuilder(item) : undefined}
-                              featured={isFeatured}
-                              onQuickAdd={onQuickAdd}
-                              quickAddLabel={quickAddLabel}
-                              style={isFeatured ? { gridColumn: 'span 2' } : undefined}
-                          />
-                      );
-                  })}
+                ? variant === 'featured'
+                    ? (
+                          <>
+                              <SkeletonCard featuredLayout />
+                              <Div
+                                  data-testid="product-grid-secondary-skeleton"
+                                  style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                      gap: 'var(--scm-grid-gap, 1.25rem)',
+                                  }}
+                              >
+                                  {Array.from({ length: 6 }).map((_, idx) => (
+                                      <SkeletonCard key={`s-skel-${idx}`} />
+                                  ))}
+                              </Div>
+                          </>
+                      )
+                    : Array.from({ length: 4 }).map((_, idx) => <SkeletonCard key={`skeleton-${idx}`} />)
+                : variant === 'featured'
+                  ? (
+                        <>
+                            <ProductCard
+                                item={visible[0]}
+                                featured
+                                href={itemHrefBuilder ? itemHrefBuilder(visible[0]) : undefined}
+                                onQuickAdd={onQuickAdd}
+                                quickAddLabel={quickAddLabel}
+                                featuredCtaLabel={featuredCtaLabel}
+                                featuredEyebrow={featuredEyebrow}
+                                style={{ gridColumn: '1' }}
+                            />
+                            <Div
+                                data-testid="product-grid-secondary"
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                                    gap: 'var(--scm-grid-gap, 1.25rem)',
+                                    gridColumn: '2',
+                                    alignContent: 'start',
+                                }}
+                            >
+                                {visible.slice(1, 7).map((item) => (
+                                    <ProductCard
+                                        key={String(item.id)}
+                                        item={item}
+                                        href={itemHrefBuilder ? itemHrefBuilder(item) : undefined}
+                                        onQuickAdd={onQuickAdd}
+                                        quickAddLabel={quickAddLabel}
+                                        compactFeatured
+                                    />
+                                ))}
+                            </Div>
+                        </>
+                    )
+                  : visible.map((item) => (
+                        <ProductCard
+                            key={String(item.id)}
+                            item={item}
+                            href={itemHrefBuilder ? itemHrefBuilder(item) : undefined}
+                            onQuickAdd={onQuickAdd}
+                            quickAddLabel={quickAddLabel}
+                        />
+                    ))}
         </Div>
     );
 }

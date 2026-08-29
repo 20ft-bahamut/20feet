@@ -68,17 +68,18 @@ export function StoreHeader({
                     <Img
                         src={logoSrc}
                         alt=""
-                        width={32}
-                        height={32}
-                        style={{ width: 32, height: 32, display: 'block' }}
+                        width={36}
+                        height={36}
+                        style={{ width: 36, height: 36, display: 'block' }}
                     />
                     <Div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
                         <Span
                             style={{
                                 fontFamily: 'var(--scm-font-display, system-ui)',
-                                fontSize: '1rem',
+                                fontSize: '1.0625rem',
                                 fontWeight: 700,
                                 color: 'var(--scm-text-primary, #26221E)',
+                                letterSpacing: '-0.005em',
                             }}
                         >
                             {brandName}
@@ -105,7 +106,7 @@ export function StoreHeader({
                             padding: 0,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 'var(--scm-spacing-xs, 0.5rem)',
+                            gap: 'var(--scm-spacing-sm, 0.75rem)',
                         }}
                     >
                         {NAV_ITEMS.map((it) => {
@@ -120,13 +121,14 @@ export function StoreHeader({
                                             display: 'inline-flex',
                                             alignItems: 'center',
                                             minHeight: 'var(--scm-touch-min, 44px)',
-                                            padding: '0 var(--scm-spacing-sm, 0.75rem)',
+                                            padding: '0 var(--scm-spacing-md, 1rem)',
                                             borderRadius: 'var(--scm-radius-sm, 4px)',
                                             textDecoration: 'none',
                                             color: 'var(--scm-text-body, #4A4643)',
                                             fontFamily: 'var(--scm-font-body, system-ui)',
-                                            fontSize: '0.9375rem',
+                                            fontSize: '1rem',
                                             fontWeight: 500,
+                                            letterSpacing: '0.005em',
                                         }}
                                         data-testid={isCart ? 'nav-cart' : `nav-${it.key}`}
                                     >

@@ -79,7 +79,7 @@ body {
     --scm-spacing-3xl: 6rem;
 
     /* Layout */
-    --scm-max-width: 1240px;
+    --scm-max-width: 1320px;
     --scm-gutter: 1rem;
 
     /* Typography */
@@ -98,9 +98,9 @@ body {
     --scm-section-py-lg: 6rem;
 
     /* Hero */
-    --scm-hero-py: 3.5rem;
-    --scm-hero-pb: 2.5rem;
-    --scm-hero-heading-size: clamp(2rem, 6.2vw, 3.85rem);
+    --scm-hero-py: 4rem;
+    --scm-hero-pb: 3rem;
+    --scm-hero-heading-size: clamp(2.125rem, 6.6vw, 4.25rem);
 
     /* Product grid */
     --scm-grid-columns: 1fr;
@@ -108,8 +108,8 @@ body {
 
     /* Price typography scale (used by Price component, cart, etc.) */
     --scm-price-md: 1rem;
-    --scm-price-lg: 1.375rem;
-    --scm-price-xl: 1.75rem;
+    --scm-price-lg: 1.5rem;
+    --scm-price-xl: 1.875rem;
 }
 
 @media (min-width: 768px) {
@@ -256,11 +256,30 @@ body {
     transform: translateY(0) scale(0.98);
 }
 
-/* Featured grid: 2 cols mobile (first item spans 2 = full row),
-   4 cols desktop (first item spans 2 = half row). */
+/* Featured grid: confident split layout — large featured tile occupies
+   left column, secondary cards stack 3-up on the right.
+   On mobile (<768) featured goes full-width and secondaries are 2-col. */
 @media (min-width: 768px) {
     [data-testid="product-grid"][data-variant="featured"] {
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr) !important;
+    }
+    [data-testid="product-grid"][data-variant="featured"] [data-testid="product-card"][data-featured="true"] {
+        grid-column: 1 !important;
+    }
+    [data-testid="product-grid"][data-variant="featured"] [data-testid="product-grid-secondary"] {
+        grid-column: 2 !important;
+    }
+}
+@media (max-width: 767.98px) {
+    [data-testid="product-grid"][data-variant="featured"] {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+    [data-testid="product-grid"][data-variant="featured"] [data-testid="product-card"][data-featured="true"] {
+        grid-column: 1 !important;
+    }
+    [data-testid="product-grid"][data-variant="featured"] [data-testid="product-grid-secondary"] {
+        grid-column: 1 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
@@ -301,6 +320,23 @@ body {
 .scm-category-strip-tile:focus-visible {
     border-color: var(--scm-charcoal, #26221E);
     background-color: var(--scm-bg-secondary, #F4F0E6);
+}
+
+.scm-category-strip-tile:hover > div:first-child,
+.scm-category-strip-tile:focus-visible > div:first-child {
+    transform: scale(1.04);
+}
+
+/* Mobile: peek next chip — left padding already provides a peek; ensure right padding. */
+@media (max-width: 767.98px) {
+    .scm-category-strip-list {
+        padding-right: var(--scm-gutter, 1rem);
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+    }
+    .scm-category-strip-tile {
+        scroll-snap-align: start;
+    }
 }
 
 @media (max-width: 767.98px) {
@@ -378,7 +414,7 @@ body {
    align-items:center on the grid so it sits flush against the image. */
 @media (min-width: 1024px) {
     [data-testid="hero-banner"][data-layout="wide"] .scm-hero-grid > [data-testid="hero-image-tile"] {
-        min-height: 420px;
+        min-height: 500px;
     }
     [data-testid="hero-banner"][data-layout="wide"] .scm-hero-grid {
         align-items: center;

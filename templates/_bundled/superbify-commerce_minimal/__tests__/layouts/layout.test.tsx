@@ -29,7 +29,7 @@ describe('layout JSONs', () => {
         expect(ids).toEqual(expect.arrayContaining(['new_arrivals', 'popular_products', 'featured_categories']));
     });
 
-    it('home.json renders hero, category, new arrivals, popular, story, and promo sections', () => {
+    it('home.json renders hero, category, new arrivals, popular, story, editorial, and final CTA sections', () => {
         const home = JSON.parse(fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/home.json'), 'utf8'));
 
         // Walk the layout tree to collect all composite component names.
@@ -55,9 +55,17 @@ describe('layout JSONs', () => {
                 'ProductGrid',
                 'BrandStorySection',
                 'EditorialBanner',
-                'PromoBanner',
             ])
         );
+        // Final CTA block has no composite (it's inline primitives); confirm
+        // the eyebrow / heading / cta i18n keys plus the /shop href are bound.
+        const finalCta = home.slots?.content?.find((s: any) => s?.id === 'home_final_cta');
+        expect(finalCta).toBeTruthy();
+        const textBlob = JSON.stringify(finalCta);
+        expect(textBlob).toContain('$t:superbify.home.final_cta.eyebrow');
+        expect(textBlob).toContain('$t:superbify.home.final_cta.heading');
+        expect(textBlob).toContain('$t:superbify.home.final_cta.cta');
+        expect(textBlob).toContain('"href":"/shop"');
     });
 
     it('shop/index.json uses products and categories data sources', () => {

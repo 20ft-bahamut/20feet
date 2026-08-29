@@ -12,6 +12,9 @@ export interface PriceProps {
     /** 0–100 percent or already-formatted string. */
     discountRate?: number | string | null;
     className?: string;
+    /** When true, suppress the inline discount percent badge (used when
+     *  the parent already renders a discount chip on the image). */
+    hideDiscountBadge?: boolean;
 }
 
 function toFormatted(value: number | string | null | undefined, fallback?: string | null): string {
@@ -42,6 +45,7 @@ export function Price({
     listPriceFormatted,
     discountRate,
     className,
+    hideDiscountBadge = false,
 }: PriceProps): React.ReactElement {
     const selling = toFormatted(sellingPrice, sellingPriceFormatted);
     const list = toFormatted(listPrice, listPriceFormatted);
@@ -61,11 +65,11 @@ export function Price({
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: 'var(--scm-price-lg, 1.375rem)',
+                    fontSize: 'var(--scm-price-lg, 1.5rem)',
                     fontWeight: 700,
                     color: 'var(--scm-text-primary, #26221E)',
                     fontVariantNumeric: 'tabular-nums',
-                    letterSpacing: '-0.005em',
+                    letterSpacing: '-0.01em',
                 }}
             >
                 {selling || '—'}
@@ -74,7 +78,7 @@ export function Price({
                 <Span
                     style={{
                         fontFamily: 'var(--scm-font-body, system-ui)',
-                        fontSize: '0.875rem',
+                        fontSize: '0.8125rem',
                         color: 'var(--scm-text-muted, #8A837B)',
                         textDecoration: 'line-through',
                         fontVariantNumeric: 'tabular-nums',
@@ -84,7 +88,7 @@ export function Price({
                     {list}
                 </Span>
             ) : null}
-            {discount && discount > 0 ? (
+            {discount && discount > 0 && !hideDiscountBadge ? (
                 <Badge tone="discount-soft" label={`-${Math.round(discount)}%`} />
             ) : null}
         </Div>

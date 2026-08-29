@@ -97,9 +97,9 @@ export function CategoryPreviewStrip({
                     style={{
                         display: 'flex',
                         flexWrap: 'wrap',
-                        gap: 'var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-md, 1rem)',
+                        gap: 'var(--scm-spacing-md, 1rem) var(--scm-spacing-lg, 1.5rem)',
                         overflowX: 'visible',
-                        paddingBottom: 'var(--scm-spacing-xs, 0.5rem)',
+                        paddingBlock: '0.5rem',
                     }}
                     data-testid="category-preview-strip-list"
                 >
@@ -119,24 +119,28 @@ export function CategoryPreviewStrip({
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: 'var(--scm-spacing-sm, 0.75rem)',
-                                    padding: '0.45rem 0.65rem',
+                                    padding: '0.5rem 0.75rem',
                                     borderRadius: 'var(--scm-radius, 8px)',
                                     backgroundColor: 'transparent',
                                     textDecoration: 'none',
                                     color: 'inherit',
-                                    transition: 'border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease)',
+                                    transition:
+                                        'border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease), background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease)',
+                                    minHeight: 'var(--scm-touch-min, 44px)',
                                 }}
                             >
                                 <Div
                                     aria-hidden
                                     style={{
-                                        width: '52px',
-                                        height: '52px',
-                                        flex: '0 0 52px',
+                                        width: '60px',
+                                        height: '60px',
+                                        flex: '0 0 60px',
                                         borderRadius: '50%',
                                         overflow: 'hidden',
                                         backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
                                         border: '1px solid var(--scm-line, #E4DCCE)',
+                                        transition:
+                                            'transform var(--scm-duration-base, 220ms) var(--scm-ease-out, ease)',
                                     }}
                                 >
                                     <Img
@@ -158,7 +162,7 @@ export function CategoryPreviewStrip({
                                     <Span
                                         style={{
                                             fontFamily: 'var(--scm-font-display, system-ui)',
-                                            fontSize: '0.8125rem',
+                                            fontSize: '0.9375rem',
                                             fontWeight: 600,
                                             color: 'var(--scm-text-primary, #26221E)',
                                             whiteSpace: 'nowrap',

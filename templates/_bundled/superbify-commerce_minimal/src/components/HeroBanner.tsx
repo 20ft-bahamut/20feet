@@ -145,8 +145,8 @@ export function HeroBanner({
                         <P
                             style={{
                                 fontFamily: 'var(--scm-font-body, system-ui)',
-                                fontSize: '0.9375rem',
-                                lineHeight: 1.75,
+                                fontSize: '1rem',
+                                lineHeight: 1.85,
                                 color: 'var(--scm-text-body, #4A4643)',
                                 margin: 0,
                                 maxWidth: '44ch',
@@ -161,7 +161,7 @@ export function HeroBanner({
                                 display: 'flex',
                                 flexWrap: 'wrap',
                                 gap: 'var(--scm-spacing-sm, 0.75rem)',
-                                marginTop: 'var(--scm-spacing-md, 1rem)',
+                                marginTop: 'var(--scm-spacing-lg, 1.5rem)',
                             }}
                         >
                             {primaryCtaLabel && primaryCtaHref ? (
@@ -171,16 +171,17 @@ export function HeroBanner({
                                     style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        minHeight: 'var(--scm-touch-min, 44px)',
-                                        padding: '0 var(--scm-spacing-lg, 1.5rem)',
+                                        minHeight: '52px',
+                                        padding: '0 1.75rem',
                                         borderRadius: 'var(--scm-radius, 4px)',
                                         backgroundColor: 'var(--scm-charcoal, #26221E)',
                                         color: 'var(--scm-text-inverse, #FAF8F3)',
                                         textDecoration: 'none',
                                         fontFamily: 'var(--scm-font-body, system-ui)',
-                                        fontSize: '0.9375rem',
+                                        fontSize: '1rem',
                                         fontWeight: 600,
                                         letterSpacing: '0.02em',
+                                        boxShadow: '0 6px 18px -10px rgba(38, 34, 30, 0.45)',
                                     }}
                                 >
                                     {primaryCtaLabel}
@@ -193,15 +194,15 @@ export function HeroBanner({
                                     style={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
-                                        minHeight: 'var(--scm-touch-min, 44px)',
-                                        padding: '0 var(--scm-spacing-lg, 1.5rem)',
+                                        minHeight: '52px',
+                                        padding: '0 1.75rem',
                                         borderRadius: 'var(--scm-radius, 4px)',
                                         backgroundColor: 'transparent',
                                         color: 'var(--scm-text-primary, #26221E)',
                                         border: '1px solid var(--scm-charcoal, #26221E)',
                                         textDecoration: 'none',
                                         fontFamily: 'var(--scm-font-body, system-ui)',
-                                        fontSize: '0.9375rem',
+                                        fontSize: '1rem',
                                         fontWeight: 600,
                                         letterSpacing: '0.02em',
                                     }}
@@ -230,7 +231,13 @@ export function HeroBanner({
                         <img
                             src={src}
                             alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                objectPosition: layout === 'wide' ? 'center 42%' : 'center',
+                                display: 'block',
+                            }}
                         />
                     </Div>
                 ) : null}

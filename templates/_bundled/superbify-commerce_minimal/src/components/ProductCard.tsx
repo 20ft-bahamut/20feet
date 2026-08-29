@@ -16,8 +16,15 @@ export interface ProductCardProps {
     onQuickAdd?: (item: ProductItem, event: React.MouseEvent | React.KeyboardEvent) => void;
     /** When true, render the card as a large featured tile (col-span 2, larger image, bigger name). */
     featured?: boolean;
+    /** When true, the card is rendered inside the featured grid's secondary area;
+     *  uses a slightly taller image aspect to balance the layout. */
+    compactFeatured?: boolean;
     /** Inline style override forwarded to the outer anchor. */
     style?: React.CSSProperties;
+    /** Featured-only inline CTA label (e.g. "자세히 보기 →"). */
+    featuredCtaLabel?: string;
+    /** Featured-only eyebrow above the category, e.g. "대표 상품". */
+    featuredEyebrow?: string;
 }
 
 function isStopStatus(sales_status?: string | null): boolean {
@@ -45,7 +52,10 @@ export function ProductCard({
     quickAddLabel = '담기',
     onQuickAdd,
     featured = false,
+    compactFeatured = false,
     style,
+    featuredCtaLabel,
+    featuredEyebrow,
 }: ProductCardProps): React.ReactElement | null {
     if (item.isFixture === true) {
         // Fixtures are dev/test only — never render at runtime.
@@ -98,7 +108,7 @@ export function ProductCard({
             <Div
                 style={{
                     position: 'relative',
-                    aspectRatio: featured ? '3 / 2' : '1 / 1',
+                    aspectRatio: featured ? '4 / 5' : compactFeatured ? '1 / 1.05' : '1 / 1',
                     backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
                     overflow: 'hidden',
                     display: 'flex',
@@ -182,10 +192,25 @@ export function ProductCard({
                     flexDirection: 'column',
                     gap: 'var(--scm-spacing-2xs, 0.25rem)',
                     padding: featured
-                        ? 'var(--scm-spacing-lg, 1.5rem) var(--scm-spacing-md, 1rem) 0'
+                        ? 'var(--scm-spacing-xl, 2rem) var(--scm-spacing-md, 1rem) 0'
                         : 'var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-2xs, 0.25rem) 0',
                 }}
             >
+                {featured && featuredEyebrow ? (
+                    <Span
+                        style={{
+                            fontFamily: 'var(--scm-font-body, system-ui)',
+                            fontSize: '0.75rem',
+                            color: 'var(--scm-wood-dark, #A8916F)',
+                            letterSpacing: '0.18em',
+                            textTransform: 'uppercase',
+                            fontWeight: 700,
+                            marginBottom: 'var(--scm-spacing-2xs, 0.25rem)',
+                        }}
+                    >
+                        {featuredEyebrow}
+                    </Span>
+                ) : null}
                 {eyebrowText ? (
                     <Span
                         style={{
@@ -203,14 +228,14 @@ export function ProductCard({
                 <Span
                     style={{
                         fontFamily: 'var(--scm-font-display, system-ui)',
-                        fontSize: featured ? '1.25rem' : '0.9375rem',
+                        fontSize: featured ? '1.5rem' : '1rem',
                         fontWeight: 500,
                         color: 'var(--scm-text-primary, #26221E)',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
                         minHeight: '1.4em',
-                        letterSpacing: '-0.005em',
+                        letterSpacing: '-0.01em',
                     }}
                     title={nameText ?? undefined}
                     data-testid="product-card-name"
@@ -223,7 +248,30 @@ export function ProductCard({
                     sellingPriceFormatted={item.selling_price_formatted}
                     listPriceFormatted={item.list_price_formatted}
                     discountRate={item.discount_rate}
+                    hideDiscountBadge={true}
                 />
+                {featured && featuredCtaLabel ? (
+                    <Span
+                        aria-hidden
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            marginTop: 'var(--scm-spacing-sm, 0.75rem)',
+                            paddingBottom: '2px',
+                            alignSelf: 'flex-start',
+                            borderBottom: '1px solid var(--scm-charcoal, #26221E)',
+                            fontFamily: 'var(--scm-font-body, system-ui)',
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            color: 'var(--scm-text-primary, #26221E)',
+                            letterSpacing: '0.01em',
+                        }}
+                    >
+                        {featuredCtaLabel}
+                        <span>→</span>
+                    </Span>
+                ) : null}
             </Div>
         </A>
     );

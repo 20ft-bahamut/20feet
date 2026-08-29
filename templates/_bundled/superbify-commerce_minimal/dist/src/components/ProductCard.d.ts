@@ -11,8 +11,15 @@ export interface ProductCardProps {
     onQuickAdd?: (item: ProductItem, event: React.MouseEvent | React.KeyboardEvent) => void;
     /** When true, render the card as a large featured tile (col-span 2, larger image, bigger name). */
     featured?: boolean;
+    /** When true, the card is rendered inside the featured grid's secondary area;
+     *  uses a slightly taller image aspect to balance the layout. */
+    compactFeatured?: boolean;
     /** Inline style override forwarded to the outer anchor. */
     style?: React.CSSProperties;
+    /** Featured-only inline CTA label (e.g. "자세히 보기 →"). */
+    featuredCtaLabel?: string;
+    /** Featured-only eyebrow above the category, e.g. "대표 상품". */
+    featuredEyebrow?: string;
 }
-export declare function ProductCard({ item, href, className, quickAddLabel, onQuickAdd, featured, style, }: ProductCardProps): React.ReactElement | null;
+export declare function ProductCard({ item, href, className, quickAddLabel, onQuickAdd, featured, compactFeatured, style, featuredCtaLabel, featuredEyebrow, }: ProductCardProps): React.ReactElement | null;
 export default ProductCard;

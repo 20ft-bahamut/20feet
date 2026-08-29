@@ -93,9 +93,9 @@ export function BrandStorySection({
                     <H2
                         style={{
                             fontFamily: 'var(--scm-font-display, system-ui)',
-                            fontSize: 'clamp(1.625rem, 3.2vw, 2.25rem)',
+                            fontSize: 'clamp(1.75rem, 3.6vw, 2.625rem)',
                             fontWeight: 600,
-                            letterSpacing: '-0.015em',
+                            letterSpacing: '-0.018em',
                             lineHeight: 1.15,
                             color: 'var(--scm-text-primary, #26221E)',
                             margin: 0,
@@ -109,7 +109,7 @@ export function BrandStorySection({
                     <P
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
-                            fontSize: '0.9375rem',
+                            fontSize: '1rem',
                             color: 'var(--scm-text-body, #4A4643)',
                             lineHeight: 1.85,
                             margin: 0,

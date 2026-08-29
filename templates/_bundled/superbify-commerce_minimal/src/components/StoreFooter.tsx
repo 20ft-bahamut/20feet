@@ -65,7 +65,7 @@ export function StoreFooter({
                         <Span
                             style={{
                                 fontFamily: 'var(--scm-font-display, system-ui)',
-                                fontSize: '1.125rem',
+                                fontSize: '1.25rem',
                                 fontWeight: 700,
                                 letterSpacing: '-0.01em',
                             }}
@@ -75,7 +75,7 @@ export function StoreFooter({
                         <Span
                             style={{
                                 fontFamily: 'var(--scm-font-body, system-ui)',
-                                fontSize: '0.8125rem',
+                                fontSize: '0.875rem',
                                 opacity: 0.7,
                                 letterSpacing: '0.02em',
                             }}
@@ -90,7 +90,7 @@ export function StoreFooter({
                             padding: 0,
                             display: 'flex',
                             flexWrap: 'wrap',
-                            gap: 'var(--scm-spacing-lg, 1.5rem)',
+                            gap: 'var(--scm-spacing-xl, 2rem)',
                             alignItems: 'center',
                         }}
                     >
@@ -102,7 +102,7 @@ export function StoreFooter({
                                         color: 'var(--scm-text-inverse, #FAF8F3)',
                                         textDecoration: 'none',
                                         fontFamily: 'var(--scm-font-body, system-ui)',
-                                        fontSize: '0.875rem',
+                                        fontSize: '0.9375rem',
                                         fontWeight: 500,
                                         opacity: 0.9,
                                     }}
@@ -127,8 +127,9 @@ export function StoreFooter({
                     <Span
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
-                            fontSize: '0.75rem',
-                            opacity: 0.55,
+                            fontSize: '0.8125rem',
+                            opacity: 0.65,
+                            letterSpacing: '0.01em',
                         }}
                     >
                         {copyright}

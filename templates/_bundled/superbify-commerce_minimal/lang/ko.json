@@ -115,6 +115,12 @@
                 "eyebrow": "LIFESTYLE",
                 "title": "오늘의 한 권",
                 "description": "책꽂이 위에 머무는 단행본 한 권처럼, 일상에 한 점 더해지는 물건을 소개합니다."
+            },
+            "final_cta": {
+                "eyebrow": "EXPLORE",
+                "heading": "조용한 일상의 모든 물건을 한 자리에서",
+                "body": "지금 전체 Shop을 둘러보고, 오래 머무를 한 가지 물건을 골라보세요.",
+                "cta": "Shop 전체 보기"
             }
         },
         "shop": {
@@ -136,6 +142,8 @@
             "info_title": "안내",
             "shipping_label": "SHIPPING",
             "shipping_title": "배송 안내",
+            "view_detail": "자세히 보기",
+            "featured_eyebrow": "대표 상품",
             "info": {
                 "material": "소재",
                 "size": "사이즈",
