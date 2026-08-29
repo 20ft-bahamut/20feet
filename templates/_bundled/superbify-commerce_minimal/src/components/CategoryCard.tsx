@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Div, Img, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
+import { resolveDemoCategoryAsset } from './demoAssets';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryCardProps {
@@ -15,6 +16,9 @@ function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: strin
     if (imageUrl && imageUrl.startsWith('/') && /^https?:\/\//.test(imageUrl) === false) {
         return { src: imageUrl, isFallback: false };
     }
+    // Real bundled demo photo for the 8 demo categories.
+    const demo = resolveDemoCategoryAsset(item.slug, item.name_localized ?? item.name);
+    if (demo) return { src: demo, isFallback: false };
     // External http(s) or no URL: use bundled slot data-URI (never 404).
     return { src: resolveSlotImage(fallbackSlot), isFallback: true };
 }

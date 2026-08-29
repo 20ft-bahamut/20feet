@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Div, H1, P, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
+import { demoAssets } from './demoAssets';
 
 export interface HeroBannerProps {
     eyebrow?: string;
@@ -13,10 +14,19 @@ export interface HeroBannerProps {
     className?: string;
     /** Slot id of the visual tile image. */
     mediaSlot?: string;
+    /** Override the hero image directly with a bundled asset URL. */
+    mediaSrc?: string;
     /** When true, render a soft ivory border/veil around the visual tile. */
     veil?: boolean;
     /** Visual variant — 'full' (default) bleeds the section edges, 'contained' adds side gutter. */
     bleed?: 'full' | 'contained';
+    /**
+     * Layout style.
+     *  - 'split' (default): left type column + right 4:3 image tile
+     *  - 'wide':   type left (~38%), image right (~62%) — confident desktop presence
+     *  - 'stacked': full-width image on top, type below
+     */
+    layout?: 'split' | 'wide' | 'stacked';
 }
 
 export function HeroBanner({
@@ -29,10 +39,14 @@ export function HeroBanner({
     secondaryCtaHref,
     className,
     mediaSlot = 'hero-mood-1',
-    veil = true,
+    mediaSrc,
+    veil = false,
     bleed = 'full',
+    layout = 'wide',
 }: HeroBannerProps): React.ReactElement {
-    const mediaSrc = resolveSlotImage(mediaSlot);
+    const src = mediaSrc ?? demoAssets.hero ?? resolveSlotImage(mediaSlot);
+    const stacked = layout === 'stacked';
+
     return (
         <Div
             className={className}
@@ -43,26 +57,48 @@ export function HeroBanner({
                 overflow: 'hidden',
             }}
             data-testid="hero-banner"
+            data-layout={layout}
         >
             <Div
                 style={{
                     maxWidth: 'var(--scm-max-width, 1200px)',
                     marginInline: 'auto',
                     paddingInline: 'var(--scm-gutter, 1rem)',
-                    paddingBlock: 'clamp(3rem, 7vw, 6rem)',
+                    paddingBlock: stacked
+                        ? 'clamp(2.5rem, 5vw, 4rem)'
+                        : 'clamp(3rem, 7vw, 6rem)',
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr)',
+                    gridTemplateColumns: stacked ? 'minmax(0, 1fr)' : 'minmax(0, 1fr)',
                     alignItems: 'center',
-                    gap: 'var(--scm-spacing-xl, 2.5rem)',
+                    gap: stacked ? 'var(--scm-spacing-lg, 1.5rem)' : 'var(--scm-spacing-xl, 2.5rem)',
                 }}
-                className="scm-hero-grid"
+                className={stacked ? '' : 'scm-hero-grid'}
             >
+                {stacked ? (
+                    <Div
+                        aria-hidden
+                        style={{
+                            width: '100%',
+                            aspectRatio: '21 / 9',
+                            backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+                            borderRadius: 'var(--scm-radius, 4px)',
+                            overflow: 'hidden',
+                            order: 1,
+                        }}
+                    >
+                        <img
+                            src={src}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                    </Div>
+                ) : null}
                 <Div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 'var(--scm-spacing-md, 1rem)',
-                        order: 1,
+                        order: 2,
                     }}
                 >
                     {eyebrow ? (
@@ -71,7 +107,7 @@ export function HeroBanner({
                                 fontFamily: 'var(--scm-font-body, system-ui)',
                                 fontSize: '0.75rem',
                                 color: 'var(--scm-wood-dark, #A8916F)',
-                                letterSpacing: '0.14em',
+                                letterSpacing: '0.18em',
                                 textTransform: 'uppercase',
                                 fontWeight: 600,
                             }}
@@ -85,11 +121,12 @@ export function HeroBanner({
                                 fontFamily: 'var(--scm-font-display, system-ui)',
                                 fontSize: 'var(--scm-hero-heading-size, clamp(2rem, 5.6vw, 3.5rem))',
                                 fontWeight: 600,
-                                lineHeight: 1.1,
-                                letterSpacing: '-0.015em',
+                                lineHeight: 1.08,
+                                letterSpacing: '-0.02em',
                                 color: 'var(--scm-text-primary, #26221E)',
                                 margin: 0,
-                                maxWidth: '18ch',
+                                maxWidth: '16ch',
+                                whiteSpace: 'pre-line',
                             }}
                         >
                             {headline}
@@ -136,7 +173,7 @@ export function HeroBanner({
                                         alignItems: 'center',
                                         minHeight: 'var(--scm-touch-min, 44px)',
                                         padding: '0 var(--scm-spacing-lg, 1.5rem)',
-                                        borderRadius: 'var(--scm-radius, 8px)',
+                                        borderRadius: 'var(--scm-radius, 4px)',
                                         backgroundColor: 'var(--scm-charcoal, #26221E)',
                                         color: 'var(--scm-text-inverse, #FAF8F3)',
                                         textDecoration: 'none',
@@ -158,7 +195,7 @@ export function HeroBanner({
                                         alignItems: 'center',
                                         minHeight: 'var(--scm-touch-min, 44px)',
                                         padding: '0 var(--scm-spacing-lg, 1.5rem)',
-                                        borderRadius: 'var(--scm-radius, 8px)',
+                                        borderRadius: 'var(--scm-radius, 4px)',
                                         backgroundColor: 'transparent',
                                         color: 'var(--scm-text-primary, #26221E)',
                                         border: '1px solid var(--scm-charcoal, #26221E)',
@@ -175,25 +212,28 @@ export function HeroBanner({
                         </Div>
                     ) : null}
                 </Div>
-                <Div
-                    style={{
-                        order: 2,
-                        position: 'relative',
-                        width: '100%',
-                        aspectRatio: '4 / 3',
-                        backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                        borderRadius: 'var(--scm-radius, 8px)',
-                        overflow: 'hidden',
-                        border: veil ? '1px solid var(--scm-line, #E4DCCE)' : 'none',
-                    }}
-                    aria-hidden
-                >
-                    <img
-                        src={mediaSrc}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                </Div>
+                {!stacked ? (
+                    <Div
+                        data-testid="hero-image-tile"
+                        style={{
+                            order: 3,
+                            position: 'relative',
+                            width: '100%',
+                            aspectRatio: layout === 'wide' ? '5 / 4' : '4 / 3',
+                            backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+                            borderRadius: 'var(--scm-radius, 4px)',
+                            overflow: 'hidden',
+                            border: veil ? '1px solid var(--scm-line, #E4DCCE)' : 'none',
+                        }}
+                        aria-hidden
+                    >
+                        <img
+                            src={src}
+                            alt=""
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                    </Div>
+                ) : null}
             </Div>
         </Div>
     );

@@ -83,9 +83,9 @@ export function ProductCard({
                 flexDirection: 'column',
                 textDecoration: 'none',
                 color: 'inherit',
-                backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                border: '1px solid var(--scm-line, #E4DCCE)',
-                borderRadius: 'var(--scm-radius, 8px)',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: 0,
                 overflow: 'hidden',
                 height: '100%',
                 minWidth: 0,
@@ -98,24 +98,26 @@ export function ProductCard({
             <Div
                 style={{
                     position: 'relative',
-                    aspectRatio: featured ? '16 / 11' : '1 / 1',
+                    aspectRatio: featured ? '3 / 2' : '1 / 1',
                     backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
                     overflow: 'hidden',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: featured ? 'var(--scm-spacing-lg, 1.5rem)' : 'var(--scm-spacing-md, 1rem)',
+                    padding: 0,
                 }}
             >
                 <Img
                     src={src}
                     alt={nameText}
-                    loading="lazy"
+                    loading="eager"
+                    decoding="async"
                     data-fallback={isFallback ? 'true' : 'false'}
                     style={{
                         width: '100%',
                         height: '100%',
-                        objectFit: 'contain',
+                        objectFit: 'cover',
+                        objectPosition: 'center',
                         display: 'block',
                         transition: 'transform var(--scm-duration-base, 220ms) var(--scm-ease-out, ease)',
                     }}
@@ -124,8 +126,8 @@ export function ProductCard({
                 <Div
                     style={{
                         position: 'absolute',
-                        top: 'var(--scm-spacing-xs, 0.5rem)',
-                        left: 'var(--scm-spacing-xs, 0.5rem)',
+                        top: '12px',
+                        left: '12px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 'var(--scm-spacing-2xs, 0.25rem)',
@@ -147,9 +149,9 @@ export function ProductCard({
                         data-testid="product-card-quickadd"
                         style={{
                             position: 'absolute',
-                            left: 'var(--scm-spacing-xs, 0.5rem)',
-                            right: 'var(--scm-spacing-xs, 0.5rem)',
-                            bottom: 'var(--scm-spacing-xs, 0.5rem)',
+                            left: '10px',
+                            right: '10px',
+                            bottom: '10px',
                             minHeight: '36px',
                             padding: '0 var(--scm-spacing-sm, 0.75rem)',
                             border: 'none',
@@ -179,7 +181,9 @@ export function ProductCard({
                     display: 'flex',
                     flexDirection: 'column',
                     gap: 'var(--scm-spacing-2xs, 0.25rem)',
-                    padding: featured ? 'var(--scm-spacing-lg, 1.5rem)' : 'var(--scm-spacing-md, 1rem)',
+                    padding: featured
+                        ? 'var(--scm-spacing-lg, 1.5rem) var(--scm-spacing-md, 1rem) 0'
+                        : 'var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-2xs, 0.25rem) 0',
                 }}
             >
                 {eyebrowText ? (
@@ -188,9 +192,9 @@ export function ProductCard({
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.6875rem',
                             color: 'var(--scm-text-muted, #8A837B)',
-                            letterSpacing: '0.12em',
+                            letterSpacing: '0.14em',
                             textTransform: 'uppercase',
-                            fontWeight: 500,
+                            fontWeight: 600,
                         }}
                     >
                         {eyebrowText}
@@ -199,15 +203,17 @@ export function ProductCard({
                 <Span
                     style={{
                         fontFamily: 'var(--scm-font-display, system-ui)',
-                        fontSize: featured ? '1.125rem' : '0.9375rem',
+                        fontSize: featured ? '1.25rem' : '0.9375rem',
                         fontWeight: 500,
                         color: 'var(--scm-text-primary, #26221E)',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
                         minHeight: '1.4em',
+                        letterSpacing: '-0.005em',
                     }}
                     title={nameText ?? undefined}
+                    data-testid="product-card-name"
                 >
                     {nameText}
                 </Span>

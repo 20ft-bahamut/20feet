@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Div, H2, P, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
+import { demoAssets } from './demoAssets';
 
 export interface BrandStorySectionProps {
     eyebrow?: string;
@@ -11,6 +12,8 @@ export interface BrandStorySectionProps {
     className?: string;
     /** Slot id of a side image. */
     mediaSlot?: string;
+    /** Override the side image directly with a bundled asset URL. */
+    mediaSrc?: string;
     /** Visual variant. 'split' = image+text 2-col (default). 'stacked' = type only. */
     layout?: 'split' | 'stacked';
 }
@@ -23,19 +26,19 @@ export function BrandStorySection({
     ctaHref,
     className,
     mediaSlot = 'hero-mood-1',
+    mediaSrc,
     layout = 'split',
 }: BrandStorySectionProps): React.ReactElement {
-    const mediaSrc = resolveSlotImage(mediaSlot);
+    const src = mediaSrc ?? demoAssets.brandStory ?? resolveSlotImage(mediaSlot);
     const isSplit = layout === 'split';
     return (
         <Div
             className={className}
             style={{
                 display: 'grid',
-                gridTemplateColumns: isSplit ? 'minmax(0, 1fr) minmax(0, 1fr)' : '1fr',
-                gap: 'var(--scm-spacing-xl, 2.5rem)',
+                gridTemplateColumns: isSplit ? 'minmax(0, 1.05fr) minmax(0, 0.95fr)' : '1fr',
+                gap: isSplit ? 'clamp(2rem, 4vw, 4rem)' : 0,
                 alignItems: 'center',
-                paddingBlock: 'var(--scm-section-py-md, 4rem)',
             }}
             data-testid="brand-story-section"
         >
@@ -44,13 +47,13 @@ export function BrandStorySection({
                     style={{
                         aspectRatio: '4 / 5',
                         backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                        borderRadius: 'var(--scm-radius, 8px)',
+                        borderRadius: 'var(--scm-radius, 4px)',
                         overflow: 'hidden',
                     }}
                     aria-hidden
                 >
                     <img
-                        src={mediaSrc}
+                        src={src}
                         alt=""
                         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
@@ -69,7 +72,7 @@ export function BrandStorySection({
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.75rem',
                             color: 'var(--scm-wood-dark, #A8916F)',
-                            letterSpacing: '0.14em',
+                            letterSpacing: '0.18em',
                             textTransform: 'uppercase',
                             fontWeight: 600,
                         }}
@@ -90,13 +93,13 @@ export function BrandStorySection({
                     <H2
                         style={{
                             fontFamily: 'var(--scm-font-display, system-ui)',
-                            fontSize: 'clamp(1.5rem, 3.6vw, 2.25rem)',
+                            fontSize: 'clamp(1.625rem, 3.2vw, 2.25rem)',
                             fontWeight: 600,
-                            letterSpacing: '-0.01em',
-                            lineHeight: 1.18,
+                            letterSpacing: '-0.015em',
+                            lineHeight: 1.15,
                             color: 'var(--scm-text-primary, #26221E)',
                             margin: 0,
-                            maxWidth: '22ch',
+                            maxWidth: '20ch',
                         }}
                     >
                         {heading}
@@ -108,7 +111,7 @@ export function BrandStorySection({
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.9375rem',
                             color: 'var(--scm-text-body, #4A4643)',
-                            lineHeight: 1.8,
+                            lineHeight: 1.85,
                             margin: 0,
                             maxWidth: '52ch',
                         }}

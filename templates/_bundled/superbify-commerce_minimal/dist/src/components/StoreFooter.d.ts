@@ -1,6 +1,7 @@
 import { default as React } from 'react';
 export interface StoreFooterProps {
     brandName?: string;
+    tagline?: string;
     copyright?: string;
     className?: string;
     navItems?: {
@@ -8,5 +9,5 @@ export interface StoreFooterProps {
         label: string;
     }[];
 }
-export declare function StoreFooter({ brandName, copyright, className, navItems, }: StoreFooterProps): React.ReactElement;
+export declare function StoreFooter({ brandName, tagline, copyright, className, navItems, }: StoreFooterProps): React.ReactElement;
 export default StoreFooter;

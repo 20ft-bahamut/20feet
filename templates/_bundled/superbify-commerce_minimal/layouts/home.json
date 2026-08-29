@@ -318,7 +318,9 @@
                                     "heading": "$t:superbify.home.editorial.heading",
                                     "body": "$t:superbify.home.editorial.body",
                                     "ctaLabel": "$t:superbify.home.editorial.cta",
-                                    "ctaHref": "/shop"
+                                    "ctaHref": "/shop",
+                                    "variant": "panel",
+                                    "mediaSrc": "/api/templates/assets/superbify-commerce_minimal/images/demo/editorial.jpg"
                                 }
                             }
                         ]

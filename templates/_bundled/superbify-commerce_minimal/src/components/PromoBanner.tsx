@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Div, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
+import { demoAssets } from './demoAssets';
 
 export interface PromoBannerProps {
     eyebrow?: string;
@@ -10,6 +11,8 @@ export interface PromoBannerProps {
     ctaHref?: string;
     className?: string;
     mediaSlot?: string;
+    /** Override the visual asset directly. */
+    mediaSrc?: string;
     /** Visual variant. 'split' = image left + type right. */
     layout?: 'split' | 'dark';
 }
@@ -26,9 +29,10 @@ export function PromoBanner({
     ctaHref,
     className,
     mediaSlot = 'hero-mood-3',
+    mediaSrc,
     layout = 'split',
 }: PromoBannerProps): React.ReactElement {
-    const mediaSrc = resolveSlotImage(mediaSlot);
+    const src = mediaSrc ?? demoAssets.promo ?? resolveSlotImage(mediaSlot);
     if (layout === 'dark') {
         return (
             <Div
@@ -142,7 +146,7 @@ export function PromoBanner({
                 }}
             >
                 <img
-                    src={mediaSrc}
+                    src={src}
                     alt=""
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
@@ -162,7 +166,7 @@ export function PromoBanner({
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.75rem',
                             color: 'var(--scm-wood-dark, #A8916F)',
-                            letterSpacing: '0.14em',
+                            letterSpacing: '0.18em',
                             textTransform: 'uppercase',
                             fontWeight: 600,
                         }}
@@ -180,30 +184,35 @@ export function PromoBanner({
                     aria-hidden
                 />
                 {title ? (
-                    <Span
+                    <h2
                         style={{
                             fontFamily: 'var(--scm-font-display, system-ui)',
-                            fontSize: 'clamp(1.5rem, 3vw, 2.125rem)',
+                            fontSize: 'clamp(1.625rem, 3vw, 2.25rem)',
                             fontWeight: 600,
-                            lineHeight: 1.2,
-                            letterSpacing: '-0.01em',
+                            lineHeight: 1.18,
+                            letterSpacing: '-0.015em',
                             color: 'var(--scm-text-primary, #26221E)',
+                            margin: 0,
+                            maxWidth: '20ch',
+                            whiteSpace: 'pre-line',
                         }}
                     >
                         {title}
-                    </Span>
+                    </h2>
                 ) : null}
                 {description ? (
-                    <Span
+                    <p
                         style={{
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.9375rem',
                             lineHeight: 1.75,
                             color: 'var(--scm-text-body, #4A4643)',
+                            margin: 0,
+                            maxWidth: '52ch',
                         }}
                     >
                         {description}
-                    </Span>
+                    </p>
                 ) : null}
                 {ctaLabel && ctaHref ? (
                     <A

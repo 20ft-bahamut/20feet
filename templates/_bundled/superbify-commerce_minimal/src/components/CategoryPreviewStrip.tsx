@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Div, Img, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
+import { resolveDemoCategoryAsset } from './demoAssets';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryPreviewStripProps {
@@ -18,6 +19,9 @@ function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: strin
     if (imageUrl && imageUrl.startsWith('/') && /^https?:\/\//.test(imageUrl) === false) {
         return { src: imageUrl, isFallback: false };
     }
+    // Prefer bundled demo photo for the 8 demo categories.
+    const demo = resolveDemoCategoryAsset(item.slug, item.name_localized ?? item.name);
+    if (demo) return { src: demo, isFallback: false };
     return { src: resolveSlotImage(fallbackSlot), isFallback: true };
 }
 
@@ -115,7 +119,7 @@ export function CategoryPreviewStrip({
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: 'var(--scm-spacing-sm, 0.75rem)',
-                                    padding: '0.5rem 0.75rem',
+                                    padding: '0.45rem 0.65rem',
                                     borderRadius: 'var(--scm-radius, 8px)',
                                     backgroundColor: 'transparent',
                                     textDecoration: 'none',
@@ -126,12 +130,13 @@ export function CategoryPreviewStrip({
                                 <Div
                                     aria-hidden
                                     style={{
-                                        width: '56px',
-                                        height: '56px',
-                                        flex: '0 0 56px',
+                                        width: '52px',
+                                        height: '52px',
+                                        flex: '0 0 52px',
                                         borderRadius: '50%',
                                         overflow: 'hidden',
                                         backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+                                        border: '1px solid var(--scm-line, #E4DCCE)',
                                     }}
                                 >
                                     <Img
@@ -153,12 +158,13 @@ export function CategoryPreviewStrip({
                                     <Span
                                         style={{
                                             fontFamily: 'var(--scm-font-display, system-ui)',
-                                            fontSize: '0.85rem',
+                                            fontSize: '0.8125rem',
                                             fontWeight: 600,
                                             color: 'var(--scm-text-primary, #26221E)',
                                             whiteSpace: 'nowrap',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
+                                            lineHeight: 1.2,
                                         }}
                                     >
                                         {nameText}

@@ -38,7 +38,7 @@
                 "type": "basic",
                 "name": "Section",
                 "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 4rem)"
+                    "paddingBlock": "var(--scm-section-py-md, 2.5rem)"
                 },
                 "children": [
                     {

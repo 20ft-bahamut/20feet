@@ -61,9 +61,11 @@ export function Price({
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: '1.125rem',
+                    fontSize: 'var(--scm-price-lg, 1.375rem)',
                     fontWeight: 700,
                     color: 'var(--scm-text-primary, #26221E)',
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: '-0.005em',
                 }}
             >
                 {selling || '—'}
@@ -75,6 +77,7 @@ export function Price({
                         fontSize: '0.875rem',
                         color: 'var(--scm-text-muted, #8A837B)',
                         textDecoration: 'line-through',
+                        fontVariantNumeric: 'tabular-nums',
                     }}
                     data-testid="price-list"
                 >

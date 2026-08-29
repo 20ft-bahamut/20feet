@@ -29,12 +29,41 @@ describe('ProductCard', () => {
         expect(card).toHaveTextContent('24,000원');
     });
 
-    it('renders fallback image (data URI) when no thumbnail_url is present', () => {
+    it('resolves demo product image (jpg) when product_code is a known demo prefix', () => {
+        // baseItem.product_code is STLMUG0001AB12CD, which maps to the bundled
+        // demo mug product cut (real JPG). The image is no longer a data URI.
         render(<ProductCard item={baseItem} />);
+        const img = screen.getByRole('img', { hidden: true });
+        const src = img.getAttribute('src') ?? '';
+        expect(src.startsWith('/api/templates/assets/superbify-commerce_minimal/images/demo/')).toBe(true);
+        expect(src).toContain('3.jpg');
+        expect(img).toHaveAttribute('data-fallback', 'false');
+    });
+
+    it('falls back to a SVG data URI when the product_code is unknown', () => {
+        // Unknown product code → still-life slot resolver kicks in (id-based fallback)
+        // which resolves to a bundled SVG. Confirm the original fallback path still works.
+        const unknown: ProductItem = {
+            ...baseItem,
+            product_code: 'UNKNOWN-CODE-XXX',
+        };
+        render(<ProductCard item={unknown} />);
         const img = screen.getByRole('img', { hidden: true });
         const src = img.getAttribute('src') ?? '';
         expect(src.startsWith('data:image/svg+xml')).toBe(true);
         expect(img).toHaveAttribute('data-fallback', 'true');
+    });
+
+    it('honours an explicit server-provided relative thumbnail_url', () => {
+        const withThumb: ProductItem = {
+            ...baseItem,
+            thumbnail_url: '/uploads/sample-product.jpg',
+        };
+        render(<ProductCard item={withThumb} />);
+        const img = screen.getByRole('img', { hidden: true });
+        const src = img.getAttribute('src') ?? '';
+        expect(src).toBe('/uploads/sample-product.jpg');
+        expect(img).toHaveAttribute('data-fallback', 'false');
     });
 
     it('does not render when item is a fixture', () => {

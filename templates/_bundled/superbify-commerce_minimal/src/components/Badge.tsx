@@ -19,9 +19,9 @@ function toneColor(tone: BadgeTone): { bg: string; fg: string; border: string } 
             };
         case 'discount-soft':
             return {
-                bg: 'transparent',
-                fg: 'var(--scm-wood-dark, #A8916F)',
-                border: 'var(--scm-wood, #C9B08D)',
+                bg: 'rgba(250, 248, 243, 0.95)',
+                fg: 'var(--scm-charcoal, #26221E)',
+                border: 'rgba(38, 34, 30, 0.12)',
             };
         case 'soldout':
             return {
@@ -69,6 +69,9 @@ export function Badge({ label, tone = 'default', className }: BadgeProps): React
                 fontWeight: tone === 'discount-soft' ? 500 : 600,
                 lineHeight: 1.2,
                 letterSpacing: tone === 'discount-soft' ? '0.02em' : '0.02em',
+                boxShadow: tone === 'discount-soft'
+                    ? '0 1px 2px rgba(38, 34, 30, 0.12)'
+                    : 'none',
             }}
             data-testid="badge"
             data-tone={tone}

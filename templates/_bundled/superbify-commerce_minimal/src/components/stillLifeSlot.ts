@@ -1,4 +1,5 @@
 import { resolveSlotImage } from './imageSlots';
+import { resolveDemoProductAsset } from './demoAssets';
 
 // Deterministic still-life slot resolver.
 // Each demo product has a unique still-life so the SAME product never flips
@@ -111,6 +112,10 @@ export function resolveStillLifeThumb(input: SlotInput | null | undefined): { sr
     if (t && t.startsWith('/') && !/^https?:\/\//.test(t)) {
         return { src: t, isFallback: false };
     }
+    // Real bundled demo photo (preferred over placeholder SVG).
+    const code = (input?.product_code ?? input?.code ?? '').toString();
+    const demoSrc = resolveDemoProductAsset(code);
+    if (demoSrc) return { src: demoSrc, isFallback: false };
     // External URL → fall back to a bundled slot rather than 404 or violating
     // the no-external-urls rule.
     const slot = pickStillLifeSlot(input);

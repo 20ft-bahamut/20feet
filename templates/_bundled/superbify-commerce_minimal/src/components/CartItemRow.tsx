@@ -125,8 +125,9 @@ export function CartItemRow({
             data-item-id={item.id}
             style={{
                 display: 'grid',
-                gridTemplateColumns: '5.25rem 1fr auto',
-                gap: 'var(--scm-spacing-md, 1rem)',
+                gridTemplateColumns: '5.25rem minmax(0, 1fr) minmax(6rem, auto)',
+                columnGap: 'var(--scm-spacing-md, 1rem)',
+                rowGap: 'var(--scm-spacing-sm, 0.75rem)',
                 padding: 'var(--scm-spacing-lg, 1.5rem) 0',
                 borderBottom: '1px solid var(--scm-line, #E4DCCE)',
                 alignItems: 'flex-start',
@@ -169,7 +170,9 @@ export function CartItemRow({
                             fontSize: '0.9375rem',
                             fontWeight: 600,
                             color: 'var(--scm-text-primary, #26221E)',
-                            wordBreak: 'break-word',
+                            wordBreak: 'keep-all',
+                            overflowWrap: 'break-word',
+                            whiteSpace: 'normal',
                             lineHeight: 1.4,
                         }}
                     >
@@ -324,6 +327,9 @@ export function CartItemRow({
                     justifyContent: 'space-between',
                     gap: 'var(--scm-spacing-sm, 0.75rem)',
                     minHeight: '5.25rem',
+                    minWidth: '6rem',
+                    textAlign: 'right',
+                    whiteSpace: 'nowrap',
                 }}
             >
                 <Span
@@ -332,6 +338,8 @@ export function CartItemRow({
                         fontSize: '1rem',
                         fontWeight: 600,
                         color: 'var(--scm-text-primary, #26221E)',
+                        fontVariantNumeric: 'tabular-nums',
+                        whiteSpace: 'nowrap',
                     }}
                 >
                     {lineTotalFormatted ?? formatPrice(lineTotal)}
@@ -351,6 +359,7 @@ export function CartItemRow({
                         color: 'var(--scm-text-muted, #8A837B)',
                         fontSize: '0.8125rem',
                         cursor: 'pointer',
+                        whiteSpace: 'nowrap',
                     }}
                 >
                     {deleteLabel}

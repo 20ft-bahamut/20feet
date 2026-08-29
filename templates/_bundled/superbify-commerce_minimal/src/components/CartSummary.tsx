@@ -153,6 +153,7 @@ export function CartSummary({
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'baseline',
+                    gap: 'var(--scm-spacing-sm, 0.75rem)',
                 }}
             >
                 <Span
@@ -161,6 +162,8 @@ export function CartSummary({
                         fontSize: '0.95rem',
                         fontWeight: 600,
                         color: 'var(--scm-text-primary, #26221E)',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
                     }}
                 >
                     {totalLabel}
@@ -172,6 +175,10 @@ export function CartSummary({
                         fontSize: '1.375rem',
                         fontWeight: 700,
                         color: 'var(--scm-text-primary, #26221E)',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
+                        fontVariantNumeric: 'tabular-nums',
+                        textAlign: 'right',
                     }}
                 >
                     {totalStr}
@@ -236,6 +243,7 @@ function SummaryRow({ label, value }: { label: string; value: string }): React.R
                 alignItems: 'baseline',
                 paddingBlock: 'var(--scm-spacing-xs, 0.5rem)',
                 borderBottom: '1px solid var(--scm-line, #E4DCCE)',
+                gap: 'var(--scm-spacing-sm, 0.75rem)',
             }}
         >
             <Span
@@ -243,6 +251,8 @@ function SummaryRow({ label, value }: { label: string; value: string }): React.R
                     fontFamily: 'var(--scm-font-body, system-ui)',
                     fontSize: '0.875rem',
                     color: 'var(--scm-text-muted, #8A837B)',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
                 }}
             >
                 {label}
@@ -253,6 +263,10 @@ function SummaryRow({ label, value }: { label: string; value: string }): React.R
                     fontSize: '0.9375rem',
                     color: 'var(--scm-text-primary, #26221E)',
                     fontWeight: 500,
+                    whiteSpace: 'nowrap',
+                    fontVariantNumeric: 'tabular-nums',
+                    textAlign: 'right',
+                    minWidth: 0,
                 }}
             >
                 {value}
