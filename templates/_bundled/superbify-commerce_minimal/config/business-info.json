@@ -1,0 +1,205 @@
+{
+    "$comment": "Still Form 템플릿 사업자 정보 & 정책 문서 단일 편집 지점 (single edit point). 이 파일 하나를 수정하고 빌드+동기화하면 푸터와 정책 페이지 전체에 반영됩니다. 사업자 정보 기본값은 모두 빈 문자열이며, 값이 채워진 항목만 푸터에 렌더링됩니다(조건부 렌더링 — N/A / '-' 등 자리표시 문구를 출력하지 않습니다). 사업자등록번호 등 번호류는 문자열로 기입해야 앞자리 0과 하이픈이 보존됩니다. 정책 문서는 템플릿 시안용 문단 구성 예시이며 실제 법적 효력이 없습니다. / Single edit point for business information and policy documents. Business fields ship EMPTY by default; the footer renders only non-empty values (no N/A / '-' placeholders). Keep number-like fields as strings so leading zeros and dashes survive. Policy documents are template scaffolding with no legal effect.",
+    "shop": {
+        "shopName": "",
+        "companyName": "",
+        "representative": "",
+        "businessRegistrationNumber": "",
+        "ecommerceRegistrationNumber": "",
+        "ecommerceRegistrationAuthority": "",
+        "businessAddress": "",
+        "customerServicePhone": "",
+        "customerServiceEmail": "",
+        "hostingProvider": "",
+        "businessVerificationUrl": ""
+    },
+    "policies": {
+        "terms": {
+            "title": {
+                "ko": "이용약관",
+                "en": "Terms of Service"
+            },
+            "updated": "",
+            "sections": [
+                {
+                    "heading": {
+                        "ko": "문서의 성격",
+                        "en": "About this document"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 이용약관 예시 구조입니다. 조항 배치를 보여 주기 위한 시안 문구이며 실제 서비스 내용을 담고 있지 않습니다.",
+                            "en": "This is a sample terms-of-service structure included with the Still Form demo store template. It is placeholder wording that demonstrates section layout and does not describe a real service."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "서비스 이용",
+                        "en": "Using the service"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "서비스 이용 조건, 회원 가입 절차, 서비스 중단 정책 등은 스토어 운영자가 실제 기준을 확인한 뒤 이 문단을 교체하여 작성합니다.",
+                            "en": "Conditions of use, membership steps, and service interruption policies should be written by the store operator after confirming the actual rules, replacing these paragraphs."
+                        },
+                        {
+                            "ko": "상품 소개 문구와 이미지 중 데모 자산으로 표시된 것은 템플릿 출하용 예시이며 실제 상품 정보가 아닙니다.",
+                            "en": "Product copy and images marked as demo assets are template samples, not real product information."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "게시물 및 콘텐츠",
+                        "en": "Postings and content"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "게시물 관리, 저작권 표기, 문의 창구 안내 등은 스토어 운영자가 실제 운영 방식에 맞추어 작성합니다.",
+                            "en": "Content moderation, copyright notices, and contact details should be written by the store operator to match how the store is actually run."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "실제 운영 전 확인",
+                        "en": "Before launching a real store"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
+                            "en": "Replace all placeholder text before launching a real store."
+                        }
+                    ]
+                }
+            ]
+        },
+        "privacy": {
+            "title": {
+                "ko": "개인정보처리방침",
+                "en": "Privacy Policy"
+            },
+            "updated": "",
+            "sections": [
+                {
+                    "heading": {
+                        "ko": "문서의 성격",
+                        "en": "About this document"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 개인정보처리방침 예시 구조입니다. 실제 수집·처리 항목은 담고 있지 않습니다.",
+                            "en": "This is a sample privacy-policy structure included with the Still Form demo store template. It does not list any data actually collected or processed."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "처리하는 항목과 방법",
+                        "en": "Items processed and how"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "주문 과정에서 이름, 연락처, 주소 등 처리 항목과 수집 방법을 정리하는 자리입니다. 실제 항목은 스토어 운영자가 서비스 구성에 맞추어 작성합니다.",
+                            "en": "This is where processed items (such as name, contact details, and address) and collection methods are described. The store operator should write the actual list to match the service."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "보관 기간 및 파기",
+                        "en": "Retention and disposal"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "개인정보 보관 기간과 파기 절차는 서비스마다 다르므로 실제 운영 기준에 맞추어 작성합니다.",
+                            "en": "Retention periods and disposal procedures differ per service and should be written to match the actual operating rules."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "이용자 권리",
+                        "en": "Your rights"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "이용자는 자신의 개인정보에 대해 열람, 정정, 삭제를 요청할 수 있습니다. 실제 요청 절차와 창구는 스토어 운영자가 안내 문구로 작성합니다.",
+                            "en": "Users may request to view, correct, or delete their personal data. The store operator should write the actual request procedure and contact point."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "실제 운영 전 확인",
+                        "en": "Before launching a real store"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
+                            "en": "Replace all placeholder text before launching a real store."
+                        }
+                    ]
+                }
+            ]
+        },
+        "shippingReturns": {
+            "title": {
+                "ko": "배송·교환·반품 안내",
+                "en": "Shipping, Returns & Exchanges"
+            },
+            "updated": "",
+            "sections": [
+                {
+                    "heading": {
+                        "ko": "문서의 성격",
+                        "en": "About this document"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 배송·교환·반품 안내 예시 구조입니다. 실제 배송 정책이 담겨 있지 않습니다.",
+                            "en": "This is a sample shipping, returns, and exchanges structure included with the Still Form demo store template. It contains no real shipping policy."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "배송 안내",
+                        "en": "Shipping"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "데모 스토어에는 실제 배송 정책이 없습니다. 배송 지역, 배송비, 평균 배송 기간은 스토어 운영자가 실제 기준을 확인해 작성합니다.",
+                            "en": "The demo store carries no real shipping policy. Shipping regions, fees, and delivery timeframes should be written by the store operator after confirming the actual rules."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "교환 및 반품",
+                        "en": "Exchanges and returns"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "교환·반품 조건, 절차와 연락 방법은 스토어 운영자가 실제 기준에 맞추어 작성합니다.",
+                            "en": "Exchange and return conditions, procedures, and contact methods should be written by the store operator to match the actual rules."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "실제 운영 전 확인",
+                        "en": "Before launching a real store"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
+                            "en": "Replace all placeholder text before launching a real store."
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

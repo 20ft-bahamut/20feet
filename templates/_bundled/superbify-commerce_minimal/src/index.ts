@@ -77,6 +77,26 @@ export {
     type OrderCompletePageProps,
     type OrderCompleteOrderData,
 } from './components/OrderCompletePage';
+export { PolicyPage, type PolicyPageProps } from './components/PolicyPage';
+
+// Business information single edit point (config/business-info.json)
+export {
+    businessInfo,
+    businessFields,
+    hasBusinessInfo,
+    getPolicyDocument,
+    localText,
+    resolveTemplateLocale,
+    POLICY_ROUTES,
+    type BusinessField,
+    type BusinessInfo,
+    type LocalizedText,
+    type PolicyDocument,
+    type PolicyDocumentKey,
+    type PolicySection,
+    type ShopInfo,
+    type TemplateLocale,
+} from './config/businessInfo';
 export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './components/CartItemRow';
 export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';
@@ -145,6 +165,7 @@ import { CartItemRow } from './components/CartItemRow';
 import { CheckoutForm } from './components/CheckoutForm';
 import { CheckoutPage } from './components/CheckoutPage';
 import { OrderCompletePage } from './components/OrderCompletePage';
+import { PolicyPage } from './components/PolicyPage';
 import { CartSummary } from './components/CartSummary';
 import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
@@ -215,6 +236,7 @@ if (registry) {
     registry.register({ component: CheckoutForm, metadata: { name: 'CheckoutForm', type: 'composite' } });
     registry.register({ component: CheckoutPage, metadata: { name: 'CheckoutPage', type: 'composite' } });
     registry.register({ component: OrderCompletePage, metadata: { name: 'OrderCompletePage', type: 'composite' } });
+    registry.register({ component: PolicyPage, metadata: { name: 'PolicyPage', type: 'composite' } });
     registry.register({ component: CartSummary, metadata: { name: 'CartSummary', type: 'composite' } });
     registry.register({ component: CategoryCard, metadata: { name: 'CategoryCard', type: 'composite' } });
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });

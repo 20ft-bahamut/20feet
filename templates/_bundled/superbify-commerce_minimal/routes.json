@@ -57,6 +57,31 @@
             }
         },
         {
+            "_comment": "=== 정책 문서 (config/business-info.json 단일 소스) ===",
+            "path": "/shop/terms",
+            "layout": "shop/terms",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.terms.title"
+            }
+        },
+        {
+            "path": "/shop/privacy",
+            "layout": "shop/privacy",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.privacy.title"
+            }
+        },
+        {
+            "path": "/shop/shipping-policy",
+            "layout": "shop/shipping-policy",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.shipping_policy.title"
+            }
+        },
+        {
             "_comment": "=== 장바구니 ===",
             "path": "/cart",
             "layout": "cart",

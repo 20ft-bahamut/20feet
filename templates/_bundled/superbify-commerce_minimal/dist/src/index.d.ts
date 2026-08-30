@@ -7,6 +7,8 @@ export { BrandStorySection, type BrandStorySectionProps } from './components/Bra
 export { CheckoutForm, type CheckoutFormProps, type CheckoutPaymentMethod, type CheckoutItem, type CheckoutFormCheckoutPayload, type CheckoutSubmitPayload, } from './components/CheckoutForm';
 export { CheckoutPage, type CheckoutPageProps, type CheckoutPageCheckoutData, type CheckoutPageSettings, } from './components/CheckoutPage';
 export { OrderCompletePage, type OrderCompletePageProps, type OrderCompleteOrderData, } from './components/OrderCompletePage';
+export { PolicyPage, type PolicyPageProps } from './components/PolicyPage';
+export { businessInfo, businessFields, hasBusinessInfo, getPolicyDocument, localText, resolveTemplateLocale, POLICY_ROUTES, type BusinessField, type BusinessInfo, type LocalizedText, type PolicyDocument, type PolicyDocumentKey, type PolicySection, type ShopInfo, type TemplateLocale, } from './config/businessInfo';
 export { CartItemRow, type CartItemRowItem, type CartItemRowProps } from './components/CartItemRow';
 export { CartSummary, type CartSummaryCalc, type CartSummaryProps } from './components/CartSummary';
 export { CategoryCard, type CategoryCardProps } from './components/CategoryCard';

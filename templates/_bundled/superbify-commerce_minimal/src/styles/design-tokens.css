@@ -119,6 +119,11 @@ body {
     --scm-price-md: 1rem;
     --scm-price-lg: 1.5rem;
     --scm-price-xl: 1.875rem;
+
+    /* Store footer business info row.
+       Label floor is 11px — values/labels must not shrink below this. */
+    --scm-footer-info-value: 0.8125rem;  /* 13px */
+    --scm-footer-info-label: 0.6875rem;  /* 11px */
 }
 
 @media (min-width: 768px) {
@@ -540,6 +545,31 @@ body {
     }
     [data-testid="product-gallery"] > ul li button {
         aspect-ratio: 1 / 1 !important;
+    }
+}
+
+/* ------------------------------------------------------------------
+   Store footer — business info row (config/business-info.json)
+   Desktop (≥768px): 3-col compact grid, labels above values. The third
+   column is wider so addresses do not over-wrap. Mobile (<768px): single
+   column. Cells never overflow horizontally (values break anywhere).
+   ------------------------------------------------------------------ */
+
+.scm-footer-info-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.6fr);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.scm-footer-info-grid > [data-testid="footer-business-field"] {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 767.98px) {
+    .scm-footer-info-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        column-gap: 0 !important;
     }
 }
 

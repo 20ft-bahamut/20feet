@@ -341,6 +341,12 @@
         "type": "composite",
         "description": "Order complete page — bank deposit info + order details + CTAs",
         "path": "src/components/OrderCompletePage.tsx"
+      },
+      {
+        "name": "PolicyPage",
+        "type": "composite",
+        "description": "Policy document page (terms/privacy/shipping) rendered from config/business-info.json",
+        "path": "src/components/PolicyPage.tsx"
       }
     ],
     "layout": [

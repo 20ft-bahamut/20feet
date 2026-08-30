@@ -142,7 +142,8 @@
             "ConfirmDialog",
             "CheckoutForm",
             "CheckoutPage",
-            "OrderCompletePage"
+            "OrderCompletePage",
+            "PolicyPage"
         ],
         "layout": [
             "Container"

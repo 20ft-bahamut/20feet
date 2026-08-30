@@ -85,12 +85,17 @@
                     ]
                 },
                 {
-                    "comment": "=== Store Footer ===",
+                    "comment": "=== Store Footer === 사업자 정보/정책 링크는 config/business-info.json 단일 편집 지점에서 온다. 정책 링크 문구는 lang, 링크 경로는 src/config/businessInfo.ts POLICY_ROUTES.",
                     "id": "store_footer",
                     "type": "composite",
                     "name": "StoreFooter",
                     "props": {
-                        "brandName": "$t:superbify.brand.name"
+                        "brandName": "$t:superbify.brand.name",
+                        "demoNotice": "$t:superbify.business.demo_notice",
+                        "termsLabel": "$t:superbify.business.links.terms",
+                        "privacyLabel": "$t:superbify.business.links.privacy",
+                        "shippingLabel": "$t:superbify.business.links.shipping",
+                        "verificationLabel": "$t:superbify.business.links.verification"
                     }
                 }
             ]

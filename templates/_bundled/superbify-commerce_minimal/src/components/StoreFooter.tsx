@@ -1,5 +1,11 @@
 import React from 'react';
 import { A, Div, Footer, Li, Span, Ul } from './basic';
+import {
+    businessFields,
+    POLICY_ROUTES,
+    type BusinessField,
+    type PolicyDocumentKey,
+} from '../config/businessInfo';
 
 export interface StoreFooterProps {
     brandName?: string;
@@ -7,6 +13,16 @@ export interface StoreFooterProps {
     copyright?: string;
     className?: string;
     navItems?: { href: string; label: string }[];
+    /** Muted footer line shown when no business info is configured (from lang). */
+    demoNotice?: string;
+    /** Policy link labels from lang. 개인정보처리방침 uses the same size as the others. */
+    termsLabel?: string;
+    privacyLabel?: string;
+    shippingLabel?: string;
+    /** Label of the external 사업자정보확인 link (from lang); only rendered when configured. */
+    verificationLabel?: string;
+    /** Test/diagnostic injection point; defaults to businessFields() from config/business-info.json. */
+    infoFields?: BusinessField[];
 }
 
 const DEFAULT_NAV: { href: string; label: string }[] = [
@@ -16,13 +32,58 @@ const DEFAULT_NAV: { href: string; label: string }[] = [
     { href: '/cart', label: 'Cart' },
 ];
 
+/** Policy page links — labels come from lang, hrefs from the single POLICY_ROUTES source. */
+const POLICY_LINKS: { key: PolicyDocumentKey; labelProp: keyof StoreFooterProps; fallback: string }[] = [
+    { key: 'terms', labelProp: 'termsLabel', fallback: '이용약관' },
+    { key: 'privacy', labelProp: 'privacyLabel', fallback: '개인정보처리방침' },
+    { key: 'shipping', labelProp: 'shippingLabel', fallback: '배송·교환·반품 안내' },
+];
+
+const labelStyle: React.CSSProperties = {
+    fontFamily: 'var(--scm-font-body, system-ui)',
+    fontSize: 'var(--scm-footer-info-label, 0.6875rem)',
+    color: 'rgba(250, 248, 243, 0.55)',
+    letterSpacing: '0.03em',
+    display: 'block',
+    marginBottom: 'var(--scm-spacing-3xs, 0.125rem)',
+};
+
+const valueStyle: React.CSSProperties = {
+    fontFamily: 'var(--scm-font-body, system-ui)',
+    fontSize: 'var(--scm-footer-info-value, 0.8125rem)',
+    color: 'var(--scm-text-inverse, #FAF8F3)',
+    opacity: 0.85,
+    lineHeight: 1.5,
+    overflowWrap: 'anywhere',
+    minWidth: 0,
+};
+
+const linkStyle: React.CSSProperties = {
+    color: 'var(--scm-text-inverse, #FAF8F3)',
+    textDecoration: 'none',
+    opacity: 0.8,
+};
+
 export function StoreFooter({
     brandName = 'Still Form',
     tagline = '조용한 일상의 물건들',
     copyright = '© 2026 Still Form — demo store built on Gnuboard 7',
     className,
     navItems = DEFAULT_NAV,
+    demoNotice,
+    termsLabel,
+    privacyLabel,
+    shippingLabel,
+    verificationLabel,
+    infoFields,
 }: StoreFooterProps): React.ReactElement {
+    // Single source of truth: config/business-info.json via businessInfo.ts.
+    // infoFields is only an injection point for tests; it is never passed by layouts.
+    const resolved = (infoFields ?? businessFields()).filter((field) => !field.external);
+    const verification = (infoFields ?? businessFields()).find((field) => field.external);
+    const hasInfo = resolved.length > 0;
+    const hasVerification = Boolean(verification);
+
     return (
         <Footer
             className={className}
@@ -113,7 +174,117 @@ export function StoreFooter({
                         ))}
                     </Ul>
                 </Div>
-                {/* Row 2: hairline divider + copyright */}
+
+                {/* Row 2: business info grid — rendered only when at least one
+                    non-external field has a value in config/business-info.json. */}
+                {hasInfo ? (
+                    <Div
+                        className="scm-footer-info-grid"
+                        data-testid="footer-business-info"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                            columnGap: 'var(--scm-spacing-lg, 1.5rem)',
+                            rowGap: 'var(--scm-spacing-md, 1rem)',
+                            minWidth: 0,
+                        }}
+                    >
+                        {resolved.map((field) => (
+                            <Div key={field.label_key} data-testid="footer-business-field" style={{ minWidth: 0 }}>
+                                <Span style={labelStyle}>{field.label}</Span>
+                                {field.href ? (
+                                    <A
+                                        href={field.href}
+                                        style={{ ...valueStyle, textDecoration: 'none', color: 'var(--scm-text-inverse, #FAF8F3)' }}
+                                    >
+                                        {field.value}
+                                    </A>
+                                ) : (
+                                    <Span style={valueStyle}>{field.value}</Span>
+                                )}
+                            </Div>
+                        ))}
+                    </Div>
+                ) : null}
+
+                {/* Empty-config demo notice: a single muted guidance line, never N/A placeholders. */}
+                {!hasInfo && !hasVerification && demoNotice ? (
+                    <Span
+                        data-testid="footer-demo-notice"
+                        style={{
+                            fontFamily: 'var(--scm-font-body, system-ui)',
+                            fontSize: 'var(--scm-footer-info-label, 0.6875rem)',
+                            color: 'rgba(250, 248, 243, 0.55)',
+                            letterSpacing: '0.02em',
+                        }}
+                    >
+                        {demoNotice}
+                    </Span>
+                ) : null}
+
+                {/* Row 3: policy links + optional 외부 사업자정보확인 */}
+                <Div
+                    data-testid="footer-policy-row"
+                    style={{
+                        borderTop: '1px solid rgba(250, 248, 243, 0.15)',
+                        paddingTop: 'var(--scm-spacing-md, 1rem)',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        columnGap: 'var(--scm-spacing-xl, 2rem)',
+                        rowGap: 'var(--scm-spacing-xs, 0.5rem)',
+                    }}
+                >
+                    {POLICY_LINKS.map((policy) => {
+                        const label = (policy.labelProp === 'termsLabel'
+                            ? termsLabel
+                            : policy.labelProp === 'privacyLabel'
+                                ? privacyLabel
+                                : shippingLabel) ?? policy.fallback;
+                        return (
+                            <A
+                                key={policy.key}
+                                href={POLICY_ROUTES[policy.key]}
+                                data-testid={`footer-policy-${policy.key}`}
+                                style={{
+                                    ...linkStyle,
+                                    fontFamily: 'var(--scm-font-body, system-ui)',
+                                    fontSize: '0.8125rem',
+                                    letterSpacing: '0.01em',
+                                }}
+                            >
+                                {label}
+                            </A>
+                        );
+                    })}
+                    {verification ? (
+                        <A
+                            href={verification.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            data-testid="footer-business-verification"
+                            style={{
+                                ...linkStyle,
+                                fontFamily: 'var(--scm-font-body, system-ui)',
+                                fontSize: '0.8125rem',
+                                letterSpacing: '0.01em',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 'var(--scm-spacing-3xs, 0.125rem)',
+                            }}
+                        >
+                            {verificationLabel ?? verification.label}
+                            <Span
+                                aria-hidden
+                                style={{ fontSize: '0.625rem', transform: 'translateY(-1px)' }}
+                            >
+                                ↗
+                            </Span>
+                        </A>
+                    ) : null}
+                </Div>
+
+                {/* Row 4: hairline divider + copyright */}
                 <Div
                     style={{
                         borderTop: '1px solid rgba(250, 248, 243, 0.15)',

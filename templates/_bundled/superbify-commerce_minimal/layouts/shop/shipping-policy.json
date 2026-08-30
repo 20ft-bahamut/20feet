@@ -1,0 +1,24 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/shipping-policy",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.shipping_policy.title",
+        "description": "$t:superbify.routes.shipping_policy.description"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "shop_shipping_policy",
+                "type": "composite",
+                "name": "PolicyPage",
+                "props": {
+                    "documentKey": "shipping",
+                    "eyebrow": "$t:superbify.business.policy.eyebrow",
+                    "note": "$t:superbify.business.policy.note"
+                }
+            }
+        ]
+    }
+}

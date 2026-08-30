@@ -50,6 +50,18 @@
             "guest_order_show": {
                 "title": "Guest Order Detail — Still Form",
                 "description": "View your guest order details"
+            },
+            "terms": {
+                "title": "Terms of Service — Still Form",
+                "description": "Store terms of service"
+            },
+            "privacy": {
+                "title": "Privacy Policy — Still Form",
+                "description": "Privacy policy information"
+            },
+            "shipping_policy": {
+                "title": "Shipping, Returns & Exchanges — Still Form",
+                "description": "Shipping, exchange, and return information"
             }
         },
         "data_source": {
@@ -219,6 +231,19 @@
             "all": "All",
             "view_all": "View all",
             "demo_marker": "demo"
+        },
+        "business": {
+            "demo_notice": "Demo store. Business information can be configured in the template's config/business-info.json.",
+            "links": {
+                "terms": "Terms of Service",
+                "privacy": "Privacy Policy",
+                "shipping": "Shipping, Returns & Exchanges",
+                "verification": "Verify business info"
+            },
+            "policy": {
+                "eyebrow": "POLICY",
+                "note": "This document is template placeholder wording. Before launching a real store, terms must be written to match the operator's situation and reviewed legally."
+            }
         },
         "checkout": {
             "title": "Checkout",
