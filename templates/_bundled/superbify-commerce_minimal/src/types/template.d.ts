@@ -120,6 +120,25 @@ export interface CartCount {
     count: number;
 }
 
+/**
+ * List item shape from `sirsoft-board` public PostListResource
+ * (GET /api/modules/sirsoft-board/boards/{slug}/posts). Only fields read at
+ * render time are declared.
+ */
+export interface NoticeItem {
+    id: number | string;
+    title: string;
+    is_notice?: boolean;
+    is_secret?: boolean;
+    status?: string;
+    view_count?: number;
+    content_preview?: string | null;
+    created_at?: string;
+    created_at_formatted?: string;
+    /** Fixture marker used by local demo data; filtered out at render time. */
+    isFixture?: boolean;
+}
+
 export interface RouteContext {
     slug?: string;
 }

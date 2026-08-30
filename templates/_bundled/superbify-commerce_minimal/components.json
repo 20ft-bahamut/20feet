@@ -289,6 +289,12 @@
         "path": "src/components/CrossSellStrip.tsx"
       },
       {
+        "name": "NoticeList",
+        "type": "composite",
+        "description": "Board notice list rows with date, pinned badge and empty state",
+        "path": "src/components/NoticeList.tsx"
+      },
+      {
         "name": "EmptyState",
         "type": "composite",
         "description": "Empty state placeholder",

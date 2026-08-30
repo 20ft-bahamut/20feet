@@ -117,6 +117,7 @@
             "CategoryPreviewStrip",
             "ProductCard",
             "ProductGrid",
+            "NoticeList",
             "ProductGallery",
             "Price",
             "Badge",

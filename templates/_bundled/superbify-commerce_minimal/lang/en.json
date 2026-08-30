@@ -63,7 +63,8 @@
             "product_detail": "Product detail",
             "product_reviews": "Product reviews",
             "cart": "Cart",
-            "cart_count": "Cart count"
+            "cart_count": "Cart count",
+            "notice_posts": "Store notices"
         },
         "errors": {
             "not_found_title": "Page not found",
@@ -173,6 +174,7 @@
         "notice": {
             "title": "Notice",
             "eyebrow": "NOTICE",
+            "fixed_badge": "Pinned",
             "empty_title": "No notices yet",
             "empty_message": "This is a demo template. Real notice data can be added from admin."
         },

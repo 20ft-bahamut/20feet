@@ -87,6 +87,7 @@ export { CrossSellStrip, type CrossSellStripProps } from './components/CrossSell
 export { EditorialBanner, type EditorialBannerProps } from './components/EditorialBanner';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { HeroBanner, type HeroBannerProps } from './components/HeroBanner';
+export { NoticeList, type NoticeListProps } from './components/NoticeList';
 export { Price, type PriceProps } from './components/Price';
 export { ProductCard, type ProductCardProps } from './components/ProductCard';
 export { ProductGallery, type ProductGalleryProps, type ProductGalleryImage } from './components/ProductGallery';
@@ -153,6 +154,7 @@ import { CrossSellStrip } from './components/CrossSellStrip';
 import { EditorialBanner } from './components/EditorialBanner';
 import { EmptyState } from './components/EmptyState';
 import { HeroBanner } from './components/HeroBanner';
+import { NoticeList } from './components/NoticeList';
 import { Price } from './components/Price';
 import { ProductCard } from './components/ProductCard';
 import { ProductGallery } from './components/ProductGallery';
@@ -222,6 +224,7 @@ if (registry) {
     registry.register({ component: EditorialBanner, metadata: { name: 'EditorialBanner', type: 'composite' } });
     registry.register({ component: EmptyState, metadata: { name: 'EmptyState', type: 'composite' } });
     registry.register({ component: HeroBanner, metadata: { name: 'HeroBanner', type: 'composite' } });
+    registry.register({ component: NoticeList, metadata: { name: 'NoticeList', type: 'composite' } });
     registry.register({ component: Price, metadata: { name: 'Price', type: 'composite' } });
     registry.register({ component: ProductCard, metadata: { name: 'ProductCard', type: 'composite' } });
     registry.register({ component: ProductGallery, metadata: { name: 'ProductGallery', type: 'composite' } });
