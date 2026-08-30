@@ -1,22 +1,11 @@
 import { resolveSlotImage } from './imageSlots';
-import { resolveDemoProductAsset } from './demoAssets';
 
 // Deterministic still-life slot resolver.
-// Each demo product has a unique still-life so the SAME product never flips
-// between icons across ProductCard, ProductGallery, CartItemRow.
-//
-// Demo product inventory (queried from the sirsoft-ecommerce sample seed):
-//   id=1  STLMUG0001AB12CD  머그 (mug with handle)              -> product-1
-//   id=2  STLGLSCUP0002XY   글라스 컵 (no handle, clear)        -> product-2
-//   id=3  STLLAMP0003PQR7   테이블 램프 (dome + stem + base)    -> product-3
-//   id=4  STLTRAY0004WXYZ   우드 트레이 (oval tray)             -> product-4
-//   id=5  STLCUSH0005AB45   쿠션 커버 (cushion with seam)       -> product-5
-//   id=6  STLDIFF0006MN12   리드 디퓨저 (bottle + reed sticks)   -> product-6
-//   id=7  STLPEN0000007QR   펜 스탠드 (cylinder pen cup)        -> product-7
-//   id=8  STLBOOK000008XY   북 스탠드 (L-shape + book stack)    -> product-8
-//
-// The product-code prefix is preserved as a stable lookup so even if the
-// backend reseeds with different IDs the mapping stays correct.
+// PRODUCT images are DB-driven: thumbnail_url / images[] come from the
+// sirsoft-ecommerce product API. The still-life slots below are the NEUTRAL
+// fallback for products that have zero DB images — they never replace a
+// server-provided product image, and bundled demo JPGs are never used as
+// product data.
 
 const PRODUCT_CODE_PREFIX_TO_SLOT: Array<[RegExp, string]> = [
     [/^STLGLSCUP/i, 'product-2'], // 글라스 컵 MUST come before generic MUG
@@ -35,20 +24,26 @@ export type SlotInput = {
     code?: string | null;
     thumbnail_slot?: string | null;
     thumbnail_url?: string | null;
+    /** DB-provided image list (PublicProductResource). First entry feeds
+     *  products whose `thumbnail_url` is null. */
+    images?: Array<{ url?: string | null; download_url?: string | null } | undefined> | null;
     categories?: Array<{ id?: number; name?: string | { ko?: string } }>;
     categories_with_path?: Array<{ path?: Array<{ slug?: string }> }>;
 };
 
+/** A relative, same-origin URL is renderable; anything else (empty, http(s),
+ *  data:) is not honoured as a product image src. */
+function isSameOriginRelativeUrl(value: string | null | undefined): value is string {
+    return !!value && value.startsWith('/') && !value.startsWith('//') && !/^https?:\/\//i.test(value);
+}
+
 /**
- * Pick a still-life slot for a demo item. Order of precedence:
- *   1. Explicit thumbnail_slot (only honored when it matches the expected slot
- *      for the item; otherwise we ignore it so a stale slot field can't flip
- *      the icon between pages).
- *   2. Product code prefix (the source of truth for the demo fixture).
- *   3. Category id → slot.
- *   4. Category name → slot.
- *   5. Stable id-based fallback (id % 8 + 1) so newly seeded items still get
- *      a deterministic slot instead of all-of-product-fallback.
+ * Pick a still-life slot for an item with no DB image. Order of precedence:
+ *   1. Product code prefix (stable across reseeds of the demo seed data).
+ *   2. Category id → slot.
+ *   3. Category name → slot.
+ *   4. Stable id-based fallback (id % 8 + 1) so items without a known prefix
+ *      still get a deterministic slot instead of all-of-product-fallback.
  */
 export function pickStillLifeSlot(input: SlotInput | null | undefined): string {
     if (!input) return 'product-1';
@@ -106,18 +101,25 @@ export function pickStillLifeSlot(input: SlotInput | null | undefined): string {
     return 'product-fallback';
 }
 
-/** Resolve a thumbnail source for a demo item, honouring server-provided URLs. */
+/**
+ * Resolve a product thumbnail source. DB is the only product image source:
+ *   1. `thumbnail_url` (relative, same-origin)
+ *   2. `images[0].download_url` / `images[0].url`
+ *   3. Bundled neutral still-life SVG slot (honest empty state).
+ * Bundled demo JPGs are never used as product data.
+ */
 export function resolveStillLifeThumb(input: SlotInput | null | undefined): { src: string; isFallback: boolean } {
     const t = (input?.thumbnail_url ?? '').toString();
-    if (t && t.startsWith('/') && !/^https?:\/\//.test(t)) {
+    if (isSameOriginRelativeUrl(t)) {
         return { src: t, isFallback: false };
     }
-    // Real bundled demo photo (preferred over placeholder SVG).
-    const code = (input?.product_code ?? input?.code ?? '').toString();
-    const demoSrc = resolveDemoProductAsset(code);
-    if (demoSrc) return { src: demoSrc, isFallback: false };
-    // External URL → fall back to a bundled slot rather than 404 or violating
-    // the no-external-urls rule.
+    const firstImage = Array.isArray(input?.images) ? input.images[0] : undefined;
+    const imgSrc = firstImage?.download_url ?? firstImage?.url ?? '';
+    if (isSameOriginRelativeUrl(imgSrc)) {
+        return { src: imgSrc, isFallback: false };
+    }
+    // External/missing URL → bundled slot rather than 404 or violating the
+    // no-external-urls rule.
     const slot = pickStillLifeSlot(input);
     return { src: resolveSlotImage(slot), isFallback: true };
 }

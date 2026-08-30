@@ -3,7 +3,14 @@ import { ProductItem } from '../types/template';
 export interface ProductGalleryImage {
     id?: number | string;
     url?: string;
-    alt_text?: string;
+    /** Public product-image API field (`/product-image/{hash}` relative URL). */
+    download_url?: string;
+    alt_text?: string | {
+        ko?: string;
+        en?: string;
+    } | null;
+    /** Pre-localized alt text (PublicProductResource.alt_text_current). */
+    alt_text_current?: string | null;
     /** Local asset slot id used as fallback when the URL is missing. */
     slot?: string;
 }
