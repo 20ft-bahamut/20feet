@@ -15,6 +15,9 @@ export interface PriceProps {
     /** When true, suppress the inline discount percent badge (used when
      *  the parent already renders a discount chip on the image). */
     hideDiscountBadge?: boolean;
+    /** 'compact' fits product cards (smaller sale price, tighter gaps);
+     *  default suits detail/checkout surfaces. */
+    size?: 'default' | 'compact';
 }
 
 function toFormatted(value: number | string | null | undefined, fallback?: string | null): string {
@@ -46,11 +49,13 @@ export function Price({
     discountRate,
     className,
     hideDiscountBadge = false,
+    size = 'default',
 }: PriceProps): React.ReactElement {
     const selling = toFormatted(sellingPrice, sellingPriceFormatted);
     const list = toFormatted(listPrice, listPriceFormatted);
     const discount = normalizeDiscount(discountRate);
     const showList = list && list !== selling;
+    const compact = size === 'compact';
     return (
         <Div
             className={className}
@@ -58,18 +63,18 @@ export function Price({
                 display: 'flex',
                 alignItems: 'baseline',
                 flexWrap: 'wrap',
-                gap: 'var(--scm-spacing-xs, 0.5rem)',
+                gap: compact ? 'var(--scm-spacing-2xs, 0.25rem)' : 'var(--scm-spacing-xs, 0.5rem)',
             }}
             data-testid="price"
         >
             <Span
                 style={{
                     fontFamily: 'var(--scm-font-body, system-ui)',
-                    fontSize: 'var(--scm-price-lg, 1.5rem)',
+                    fontSize: compact ? 'var(--scm-price-md, 1.1875rem)' : 'var(--scm-price-lg, 1.5rem)',
                     fontWeight: 700,
                     color: 'var(--scm-text-primary, #26221E)',
                     fontVariantNumeric: 'tabular-nums',
-                    letterSpacing: '-0.01em',
+                    letterSpacing: compact ? '-0.005em' : '-0.01em',
                 }}
             >
                 {selling || '—'}
@@ -78,10 +83,11 @@ export function Price({
                 <Span
                     style={{
                         fontFamily: 'var(--scm-font-body, system-ui)',
-                        fontSize: '0.8125rem',
+                        fontSize: compact ? '0.75rem' : '0.8125rem',
                         color: 'var(--scm-text-muted, #8A837B)',
                         textDecoration: 'line-through',
                         fontVariantNumeric: 'tabular-nums',
+                        letterSpacing: '0',
                     }}
                     data-testid="price-list"
                 >

@@ -190,10 +190,10 @@ export function ProductCard({
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 'var(--scm-spacing-2xs, 0.25rem)',
+                    gap: 'var(--scm-spacing-3xs, 0.125rem)',
                     padding: featured
                         ? 'var(--scm-spacing-xl, 2rem) var(--scm-spacing-md, 1rem) 0'
-                        : 'var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-2xs, 0.25rem) 0',
+                        : 'var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-2xs, 0.25rem) var(--scm-spacing-xs, 0.5rem)',
                 }}
             >
                 {featured && featuredEyebrow ? (
@@ -217,9 +217,10 @@ export function ProductCard({
                             fontFamily: 'var(--scm-font-body, system-ui)',
                             fontSize: '0.6875rem',
                             color: 'var(--scm-text-muted, #8A837B)',
-                            letterSpacing: '0.14em',
+                            letterSpacing: '0.08em',
                             textTransform: 'uppercase',
                             fontWeight: 600,
+                            marginBottom: '0.125rem',
                         }}
                     >
                         {eyebrowText}
@@ -236,6 +237,8 @@ export function ProductCard({
                         whiteSpace: 'nowrap',
                         minHeight: '1.4em',
                         letterSpacing: '-0.01em',
+                        lineHeight: 1.35,
+                        marginBottom: featured ? '0.25rem' : '0.375rem',
                     }}
                     title={nameText ?? undefined}
                     data-testid="product-card-name"
@@ -249,6 +252,7 @@ export function ProductCard({
                     listPriceFormatted={item.list_price_formatted}
                     discountRate={item.discount_rate}
                     hideDiscountBadge={true}
+                    size="compact"
                 />
                 {featured && featuredCtaLabel ? (
                     <Span

@@ -12,6 +12,9 @@ export interface PriceProps {
     /** When true, suppress the inline discount percent badge (used when
      *  the parent already renders a discount chip on the image). */
     hideDiscountBadge?: boolean;
+    /** 'compact' fits product cards (smaller sale price, tighter gaps);
+     *  default suits detail/checkout surfaces. */
+    size?: 'default' | 'compact';
 }
-export declare function Price({ sellingPrice, listPrice, sellingPriceFormatted, listPriceFormatted, discountRate, className, hideDiscountBadge, }: PriceProps): React.ReactElement;
+export declare function Price({ sellingPrice, listPrice, sellingPriceFormatted, listPriceFormatted, discountRate, className, hideDiscountBadge, size, }: PriceProps): React.ReactElement;
 export default Price;
