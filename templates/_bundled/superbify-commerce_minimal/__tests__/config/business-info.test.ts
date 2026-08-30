@@ -11,7 +11,7 @@ import {
 
 const TEMPLATE_ROOT = path.resolve(__dirname, '../..');
 
-describe('config/business-info.json — no fake data guard', () => {
+describe('config/business-info.json — demo seed values', () => {
     const raw = JSON.parse(
         fs.readFileSync(path.join(TEMPLATE_ROOT, 'config/business-info.json'), 'utf8')
     ) as { shop: Record<string, string>; policies: Record<string, ReturnType<typeof getPolicyDocument>> };
@@ -30,10 +30,27 @@ describe('config/business-info.json — no fake data guard', () => {
         'businessVerificationUrl',
     ];
 
-    it('business fields ship as empty strings in the repo default (no fake 000-00-00000 etc.)', () => {
+    // USER-APPROVED DEMO SEED: the store ships with clearly temporary demo business
+    // values (a demo-store notice renders alongside them in the footer). Any
+    // deviation from these literals must be a deliberate edit to business-info.json.
+    const DEMO_SEED: Partial<Record<string, string>> = {
+        businessRegistrationNumber: '12-345-67890',
+        businessAddress: '경남 김해시 장유로 362 쌍용예가2차 207동 604호',
+        customerServicePhone: '070-123-1234',
+        hostingProvider: '가비아',
+    };
+
+    it('business fields exist; the shipped demo seed matches the approved literals', () => {
         for (const key of REQUIRED_FIELDS) {
             expect(raw.shop, `field "${key}" must exist`).toHaveProperty(key);
-            expect(raw.shop[key], `field "${key}" must ship empty`).toBe('');
+        }
+        for (const [key, value] of Object.entries(DEMO_SEED)) {
+            expect(raw.shop[key], `demo seed value of "${key}" must match`).toBe(value);
+        }
+        for (const key of REQUIRED_FIELDS) {
+            if (!(key in DEMO_SEED)) {
+                expect(raw.shop[key], `field "${key}" must stay empty until approved`).toBe('');
+            }
         }
     });
 
@@ -63,9 +80,18 @@ describe('config/business-info.json — no fake data guard', () => {
 });
 
 describe('businessFields()', () => {
-    it('returns only non-empty fields from the shipped (empty) config', () => {
-        expect(businessFields()).toEqual([]);
-        expect(hasBusinessInfo()).toBe(false);
+    it('returns only the seeded demo fields from the shipped config (empty fields omitted)', () => {
+        const fields = businessFields();
+        expect(fields.map((f) => f.label_key).sort()).toEqual(
+            [
+                'superbify.business.field.business_registration_number',
+                'superbify.business.field.business_address',
+                'superbify.business.field.customer_service_phone',
+                'superbify.business.field.hosting_provider',
+            ].sort()
+        );
+        expect(hasBusinessInfo()).toBe(true);
+        expect(businessFields('ko').find((f) => f.label_key === 'superbify.business.field.hosting_provider')?.value).toBe('가비아');
     });
 
     it('keeps labels stable for future i18n bindings (label_key contract)', () => {

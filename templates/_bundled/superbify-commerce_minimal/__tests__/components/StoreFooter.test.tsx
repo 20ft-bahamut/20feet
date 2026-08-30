@@ -32,13 +32,19 @@ describe('StoreFooter — business info conditional rendering', () => {
     });
 
     it('CASE 1: renders the business info grid when fields are set', () => {
-        render(<StoreFooter infoFields={FULL_FIELDS} />);
+        render(
+            <StoreFooter
+                infoFields={FULL_FIELDS}
+                demoNotice="데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다."
+            />
+        );
         const info = screen.getByTestId('footer-business-info');
         expect(within(info).getAllByTestId('footer-business-field')).toHaveLength(4);
         expect(within(info).getByText('123-45-67890')).toBeInTheDocument();
         // leading-zero / dash preservation: value rendered verbatim, not reformatted
         expect(within(info).getByText('000-0000-0000')).toBeInTheDocument();
-        expect(screen.queryByTestId('footer-demo-notice')).not.toBeInTheDocument();
+        // demo-store notice shows alongside business info too (seed values are demo)
+        expect(screen.getByTestId('footer-demo-notice')).toBeInTheDocument();
     });
 
     it('CASE 1: phone and email fields render as real anchors (no div onClick)', () => {
@@ -91,7 +97,12 @@ describe('StoreFooter — business info conditional rendering', () => {
     });
 
     it('CASE 4: all empty → info block absent, demo notice shown, footer intact', () => {
-        render(<StoreFooter demoNotice="데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다." />);
+        render(
+            <StoreFooter
+                infoFields={[]}
+                demoNotice="데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다."
+            />
+        );
         expect(screen.queryByTestId('footer-business-info')).not.toBeInTheDocument();
         expect(screen.queryByTestId('footer-business-field')).not.toBeInTheDocument();
         expect(screen.queryByTestId('footer-business-verification')).not.toBeInTheDocument();
@@ -103,10 +114,13 @@ describe('StoreFooter — business info conditional rendering', () => {
         expect(screen.getByTestId('footer-policy-privacy')).toBeInTheDocument();
     });
 
-    it('CASE 4 (default state): with no props and empty shipped config, demo notice appears', () => {
-        render(<StoreFooter />);
-        // default comes from businessFields() — config ships empty, so no info grid
-        expect(screen.queryByTestId('footer-business-info')).not.toBeInTheDocument();
+    it('CASE 4 (shipped config): footer renders seeded demo info and the demo notice', () => {
+        render(
+            <StoreFooter demoNotice="데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다." />
+        );
+        // shipped business-info.json carries the user-approved demo seed
+        expect(screen.getByTestId('footer-business-info')).toBeInTheDocument();
+        expect(screen.getByTestId('footer-demo-notice')).toBeInTheDocument();
     });
 
     it('policy links are real anchors with template routes; 개인정보처리방침 matches the other sizes', () => {

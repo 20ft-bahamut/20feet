@@ -32,9 +32,11 @@ describe('PolicyPage', () => {
         );
     });
 
-    it('hides the updated date when it ships empty', () => {
+    it('renders the updated date from the shipped config', () => {
         render(<PolicyPage documentKey="shipping" />);
-        expect(screen.queryByTestId('policy-page-updated')).not.toBeInTheDocument();
+        const updated = screen.queryByTestId('policy-page-updated');
+        expect(updated).toBeInTheDocument();
+        expect(updated).toHaveTextContent('2026-09-01');
     });
 
     it('resolves the en mirror when the document locale is en', () => {

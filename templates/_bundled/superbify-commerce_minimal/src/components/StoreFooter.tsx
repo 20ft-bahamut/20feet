@@ -82,7 +82,6 @@ export function StoreFooter({
     const resolved = (infoFields ?? businessFields()).filter((field) => !field.external);
     const verification = (infoFields ?? businessFields()).find((field) => field.external);
     const hasInfo = resolved.length > 0;
-    const hasVerification = Boolean(verification);
 
     return (
         <Footer
@@ -207,8 +206,10 @@ export function StoreFooter({
                     </Div>
                 ) : null}
 
-                {/* Empty-config demo notice: a single muted guidance line, never N/A placeholders. */}
-                {!hasInfo && !hasVerification && demoNotice ? (
+                {/* Demo-store notice: a single muted guidance line shown alongside business info
+                    (shipping values are demo seed) or standalone when nothing is configured.
+                    Never N/A placeholders. */}
+                {demoNotice ? (
                     <Span
                         data-testid="footer-demo-notice"
                         style={{

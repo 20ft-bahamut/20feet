@@ -1,16 +1,16 @@
 {
-    "$comment": "Still Form 템플릿 사업자 정보 & 정책 문서 단일 편집 지점 (single edit point). 이 파일 하나를 수정하고 빌드+동기화하면 푸터와 정책 페이지 전체에 반영됩니다. 사업자 정보 기본값은 모두 빈 문자열이며, 값이 채워진 항목만 푸터에 렌더링됩니다(조건부 렌더링 — N/A / '-' 등 자리표시 문구를 출력하지 않습니다). 사업자등록번호 등 번호류는 문자열로 기입해야 앞자리 0과 하이픈이 보존됩니다. 정책 문서는 템플릿 시안용 문단 구성 예시이며 실제 법적 효력이 없습니다. / Single edit point for business information and policy documents. Business fields ship EMPTY by default; the footer renders only non-empty values (no N/A / '-' placeholders). Keep number-like fields as strings so leading zeros and dashes survive. Policy documents are template scaffolding with no legal effect.",
+    "$comment": "Still Form 템플릿 사업자 정보 & 정책 문서 단일 편집 지점 (single edit point). 이 파일 하나를 수정하고 빌드+동기화하면 푸터와 정책 페이지 전체에 반영됩니다. 값이 채워진 항목만 푸터에 렌더링됩니다(조건부 렌더링 — N/A / '-' 등 자리표시 문구를 출력하지 않습니다). 사업자등록번호 등 번호류는 문자열로 기입해야 앞자리 0과 하이픈이 보존됩니다. 현재 기입된 값은 DEMO SEED입니다(데모 스토어 표시 문구가 함께 출력됨). 정책 문서는 템플릿 시안 문구이며 실제 법적 효력이 없습니다. / Single edit point for business information and policy documents. Values filled here render in the footer; empty fields are omitted. Keep number-like fields as strings so leading zeros and dashes survive. The currently entered values are DEMO SEED data (a demo-store notice is shown alongside). Policy documents are template scaffolding with no legal effect.",
     "shop": {
         "shopName": "",
         "companyName": "",
         "representative": "",
-        "businessRegistrationNumber": "",
+        "businessRegistrationNumber": "12-345-67890",
         "ecommerceRegistrationNumber": "",
         "ecommerceRegistrationAuthority": "",
-        "businessAddress": "",
-        "customerServicePhone": "",
+        "businessAddress": "경남 김해시 장유로 362 쌍용예가2차 207동 604호",
+        "customerServicePhone": "070-123-1234",
         "customerServiceEmail": "",
-        "hostingProvider": "",
+        "hostingProvider": "가비아",
         "businessVerificationUrl": ""
     },
     "policies": {
@@ -19,45 +19,69 @@
                 "ko": "이용약관",
                 "en": "Terms of Service"
             },
-            "updated": "",
+            "updated": "2026-09-01",
             "sections": [
                 {
                     "heading": {
-                        "ko": "문서의 성격",
-                        "en": "About this document"
+                        "ko": "제1조 (목적)",
+                        "en": "Article 1 (Purpose)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 이용약관 예시 구조입니다. 조항 배치를 보여 주기 위한 시안 문구이며 실제 서비스 내용을 담고 있지 않습니다.",
-                            "en": "This is a sample terms-of-service structure included with the Still Form demo store template. It is placeholder wording that demonstrates section layout and does not describe a real service."
+                            "ko": "이 약관은 스틸폼(이하 '스토어')이 운영하는 온라인 쇼핑몰에서 제공하는 서비스와 상품의 이용 조건 및 절차, 스토어와 이용자의 권리·의무, 책임 사항 등을 규정함을 목적으로 합니다.",
+                            "en": "These terms govern the conditions and procedures for using the services and products of the Still Form online store (the 'Store'), and the rights, duties, and responsibilities of the Store and its users."
                         }
                     ]
                 },
                 {
                     "heading": {
-                        "ko": "서비스 이용",
-                        "en": "Using the service"
+                        "ko": "제2조 (서비스 이용)",
+                        "en": "Article 2 (Use of the service)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "서비스 이용 조건, 회원 가입 절차, 서비스 중단 정책 등은 스토어 운영자가 실제 기준을 확인한 뒤 이 문단을 교체하여 작성합니다.",
-                            "en": "Conditions of use, membership steps, and service interruption policies should be written by the store operator after confirming the actual rules, replacing these paragraphs."
+                            "ko": "스토어는 상품 전시, 구매, 주문 확인 등 온라인 쇼핑몰 서비스를 제공합니다. 서비스는 연중무휴 운영을 원칙으로 하며, 시스템 점검 등 불가피한 사유로 일시 중단될 수 있습니다.",
+                            "en": "The Store provides online shopping services including product display, purchase, and order confirmation. Services operate year-round and may be suspended temporarily for system maintenance."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "제3조 (상품 정보 및 구매)",
+                        "en": "Article 3 (Product information and purchase)"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "상품의 가격, 옵션, 재고 등은 주문 시점을 기준으로 합니다. 장바구니에 담긴 상품은 일정 기간 임시 주문으로 보관되며, 결제가 완료되면 주문이 확정됩니다.",
+                            "en": "Product prices, options, and stock levels are based on the time of order. Cart items are held as a temporary order for a limited period and are confirmed once payment is completed."
                         },
                         {
-                            "ko": "상품 소개 문구와 이미지 중 데모 자산으로 표시된 것은 템플릿 출하용 예시이며 실제 상품 정보가 아닙니다.",
-                            "en": "Product copy and images marked as demo assets are template samples, not real product information."
+                            "ko": "데모 스토어에 게시된 상품 이미지와 설명 중 일부는 템플릿 출하용 예시 자산입니다.",
+                            "en": "Some product images and descriptions in this demo store are template sample assets."
                         }
                     ]
                 },
                 {
                     "heading": {
-                        "ko": "게시물 및 콘텐츠",
-                        "en": "Postings and content"
+                        "ko": "제4조 (스토어의 의무)",
+                        "en": "Article 4 (Duties of the Store)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "게시물 관리, 저작권 표기, 문의 창구 안내 등은 스토어 운영자가 실제 운영 방식에 맞추어 작성합니다.",
-                            "en": "Content moderation, copyright notices, and contact details should be written by the store operator to match how the store is actually run."
+                            "ko": "스토어는 관련 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지 않고, 지속적이고 안정적으로 상품과 서비스를 제공하기 위해 노력합니다.",
+                            "en": "The Store shall not act in violation of applicable law, these terms, or public order and morals, and shall strive to provide products and services continuously and reliably."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "제5조 (게시물 및 콘텐츠)",
+                        "en": "Article 5 (Postings and content)"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "스토어에 게시된 공지, 사진, 리뷰 등 콘텐츠에 대한 권리와 관리 책임은 게시 주체에게 있으며, 스토어는 서비스 운영을 위해 필요한 범위에서 게시물을 관리할 수 있습니다.",
+                            "en": "Rights over and responsibility for postings, photos, and reviews rest with their authors. The Store may moderate postings to the extent necessary to operate the service."
                         }
                     ]
                 },
@@ -68,8 +92,8 @@
                     },
                     "paragraphs": [
                         {
-                            "ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
-                            "en": "Replace all placeholder text before launching a real store."
+                            "ko": "본 약관은 템플릿 시안 문구입니다. 운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
+                            "en": "These terms are template scaffolding. Replace all placeholder text and obtain legal review before launching a real store."
                         }
                     ]
                 }
@@ -80,53 +104,65 @@
                 "ko": "개인정보처리방침",
                 "en": "Privacy Policy"
             },
-            "updated": "",
+            "updated": "2026-09-01",
             "sections": [
                 {
                     "heading": {
-                        "ko": "문서의 성격",
-                        "en": "About this document"
+                        "ko": "제1조 (개인정보의 처리 목적)",
+                        "en": "Article 1 (Purpose of processing)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 개인정보처리방침 예시 구조입니다. 실제 수집·처리 항목은 담고 있지 않습니다.",
-                            "en": "This is a sample privacy-policy structure included with the Still Form demo store template. It does not list any data actually collected or processed."
+                            "ko": "스토어는 상품 주문 및 배송, 고객 문의 응대, 게시물 이용 등 서비스 제공에 필요한 최소한의 개인정보만을 처리합니다.",
+                            "en": "The Store processes only the minimum personal information necessary to provide services such as product ordering, delivery, handling customer inquiries, and postings."
                         }
                     ]
                 },
                 {
                     "heading": {
-                        "ko": "처리하는 항목과 방법",
-                        "en": "Items processed and how"
+                        "ko": "제2조 (수집하는 개인정보 항목)",
+                        "en": "Article 2 (Items collected)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "주문 과정에서 이름, 연락처, 주소 등 처리 항목과 수집 방법을 정리하는 자리입니다. 실제 항목은 스토어 운영자가 서비스 구성에 맞추어 작성합니다.",
-                            "en": "This is where processed items (such as name, contact details, and address) and collection methods are described. The store operator should write the actual list to match the service."
+                            "ko": "주문 과정에서 이름, 연락처, 배송지 주소, 결제에 필요한 정보가 수집될 수 있습니다. 게시물 작성 시 닉네임과 이메일이 처리될 수 있습니다. 이 데모 스토어는 실제 결제나 배송이 발생하지 않습니다.",
+                            "en": "During ordering the store may collect name, contact details, delivery address, and information needed for payment. Nickname and email may be processed for postings. This demo store does not perform real payments or deliveries."
                         }
                     ]
                 },
                 {
                     "heading": {
-                        "ko": "보관 기간 및 파기",
-                        "en": "Retention and disposal"
+                        "ko": "제3조 (보관 기간 및 파기)",
+                        "en": "Article 3 (Retention and disposal)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "개인정보 보관 기간과 파기 절차는 서비스마다 다르므로 실제 운영 기준에 맞추어 작성합니다.",
-                            "en": "Retention periods and disposal procedures differ per service and should be written to match the actual operating rules."
+                            "ko": "개인정보는 수집·이용 목적이 달성되면 해당 정보를 지체 없이 파기합니다. 관련 법령에 따라 보존이 필요한 경우 정해진 기간 동안 안전하게 보관합니다.",
+                            "en": "Personal information is destroyed without delay once the purpose of collection and use is fulfilled. Where retention is required by applicable law, it is kept securely for the statutory period."
                         }
                     ]
                 },
                 {
                     "heading": {
-                        "ko": "이용자 권리",
-                        "en": "Your rights"
+                        "ko": "제4조 (이용자 권리)",
+                        "en": "Article 4 (Your rights)"
                     },
                     "paragraphs": [
                         {
-                            "ko": "이용자는 자신의 개인정보에 대해 열람, 정정, 삭제를 요청할 수 있습니다. 실제 요청 절차와 창구는 스토어 운영자가 안내 문구로 작성합니다.",
-                            "en": "Users may request to view, correct, or delete their personal data. The store operator should write the actual request procedure and contact point."
+                            "ko": "이용자는 자신의 개인정보에 대해 열람, 정정·삭제, 처리정지를 요청할 수 있으며, 고객센터를 통해 절차 안내를 받을 수 있습니다.",
+                            "en": "You may request to view, correct, delete, or suspend the processing of your personal information. Contact customer service for the process."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "제5조 (개인정보 보호책임자)",
+                        "en": "Article 5 (Privacy officer)"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "개인정보 처리 관련 문의는 고객센터(070-123-1234)로 연락할 수 있습니다.",
+                            "en": "For questions about personal information, contact customer service at 070-123-1234."
                         }
                     ]
                 },
@@ -137,8 +173,8 @@
                     },
                     "paragraphs": [
                         {
-                            "ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
-                            "en": "Replace all placeholder text before launching a real store."
+                            "ko": "본 개인정보처리방침은 템플릿 시안 문구입니다. 운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다.",
+                            "en": "This privacy policy is template scaffolding. Replace all placeholder text and obtain legal review before launching a real store."
                         }
                     ]
                 }
@@ -149,20 +185,8 @@
                 "ko": "배송·교환·반품 안내",
                 "en": "Shipping, Returns & Exchanges"
             },
-            "updated": "",
+            "updated": "2026-09-01",
             "sections": [
-                {
-                    "heading": {
-                        "ko": "문서의 성격",
-                        "en": "About this document"
-                    },
-                    "paragraphs": [
-                        {
-                            "ko": "이 문서는 Still Form 데모 스토어 템플릿에 포함된 배송·교환·반품 안내 예시 구조입니다. 실제 배송 정책이 담겨 있지 않습니다.",
-                            "en": "This is a sample shipping, returns, and exchanges structure included with the Still Form demo store template. It contains no real shipping policy."
-                        }
-                    ]
-                },
                 {
                     "heading": {
                         "ko": "배송 안내",
@@ -170,8 +194,8 @@
                     },
                     "paragraphs": [
                         {
-                            "ko": "데모 스토어에는 실제 배송 정책이 없습니다. 배송 지역, 배송비, 평균 배송 기간은 스토어 운영자가 실제 기준을 확인해 작성합니다.",
-                            "en": "The demo store carries no real shipping policy. Shipping regions, fees, and delivery timeframes should be written by the store operator after confirming the actual rules."
+                            "ko": "결제 완료 후 상품을 확인하고 평일 기준 2~3일 내에 출고하며, 출고 후 1~2일 내에 수령하실 수 있습니다. 배송비는 주문 화면에 표시되는 금액을 따릅니다. 도서산간 지역은 추가 배송비가 발생할 수 있습니다.",
+                            "en": "Orders ship within 2–3 business days after payment confirmation and typically arrive 1–2 days after dispatch. Shipping fees follow the amount shown at checkout. Additional fees may apply to remote areas."
                         }
                     ]
                 },
@@ -182,8 +206,20 @@
                     },
                     "paragraphs": [
                         {
-                            "ko": "교환·반품 조건, 절차와 연락 방법은 스토어 운영자가 실제 기준에 맞추어 작성합니다.",
-                            "en": "Exchange and return conditions, procedures, and contact methods should be written by the store operator to match the actual rules."
+                            "ko": "상품 수령 후 7일 이내에 미사용 상품에 한하여 교환·반품을 요청할 수 있습니다. 상품 수령일 이전에 구매의사를 철회하는 경우에도 7일 이내에 취소를 요청할 수 있습니다.",
+                            "en": "Exchanges and returns may be requested within 7 days of receipt for unused products in original condition. A purchase may be cancelled within 7 days of receipt."
+                        }
+                    ]
+                },
+                {
+                    "heading": {
+                        "ko": "예외 사항",
+                        "en": "Exceptions"
+                    },
+                    "paragraphs": [
+                        {
+                            "ko": "이용자 책임 사유로 상품이 훼손된 경우, 시간 경과로 재판매가 곤란할 정도로 가치가 훼손된 경우, 복제가 가능한 상품의 포장을 개봉한 경우에는 교환·반품이 제한될 수 있습니다. 자세한 사항은 고객센터(070-123-1234)로 문의해 주세요.",
+                            "en": "Exchanges and returns may be limited if the product is damaged by the user, has lost value over time, or if packaging of a duplicable product has been opened. For details, contact customer service at 070-123-1234."
                         }
                     ]
                 },
