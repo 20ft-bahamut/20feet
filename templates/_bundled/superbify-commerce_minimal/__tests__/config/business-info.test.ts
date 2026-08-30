@@ -35,6 +35,7 @@ describe('config/business-info.json — demo seed values', () => {
     // deviation from these literals must be a deliberate edit to business-info.json.
     const DEMO_SEED: Partial<Record<string, string>> = {
         businessRegistrationNumber: '12-345-67890',
+        ecommerceRegistrationNumber: '2026-경남김해-1234호',
         businessAddress: '경남 김해시 장유로 362 쌍용예가2차 207동 604호',
         customerServicePhone: '070-123-1234',
         hostingProvider: '가비아',
@@ -85,6 +86,7 @@ describe('businessFields()', () => {
         expect(fields.map((f) => f.label_key).sort()).toEqual(
             [
                 'superbify.business.field.business_registration_number',
+                'superbify.business.field.ecommerce_registration_number',
                 'superbify.business.field.business_address',
                 'superbify.business.field.customer_service_phone',
                 'superbify.business.field.hosting_provider',
