@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+body{background:#FAF8F3;margin:0;padding:24px;font-family:sans-serif}
+.row{display:flex;align-items:center;gap:32px;margin-bottom:36px}
+</style></head><body>
+<div class="row"><span>primary @34</span><img id="p34" style="display:block"></div>
+<div class="row"><span>wordmark @34</span><img id="w34" style="display:block"></div>
+<div class="row"><span>primary @28</span><img id="p28" style="display:block"></div>
+<div class="row"><span>wordmark @28</span><img id="w28" style="display:block"></div>
+<div class="row"><span>emblem @80</span><img id="e80" style="display:block"></div>
+<script>
+const CANVAS = 1254;
+const logos = {
+  p: { src: '/home/bahamut/20feet/docs/template_brand/still-form-logo-primary.png',  x: 121, y: 486, w: 1021, h: 256 },
+  w: { src: '/home/bahamut/20feet/docs/template_brand/still-form-logo-wordmark.png', x: 124, y: 512, w: 1013, h: 222 },
+  e: { src: '/home/bahamut/20feet/docs/template_brand/still-form-logo-emblem.png',   x: 294, y: 126, w: 665,  h: 989 },
+};
+for (const [id, l, ink] of [['p34', logos.p, 34], ['w34', logos.w, 34], ['p28', logos.p, 28], ['w28', logos.w, 28], ['e80', logos.e, 80]]) {
+  const s = ink / (l.h / CANVAS);
+  const img = document.getElementById(id);
+  img.src = l.src;
+  img.style.width = s + 'px';
+  // clip to ink box via wrapper
+  const wrap = document.createElement('span');
+  wrap.style.display = 'inline-block';
+  wrap.style.width = (l.w / CANVAS * s) + 'px';
+  wrap.style.height = ink + 'px';
+  wrap.style.position = 'relative';
+  wrap.style.overflow = 'hidden';
+  img.style.position = 'absolute';
+  img.style.left = (-(l.x / CANVAS) * s) + 'px';
+  img.style.top = (-(l.y / CANVAS) * s) + 'px';
+  img.replaceWith(wrap);
+  wrap.appendChild(img);
+}
+</script></body></html>

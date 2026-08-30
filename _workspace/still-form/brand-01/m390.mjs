@@ -1,0 +1,10 @@
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH });
+const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
+const page = await ctx.newPage();
+await page.goto('http://127.0.0.1:8000/', { waitUntil: 'networkidle', timeout: 45000 });
+await page.waitForTimeout(700);
+await page.locator('[data-testid="store-header"]').screenshot({ path: '/home/bahamut/20feet/_workspace/still-form/visual-qa/brand-01/mobile-390-after-v1-header.png' });
+const ov = await page.evaluate(() => ({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth, headerW: document.querySelector('[data-testid="store-header"]').getBoundingClientRect().width, brandRight: document.querySelector('.scm-header-brand').getBoundingClientRect().right, cartLeft: document.querySelector('[data-testid="nav-cart"]').getBoundingClientRect().left }));
+console.log(JSON.stringify(ov));
+await browser.close();

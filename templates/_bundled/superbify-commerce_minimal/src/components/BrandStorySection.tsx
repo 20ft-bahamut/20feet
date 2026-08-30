@@ -1,7 +1,7 @@
 import React from 'react';
-import { A, Div, H2, P, Span } from './basic';
+import { A, Div, H2, Img, P, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
-import { demoAssets } from './demoAssets';
+import { brandAssets, brandLogoInk, demoAssets } from './demoAssets';
 
 export interface BrandStorySectionProps {
     eyebrow?: string;
@@ -16,6 +16,50 @@ export interface BrandStorySectionProps {
     mediaSrc?: string;
     /** Visual variant. 'split' = image+text 2-col (default). 'stacked' = type only. */
     layout?: 'split' | 'stacked';
+    /** Render the small Still Form emblem stamp under the copy (default off). */
+    stamp?: boolean;
+    /** Stamp visual ink height in px (default 80). */
+    stampHeight?: number;
+}
+
+/**
+ * Still Form emblem stamp — clipped to the measured ink box so the
+ * transparent canvas padding does not add offset, rendered quiet
+ * (<= 0.6 opacity) as a brand signature at the end of the copy column.
+ */
+function BrandStamp({ height = 80 }: { height?: number }): React.ReactElement {
+    const ink = brandLogoInk.emblem;
+    const scale = (height / ink.h) * ink.canvas;
+    return (
+        <Span
+            aria-hidden
+            style={{
+                position: 'relative',
+                display: 'block',
+                width: (ink.w / ink.canvas) * scale,
+                height,
+                marginTop: 'var(--scm-spacing-xs, 0.5rem)',
+                overflow: 'hidden',
+            }}
+            data-scm-brand-stamp
+        >
+            <Img
+                src={brandAssets.emblem}
+                alt=""
+                width={ink.canvas}
+                height={ink.canvas}
+                style={{
+                    position: 'absolute',
+                    left: -(ink.x / ink.canvas) * scale,
+                    top: -(ink.y / ink.canvas) * scale,
+                    width: scale,
+                    height: scale,
+                    display: 'block',
+                    opacity: 0.55,
+                }}
+            />
+        </Span>
+    );
 }
 
 export function BrandStorySection({
@@ -28,6 +72,8 @@ export function BrandStorySection({
     mediaSlot = 'hero-mood-1',
     mediaSrc,
     layout = 'split',
+    stamp = false,
+    stampHeight = 80,
 }: BrandStorySectionProps): React.ReactElement {
     const src = mediaSrc ?? demoAssets.brandStory ?? resolveSlotImage(mediaSlot);
     const isSplit = layout === 'split';
@@ -141,6 +187,9 @@ export function BrandStorySection({
                         <span>{ctaLabel}</span>
                         <span aria-hidden style={{ marginLeft: 4 }}>→</span>
                     </A>
+                ) : null}
+                {stamp ? (
+                    <BrandStamp height={stampHeight} />
                 ) : null}
             </Div>
         </Div>

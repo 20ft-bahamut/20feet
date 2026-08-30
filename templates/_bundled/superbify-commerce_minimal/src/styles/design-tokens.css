@@ -82,6 +82,15 @@ body {
     --scm-max-width: 1320px;
     --scm-gutter: 1rem;
 
+    /* Header (brand lockup + nav rhythm) */
+    --scm-header-height: 64px;
+    --scm-header-py: 0.625rem;
+    /* Visual ink height of the Still Form wordmark (transparent padding is
+       clipped by StoreHeader; only the drawn mark occupies this space). */
+    --scm-logo-h: 24px;
+    --scm-header-nav-size: 0.9375rem;
+    --scm-header-nav-gap: 0.25rem;
+
     /* Typography */
     --scm-font-display: 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont,
         'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
@@ -119,6 +128,10 @@ body {
         --scm-section-py-lg: 7rem;
         --scm-grid-columns: repeat(2, 1fr);
         --scm-grid-gap: 1.25rem;
+
+        --scm-header-height: 72px;
+        --scm-header-py: 0.875rem;
+        --scm-logo-h: 34px;
     }
 }
 
@@ -222,6 +235,71 @@ body {
     height: 1px;
     background-color: var(--scm-wood, #C9B08D);
     border: 0;
+}
+
+/* ------------------------------------------------------------------
+   Store header
+   - Nav links: quiet hairline underline that deepens to charcoal on
+     hover/focus (understated, no background fill).
+   - Brand lockup never shrinks below its ink width; nav is allowed to
+     tighten on phones instead of truncating.
+   ------------------------------------------------------------------ */
+
+.scm-header-brand img {
+    /* Lockup geometry is set inline (see StoreHeader) — keep rendering crisp. */
+    image-rendering: auto;
+}
+
+.scm-header-nav-link::after {
+    content: '';
+    position: absolute;
+    left: var(--scm-spacing-xs, 0.5rem);
+    right: var(--scm-spacing-xs, 0.5rem);
+    bottom: calc(50% - 0.5 * var(--scm-touch-min, 44px) + 12px);
+    height: 1px;
+    background-color: var(--scm-charcoal, #26221E);
+    opacity: 0;
+    transform: scaleX(0.6);
+    transition:
+        opacity var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+@media (max-width: 767.98px) {
+    .scm-header-nav-link::after {
+        display: none;
+    }
+}
+
+.scm-header-nav-link:hover::after,
+.scm-header-nav-link:focus-visible::after {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+.scm-header-nav-link[data-testid="nav-cart"] {
+    color: var(--scm-text-primary, #26221E);
+    font-weight: 600;
+}
+
+/* Cart carries the count badge — its underline would run under the badge,
+   so the cart link is marked by weight alone. */
+.scm-header-nav-link[data-testid="nav-cart"]::after {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .scm-header-bar {
+        --scm-header-height: 60px;
+        column-gap: 0.5rem;
+    }
+    .scm-header-nav {
+        gap: 0 !important;
+    }
+    .scm-header-nav-link {
+        padding-inline: 0.5rem !important;
+        font-size: 0.875rem !important;
+    }
 }
 
 /* ------------------------------------------------------------------

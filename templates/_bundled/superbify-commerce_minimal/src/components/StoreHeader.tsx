@@ -1,6 +1,6 @@
 import React from 'react';
 import { A, Div, Header, Img, Li, Nav, Span, Ul } from './basic';
-import { resolveSlotImage } from './imageSlots';
+import { brandAssets, brandLogoInk } from './demoAssets';
 
 export interface StoreHeaderProps {
     brandName?: string;
@@ -23,13 +23,87 @@ function displayCount(n: number): string {
     return String(n);
 }
 
+/* ------------------------------------------------------------------
+   Brand lockup geometry
+   The wordmark PNG is a 1254x1254 canvas with ~41% transparent
+   padding top/bottom. We size by INK height and clip the transparent
+   padding with an overflow-hidden wrapper sized to the ink box, so the
+   rendered mark matches its visual size without cropping the asset.
+   All geometry derives from the ink metrics (relative to the ink
+   height, `--scm-logo-h`) so breakpoint size overrides in
+   design-tokens.css just retune that single variable.
+------------------------------------------------------------------ */
+const LOGO_INK = brandLogoInk.wordmark;
+const LOGO_SRC = brandAssets.wordmark;
+const imgScale = LOGO_INK.canvas / LOGO_INK.h; // square img box per 1px ink height
+const R = {
+    img: imgScale,
+    left: (LOGO_INK.x / LOGO_INK.canvas) * imgScale,
+    top: (LOGO_INK.y / LOGO_INK.canvas) * imgScale,
+    width: (LOGO_INK.w / LOGO_INK.canvas) * imgScale,
+};
+
+function BrandLogo({ alt }: { alt: string }): React.ReactElement {
+    const h = 'var(--scm-logo-h, 34px)';
+    const img = `calc(${h} * ${R.img})`;
+    return (
+        <Span
+            aria-hidden
+            style={{
+                position: 'relative',
+                display: 'block',
+                width: `calc(${h} * ${R.width})`,
+                height: h,
+                overflow: 'hidden',
+                flex: '0 0 auto',
+            }}
+            data-scm-logo
+        >
+            <Img
+                src={LOGO_SRC}
+                alt={alt}
+                width={1254}
+                height={1254}
+                style={{
+                    position: 'absolute',
+                    left: `calc(${h} * -${R.left})`,
+                    top: `calc(${h} * -${R.top})`,
+                    width: img,
+                    height: img,
+                    display: 'block',
+                }}
+            />
+        </Span>
+    );
+}
+
+/** Visually hidden text — keeps the brand name / tagline in the a11y tree. */
+function SrOnly({ children }: { children: React.ReactNode }): React.ReactElement {
+    return (
+        <Span
+            style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                whiteSpace: 'nowrap',
+                border: 0,
+            }}
+        >
+            {children}
+        </Span>
+    );
+}
+
 export function StoreHeader({
     brandName = 'Still Form',
     tagline,
     cartCount,
     className,
 }: StoreHeaderProps): React.ReactElement {
-    const logoSrc = resolveSlotImage('logo');
     return (
         <Header
             className={className}
@@ -43,11 +117,13 @@ export function StoreHeader({
             data-testid="store-header"
         >
             <Div
+                className="scm-header-bar"
                 style={{
-                    maxWidth: 'var(--scm-max-width, 1200px)',
+                    maxWidth: 'var(--scm-max-width, 1320px)',
                     marginInline: 'auto',
                     paddingInline: 'var(--scm-gutter, 1rem)',
-                    paddingBlock: 'var(--scm-spacing-sm, 0.75rem)',
+                    minHeight: 'var(--scm-header-height, 72px)',
+                    paddingBlock: 'var(--scm-header-py, 0.875rem)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -56,57 +132,31 @@ export function StoreHeader({
             >
                 <A
                     href="/"
-                    aria-label={brandName}
+                    aria-label={`${brandName} Home`}
+                    className="scm-header-brand"
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: 'var(--scm-spacing-xs, 0.5rem)',
                         textDecoration: 'none',
                         color: 'inherit',
+                        minWidth: 0,
                     }}
                 >
-                    <Img
-                        src={logoSrc}
-                        alt=""
-                        width={36}
-                        height={36}
-                        style={{ width: 36, height: 36, display: 'block' }}
-                    />
-                    <Div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
-                        <Span
-                            style={{
-                                fontFamily: 'var(--scm-font-display, system-ui)',
-                                fontSize: '1.0625rem',
-                                fontWeight: 700,
-                                color: 'var(--scm-text-primary, #26221E)',
-                                letterSpacing: '-0.005em',
-                            }}
-                        >
-                            {brandName}
-                        </Span>
-                        {tagline ? (
-                            <Span
-                                style={{
-                                    fontFamily: 'var(--scm-font-body, system-ui)',
-                                    fontSize: '0.6875rem',
-                                    color: 'var(--scm-text-muted, #8A837B)',
-                                    letterSpacing: '0.05em',
-                                }}
-                            >
-                                {tagline}
-                            </Span>
-                        ) : null}
-                    </Div>
+                    <BrandLogo alt={brandName} />
+                    <SrOnly>{brandName}</SrOnly>
+                    {tagline ? <SrOnly>{tagline}</SrOnly> : null}
                 </A>
                 <Nav aria-label="Primary">
                     <Ul
+                        className="scm-header-nav"
                         style={{
                             listStyle: 'none',
                             margin: 0,
                             padding: 0,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 'var(--scm-spacing-sm, 0.75rem)',
+                            gap: 'var(--scm-spacing-2xs, 0.25rem)',
                         }}
                     >
                         {NAV_ITEMS.map((it) => {
@@ -116,19 +166,21 @@ export function StoreHeader({
                                     <A
                                         href={it.href}
                                         aria-label={isCart && cartCount ? `Cart, ${cartCount} items` : undefined}
+                                        className="scm-header-nav-link"
                                         style={{
                                             position: 'relative',
                                             display: 'inline-flex',
                                             alignItems: 'center',
                                             minHeight: 'var(--scm-touch-min, 44px)',
-                                            padding: '0 var(--scm-spacing-md, 1rem)',
+                                            padding: '0 var(--scm-spacing-xs, 0.5rem)',
                                             borderRadius: 'var(--scm-radius-sm, 4px)',
                                             textDecoration: 'none',
                                             color: 'var(--scm-text-body, #4A4643)',
                                             fontFamily: 'var(--scm-font-body, system-ui)',
-                                            fontSize: '1rem',
+                                            fontSize: 'var(--scm-header-nav-size, 0.9375rem)',
                                             fontWeight: 500,
                                             letterSpacing: '0.005em',
+                                            whiteSpace: 'nowrap',
                                         }}
                                         data-testid={isCart ? 'nav-cart' : `nav-${it.key}`}
                                     >
@@ -136,8 +188,10 @@ export function StoreHeader({
                                         {isCart && typeof cartCount === 'number' ? (
                                             <Span
                                                 aria-hidden
+                                                className="scm-header-cart-badge"
                                                 style={{
-                                                    marginLeft: 6,
+                                                    marginLeft: 8,
+                                                    alignSelf: 'center',
                                                     minWidth: 20,
                                                     height: 20,
                                                     padding: '0 6px',
@@ -147,8 +201,10 @@ export function StoreHeader({
                                                     borderRadius: 'var(--scm-radius-pill, 9999px)',
                                                     backgroundColor: 'var(--scm-charcoal, #26221E)',
                                                     color: 'var(--scm-text-inverse, #FAF8F3)',
-                                                    fontSize: '0.75rem',
+                                                    fontSize: '0.6875rem',
                                                     fontWeight: 600,
+                                                    lineHeight: 1,
+                                                    transform: 'translateY(0.5px)',
                                                 }}
                                                 data-testid="cart-count"
                                             >

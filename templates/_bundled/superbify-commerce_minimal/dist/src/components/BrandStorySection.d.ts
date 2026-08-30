@@ -12,6 +12,10 @@ export interface BrandStorySectionProps {
     mediaSrc?: string;
     /** Visual variant. 'split' = image+text 2-col (default). 'stacked' = type only. */
     layout?: 'split' | 'stacked';
+    /** Render the small Still Form emblem stamp under the copy (default off). */
+    stamp?: boolean;
+    /** Stamp visual ink height in px (default 80). */
+    stampHeight?: number;
 }
-export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, mediaSrc, layout, }: BrandStorySectionProps): React.ReactElement;
+export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, mediaSrc, layout, stamp, stampHeight, }: BrandStorySectionProps): React.ReactElement;
 export default BrandStorySection;
