@@ -6,8 +6,15 @@ export interface CategoryPreviewStripProps {
     eyebrow?: string;
     className?: string;
     emptyLabel?: string;
-    /** Slot id used when a category lacks a usable image. */
-    fallbackSlot?: string;
+    /** Label for the "all categories" chip (falls back to generic label). */
+    allLabel?: string;
 }
-export declare function CategoryPreviewStrip({ items, title, eyebrow, className, emptyLabel, fallbackSlot, }: CategoryPreviewStripProps): React.ReactElement;
+/**
+ * Typographic category rail — no image dependency.
+ *
+ * Data-driven from the public category API (name/slug/products_count), so any
+ * admin-side category change is reflected without template edits. Visual
+ * language mirrors the shop page's CategoryNav pills for consistency.
+ */
+export declare function CategoryPreviewStrip({ items, title, eyebrow, className, emptyLabel, allLabel, }: CategoryPreviewStripProps): React.ReactElement;
 export default CategoryPreviewStrip;

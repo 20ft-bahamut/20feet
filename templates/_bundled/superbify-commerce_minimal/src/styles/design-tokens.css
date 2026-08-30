@@ -303,17 +303,16 @@ body {
    On mobile the strip is a single horizontal scroll row; from 768px
    upward it wraps so all chips fit without clipping. */
 .scm-category-strip-list {
-    border: 1px solid var(--scm-line, #E4DCCE);
-    border-radius: var(--scm-radius, 8px);
-    padding: var(--scm-spacing-xs, 0.5rem);
-    background-color: var(--scm-bg-primary, #FAF8F3);
+    padding-block: var(--scm-spacing-3xs, 0.125rem);
 }
 
+/* Typographic pill chips — hover raises border to hairline-strong (charcoal)
+   with a subtle ivory fill; no image thumbnail transforms. */
 .scm-category-strip-tile {
-    border: 1px solid transparent;
     transition:
         border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
-        background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+        background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
 }
 
 .scm-category-strip-tile:hover,
@@ -322,9 +321,8 @@ body {
     background-color: var(--scm-bg-secondary, #F4F0E6);
 }
 
-.scm-category-strip-tile:hover > div:first-child,
-.scm-category-strip-tile:focus-visible > div:first-child {
-    transform: scale(1.04);
+.scm-category-strip-tile:active {
+    transform: translateY(1px);
 }
 
 /* Mobile: peek next chip — left padding already provides a peek; ensure right padding. */

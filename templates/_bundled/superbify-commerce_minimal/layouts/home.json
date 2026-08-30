@@ -66,7 +66,9 @@
                 "type": "basic",
                 "name": "Section",
                 "style": {
-                    "paddingBlock": "var(--scm-section-py-md, 3.5rem)"
+                    "paddingBlock": "var(--scm-section-py-sm, 2.5rem)",
+                    "borderTop": "1px solid var(--scm-line, #E4DCCE)",
+                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
                 },
                 "children": [
                     {
@@ -90,7 +92,8 @@
                                     "eyebrow": "$t:superbify.home.featured_categories.eyebrow",
                                     "title": "$t:superbify.home.featured_categories.heading",
                                     "items": "{{featured_categories?.data?.data ?? featured_categories?.data ?? []}}",
-                                    "emptyLabel": "$t:superbify.home.featured_categories.empty_label"
+                                    "emptyLabel": "$t:superbify.home.featured_categories.empty_label",
+                                    "allLabel": "$t:superbify.common.all"
                                 }
                             }
                         ]

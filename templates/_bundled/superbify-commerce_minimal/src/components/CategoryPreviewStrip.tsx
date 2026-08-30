@@ -1,7 +1,5 @@
 import React from 'react';
-import { A, Div, Img, Span } from './basic';
-import { resolveSlotImage } from './imageSlots';
-import { resolveDemoCategoryAsset } from './demoAssets';
+import { A, Div, Span } from './basic';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryPreviewStripProps {
@@ -10,28 +8,24 @@ export interface CategoryPreviewStripProps {
     eyebrow?: string;
     className?: string;
     emptyLabel?: string;
-    /** Slot id used when a category lacks a usable image. */
-    fallbackSlot?: string;
+    /** Label for the "all categories" chip (falls back to generic label). */
+    allLabel?: string;
 }
 
-function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: string; isFallback: boolean } {
-    const imageUrl = (item as { image_url?: string | null }).image_url;
-    if (imageUrl && imageUrl.startsWith('/') && /^https?:\/\//.test(imageUrl) === false) {
-        return { src: imageUrl, isFallback: false };
-    }
-    // Prefer bundled demo photo for the 8 demo categories.
-    const demo = resolveDemoCategoryAsset(item.slug, item.name_localized ?? item.name);
-    if (demo) return { src: demo, isFallback: false };
-    return { src: resolveSlotImage(fallbackSlot), isFallback: true };
-}
-
+/**
+ * Typographic category rail — no image dependency.
+ *
+ * Data-driven from the public category API (name/slug/products_count), so any
+ * admin-side category change is reflected without template edits. Visual
+ * language mirrors the shop page's CategoryNav pills for consistency.
+ */
 export function CategoryPreviewStrip({
     items,
     title,
     eyebrow,
     className,
     emptyLabel,
-    fallbackSlot,
+    allLabel,
 }: CategoryPreviewStripProps): React.ReactElement {
     const list = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     return (
@@ -97,16 +91,47 @@ export function CategoryPreviewStrip({
                     style={{
                         display: 'flex',
                         flexWrap: 'wrap',
-                        gap: 'var(--scm-spacing-md, 1rem) var(--scm-spacing-lg, 1.5rem)',
-                        overflowX: 'visible',
-                        paddingBlock: '0.5rem',
+                        gap: 'var(--scm-spacing-sm, 0.75rem)',
+                        paddingBlock: '0.25rem',
                     }}
                     data-testid="category-preview-strip-list"
                 >
+                    {allLabel ? (
+                        <A
+                            href="/shop"
+                            data-testid="category-preview-tile"
+                            data-slug="all"
+                            className="scm-category-strip-tile"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'baseline',
+                                gap: '0.4rem',
+                                padding: '0.625rem 1.25rem',
+                                borderRadius: 'var(--scm-radius-pill, 9999px)',
+                                border: '1px solid var(--scm-charcoal, #26221E)',
+                                backgroundColor: 'var(--scm-charcoal, #26221E)',
+                                color: 'var(--scm-text-inverse, #FAF8F3)',
+                                textDecoration: 'none',
+                                minHeight: 'var(--scm-touch-min, 44px)',
+                                transition:
+                                    'transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease)',
+                            }}
+                        >
+                            <Span
+                                style={{
+                                    fontFamily: 'var(--scm-font-display, system-ui)',
+                                    fontSize: '0.9375rem',
+                                    fontWeight: 600,
+                                    lineHeight: 1.2,
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {allLabel}
+                            </Span>
+                        </A>
+                    ) : null}
                     {list.slice(0, 12).map((cat) => {
-                        const slot = fallbackSlot ?? `category-${cat.slug}`;
                         const nameText = cat.name_localized ?? cat.name;
-                        const { src, isFallback } = resolveImageSrc(cat, slot);
                         return (
                             <A
                                 key={String(cat.id)}
@@ -116,76 +141,45 @@ export function CategoryPreviewStrip({
                                 data-slug={cat.slug}
                                 className="scm-category-strip-tile"
                                 style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 'var(--scm-spacing-sm, 0.75rem)',
-                                    padding: '0.5rem 0.75rem',
-                                    borderRadius: 'var(--scm-radius, 8px)',
+                                    display: 'inline-flex',
+                                    alignItems: 'baseline',
+                                    gap: '0.4rem',
+                                    padding: '0.625rem 1.25rem',
+                                    borderRadius: 'var(--scm-radius-pill, 9999px)',
+                                    border: '1px solid var(--scm-line, #E4DCCE)',
                                     backgroundColor: 'transparent',
+                                    color: 'var(--scm-text-primary, #26221E)',
                                     textDecoration: 'none',
-                                    color: 'inherit',
-                                    transition:
-                                        'border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease), background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease)',
+                                    cursor: 'pointer',
                                     minHeight: 'var(--scm-touch-min, 44px)',
+                                    transition:
+                                        'border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease), background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease), transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease)',
                                 }}
                             >
-                                <Div
-                                    aria-hidden
+                                <Span
                                     style={{
-                                        width: '60px',
-                                        height: '60px',
-                                        flex: '0 0 60px',
-                                        borderRadius: '50%',
-                                        overflow: 'hidden',
-                                        backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
-                                        border: '1px solid var(--scm-line, #E4DCCE)',
-                                        transition:
-                                            'transform var(--scm-duration-base, 220ms) var(--scm-ease-out, ease)',
+                                        fontFamily: 'var(--scm-font-display, system-ui)',
+                                        fontSize: '0.9375rem',
+                                        fontWeight: 500,
+                                        lineHeight: 1.2,
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    <Img
-                                        src={src}
-                                        alt=""
-                                        loading="lazy"
-                                        data-fallback={isFallback ? 'true' : 'false'}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                    />
-                                </Div>
-                                <Div
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: '2px',
-                                        minWidth: 0,
-                                    }}
-                                >
+                                    {nameText}
+                                </Span>
+                                {typeof cat.products_count === 'number' ? (
                                     <Span
                                         style={{
-                                            fontFamily: 'var(--scm-font-display, system-ui)',
-                                            fontSize: '0.9375rem',
-                                            fontWeight: 600,
-                                            color: 'var(--scm-text-primary, #26221E)',
-                                            whiteSpace: 'nowrap',
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            lineHeight: 1.2,
+                                            fontFamily: 'var(--scm-font-body, system-ui)',
+                                            fontSize: '0.6875rem',
+                                            color: 'var(--scm-text-muted, #8A837B)',
+                                            letterSpacing: '0.04em',
+                                            fontVariantNumeric: 'tabular-nums',
                                         }}
                                     >
-                                        {nameText}
+                                        {cat.products_count}
                                     </Span>
-                                    {typeof cat.products_count === 'number' ? (
-                                        <Span
-                                            style={{
-                                                fontFamily: 'var(--scm-font-body, system-ui)',
-                                                fontSize: '0.6875rem',
-                                                color: 'var(--scm-text-muted, #8A837B)',
-                                                letterSpacing: '0.04em',
-                                            }}
-                                        >
-                                            {cat.products_count}
-                                        </Span>
-                                    ) : null}
-                                </Div>
+                                ) : null}
                             </A>
                         );
                     })}
