@@ -104,7 +104,8 @@ export interface CheckoutPaymentMethod {
 
 export interface CheckoutBankAccount {
     id?: number | string;
-    bank_name?: string;
+    /** getPublicPaymentSettings 가 banks[*].name({ko,en}) 을 주입 — 로컬라이즈 객체 가능 */
+    bank_name?: string | Record<string, string> | null;
     bank_code?: string;
     account_number?: string;
     account_holder?: string;
@@ -1672,7 +1673,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
                                                                                     className="scm-checkout-radio"
                                                                                 />
                                                                                 <Span className="scm-checkout-bank-value">
-                                                                                    {account.bank_name ?? ''}
+                                                                                    {resolveLabel(account.bank_name, locale) || (account.bank_code ?? '')}
                                                                                     {' '}{account.account_number ?? ''}
                                                                                     {account.account_holder ? ` (${account.account_holder})` : ''}
                                                                                 </Span>
