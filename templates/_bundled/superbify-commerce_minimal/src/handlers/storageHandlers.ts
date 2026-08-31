@@ -134,11 +134,7 @@ export async function addToCartHandler(
         const response = await fetch('/api/modules/sirsoft-ecommerce/cart', {
             method: 'POST',
             credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                ...(liveCartKey ? { 'X-Cart-Key': liveCartKey } : {}),
-            },
+            headers: buildCartHeaders(liveCartKey),
             body: JSON.stringify({
                 product_id: typeof productId === 'string' ? parseInt(productId, 10) : productId,
                 items: [{ quantity }],
@@ -223,6 +219,28 @@ export async function bindAddToCartListenerHandler(): Promise<void> {
 // Cart page event handlers ------------------------------------------------
 
 /**
+ * Build cart request headers — X-Cart-Key for guest carts PLUS Bearer for
+ * logged-in members (merged user cart). Raw fetches here bypass ApiClient,
+ * so the Authorization header must be added explicitly. CheckoutPage uses the
+ * same G7Core.api.getToken() pattern (readAuthHeader).
+ */
+function buildCartHeaders(liveCartKey?: string | null): Record<string, string> {
+    const G7Core = (window as any).G7Core;
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        ...(liveCartKey ? { 'X-Cart-Key': liveCartKey } : {}),
+    };
+    try {
+        const token: unknown = G7Core?.api?.getToken?.();
+        if (typeof token === 'string' && token.length > 0) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+    } catch { /* unauthenticated — guest cart via X-Cart-Key */ }
+    return headers;
+}
+
+/**
  * Update quantity: PATCH /api/modules/sirsoft-ecommerce/cart/{id}/quantity
  */
 async function patchCartItemQuantity(id: string | number, quantity: number): Promise<{ ok: boolean; data?: unknown; error?: string }> {
@@ -240,11 +258,7 @@ async function patchCartItemQuantity(id: string | number, quantity: number): Pro
         const res = await fetch(`/api/modules/sirsoft-ecommerce/cart/${encodeURIComponent(String(id))}/quantity`, {
             method: 'PATCH',
             credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Cart-Key': liveCartKey ?? '',
-            },
+            headers: buildCartHeaders(liveCartKey),
             body: JSON.stringify({
                 quantity: Math.max(1, Math.min(99, Number(quantity))),
             }),
@@ -282,11 +296,7 @@ async function deleteCartItems(ids: Array<string | number>): Promise<{ ok: boole
         const res = await fetch('/api/modules/sirsoft-ecommerce/cart', {
             method: 'DELETE',
             credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-Cart-Key': liveCartKey ?? '',
-            },
+            headers: buildCartHeaders(liveCartKey),
             body: JSON.stringify({ ids: ids.map((i) => Number(i)) }),
         });
         if (!res.ok) {
