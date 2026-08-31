@@ -573,3 +573,163 @@ body {
     }
 }
 
+/* ------------------------------------------------------------------
+   Notice list rows (NoticeList composite)
+   - Whole row is an <a>. Hover deepens the title ink to charcoal-strong
+     and slides the trailing arrow slightly right; dates never move.
+   ------------------------------------------------------------------ */
+
+.scm-notice-row-link {
+    transition:
+        color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-notice-row-link .scm-notice-row-title {
+    transition: color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-notice-row-link .scm-notice-row-arrow {
+    transition:
+        transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-notice-row-link:hover .scm-notice-row-title,
+.scm-notice-row-link:focus-visible .scm-notice-row-title {
+    color: var(--scm-accent, #2E3A48);
+}
+
+.scm-notice-row-link:hover .scm-notice-row-arrow,
+.scm-notice-row-link:focus-visible .scm-notice-row-arrow {
+    color: var(--scm-accent, #2E3A48);
+    transform: translateX(3px);
+}
+
+/* Notice detail prev/next navigation.
+   On phones the two links stack as full-width rows so the prev/next label
+   never wraps mid-word and the neighbor titles keep readable room. */
+@media (max-width: 767.98px) {
+    .scm-notice-nav-link {
+        max-width: 100% !important;
+    }
+
+    .scm-notice-nav-link .scm-notice-nav-neighbor-title {
+        max-width: 12rem;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+}
+
+.scm-notice-nav-link:hover,
+.scm-notice-nav-link:focus-visible {
+    color: var(--scm-accent, #2E3A48);
+}
+
+/* ------------------------------------------------------------------
+   Rich text body (HtmlContent composite)
+   - Store notice / board post bodies arrive as sanitized HTML
+     (content_mode='html'). Inline styles cannot target children, so the
+     element rules live here, using the same warm-neutral tokens.
+   ------------------------------------------------------------------ */
+
+.scm-rich-content {
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    color: var(--scm-text-body, #4A4643);
+    word-break: break-word;
+}
+
+.scm-rich-content p {
+    margin: 0 0 1em;
+    font-size: 0.9375rem;
+    line-height: 1.8;
+}
+
+.scm-rich-content p:last-child {
+    margin-bottom: 0;
+}
+
+.scm-rich-content strong,
+.scm-rich-content b {
+    color: var(--scm-text-primary, #26221E);
+    font-weight: 600;
+}
+
+.scm-rich-content h1,
+.scm-rich-content h2,
+.scm-rich-content h3,
+.scm-rich-content h4 {
+    margin: 1.5em 0 0.5em;
+    font-family: var(--scm-font-display, system-ui);
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+    line-height: 1.4;
+}
+
+.scm-rich-content h1 { font-size: 1.125rem; }
+.scm-rich-content h2 { font-size: 1.0625rem; }
+.scm-rich-content h3,
+.scm-rich-content h4 { font-size: 1rem; }
+
+.scm-rich-content h1:first-child,
+.scm-rich-content h2:first-child,
+.scm-rich-content h3:first-child {
+    margin-top: 0;
+}
+
+.scm-rich-content ul,
+.scm-rich-content ol {
+    margin: 0 0 1em;
+    padding-left: 1.25rem;
+}
+
+.scm-rich-content li {
+    margin: 0.25em 0;
+}
+
+.scm-rich-content a {
+    color: var(--scm-accent, #2E3A48);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.scm-rich-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--scm-radius, 8px);
+}
+
+.scm-rich-content blockquote {
+    margin: 1em 0;
+    padding-left: 0.875rem;
+    border-left: 2px solid var(--scm-wood, #C9B08D);
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-rich-content hr {
+    margin: 1.5em 0;
+    border: 0;
+    border-top: 1px solid var(--scm-line, #E4DCCE);
+}
+
+.scm-rich-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 1em;
+}
+
+.scm-rich-content th,
+.scm-rich-content td {
+    border: 1px solid var(--scm-line, #E4DCCE);
+    padding: 0.5rem 0.625rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.scm-rich-content th {
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+    color: var(--scm-text-primary, #26221E);
+    font-weight: 600;
+}
+

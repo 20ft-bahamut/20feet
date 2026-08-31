@@ -193,6 +193,18 @@
         "path": "src/components/Container.tsx"
       },
       {
+        "name": "HtmlContent",
+        "type": "composite",
+        "description": "Sanitized rich-text body renderer (sirsoft-basic official HtmlContent fork) — DOMPurify HTML or pre-wrap text",
+        "path": "src/components/HtmlContent.tsx"
+      },
+      {
+        "name": "Pagination",
+        "type": "composite",
+        "description": "Store pagination — prev/next + page numbers, hidden when last_page <= 1",
+        "path": "src/components/Pagination.tsx"
+      },
+      {
         "name": "StoreHeader",
         "type": "composite",
         "description": "Top navigation with Shop, Story, Notice, Cart links and brand wordmark",

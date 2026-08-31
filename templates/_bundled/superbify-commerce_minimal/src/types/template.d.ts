@@ -143,6 +143,49 @@ export interface RouteContext {
     slug?: string;
 }
 
+/**
+ * Detail shape from `sirsoft-board` public post detail
+ * (GET /api/modules/sirsoft-board/boards/{slug}/posts/{id}). Only fields read
+ * at render time are declared.
+ */
+export interface NoticeDetailItem {
+    id: number | string;
+    title: string;
+    is_notice?: boolean;
+    is_secret?: boolean;
+    /** 'html' | 'text' — html is rendered via the DOMPurify-backed HtmlContent composite. */
+    content_mode?: string;
+    content?: string | null;
+    status?: string;
+    view_count?: number;
+    author?: { name?: string } | null;
+    created_at?: string;
+    created_at_formatted?: string;
+    isFixture?: boolean;
+}
+
+/** Prev/next entry from `GET .../posts/{id}/navigation` (`data.prev` / `data.next`). */
+export interface NoticeNavigationNeighbor {
+    id: number | string;
+    title?: string;
+}
+
+export interface NoticeNavigation {
+    prev?: NoticeNavigationNeighbor | null;
+    next?: NoticeNavigationNeighbor | null;
+}
+
+/** Pagination block from `sirsoft-board` public PostListResource. */
+export interface NoticePagination {
+    total?: number;
+    per_page?: number;
+    current_page?: number;
+    last_page?: number | null;
+    from?: number | null;
+    to?: number | null;
+    has_more_pages?: boolean;
+}
+
 export interface DataSourceResponse<T> {
     data?: T;
     loading?: boolean;

@@ -62,6 +62,10 @@
             "shipping_policy": {
                 "title": "배송·교환·반품 안내 — Still Form",
                 "description": "배송, 교환, 반품 안내"
+            },
+            "notice_detail": {
+                "title": "공지 상세 — Still Form",
+                "description": "스토어 공지 상세 보기"
             }
         },
         "data_source": {
@@ -188,7 +192,15 @@
             "eyebrow": "NOTICE",
             "fixed_badge": "고정",
             "empty_title": "등록된 공지가 없습니다",
-            "empty_message": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다."
+            "empty_message": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다.",
+            "back_to_list": "목록으로",
+            "view_count": "조회",
+            "prev_page_aria": "이전 페이지",
+            "next_page_aria": "다음 페이지",
+            "page_aria": ":n 페이지",
+            "row_aria": "공지 열기: :t",
+            "prev_post": "이전 공지",
+            "next_post": "다음 공지"
         },
         "cart": {
             "title": "Cart",

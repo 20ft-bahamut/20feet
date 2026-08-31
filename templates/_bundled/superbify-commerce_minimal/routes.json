@@ -48,6 +48,16 @@
             }
         },
         {
+            "_comment": "=== 공지 상세 ===",
+            "path": "/shop/notice/:id",
+            "layout": "shop/notice-detail",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.notice_detail.title",
+                "description": "$t:superbify.routes.notice_detail.description"
+            }
+        },
+        {
             "_comment": "=== 브랜드 스토리 ===",
             "path": "/shop/story",
             "layout": "shop/story",

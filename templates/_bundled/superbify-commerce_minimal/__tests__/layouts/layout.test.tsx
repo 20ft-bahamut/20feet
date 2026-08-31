@@ -22,6 +22,47 @@ function listLayoutJsonFiles(): string[] {
     return result;
 }
 
+function collectCompositeNames(node: any): string[] {
+    if (!node || typeof node !== 'object') return [];
+    const out: string[] = [];
+    if (typeof node.name === 'string') out.push(node.name);
+    if (Array.isArray(node)) {
+        for (const child of node) out.push(...collectCompositeNames(child));
+    }
+    if (Array.isArray(node.children)) {
+        for (const child of node.children) out.push(...collectCompositeNames(child));
+    }
+    if (Array.isArray(node.slots)) {
+        for (const slot of node.slots) {
+            if (slot.content) out.push(...collectCompositeNames({ children: slot.content }));
+        }
+    }
+    return out;
+}
+
+function findNodeByName(node: any, name: string): any | null {
+    if (!node || typeof node !== 'object') return null;
+    if (node.name === name) return node;
+    if (Array.isArray(node)) {
+        for (const child of node) {
+            const hit = findNodeByName(child, name);
+            if (hit) return hit;
+        }
+        return null;
+    }
+    for (const child of node.children ?? []) {
+        const hit = findNodeByName(child, name);
+        if (hit) return hit;
+    }
+    if (Array.isArray(node.slots)) {
+        for (const slot of node.slots) {
+            const hit = findNodeByName({ children: slot.content }, name);
+            if (hit) return hit;
+        }
+    }
+    return null;
+}
+
 describe('layout JSONs', () => {
     it('home.json wires the required data sources', () => {
         const home = JSON.parse(fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/home.json'), 'utf8'));
@@ -228,6 +269,75 @@ describe('layout JSONs', () => {
         expect(paths).toContain('/shop/order/complete');
         expect(paths).toContain('/shop/guest/orders');
         expect(paths).toContain('/shop/guest/orders/:order_number');
+    });
+
+    it('shop/notice.json wires page query param, row links, and pagination navigation', () => {
+        const notice = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/notice.json'), 'utf8')
+        );
+        // list data source forwards the page query param
+        const list = (notice.data_sources as Array<{
+            id: string;
+            endpoint: string;
+            params: Record<string, string>;
+        }>).find((d) => d.id === 'notice_posts');
+        expect(list?.endpoint).toBe('/api/modules/sirsoft-board/boards/store-notice/posts');
+        expect(list?.params?.page).toBe('{{query.page ?? 1}}');
+        expect(list?.params?.per_page).toBe('{{query.per_page ?? 10}}');
+
+        const names = collectCompositeNames({ children: notice.slots?.content });
+        expect(names).toEqual(expect.arrayContaining(['NoticeList', 'Pagination']));
+
+        const pagination = findNodeByName(notice.slots?.content, 'Pagination');
+        expect(pagination.props.totalPages).toContain('pagination?.last_page');
+        const navAction = (pagination.actions as Array<{
+            event: string;
+            handler: string;
+            params: { path: string; mergeQuery: boolean; query: Record<string, string> };
+        }>).find((a) => a.event === 'onPageChange');
+        expect(navAction?.handler).toBe('navigate');
+        expect(navAction?.params.mergeQuery).toBe(true);
+        expect(navAction?.params.query?.page).toBe('{{$args[0]}}');
+    });
+
+    it('shop/notice-detail.json binds post + navigation sources on route.id and renders via HtmlContent', () => {
+        const detail = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/notice-detail.json'), 'utf8')
+        );
+        const post = (detail.data_sources as Array<{ id: string; endpoint: string }>).find(
+            (d) => d.id === 'notice_post'
+        );
+        const navigation = (detail.data_sources as Array<{ id: string; endpoint: string }>).find(
+            (d) => d.id === 'notice_navigation'
+        );
+        expect(post?.endpoint).toBe(
+            '/api/modules/sirsoft-board/boards/store-notice/posts/{{route.id}}'
+        );
+        expect(navigation?.endpoint).toBe(
+            '/api/modules/sirsoft-board/boards/store-notice/posts/{{route.id}}/navigation'
+        );
+
+        const names = collectCompositeNames({ children: detail.slots?.content });
+        expect(names).toContain('HtmlContent');
+
+        const textBlob = JSON.stringify(detail.slots);
+        // back link + meta labels are bound via i18n keys
+        expect(textBlob).toContain('$t:superbify.notice.back_to_list');
+        expect(textBlob).toContain('$t:superbify.notice.view_count');
+        expect(textBlob).toContain('"href":"/shop/notice"');
+        // content html rendering goes through the sanitized composite, not raw layout text
+        const content = findNodeByName(detail.slots?.content, 'HtmlContent');
+        expect(content?.props?.content).toContain('notice_post?.data?.content');
+        expect(content?.props?.isHtml).toContain("content_mode ?? 'text') === 'html'");
+    });
+
+    it('routes.json declares /shop/notice and /shop/notice/:id', () => {
+        const routes = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'routes.json'), 'utf8')
+        );
+        const pairs = routes.routes as Array<{ path: string; layout: string }>;
+        expect(pairs.find((r) => r.path === '/shop/notice/:id')?.layout).toBe('shop/notice-detail');
+        expect(pairs.find((r) => r.path === '/shop/notice')?.layout).toBe('shop/notice');
     });
 });
 

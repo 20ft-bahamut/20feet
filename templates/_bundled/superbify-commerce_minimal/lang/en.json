@@ -62,6 +62,10 @@
             "shipping_policy": {
                 "title": "Shipping, Returns & Exchanges — Still Form",
                 "description": "Shipping, exchange, and return information"
+            },
+            "notice_detail": {
+                "title": "Notice detail — Still Form",
+                "description": "Store notice detail"
             }
         },
         "data_source": {
@@ -188,7 +192,15 @@
             "eyebrow": "NOTICE",
             "fixed_badge": "Pinned",
             "empty_title": "No notices yet",
-            "empty_message": "This is a demo template. Real notice data can be added from admin."
+            "empty_message": "This is a demo template. Real notice data can be added from admin.",
+            "back_to_list": "Back to list",
+            "view_count": "views",
+            "prev_page_aria": "Previous page",
+            "next_page_aria": "Next page",
+            "page_aria": "Page :n",
+            "row_aria": "Open notice: :t",
+            "prev_post": "Previous",
+            "next_post": "Next"
         },
         "cart": {
             "title": "Cart",

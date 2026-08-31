@@ -19,7 +19,9 @@ export { CrossSellStrip, type CrossSellStripProps } from './components/CrossSell
 export { EditorialBanner, type EditorialBannerProps } from './components/EditorialBanner';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
 export { HeroBanner, type HeroBannerProps } from './components/HeroBanner';
+export { HtmlContent, type HtmlContentProps } from './components/HtmlContent';
 export { NoticeList, type NoticeListProps } from './components/NoticeList';
+export { Pagination, type PaginationProps } from './components/Pagination';
 export { Price, type PriceProps } from './components/Price';
 export { ProductCard, type ProductCardProps } from './components/ProductCard';
 export { ProductGallery, type ProductGalleryProps, type ProductGalleryImage } from './components/ProductGallery';

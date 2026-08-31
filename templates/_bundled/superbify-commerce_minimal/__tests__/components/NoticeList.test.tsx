@@ -39,4 +39,27 @@ describe('NoticeList', () => {
         expect(screen.getByTestId('notice-list')).toHaveAttribute('data-loading', 'true');
         expect(screen.getAllByTestId('notice-row-skeleton').length).toBeGreaterThan(0);
     });
+
+    it('links each row to the notice detail page', () => {
+        render(<NoticeList items={items} />);
+        const rows = screen.getAllByTestId('notice-row');
+        expect(rows.every((r) => r.tagName === 'A')).toBe(true);
+        expect(rows[0]).toHaveAttribute('href', '/shop/notice/8');
+        expect(rows[1]).toHaveAttribute('href', '/shop/notice/10');
+        expect(rows[0]).toHaveTextContent('배송 및 수령 안내');
+        expect(rows[0].getAttribute('href')).toContain('/shop/notice/');
+    });
+
+    it('supports a custom detail base path', () => {
+        render(<NoticeList items={items} detailBasePath="/shop/notice" />);
+        expect(screen.getAllByTestId('notice-row')[1]).toHaveAttribute('href', '/shop/notice/10');
+    });
+
+    it('builds row aria label from rowAriaLabel with :t placeholder', () => {
+        render(<NoticeList items={items} rowAriaLabel="공지 열기: :t" />);
+        expect(screen.getAllByTestId('notice-row')[0]).toHaveAttribute(
+            'aria-label',
+            '공지 열기: 배송 및 수령 안내'
+        );
+    });
 });

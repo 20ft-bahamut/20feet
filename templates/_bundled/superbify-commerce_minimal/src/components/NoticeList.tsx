@@ -1,5 +1,5 @@
 import React from 'react';
-import { Div, Span } from './basic';
+import { A, Div, Span } from './basic';
 import { EmptyState } from './EmptyState';
 import type { NoticeItem } from '../types/template';
 
@@ -12,6 +12,10 @@ export interface NoticeListProps {
     emptyMessage?: string;
     /** Localized label for the pinned (공지) row badge. */
     fixedLabel?: string;
+    /** Row link base path. Defaults to `/shop/notice`; rows link to `{base}/{id}`. */
+    detailBasePath?: string;
+    /** Localized aria label for a row link (`:t` is replaced with the post title). */
+    rowAriaLabel?: string;
     className?: string;
 }
 
@@ -57,6 +61,8 @@ export function NoticeList({
     emptyTitle = 'No notices yet',
     emptyMessage,
     fixedLabel = '고정',
+    detailBasePath = '/shop/notice',
+    rowAriaLabel,
     className,
 }: NoticeListProps): React.ReactElement {
     const safeItems = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
@@ -84,9 +90,16 @@ export function NoticeList({
             {loading
                 ? Array.from({ length: 4 }).map((_, idx) => <SkeletonRow key={`skeleton-${idx}`} />)
                 : visible.map((item) => (
-                      <Div
+                      <A
                           key={String(item.id)}
+                          href={`${detailBasePath}/${item.id}`}
                           data-testid="notice-row"
+                          aria-label={
+                              rowAriaLabel && rowAriaLabel.includes(':t')
+                                  ? rowAriaLabel.replace(':t', String(item.title ?? ''))
+                                  : rowAriaLabel
+                          }
+                          className="scm-notice-row-link"
                           style={{
                               display: 'flex',
                               alignItems: 'baseline',
@@ -94,6 +107,8 @@ export function NoticeList({
                               padding: 'var(--scm-spacing-md, 1rem) 0',
                               borderBottom: '1px solid var(--scm-line, #E4DCCE)',
                               minHeight: 'var(--scm-touch-min, 44px)',
+                              textDecoration: 'none',
+                              color: 'inherit',
                           }}
                       >
                           <Span
@@ -136,6 +151,7 @@ export function NoticeList({
                                   </Span>
                               ) : null}
                               <Span
+                                  className="scm-notice-row-title"
                                   style={{
                                       fontFamily: 'var(--scm-font-body, system-ui)',
                                       fontSize: '0.9375rem',
@@ -149,7 +165,21 @@ export function NoticeList({
                                   {item.title}
                               </Span>
                           </Div>
-                      </Div>
+                          <Span
+                              aria-hidden
+                              className="scm-notice-row-arrow"
+                              style={{
+                                  marginLeft: 'auto',
+                                  flexShrink: 0,
+                                  alignSelf: 'center',
+                                  fontFamily: 'var(--scm-font-body, system-ui)',
+                                  fontSize: '0.875rem',
+                                  color: 'var(--scm-text-muted, #8A837B)',
+                              }}
+                          >
+                              →
+                          </Span>
+                      </A>
                   ))}
         </Div>
     );
