@@ -54,6 +54,66 @@
     "slots": {
         "content": [
             {
+                "_comment": "daum 우편번호 extension_point (FORK SOURCE: templates/_bundled/sirsoft-basic/layouts/partials/shop/_checkout_shipping.json:484-543. 우편번호 검색 버튼을 주입받는 sibling 배치 — 플러그인 openPostcode 는 DOM input 에 값을 쓰지 않고 callbackAction($event) 디스패치만 하므로, CheckoutForm(React controlled input)은 _global.checkoutAddress 브리지로만 주소를 받는다. CheckoutForm 은 input name=zipcode/address 를 유지하므로 setFieldReadOnly 가 그대로 동작한다.)",
+                "id": "checkout_address_search_slot",
+                "type": "extension_point",
+                "name": "address_search_slot",
+                "props": {
+                    "readOnlyFields": ["zipcode", "address"]
+                },
+                "callbacks": {
+                    "onAddressSelect": {
+                        "handler": "sequence",
+                        "actions": [
+                            {
+                                "comment": "우편번호/주소를 _global.checkoutAddress 에 기록 — CheckoutForm 이 G7Core.state 구독으로 동기화",
+                                "handler": "setState",
+                                "params": {
+                                    "target": "global",
+                                    "checkoutAddress": {
+                                        "zipcode": "{{$event.zipcode}}",
+                                        "address": "{{$event.address}}",
+                                        "region": "{{$event.region}}",
+                                        "city": "{{$event.city}}",
+                                        "country_code": "{{$event.countryCode ?? 'KR'}}"
+                                    }
+                                }
+                            },
+                            {
+                                "comment": "배송지 변경 시 checkout API 호출 (도서산간 배송비 재계산)",
+                                "handler": "apiCall",
+                                "target": "/api/modules/sirsoft-ecommerce/checkout",
+                                "auth_mode": "optional",
+                                "params": {
+                                    "method": "PUT",
+                                    "body": {
+                                        "zipcode": "{{_global.checkoutAddress?.zipcode ?? ''}}",
+                                        "country_code": "{{_global.checkoutAddress?.country_code ?? 'KR'}}"
+                                    }
+                                },
+                                "onSuccess": [
+                                    {
+                                        "handler": "refetchDataSource",
+                                        "params": {
+                                            "dataSourceId": "checkoutData"
+                                        }
+                                    }
+                                ],
+                                "onError": [
+                                    {
+                                        "handler": "toast",
+                                        "params": {
+                                            "type": "error",
+                                            "message": "{{error.message}}"
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
                 "id": "checkout_page_wrapper",
                 "type": "composite",
                 "name": "CheckoutPage",
@@ -62,10 +122,10 @@
                     "checkoutData": "{{checkoutData}}",
                     "paymentSettings": "{{paymentSettings}}",
                     "shippingSettings": "{{shippingSettings}}",
-                    "isLoggedIn": false,
-                    "currentUserName": "",
-                    "currentUserPhone": "",
-                    "currentUserEmail": "",
+                    "isLoggedIn": "{{_global.currentUser ? true : false}}",
+                    "currentUserName": "{{_global.currentUser?.name ?? ''}}",
+                    "currentUserPhone": "{{_global.currentUser?.phone ?? ''}}",
+                    "currentUserEmail": "{{_global.currentUser?.email ?? ''}}",
                     "locale": "ko",
                     "title": "$t:superbify.checkout.title",
                     "loadingLabel": "$t:superbify.checkout.loading",

@@ -1,0 +1,152 @@
+{
+    "version": "1.0.0",
+    "layout_name": "auth/register",
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.register",
+        "guest_only": true,
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/auth/register.json"
+    },
+    "init_actions": [
+        {
+            "comment": "registerForm 초기 상태 시드 — BASIC 과 동일. Select 언어 기본값 필드는 SRC 가입 플로우에서 생략했다.",
+            "handler": "setState",
+            "params": {
+                "target": "local",
+                "isRegistering": false,
+                "registerError": null,
+                "errors": null,
+                "registerForm": {}
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "auth_register_section",
+                "type": "basic",
+                "name": "Section",
+                "comment": "BASIC 의 layout/Flex 센터링 래퍼는 SRC 에 Flex 가 미등록이라 기본 Div/Section 로 치환. 약관/개인정보 모달(termsContent/privacyContent DS + Modal)은 SRC 미등록 컴포넌트라 /shop/terms · /shop/privacy 링크로 치환했다.",
+                "style": {
+                    "minHeight": "60vh",
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "alignItems": "flex-start",
+                    "paddingBlock": "var(--scm-section-py-lg, 4.5rem)",
+                    "paddingInline": "var(--scm-gutter, 1rem)"
+                },
+                "children": [
+                    {
+                        "id": "auth_register_wrapper",
+                        "type": "basic",
+                        "name": "Div",
+                        "blur_until_loaded": "{{_global?.currentUser?.uuid}}",
+                        "style": {
+                            "width": "100%"
+                        },
+                        "children": [
+                            {
+                                "partial": "partials/auth/_redirect_if_logged_in.json"
+                            },
+                            {
+                                "id": "auth_register_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "className": "scm-auth-card",
+                                "children": [
+                                    {
+                                        "id": "auth_register_heading",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "textAlign": "center"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "H2",
+                                                "style": {
+                                                    "margin": "0 0 var(--scm-spacing-3xs, 0.25rem)",
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.375rem",
+                                                    "fontWeight": 700,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "text": "$t:superbify.auth.register.title"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "margin": 0,
+                                                    "fontSize": "0.875rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)"
+                                                },
+                                                "text": "$t:superbify.auth.register.subtitle"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "partial": "partials/auth/_register_form.json"
+                                    },
+                                    {
+                                        "id": "auth_register_bottom_links",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "marginTop": "var(--scm-spacing-md, 1rem)",
+                                            "display": "flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "center",
+                                            "gap": "var(--scm-spacing-3xs, 0.25rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "style": {
+                                                    "fontSize": "0.875rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)"
+                                                },
+                                                "text": "$t:superbify.auth.register.has_account"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "id": "auth_register_login_link",
+                                                "props": {
+                                                    "href": "/login"
+                                                },
+                                                "style": {
+                                                    "minHeight": "44px",
+                                                    "display": "inline-flex",
+                                                    "alignItems": "center",
+                                                    "fontSize": "0.875rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "textDecoration": "underline",
+                                                    "textUnderlineOffset": "3px",
+                                                    "cursor": "pointer"
+                                                },
+                                                "text": "$t:superbify.auth.login",
+                                                "actions": [
+                                                    {
+                                                        "type": "click",
+                                                        "handler": "navigate",
+                                                        "params": {
+                                                            "path": "/login"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,223 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 주문 취소 (인라인 패널 + ConfirmDialog)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_modal_cancel.json — BASIC Modal(부분취소 아이템 선택/환불 예상금액 비교표/환불 우선순위/기타 상세사유)을 SRC 치환 규칙에 따라 전체취소 전용 인라인 패널로 축약. refundReasons DS(params type=refund) + POST user/orders/{id}/cancel(reason) 액션 체인과 refetchDataSource order 는 KEEP.",
+        "api_note": "회원 취소 라우트는 numeric id 전용(modules/sirsoft-ecommerce/src/routes/api.php — user/orders/{id}/cancel whereNumber)이므로 order.data.id 로 호출한다. 요청 바디는 CancelOrderRequest 규칙(reason 필수)을 따른다."
+    },
+    "id": "mypage_order_cancel_panel",
+    "type": "basic",
+    "name": "Div",
+    "if": "{{order.data.abilities?.can_cancel === true}}",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-sm, 0.75rem)",
+        "borderColor": "var(--scm-danger, #B3261E)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_cancel_title",
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.0625rem",
+                "fontWeight": "600",
+                "color": "var(--scm-danger, #B3261E)",
+                "margin": 0
+            },
+            "text": "$t:superbify.mypage.orders.cancel"
+        },
+        {
+            "comment": "취소 사유 — user/orders/{id}/cancel 의 reason 은 claim-reasons(type=refund) 코드 필수다",
+            "id": "mypage_order_cancel_reason_field",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-2xs, 0.25rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_cancel_reason_label",
+                    "type": "basic",
+                    "name": "Label",
+                    "props": { "for": "mypage_order_cancel_reason_select" },
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 500,
+                        "color": "var(--scm-text-body, #4A4643)"
+                    },
+                    "text": "$t:superbify.mypage.orders.cancel_reason"
+                },
+                {
+                    "id": "mypage_order_cancel_reason_select",
+                    "type": "basic",
+                    "name": "Select",
+                    "props": {
+                        "id": "mypage_order_cancel_reason_select",
+                        "value": "{{_local.cancelReason ?? ''}}"
+                    },
+                    "style": {
+                        "minHeight": "var(--scm-touch-min, 44px)",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem"
+                    },
+                    "actions": [
+                        {
+                            "type": "change",
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "cancelReason": "{{$event.target.value}}"
+                            }
+                        }
+                    ],
+                    "children": [
+                        {
+                            "id": "mypage_order_cancel_reason_placeholder",
+                            "type": "basic",
+                            "name": "Option",
+                            "props": { "value": "" },
+                            "text": "$t:superbify.mypage.orders.reason_placeholder"
+                        },
+                        {
+                            "id": "mypage_order_cancel_reason_option",
+                            "type": "basic",
+                            "name": "Option",
+                            "iteration": { "source": "{{refundReasons?.data?.data ?? refundReasons?.data ?? []}}", "item_var": "reason" },
+                            "props": { "value": "{{reason.code ?? ''}}" },
+                            "text": "{{reason.localized_name ?? ''}}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "mypage_order_cancel_button",
+            "type": "basic",
+            "name": "Button",
+            "props": {
+                "type": "button",
+                "disabled": "{{!_local.cancelReason || (_local.isCancelling ?? false)}}"
+            },
+            "style": {
+                "display": "inline-flex",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "alignSelf": "flex-start",
+                "minHeight": "var(--scm-touch-min, 44px)",
+                "padding": "0 var(--scm-spacing-lg, 1.5rem)",
+                "borderRadius": "var(--scm-radius, 8px)",
+                "border": "1px solid var(--scm-danger, #B3261E)",
+                "backgroundColor": "var(--scm-danger, #B3261E)",
+                "color": "var(--scm-text-inverse, #FAF8F3)",
+                "fontFamily": "var(--scm-font-body, system-ui)",
+                "fontSize": "0.9375rem",
+                "fontWeight": 600,
+                "cursor": "pointer"
+            },
+            "actions": [
+                {
+                    "comment": "ConfirmDialog open — 실제 취소 API 호출은 다이얼로그 confirm 에서 실행한다",
+                    "type": "click",
+                    "handler": "setState",
+                    "params": { "target": "local", "showCancelConfirm": true }
+                }
+            ],
+            "text": "$t:superbify.mypage.orders.cancel"
+        },
+        {
+            "comment": "SRC ConfirmDialog 컴포지트 — BASIC Modal 의 치환체. cancel 은 destructive 액션이므로 tone danger.",
+            "id": "mypage_order_cancel_confirm_dialog",
+            "type": "composite",
+            "name": "ConfirmDialog",
+            "props": {
+                "open": "{{_local.showCancelConfirm ?? false}}",
+                "title": "$t:superbify.mypage.orders.cancel_confirm_title",
+                "message": "$t:superbify.mypage.orders.cancel_confirm_body",
+                "confirmLabel": "$t:superbify.mypage.orders.cancel",
+                "cancelLabel": "$t:superbify.cart.delete_cancel",
+                "tone": "danger",
+                "busy": "{{_local.isCancelling ?? false}}"
+            },
+            "actions": [
+                {
+                    "event": "onConfirm",
+                    "handler": "sequence",
+                    "actions": [
+                        {
+                            "handler": "setState",
+                            "params": { "target": "local", "isCancelling": true }
+                        },
+                        {
+                            "comment": "POST /api/modules/sirsoft-ecommerce/user/orders/{id}/cancel — CancelOrderRequest(reason 필수). 부분취소(items)와 refund_priority 는 이 화면에서 다루지 않는다.",
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/modules/sirsoft-ecommerce/user/orders/{{order.data.id ?? ''}}/cancel",
+                            "params": {
+                                "method": "POST",
+                                "body": {
+                                    "reason": "{{_local.cancelReason ?? ''}}"
+                                }
+                            },
+                            "onSuccess": [
+                                {
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "isCancelling": false,
+                                        "showCancelConfirm": false
+                                    }
+                                },
+                                {
+                                    "handler": "toast",
+                                    "params": {
+                                        "type": "success",
+                                        "message": "$t:superbify.mypage.orders.cancel_success"
+                                    }
+                                },
+                                {
+                                    "comment": "취소 응답에는 갱신된 주문 상세가 온다 — order DS 를 다시 불러 상태 헤더/이력을 즉시 반영한다(BASIC executeUserCancelOrder 후 reload 와 동일 역할).",
+                                    "handler": "refetchDataSource",
+                                    "params": { "dataSourceId": "order" }
+                                }
+                            ],
+                            "onError": [
+                                {
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "isCancelling": false,
+                                        "showCancelConfirm": false
+                                    }
+                                },
+                                {
+                                    "handler": "toast",
+                                    "params": {
+                                        "type": "error",
+                                        "message": "{{error.message ?? $t:superbify.errors.server_error_title}}"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "event": "onCancel",
+                    "handler": "setState",
+                    "params": { "target": "local", "showCancelConfirm": false }
+                }
+            ]
+        }
+    ]
+}

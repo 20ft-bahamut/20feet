@@ -1,0 +1,101 @@
+{
+    "version": "1.0.0",
+    "layout_name": "mypage/wishlist",
+    "extends": "_user_base",
+    "permissions": [],
+    "computed": {
+        "currentTab": "wishlist"
+    },
+    "fork_source_comment": "templates/_bundled/sirsoft-basic/layouts/mypage/wishlist.json 포크 — wishlist DS(auth required)와 page 상태 리페치 방식 유지, BASIC endpoint query binding 을 params.page 로 옮기고 Grid layout 컴포지트를 scm grid Div 로 치환했다.",
+    "data_sources": [
+        {
+            "fork_source": "templates/_bundled/sirsoft-basic/layouts/mypage/wishlist.json",
+            "id": "wishlist",
+            "label_key": "$t:superbify.data_source.current_user",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/wishlist",
+            "method": "GET",
+            "params": {
+                "page": "{{_local.wishlistPage ?? 1}}"
+            },
+            "auto_fetch": true,
+            "auth_mode": "required",
+            "loading_strategy": "progressive"
+        }
+    ],
+    "init_actions": [
+        {
+            "handler": "setState",
+            "params": { "target": "local", "wishlistPage": "{{query.page ?? 1}}" }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "mypage_wishlist_section",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "mypage_wishlist_wrap",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1320px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "mypage_wishlist_eyebrow",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.75rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.08em",
+                                    "textTransform": "uppercase"
+                                },
+                                "text": "$t:superbify.mypage.tabs.wishlist"
+                            },
+                            {
+                                "id": "mypage_wishlist_title",
+                                "type": "basic",
+                                "name": "H1",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.75rem",
+                                    "fontWeight": "700",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.mypage.title"
+                            },
+                            {
+                                "partial": "partials/mypage/_tabs.json"
+                            },
+                            {
+                                "id": "mypage_tab_content",
+                                "type": "basic",
+                                "name": "Div",
+                                "children": [
+                                    {
+                                        "comment": "찜 목록 + 삭제 + SRC Pagination",
+                                        "partial": "partials/mypage/wishlist/_list.json"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

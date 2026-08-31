@@ -1,0 +1,275 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 프로필 — 보기 모드. sirsoft-basic layouts/partials/mypage/profile/_view.json 포크. AvatarUploader/Icon/탈퇴/알림설정/통화섹션은 SRC 범위에서 제외하고 이름/닉네임/이메일/휴대폰/가입일과 수정·비밀번호 변경 버튼만 남겼다. 스타일은 scm 토큰 inline으로 재작성.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/profile/_view.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "props": {
+        "className": "scm-panel"
+    },
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "섹션 헤더 — 제목 + 수정/비밀번호 변경 버튼 (BASIC action chain: navigate 유지)",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+                "flexWrap": "wrap",
+                "gap": "var(--scm-spacing-xs, 0.5rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "H2",
+                    "style": {
+                        "fontFamily": "var(--scm-font-display, system-ui)",
+                        "fontSize": "1.125rem",
+                        "fontWeight": "600",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "margin": "0"
+                    },
+                    "text": "$t:superbify.mypage.tabs.profile"
+                },
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "display": "flex",
+                        "gap": "var(--scm-spacing-xs, 0.5rem)",
+                        "flexWrap": "wrap"
+                    },
+                    "children": [
+                        {
+                            "comment": "비밀번호 변경 버튼 — BASIC /mypage/change-password navigate 유지",
+                            "type": "basic",
+                            "name": "Button",
+                            "props": { "type": "button" },
+                            "style": {
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.875rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer"
+                            },
+                            "text": "$t:superbify.mypage.tabs.password",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": { "path": "/mypage/change-password" }
+                                }
+                            ]
+                        },
+                        {
+                            "comment": "수정 버튼 — BASIC /mypage/profile/edit navigate 유지",
+                            "type": "basic",
+                            "name": "Button",
+                            "props": { "type": "button" },
+                            "style": {
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-md, 1rem)",
+                                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                "color": "var(--scm-text-inverse, #FAF8F3)",
+                                "border": "1px solid var(--scm-charcoal, #26221E)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.875rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer"
+                            },
+                            "text": "$t:superbify.mypage.profile.edit",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": { "path": "/mypage/profile/edit" }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "정보 행 — 이름",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "paddingBlock": "var(--scm-spacing-xs, 0.5rem)",
+                "borderBottom": "var(--scm-hairline, 1px solid #E4DCCE)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.profile.name"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.9375rem",
+                        "fontWeight": "600",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "textAlign": "right"
+                    },
+                    "text": "{{user?.data?.name ?? '-'}}"
+                }
+            ]
+        },
+        {
+            "comment": "정보 행 — 닉네임",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "paddingBlock": "var(--scm-spacing-xs, 0.5rem)",
+                "borderBottom": "var(--scm-hairline, 1px solid #E4DCCE)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.profile.nickname"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.9375rem",
+                        "fontWeight": "600",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "textAlign": "right"
+                    },
+                    "text": "{{user?.data?.nickname ?? '-'}}"
+                }
+            ]
+        },
+        {
+            "comment": "정보 행 — 이메일 (변경 불가)",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "paddingBlock": "var(--scm-spacing-xs, 0.5rem)",
+                "borderBottom": "var(--scm-hairline, 1px solid #E4DCCE)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.profile.email"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.9375rem",
+                        "color": "var(--scm-text-body, #4A4643)",
+                        "textAlign": "right",
+                        "wordBreak": "break-all"
+                    },
+                    "text": "{{user?.data?.email ?? '-'}}"
+                }
+            ]
+        },
+        {
+            "comment": "정보 행 — 휴대폰",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "paddingBlock": "var(--scm-spacing-xs, 0.5rem)",
+                "borderBottom": "var(--scm-hairline, 1px solid #E4DCCE)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.profile.phone"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.9375rem",
+                        "color": "var(--scm-text-body, #4A4643)",
+                        "textAlign": "right"
+                    },
+                    "text": "{{user?.data?.phone ?? user?.data?.mobile ?? '-'}}"
+                }
+            ]
+        },
+        {
+            "comment": "정보 행 — 가입일",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "paddingBlock": "var(--scm-spacing-xs, 0.5rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.profile.joined"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.9375rem",
+                        "color": "var(--scm-text-body, #4A4643)",
+                        "textAlign": "right"
+                    },
+                    "text": "{{user?.data?.created_at ?? '-'}}"
+                }
+            ]
+        }
+    ]
+}

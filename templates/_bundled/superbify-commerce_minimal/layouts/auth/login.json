@@ -1,0 +1,230 @@
+{
+    "version": "1.0.0",
+    "layout_name": "auth/login",
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.routes.login",
+        "guest_only": true,
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/auth/login.json"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "auth_login_section",
+                "type": "basic",
+                "name": "Section",
+                "comment": "BASIC 의 layout/Flex 센터링 래퍼는 SRC 에 Flex 가 미등록이라 기본 Div/Section 로 치환",
+                "style": {
+                    "minHeight": "60vh",
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "alignItems": "flex-start",
+                    "paddingBlock": "var(--scm-section-py-lg, 4.5rem)",
+                    "paddingInline": "var(--scm-gutter, 1rem)"
+                },
+                "children": [
+                    {
+                        "id": "auth_login_wrapper",
+                        "type": "basic",
+                        "name": "Div",
+                        "blur_until_loaded": "{{_global?.currentUser?.uuid}}",
+                        "style": {
+                            "width": "100%"
+                        },
+                        "children": [
+                            {
+                                "partial": "partials/auth/_redirect_if_logged_in.json"
+                            },
+                            {
+                                "id": "auth_login_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "className": "scm-auth-card",
+                                "children": [
+                                    {
+                                        "id": "auth_login_heading",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "textAlign": "center"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "H2",
+                                                "style": {
+                                                    "margin": "0 0 var(--scm-spacing-3xs, 0.25rem)",
+                                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                                    "fontSize": "1.375rem",
+                                                    "fontWeight": 700,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "text": "$t:superbify.auth.login_form.title"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "margin": 0,
+                                                    "fontSize": "0.875rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)"
+                                                },
+                                                "text": "$t:superbify.auth.login_form.subtitle"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "partial": "partials/auth/_login_form.json"
+                                    },
+                                    {
+                                        "comment": "비회원 주문 진입 — redirect 가 checkout 일 때만 노출. Form 바깥에 두어 submit 으로 가로채지 않는다(BASIC 동일). 임시주문은 cartKey(localStorage)로 이미 생성됐으므로 비회원 주문 조회 페이지로 안내한다.",
+                                        "id": "auth_login_guest_continue",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "if": "{{query.redirect && query.redirect.includes('checkout')}}",
+                                        "style": {
+                                            "marginTop": "var(--scm-spacing-md, 1rem)",
+                                            "paddingTop": "var(--scm-spacing-md, 1rem)",
+                                            "borderTop": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                            "display": "flex",
+                                            "flexDirection": "column",
+                                            "gap": "var(--scm-spacing-2xs, 0.5rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "margin": 0,
+                                                    "fontSize": "0.875rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)"
+                                                },
+                                                "text": "$t:superbify.auth.guest_continue.title"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "P",
+                                                "style": {
+                                                    "margin": 0,
+                                                    "fontSize": "0.8125rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)"
+                                                },
+                                                "text": "$t:superbify.auth.guest_continue.hint"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "id": "auth_login_guest_continue_cta",
+                                                "props": {
+                                                    "href": "/shop/guest/orders"
+                                                },
+                                                "style": {
+                                                    "minHeight": "44px",
+                                                    "display": "inline-flex",
+                                                    "alignItems": "center",
+                                                    "justifyContent": "center",
+                                                    "padding": "0.625rem 1rem",
+                                                    "backgroundColor": "var(--scm-paper, #FAF8F3)",
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "border": "1px solid var(--scm-line, #E4DCCE)",
+                                                    "borderRadius": "var(--scm-radius, 8px)",
+                                                    "fontWeight": 600,
+                                                    "fontSize": "0.9375rem",
+                                                    "textDecoration": "none",
+                                                    "cursor": "pointer"
+                                                },
+                                                "text": "$t:superbify.auth.guest_continue.cta",
+                                                "actions": [
+                                                    {
+                                                        "type": "click",
+                                                        "handler": "navigate",
+                                                        "params": {
+                                                            "path": "/shop/guest/orders"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "comment": "하단 링크 — 비밀번호 찾기 / 회원가입",
+                                        "id": "auth_login_bottom_links",
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "style": {
+                                            "marginTop": "var(--scm-spacing-sm, 0.75rem)",
+                                            "display": "flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "space-between",
+                                            "gap": "var(--scm-spacing-sm, 0.75rem)"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "id": "auth_login_forgot_link",
+                                                "props": {
+                                                    "href": "/forgot-password"
+                                                },
+                                                "style": {
+                                                    "minHeight": "44px",
+                                                    "display": "inline-flex",
+                                                    "alignItems": "center",
+                                                    "fontSize": "0.875rem",
+                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                    "textDecoration": "underline",
+                                                    "textUnderlineOffset": "3px",
+                                                    "cursor": "pointer"
+                                                },
+                                                "text": "$t:superbify.auth.forgot_password_link",
+                                                "actions": [
+                                                    {
+                                                        "type": "click",
+                                                        "handler": "navigate",
+                                                        "params": {
+                                                            "path": "/forgot-password"
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "id": "auth_login_register_link",
+                                                "props": {
+                                                    "href": "/register"
+                                                },
+                                                "style": {
+                                                    "minHeight": "44px",
+                                                    "display": "inline-flex",
+                                                    "alignItems": "center",
+                                                    "fontSize": "0.875rem",
+                                                    "fontWeight": 600,
+                                                    "color": "var(--scm-text-primary, #26221E)",
+                                                    "textDecoration": "underline",
+                                                    "textUnderlineOffset": "3px",
+                                                    "cursor": "pointer"
+                                                },
+                                                "text": "$t:superbify.auth.register_link",
+                                                "actions": [
+                                                    {
+                                                        "type": "click",
+                                                        "handler": "navigate",
+                                                        "params": {
+                                                            "path": "/register"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

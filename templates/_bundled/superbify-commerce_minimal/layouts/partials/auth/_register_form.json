@@ -1,0 +1,690 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "회원가입 폼. BASIC 의 apiCall POST /api/auth/register 체인(setState → apiCall → toast → /login navigate)은 그대로 유지. BASIC 약관 모달(termsContent/privacyContent DS + Modal)은 SRC 에 Modal 이 없어 /shop/terms · /shop/privacy 페이지 링크로 치환했고, mobile/phone/language 선택 필드는 SRC lang 키가 없어 이커머스 최소 가입 플로우에 맞게 생략했다. Checkbox 는 Input type=checkbox 로 치환. 스타일은 scm 토큰 inline.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/auth/_register_form.json"
+    },
+    "type": "basic",
+    "name": "Form",
+    "id": "auth_register_form",
+    "dataKey": "registerForm",
+    "props": {
+        "id": "registerForm"
+    },
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)",
+        "marginTop": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "API 에러 메시지 표시 — 전체 응답 message + form field 외 errors",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_error",
+            "if": "{{_local?.registerError}}",
+            "style": {
+                "padding": "var(--scm-spacing-sm, 0.75rem)",
+                "border": "1px solid rgba(179, 38, 30, 0.35)",
+                "borderRadius": "var(--scm-radius, 8px)",
+                "backgroundColor": "rgba(179, 38, 30, 0.06)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "P",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.registerError}}"
+                },
+                {
+                    "comment": "비-form-field 에러 메시지(identity / verification_token 등)를 추가 나열",
+                    "type": "basic",
+                    "name": "Ul",
+                    "if": "{{_local.errors && Object.keys(_local.errors).filter(function(k) { return ['email','password','password_confirmation','name','nickname','agree_terms','agree_privacy'].indexOf(k) === -1; }).length > 0}}",
+                    "props": {
+                        "role": "list"
+                    },
+                    "style": {
+                        "marginTop": "0.25rem",
+                        "paddingLeft": "1.25rem",
+                        "listStyleType": "disc"
+                    },
+                    "iteration": {
+                        "source": "Object.entries(_local.errors ?? {}).filter(function(entry) { return ['email','password','password_confirmation','name','nickname','agree_terms','agree_privacy'].indexOf(entry[0]) === -1; }).flatMap(function(entry) { return Array.isArray(entry[1]) ? entry[1] : [entry[1]]; })",
+                        "item_var": "message"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Li",
+                            "style": {
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-danger, #B3261E)"
+                            },
+                            "text": "{{message}}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "이메일 필드",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_email_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_register_email"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "$t:superbify.auth.register.email"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "color": "var(--scm-danger, #B3261E)"
+                            },
+                            "text": " *"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_register_email",
+                    "props": {
+                        "type": "email",
+                        "name": "email",
+                        "placeholder": "$t:superbify.auth.register.email_placeholder",
+                        "required": true,
+                        "autocomplete": "email",
+                        "disabled": "{{_local?.isRegistering}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local.errors?.email}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.errors?.email?.[0] ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "비밀번호 필드 — BASIC PasswordInput(showToggle/showValidation) 은 SRC 미등록이라 Input type=password 로 치환",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_password_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_register_password"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "$t:superbify.auth.register.password"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "color": "var(--scm-danger, #B3261E)"
+                            },
+                            "text": " *"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_register_password",
+                    "props": {
+                        "type": "password",
+                        "name": "password",
+                        "placeholder": "$t:superbify.auth.register.password_placeholder|count=8",
+                        "required": true,
+                        "minLength": 8,
+                        "autocomplete": "new-password",
+                        "disabled": "{{_local?.isRegistering}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local.errors?.password}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.errors?.password?.[0] ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "비밀번호 확인 필드",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_password_confirm_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_register_password_confirm"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "$t:superbify.auth.register.password_confirm"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "color": "var(--scm-danger, #B3261E)"
+                            },
+                            "text": " *"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_register_password_confirm",
+                    "props": {
+                        "type": "password",
+                        "name": "password_confirmation",
+                        "placeholder": "$t:superbify.auth.register.password_confirm_placeholder",
+                        "required": true,
+                        "autocomplete": "new-password",
+                        "disabled": "{{_local?.isRegistering}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local.errors?.password_confirmation || (_local.registerForm?.password && _local.registerForm?.password_confirmation && _local.registerForm?.password !== _local.registerForm?.password_confirmation)}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.errors?.password_confirmation?.[0] ?? '$t:superbify.auth.register.error.password_mismatch'}}"
+                }
+            ]
+        },
+        {
+            "comment": "이름 필드 (필수)",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_name_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_register_name"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "$t:superbify.auth.register.name"
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_register_name",
+                    "props": {
+                        "type": "text",
+                        "name": "name",
+                        "placeholder": "$t:superbify.auth.register.name_placeholder",
+                        "required": true,
+                        "autocomplete": "name",
+                        "disabled": "{{_local?.isRegistering}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local.errors?.name}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.errors?.name?.[0] ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "닉네임 필드 (선택)",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_nickname_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_register_nickname"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "$t:superbify.auth.register.nickname"
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_register_nickname",
+                    "props": {
+                        "type": "text",
+                        "name": "nickname",
+                        "placeholder": "$t:superbify.auth.register.nickname_placeholder",
+                        "disabled": "{{_local?.isRegistering}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local.errors?.nickname}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_local.errors?.nickname?.[0] ?? ''}}"
+                }
+            ]
+        },
+        {
+            "id": "register_extension_fields",
+            "comment": "확장 주입 앵커 — 모듈이 layout_extensions 로 가입폼 추가 필드를 주입한다. 미설치 시 빈 슬롯(렌더 영향 없음). BASIC 동일 유지.",
+            "type": "basic",
+            "name": "Div"
+        },
+        {
+            "comment": "약관 동의 — BASIC 약관/개인정보 모달 대신 스토어 정책 페이지 링크(/shop/terms · /shop/privacy)",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_register_agreements",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.25rem",
+                "paddingTop": "var(--scm-spacing-2xs, 0.5rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "id": "auth_register_agree_terms_row",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "alignItems": "center",
+                                "gap": "0.5rem",
+                                "minHeight": "44px"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "id": "auth_register_agree_terms",
+                                    "props": {
+                                        "type": "checkbox",
+                                        "name": "agree_terms",
+                                        "value": "1",
+                                        "required": true,
+                                        "disabled": "{{_local?.isRegistering}}"
+                                    },
+                                    "style": {
+                                        "width": "18px",
+                                        "height": "18px",
+                                        "accentColor": "var(--scm-charcoal, #26221E)",
+                                        "cursor": "pointer"
+                                    }
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "style": {
+                                        "fontSize": "0.875rem",
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "cursor": "pointer"
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "text": "$t:superbify.auth.register.terms_agree"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "A",
+                                    "id": "auth_register_terms_link",
+                                    "props": {
+                                        "href": "/shop/terms",
+                                        "target": "_blank",
+                                        "rel": "noopener"
+                                    },
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-muted, #8A837B)",
+                                        "textDecoration": "underline",
+                                        "textUnderlineOffset": "3px",
+                                        "cursor": "pointer"
+                                    },
+                                    "text": "$t:superbify.auth.register.terms_link"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "if": "{{_local.errors?.agree_terms}}",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "color": "var(--scm-danger, #B3261E)",
+                                "paddingLeft": "1.625rem"
+                            },
+                            "text": "{{_local.errors?.agree_terms?.[0] ?? ''}}"
+                        }
+                    ]
+                },
+                {
+                    "id": "register_privacy_agreement",
+                    "type": "basic",
+                    "name": "Div",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "alignItems": "center",
+                                "gap": "0.5rem",
+                                "minHeight": "44px"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "id": "auth_register_agree_privacy",
+                                    "props": {
+                                        "type": "checkbox",
+                                        "name": "agree_privacy",
+                                        "value": "1",
+                                        "required": true,
+                                        "disabled": "{{_local?.isRegistering}}"
+                                    },
+                                    "style": {
+                                        "width": "18px",
+                                        "height": "18px",
+                                        "accentColor": "var(--scm-charcoal, #26221E)",
+                                        "cursor": "pointer"
+                                    }
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "style": {
+                                        "fontSize": "0.875rem",
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "cursor": "pointer"
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "text": "$t:superbify.auth.register.privacy_agree"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "A",
+                                    "id": "auth_register_privacy_link",
+                                    "props": {
+                                        "href": "/shop/privacy",
+                                        "target": "_blank",
+                                        "rel": "noopener"
+                                    },
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-muted, #8A837B)",
+                                        "textDecoration": "underline",
+                                        "textUnderlineOffset": "3px",
+                                        "cursor": "pointer"
+                                    },
+                                    "text": "$t:superbify.auth.register.privacy_link"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "if": "{{_local.errors?.agree_privacy}}",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "color": "var(--scm-danger, #B3261E)",
+                                "paddingLeft": "1.625rem"
+                            },
+                            "text": "{{_local.errors?.agree_privacy?.[0] ?? ''}}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "제출 버튼 — BASIC animate-spin 스피너는 template CSS 에 @keyframes 가 없어 텍스트 전환으로 대체",
+            "type": "basic",
+            "name": "Button",
+            "id": "auth_register_submit",
+            "props": {
+                "type": "submit",
+                "disabled": "{{_local?.isRegistering}}"
+            },
+            "style": {
+                "minHeight": "44px",
+                "padding": "0.75rem 1rem",
+                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                "color": "var(--scm-text-inverse, #FAF8F3)",
+                "border": "1px solid var(--scm-charcoal, #26221E)",
+                "borderRadius": "var(--scm-radius, 8px)",
+                "fontWeight": 600,
+                "cursor": "pointer",
+                "fontFamily": "var(--scm-font-body, system-ui)",
+                "fontSize": "0.9375rem",
+                "marginTop": "var(--scm-spacing-sm, 0.75rem)",
+                "display": "inline-flex",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "gap": "0.5rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{!_local?.isRegistering}}",
+                    "text": "$t:superbify.auth.register.submit"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_local?.isRegistering}}",
+                    "text": "$t:superbify.auth.register.processing"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "comment": "BASIC 등록 체인 유지 — 응답에 token 이 있으면 AuthManager 가 자동 로그인 처리한다",
+            "type": "submit",
+            "handler": "sequence",
+            "actions": [
+                {
+                    "handler": "setState",
+                    "params": {
+                        "target": "local",
+                        "isRegistering": true,
+                        "registerError": null,
+                        "errors": null
+                    }
+                },
+                {
+                    "handler": "apiCall",
+                    "target": "/api/auth/register",
+                    "params": {
+                        "method": "POST",
+                        "body": "{{Object.assign({}, _local.registerForm, query.verification_token ? { verification_token: query.verification_token } : {})}}"
+                    },
+                    "onSuccess": [
+                        {
+                            "handler": "toast",
+                            "params": {
+                                "type": "success",
+                                "message": "$t:superbify.auth.register_success"
+                            }
+                        },
+                        {
+                            "comment": "로그인 화면으로 안내 — BASIC 과 동일(레이아웃 apiCall 은 토큰을 저장하지 않으므로 회원가입 후 명시적으로 로그인한다)",
+                            "handler": "navigate",
+                            "params": {
+                                "path": "/login"
+                            }
+                        }
+                    ],
+                    "onError": [
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "isRegistering": false,
+                                "errors": "{{error.response?.errors ?? error.errors}}",
+                                "registerError": "{{error.response?.message ?? error.message}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,284 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "로그인 폼(이메일/비밀번호). BASIC 의 login handler 체인(setState isLoginAction → handler login target user → onSuccess setCurrentUser + toast + navigate, onError loginError)을 그대로 유지하고 v0.2.0 에서 게스트 장바구니 병합 후 헤더 카운트를 갱신하도록 refetchDataSource cart_count 를 추가했다. PasswordInput 은 SRC 에 미등록 컴포넌트라 Input type=password 로 치환했고 스타일은 scm 토큰 inline 이다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/auth/_login_form.json"
+    },
+    "type": "basic",
+    "name": "Form",
+    "id": "auth_login_form",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)",
+        "marginTop": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "API 에러 메시지 표시",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_login_error",
+            "if": "{{_global.loginError}}",
+            "style": {
+                "padding": "var(--scm-spacing-sm, 0.75rem)",
+                "border": "1px solid rgba(179, 38, 30, 0.35)",
+                "borderRadius": "var(--scm-radius, 8px)",
+                "backgroundColor": "rgba(179, 38, 30, 0.06)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "P",
+                    "style": {
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{_global.loginError}}"
+                }
+            ]
+        },
+        {
+            "comment": "이메일 입력 필드",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_login_email_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_login_email"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "$t:superbify.auth.login_form.email"
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_login_email",
+                    "props": {
+                        "type": "email",
+                        "name": "email",
+                        "placeholder": "$t:superbify.auth.login_form.email_placeholder",
+                        "required": true,
+                        "autocomplete": "email",
+                        "disabled": "{{_global.isLoggingIn}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "comment": "이메일 필드 에러 메시지",
+                    "type": "basic",
+                    "name": "P",
+                    "if": "{{_global.loginErrors?.email}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{Array.isArray(_global.loginErrors?.email) ? _global.loginErrors.email[0] : _global.loginErrors?.email}}"
+                }
+            ]
+        },
+        {
+            "comment": "비밀번호 입력 필드 — BASIC PasswordInput(showToggle) 은 SRC 미등록이라 Input type=password 로 치환",
+            "type": "basic",
+            "name": "Div",
+            "id": "auth_login_password_field",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "0.375rem"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Label",
+                    "props": {
+                        "htmlFor": "auth_login_password"
+                    },
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "$t:superbify.auth.login_form.password"
+                },
+                {
+                    "type": "basic",
+                    "name": "Input",
+                    "id": "auth_login_password",
+                    "props": {
+                        "type": "password",
+                        "name": "password",
+                        "placeholder": "$t:superbify.auth.login_form.password_placeholder",
+                        "required": true,
+                        "autocomplete": "current-password",
+                        "disabled": "{{_global.isLoggingIn}}"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0.625rem 0.75rem",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius, 8px)",
+                        "backgroundColor": "#FFFFFF",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontSize": "0.9375rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "P",
+                    "if": "{{_global.loginErrors?.password}}",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-danger, #B3261E)"
+                    },
+                    "text": "{{Array.isArray(_global.loginErrors?.password) ? _global.loginErrors.password[0] : _global.loginErrors?.password}}"
+                }
+            ]
+        },
+        {
+            "comment": "제출 버튼 — charcoal fill primary CTA",
+            "type": "basic",
+            "name": "Button",
+            "id": "auth_login_submit",
+            "props": {
+                "type": "submit",
+                "disabled": "{{_global.isLoggingIn}}"
+            },
+            "style": {
+                "minHeight": "44px",
+                "padding": "0.75rem 1rem",
+                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                "color": "var(--scm-text-inverse, #FAF8F3)",
+                "border": "1px solid var(--scm-charcoal, #26221E)",
+                "borderRadius": "var(--scm-radius, 8px)",
+                "fontWeight": 600,
+                "cursor": "pointer",
+                "fontFamily": "var(--scm-font-body, system-ui)",
+                "fontSize": "0.9375rem",
+                "marginTop": "var(--scm-spacing-sm, 0.75rem)",
+                "display": "inline-flex",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "gap": "0.5rem"
+            },
+            "children": [
+                {
+                    "comment": "BASIC 의 animate-spin 스피너는 layout inline 스타일로 표현할 @keyframes 가 template CSS 에 없어 텍스트 전환으로 대체 (submit → processing)",
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{!_global.isLoggingIn}}",
+                    "text": "$t:superbify.auth.login_form.submit"
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{_global.isLoggingIn}}",
+                    "text": "$t:superbify.auth.login_form.processing"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "comment": "BASIC 로그인 체인 유지 — 로그인 직후 게스트 장바구니가 회원 장바구니로 병합(MergeCartOnLogin, X-Cart-Key)되므로 onSuccess 에서 cart_count 를 다시 fetch 해 헤더 뱃지를 갱신한다 (v0.2.0).",
+            "type": "submit",
+            "handler": "sequence",
+            "actions": [
+                {
+                    "handler": "setState",
+                    "params": {
+                        "target": "local",
+                        "isLoginAction": true
+                    }
+                },
+                {
+                    "handler": "setState",
+                    "params": {
+                        "target": "global",
+                        "isLoggingIn": true,
+                        "loginError": null,
+                        "loginErrors": null
+                    }
+                },
+                {
+                    "handler": "login",
+                    "target": "user",
+                    "params": {
+                        "body": {
+                            "email": "{{form.email}}",
+                            "password": "{{form.password}}"
+                        }
+                    },
+                    "onSuccess": [
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "global",
+                                "currentUser": "{{response.user}}"
+                            }
+                        },
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "global",
+                                "isLoggingIn": false
+                            }
+                        },
+                        {
+                            "handler": "refetchDataSource",
+                            "params": {
+                                "dataSourceId": "cart_count"
+                            }
+                        },
+                        {
+                            "handler": "toast",
+                            "params": {
+                                "type": "success",
+                                "message": "$t:superbify.auth.login_success"
+                            }
+                        },
+                        {
+                            "handler": "navigate",
+                            "params": {
+                                "path": "{{query.redirect ?? '/'}}"
+                            }
+                        }
+                    ],
+                    "onError": [
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "global",
+                                "isLoggingIn": false,
+                                "loginError": "{{error.message ?? '$t:superbify.auth.login_form.error.invalid'}}",
+                                "loginErrors": "{{error.errors}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

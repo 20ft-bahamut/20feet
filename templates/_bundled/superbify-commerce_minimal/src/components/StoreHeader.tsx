@@ -1,5 +1,5 @@
 import React from 'react';
-import { A, Div, Header, Img, Li, Nav, Span, Ul } from './basic';
+import { A, Button, Div, Header, Img, Li, Nav, Span, Ul } from './basic';
 import { brandAssets, brandLogoInk } from './demoAssets';
 
 export interface StoreHeaderProps {
@@ -7,6 +7,12 @@ export interface StoreHeaderProps {
     tagline?: string;
     /** Cart count for the cart badge; undefined hides the badge. */
     cartCount?: number;
+    /** Logged-in user display name (nick_name ?? name ?? email). Empty/null/missing => logged out. */
+    user?: string | null;
+    loginLabel?: string;
+    signupLabel?: string;
+    mypageLabel?: string;
+    logoutLabel?: string;
     className?: string;
 }
 
@@ -98,12 +104,57 @@ function SrOnly({ children }: { children: React.ReactNode }): React.ReactElement
     );
 }
 
+/**
+ * Logout — the component never calls the auth API directly. It forwards the
+ * whole flow to the engine ActionDispatcher as a sequence:
+ *   1. logout (AuthManager clears the session)
+ *   2. refetchDataSource cart_count (guest cart after member-cart merge reset)
+ *   3. navigate to /
+ * Optional chaining keeps this a no-op when G7Core is not mounted (tests, SSR).
+ */
+function dispatchLogoutSequence(): void {
+    (window as any).G7Core?.getActionDispatcher?.()?.dispatchAction?.({
+        handler: 'sequence',
+        actions: [
+            { handler: 'logout', target: 'user' },
+            { handler: 'refetchDataSource', params: { dataSourceId: 'cart_count' } },
+            { handler: 'navigate', params: { path: '/' } },
+        ],
+    });
+}
+
+/** Shared nav typography — matches the primary nav links (scm-header-nav-link). */
+const NAV_LINK_STYLE: React.CSSProperties = {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    minHeight: 'var(--scm-touch-min, 44px)',
+    padding: '0 var(--scm-spacing-xs, 0.5rem)',
+    borderRadius: 'var(--scm-radius-sm, 4px)',
+    textDecoration: 'none',
+    color: 'var(--scm-text-body, #4A4643)',
+    fontFamily: 'var(--scm-font-body, system-ui)',
+    fontSize: 'var(--scm-header-nav-size, 0.9375rem)',
+    fontWeight: 500,
+    letterSpacing: '0.005em',
+    whiteSpace: 'nowrap',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+};
+
 export function StoreHeader({
     brandName = 'Still Form',
     tagline,
     cartCount,
+    user,
+    loginLabel = 'Login',
+    signupLabel = 'Sign up',
+    mypageLabel = 'My page',
+    logoutLabel = 'Logout',
     className,
 }: StoreHeaderProps): React.ReactElement {
+    const isLoggedIn = typeof user === 'string' && user.trim().length > 0;
     return (
         <Header
             className={className}
@@ -167,21 +218,7 @@ export function StoreHeader({
                                         href={it.href}
                                         aria-label={isCart && cartCount ? `Cart, ${cartCount} items` : undefined}
                                         className="scm-header-nav-link"
-                                        style={{
-                                            position: 'relative',
-                                            display: 'inline-flex',
-                                            alignItems: 'center',
-                                            minHeight: 'var(--scm-touch-min, 44px)',
-                                            padding: '0 var(--scm-spacing-xs, 0.5rem)',
-                                            borderRadius: 'var(--scm-radius-sm, 4px)',
-                                            textDecoration: 'none',
-                                            color: 'var(--scm-text-body, #4A4643)',
-                                            fontFamily: 'var(--scm-font-body, system-ui)',
-                                            fontSize: 'var(--scm-header-nav-size, 0.9375rem)',
-                                            fontWeight: 500,
-                                            letterSpacing: '0.005em',
-                                            whiteSpace: 'nowrap',
-                                        }}
+                                        style={NAV_LINK_STYLE}
                                         data-testid={isCart ? 'nav-cart' : `nav-${it.key}`}
                                     >
                                         {it.key === 'shop' ? 'Shop' : it.key === 'story' ? 'Story' : it.key === 'notice' ? 'Notice' : 'Cart'}
@@ -215,6 +252,78 @@ export function StoreHeader({
                                 </Li>
                             );
                         })}
+                        {isLoggedIn ? (
+                            <>
+                                <Li>
+                                    <A
+                                        href="/mypage"
+                                        className="scm-header-nav-link"
+                                        style={NAV_LINK_STYLE}
+                                        data-testid="nav-mypage"
+                                    >
+                                        {mypageLabel}
+                                    </A>
+                                </Li>
+                                <Li>
+                                    <Span
+                                        className="scm-header-nav-user"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            minHeight: 'var(--scm-touch-min, 44px)',
+                                            padding: '0 var(--scm-spacing-2xs, 0.25rem)',
+                                            fontFamily: 'var(--scm-font-body, system-ui)',
+                                            fontSize: 'var(--scm-header-nav-size, 0.9375rem)',
+                                            fontWeight: 500,
+                                            letterSpacing: '0.005em',
+                                            color: 'var(--scm-text-muted, #7A736B)',
+                                            whiteSpace: 'nowrap',
+                                            maxWidth: '10rem',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                        data-testid="nav-user-name"
+                                    >
+                                        {user}
+                                    </Span>
+                                </Li>
+                                <Li>
+                                    <Button
+                                        type="button"
+                                        onClick={dispatchLogoutSequence}
+                                        aria-label={logoutLabel}
+                                        className="scm-header-nav-link"
+                                        style={NAV_LINK_STYLE}
+                                        data-testid="nav-logout"
+                                    >
+                                        {logoutLabel}
+                                    </Button>
+                                </Li>
+                            </>
+                        ) : (
+                            <>
+                                <Li>
+                                    <A
+                                        href="/login"
+                                        className="scm-header-nav-link"
+                                        style={NAV_LINK_STYLE}
+                                        data-testid="nav-login"
+                                    >
+                                        {loginLabel}
+                                    </A>
+                                </Li>
+                                <Li>
+                                    <A
+                                        href="/register"
+                                        className="scm-header-nav-link"
+                                        style={NAV_LINK_STYLE}
+                                        data-testid="nav-signup"
+                                    >
+                                        {signupLabel}
+                                    </A>
+                                </Li>
+                            </>
+                        )}
                     </Ul>
                 </Nav>
             </Div>

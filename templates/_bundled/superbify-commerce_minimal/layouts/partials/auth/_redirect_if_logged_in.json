@@ -1,0 +1,35 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "로그인 상태로 auth 페이지 진입 시 홈으로 되돌린다. guest_only 는 엔진이 강제하지 않으므로 각 auth 레이아웃이 이 partial 을 content 첫 자식으로 넣는다. _local.isLoginAction 플래그는 로그인 submit 직후 currentUser 가 세팅되는 순간 리다이렉트 루프(토스트 중복 발화)를 막기 위한 것으로 BASIC 과 동일하다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/auth/_redirect_if_logged_in.json"
+    },
+    "comment": "로그인 상태일 때 홈으로 리다이렉트",
+    "type": "basic",
+    "name": "Div",
+    "id": "auth_redirect_if_logged_in",
+    "if": "{{_global?.currentUser?.uuid && !_local.isLoginAction}}",
+    "children": [
+        {
+            "type": "basic",
+            "name": "Div",
+            "lifecycle": {
+                "onMount": [
+                    {
+                        "handler": "toast",
+                        "params": {
+                            "message": "$t:superbify.auth.already_logged_in",
+                            "type": "info"
+                        }
+                    },
+                    {
+                        "handler": "navigate",
+                        "params": {
+                            "path": "/"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

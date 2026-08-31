@@ -1,0 +1,328 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 배송지 목록 — BASIC _list.json 포크. 추가/수정은 _local.editingAddress 를 세팅해 인라인 폼 패널(_modal_address.json)을 열고, 삭제는 _local.confirmDeleteId 세팅 후 ConfirmDialog 가 처리하며, 기본 배송지는 PATCH user/addresses/{id}/default 로 즉시 반영한다(BASIC에 없던 set_default 액션은 verified endpoint 추가분). Icon/Tailwind 를 scm 토큰 inline 스타일로 치환.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/addresses/_list.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "헤더 — 추가 버튼 (BASIC setState editingAddress → openModal 체인을 setState editingAddress 로 치환)",
+            "type": "basic",
+            "name": "Div",
+            "style": { "display": "flex", "justifyContent": "flex-end" },
+            "children": [
+                {
+                    "id": "addresses_add_button",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button", "data-testid": "address-add" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-md, 1rem)",
+                        "backgroundColor": "var(--scm-charcoal, #26221E)",
+                        "color": "var(--scm-text-inverse, #FAF8F3)",
+                        "border": "1px solid var(--scm-charcoal, #26221E)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": "600",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.addresses.add",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "editingAddress": { "is_default": false },
+                                        "addressErrors": null
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "배송지 카드 목록",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(addresses?.data?.addresses?.data ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": { "source": "{{addresses?.data?.addresses?.data ?? []}}", "item_var": "address", "index_var": "addressIdx" },
+                    "props": {
+                        "className": "scm-panel",
+                        "data-testid": "address-card"
+                    },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-2xs, 0.25rem)"
+                    },
+                    "children": [
+                        {
+                            "comment": "카드 헤더 — 라벨 + 기본배송지 뱃지 + 수정/삭제",
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "flexWrap": "wrap",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "style": {
+                                        "display": "flex",
+                                        "alignItems": "center",
+                                        "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                                        "flexWrap": "wrap"
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "style": {
+                                                "fontSize": "0.9375rem",
+                                                "fontWeight": "600",
+                                                "color": "var(--scm-text-primary, #26221E)"
+                                            },
+                                            "text": "{{address.name ?? '-'}}"
+                                        },
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "if": "{{address.is_default}}",
+                                            "style": {
+                                                "display": "inline-flex",
+                                                "padding": "0 var(--scm-spacing-2xs, 0.25rem)",
+                                                "minHeight": "20px",
+                                                "alignItems": "center",
+                                                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                                "color": "var(--scm-text-inverse, #FAF8F3)",
+                                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                                "fontSize": "0.6875rem",
+                                                "fontWeight": "600"
+                                            },
+                                            "text": "$t:superbify.mypage.addresses.default"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "style": {
+                                        "display": "flex",
+                                        "alignItems": "center",
+                                        "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                                        "flexWrap": "wrap"
+                                    },
+                                    "children": [
+                                        {
+                                            "comment": "기본 배송지로 설정 — PATCH user/addresses/{id}/default (verified endpoint)",
+                                            "type": "basic",
+                                            "name": "Button",
+                                            "if": "{{!address.is_default}}",
+                                            "props": { "type": "button" },
+                                            "style": {
+                                                "minHeight": "36px",
+                                                "padding": "0 var(--scm-spacing-xs, 0.5rem)",
+                                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                                "color": "var(--scm-text-primary, #26221E)",
+                                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                                "fontSize": "0.8125rem",
+                                                "fontWeight": "500",
+                                                "cursor": "pointer"
+                                            },
+                                            "text": "$t:superbify.mypage.addresses.set_default",
+                                            "actions": [
+                                                {
+                                                    "type": "click",
+                                                    "handler": "apiCall",
+                                                    "auth_required": true,
+                                                    "target": "/api/modules/sirsoft-ecommerce/user/addresses/{{address.id}}/default",
+                                                    "params": { "method": "PATCH" },
+                                                    "onSuccess": [
+                                                        { "handler": "refetchDataSource", "params": { "dataSourceId": "addresses" } },
+                                                        {
+                                                            "handler": "toast",
+                                                            "params": { "type": "success", "message": "$t:superbify.mypage.addresses.default_saved" }
+                                                        }
+                                                    ],
+                                                    "onError": [
+                                                        {
+                                                            "handler": "toast",
+                                                            "params": { "type": "error", "message": "{{error.message}}" }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "comment": "수정 — BASIC setState editingAddress(국내/해외 필드 매핑 포함) 후 인라인 패널 오픈",
+                                            "type": "basic",
+                                            "name": "Button",
+                                            "if": "{{address.abilities?.can_update === true}}",
+                                            "props": { "type": "button" },
+                                            "style": {
+                                                "minHeight": "36px",
+                                                "padding": "0 var(--scm-spacing-xs, 0.5rem)",
+                                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                                "color": "var(--scm-text-primary, #26221E)",
+                                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                                "fontSize": "0.8125rem",
+                                                "fontWeight": "500",
+                                                "cursor": "pointer"
+                                            },
+                                            "text": "$t:superbify.mypage.addresses.edit",
+                                            "actions": [
+                                                {
+                                                    "type": "click",
+                                                    "handler": "sequence",
+                                                    "actions": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "addressErrors": null,
+                                                                "editingAddress": {
+                                                                    "id": "{{address.id}}",
+                                                                    "name": "{{address.name ?? ''}}",
+                                                                    "recipient_name": "{{address.recipient_name ?? ''}}",
+                                                                    "recipient_phone": "{{address.recipient_phone ?? ''}}",
+                                                                    "country_code": "{{address.country_code ?? 'KR'}}",
+                                                                    "zipcode": "{{address.zipcode ?? ''}}",
+                                                                    "address": "{{address.address ?? ''}}",
+                                                                    "address_detail": "{{address.address_detail ?? ''}}",
+                                                                    "city": "{{address.city ?? ''}}",
+                                                                    "address_line_1": "{{address.address_line_1 ?? ''}}",
+                                                                    "address_line_2": "{{address.address_line_2 ?? ''}}",
+                                                                    "intl_city": "{{address.city ?? ''}}",
+                                                                    "intl_state": "{{address.state ?? ''}}",
+                                                                    "intl_postal_code": "{{address.postal_code ?? ''}}",
+                                                                    "is_default": "{{address.is_default ?? false}}"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "comment": "삭제 — BASIC setState deletingAddressId → openModal 체인을 confirmDeleteId 로 치환",
+                                            "type": "basic",
+                                            "name": "Button",
+                                            "if": "{{address.abilities?.can_delete === true}}",
+                                            "props": { "type": "button" },
+                                            "style": {
+                                                "minHeight": "36px",
+                                                "padding": "0 var(--scm-spacing-xs, 0.5rem)",
+                                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                                "color": "var(--scm-danger, #B3261E)",
+                                                "border": "1px solid var(--scm-danger, #B3261E)",
+                                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                                "fontSize": "0.8125rem",
+                                                "fontWeight": "500",
+                                                "cursor": "pointer"
+                                            },
+                                            "text": "$t:superbify.mypage.delete",
+                                            "actions": [
+                                                {
+                                                    "type": "click",
+                                                    "handler": "sequence",
+                                                    "actions": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "confirmDeleteId": "{{address.id}}",
+                                                                "isDeleting": false
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "P",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-text-body, #4A4643)"
+                            },
+                            "text": "{{address.recipient_name}} | {{address.recipient_phone}}"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "P",
+                            "if": "{{(address.country_code ?? 'KR') === 'KR'}}",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "wordBreak": "break-word"
+                            },
+                            "text": "[{{address.zipcode}}] {{address.address}} {{address.address_detail}}"
+                        },
+                        {
+                            "comment": "해외 주소 — 서버 조립 full_address (BASIC 규칙 유지)",
+                            "type": "basic",
+                            "name": "P",
+                            "if": "{{(address.country_code ?? 'KR') !== 'KR'}}",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "wordBreak": "break-word"
+                            },
+                            "text": "{{address.full_address ?? ''}}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "빈 상태 — SRC EmptyState 컴포지트",
+            "type": "composite",
+            "name": "EmptyState",
+            "if": "{{!(addresses?.data?.addresses?.data ?? []).length}}",
+            "props": {
+                "title": "$t:superbify.mypage.addresses.title",
+                "message": "$t:superbify.mypage.addresses.empty"
+            }
+        }
+    ]
+}

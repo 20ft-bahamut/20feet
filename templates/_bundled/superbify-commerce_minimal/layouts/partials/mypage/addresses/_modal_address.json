@@ -1,0 +1,567 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "배송지 추가/수정 폼 — BASIC _modal_address.json 포크. Modal 컴포지트를 _local.editingAddress 로 게이트되는 인라인 scm 패널로 치환했다(openModal/closeModal → setState editingAddress). daum extension_point 는 props.onAddressSelect($event.* → setState editingAddress.*) + targetFields 를 함께 유지하고, zipcode/address 는 readOnly(BASIC setFieldReadOnly onMount 규칙 = extension 쪽 readOnlyFields). 국가 Select 컴포지트는 SRC 미등록이라 제거하고 country_code 는 편집 대상 배송지 값으로만 분기(BASIC 국내/해외 필드 스위치 유지). 저장 체인(POST/PUT user/addresses + 409 → overwrite 확인 + refetch) 은 그대로.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/addresses/_modal_address.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "if": "{{_local.editingAddress != null}}",
+    "props": { "className": "scm-panel" },
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)",
+        "borderColor": "var(--scm-charcoal, #26221E)"
+    },
+    "children": [
+        {
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": "0"
+            },
+            "text": "{{_local.editingAddress?.id ? '$t:superbify.mypage.addresses.edit' : '$t:superbify.mypage.addresses.add'}}"
+        },
+        {
+            "comment": "BASIC dataKey _global.editingAddress → _local.editingAddress",
+            "type": "basic",
+            "name": "Form",
+            "dataKey": "_local.editingAddress",
+            "props": { "id": "addressEditForm" },
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-md, 1rem)"
+            },
+            "children": [
+                {
+                    "comment": "배송지명",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": { "fontSize": "0.8125rem", "fontWeight": "500", "color": "var(--scm-text-muted, #8A837B)" },
+                            "text": "$t:superbify.mypage.addresses.name"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "name",
+                                "value": "{{_local.editingAddress?.name ?? ''}}",
+                                "required": true
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "{{_local.addressErrors?.name ? '1px solid var(--scm-danger, #B3261E)' : 'var(--scm-hairline, 1px solid #E4DCCE)'}}",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "if": "{{_local.addressErrors?.name}}",
+                            "style": { "fontSize": "0.75rem", "color": "var(--scm-danger, #B3261E)" },
+                            "text": "{{_local.addressErrors?.name?.[0] ?? ''}}"
+                        }
+                    ]
+                },
+                {
+                    "comment": "받는 분 + 연락처",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "display": "grid",
+                        "gridTemplateColumns": "repeat(auto-fit, minmax(220px, 1fr))",
+                        "gap": "var(--scm-spacing-sm, 0.75rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "style": { "fontSize": "0.8125rem", "fontWeight": "500", "color": "var(--scm-text-muted, #8A837B)" },
+                                    "text": "$t:superbify.mypage.addresses.recipient"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                        "type": "text",
+                                        "name": "recipient_name",
+                                        "value": "{{_local.editingAddress?.recipient_name ?? ''}}",
+                                        "required": true
+                                    },
+                                    "style": {
+                                        "width": "100%",
+                                        "minHeight": "44px",
+                                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                                        "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem"
+                                    }
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{_local.addressErrors?.recipient_name}}",
+                                    "style": { "fontSize": "0.75rem", "color": "var(--scm-danger, #B3261E)" },
+                                    "text": "{{_local.addressErrors?.recipient_name?.[0] ?? ''}}"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "style": { "fontSize": "0.8125rem", "fontWeight": "500", "color": "var(--scm-text-muted, #8A837B)" },
+                                    "text": "$t:superbify.mypage.addresses.phone"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                        "type": "tel",
+                                        "name": "recipient_phone",
+                                        "value": "{{_local.editingAddress?.recipient_phone ?? ''}}",
+                                        "required": true
+                                    },
+                                    "style": {
+                                        "width": "100%",
+                                        "minHeight": "44px",
+                                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                                        "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem"
+                                    }
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{_local.addressErrors?.recipient_phone}}",
+                                    "style": { "fontSize": "0.75rem", "color": "var(--scm-danger, #B3261E)" },
+                                    "text": "{{_local.addressErrors?.recipient_phone?.[0] ?? ''}}"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "comment": "국내 주소 — 우편번호(readOnly + daum 검색) + 기본 주소(readOnly)",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{(_local.editingAddress?.country_code ?? 'KR') === 'KR'}}",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": { "fontSize": "0.8125rem", "fontWeight": "500", "color": "var(--scm-text-muted, #8A837B)" },
+                            "text": "$t:superbify.mypage.addresses.address"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                                "alignItems": "center"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                        "type": "text",
+                                        "name": "zipcode",
+                                        "value": "{{_local.editingAddress?.zipcode ?? ''}}",
+                                        "readOnly": true
+                                    },
+                                    "style": {
+                                        "width": "8rem",
+                                        "flex": "0 0 auto",
+                                        "minHeight": "44px",
+                                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                        "color": "var(--scm-text-body, #4A4643)",
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem"
+                                    }
+                                },
+                                {
+                                    "comment": "sirsoft-daum_postcode 확장 — onAddressSelect($event.*) 는 editingAddress.zipcode/address/region/city 에 기입하고, 미지원 엔진용 targetFields 도 함께 전달한다. readOnly 필드는 extension 이 onMount setFieldReadOnly 로 잠근다.",
+                                    "id": "modal_address_search_slot",
+                                    "type": "extension_point",
+                                    "name": "address_search_slot",
+                                    "props": {
+                                        "readOnlyFields": ["zipcode", "address"],
+                                        "targetFields": {
+                                            "zipcode": "_local.editingAddress.zipcode",
+                                            "address": "_local.editingAddress.address",
+                                            "region": "_local.editingAddress.region",
+                                            "city": "_local.editingAddress.city"
+                                        },
+                                        "onAddressSelect": {
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "local",
+                                                "editingAddress.zipcode": "{{$event.zipcode}}",
+                                                "editingAddress.address": "{{$event.address}}",
+                                                "editingAddress.region": "{{$event.region}}",
+                                                "editingAddress.city": "{{$event.city}}"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "address",
+                                "value": "{{_local.editingAddress?.address ?? ''}}",
+                                "readOnly": true
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "address_detail",
+                                "value": "{{_local.editingAddress?.address_detail ?? ''}}",
+                                "placeholder": "$t:superbify.mypage.addresses.address_detail"
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "if": "{{_local.addressErrors?.zipcode || _local.addressErrors?.address}}",
+                            "style": { "fontSize": "0.75rem", "color": "var(--scm-danger, #B3261E)" },
+                            "text": "{{_local.addressErrors?.zipcode?.[0] ?? _local.addressErrors?.address?.[0] ?? ''}}"
+                        }
+                    ]
+                },
+                {
+                    "comment": "해외 주소 — KR 외 country_code 로 편집 진입 시(BASIC address_line_1/2 + intl_* 필드 매핑 유지, 국가 Select 컴포지트는 SRC 미등록이라 제외)",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{(_local.editingAddress?.country_code ?? 'KR') !== 'KR'}}",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": { "type": "text", "name": "address_line_1", "value": "{{_local.editingAddress?.address_line_1 ?? ''}}" },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": { "type": "text", "name": "address_line_2", "value": "{{_local.editingAddress?.address_line_2 ?? ''}}" },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": { "type": "text", "name": "intl_city", "value": "{{_local.editingAddress?.intl_city ?? ''}}" },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": { "type": "text", "name": "intl_state", "value": "{{_local.editingAddress?.intl_state ?? ''}}" },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": { "type": "text", "name": "intl_postal_code", "value": "{{_local.editingAddress?.intl_postal_code ?? ''}}" },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "comment": "기본 배송지로 설정 — Checkbox → Input type checkbox 치환",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "var(--scm-spacing-2xs, 0.25rem)"
+                    },
+                    "children": [
+                        {
+                            "id": "address_is_default",
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "checkbox",
+                                "name": "is_default",
+                                "checked": "{{_local.editingAddress?.is_default === true}}",
+                                "aria-label": "$t:superbify.mypage.addresses.set_default"
+                            },
+                            "style": {
+                                "width": "20px",
+                                "height": "20px",
+                                "minHeight": "20px",
+                                "padding": "0",
+                                "accentColor": "var(--scm-charcoal, #26221E)",
+                                "cursor": "pointer"
+                            },
+                            "actions": [
+                                {
+                                    "type": "change",
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "editingAddress.is_default": "{{$event.target.checked}}"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "props": { "for": "address_is_default" },
+                            "style": {
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "cursor": "pointer",
+                                "minHeight": "44px",
+                                "display": "inline-flex",
+                                "alignItems": "center"
+                            },
+                            "text": "$t:superbify.mypage.addresses.set_default"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "저장/취소 — BASIC 저장 시퀀스 setState → apiCall(POST|PUT user/addresses) → 409 overwrite → refetch/toast 유지, closeModal 대신 editingAddress 클리어",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "justifyContent": "flex-end",
+                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                "flexWrap": "wrap",
+                "paddingTop": "var(--scm-spacing-xs, 0.5rem)",
+                "borderTop": "var(--scm-hairline, 1px solid #E4DCCE)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-md, 1rem)",
+                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": "600",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.cancel",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "setState",
+                            "params": { "target": "local", "editingAddress": null, "addressErrors": null }
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                        "type": "button",
+                        "disabled": "{{_local.isSaving ?? false}}",
+                        "data-testid": "address-save"
+                    },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-md, 1rem)",
+                        "backgroundColor": "var(--scm-charcoal, #26221E)",
+                        "color": "var(--scm-text-inverse, #FAF8F3)",
+                        "border": "1px solid var(--scm-charcoal, #26221E)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": "600",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.addresses.save",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "isSaving": true, "addressErrors": null }
+                                },
+                                {
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "{{_local.editingAddress?.id ? '/api/modules/sirsoft-ecommerce/user/addresses/' + _local.editingAddress.id : '/api/modules/sirsoft-ecommerce/user/addresses'}}",
+                                    "params": {
+                                        "method": "{{_local.editingAddress?.id ? 'PUT' : 'POST'}}",
+                                        "body": "{{_local.editingAddress}}"
+                                    },
+                                    "onSuccess": [
+                                        { "handler": "refetchDataSource", "params": { "dataSourceId": "addresses" } },
+                                        {
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "local",
+                                                "isSaving": false,
+                                                "addressErrors": null,
+                                                "editingAddress": null
+                                            }
+                                        },
+                                        {
+                                            "handler": "toast",
+                                            "params": { "type": "success", "message": "$t:superbify.mypage.addresses.saved" }
+                                        }
+                                    ],
+                                    "onError": [
+                                        {
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "local",
+                                                "isSaving": false,
+                                                "addressErrors": "{{error.errors ?? {}}}"
+                                            }
+                                        },
+                                        {
+                                            "comment": "409 = 배송지명 중복 → 덮어쓰기 확인(SRC ConfirmDialog)",
+                                            "if": "{{error.status === 409}}",
+                                            "handler": "setState",
+                                            "params": { "target": "local", "confirmOverwrite": true }
+                                        },
+                                        {
+                                            "if": "{{error.status !== 409}}",
+                                            "handler": "toast",
+                                            "params": { "type": "error", "message": "{{error.message}}" }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

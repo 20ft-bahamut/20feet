@@ -1,0 +1,430 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 프로필 수정 폼 — BASIC ProfileEditForm 포크. PUT /api/me 후 onSuccess 체인(refetchDataSource user + current_user → toast → navigate /mypage/profile)은 그대로 유지. Icon/AvatarUploader/언어·시간대 Select/서명·자기소개/통화·배송국가 카드는 SRC 범위에서 제외하고 daum extension_point(address_search_slot → targetFields profileEditForm.*)만 유지한다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/profile/_edit.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "if": "{{_local?.isPasswordVerified}}",
+    "props": { "className": "scm-panel" },
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "type": "basic",
+            "name": "H2",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.125rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": "0"
+            },
+            "text": "$t:superbify.mypage.profile.edit_title"
+        },
+        {
+            "comment": "전체 에러 메시지 (BASIC profileErrors 박스 축약판)",
+            "type": "basic",
+            "name": "P",
+            "if": "{{_local.profileErrors && Object.keys(_local.profileErrors).length > 0}}",
+            "style": {
+                "margin": "0",
+                "padding": "var(--scm-spacing-xs, 0.5rem) var(--scm-spacing-sm, 0.75rem)",
+                "border": "1px solid var(--scm-danger, #B3261E)",
+                "borderRadius": "var(--scm-radius-sm, 4px)",
+                "color": "var(--scm-danger, #B3261E)",
+                "fontSize": "0.875rem"
+            },
+            "text": "{{error.message ?? _local.profileErrors?.message ?? ''}}"
+        },
+        {
+            "comment": "BASIC dataKey profileEditForm Form — name/zipcode/address/address_detail 필드 유지",
+            "type": "basic",
+            "name": "Form",
+            "dataKey": "profileEditForm",
+            "props": { "id": "profileEditForm" },
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-md, 1rem)"
+            },
+            "children": [
+                {
+                    "comment": "이름",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "fontWeight": "500",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "$t:superbify.mypage.profile.name"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "name",
+                                "value": "{{_local.profileEditForm?.name ?? user?.data?.name ?? ''}}",
+                                "required": true
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "comment": "닉네임",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "fontWeight": "500",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "$t:superbify.mypage.profile.nickname"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "nickname",
+                                "value": "{{_local.profileEditForm?.nickname ?? user?.data?.nickname ?? ''}}"
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "comment": "휴대폰",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "fontWeight": "500",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "$t:superbify.mypage.profile.phone"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "tel",
+                                "name": "phone",
+                                "value": "{{_local.profileEditForm?.phone ?? user?.data?.phone ?? ''}}"
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "comment": "주소 — 우편번호(readOnly) + daum extension_point + 기본주소(readOnly) + 상세주소",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": { "display": "flex", "flexDirection": "column", "gap": "var(--scm-spacing-2xs, 0.25rem)" },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Label",
+                            "style": {
+                                "fontSize": "0.8125rem",
+                                "fontWeight": "500",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "$t:superbify.mypage.addresses.address"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                                "alignItems": "center"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                        "type": "text",
+                                        "name": "zipcode",
+                                        "value": "{{_local.profileEditForm?.zipcode ?? user?.data?.zipcode ?? ''}}",
+                                        "readOnly": true
+                                    },
+                                    "style": {
+                                        "width": "8rem",
+                                        "flex": "0 0 auto",
+                                        "minHeight": "44px",
+                                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                        "color": "var(--scm-text-body, #4A4643)",
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem"
+                                    }
+                                },
+                                {
+                                    "comment": "sirsoft-daum_postcode 확장 — callback onAddressSelect 가 profileEditForm 의 zipcode/address/region/city 에 기입하고 별도로 user DS 를 다시 읽지 않는다(form 값이 서버 값으로 덮이는 것을 방지).",
+                                    "id": "profile_address_search_slot",
+                                    "type": "extension_point",
+                                    "name": "address_search_slot",
+                                    "props": {
+                                        "readOnlyFields": ["zipcode", "address"],
+                                        "targetFields": {
+                                            "zipcode": "profileEditForm.zipcode",
+                                            "address": "profileEditForm.address",
+                                            "region": "profileEditForm.region",
+                                            "city": "profileEditForm.city"
+                                        },
+                                        "onAddressSelect": {
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "local",
+                                                "profileEditForm.zipcode": "{{$event.zipcode}}",
+                                                "profileEditForm.address": "{{$event.address}}",
+                                                "profileEditForm.region": "{{$event.region}}",
+                                                "profileEditForm.city": "{{$event.city}}"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Input",
+                            "props": {
+                                "type": "text",
+                                "name": "address",
+                                "value": "{{_local.profileEditForm?.address ?? user?.data?.address ?? ''}}",
+                                "readOnly": true
+                            },
+                            "style": {
+                                "width": "100%",
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem"
+                            }
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                                "marginTop": "var(--scm-spacing-2xs, 0.25rem)"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Label",
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "fontWeight": "500",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "$t:superbify.mypage.addresses.address_detail"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Input",
+                                    "props": {
+                                        "type": "text",
+                                        "name": "address_detail",
+                                        "value": "{{_local.profileEditForm?.address_detail ?? user?.data?.address_detail ?? ''}}"
+                                    },
+                                    "style": {
+                                        "width": "100%",
+                                        "minHeight": "44px",
+                                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                                        "backgroundColor": "var(--scm-bg-primary, #FAF8F3)",
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "actions": [
+                {
+                    "comment": "BASIC PUT /api/me 성공 체인 유저 — state 정리 → user/current_user refetch → toast → navigate",
+                    "type": "submit",
+                    "handler": "sequence",
+                    "actions": [
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "isSavingProfile": true,
+                                "profileErrors": null
+                            }
+                        },
+                        {
+                            "handler": "apiCall",
+                            "auth_required": true,
+                            "target": "/api/me",
+                            "params": {
+                                "method": "PUT",
+                                "body": "{{_local?.profileEditForm}}"
+                            },
+                            "onSuccess": [
+                                {
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "isSavingProfile": false,
+                                        "profileErrors": null
+                                    }
+                                },
+                                { "handler": "refetchDataSource", "params": { "dataSourceId": "user" } },
+                                { "handler": "refetchDataSource", "params": { "dataSourceId": "current_user" } },
+                                {
+                                    "handler": "toast",
+                                    "params": { "type": "success", "message": "$t:superbify.mypage.profile.updated" }
+                                },
+                                { "handler": "navigate", "params": { "path": "/mypage/profile" } }
+                            ],
+                            "onError": [
+                                {
+                                    "handler": "setState",
+                                    "params": {
+                                        "target": "local",
+                                        "isSavingProfile": false,
+                                        "profileErrors": "{{error.errors ?? {message: error.message}}}"
+                                    }
+                                },
+                                {
+                                    "handler": "toast",
+                                    "params": { "type": "error", "message": "{{error.message}}" }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                "flexWrap": "wrap"
+            },
+            "children": [
+                {
+                    "comment": "취소 — BASIC /mypage/profile navigate 유지",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "flex": "1 1 0",
+                        "minHeight": "44px",
+                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": "600",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.cancel",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "navigate",
+                            "params": { "path": "/mypage/profile" }
+                        }
+                    ]
+                },
+                {
+                    "comment": "저장 — submit target = profileEditForm (BASIC props.form 유지)",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                        "type": "submit",
+                        "form": "profileEditForm",
+                        "disabled": "{{_local.isSavingProfile ?? false}}"
+                    },
+                    "style": {
+                        "flex": "1 1 0",
+                        "minHeight": "44px",
+                        "backgroundColor": "var(--scm-charcoal, #26221E)",
+                        "color": "var(--scm-text-inverse, #FAF8F3)",
+                        "border": "1px solid var(--scm-charcoal, #26221E)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": "600",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.profile.save"
+                }
+            ]
+        }
+    ]
+}

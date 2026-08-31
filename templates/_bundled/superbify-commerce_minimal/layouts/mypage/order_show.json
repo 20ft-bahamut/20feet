@@ -1,0 +1,193 @@
+{
+    "version": "1.0.0",
+    "layout_name": "mypage/order_show",
+    "extends": "_user_base",
+    "permissions": [],
+    "fork_source_comment": "templates/_bundled/sirsoft-basic/layouts/mypage/orders/show.json 포크 — order/userAddresses/refundReasons DS 유지(reviewSettings 는 리뷰 모달 제외로 생략), modals 5종은 SRC 치환 규칙에 따라 상태헤더/상품/배송/결제/이력 읽기전용 카드 + 주문 취소 인라인 패널로 축약. IdentityChallenge/Modal/Icon/Tailwind 미사용.",
+    "computed": {
+        "currentTab": "orders"
+    },
+    "meta": {
+        "title": "$t:superbify.routes.mypage_order"
+    },
+    "initLocal": {
+        "showCancelConfirm": false,
+        "cancelReason": "",
+        "isCancelling": false
+    },
+    "data_sources": [
+        {
+            "comment": "주문 상세 — 주문번호로 조회하는 회원/비회원 공유 통합 엔드포인트(user/orders/{orderNumber}). 취소는 별도 numeric id 라우트라 레이아웃에서 order.data.id 를 쓴다.",
+            "fork_source": "templates/_bundled/sirsoft-basic/layouts/mypage/orders/show.json (order DS)",
+            "id": "order",
+            "label_key": "$t:superbify.mypage.tabs.orders",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/orders/{{route.order_number}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "fallback": { "data": null }
+        },
+        {
+            "comment": "배송지 목록 — BASIC show.json 과 동일. 주문 상세 화면 자체는 읽기전용이지만 주문 배송지 변경 모달 생략에 따른 최소 유지 비용이 없어 잔존시킨다.",
+            "fork_source": "templates/_bundled/sirsoft-basic/layouts/mypage/orders/show.json (userAddresses DS)",
+            "id": "userAddresses",
+            "label_key": "$t:superbify.mypage.tabs.addresses",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/addresses",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "fallback": { "data": [] }
+        },
+        {
+            "comment": "취소 사유 목록 — user/orders/{id}/cancel 의 reason 은 claim-reasons(type=refund, 사용자 선택 가능) 코드 존재 검증을 한다.",
+            "fork_source": "templates/_bundled/sirsoft-basic/layouts/mypage/orders/show.json (refundReasons DS)",
+            "id": "refundReasons",
+            "label_key": "$t:superbify.mypage.orders.cancel_reason",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/claim-reasons",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "params": { "type": "refund" },
+            "fallback": { "data": [] }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "mypage_order_show_section",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "mypage_order_show_wrap",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1320px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "comment": "뒤로가기 — 주문내역 목록으로",
+                                "id": "mypage_order_show_back",
+                                "type": "basic",
+                                "name": "A",
+                                "className": "scm-notice-nav-link",
+                                "props": { "href": "/mypage/orders" },
+                                "style": {
+                                    "display": "inline-flex",
+                                    "alignItems": "center",
+                                    "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                                    "alignSelf": "flex-start",
+                                    "minHeight": "var(--scm-touch-min, 44px)",
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.875rem",
+                                    "fontWeight": 500,
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "textDecoration": "none",
+                                    "cursor": "pointer"
+                                },
+                                "text": "‹ $t:superbify.notice.back_to_list",
+                                "actions": [
+                                    {
+                                        "comment": "audit:allow layout-list-context-navigate-merge-query 주문 목록 복귀 — 상태를 물려받으면 필터가 꼬이므로 query 없이 이동한다.",
+                                        "type": "click",
+                                        "handler": "navigate",
+                                        "params": { "path": "/mypage/orders" }
+                                    }
+                                ]
+                            },
+                            {
+                                "comment": "마이페이지 공통 탭 네비게이션 (WP1 공용 partial)",
+                                "partial": "partials/mypage/_tabs.json"
+                            },
+                            {
+                                "comment": "로딩 표시 — order DS 가 progressive 로 채워지기 전까지 상태 헤더 자리를 잡아준다",
+                                "id": "mypage_order_show_loading",
+                                "type": "basic",
+                                "name": "P",
+                                "if": "{{!!(order?.loading ?? false)}}",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.875rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "margin": 0
+                                },
+                                "text": "$t:superbify.mypage.orders.processing"
+                            },
+                            {
+                                "comment": "주문 상세 카드 묶음",
+                                "id": "mypage_order_show_content",
+                                "type": "basic",
+                                "name": "Div",
+                                "if": "{{!!order?.data}}",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-md, 1rem)",
+                                    "maxWidth": "48rem"
+                                },
+                                "children": [
+                                    { "partial": "partials/mypage/orders/_status_header.json" },
+                                    { "partial": "partials/mypage/orders/_items.json" },
+                                    { "partial": "partials/mypage/orders/_shipping.json" },
+                                    { "partial": "partials/mypage/orders/_payment.json" },
+                                    { "partial": "partials/mypage/orders/_history.json" },
+                                    {
+                                        "comment": "주문 취소 인라인 패널 (BASIC _modal_cancel.json 의 SRC 치환 — Modal 없이 확장 패널 + ConfirmDialog)",
+                                        "partial": "partials/mypage/orders/_modal_cancel.json"
+                                    },
+                                    {
+                                        "comment": "재주문 — 취소된 주문만 BASIC 과 동일 조건",
+                                        "id": "mypage_order_show_reorder",
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "if": "{{(order.data.order_status ?? '') === 'cancelled'}}",
+                                        "props": { "type": "button" },
+                                        "style": {
+                                            "display": "inline-flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "center",
+                                            "alignSelf": "flex-start",
+                                            "minHeight": "var(--scm-touch-min, 44px)",
+                                            "padding": "0 var(--scm-spacing-lg, 1.5rem)",
+                                            "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                            "border": "1px solid var(--scm-charcoal, #26221E)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
+                                            "color": "var(--scm-text-inverse, #FAF8F3)",
+                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                            "fontSize": "0.9375rem",
+                                            "fontWeight": 600,
+                                            "cursor": "pointer"
+                                        },
+                                        "actions": [
+                                            {
+                                                "comment": "audit:allow layout-list-context-navigate-merge-query 재주문 — /reorder/:id 경로가 주문을 장바구니에 담고 /cart 로 보낸다. 주문 목록 query 를 물려주지 않는다.",
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": { "path": "/reorder/{{order.data.id ?? ''}}" }
+                                            }
+                                        ],
+                                        "text": "$t:superbify.mypage.orders.reorder"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

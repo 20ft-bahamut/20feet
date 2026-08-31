@@ -13,6 +13,13 @@
             "headers": {
                 "X-Cart-Key": "{{_global.cartKey}}"
             }
+        },
+        {
+            "_comment": "인증 API에도 X-Cart-Key 자동 첨부 — 로그인 직후 모듈 MergeCartOnLogin 이 게스트 장바구니를 회원 장바구니로 병합한다. 헤더가 없으면 병합 대상 게스트 키를 서버가 알 수 없다 (v0.2.0 member features).",
+            "pattern": "/api/auth/*",
+            "headers": {
+                "X-Cart-Key": "{{_global.cartKey}}"
+            }
         }
     ],
     "init_actions": [
@@ -37,6 +44,24 @@
                 "path": "count"
             },
             "fallback": { "data": { "count": 0 } }
+        },
+        {
+            "_comment": "로그인 사용자 — StoreHeader 인증 상태(이름/마이페이지/로그아웃)에 사용. 비회원의 401은 정상 상태이므로 suppress 로 레이아웃 에러 전파를 막고 fallback 을 쓴다 (sirsoft-basic _user_base 패턴 복제).",
+            "id": "current_user",
+            "label_key": "$t:superbify.data_source.current_user",
+            "type": "api",
+            "endpoint": "/api/auth/user",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "initGlobal": "currentUser",
+            "fallback": { "data": [] },
+            "errorHandling": {
+                "401": {
+                    "handler": "suppress"
+                }
+            }
         }
     ],
     "components": [
@@ -63,7 +88,12 @@
                     "props": {
                         "brandName": "$t:superbify.brand.name",
                         "tagline": "$t:superbify.brand.tagline",
-                        "cartCount": "{{_global.cartCount}}"
+                        "cartCount": "{{_global.cartCount}}",
+                        "user": "{{_global.currentUser ? (_global.currentUser.nick_name ?? _global.currentUser.name ?? _global.currentUser.email) : null}}",
+                        "loginLabel": "$t:superbify.auth.login",
+                        "signupLabel": "$t:superbify.auth.signup",
+                        "mypageLabel": "$t:superbify.mypage.title",
+                        "logoutLabel": "$t:superbify.auth.logout"
                     }
                 },
                 {

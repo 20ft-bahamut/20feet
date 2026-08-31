@@ -1,0 +1,244 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 공통 탭 네비게이션 — Nav > Ul > A 구조. BASIC layouts/partials/mypage/_tab_navigation.json 포크에서 TabNavigation/Icon/Flex 컴포지트를 제거하고 기본 컴포넌트만으로 재작성했다. 활성 탭은 각 레이아웃의 computed.currentTab(partials/mypage/_tabs.json 사용 레이아웃이 'profile' | 'orders' | 'addresses' | 'wishlist' | 'coupons' | 'mileage' | 'inquiries' | 'password' 로 세팅)으로 결정된다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/_tab_navigation.json"
+    },
+    "comment": "마이페이지 탭",
+    "type": "basic",
+    "name": "Nav",
+    "id": "mypage_tab_nav",
+    "props": {
+        "aria-label": "$t:superbify.mypage.title"
+    },
+    "style": {
+        "marginBottom": "var(--scm-spacing-lg, 1.5rem)",
+        "borderBottom": "var(--scm-hairline, 1px solid #E4DCCE)"
+    },
+    "children": [
+        {
+            "type": "basic",
+            "name": "Ul",
+            "id": "mypage_tab_list",
+            "style": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                "margin": "0",
+                "padding": "0",
+                "listStyle": "none"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_profile",
+                            "props": {
+                                "href": "/mypage/profile",
+                                "className": "{{_computed.currentTab === 'profile' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'profile' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.profile",
+                            "actions": [
+                                {
+                                    "comment": "audit:allow layout-list-context-navigate-merge-query 마이페이지 탭 전환 — 탭마다 다루는 목록이 달라 이전 탭의 페이지·필터를 물려받으면 잘못된 화면이 된다. ActionDispatcher 가 click 기본 동작(preventDefault)을 막고 SPA navigate 로 처리한다.",
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/profile"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_orders",
+                            "props": {
+                                "href": "/mypage/orders",
+                                "className": "{{_computed.currentTab === 'orders' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'orders' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.orders",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/orders"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_addresses",
+                            "props": {
+                                "href": "/mypage/addresses",
+                                "className": "{{_computed.currentTab === 'addresses' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'addresses' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.addresses",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/addresses"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_wishlist",
+                            "props": {
+                                "href": "/mypage/wishlist",
+                                "className": "{{_computed.currentTab === 'wishlist' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'wishlist' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.wishlist",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/wishlist"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_coupons",
+                            "props": {
+                                "href": "/mypage/coupons",
+                                "className": "{{_computed.currentTab === 'coupons' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'coupons' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.coupons",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/coupons"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_mileage",
+                            "props": {
+                                "href": "/mypage/mileage",
+                                "className": "{{_computed.currentTab === 'mileage' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'mileage' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.mileage",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/mileage"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_inquiries",
+                            "props": {
+                                "href": "/mypage/inquiries",
+                                "className": "{{_computed.currentTab === 'inquiries' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'inquiries' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.inquiries",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/inquiries"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Li",
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "A",
+                            "id": "mypage_tab_password",
+                            "props": {
+                                "href": "/mypage/change-password",
+                                "className": "{{_computed.currentTab === 'password' ? 'scm-mypage-tab scm-tab-active' : 'scm-mypage-tab'}}",
+                                "aria-current": "{{_computed.currentTab === 'password' ? 'page' : undefined}}"
+                            },
+                            "text": "$t:superbify.mypage.tabs.password",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/change-password"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

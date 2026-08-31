@@ -1,0 +1,107 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 주문 상태 헤더 (상태 + 주문번호 + 주문일시)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_status_header.json — BASIC status 아이콘(classMap variant)/부분취소 배지를 제외하고 scm 토큰 인라인 상태 칩으로 재작성. 바인딩은 order.data.* 동일."
+    },
+    "id": "mypage_order_status_header",
+    "type": "basic",
+    "name": "Div",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-2xs, 0.25rem)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_status_header_top",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "flexWrap": "wrap"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_status_label_text",
+                    "type": "basic",
+                    "name": "H2",
+                    "style": {
+                        "fontFamily": "var(--scm-font-display, system-ui)",
+                        "fontSize": "1.25rem",
+                        "fontWeight": "700",
+                        "margin": 0,
+                        "color": "{{(order.data.order_status_variant ?? '') === 'success' ? 'var(--scm-charcoal, #26221E)' : (order.data.order_status_variant ?? '') === 'danger' ? 'var(--scm-danger, #B3261E)' : (order.data.order_status_variant ?? '') === 'warning' ? 'var(--scm-wood-dark, #A8916F)' : 'var(--scm-accent, #2E3A48)'}}"
+                    },
+                    "text": "{{order.data.order_status_label ?? ''}}"
+                },
+                {
+                    "id": "mypage_order_status_chip",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "padding": "var(--scm-spacing-2xs, 0.25rem) var(--scm-spacing-xs, 0.5rem)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.75rem",
+                        "fontWeight": 600,
+                        "whiteSpace": "nowrap",
+                        "color": "{{(order.data.order_status_variant ?? '') === 'success' ? 'var(--scm-charcoal, #26221E)' : (order.data.order_status_variant ?? '') === 'danger' ? 'var(--scm-danger, #B3261E)' : (order.data.order_status_variant ?? '') === 'warning' ? 'var(--scm-wood-dark, #A8916F)' : 'var(--scm-accent, #2E3A48)'}}"
+                    },
+                    "text": "{{order.data.order_status_label ?? ''}}"
+                }
+            ]
+        },
+        {
+            "id": "mypage_order_status_meta",
+            "type": "basic",
+            "name": "P",
+            "style": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                "fontFamily": "var(--scm-font-body, system-ui)",
+                "fontSize": "0.875rem",
+                "color": "var(--scm-text-muted, #8A837B)",
+                "margin": 0
+            },
+            "children": [
+                {
+                    "id": "mypage_order_status_number_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "text": "$t:superbify.mypage.orders.order_no"
+                },
+                {
+                    "id": "mypage_order_status_number_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.order_number ?? ''}}"
+                },
+                {
+                    "id": "mypage_order_status_date_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "if": "{{!!order.data.ordered_at_formatted}}",
+                    "style": {
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.ordered_at_formatted ?? ''}}"
+                }
+            ]
+        }
+    ]
+}

@@ -66,7 +66,23 @@
             "notice_detail": {
                 "title": "Notice detail — Still Form",
                 "description": "Store notice detail"
-            }
+            },
+            "login": "Login — Still Form",
+            "register": "Sign up — Still Form",
+            "forgot_password": "Forgot password — Still Form",
+            "reset_password": "Reset password — Still Form",
+            "mypage": "My Page — Still Form",
+            "mypage_profile": "Profile — My Page",
+            "mypage_profile_edit": "Edit Profile — My Page",
+            "mypage_change_password": "Change Password — My Page",
+            "mypage_orders": "Orders — My Page",
+            "mypage_order": "Order Detail — My Page",
+            "mypage_addresses": "Addresses — My Page",
+            "mypage_wishlist": "Wishlist — My Page",
+            "mypage_coupons": "Coupons — My Page",
+            "mypage_mileage": "Mileage — My Page",
+            "mypage_inquiries": "Product Inquiries — My Page",
+            "reorder": "Reorder"
         },
         "data_source": {
             "new_arrivals": "New arrivals",
@@ -80,7 +96,9 @@
             "product_reviews": "Product reviews",
             "cart": "Cart",
             "cart_count": "Cart count",
-            "notice_posts": "Store notices"
+            "notice_posts": "Store notices",
+            "current_user": "Signed-in user",
+            "token_validation": "Password reset token validation"
         },
         "errors": {
             "not_found_title": "Page not found",
@@ -88,7 +106,235 @@
             "forbidden_title": "Access denied",
             "forbidden_description": "You don't have permission to access this page.",
             "server_error_title": "Something went wrong",
-            "server_error_description": "Please try again in a moment."
+            "server_error_description": "Please try again in a moment.",
+            "unauthorized_title": "Sign-in required",
+            "unauthorized_message": "This page is for members. Please sign in and try again.",
+            "unauthorized_cta_login": "Go to sign in",
+            "unauthorized_cta_home": "Go to home"
+        },
+        "auth": {
+            "login": "Login",
+            "signup": "Sign up",
+            "logout": "Log out",
+            "register_link": "Sign up",
+            "already_member": "Already a member?",
+            "forgot_password_link": "Forgot your password?",
+            "login_success": "You are signed in.",
+            "register_success": "Your account has been created.",
+            "already_logged_in": "You are already signed in.",
+            "login_form": {
+                "title": "Login",
+                "subtitle": "Sign in to your account",
+                "email": "Email",
+                "email_placeholder": "Enter your email address",
+                "password": "Password",
+                "password_placeholder": "Enter your password",
+                "remember": "Keep me signed in",
+                "submit": "Login",
+                "processing": "Signing in...",
+                "no_account": "Don't have an account?",
+                "error": {
+                    "invalid": "The email or password is incorrect.",
+                    "email_required": "Please enter your email.",
+                    "email_invalid": "Please enter a valid email address.",
+                    "password_required": "Please enter your password."
+                }
+            },
+            "register": {
+                "title": "Sign up",
+                "subtitle": "Create a new account",
+                "email": "Email",
+                "email_placeholder": "Enter your email address",
+                "password": "Password",
+                "password_placeholder": "Enter your password",
+                "password_confirm": "Confirm password",
+                "password_confirm_placeholder": "Enter your password again",
+                "nickname": "Nickname",
+                "nickname_placeholder": "Enter a nickname (optional)",
+                "name": "Name",
+                "name_placeholder": "Enter your name (optional)",
+                "terms_agree": "I agree to the Terms of Service.",
+                "privacy_agree": "I agree to the Privacy Policy.",
+                "terms_link": "View Terms of Service",
+                "privacy_link": "View Privacy Policy",
+                "submit": "Sign up",
+                "processing": "Creating account...",
+                "has_account": "Already have an account?",
+                "error": {
+                    "email_required": "Please enter your email.",
+                    "email_invalid": "Please enter a valid email address.",
+                    "email_exists": "This email is already in use.",
+                    "password_required": "Please enter a password.",
+                    "password_min": "Password must be at least {{count}} characters.",
+                    "password_mismatch": "Passwords do not match.",
+                    "terms_required": "Please agree to the Terms of Service."
+                }
+            },
+            "forgot_password": {
+                "title": "Forgot password",
+                "subtitle": "We will email you a password reset link",
+                "email": "Email",
+                "email_placeholder": "Enter the email address you registered with",
+                "submit": "Send reset link",
+                "processing": "Sending...",
+                "success": "A password reset email has been sent.",
+                "back_to_login": "Back to login"
+            },
+            "reset_password": {
+                "title": "Reset password",
+                "subtitle": "Enter a new password",
+                "password": "New password",
+                "password_placeholder": "Enter the new password",
+                "password_confirm": "Confirm password",
+                "password_confirm_placeholder": "Enter the new password again",
+                "submit": "Change password",
+                "processing": "Updating...",
+                "success": "Your password has been changed.",
+                "token_invalid": "This link is invalid or expired. Please request a password reset again.",
+                "go_to_login": "Log in",
+                "go_to_home": "Go to home"
+            },
+            "guest_continue": {
+                "title": "Guest order lookup",
+                "hint": "You can look up your order with the order number you received.",
+                "cta": "Guest order lookup"
+            }
+        },
+        "mypage": {
+            "title": "My Page",
+            "logout_success": "You have been signed out.",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "tabs": {
+                "profile": "Profile",
+                "orders": "Orders",
+                "addresses": "Addresses",
+                "wishlist": "Wishlist",
+                "coupons": "Coupons",
+                "mileage": "Mileage",
+                "inquiries": "Inquiries",
+                "password": "Change password"
+            },
+            "orders": {
+                "empty": "No orders yet.",
+                "order_no": "Order number",
+                "status": "Status",
+                "item": "Items",
+                "total": "Total",
+                "date": "Order date",
+                "shipping_to": "Shipping to",
+                "payment": "Payment",
+                "history": "Order history",
+                "detail": "View detail",
+                "cancel": "Cancel order",
+                "cancel_confirm_title": "Cancel this order?",
+                "cancel_confirm_body": "A cancelled order cannot be restored. This order will be cancelled.",
+                "cancel_reason": "Cancellation reason",
+                "cancelled": "Cancelled",
+                "reorder": "Reorder",
+                "reorder_success": "The items were added to your cart.",
+                "recipient": "Recipient",
+                "phone": "Contact",
+                "address": "Address",
+                "memo": "Delivery memo",
+                "payment_date": "Payment date",
+                "cancelled_at": "Cancelled at",
+                "processing": "Processing…",
+                "reason_placeholder": "Select a cancellation reason.",
+                "cancel_success": "Your order has been cancelled.",
+                "free_shipping": "Free shipping"
+            },
+            "profile": {
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone",
+                "nickname": "Nickname",
+                "save": "Save",
+                "edit": "Edit",
+                "joined": "Joined",
+                "edit_title": "Edit profile",
+                "updated": "Your profile has been saved.",
+                "verify_title": "Confirm password",
+                "verify_message": "Enter your current password before editing your profile.",
+                "verify_error": "The password does not match.",
+                "verify_submit": "Confirm"
+            },
+            "password": {
+                "current": "Current password",
+                "new": "New password",
+                "confirm": "Confirm new password",
+                "submit": "Change password",
+                "changed": "Your password has been changed."
+            },
+            "addresses": {
+                "title": "Addresses",
+                "add": "Add address",
+                "edit": "Edit",
+                "default": "Default address",
+                "set_default": "Set as default",
+                "confirm_delete_title": "Delete this address?",
+                "confirm_delete_body": "A deleted address cannot be restored.",
+                "zipcode": "Zip code",
+                "address": "Address",
+                "address_detail": "Address detail",
+                "recipient": "Recipient",
+                "phone": "Phone",
+                "empty": "No saved addresses yet.",
+                "name": "Label",
+                "save": "Save",
+                "saved": "The address has been saved.",
+                "deleted": "The address has been deleted.",
+                "default_saved": "The default address has been updated.",
+                "conflict_title": "This address label is already in use.",
+                "conflict_body": "Overwrite the existing address with this one?",
+                "conflict_confirm": "Overwrite"
+            },
+            "wishlist": {
+                "title": "Wishlist",
+                "empty": "Your wishlist is empty.",
+                "remove": "Remove",
+                "add_to_cart_note": "To add to the cart, add the item from its product page.",
+                "removed": "Removed from your wishlist."
+            },
+            "coupons": {
+                "title": "Coupons",
+                "empty": "You have no coupons.",
+                "available": "Available coupons",
+                "download": "Download",
+                "downloaded": "Downloaded",
+                "expires": "Valid until",
+                "owned": "My coupons",
+                "no_available": "No coupons to download right now."
+            },
+            "mileage": {
+                "title": "Mileage",
+                "balance": "Mileage balance",
+                "history": "Mileage history",
+                "empty": "No mileage history yet.",
+                "earned": "Earned",
+                "used": "Used",
+                "date": "Date",
+                "disabled": "Mileage is currently disabled.",
+                "filter": {
+                    "all": "All",
+                    "earn": "Earned",
+                    "use": "Used"
+                }
+            },
+            "inquiries": {
+                "title": "Product inquiries",
+                "empty": "No product inquiries yet.",
+                "status_answered": "Answered",
+                "status_waiting": "Awaiting reply",
+                "view_product": "View product",
+                "question": "Question",
+                "reply": "Seller reply",
+                "filter": {
+                    "all": "All",
+                    "pending": "Awaiting reply",
+                    "answered": "Answered"
+                }
+            }
         },
         "nav": {
             "shop": "Shop",
@@ -259,6 +505,7 @@
         },
         "checkout": {
             "title": "Checkout",
+            "logged_in_as": "Ordering as {{name}}",
             "loading": "Loading checkout…",
             "empty_title": "Cannot create checkout",
             "back_to_cart": "Back to cart",

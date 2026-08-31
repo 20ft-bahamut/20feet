@@ -37,6 +37,9 @@ body {
     --scm-line: #E4DCCE;
     --scm-muted: #8A837B;
     --scm-accent: #2E3A48;
+    /* Destructive tone — member features v0.2.0 (주문 취소/배송지 삭제 ConfirmDialog,
+       로그아웃 버튼은 destructive 가 아니므로 사용하지 않는다) */
+    --scm-danger: #B3261E;
 
     /* Semantic surfaces */
     --scm-bg-primary: var(--scm-paper);
@@ -297,13 +300,25 @@ body {
     .scm-header-bar {
         --scm-header-height: 60px;
         column-gap: 0.5rem;
+        /* Auth nav (마이페이지/이름/로그아웃) can exceed one row on 390px —
+           wrap instead of overlapping the brand lockup. */
+        flex-wrap: wrap;
+        row-gap: 0;
     }
     .scm-header-nav {
         gap: 0 !important;
+        flex-wrap: wrap;
+        row-gap: 0.125rem;
     }
     .scm-header-nav-link {
-        padding-inline: 0.5rem !important;
-        font-size: 0.875rem !important;
+        padding-inline: 0.4rem !important;
+        font-size: 0.8125rem !important;
+    }
+    .scm-header-nav-user {
+        max-width: 88px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }
 
@@ -623,6 +638,90 @@ body {
 .scm-notice-nav-link:hover,
 .scm-notice-nav-link:focus-visible {
     color: var(--scm-accent, #2E3A48);
+}
+
+/* ------------------------------------------------------------------
+   Member features (v0.2.0) shared helpers
+   - Backs the SC partials under layouts/partials/mypage/_tabs.json and
+     the auth/mypage layouts that branch from them. Nodes carry scm
+     tokens inline; these rules only add hover/focus states and the
+     panel shells that inline styles cannot express.
+   - .scm-mypage-tab / .scm-tab-active → partials/mypage/_tabs.json
+   - .scm-auth-card / .scm-panel       → auth + mypage layouts (WP3/4/6)
+   - .scm-address-search-button        → extensions/sirsoft-daum_postcode/
+                                         user-address-search.json
+   ------------------------------------------------------------------ */
+
+.scm-mypage-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 var(--scm-spacing-sm, 0.75rem);
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    color: var(--scm-text-muted, #8A837B);
+    font-family: var(--scm-font-body, system-ui);
+    font-size: var(--scm-header-nav-size, 0.9375rem);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease-out),
+        border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease-out);
+}
+
+.scm-mypage-tab:hover {
+    color: var(--scm-charcoal, #26221E);
+}
+
+.scm-mypage-tab:focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring-soft, 0 0 0 2px rgba(46, 58, 72, 0.22));
+    border-radius: var(--scm-radius-sm, 4px);
+    color: var(--scm-charcoal, #26221E);
+}
+
+.scm-tab-active {
+    border-bottom-color: var(--scm-charcoal, #26221E);
+    color: var(--scm-charcoal, #26221E);
+    font-weight: 600;
+}
+
+/* Auth pages (login / register / forgot / reset) — single paper card */
+.scm-auth-card {
+    width: 100%;
+    max-width: 26rem;
+    margin: 0 auto;
+    padding: var(--scm-spacing-lg, 1.5rem);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+    border: var(--scm-hairline, 1px solid #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    color: var(--scm-text-primary, #26221E);
+}
+
+/* My page generic panel (forms, detail sections, inline replaces of Modal) */
+.scm-panel {
+    padding: var(--scm-spacing-lg, 1.5rem);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+    border: var(--scm-hairline, 1px solid #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    color: var(--scm-text-primary, #26221E);
+}
+
+/* Daum 우편번호 검색 버튼 (plugin extension override) — inline styles carry
+   the base look; hover/focus live here because inline styles cannot. */
+.scm-address-search-button:hover {
+    background-color: var(--scm-wood, #C9B08D);
+    border-color: var(--scm-wood-dark, #A8916F);
+    color: var(--scm-text-inverse, #FAF8F3);
+}
+
+.scm-address-search-button:focus-visible {
+    outline: none;
+    box-shadow: var(--scm-focus-ring-soft, 0 0 0 2px rgba(46, 58, 72, 0.22));
 }
 
 /* ------------------------------------------------------------------

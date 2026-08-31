@@ -1,0 +1,146 @@
+{
+    "version": "1.0.0",
+    "layout_name": "errors/401",
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:superbify.errors.unauthorized_title",
+        "description": "$t:superbify.errors.unauthorized_message"
+    },
+    "comment": "BASIC errors/401 의 Tailwind 중앙 정렬 블록 + Icon(home) CTA 를 scm-auth-card 단일 카드로 치환. 로그인 CTA는 auth_required 가드가 붙인 query.redirect 를 되돌려준다.",
+    "slots": {
+        "content": [
+            {
+                "id": "error_401_section",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "minHeight": "60vh",
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "alignItems": "flex-start",
+                    "paddingBlock": "var(--scm-section-py-lg, 4.5rem)",
+                    "paddingInline": "var(--scm-gutter, 1rem)"
+                },
+                "children": [
+                    {
+                        "id": "error_401_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "className": "scm-auth-card",
+                        "style": {
+                            "textAlign": "center",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-sm, 0.75rem)",
+                            "alignItems": "center"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H1",
+                                "style": {
+                                    "margin": 0,
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.375rem",
+                                    "fontWeight": 700,
+                                    "color": "var(--scm-text-primary, #26221E)"
+                                },
+                                "text": "$t:superbify.errors.unauthorized_title"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "P",
+                                "style": {
+                                    "margin": 0,
+                                    "fontSize": "0.875rem",
+                                    "color": "var(--scm-text-muted, #8A837B)"
+                                },
+                                "text": "$t:superbify.errors.unauthorized_message"
+                            },
+                            {
+                                "id": "error_401_actions",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "marginTop": "var(--scm-spacing-2xs, 0.5rem)",
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-sm, 0.75rem)",
+                                    "width": "100%"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "A",
+                                        "id": "error_401_login_link",
+                                        "props": {
+                                            "href": "/login?redirect={{query.redirect}}"
+                                        },
+                                        "style": {
+                                            "minHeight": "44px",
+                                            "display": "inline-flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "center",
+                                            "padding": "0.625rem 1rem",
+                                            "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                            "color": "var(--scm-text-inverse, #FAF8F3)",
+                                            "border": "1px solid var(--scm-charcoal, #26221E)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
+                                            "fontWeight": 600,
+                                            "fontSize": "0.9375rem",
+                                            "textDecoration": "none",
+                                            "cursor": "pointer"
+                                        },
+                                        "text": "$t:superbify.errors.unauthorized_cta_login",
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/login?redirect={{query.redirect}}"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "A",
+                                        "id": "error_401_home_link",
+                                        "props": {
+                                            "href": "/"
+                                        },
+                                        "style": {
+                                            "minHeight": "44px",
+                                            "display": "inline-flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "center",
+                                            "padding": "0.625rem 1rem",
+                                            "backgroundColor": "var(--scm-paper, #FAF8F3)",
+                                            "color": "var(--scm-text-primary, #26221E)",
+                                            "border": "1px solid var(--scm-line, #E4DCCE)",
+                                            "borderRadius": "var(--scm-radius, 8px)",
+                                            "fontWeight": 600,
+                                            "fontSize": "0.9375rem",
+                                            "textDecoration": "none",
+                                            "cursor": "pointer"
+                                        },
+                                        "text": "$t:superbify.errors.unauthorized_cta_home",
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "navigate",
+                                                "params": {
+                                                    "path": "/"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

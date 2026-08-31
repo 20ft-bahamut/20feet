@@ -1,0 +1,89 @@
+{
+    "_comment": "=== sirsoft-daum_postcode 주소검색 확장 오버라이드 === templates/_bundled/sirsoft-basic/extensions/sirsoft-daum_postcode/user-address-search.json 포크. extension_point 이름/protocol-relative daum script/priority 50/setFieldReadOnly onMount/callbackAction/targetFields 전달은 그대로 유지하고, Icon 컴포지트와 Tailwind 클래스를 제거한 뒤 scm 토큰 inline 스타일로 재작성했다. 외부 스크립트는 scheme 리터럴 없이 protocol-relative 로만 기술한다.",
+    "fork_source": "templates/_bundled/sirsoft-basic/extensions/sirsoft-daum_postcode/user-address-search.json",
+    "extension_point": "address_search_slot",
+    "scripts": [
+        {
+            "src": "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js",
+            "id": "daum_postcode_script"
+        }
+    ],
+    "components": [
+        {
+            "id": "daum_postcode_user_container",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+                "className": "scm-address-search"
+            },
+            "lifecycle": {
+                "onMount": [
+                    {
+                        "comment": "주소 검색 플러그인 마운트 시 지정된 필드를 readOnly로 설정",
+                        "handler": "sirsoft-daum_postcode.setFieldReadOnly",
+                        "params": {
+                            "fields": "{{extensionPointProps.readOnlyFields ?? ['zipcode', 'address']}}",
+                            "readOnly": true
+                        }
+                    }
+                ]
+            },
+            "children": [
+                {
+                    "id": "btn_user_search_address",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": {
+                        "type": "button",
+                        "className": "scm-address-search-button"
+                    },
+                    "style": {
+                        "display": "inline-flex",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "flexShrink": 0,
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                        "whiteSpace": "nowrap",
+                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                        "border": "1px solid var(--scm-line, #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-sm, 4px)",
+                        "color": "var(--scm-charcoal, #26221E)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.9375rem",
+                        "fontWeight": 600,
+                        "letterSpacing": "0.02em",
+                        "cursor": "pointer",
+                        "transition": "background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease-out), border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease-out)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "text": "$t:sirsoft-daum_postcode.search_address"
+                        }
+                    ],
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sirsoft-daum_postcode.openPostcode",
+                            "params": {
+                                "displayMode": "{{_global.plugins['sirsoft-daum_postcode']?.display_mode ?? 'layer'}}",
+                                "width": "{{_global.plugins['sirsoft-daum_postcode']?.popup_width ?? 500}}",
+                                "height": "{{_global.plugins['sirsoft-daum_postcode']?.popup_height ?? 600}}",
+                                "theme": {
+                                    "searchBgColor": "{{_global.plugins['sirsoft-daum_postcode']?.theme_color ?? '#26221E'}}",
+                                    "queryTextColor": "#FFFFFF"
+                                },
+                                "callbackAction": "{{extensionPointCallbacks.onAddressSelect}}",
+                                "targetFields": "{{extensionPointProps.targetFields}}"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "priority": 50
+}

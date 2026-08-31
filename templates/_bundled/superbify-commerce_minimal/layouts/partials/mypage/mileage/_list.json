@@ -1,0 +1,383 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 마일리지 — BASIC mileage/_list.json 포크. 요약 카드 4종(사용가능/소멸예정/누적적립/누적사용)은 보유·누적적립·누적사용 3종으로 축약, 필터 5종은 전체/적립/사용 3종으로 축약(BASIC navigate mergeQuery replace 체인 유지). 내역은 BASIC PC 테이블+모바일 카드 대신 scm 카드 리스트 하나로 통일했고 페이지네이션은 SRC Pagination(props 상이) 으로 치환했다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/mileage/_list.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "마일리지 비활성 — SRC EmptyState",
+            "type": "composite",
+            "name": "EmptyState",
+            "if": "{{mileage_balance?.data?.mileage?.enabled === false}}",
+            "props": {
+                "title": "$t:superbify.mypage.mileage.title",
+                "message": "$t:superbify.mypage.mileage.disabled"
+            }
+        },
+        {
+            "comment": "요약 카드 3종 (보유 / 누적 적립 / 누적 사용)",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{mileage_balance?.data?.mileage?.enabled !== false}}",
+            "style": {
+                "display": "grid",
+                "gridTemplateColumns": "repeat(auto-fit, minmax(160px, 1fr))",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": { "fontSize": "0.75rem", "color": "var(--scm-text-muted, #8A837B)" },
+                            "text": "$t:superbify.mypage.mileage.balance"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "fontFamily": "var(--scm-font-display, system-ui)",
+                                "fontSize": "1.25rem",
+                                "fontWeight": "700",
+                                "color": "var(--scm-text-primary, #26221E)"
+                            },
+                            "text": "{{(mileage_balance?.data?.mileage?.available ?? 0).toLocaleString()}} P"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": { "fontSize": "0.75rem", "color": "var(--scm-text-muted, #8A837B)" },
+                            "text": "$t:superbify.mypage.mileage.earned"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "fontFamily": "var(--scm-font-display, system-ui)",
+                                "fontSize": "1.25rem",
+                                "fontWeight": "700",
+                                "color": "var(--scm-text-primary, #26221E)"
+                            },
+                            "text": "{{(mileage_balance?.data?.mileage?.total_earned ?? 0).toLocaleString()}} P"
+                        }
+                    ]
+                },
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": { "fontSize": "0.75rem", "color": "var(--scm-text-muted, #8A837B)" },
+                            "text": "$t:superbify.mypage.mileage.used"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "fontFamily": "var(--scm-font-display, system-ui)",
+                                "fontSize": "1.25rem",
+                                "fontWeight": "700",
+                                "color": "var(--scm-text-primary, #26221E)"
+                            },
+                            "text": "{{(mileage_balance?.data?.mileage?.total_used ?? 0).toLocaleString()}} P"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "분류 필터 — BASIC classMap 버튼 대신 inline 계열 스타일, navigate mergeQuery replace 체인 유지",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{mileage_balance?.data?.mileage?.enabled !== false}}",
+            "style": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "var(--scm-spacing-2xs, 0.25rem)"
+            },
+            "children": [
+                {
+                    "id": "mileage_filter_all",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{!_local.mileageCategory ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{!_local.mileageCategory ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.mileage.filter.all",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "mileageCategory": "" }
+                                },
+                                {
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/mileage",
+                                        "mergeQuery": true,
+                                        "query": { "category": "", "page": "1" },
+                                        "replace": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "mileage_filter_earn",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{_local.mileageCategory === 'earn' ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{_local.mileageCategory === 'earn' ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.mileage.filter.earn",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "mileageCategory": "earn" }
+                                },
+                                {
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/mileage",
+                                        "mergeQuery": true,
+                                        "query": { "category": "earn", "page": "1" },
+                                        "replace": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "mileage_filter_use",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{_local.mileageCategory === 'use' ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{_local.mileageCategory === 'use' ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.mileage.filter.use",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "mileageCategory": "use" }
+                                },
+                                {
+                                    "handler": "navigate",
+                                    "params": {
+                                        "path": "/mypage/mileage",
+                                        "mergeQuery": true,
+                                        "query": { "category": "use", "page": "1" },
+                                        "replace": true
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "적립 내역 카드 목록 — BASIC 분류 뱃지/금액 색상 규칙을 scm 토큰으로",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(mileage_history?.data?.transactions?.data ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                        "source": "{{mileage_history?.data?.transactions?.data ?? []}}",
+                        "item_var": "tx",
+                        "index_var": "txIdx"
+                    },
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-3xs, 0.125rem)",
+                        "padding": "var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-md, 1rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "style": {
+                                        "display": "inline-flex",
+                                        "padding": "0 var(--scm-spacing-2xs, 0.25rem)",
+                                        "minHeight": "20px",
+                                        "alignItems": "center",
+                                        "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                        "color": "var(--scm-text-body, #4A4643)",
+                                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                                        "fontSize": "0.6875rem",
+                                        "fontWeight": "600"
+                                    },
+                                    "text": "{{tx.amount >= 0 ? $t('superbify.mypage.mileage.earned') : $t('superbify.mypage.mileage.used')}}"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "style": {
+                                        "fontSize": "0.9375rem",
+                                        "fontWeight": "700",
+                                        "color": "{{tx.amount >= 0 ? 'var(--scm-text-primary, #26221E)' : 'var(--scm-text-muted, #8A837B)'}}"
+                                    },
+                                    "text": "{{tx.amount >= 0 ? '+' : ''}}{{tx.amount_formatted ?? tx.amount ?? 0}} P"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "basic",
+                            "name": "P",
+                            "if": "{{tx.description}}",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.875rem",
+                                "color": "var(--scm-text-body, #4A4643)"
+                            },
+                            "text": "{{tx.description ?? ''}}"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "fontSize": "0.75rem",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "{{tx.created_at_formatted ?? tx.created_at ?? ''}}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "내역 없음 — SRC EmptyState",
+            "type": "composite",
+            "name": "EmptyState",
+            "if": "{{mileage_balance?.data?.mileage?.enabled !== false && !(mileage_history?.data?.transactions?.data ?? []).length}}",
+            "props": {
+                "title": "$t:superbify.mypage.mileage.history",
+                "message": "$t:superbify.mypage.mileage.empty"
+            }
+        },
+        {
+            "comment": "SRC Pagination — query.page 기반으로 navigate mergeQuery (BASIC 체인의 navigate 부만 남김)",
+            "type": "composite",
+            "name": "Pagination",
+            "id": "mileage_pagination",
+            "props": {
+                "currentPage": "{{Number(mileage_history?.data?.transactions?.pagination?.current_page ?? 1)}}",
+                "totalPages": "{{Number(mileage_history?.data?.transactions?.pagination?.last_page ?? 1)}}",
+                "prevLabel": "$t:superbify.notice.prev_page_aria",
+                "nextLabel": "$t:superbify.notice.next_page_aria",
+                "pageLabel": "$t:superbify.notice.page_aria"
+            },
+            "actions": [
+                {
+                    "event": "onPageChange",
+                    "handler": "navigate",
+                    "params": {
+                        "path": "/mypage/mileage",
+                        "mergeQuery": true,
+                        "query": { "page": "{{$args[0]}}" },
+                        "replace": true
+                    }
+                }
+            ]
+        }
+    ]
+}

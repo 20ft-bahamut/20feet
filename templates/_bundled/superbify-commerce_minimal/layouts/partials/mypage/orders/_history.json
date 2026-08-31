@@ -1,0 +1,243 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 주문 진행 이력 (주문/결제/취소 일시 + 취소 사유)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_history.json — 배송완료일시(delivered_at raw) 행을 생략하고 주문/결제/취소 일시 + 취소 건별 사유 카드만 남긴다. 바인딩 필드(order.data.*_formatted, order.data.cancels)는 동일."
+    },
+    "id": "mypage_order_history_section",
+    "type": "basic",
+    "name": "Div",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-sm, 0.75rem)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_history_title",
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.0625rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": 0,
+                "paddingBottom": "var(--scm-spacing-sm, 0.75rem)",
+                "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+            },
+            "text": "$t:superbify.mypage.orders.history"
+        },
+        {
+            "comment": "주문일시",
+            "id": "mypage_order_history_row_ordered",
+            "if": "{{!!order.data.ordered_at_formatted}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_history_ordered_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.date"
+                },
+                {
+                    "id": "mypage_order_history_ordered_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.ordered_at_formatted ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "결제일시 (결제 완료된 경우만)",
+            "id": "mypage_order_history_row_paid",
+            "if": "{{!!order.data.paid_at_formatted}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_history_paid_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.payment_date"
+                },
+                {
+                    "id": "mypage_order_history_paid_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.paid_at_formatted ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "취소일시 (취소된 경우만)",
+            "id": "mypage_order_history_row_cancelled",
+            "if": "{{!!order.data.cancelled_at_formatted}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_history_cancelled_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.cancelled_at"
+                },
+                {
+                    "id": "mypage_order_history_cancelled_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.cancelled_at_formatted ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "취소 사유 (취소 이력이 있는 경우만)",
+            "id": "mypage_order_history_cancels",
+            "if": "{{(order.data.cancels?.data ?? order.data.cancels ?? []).length > 0}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                "borderTop": "1px solid var(--scm-line, #E4DCCE)",
+                "paddingTop": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_history_cancels_title",
+                    "type": "basic",
+                    "name": "P",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "margin": 0
+                    },
+                    "text": "$t:superbify.mypage.orders.cancel_reason"
+                },
+                {
+                    "comment": "취소 건별 카드 — BASIC cancels 순회 바인딩 유지",
+                    "id": "mypage_order_history_cancels_list",
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": { "source": "{{order.data.cancels?.data ?? order.data.cancels ?? []}}", "item_var": "cancel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-xs, 0.5rem)"
+                    },
+                    "children": [
+                        {
+                            "id": "mypage_order_history_cancel_card",
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "flexWrap": "wrap",
+                                "alignItems": "baseline",
+                                "justifyContent": "space-between",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                                "padding": "var(--scm-spacing-xs, 0.5rem) var(--scm-spacing-sm, 0.75rem)",
+                                "border": "1px solid var(--scm-line, #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontFamily": "var(--scm-font-body, system-ui)"
+                            },
+                            "children": [
+                                {
+                                    "id": "mypage_order_history_cancel_reason",
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "style": {
+                                        "fontSize": "0.875rem",
+                                        "fontWeight": 500
+                                    },
+                                    "text": "{{cancel.cancel_reason_label ?? ''}}"
+                                },
+                                {
+                                    "id": "mypage_order_history_cancel_detail",
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{!!cancel.cancel_reason_detail}}",
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "{{cancel.cancel_reason_detail ?? ''}}"
+                                },
+                                {
+                                    "id": "mypage_order_history_cancel_date",
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{!!cancel.cancelled_at_formatted}}",
+                                    "style": {
+                                        "fontSize": "0.75rem",
+                                        "color": "var(--scm-text-muted, #8A837B)",
+                                        "fontVariantNumeric": "tabular-nums"
+                                    },
+                                    "text": "{{cancel.cancelled_at_formatted ?? ''}}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

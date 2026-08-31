@@ -1,0 +1,123 @@
+{
+    "version": "1.0.0",
+    "layout_name": "mypage/addresses",
+    "extends": "_user_base",
+    "permissions": [],
+    "computed": {
+        "currentTab": "addresses"
+    },
+    "fork_source_comment": "templates/_bundled/sirsoft-basic/layouts/mypage/addresses.json 포크 — addresses DS(auth_mode required) 그대로. BASIC modals 3종은 SRC 치환 규칙에 따라 각각 partials/mypage/addresses/_list.json(목록+기본배송지 PATCH), _modal_address.json(인라인 폼 패널, _local.editingAddress 게이트), _modal_confirm_delete.json / _modal_confirm_overwrite.json(SRC ConfirmDialog 컴포지트)로 치환했다.",
+    "data_sources": [
+        {
+            "fork_source": "templates/_bundled/sirsoft-basic/layouts/mypage/addresses.json",
+            "id": "addresses",
+            "label_key": "$t:superbify.data_source.current_user",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/addresses",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "required",
+            "loading_strategy": "progressive"
+        }
+    ],
+    "init_actions": [
+        {
+            "handler": "setState",
+            "params": {
+                "target": "local",
+                "editingAddress": null,
+                "isSaving": false,
+                "addressErrors": null,
+                "confirmDeleteId": null,
+                "isDeleting": false,
+                "confirmOverwrite": false
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "mypage_addresses_section",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "id": "mypage_addresses_wrap",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1320px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "gap": "var(--scm-spacing-md, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "mypage_addresses_eyebrow",
+                                "type": "basic",
+                                "name": "Span",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.75rem",
+                                    "color": "var(--scm-text-muted, #8A837B)",
+                                    "letterSpacing": "0.08em",
+                                    "textTransform": "uppercase"
+                                },
+                                "text": "$t:superbify.mypage.tabs.addresses"
+                            },
+                            {
+                                "id": "mypage_addresses_title",
+                                "type": "basic",
+                                "name": "H1",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-display, system-ui)",
+                                    "fontSize": "1.75rem",
+                                    "fontWeight": "700",
+                                    "color": "var(--scm-text-primary, #26221E)",
+                                    "margin": "0"
+                                },
+                                "text": "$t:superbify.mypage.title"
+                            },
+                            {
+                                "partial": "partials/mypage/_tabs.json"
+                            },
+                            {
+                                "id": "mypage_tab_content",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "gap": "var(--scm-spacing-md, 1rem)"
+                                },
+                                "children": [
+                                    {
+                                        "comment": "배송지 목록 + 추가/수정/삭제/기본설정 버튼",
+                                        "partial": "partials/mypage/addresses/_list.json"
+                                    },
+                                    {
+                                        "comment": "추가/수정 폼 — BASIC addressModal → 인라인 scm 패널 (_local.editingAddress 게이트)",
+                                        "partial": "partials/mypage/addresses/_modal_address.json"
+                                    },
+                                    {
+                                        "comment": "삭제 확인 — BASIC confirmDeleteAddressModal → SRC ConfirmDialog",
+                                        "partial": "partials/mypage/addresses/_modal_confirm_delete.json"
+                                    },
+                                    {
+                                        "comment": "배송지명 중복 덮어쓰기 확인 — BASIC confirmOverwriteModal → SRC ConfirmDialog",
+                                        "partial": "partials/mypage/addresses/_modal_confirm_overwrite.json"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

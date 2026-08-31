@@ -1,0 +1,72 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "배송지 삭제 확인 — BASIC _modal_confirm_delete.json(Modal 컴포지트) 포크 → SRC ConfirmDialog 컴포지트. open 은 _local.confirmDeleteId != null 게이트, 확인 시 DELETE user/addresses/{id} + onSuccess refetch/toast 체인은 BASIC 그대로 유지하고 closeModal 을 confirmDeleteId 클리어로 치환했다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/addresses/_modal_confirm_delete.json"
+    },
+    "type": "composite",
+    "name": "ConfirmDialog",
+    "id": "confirm_delete_address_dialog",
+    "props": {
+        "open": "{{_local.confirmDeleteId != null}}",
+        "title": "$t:superbify.mypage.addresses.confirm_delete_title",
+        "message": "$t:superbify.mypage.addresses.confirm_delete_body",
+        "confirmLabel": "$t:superbify.mypage.delete",
+        "cancelLabel": "$t:superbify.mypage.cancel",
+        "tone": "danger",
+        "busy": "{{_local.isDeleting ?? false}}"
+    },
+    "actions": [
+        {
+            "comment": "BASIC 삭제 시퀀스 — setState isDeleting → DELETE user/addresses/{id} → refetch + toast",
+            "event": "onConfirm",
+            "handler": "sequence",
+            "actions": [
+                {
+                    "handler": "setState",
+                    "params": { "target": "local", "isDeleting": true }
+                },
+                {
+                    "handler": "apiCall",
+                    "auth_required": true,
+                    "target": "/api/modules/sirsoft-ecommerce/user/addresses/{{_local.confirmDeleteId}}",
+                    "params": { "method": "DELETE" },
+                    "onSuccess": [
+                        { "handler": "refetchDataSource", "params": { "dataSourceId": "addresses" } },
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "isDeleting": false,
+                                "confirmDeleteId": null
+                            }
+                        },
+                        {
+                            "handler": "toast",
+                            "params": { "type": "success", "message": "$t:superbify.mypage.addresses.deleted" }
+                        }
+                    ],
+                    "onError": [
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "isDeleting": false,
+                                "confirmDeleteId": null
+                            }
+                        },
+                        {
+                            "handler": "toast",
+                            "params": { "type": "error", "message": "{{error.message}}" }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "event": "onCancel",
+            "handler": "setState",
+            "params": { "target": "local", "confirmDeleteId": null }
+        }
+    ]
+}

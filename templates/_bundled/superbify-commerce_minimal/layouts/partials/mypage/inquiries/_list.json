@@ -1,0 +1,408 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 상품 문의 내역 — BASIC inquiries/_list.json 포크(읽기 전용). 필터 3종(setState + refetch 체인 유지), 카드 펼침(openedInquiryId), 상품 링크(navigate item.product.url)는 그대로 두고 BASIC 수정/삭제 버튼과 qna/inquiry 모달 액션은 SRC 범위(읽기 전용)에서 제외했다. Icon/Tailwind → scm 토큰 inline 스타일, BASIC Pagination → SRC Pagination.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/inquiries/_list.json"
+    },
+    "type": "basic",
+    "name": "Div",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-md, 1rem)"
+    },
+    "children": [
+        {
+            "comment": "필터 — 전체 / 답변 대기 / 답변 완료 (BASIC setState inquiriesFilter + refetch 체인 유지)",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "var(--scm-spacing-2xs, 0.25rem)"
+            },
+            "children": [
+                {
+                    "id": "inquiries_filter_all",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{!(_local.inquiriesFilter ?? '') ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{!(_local.inquiriesFilter ?? '') ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.inquiries.filter.all",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "inquiriesFilter": "", "inquiriesPage": 1 }
+                                },
+                                { "handler": "refetchDataSource", "params": { "dataSourceId": "myInquiries" } }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "inquiries_filter_pending",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{(_local.inquiriesFilter ?? '') === '0' ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{(_local.inquiriesFilter ?? '') === '0' ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.inquiries.filter.pending",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "inquiriesFilter": "0", "inquiriesPage": 1 }
+                                },
+                                { "handler": "refetchDataSource", "params": { "dataSourceId": "myInquiries" } }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "inquiries_filter_answered",
+                    "type": "basic",
+                    "name": "Button",
+                    "props": { "type": "button" },
+                    "style": {
+                        "minHeight": "44px",
+                        "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                        "backgroundColor": "{{(_local.inquiriesFilter ?? '') === '1' ? 'var(--scm-charcoal, #26221E)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                        "color": "{{(_local.inquiriesFilter ?? '') === '1' ? 'var(--scm-text-inverse, #FAF8F3)' : 'var(--scm-text-body, #4A4643)'}}",
+                        "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "fontWeight": "500",
+                        "cursor": "pointer"
+                    },
+                    "text": "$t:superbify.mypage.inquiries.filter.answered",
+                    "actions": [
+                        {
+                            "type": "click",
+                            "handler": "sequence",
+                            "actions": [
+                                {
+                                    "handler": "setState",
+                                    "params": { "target": "local", "inquiriesFilter": "1", "inquiriesPage": 1 }
+                                },
+                                { "handler": "refetchDataSource", "params": { "dataSourceId": "myInquiries" } }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "문의 카드 목록 (읽기 전용, 펼침 상세)",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(myInquiries?.data?.items ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                        "source": "{{myInquiries?.data?.items ?? []}}",
+                        "item_var": "item",
+                        "index_var": "inqIdx"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "props": { "className": "scm-panel" },
+                            "style": {
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                                "padding": "var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-md, 1rem)"
+                            },
+                            "children": [
+                                {
+                                    "comment": "카드 헤더 — 상품 + 제목 + 상태 배지, 클릭 시 상세 펼침/접힘"
+                                    ,
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "style": {
+                                        "display": "flex",
+                                        "justifyContent": "space-between",
+                                        "alignItems": "flex-start",
+                                        "gap": "var(--scm-spacing-xs, 0.5rem)"
+                                    },
+                                    "actions": [
+                                        {
+                                            "type": "click",
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "local",
+                                                "openedInquiryId": "{{_local.openedInquiryId === item.id ? null : item.id}}"
+                                            }
+                                        }
+                                    ],
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "style": {
+                                                "display": "flex",
+                                                "flexDirection": "column",
+                                                "gap": "var(--scm-spacing-3xs, 0.125rem)",
+                                                "minWidth": 0
+                                            },
+                                            "children": [
+                                                {
+                                                    "comment": "상품명 — 상품 상세로 이동(BASIC product navigate 유지)",
+                                                    "type": "basic",
+                                                    "name": "Button",
+                                                    "if": "{{!!item.product?.url}}",
+                                                    "props": { "type": "button" },
+                                                    "style": {
+                                                        "display": "block",
+                                                        "background": "none",
+                                                        "border": "none",
+                                                        "padding": "0",
+                                                        "textAlign": "left",
+                                                        "minHeight": "24px",
+                                                        "fontSize": "0.8125rem",
+                                                        "fontWeight": "500",
+                                                        "color": "var(--scm-accent, #2E3A48)",
+                                                        "textDecoration": "underline",
+                                                        "cursor": "pointer",
+                                                        "overflow": "hidden",
+                                                        "textOverflow": "ellipsis",
+                                                        "whiteSpace": "nowrap"
+                                                    },
+                                                    "text": "{{item.product_name ?? ''}}",
+                                                    "actions": [
+                                                        {
+                                                            "type": "click",
+                                                            "handler": "navigate",
+                                                            "params": { "path": "{{item.product?.url ?? '/'}}" }
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "if": "{{!item.product?.url}}",
+                                                    "style": {
+                                                        "fontSize": "0.8125rem",
+                                                        "color": "var(--scm-text-muted, #8A837B)"
+                                                    },
+                                                    "text": "{{item.product_name ?? ''}}"
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "style": {
+                                                        "fontSize": "0.9375rem",
+                                                        "fontWeight": "600",
+                                                        "color": "var(--scm-text-primary, #26221E)",
+                                                        "overflow": "hidden",
+                                                        "textOverflow": "ellipsis",
+                                                        "whiteSpace": "nowrap"
+                                                    },
+                                                    "text": "{{item.title ?? item.content ?? ''}}"
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "style": {
+                                                        "fontSize": "0.75rem",
+                                                        "color": "var(--scm-text-muted, #8A837B)"
+                                                    },
+                                                    "text": "{{item.created_at ?? ''}}"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "basic",
+                                            "name": "Span",
+                                            "style": {
+                                                "flexShrink": 0,
+                                                "display": "inline-flex",
+                                                "alignItems": "center",
+                                                "padding": "0 var(--scm-spacing-2xs, 0.25rem)",
+                                                "minHeight": "22px",
+                                                "backgroundColor": "{{item.is_answered ? 'var(--scm-bg-secondary, #F4F0E6)' : 'var(--scm-bg-primary, #FAF8F3)'}}",
+                                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                                "color": "var(--scm-text-body, #4A4643)",
+                                                "borderRadius": "var(--scm-radius-pill, 9999px)",
+                                                "fontSize": "0.6875rem",
+                                                "fontWeight": "600"
+                                            },
+                                            "text": "{{item.is_answered ? $t('superbify.mypage.inquiries.status_answered') : $t('superbify.mypage.inquiries.status_waiting')}}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "comment": "펼침 상세 — 문의 내용 + 판매자 답변 (읽기 전용)",
+                                    "type": "basic",
+                                    "name": "Div",
+                                    "if": "{{_local.openedInquiryId === item.id}}",
+                                    "style": {
+                                        "display": "flex",
+                                        "flexDirection": "column",
+                                        "gap": "var(--scm-spacing-sm, 0.75rem)",
+                                        "paddingTop": "var(--scm-spacing-xs, 0.5rem)",
+                                        "borderTop": "var(--scm-hairline, 1px solid #E4DCCE)"
+                                    },
+                                    "children": [
+                                        {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "style": {
+                                                "display": "flex",
+                                                "flexDirection": "column",
+                                                "gap": "var(--scm-spacing-2xs, 0.25rem)"
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "style": {
+                                                        "fontSize": "0.75rem",
+                                                        "fontWeight": "600",
+                                                        "color": "var(--scm-text-muted, #8A837B)"
+                                                    },
+                                                    "text": "$t:superbify.mypage.inquiries.question"
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "P",
+                                                    "style": {
+                                                        "margin": "0",
+                                                        "fontSize": "0.875rem",
+                                                        "color": "var(--scm-text-body, #4A4643)",
+                                                        "whiteSpace": "pre-line"
+                                                    },
+                                                    "text": "{{item.content ?? ''}}"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "basic",
+                                            "name": "Div",
+                                            "if": "{{!!item.reply}}",
+                                            "style": {
+                                                "display": "flex",
+                                                "flexDirection": "column",
+                                                "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                                                "padding": "var(--scm-spacing-xs, 0.5rem) var(--scm-spacing-sm, 0.75rem)",
+                                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                                "borderRadius": "var(--scm-radius-sm, 4px)"
+                                            },
+                                            "children": [
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "style": {
+                                                        "fontSize": "0.75rem",
+                                                        "fontWeight": "600",
+                                                        "color": "var(--scm-accent, #2E3A48)"
+                                                    },
+                                                    "text": "$t:superbify.mypage.inquiries.reply"
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "Span",
+                                                    "if": "{{item.reply?.created_at}}",
+                                                    "style": {
+                                                        "fontSize": "0.75rem",
+                                                        "fontWeight": "500",
+                                                        "color": "var(--scm-text-muted, #8A837B)"
+                                                    },
+                                                    "text": "{{item.reply?.created_at ?? ''}}"
+                                                },
+                                                {
+                                                    "type": "basic",
+                                                    "name": "P",
+                                                    "style": {
+                                                        "margin": "0",
+                                                        "fontSize": "0.875rem",
+                                                        "color": "var(--scm-text-body, #4A4643)",
+                                                        "whiteSpace": "pre-line"
+                                                    },
+                                                    "text": "{{item.reply?.content ?? ''}}"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "빈 상태 — SRC EmptyState",
+            "type": "composite",
+            "name": "EmptyState",
+            "if": "{{!(myInquiries?.data?.items ?? []).length}}",
+            "props": {
+                "title": "$t:superbify.mypage.inquiries.title",
+                "message": "$t:superbify.mypage.inquiries.empty"
+            }
+        },
+        {
+            "comment": "SRC Pagination — BASIC setState+refetch 체인 유지",
+            "type": "composite",
+            "name": "Pagination",
+            "id": "inquiries_pagination",
+            "props": {
+                "currentPage": "{{Number(myInquiries?.data?.meta?.current_page ?? 1)}}",
+                "totalPages": "{{Number(myInquiries?.data?.meta?.last_page ?? 1)}}",
+                "prevLabel": "$t:superbify.notice.prev_page_aria",
+                "nextLabel": "$t:superbify.notice.next_page_aria",
+                "pageLabel": "$t:superbify.notice.page_aria"
+            },
+            "actions": [
+                {
+                    "event": "onPageChange",
+                    "handler": "sequence",
+                    "actions": [
+                        {
+                            "handler": "setState",
+                            "params": { "target": "local", "inquiriesPage": "{{$args[0]}}" }
+                        },
+                        { "handler": "refetchDataSource", "params": { "dataSourceId": "myInquiries" } }
+                    ]
+                }
+            ]
+        }
+    ]
+}

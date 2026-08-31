@@ -124,6 +124,31 @@ export interface CheckoutFormProps {
     emptyMethodsMessage?: string;
     /** Optional isLoggedIn flag — when false, guest password fields show. */
     isLoggedIn?: boolean;
+    /** Logged-in member profile passed from the layout (_global.currentUser) — used to prefill the orderer section. */
+    currentUserName?: string;
+    currentUserPhone?: string;
+    currentUserEmail?: string;
+    /**
+     * Address-search slot — daum 우편번호 extension_point 주입 노드가
+     * zipcode/address 입력 옆에 렌더링되도록 통과시키는 슬롯.
+     * (server-injected extension node renders inside the composite)
+     */
+    children?: React.ReactNode;
+}
+
+/**
+ * daum 우편번호 extension_point 가 G7 전역 상태 `_global.checkoutAddress` 에
+ * 기록한 주소 정보(onAddressSelect setState payload). 플러그인 핸들러는
+ * DOM input 에 값을 쓰지 않고 G7 액션만 디스패치하므로, controlled input 을
+ * 쓰는 이 컴포지트는 state 구독 브리지로만 주소를 받을 수 있다.
+ */
+export interface CheckoutFormBridgedAddress {
+    zipcode?: string;
+    address?: string;
+    region?: string;
+    city?: string;
+    country_code?: string;
+    countryCode?: string;
 }
 
 export interface CheckoutSubmitPayload {
@@ -219,6 +244,10 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         emptyMethodsTitle = '결제 수단이 없습니다',
         emptyMethodsMessage = '관리자에서 결제 설정을 확인해 주세요.',
         isLoggedIn = false,
+        currentUserName,
+        currentUserPhone,
+        currentUserEmail,
+        children,
     } = props;
 
     // Form state
@@ -239,6 +268,22 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     const userTouchedRef = useRef(false);
+
+    // Member prefill — layout passes _global.currentUser.*; fill the orderer
+    // section once when the profile arrives and the member has not edited yet.
+    // G7Core.currentUser state updates land after mount because current_user DS
+    // is progressive, so this effect re-runs as the values resolve.
+    useEffect(() => {
+        if (!isLoggedIn || userTouchedRef.current) return;
+        if (currentUserName) setOrdererName((prev) => (prev ? prev : currentUserName));
+        if (currentUserPhone) setOrdererPhone((prev) => (prev ? prev : currentUserPhone));
+    }, [isLoggedIn, currentUserName, currentUserPhone]);
+
+    useEffect(() => {
+        if (!userTouchedRef.current && isLoggedIn && currentUserEmail) {
+            setOrdererEmail((prev) => (prev ? prev : currentUserEmail));
+        }
+    }, [isLoggedIn, currentUserEmail]);
 
     const paymentMethods = useMemo<CheckoutPaymentMethod[]>(
         () => paymentSettings?.order_settings?.payment_methods ?? [],
@@ -262,6 +307,60 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
             setDepositorName(ordererName);
         }
     }, [ordererName]);
+
+    // daum 우편번호 브리지 — extension_point 의 onAddressSelect 가 G7 전역 상태
+    // `_global.checkoutAddress` 로 주소를 기록한다(플러그인은 DOM input 에 값을
+    // 쓰지 않는다). 이 컴포지트는 controlled input 을 쓰므로 G7Core.state 구독으로
+    // 해당 값을 React 상태로 동기화한다(storageHandlers tolerant-lookup 패턴).
+    const applyBridgedAddress = useCallback(
+        (addr: CheckoutFormBridgedAddress | null | undefined) => {
+            if (!addr || typeof addr !== 'object') return;
+            const nextZipcode = typeof addr.zipcode === 'string' ? addr.zipcode : '';
+            const nextAddress = typeof addr.address === 'string' ? addr.address : '';
+            if (nextZipcode) {
+                setZipcode((prev) => (prev === nextZipcode ? prev : nextZipcode));
+            }
+            if (nextAddress) {
+                setAddress((prev) => (prev === nextAddress ? prev : nextAddress));
+            }
+        },
+        [],
+    );
+
+    useEffect(() => {
+        const G7Core = (
+            window as unknown as {
+                G7Core?: {
+                    state?: {
+                        get?: () => Record<string, unknown> | null | undefined;
+                        subscribe?: (listener: (state: Record<string, unknown>) => void) => (() => void) | void;
+                    };
+                };
+            }
+        ).G7Core;
+        if (!G7Core?.state) return;
+
+        // 마운트 시점에 이미 주소가 기록돼 있으면 즉시 반영(재방문/뒤로가기 대응).
+        const snapshot = G7Core.state.get?.();
+        applyBridgedAddress(
+            (snapshot?.checkoutAddress ?? (snapshot as { _global?: { checkoutAddress?: CheckoutFormBridgedAddress } })?._global?.checkoutAddress) as
+                | CheckoutFormBridgedAddress
+                | null
+                | undefined,
+        );
+
+        const unsubscribe = G7Core.state.subscribe?.((state) => {
+            const scoped = state as {
+                checkoutAddress?: CheckoutFormBridgedAddress;
+                _global?: { checkoutAddress?: CheckoutFormBridgedAddress };
+            };
+            applyBridgedAddress(scoped?.checkoutAddress ?? scoped?._global?.checkoutAddress);
+        });
+
+        return () => {
+            if (typeof unsubscribe === 'function') unsubscribe();
+        };
+    }, [applyBridgedAddress]);
 
     const summary = checkoutData?.calculation?.summary;
     const items = checkoutData?.calculation?.items ?? [];
@@ -504,6 +603,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
                 </Div>
                 {!isLoggedIn ? (
                     <Div
+                        data-testid="checkout-guest-password"
                         style={{
                             marginTop: 'var(--scm-spacing-md, 1rem)',
                             padding: 'var(--scm-spacing-md, 1rem)',
@@ -587,6 +687,19 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
                         error={fieldErrors['shipping.zipcode']}
                         required
                     />
+                    {/* daum 우편번호 extension_point 주입 노드 슬롯 — zipcode/address 입력 옆 */}
+                    {children ? (
+                        <Div
+                            data-testid="checkout-address-search-slot"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'flex-end',
+                                gap: 'var(--scm-spacing-xs, 0.5rem)',
+                            }}
+                        >
+                            {children}
+                        </Div>
+                    ) : null}
                     <FieldText
                         label={addressLabel}
                         name="address"

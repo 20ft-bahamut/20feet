@@ -1,0 +1,275 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "마이페이지 쿠폰 목록 — 신규 작성(BASIC fork 없음). 보유 쿠폰(my_coupons) + 다운로드 가능 쿠폰(available_coupons) 두 섹션. 쿠폰 다운로드는 POST user/coupons/{id}/download 후 my_coupons refetch. 응답 래퍼는 모듈 표준 paginator/단순 배열을 모두 수용하도록 ?? 폴백으로 바인딩한다.",
+        "fork_source": null
+    },
+    "type": "basic",
+    "name": "Div",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-lg, 1.5rem)"
+    },
+    "children": [
+        {
+            "comment": "보유 쿠폰 헤더",
+            "type": "basic",
+            "name": "H2",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.125rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": "0"
+            },
+            "text": "$t:superbify.mypage.coupons.owned"
+        },
+        {
+            "comment": "보유 쿠폰 카드 목록",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(my_coupons?.data?.data ?? my_coupons?.data?.coupons?.data ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                        "source": "{{my_coupons?.data?.data ?? my_coupons?.data?.coupons?.data ?? []}}",
+                        "item_var": "coupon",
+                        "index_var": "couponIdx"
+                    },
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "justifyContent": "space-between",
+                        "alignItems": "center",
+                        "flexWrap": "wrap",
+                        "gap": "var(--scm-spacing-xs, 0.5rem)",
+                        "padding": "var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-md, 1rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "style": {
+                                        "fontSize": "0.9375rem",
+                                        "fontWeight": "600",
+                                        "color": "var(--scm-text-primary, #26221E)"
+                                    },
+                                    "text": "{{coupon.name ?? coupon.title ?? '-'}}"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.discount_display ?? coupon.discount ?? coupon.description}}",
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-body, #4A4643)"
+                                    },
+                                    "text": "{{coupon.discount_display ?? coupon.description ?? ''}}"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.expires_at ?? coupon.valid_until}}",
+                                    "style": {
+                                        "fontSize": "0.75rem",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "$t:superbify.mypage.coupons.expires"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.expires_at ?? coupon.valid_until}}",
+                                    "style": {
+                                        "fontSize": "0.75rem",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "{{coupon.expires_at ?? coupon.valid_until ?? ''}}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "comment": "보유 쿠폰 없음",
+            "type": "composite",
+            "name": "EmptyState",
+            "if": "{{!(my_coupons?.data?.data ?? my_coupons?.data?.coupons?.data ?? []).length}}",
+            "props": {
+                "title": "$t:superbify.mypage.coupons.title",
+                "message": "$t:superbify.mypage.coupons.empty"
+            }
+        },
+        {
+            "comment": "다운로드 가능한 쿠폰 헤더",
+            "type": "basic",
+            "name": "H2",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.125rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": "0"
+            },
+            "text": "$t:superbify.mypage.coupons.available"
+        },
+        {
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(available_coupons?.data?.data ?? available_coupons?.data?.coupons ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                        "source": "{{available_coupons?.data?.data ?? available_coupons?.data?.coupons ?? []}}",
+                        "item_var": "coupon",
+                        "index_var": "availableIdx"
+                    },
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "justifyContent": "space-between",
+                        "alignItems": "center",
+                        "flexWrap": "wrap",
+                        "gap": "var(--scm-spacing-xs, 0.5rem)",
+                        "padding": "var(--scm-spacing-sm, 0.75rem) var(--scm-spacing-md, 1rem)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                            },
+                            "children": [
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "style": {
+                                        "fontSize": "0.9375rem",
+                                        "fontWeight": "600",
+                                        "color": "var(--scm-text-primary, #26221E)"
+                                    },
+                                    "text": "{{coupon.name ?? coupon.title ?? '-'}}"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.discount_display ?? coupon.discount ?? coupon.description}}",
+                                    "style": {
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-body, #4A4643)"
+                                    },
+                                    "text": "{{coupon.discount_display ?? coupon.description ?? ''}}"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.expires_at ?? coupon.valid_until}}",
+                                    "style": {
+                                        "fontSize": "0.75rem",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "$t:superbify.mypage.coupons.expires"
+                                },
+                                {
+                                    "type": "basic",
+                                    "name": "Span",
+                                    "if": "{{coupon.expires_at ?? coupon.valid_until}}",
+                                    "style": {
+                                        "fontSize": "0.75rem",
+                                        "color": "var(--scm-text-muted, #8A837B)"
+                                    },
+                                    "text": "{{coupon.expires_at ?? coupon.valid_until ?? ''}}"
+                                }
+                            ]
+                        },
+                        {
+                            "comment": "쿠폰 받기 — POST user/coupons/{id}/download (verified endpoint)",
+                            "type": "basic",
+                            "name": "Button",
+                            "props": {
+                                "type": "button",
+                                "data-testid": "coupon-download"
+                            },
+                            "style": {
+                                "minHeight": "44px",
+                                "padding": "0 var(--scm-spacing-sm, 0.75rem)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "border": "var(--scm-hairline-strong, 1px solid #26221E)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.8125rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer"
+                            },
+                            "text": "$t:superbify.mypage.coupons.download",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "apiCall",
+                                    "auth_required": true,
+                                    "target": "/api/modules/sirsoft-ecommerce/user/coupons/{{coupon.id}}/download",
+                                    "params": { "method": "POST" },
+                                    "onSuccess": [
+                                        { "handler": "refetchDataSource", "params": { "dataSourceId": "my_coupons" } },
+                                        { "handler": "refetchDataSource", "params": { "dataSourceId": "available_coupons" } },
+                                        {
+                                            "handler": "toast",
+                                            "params": { "type": "success", "message": "$t:superbify.mypage.coupons.downloaded" }
+                                        }
+                                    ],
+                                    "onError": [
+                                        {
+                                            "handler": "toast",
+                                            "params": { "type": "error", "message": "{{error.message}}" }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "basic",
+            "name": "P",
+            "if": "{{!(available_coupons?.data?.data ?? available_coupons?.data?.coupons ?? []).length}}",
+            "style": {
+                "margin": "0",
+                "fontSize": "0.875rem",
+                "color": "var(--scm-text-muted, #8A837B)"
+            },
+            "text": "$t:superbify.mypage.coupons.no_available"
+        }
+    ]
+}

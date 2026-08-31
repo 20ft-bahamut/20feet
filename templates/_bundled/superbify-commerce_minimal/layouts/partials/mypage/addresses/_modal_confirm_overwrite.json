@@ -1,0 +1,85 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "배송지명 중복 덮어쓰기 확인 — BASIC _modal_confirm_overwrite.json(Modal) 포크 → SRC ConfirmDialog. open 은 _local.confirmOverwrite 게이트, 확인 시 force_overwrite:true PUT/POST 체인과 onSuccess refetch/toast 는 BASIC 그대로 유지하고 closeModal 을 state 클리어로 치환했다.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/addresses/_modal_confirm_overwrite.json"
+    },
+    "type": "composite",
+    "name": "ConfirmDialog",
+    "id": "confirm_overwrite_address_dialog",
+    "props": {
+        "open": "{{_local.confirmOverwrite === true}}",
+        "title": "$t:superbify.mypage.addresses.conflict_title",
+        "message": "$t:superbify.mypage.addresses.conflict_body",
+        "confirmLabel": "$t:superbify.mypage.addresses.conflict_confirm",
+        "cancelLabel": "$t:superbify.mypage.cancel",
+        "tone": "default",
+        "busy": "{{_local.isSaving ?? false}}"
+    },
+    "actions": [
+        {
+            "comment": "BASIC 덮어쓰기 시퀀스 — closeModal → apiCall(force_overwrite:true) → refetch + toast",
+            "event": "onConfirm",
+            "handler": "sequence",
+            "actions": [
+                {
+                    "handler": "setState",
+                    "params": {
+                        "target": "local",
+                        "confirmOverwrite": false,
+                        "isSaving": true
+                    }
+                },
+                {
+                    "handler": "apiCall",
+                    "auth_required": true,
+                    "target": "{{_local.editingAddress?.id ? '/api/modules/sirsoft-ecommerce/user/addresses/' + _local.editingAddress.id : '/api/modules/sirsoft-ecommerce/user/addresses'}}",
+                    "params": {
+                        "method": "{{_local.editingAddress?.id ? 'PUT' : 'POST'}}",
+                        "body": {
+                            "force_overwrite": true,
+                            "name": "{{_local.editingAddress?.name ?? ''}}",
+                            "recipient_name": "{{_local.editingAddress?.recipient_name ?? ''}}",
+                            "recipient_phone": "{{_local.editingAddress?.recipient_phone ?? ''}}",
+                            "country_code": "{{_local.editingAddress?.country_code ?? 'KR'}}",
+                            "zipcode": "{{_local.editingAddress?.zipcode ?? ''}}",
+                            "address": "{{_local.editingAddress?.address ?? ''}}",
+                            "address_detail": "{{_local.editingAddress?.address_detail ?? ''}}",
+                            "is_default": "{{_local.editingAddress?.is_default ?? false}}"
+                        }
+                    },
+                    "onSuccess": [
+                        { "handler": "refetchDataSource", "params": { "dataSourceId": "addresses" } },
+                        {
+                            "handler": "setState",
+                            "params": {
+                                "target": "local",
+                                "isSaving": false,
+                                "editingAddress": null
+                            }
+                        },
+                        {
+                            "handler": "toast",
+                            "params": { "type": "success", "message": "$t:superbify.mypage.addresses.saved" }
+                        }
+                    ],
+                    "onError": [
+                        {
+                            "handler": "setState",
+                            "params": { "target": "local", "isSaving": false }
+                        },
+                        {
+                            "handler": "toast",
+                            "params": { "type": "error", "message": "{{error.message}}" }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "event": "onCancel",
+            "handler": "setState",
+            "params": { "target": "local", "confirmOverwrite": false }
+        }
+    ]
+}

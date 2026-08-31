@@ -1,0 +1,224 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 결제 정보 (소계/배송비/할인/총액 읽기전용)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_payment.json — 쿠폰/마일리지/현금영수증 세부 라인(BASIC KG 플러그인 앵커 포함)을 축약하고 소계·배송비·할인·총액 요약만 남긴다. 라벨은 SRC checkout.summary.* 를 재사용."
+    },
+    "id": "mypage_order_payment_section",
+    "type": "basic",
+    "name": "Div",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-sm, 0.75rem)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_payment_title",
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.0625rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": 0,
+                "paddingBottom": "var(--scm-spacing-sm, 0.75rem)",
+                "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+            },
+            "text": "$t:superbify.mypage.orders.payment"
+        },
+        {
+            "comment": "결제 수단 (주문 payment 스냅샷)",
+            "id": "mypage_order_payment_method_row",
+            "if": "{{!!order.data.payment?.payment_method_label}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_payment_method_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.payment"
+                },
+                {
+                    "id": "mypage_order_payment_method_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "{{order.data.payment?.payment_method_label ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "소계",
+            "id": "mypage_order_payment_subtotal_row",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_payment_subtotal_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.checkout.summary.subtotal"
+                },
+                {
+                    "id": "mypage_order_payment_subtotal_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.subtotal_amount_formatted ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "배송비 (0원이면 무료배송 표기)",
+            "id": "mypage_order_payment_shipping_row",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_payment_shipping_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.checkout.summary.shipping"
+                },
+                {
+                    "id": "mypage_order_payment_shipping_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{(order.data.total_shipping_amount ?? 0) > 0 ? (order.data.total_shipping_amount_formatted ?? '') : '$t:superbify.mypage.orders.free_shipping'}}"
+                }
+            ]
+        },
+        {
+            "comment": "할인 (있을 때만)",
+            "id": "mypage_order_payment_discount_row",
+            "if": "{{(order.data.total_discount_amount ?? 0) > 0}}",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_payment_discount_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.checkout.summary.discount"
+                },
+                {
+                    "id": "mypage_order_payment_discount_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "fontWeight": 500,
+                        "color": "var(--scm-danger, #B3261E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "-{{order.data.total_discount_amount_formatted ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "총 결제금액",
+            "id": "mypage_order_payment_total_row",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "alignItems": "center",
+                "justifyContent": "space-between",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "borderTop": "1px solid var(--scm-line, #E4DCCE)",
+                "paddingTop": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_payment_total_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.9375rem",
+                        "fontWeight": 600,
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "$t:superbify.mypage.orders.total"
+                },
+                {
+                    "id": "mypage_order_payment_total_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "1.125rem",
+                        "fontWeight": 700,
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.total_amount_formatted ?? ''}}"
+                }
+            ]
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "name": "@superbify/commerce-minimal",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "SuperBify Commerce Minimal — Gnuboard7 User Template (Demo D2C store on sirsoft-ecommerce)",
     "type": "module",
     "main": "dist/js/components.iife.js",

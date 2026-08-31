@@ -60,6 +60,23 @@ function resolveLabel(value: string | Record<string, string> | null | undefined,
     return '';
 }
 
+/**
+ * Member bearer token, if present (sirsoft-basic identityLauncher tolerant pattern).
+ * Raw fetch bypasses the core ApiClient, so the Authorization header must be attached
+ * manually — otherwise the server treats component-level calls (POST /checkout, POST
+ * /user/orders) as guest calls even when the member is logged in.
+ */
+function readAuthHeader(): Record<string, string> {
+    try {
+        const G7Core = (window as unknown as { G7Core?: { api?: { getToken?: () => string | null } } }).G7Core;
+        const token = G7Core?.api?.getToken?.() ?? null;
+        if (token) return { Authorization: `Bearer ${token}` };
+    } catch {
+        /* storage may be disabled */
+    }
+    return {};
+}
+
 async function fetchJson<T>(url: string, init: RequestInit & { headers?: Record<string, string> }): Promise<{ ok: boolean; status: number; body: T | null; errorText?: string }> {
     const res = await fetch(url, {
         credentials: 'same-origin',
@@ -67,6 +84,7 @@ async function fetchJson<T>(url: string, init: RequestInit & { headers?: Record<
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
+            ...readAuthHeader(),
             ...(init.headers ?? {}),
         },
     });
@@ -110,6 +128,9 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
         paymentSettings,
         shippingSettings,
         isLoggedIn = false,
+        currentUserName,
+        currentUserPhone,
+        currentUserEmail,
     } = props;
 
     const title = props.title ?? '결제';
@@ -423,6 +444,9 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                 isSubmitting={submitting}
                 submitError={submitError}
                 isLoggedIn={isLoggedIn}
+                currentUserName={currentUserName}
+                currentUserPhone={currentUserPhone}
+                currentUserEmail={currentUserEmail}
                 resolvePaymentLabel={resolvePaymentLabel}
             />
             {isLoggedIn ? null : (

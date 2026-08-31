@@ -1,0 +1,160 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 주문 상품 목록 (읽기전용)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_items.json — 취소 선택 체크박스/추가옵션 상세/상품 상세 이동 버튼(BASIC 취소 모달 전용 상호작용)을 생략하고 읽기전용 scm 카드로 재작성. order.data.options 순회와 *_formatted 바인딩은 유지."
+    },
+    "id": "mypage_order_items_section",
+    "type": "basic",
+    "name": "Div",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-sm, 0.75rem)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_items_title",
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.0625rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": 0,
+                "paddingBottom": "var(--scm-spacing-sm, 0.75rem)",
+                "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+            },
+            "text": "$t:superbify.mypage.orders.item"
+        },
+        {
+            "comment": "아이템 행 반복 — OrderResource.options",
+            "id": "mypage_order_items_list",
+            "type": "basic",
+            "name": "Div",
+            "iteration": { "source": "{{order.data.options ?? []}}", "item_var": "item" },
+            "style": {
+                "display": "flex",
+                "flexDirection": "column"
+            },
+            "children": [
+                {
+                    "id": "mypage_order_items_row",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "display": "flex",
+                        "alignItems": "center",
+                        "gap": "var(--scm-spacing-sm, 0.75rem)",
+                        "paddingBlock": "var(--scm-spacing-sm, 0.75rem)",
+                        "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                    },
+                    "children": [
+                        {
+                            "id": "mypage_order_items_thumb",
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "width": "64px",
+                                "height": "64px",
+                                "flex": "0 0 auto",
+                                "borderRadius": "var(--scm-radius, 8px)",
+                                "border": "1px solid var(--scm-line, #E4DCCE)",
+                                "overflow": "hidden",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)"
+                            },
+                            "children": [
+                                {
+                                    "comment": "defensive bind — thumbnail_url 가 문자열일 때만 렌더",
+                                    "id": "mypage_order_items_thumb_img",
+                                    "type": "basic",
+                                    "name": "Img",
+                                    "if": "{{typeof item.thumbnail_url === 'string'}}",
+                                    "props": {
+                                        "src": "{{item.thumbnail_url ?? ''}}",
+                                        "alt": "{{$localized(item.product_name) ?? ''}}"
+                                    },
+                                    "style": {
+                                        "width": "100%",
+                                        "height": "100%",
+                                        "objectFit": "cover",
+                                        "display": "block"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "id": "mypage_order_items_info",
+                            "type": "basic",
+                            "name": "Div",
+                            "style": {
+                                "flex": "1 1 auto",
+                                "minWidth": "0",
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "gap": "var(--scm-spacing-3xs, 0.125rem)"
+                            },
+                            "children": [
+                                {
+                                    "id": "mypage_order_items_name",
+                                    "type": "basic",
+                                    "name": "P",
+                                    "style": {
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.9375rem",
+                                        "fontWeight": 500,
+                                        "color": "var(--scm-text-primary, #26221E)",
+                                        "margin": 0
+                                    },
+                                    "text": "{{$localized(item.product_name) ?? ''}}"
+                                },
+                                {
+                                    "id": "mypage_order_items_option_name",
+                                    "type": "basic",
+                                    "name": "P",
+                                    "if": "{{!!item.option_snapshot?.option_name}}",
+                                    "style": {
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-muted, #8A837B)",
+                                        "margin": 0
+                                    },
+                                    "text": "{{$localized(item.option_snapshot?.option_name) ?? ''}}"
+                                },
+                                {
+                                    "id": "mypage_order_items_unit_price",
+                                    "type": "basic",
+                                    "name": "P",
+                                    "style": {
+                                        "fontFamily": "var(--scm-font-body, system-ui)",
+                                        "fontSize": "0.8125rem",
+                                        "color": "var(--scm-text-muted, #8A837B)",
+                                        "fontVariantNumeric": "tabular-nums",
+                                        "margin": 0
+                                    },
+                                    "text": "{{item.unit_price_formatted ?? ''}} × {{item.quantity ?? 0}}"
+                                }
+                            ]
+                        },
+                        {
+                            "id": "mypage_order_items_subtotal",
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "flex": "0 0 auto",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem",
+                                "fontWeight": 700,
+                                "color": "var(--scm-text-primary, #26221E)",
+                                "fontVariantNumeric": "tabular-nums"
+                            },
+                            "text": "{{item.subtotal_price_formatted ?? ''}}"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

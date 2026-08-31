@@ -115,6 +115,30 @@ export interface CheckoutFormProps {
     emptyMethodsMessage?: string;
     /** Optional isLoggedIn flag — when false, guest password fields show. */
     isLoggedIn?: boolean;
+    /** Logged-in member profile passed from the layout (_global.currentUser) — used to prefill the orderer section. */
+    currentUserName?: string;
+    currentUserPhone?: string;
+    currentUserEmail?: string;
+    /**
+     * Address-search slot — daum 우편번호 extension_point 주입 노드가
+     * zipcode/address 입력 옆에 렌더링되도록 통과시키는 슬롯.
+     * (server-injected extension node renders inside the composite)
+     */
+    children?: React.ReactNode;
+}
+/**
+ * daum 우편번호 extension_point 가 G7 전역 상태 `_global.checkoutAddress` 에
+ * 기록한 주소 정보(onAddressSelect setState payload). 플러그인 핸들러는
+ * DOM input 에 값을 쓰지 않고 G7 액션만 디스패치하므로, controlled input 을
+ * 쓰는 이 컴포지트는 state 구독 브리지로만 주소를 받을 수 있다.
+ */
+export interface CheckoutFormBridgedAddress {
+    zipcode?: string;
+    address?: string;
+    region?: string;
+    city?: string;
+    country_code?: string;
+    countryCode?: string;
 }
 export interface CheckoutSubmitPayload {
     temp_order_id?: string | number | null;

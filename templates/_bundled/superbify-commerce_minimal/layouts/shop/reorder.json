@@ -1,0 +1,102 @@
+{
+    "version": "1.0.0",
+    "layout_name": "shop/reorder",
+    "extends": "_user_base",
+    "permissions": [],
+    "fork_source_comment": "templates/_bundled/sirsoft-basic/layouts/shop/reorder.json 포크 — init_actions apiCall 을 content 노드의 lifecycle.onMount 시퀀스로 옮기고(BASIC partials/auth/_redirect_if_logged_in.json 과 동일한 onMount 패턴), 성공 시 $t:superbify.mypage.orders.reorder_success 토스트 + cart_count refetch 후 /cart 로 보낸다. skipped 부분결과/에러 화면은 onError 토스트 + /cart 이동으로 흡수했다.",
+    "meta": {
+        "title": "$t:superbify.routes.reorder"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "reorder_section",
+                "type": "basic",
+                "name": "Section",
+                "style": {
+                    "paddingBlock": "var(--scm-section-py-md, 3rem)"
+                },
+                "children": [
+                    {
+                        "comment": "얇은 안내 카드 — onMount 시퀀스가 성공/실패 관계없이 곧 /cart 로 이동하므로 이 카드는 처리 중 표시 역할만 한다.",
+                        "id": "reorder_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "className": "scm-panel",
+                        "style": {
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "alignItems": "center",
+                            "gap": "var(--scm-spacing-2xs, 0.25rem)",
+                            "maxWidth": "26rem",
+                            "marginInline": "auto",
+                            "textAlign": "center"
+                        },
+                        "children": [
+                            {
+                                "id": "reorder_message",
+                                "type": "basic",
+                                "name": "P",
+                                "style": {
+                                    "fontFamily": "var(--scm-font-body, system-ui)",
+                                    "fontSize": "0.9375rem",
+                                    "color": "var(--scm-text-body, #4A4643)",
+                                    "margin": 0
+                                },
+                                "text": "$t:superbify.mypage.orders.processing"
+                            },
+                            {
+                                "comment": "재주문 실행 노드 — _global.currentUser 가 채워지는 마운트 시점에 lifecycle.onMount 가 실행된다.",
+                                "id": "reorder_runner",
+                                "type": "basic",
+                                "name": "Div",
+                                "lifecycle": {
+                                    "onMount": [
+                                        {
+                                            "comment": "POST /api/modules/sirsoft-ecommerce/user/orders/{id}/reorder — 응답 {added_count, skipped[], cart_count}. 재주문 라우트는 numeric id 전용(whereNumber)이라 routes.json 의 route.id 를 그대로 쓴다.",
+                                            "handler": "apiCall",
+                                            "auth_required": true,
+                                            "target": "/api/modules/sirsoft-ecommerce/user/orders/{{route.id}}/reorder",
+                                            "params": { "method": "POST" },
+                                            "onSuccess": [
+                                                {
+                                                    "handler": "toast",
+                                                    "params": {
+                                                        "type": "success",
+                                                        "message": "$t:superbify.mypage.orders.reorder_success"
+                                                    }
+                                                },
+                                                {
+                                                    "comment": "회원 장바구니 담기 후 헤더 수량 배지 갱신",
+                                                    "handler": "refetchDataSource",
+                                                    "params": { "dataSourceId": "cart_count" }
+                                                },
+                                                {
+                                                    "handler": "navigate",
+                                                    "params": { "path": "/cart" }
+                                                }
+                                            ],
+                                            "onError": [
+                                                {
+                                                    "handler": "toast",
+                                                    "params": {
+                                                        "type": "error",
+                                                        "message": "{{error.message ?? $t:superbify.errors.server_error_title}}"
+                                                    }
+                                                },
+                                                {
+                                                    "handler": "navigate",
+                                                    "params": { "path": "/cart" }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,165 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "주문 상세 - 배송지 정보 (읽기전용)",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/mypage/orders/_shipping.json — 배송지 변경 버튼/모달(BASIC _modal_change_address)은 SRC 치환 규칙상 생략. 받는 분/연락처/주소/메모 표시는 order.data.shipping_address 바인딩 그대로."
+    },
+    "id": "mypage_order_shipping_section",
+    "type": "basic",
+    "name": "Div",
+    "className": "scm-panel",
+    "style": {
+        "display": "flex",
+        "flexDirection": "column",
+        "gap": "var(--scm-spacing-sm, 0.75rem)"
+    },
+    "children": [
+        {
+            "id": "mypage_order_shipping_title",
+            "type": "basic",
+            "name": "H3",
+            "style": {
+                "fontFamily": "var(--scm-font-display, system-ui)",
+                "fontSize": "1.0625rem",
+                "fontWeight": "600",
+                "color": "var(--scm-text-primary, #26221E)",
+                "margin": 0,
+                "paddingBottom": "var(--scm-spacing-sm, 0.75rem)",
+                "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+            },
+            "text": "$t:superbify.mypage.orders.shipping_to"
+        },
+        {
+            "comment": "받는 분",
+            "id": "mypage_order_shipping_row_name",
+            "type": "basic",
+            "name": "Div",
+            "style": { "display": "flex", "gap": "var(--scm-spacing-sm, 0.75rem)" },
+            "children": [
+                {
+                    "id": "mypage_order_shipping_name_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "flex": "0 0 6rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.recipient"
+                },
+                {
+                    "id": "mypage_order_shipping_name_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)"
+                    },
+                    "text": "{{order.data.shipping_address?.recipient_name ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "연락처",
+            "id": "mypage_order_shipping_row_phone",
+            "type": "basic",
+            "name": "Div",
+            "style": { "display": "flex", "gap": "var(--scm-spacing-sm, 0.75rem)" },
+            "children": [
+                {
+                    "id": "mypage_order_shipping_phone_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "flex": "0 0 6rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.phone"
+                },
+                {
+                    "id": "mypage_order_shipping_phone_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "{{order.data.shipping_address?.recipient_phone ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "주소",
+            "id": "mypage_order_shipping_row_address",
+            "type": "basic",
+            "name": "Div",
+            "style": { "display": "flex", "gap": "var(--scm-spacing-sm, 0.75rem)" },
+            "children": [
+                {
+                    "id": "mypage_order_shipping_address_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "flex": "0 0 6rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.address"
+                },
+                {
+                    "id": "mypage_order_shipping_address_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "wordBreak": "keep-all"
+                    },
+                    "text": "{{order.data.shipping_address?.full_address ?? ''}}"
+                }
+            ]
+        },
+        {
+            "comment": "배송 메모 (있을 때만)",
+            "id": "mypage_order_shipping_row_memo",
+            "if": "{{!!(order.data.shipping_address?.delivery_memo_label || order.data.shipping_address?.delivery_memo)}}",
+            "type": "basic",
+            "name": "Div",
+            "style": { "display": "flex", "gap": "var(--scm-spacing-sm, 0.75rem)" },
+            "children": [
+                {
+                    "id": "mypage_order_shipping_memo_label",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "flex": "0 0 6rem",
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.mypage.orders.memo"
+                },
+                {
+                    "id": "mypage_order_shipping_memo_value",
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontFamily": "var(--scm-font-body, system-ui)",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-primary, #26221E)",
+                        "wordBreak": "keep-all"
+                    },
+                    "text": "{{order.data.shipping_address?.delivery_memo_label ?? order.data.shipping_address?.delivery_memo ?? ''}}"
+                }
+            ]
+        }
+    ]
+}
