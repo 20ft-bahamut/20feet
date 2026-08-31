@@ -156,7 +156,11 @@
                                                     "item": "{{item}}",
                                                     "quantityLabel": "$t:superbify.cart.quantity",
                                                     "deleteLabel": "$t:superbify.cart.delete",
-                                                    "applyLabel": "$t:superbify.cart.apply"
+                                                    "applyLabel": "$t:superbify.cart.apply",
+                                                    "deleteConfirmTitle": "$t:superbify.cart.delete_confirm_title",
+                                                    "deleteConfirmMessage": "$t:superbify.cart.delete_confirm_single",
+                                                    "deleteConfirmConfirmLabel": "$t:superbify.cart.delete",
+                                                    "deleteConfirmCancelLabel": "$t:superbify.common.cancel"
                                                 }
                                             },
                                             {

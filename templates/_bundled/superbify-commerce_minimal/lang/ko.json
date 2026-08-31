@@ -488,7 +488,8 @@
         "common": {
             "all": "전체",
             "view_all": "전체 보기",
-            "demo_marker": "demo"
+            "demo_marker": "demo",
+            "cancel": "취소"
         },
         "business": {
             "demo_notice": "데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다.",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Div, Img, Input, Span } from './basic';
+import { ConfirmDialog } from './ConfirmDialog';
 import { resolveStillLifeThumb } from './stillLifeSlot';
 
 export interface CartItemRowItem {
@@ -44,6 +45,11 @@ export interface CartItemRowProps {
     decreaseLabel?: string;
     increaseLabel?: string;
     applyLabel?: string;
+    /** Confirm dialog labels (passed from $t: keys); delete opens a confirm dialog. */
+    deleteConfirmTitle?: string;
+    deleteConfirmMessage?: string;
+    deleteConfirmConfirmLabel?: string;
+    deleteConfirmCancelLabel?: string;
     minQuantity?: number;
     maxQuantity?: number;
     className?: string;
@@ -64,12 +70,17 @@ export function CartItemRow({
     decreaseLabel = 'decrease quantity',
     increaseLabel = 'increase quantity',
     applyLabel = '변경',
+    deleteConfirmTitle = '상품을 삭제할까요?',
+    deleteConfirmMessage = '선택한 상품을 장바구니에서 삭제합니다.',
+    deleteConfirmConfirmLabel = '삭제',
+    deleteConfirmCancelLabel = '취소',
     minQuantity = 1,
     maxQuantity = 99,
     className,
 }: CartItemRowProps): React.ReactElement {
     const [localQty, setLocalQty] = React.useState<number>(item.quantity);
     const [busy, setBusy] = React.useState(false);
+    const [confirmOpen, setConfirmOpen] = React.useState(false);
 
     React.useEffect(() => {
         setLocalQty(item.quantity);
@@ -99,7 +110,7 @@ export function CartItemRow({
     };
 
     const onDelete = () => {
-        fire('scm:cart-delete', { ids: [item.id] });
+        setConfirmOpen(true);
     };
 
     const name = item.product?.name_localized ?? item.product?.name ?? 'Product';
@@ -364,6 +375,19 @@ export function CartItemRow({
                 >
                     {deleteLabel}
                 </Button>
+                <ConfirmDialog
+                    open={confirmOpen}
+                    title={deleteConfirmTitle}
+                    message={deleteConfirmMessage}
+                    confirmLabel={deleteConfirmConfirmLabel}
+                    cancelLabel={deleteConfirmCancelLabel}
+                    tone="danger"
+                    onConfirm={() => {
+                        setConfirmOpen(false);
+                        fire('scm:cart-delete', { ids: [item.id] });
+                    }}
+                    onCancel={() => setConfirmOpen(false)}
+                />
             </Div>
         </Div>
     );

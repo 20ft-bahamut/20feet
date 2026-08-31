@@ -488,7 +488,8 @@
         "common": {
             "all": "All",
             "view_all": "View all",
-            "demo_marker": "demo"
+            "demo_marker": "demo",
+            "cancel": "Cancel"
         },
         "business": {
             "demo_notice": "Demo store. Business information can be configured in the template's config/business-info.json.",

@@ -29,11 +29,18 @@ describe('CartItemRow', () => {
         expect(img.src.startsWith('data:image/svg+xml')).toBe(true);
     });
 
-    it('fires scm:cart-delete with the item id when delete clicked', () => {
+    it('fires scm:cart-delete only after the confirm dialog is accepted', () => {
         const listener = vi.fn();
         window.addEventListener('scm:cart-delete', listener as EventListener);
         render(<CartItemRow item={baseItem} deleteLabel="삭제" />);
+        // delete click opens the confirm dialog — no delete event yet
         fireEvent.click(screen.getByTestId('cart-item-delete'));
+        expect(listener).not.toHaveBeenCalled();
+        expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
+        // confirm fires the delete event with the item id
+        const confirmBtn = screen.getByTestId('confirm-ok');
+        expect(confirmBtn).toBeInTheDocument();
+        fireEvent.click(confirmBtn);
         expect(listener).toHaveBeenCalled();
         const evt = listener.mock.calls[0][0] as CustomEvent;
         expect(evt.detail.ids).toEqual([100]);

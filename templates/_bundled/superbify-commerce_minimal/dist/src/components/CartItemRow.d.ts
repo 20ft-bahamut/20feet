@@ -40,6 +40,11 @@ export interface CartItemRowProps {
     decreaseLabel?: string;
     increaseLabel?: string;
     applyLabel?: string;
+    /** Confirm dialog labels (passed from $t: keys); delete opens a confirm dialog. */
+    deleteConfirmTitle?: string;
+    deleteConfirmMessage?: string;
+    deleteConfirmConfirmLabel?: string;
+    deleteConfirmCancelLabel?: string;
     minQuantity?: number;
     maxQuantity?: number;
     className?: string;
@@ -52,5 +57,5 @@ export interface CartItemRowProps {
  * Page-level handler dispatches the actual apiCall / refetch. This keeps the
  * component event-only, mirroring the AddToCartPanel pattern.
  */
-export declare function CartItemRow({ item, quantityLabel, deleteLabel, decreaseLabel, increaseLabel, applyLabel, minQuantity, maxQuantity, className, }: CartItemRowProps): React.ReactElement;
+export declare function CartItemRow({ item, quantityLabel, deleteLabel, decreaseLabel, increaseLabel, applyLabel, deleteConfirmTitle, deleteConfirmMessage, deleteConfirmConfirmLabel, deleteConfirmCancelLabel, minQuantity, maxQuantity, className, }: CartItemRowProps): React.ReactElement;
 export default CartItemRow;
