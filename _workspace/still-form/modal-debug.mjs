@@ -1,0 +1,15 @@
+import { chromium } from 'playwright-core';
+const BASE='http://127.0.0.1:8000';
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true });
+const page = await browser.newPage({ viewport:{width:1440,height:1000}, locale:'ko-KR' });
+page.on('console',m=>{ if(m.type()==='error'||m.type()==='warning') console.log('CS:', m.text().slice(0,160)); });
+page.on('pageerror',e=>console.log('PE:',String(e).slice(0,200)));
+await page.goto(`${BASE}/shop/checkout`,{waitUntil:'networkidle'});
+await page.waitForSelector('[data-testid="checkout-form"]',{timeout:15000});
+const modalApi=await page.evaluate(()=>({hasG7:!!window.G7Core, hasModalOpen:typeof window.G7Core?.modal?.open, hasDispatch:typeof window.G7Core?.dispatch}));
+console.log('api:',JSON.stringify(modalApi));
+await page.click('[data-testid="checkout-manage-addresses"]').catch(()=>console.log('no manage button'));
+await page.waitForTimeout(1000);
+const st=await page.evaluate(()=>({active:window.G7Core?.state?.get?.()?._global?.activeModal, stack:window.G7Core?.state?.get?.()?._global?.modalStack, modalShown:!!document.querySelector('.scm-modal-panel')}));
+console.log('after click:',JSON.stringify(st));
+await browser.close();

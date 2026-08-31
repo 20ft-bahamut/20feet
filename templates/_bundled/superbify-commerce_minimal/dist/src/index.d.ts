@@ -15,6 +15,7 @@ export { CategoryCard, type CategoryCardProps } from './components/CategoryCard'
 export { CategoryNav, type CategoryNavProps } from './components/CategoryNav';
 export { CategoryPreviewStrip, type CategoryPreviewStripProps } from './components/CategoryPreviewStrip';
 export { ConfirmDialog, type ConfirmDialogProps } from './components/ConfirmDialog';
+export { Modal, type ModalProps } from './components/Modal';
 export { CrossSellStrip, type CrossSellStripProps } from './components/CrossSellStrip';
 export { EditorialBanner, type EditorialBannerProps } from './components/EditorialBanner';
 export { EmptyState, type EmptyStateProps } from './components/EmptyState';
