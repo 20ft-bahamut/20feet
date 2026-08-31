@@ -151,20 +151,24 @@ describe('member auth/mypage layout bindings (v0.2.0)', () => {
         expect(cartCount.initGlobal).toMatchObject({ key: 'cartCount' });
     });
 
-    it('checkout.json binds isLoggedIn to _global.currentUser and keeps the daum extension slot as a sibling', () => {
+    it('checkout.json binds isLoggedIn to _global.currentUser and nests the daum extension slot inside the composite', () => {
         const checkout = loadJson('layouts/shop/checkout.json');
         expect(checkout.extends).toBe('_user_base');
         const json = JSON.stringify(checkout);
-        expect(json).toContain('"isLoggedIn":"{{_global.currentUser ? true : false}}"');
+        expect(json).toContain('"isLoggedIn":"{{_global?.currentUser?.uuid ? true : false}}"');
 
         const content = checkout.slots?.content as any[];
-        const extensionNode = content.find(
+        // CHECKOUT FINAL REDESIGN — the extension_point moved INSIDE the
+        // CheckoutPage composite children so the plugin button renders in the
+        // 우편번호 field row (a sibling rendered it floating above the form).
+        const composite = content.find((n: any) => n.type === 'composite');
+        expect(composite, 'CheckoutPage composite exists in content').toBeTruthy();
+        const extensionNode = (composite.children as any[]).find(
             (n: any) => n.type === 'extension_point' && n.name === 'address_search_slot',
         );
-        expect(extensionNode, 'address_search_slot extension_point is a content sibling').toBeTruthy();
+        expect(extensionNode, 'address_search_slot extension_point is a composite child').toBeTruthy();
         expect(extensionNode.id).toBe('checkout_address_search_slot');
-        const composite = content.find((n: any) => n.type === 'composite');
-        expect(composite, 'CheckoutPage composite is content sibling').toBeTruthy();
+        expect(content.some((n: any) => n.type === 'extension_point')).toBe(false);
 
         // The callback writes _global.checkoutAddress for the CheckoutForm state bridge.
         const callbackJson = JSON.stringify(extensionNode.callbacks ?? {});

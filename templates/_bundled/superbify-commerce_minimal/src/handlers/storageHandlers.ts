@@ -131,6 +131,44 @@ export async function addToCartHandler(
     }
 
     try {
+        // 바로구매(buy) — sirsoft-basic createDirectCheckout 계약: 카트에 담지 않고
+        // POST /checkout direct_items 로 임시 주문을 만들어 /checkout 로 이동한다.
+        // (CheckoutRequest: item_ids OR direct_items)
+        if (mode === 'buy') {
+            const token = (G7Core as { api?: { getToken?: () => string | null } })?.api?.getToken?.() ?? null;
+            const checkoutRes = await fetch('/api/modules/sirsoft-ecommerce/checkout', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    ...buildCartHeaders(liveCartKey),
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                    direct_items: [
+                        {
+                            product_id: typeof productId === 'string' ? parseInt(productId, 10) : productId,
+                            quantity,
+                        },
+                    ],
+                }),
+            });
+
+            if (!checkoutRes.ok) {
+                let errMsg = `HTTP ${checkoutRes.status}`;
+                try {
+                    const errBody = await checkoutRes.json();
+                    errMsg = errBody?.errors?.message ?? errBody?.message ?? errMsg;
+                } catch { /* keep status */ }
+                logger.error('buyNow direct checkout failed:', errMsg);
+                showToast('error', errMsg);
+                return;
+            }
+
+            showToast('success', '결제 페이지로 이동합니다.');
+            window.location.assign('/checkout');
+            return;
+        }
+
         const response = await fetch('/api/modules/sirsoft-ecommerce/cart', {
             method: 'POST',
             credentials: 'same-origin',
@@ -158,16 +196,7 @@ export async function addToCartHandler(
             // Merge with existing global state — `state.set` shallow-merges by default
             G7Core.state.set({ cartCount });
         }
-        showToast(
-            'success',
-            mode === 'buy'
-                ? '장바구니에 담고 결제 페이지로 이동합니다.'
-                : '장바구니에 담았습니다.'
-        );
-
-        if (mode === 'buy') {
-            window.location.assign('/cart');
-        }
+        showToast('success', '장바구니에 담았습니다.');
     } catch (error) {
         logger.error('addToCart network error:', error);
         showToast('error', (error as Error)?.message ?? 'Network error');
@@ -368,9 +397,31 @@ export async function bindCartPageListenersHandler(): Promise<void> {
  * initCartKey 핸들러 맵.
  * `_user_base.json` 의 init_actions 가 `{ handler: "initCartKey" }` 형태로 호출한다.
  */
+/**
+ * clearGuestTokenOnEntry 핸들러 — 비회원 주문 조회 폼 진입 시 sessionStorage 토큰을
+ * 폐기해 매번 새 인증을 요구한다(sirsoft-basic guest_order_form init_action 계약).
+ */
+export async function clearGuestTokenOnEntryHandler(): Promise<void> {
+    if (typeof window === 'undefined') return;
+    try {
+        sessionStorage.removeItem('g7_guest_order_token');
+        sessionStorage.removeItem('g7_guest_order_number');
+        sessionStorage.removeItem('g7_guest_order_expires_at');
+    } catch { /* storage may be disabled */ }
+    const G7Core = (window as unknown as {
+        G7Core?: { state?: { set?: (u: Record<string, unknown>) => void; get?: () => Record<string, unknown> | null } };
+    }).G7Core;
+    try {
+        if (G7Core?.state?.set && G7Core?.state?.get?.()?.guestOrderToken) {
+            G7Core.state.set({ guestOrderToken: null });
+        }
+    } catch { /* ignore */ }
+}
+
 export const handlerMap: Record<string, (action?: unknown, context?: unknown) => void | Promise<void>> = {
     initCartKey: initCartKeyHandler,
     addToCart: addToCartHandler,
     scmBindAddToCartListener: bindAddToCartListenerHandler,
     scmBindCartPageListeners: bindCartPageListenersHandler,
+    clearGuestTokenOnEntry: clearGuestTokenOnEntryHandler,
 };

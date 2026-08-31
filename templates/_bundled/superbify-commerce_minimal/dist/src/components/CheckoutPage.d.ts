@@ -1,5 +1,5 @@
 import { default as React } from 'react';
-import { CheckoutFormCheckoutPayload, CheckoutPaymentMethod } from './CheckoutForm';
+import { CheckoutFormCheckoutPayload, CheckoutFormPaymentSettings, CheckoutFormShippingSettings, CheckoutPaymentMethod } from './CheckoutForm';
 export interface CheckoutPageCheckoutData extends CheckoutFormCheckoutPayload {
     temp_order_id?: string | number | null;
 }
@@ -14,20 +14,27 @@ export interface CheckoutPageProps {
         error?: unknown;
     } | null;
     paymentSettings?: {
-        data?: {
-            order_settings?: CheckoutPageSettings;
-        } | null;
+        data?: CheckoutFormPaymentSettings | null;
         loading?: boolean;
     } | null;
     shippingSettings?: {
-        data?: {
-            shipping?: {
-                default_country?: string;
-                international_shipping_enabled?: boolean;
-            };
-        } | null;
+        data?: CheckoutFormShippingSettings | null;
         loading?: boolean;
     } | null;
+    /** userAddresses data source (회원 저장 배송지) — 게이트는 CheckoutForm 이 isLoggedIn 으로 처리 */
+    userAddresses?: {
+        data?: {
+            addresses?: {
+                data?: unknown[];
+            };
+        };
+        loading?: boolean;
+        error?: unknown;
+    } | null;
+    /** Address-manage modal id — "배송지 관리" 클릭 시 G7Core.modal.open 대상. */
+    addressManageModalId?: string;
+    /** Downloadable-coupon modal id. */
+    couponDownloadModalId?: string;
     isLoggedIn?: boolean;
     currentUserName?: string;
     currentUserPhone?: string;
@@ -41,6 +48,12 @@ export interface CheckoutPageProps {
     submitErrorTitle?: string;
     orderFailedFallback?: string;
     redirectingLabel?: string;
+    /** Progress indicator labels — cart › checkout › complete. */
+    progressCartLabel?: string;
+    progressCheckoutLabel?: string;
+    progressCompleteLabel?: string;
+    /** daum extension_point 주입 노드 — CheckoutForm 의 우편번호 행으로 통과한다. */
+    children?: React.ReactNode;
 }
 export declare function CheckoutPage(props: CheckoutPageProps): React.ReactElement;
 export default CheckoutPage;

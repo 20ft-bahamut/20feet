@@ -38,4 +38,9 @@ export declare function bindCartPageListenersHandler(): Promise<void>;
  * initCartKey 핸들러 맵.
  * `_user_base.json` 의 init_actions 가 `{ handler: "initCartKey" }` 형태로 호출한다.
  */
+/**
+ * clearGuestTokenOnEntry 핸들러 — 비회원 주문 조회 폼 진입 시 sessionStorage 토큰을
+ * 폐기해 매번 새 인증을 요구한다(sirsoft-basic guest_order_form init_action 계약).
+ */
+export declare function clearGuestTokenOnEntryHandler(): Promise<void>;
 export declare const handlerMap: Record<string, (action?: unknown, context?: unknown) => void | Promise<void>>;

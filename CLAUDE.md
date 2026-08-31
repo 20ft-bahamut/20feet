@@ -35,6 +35,19 @@
 - Core 변경이 필요해 보이면 수정하지 말고 `BLOCKER` + 공식 확장 대안을 보고한다.
 - 가짜 프로젝트/고객/수치/Screenshot/버전/가격/Download/GitHub/SIR 링크를 만들지 않는다.
 
+### 1.1.1 COMMERCE TEMPLATE PARITY POLICY
+
+SuperBify Commerce Template(`templates/_bundled/superbify-commerce_minimal`)은
+sirsoft-ecommerce 기본 기능을 제거하거나 축소하지 않는다.
+
+- Custom Template은 UI/UX를 변경할 수 있지만 Checkout/Cart/Product/Order의
+  기능과 데이터 계약(form field name, payload, API, payment flow)은
+  기본 Ecommerce Module·기본 sirsoft-basic Template과 동등하게 유지한다.
+- 새 G7 Ecommerce 기능이 존재하면 가능한 한 재사용/노출한다.
+  기능 축소(숨김/삭제/하드코딩 대체)는 금지하며, Presentation만 바꾼다.
+- 기준 회귀: `_workspace/still-form/CHECKOUT_PARITY_MATRIX.md` +
+  `templates/_bundled/superbify-commerce_minimal/__tests__/components/CheckoutParity.test.tsx`.
+
 ## 2. 현재 제품 범위
 
 ```text

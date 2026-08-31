@@ -53,3 +53,24 @@ This means a real checkout flow with dbank will **place a temp order** but the u
 - template:update --force
 - refresh-layout + cache-clear
 - Playwright headless: 2 items in cart → /cart → checkout → fill form → POST → capture status + body → result page screenshot.
+
+---
+
+## BASE G7 COMMERCE FEATURE PARITY
+
+Still Form은 Gnuboard 7 Ecommerce(sirsoft-ecommerce + sirsoft-basic) 기본 기능을
+visual redesign한 Template이며, Core Commerce 기능을 대체하지 않는다.
+
+- 기능 SSoT는 기본 Checkout(_checkout_*.json + CreateOrderRequest/UpdateCheckoutRequest 계약).
+- Still Form은 UI/UX만 변경: 2-column 레이아웃, Order Summary 카드, Still Form 체크박스 등.
+- 복원 내역/계약은 `_workspace/still-form/CHECKOUT_PARITY_MATRIX.md` 및
+  `templates/_bundled/superbify-commerce_minimal/__tests__/components/CheckoutParity.test.tsx` 회귀 테스트가 잠근다.
+
+복원된 기능(2026-08-31):
+- 배송지 관리 모달(list·select·edit·delete·default) + 저장 배송지 pills + 주문자 정보와 동일 + 입력한 배송지를 저장합니다
+- 국제배송 국가 선택 + intl 주소 필드(international_shipping_enabled 게이트) + PUT /checkout 배송비 재계산
+- 주문쿠폰/배송비쿠폰/상품쿠폰(≤2)/쿠폰 다운로드 모달 + 적립금(마일리지) + additional_options 표시
+- 결제수단 동적 렌더링(activ+iOS 게이트, core_payment_method 번역), dbank 실계좌 라디오 선택,
+  vbank 브랜치, 환불계좌(all-or-none), 현금영수증(모듈 계약), PG pg_payment_handler 동적 dispatch,
+  PG 실패 ?error= 배너, unavailable-items 배너 + CTA 차단
+- 비회원/회원 완료 페이지 분기, 바로구매 direct_items, guest_order_form 토큰 초기화 + 회원 리다이렉트

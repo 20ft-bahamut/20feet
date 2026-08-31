@@ -832,3 +832,1091 @@ body {
     font-weight: 600;
 }
 
+
+/* ------------------------------------------------------------------
+   Checkout final redesign (shop/checkout)
+   - Two-column editorial layout on ≥1280px: form sections LEFT (~62%),
+     order summary card RIGHT (~38%, sticky). Below that: single column
+     (tablet 768–1279 constrains the summary card to 640px).
+   - Sections are heading + hairline + fields on paper — not a
+     card-in-card stack. The summary card is the only ivory surface.
+   - Payment methods render as option-card radio rows; the selected
+     method's nested fields (무통장입금 입금자명/입금 계좌) live INSIDE
+     the selected card.
+   ------------------------------------------------------------------ */
+
+.scm-checkout-page-head {
+    margin-bottom: var(--scm-spacing-lg, 1.5rem);
+}
+
+/* Progress: 장바구니 › 주문/결제 › 완료 — quiet text steps. */
+.scm-checkout-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: var(--scm-spacing-sm, 0.75rem);
+}
+
+.scm-checkout-progress-step {
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    color: var(--scm-text-muted, #8A837B);
+    text-decoration: none;
+}
+
+a.scm-checkout-progress-step:hover,
+a.scm-checkout-progress-step:focus-visible {
+    color: var(--scm-charcoal, #26221E);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.scm-checkout-progress-current {
+    color: var(--scm-charcoal, #26221E);
+    font-weight: 600;
+}
+
+.scm-checkout-progress-sep {
+    color: var(--scm-line, #E4DCCE);
+    font-size: 0.8125rem;
+}
+
+.scm-checkout-title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--scm-spacing-md, 1rem);
+}
+
+.scm-checkout-page-title {
+    font-family: var(--scm-font-display, system-ui);
+    font-size: clamp(1.625rem, 3.2vw, 2.125rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-back-button {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0;
+    color: var(--scm-text-muted, #8A837B);
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.875rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--scm-line, #E4DCCE);
+}
+
+.scm-checkout-back-button:hover {
+    color: var(--scm-charcoal, #26221E);
+    text-decoration-color: var(--scm-charcoal, #26221E);
+}
+
+/* Two-column layout: form left / summary right on ≥1280px. */
+.scm-checkout-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--scm-spacing-xl, 2.5rem);
+    align-items: start;
+}
+
+@media (min-width: 1280px) {
+    .scm-checkout-layout {
+        grid-template-columns: minmax(0, 1.63fr) minmax(0, 1fr);
+        gap: clamp(2.5rem, 4vw, 3.5rem);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1279.98px) {
+    .scm-checkout-aside {
+        max-width: 640px;
+        width: 100%;
+    }
+}
+
+/* Form sections — editorial heading + hairline, no card shells. */
+.scm-checkout-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--scm-spacing-xl, 2.5rem);
+    min-width: 0;
+}
+
+.scm-checkout-section {
+    min-width: 0;
+}
+
+.scm-checkout-section-title {
+    font-family: var(--scm-font-display, system-ui);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--scm-text-primary, #26221E);
+    margin: 0 0 var(--scm-spacing-md, 1rem);
+    padding-bottom: var(--scm-spacing-sm, 0.75rem);
+    border-bottom: 1px solid var(--scm-line, #E4DCCE);
+}
+
+/* Field grid — 2-col on ≥560px, single column below. */
+.scm-checkout-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--scm-spacing-md, 1rem) var(--scm-spacing-md, 1rem);
+}
+
+.scm-checkout-fields .scm-field-span-2,
+.scm-checkout-fields > .scm-field-span-2 {
+    grid-column: 1 / -1;
+}
+
+.scm-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--scm-spacing-3xs, 0.125rem);
+    min-width: 0;
+}
+
+@media (max-width: 559.98px) {
+    .scm-checkout-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.scm-checkout-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--scm-text-body, #4A4643);
+    margin-bottom: var(--scm-spacing-2xs, 0.25rem);
+}
+
+.scm-checkout-required {
+    color: var(--scm-wood-dark, #A8916F);
+    margin-left: 0.25rem;
+}
+
+.scm-checkout-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--scm-line, #E4DCCE);
+    border-radius: var(--scm-radius-sm, 4px);
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.9375rem;
+    color: var(--scm-text-primary, #26221E);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+}
+
+.scm-checkout-input[readonly] {
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+    color: var(--scm-text-body, #4A4643);
+}
+
+.scm-checkout-input-error {
+    border-color: var(--scm-danger, #B3261E);
+    border-width: 1.5px;
+}
+
+.scm-checkout-field-error {
+    display: block;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--scm-danger, #B3261E);
+}
+
+/* Zipcode + address search button grouped as one field row. The injected
+   plugin container (.scm-address-search) wraps the 주소 검색 button. */
+.scm-checkout-zip-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--scm-spacing-xs, 0.5rem);
+}
+
+.scm-checkout-zip-field {
+    flex: 1 1 9rem;
+    max-width: 12rem;
+}
+
+.scm-checkout-form .scm-address-search {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+@media (max-width: 559.98px) {
+    .scm-checkout-zip-field {
+        max-width: 10rem;
+    }
+}
+
+.scm-checkout-memo {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--scm-spacing-md, 1rem);
+}
+
+.scm-checkout-memo-custom {
+    margin-top: var(--scm-spacing-xs, 0.5rem);
+    resize: vertical;
+}
+
+/* Guest lookup password block — quiet hairline block, not a beige card. */
+.scm-checkout-guest-block {
+    margin-top: var(--scm-spacing-lg, 1.5rem);
+    padding-top: var(--scm-spacing-md, 1rem);
+    border-top: 1px dashed var(--scm-line, #E4DCCE);
+}
+
+.scm-checkout-guest-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin-bottom: var(--scm-spacing-sm, 0.75rem);
+}
+
+.scm-checkout-guest-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-guest-hint {
+    font-size: 0.75rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-guest-note {
+    margin: var(--scm-spacing-lg, 1.5rem) 0 0;
+    color: var(--scm-text-muted, #8A837B);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+/* Alerts (backend/validation error banners). */
+.scm-checkout-alert {
+    margin-bottom: var(--scm-spacing-md, 1rem);
+    padding: var(--scm-spacing-md, 1rem);
+    border: 1px solid var(--scm-danger, #B3261E);
+    background-color: #FBEFEC;
+    color: #8A2B25;
+    border-radius: var(--scm-radius, 8px);
+    font-size: 0.875rem;
+}
+
+/* Payment methods — option-card radio rows. */
+.scm-checkout-methods {
+    display: flex;
+    flex-direction: column;
+    gap: var(--scm-spacing-xs, 0.5rem);
+}
+
+.scm-checkout-method {
+    border: 1px solid var(--scm-line, #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+    min-width: 0;
+    transition:
+        border-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        background-color var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-checkout-method:hover {
+    border-color: var(--scm-wood-dark, #A8916F);
+}
+
+.scm-checkout-method[data-selected="true"] {
+    border-color: var(--scm-charcoal, #26221E);
+    box-shadow: inset 0 0 0 0.5px var(--scm-charcoal, #26221E);
+    background-color: var(--scm-bg-primary, #FAF8F3);
+}
+
+.scm-checkout-method-head {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem var(--scm-spacing-md, 1rem);
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: var(--scm-font-body, system-ui);
+    color: var(--scm-text-primary, #26221E);
+    border-radius: var(--scm-radius, 8px);
+}
+
+.scm-checkout-method-radio {
+    position: relative;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--scm-muted, #8A837B);
+    background: transparent;
+}
+
+.scm-checkout-method[data-selected="true"] .scm-checkout-method-radio {
+    border-color: var(--scm-charcoal, #26221E);
+}
+
+.scm-checkout-method[data-selected="true"] .scm-checkout-method-radio::after {
+    content: '';
+    position: absolute;
+    inset: 2.5px;
+    border-radius: 50%;
+    background-color: var(--scm-charcoal, #26221E);
+}
+
+.scm-checkout-method-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.scm-checkout-method-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-method-desc {
+    font-size: 0.8125rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+/* Nested fields INSIDE the selected method card (무통장입금 입금자명 등). */
+.scm-checkout-method-detail {
+    padding: var(--scm-spacing-md, 1rem) var(--scm-spacing-md, 1rem) var(--scm-spacing-md, 1rem);
+    border-top: 1px dashed var(--scm-line, #E4DCCE);
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+    border-radius: 0 0 var(--scm-radius, 8px) var(--scm-radius, 8px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--scm-spacing-sm, 0.75rem);
+}
+
+.scm-checkout-bank-accounts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.scm-checkout-bank-title {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-bank-line {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--scm-text-primary, #26221E);
+    font-variant-numeric: tabular-nums;
+    word-break: keep-all;
+}
+
+.scm-checkout-bank-holder {
+    color: var(--scm-text-body, #4A4643);
+}
+
+.scm-checkout-methods-empty {
+    padding: var(--scm-spacing-lg, 1.5rem);
+    border: 1px dashed var(--scm-line, #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+}
+
+.scm-checkout-methods-empty-title {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-methods-empty-message {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+/* Order summary card — the single ivory surface. Sticky on ≥1280px. */
+.scm-checkout-aside {
+    min-width: 0;
+}
+
+.scm-checkout-summary {
+    padding: var(--scm-spacing-lg, 1.5rem);
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+    border: 1px solid var(--scm-line, #E4DCCE);
+    border-radius: var(--scm-radius, 8px);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+@media (min-width: 1280px) {
+    .scm-checkout-aside {
+        position: sticky;
+        top: calc(var(--scm-header-height, 72px) + var(--scm-spacing-lg, 1.5rem));
+    }
+}
+
+.scm-checkout-summary-title {
+    font-family: var(--scm-font-display, system-ui);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--scm-text-primary, #26221E);
+    margin: 0 0 var(--scm-spacing-md, 1rem);
+}
+
+.scm-checkout-summary-items {
+    list-style: none;
+    margin: 0 0 var(--scm-spacing-md, 1rem);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.scm-checkout-summary-item {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+    column-gap: var(--scm-spacing-sm, 0.75rem);
+    align-items: center;
+    padding: var(--scm-spacing-sm, 0.75rem) 0;
+    border-bottom: 1px solid var(--scm-line, #E4DCCE);
+}
+
+.scm-checkout-summary-item:last-child {
+    border-bottom: none;
+    padding-bottom: var(--scm-spacing-xs, 0.5rem);
+}
+
+.scm-checkout-summary-item-thumb {
+    width: 3.5rem;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--scm-radius-sm, 4px);
+    overflow: hidden;
+    background-color: var(--scm-bg-primary, #FAF8F3);
+    border: 1px solid var(--scm-line, #E4DCCE);
+    flex-shrink: 0;
+}
+
+.scm-checkout-summary-item-thumb img,
+.scm-checkout-summary-item-thumb > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.scm-checkout-summary-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+}
+
+.scm-checkout-summary-item-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--scm-text-primary, #26221E);
+    line-height: 1.35;
+    word-break: keep-all;
+}
+
+.scm-checkout-summary-item-meta {
+    font-size: 0.75rem;
+    color: var(--scm-text-muted, #8A837B);
+    font-variant-numeric: tabular-nums;
+}
+
+.scm-checkout-summary-item-price {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.scm-checkout-amounts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scm-checkout-amount-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--scm-spacing-sm, 0.75rem);
+    font-variant-numeric: tabular-nums;
+}
+
+.scm-checkout-amount-label {
+    font-size: 0.875rem;
+    color: var(--scm-text-body, #4A4643);
+}
+
+.scm-checkout-amount-value {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-amount-discount {
+    color: var(--scm-accent, #2E3A48);
+}
+
+.scm-checkout-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--scm-spacing-sm, 0.75rem);
+    margin-top: var(--scm-spacing-xs, 0.5rem);
+    padding-top: var(--scm-spacing-sm, 0.75rem);
+    border-top: 1px solid var(--scm-charcoal, #26221E);
+}
+
+.scm-checkout-total-label {
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+    white-space: nowrap;
+}
+
+.scm-checkout-total-value {
+    font-family: var(--scm-font-display, system-ui);
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--scm-text-primary, #26221E);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* Consent + CTA directly on the summary card. */
+.scm-checkout-submit-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--scm-spacing-sm, 0.75rem);
+    margin-top: var(--scm-spacing-md, 1rem);
+}
+
+.scm-checkout-consent {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    color: var(--scm-text-muted, #8A837B);
+    text-align: left;
+    word-break: keep-all;
+}
+
+.scm-checkout-consent-error {
+    text-align: left;
+}
+
+.scm-checkout-cta {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 var(--scm-spacing-md, 1rem);
+    background-color: var(--scm-charcoal, #26221E);
+    color: var(--scm-text-inverse, #FAF8F3);
+    border: 1px solid var(--scm-charcoal, #26221E);
+    border-radius: var(--scm-radius, 8px);
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition:
+        opacity var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease),
+        transform var(--scm-duration-fast, 180ms) var(--scm-ease-out, ease);
+}
+
+.scm-checkout-cta:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.scm-checkout-cta:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.scm-checkout-cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.scm-checkout-field-error {
+    color: var(--scm-danger, #B3261E);
+}
+
+/* Guest password fields keep 2-col on mid widths, 1-col on phones. */
+@media (max-width: 559.98px) {
+    .scm-checkout-guest-block .scm-checkout-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Mobile: the summary card follows the form in flow (title+progress →
+   orderer → shipping → payment → summary+CTA). No sticky bottom bar —
+   the in-flow card keeps the real total directly above the CTA. */
+@media (max-width: 767.98px) {
+    .scm-checkout-page-head {
+        margin-bottom: var(--scm-spacing-lg, 1.5rem);
+    }
+    .scm-checkout-layout {
+        gap: var(--scm-spacing-lg, 1.5rem);
+    }
+    .scm-checkout-form .scm-checkout-zip-row {
+        flex-wrap: nowrap;
+    }
+}
+
+.scm-checkout-method-helper {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--scm-text-muted, #8A837B);
+    word-break: keep-all;
+}
+
+/* ==========================================================================
+   CHECKOUT — FUNCTIONAL PARITY RESTORE (shipping manage, same-as-orderer,
+   save-address, coupons, mileage, refund bank, cash receipt, intl shipping)
+   ========================================================================== */
+
+/* Section head with trailing text button (배송지 관리 / 쿠폰 다운로드) */
+.scm-checkout-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.scm-checkout-link-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--scm-text-muted, #8A837B);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.scm-checkout-link-button:hover {
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-link-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Saved address pills */
+.scm-checkout-saved-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.scm-checkout-saved-title {
+    font-size: 0.8125rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-saved-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.scm-checkout-saved-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    max-width: 100%;
+    padding: 0.375rem 0.75rem;
+    background: var(--scm-surface-raised, #F3F0EA);
+    border: 1px solid var(--scm-border, #E3DED6);
+    border-radius: 999px;
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.8125rem;
+    color: var(--scm-text-body, #4A4643);
+    cursor: pointer;
+}
+
+.scm-checkout-saved-pill[data-selected='true'] {
+    border-color: var(--scm-charcoal, #26221E);
+    background: var(--scm-charcoal, #26221E);
+    color: var(--scm-text-inverse, #FAF8F3);
+}
+
+.scm-checkout-saved-pill:hover {
+    border-color: var(--scm-charcoal, #26221E);
+}
+
+.scm-checkout-saved-default {
+    flex-shrink: 0;
+    padding: 0.0625rem 0.375rem;
+    border-radius: 999px;
+    background: var(--scm-charcoal, #26221E);
+    color: var(--scm-text-inverse, #FAF8F3);
+    font-size: 0.6875rem;
+}
+
+.scm-checkout-saved-pill[data-selected='true'] .scm-checkout-saved-default {
+    background: var(--scm-text-inverse, #FAF8F3);
+    color: var(--scm-charcoal, #26221E);
+}
+
+.scm-checkout-saved-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Checkboxes (same-as-orderer / save-address) — native input, a11y kept */
+.scm-checkout-checkbox {
+    margin-top: 0.25rem;
+}
+
+.scm-checkout-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.875rem;
+    color: var(--scm-text-body, #4A4643);
+}
+
+.scm-checkout-checkbox-input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--scm-charcoal, #26221E);
+    cursor: pointer;
+}
+
+.scm-checkout-checkbox-text {
+    line-height: 1.5;
+}
+
+.scm-checkout-radio {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    accent-color: var(--scm-charcoal, #26221E);
+    cursor: pointer;
+}
+
+.scm-checkout-radio-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-family: var(--scm-font-body, system-ui);
+    font-size: 0.875rem;
+    color: var(--scm-text-body, #4A4643);
+}
+
+/* dbank account radio list */
+.scm-checkout-bank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+}
+
+.scm-checkout-bank-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border: 1px solid var(--scm-border, #E3DED6);
+    border-radius: var(--scm-radius, 8px);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--scm-text-body, #4A4643);
+}
+
+.scm-checkout-bank-option:hover {
+    border-color: var(--scm-charcoal, #26221E);
+}
+
+/* Refund bank block */
+.scm-checkout-refund-bank {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--scm-border, #E3DED6);
+}
+
+/* Cash receipt */
+.scm-checkout-cash-receipt {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--scm-border, #E3DED6);
+}
+
+.scm-checkout-cash-receipt-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.scm-checkout-cash-receipt-purpose {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.scm-checkout-cash-receipt-purpose > .scm-checkout-label {
+    margin-right: 0.25rem;
+}
+
+.scm-checkout-cash-receipt-identifier {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+/* Discount · coupon section */
+.scm-checkout-coupon-count {
+    color: var(--scm-text-muted, #8A837B);
+    font-weight: 400;
+}
+
+.scm-checkout-discount-code {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.scm-checkout-discount-code .scm-field {
+    flex: 1;
+}
+
+.scm-checkout-discount-apply {
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+}
+
+/* Mileage section */
+.scm-checkout-mileage-available {
+    font-size: 0.8125rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-mileage-value {
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-mileage-max {
+    margin: 0 0 0.75rem;
+    font-size: 0.8125rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-mileage-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.scm-checkout-mileage-input {
+    flex: 1;
+    min-width: 0;
+}
+
+.scm-checkout-mileage-apply {
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+/* Per-item coupon selects inside summary */
+.scm-checkout-item-coupons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+}
+
+.scm-checkout-item-coupon-select {
+    width: 100%;
+    padding-top: 0.3125rem;
+    padding-bottom: 0.3125rem;
+    font-size: 0.8125rem;
+}
+
+/* Additional options display in summary items */
+.scm-checkout-summary-item-addopts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    font-size: 0.8125rem;
+    color: var(--scm-text-muted, #8A837B);
+}
+
+.scm-checkout-summary-item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    text-align: right;
+}
+
+.scm-checkout-summary-item-discount {
+    font-size: 0.8125rem;
+    color: var(--scm-state-danger, #B3563E);
+}
+
+/* Unavailable items banner */
+.scm-checkout-unavailable-title {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-checkout-unavailable-message {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Responsive — 768px */
+@media (max-width: 768px) {
+    .scm-checkout-mileage-controls {
+        flex-wrap: wrap;
+    }
+
+    .scm-checkout-discount-code {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .scm-checkout-discount-apply {
+        align-self: flex-start;
+        margin-bottom: 0;
+    }
+}
+
+/* 430px */
+@media (max-width: 430px) {
+    .scm-checkout-saved-list {
+        flex-direction: column;
+    }
+
+    .scm-checkout-saved-pill {
+        max-width: 100%;
+    }
+
+    .scm-checkout-saved-text {
+        white-space: normal;
+    }
+}
+
+/* ==========================================================================
+   MODAL — layout modals partials (address manage, coupon download)
+   ========================================================================== */
+
+.scm-modal-root {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.scm-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(38, 34, 30, 0.5);
+}
+
+.scm-modal-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 90vh;
+    max-width: 560px;
+    background: var(--scm-surface, #FAF8F3);
+    border: 1px solid var(--scm-border, #E3DED6);
+    border-radius: var(--scm-radius, 8px);
+    box-shadow: 0 24px 48px rgba(38, 34, 30, 0.18);
+    overflow: hidden;
+}
+
+.scm-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--scm-border, #E3DED6);
+}
+
+.scm-modal-title {
+    margin: 0;
+    font-family: var(--scm-font-display, system-ui);
+    font-weight: 600;
+    font-size: 1.0625rem;
+    color: var(--scm-text-primary, #26221E);
+}
+
+.scm-modal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    font-size: 1rem;
+    color: var(--scm-text-muted, #8A837B);
+    cursor: pointer;
+}
+
+.scm-modal-close:hover {
+    color: var(--scm-text-primary, #26221E);
+    background: var(--scm-surface-raised, #F3F0EA);
+}
+
+.scm-modal-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+
+@media (max-width: 430px) {
+    .scm-modal-root {
+        padding: 0.75rem;
+    }
+
+    .scm-modal-body {
+        padding: 1rem;
+    }
+}

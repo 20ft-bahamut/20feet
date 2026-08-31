@@ -173,6 +173,7 @@ import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
 import { CategoryPreviewStrip } from './components/CategoryPreviewStrip';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { Modal } from './components/Modal';
 import { CrossSellStrip } from './components/CrossSellStrip';
 import { EditorialBanner } from './components/EditorialBanner';
 import { EmptyState } from './components/EmptyState';
@@ -246,6 +247,7 @@ if (registry) {
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });
     registry.register({ component: CategoryPreviewStrip, metadata: { name: 'CategoryPreviewStrip', type: 'composite' } });
     registry.register({ component: ConfirmDialog, metadata: { name: 'ConfirmDialog', type: 'composite' } });
+    registry.register({ component: Modal, metadata: { name: 'Modal', type: 'composite' } });
     registry.register({ component: CrossSellStrip, metadata: { name: 'CrossSellStrip', type: 'composite' } });
     registry.register({ component: EditorialBanner, metadata: { name: 'EditorialBanner', type: 'composite' } });
     registry.register({ component: EmptyState, metadata: { name: 'EmptyState', type: 'composite' } });

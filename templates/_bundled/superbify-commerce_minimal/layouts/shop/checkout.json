@@ -33,7 +33,7 @@
             "fallback": { "data": { "order_settings": { "payment_methods": [], "banks": [], "bank_accounts": [] } } }
         },
         {
-            "_comment": "배송 설정 — 기본 국가/해외 배송 가능 여부",
+            "_comment": "배송 설정 — 기본 국가/해외 배송 가능 여부 + available_countries(배송국가 Select)",
             "id": "shippingSettings",
             "label_key": "$t:superbify.data_source.cart",
             "type": "api",
@@ -42,7 +42,22 @@
             "auto_fetch": true,
             "auth_mode": "optional",
             "loading_strategy": "progressive",
-            "fallback": { "data": { "shipping": { "default_country": "KR", "international_shipping_enabled": false } } }
+            "fallback": { "data": { "shipping": { "default_country": "KR", "international_shipping_enabled": false, "available_countries": [] } } }
+        },
+        {
+            "_comment": "회원 저장 배송지 — checkout 저장배송지 pills/배송지 관리 모달 원천. 비회원 401 은 suppress 로 조용히 무시(기본 템플릿 userAddresses DS 동일 계약). id 'addresses' 는 mypage/addresses.json 과 동일 명명 — mypage address 폼 partial 이 refetchDataSource('addresses') 를 재사용하기 위함.",
+            "id": "addresses",
+            "label_key": "$t:superbify.data_source.cart",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/user/addresses",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_mode": "required",
+            "fallback": { "data": { "addresses": { "data": [] } } },
+            "errorHandling": {
+                "401": { "handler": "suppress" },
+                "403": { "handler": "suppress" }
+            }
         }
     ],
     "init_actions": [
@@ -51,89 +66,136 @@
             "handler": "initCartKey"
         }
     ],
+    "modals": [
+        {
+            "_comment": "배송지 관리 모달 — 목록/선택(저장배송지 prefill → _global.checkoutShippingPrefill)/편집/삭제/기본배송지. CheckoutForm 의 배송지 관리 버튼이 G7Core.modal.open('checkoutAddressManageModal') 로 연다.",
+            "partial": "partials/checkout/_modal_address_manage.json"
+        },
+        {
+            "_comment": "쿠폰 다운로드 모달 — CheckoutPage 가 GET /user/coupons/downloadable 을 호출해 _global.downloadableCoupons 에 기록한 뒤 G7Core.modal.open('checkoutCouponDownloadModal') 을 호출한다(레이아웃 apiCall 시퀀스에 접근할 수 없는 React composite 보완). 모달 내 다운로드 POST 후 refetch('checkoutData').",
+            "partial": "partials/checkout/_modal_coupon_download.json"
+        }
+    ],
     "slots": {
         "content": [
             {
-                "_comment": "daum 우편번호 extension_point (FORK SOURCE: templates/_bundled/sirsoft-basic/layouts/partials/shop/_checkout_shipping.json:484-543. 우편번호 검색 버튼을 주입받는 sibling 배치 — 플러그인 openPostcode 는 DOM input 에 값을 쓰지 않고 callbackAction($event) 디스패치만 하므로, CheckoutForm(React controlled input)은 _global.checkoutAddress 브리지로만 주소를 받는다. CheckoutForm 은 input name=zipcode/address 를 유지하므로 setFieldReadOnly 가 그대로 동작한다.)",
-                "id": "checkout_address_search_slot",
-                "type": "extension_point",
-                "name": "address_search_slot",
-                "props": {
-                    "readOnlyFields": ["zipcode", "address"]
-                },
-                "callbacks": {
-                    "onAddressSelect": {
-                        "handler": "sequence",
-                        "actions": [
-                            {
-                                "comment": "우편번호/주소를 _global.checkoutAddress 에 기록 — CheckoutForm 이 G7Core.state 구독으로 동기화",
-                                "handler": "setState",
-                                "params": {
-                                    "target": "global",
-                                    "checkoutAddress": {
-                                        "zipcode": "{{$event.zipcode}}",
-                                        "address": "{{$event.address}}",
-                                        "region": "{{$event.region}}",
-                                        "city": "{{$event.city}}",
-                                        "country_code": "{{$event.countryCode ?? 'KR'}}"
-                                    }
-                                }
-                            },
-                            {
-                                "comment": "배송지 변경 시 checkout API 호출 (도서산간 배송비 재계산)",
-                                "handler": "apiCall",
-                                "target": "/api/modules/sirsoft-ecommerce/checkout",
-                                "auth_mode": "optional",
-                                "params": {
-                                    "method": "PUT",
-                                    "body": {
-                                        "zipcode": "{{_global.checkoutAddress?.zipcode ?? ''}}",
-                                        "country_code": "{{_global.checkoutAddress?.country_code ?? 'KR'}}"
-                                    }
-                                },
-                                "onSuccess": [
-                                    {
-                                        "handler": "refetchDataSource",
-                                        "params": {
-                                            "dataSourceId": "checkoutData"
-                                        }
-                                    }
-                                ],
-                                "onError": [
-                                    {
-                                        "handler": "toast",
-                                        "params": {
-                                            "type": "error",
-                                            "message": "{{error.message}}"
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                }
-            },
-            {
+                "_comment": "=== CHECKOUT FINAL REDESIGN === daum 우편번호 extension_point 는 CheckoutPage composite 의 children 으로 중첩한다. slots.content 의 sibling 배치로 두면 주입 버튼이 폼 밖 헤더 아래에 떠 있다(WP5 결함). 엔진은 composite children 을 React children 으로 전달하고(Lay-outExtensionService 가 children 트리에서도 extension_point 를 재귀 해석한다), CheckoutPage -> CheckoutForm 의 children 슬롯이 그것을 우편번호 입력 행에 렌더링한다.",
                 "id": "checkout_page_wrapper",
                 "type": "composite",
                 "name": "CheckoutPage",
                 "props": {
-                    "_comment": "data source id 를 prop 이름으로 사용해 엔진이 현재 데이터소스 값을 자동으로 평가한다",
+                    "_comment": "data source id 를 prop 이름으로 사용해 엔진이 현재 데이터소스 값을 자동으로 평가한다. isLoggedIn 은 ?.uuid 로 판정한다 — 비회원의 401 suppress 가 currentUser 를 [](빈 배열, truthy)로 초기화하므로 진실성 검사는 로그인 상태를 오판한다(auth partial 들의 _global?.currentUser?.uuid 패턴과 동일).",
                     "checkoutData": "{{checkoutData}}",
                     "paymentSettings": "{{paymentSettings}}",
                     "shippingSettings": "{{shippingSettings}}",
-                    "isLoggedIn": "{{_global.currentUser ? true : false}}",
+                    "userAddresses": "{{addresses}}",
+                    "addressManageModalId": "checkoutAddressManageModal",
+                    "couponDownloadModalId": "checkoutCouponDownloadModal",
+                    "savedAddressTitle": "$t:superbify.checkout.shipping.saved_addresses",
+                    "manageAddressesLabel": "$t:superbify.checkout.shipping.manage",
+                    "sameAsOrdererLabel": "$t:superbify.checkout.shipping.same_as_orderer",
+                    "saveAddressLabel": "$t:superbify.checkout.shipping.save_address",
+                    "countryLabel": "$t:superbify.checkout.shipping.country",
+                    "discountSectionTitle": "$t:superbify.checkout.discount.title",
+                    "couponDownloadLabel": "$t:superbify.checkout.discount.download",
+                    "orderCouponLabel": "$t:superbify.checkout.discount.order_coupon",
+                    "shippingCouponLabel": "$t:superbify.checkout.discount.shipping_coupon",
+                    "couponNoAvailableLabel": "$t:superbify.checkout.discount.no_available",
+                    "couponCountSuffixLabel": "$t:superbify.checkout.discount.count_suffix",
+                    "couponAlreadyUsedLabel": "$t:superbify.checkout.discount.already_used",
+                    "couponSelectPlaceholder": "$t:superbify.checkout.discount.select_placeholder",
+                    "discountCodeLabel": "$t:superbify.checkout.discount.discount_code",
+                    "discountCodePlaceholder": "$t:superbify.checkout.discount.discount_code_placeholder",
+                    "discountCodeApplyLabel": "$t:superbify.checkout.discount.apply",
+                    "mileageSectionTitle": "$t:superbify.checkout.mileage.title",
+                    "mileageAvailableLabel": "$t:superbify.checkout.mileage.available",
+                    "mileageUseAllLabel": "$t:superbify.checkout.mileage.use_all",
+                    "mileageApplyLabel": "$t:superbify.checkout.mileage.apply",
+                    "mileageInputPlaceholder": "$t:superbify.checkout.mileage.input_placeholder",
+                    "pointsUsedLabel": "$t:superbify.checkout.summary.points_used",
+                    "shippingCouponDiscountLabel": "$t:superbify.checkout.summary.shipping_coupon",
+                    "refundBankTitle": "$t:superbify.checkout.payment.refund_bank",
+                    "refundBankCodeLabel": "$t:superbify.checkout.payment.refund_bank_code",
+                    "refundBankAccountLabel": "$t:superbify.checkout.payment.refund_bank_account",
+                    "refundBankHolderLabel": "$t:superbify.checkout.payment.refund_bank_holder",
+                    "vbankHelperLabel": "$t:superbify.checkout.payment.vbank_helper",
+                    "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}",
                     "currentUserName": "{{_global.currentUser?.name ?? ''}}",
                     "currentUserPhone": "{{_global.currentUser?.phone ?? ''}}",
                     "currentUserEmail": "{{_global.currentUser?.email ?? ''}}",
                     "locale": "ko",
-                    "title": "$t:superbify.checkout.title",
+                    "title": "$t:superbify.checkout.page_title",
                     "loadingLabel": "$t:superbify.checkout.loading",
                     "emptyTempOrderTitle": "$t:superbify.checkout.empty_title",
                     "backToShopLabel": "$t:superbify.checkout.back_to_cart",
                     "submitErrorTitle": "$t:superbify.checkout.submit_error_title",
-                    "orderFailedFallback": "$t:superbify.checkout.order_failed_fallback"
-                }
+                    "orderFailedFallback": "$t:superbify.checkout.order_failed_fallback",
+                    "progressCartLabel": "$t:superbify.checkout.progress.cart",
+                    "progressCheckoutLabel": "$t:superbify.checkout.progress.checkout",
+                    "progressCompleteLabel": "$t:superbify.checkout.progress.complete"
+                },
+                "children": [
+                    {
+                        "_comment": "FORK SOURCE: templates/_bundled/sirsoft-basic/layouts/partials/shop/_checkout_shipping.json:484-543. 플러그인 openPostcode 는 DOM input 에 값을 쓰지 않고 callbackAction($event) 디스패치만 하므로, CheckoutForm(React controlled input)은 _global.checkoutAddress 브리지로만 주소를 받는다. CheckoutForm 은 input name=zipcode/address 를 유지하므로 setFieldReadOnly 가 그대로 동작한다.",
+                        "id": "checkout_address_search_slot",
+                        "type": "extension_point",
+                        "name": "address_search_slot",
+                        "props": {
+                            "readOnlyFields": ["zipcode", "address"]
+                        },
+                        "callbacks": {
+                            "onAddressSelect": {
+                                "handler": "sequence",
+                                "actions": [
+                                    {
+                                        "comment": "우편번호/주소를 _global.checkoutAddress 에 기록 — CheckoutForm 이 G7Core.state 구독으로 동기화",
+                                        "handler": "setState",
+                                        "params": {
+                                            "target": "global",
+                                            "checkoutAddress": {
+                                                "zipcode": "{{$event.zipcode}}",
+                                                "address": "{{$event.address}}",
+                                                "region": "{{$event.region}}",
+                                                "city": "{{$event.city}}",
+                                                "country_code": "{{$event.countryCode ?? 'KR'}}"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "comment": "배송지 변경 시 checkout API 호출 (도서산간 배송비 재계산)",
+                                        "handler": "apiCall",
+                                        "target": "/api/modules/sirsoft-ecommerce/checkout",
+                                        "auth_mode": "optional",
+                                        "params": {
+                                            "method": "PUT",
+                                            "body": {
+                                                "zipcode": "{{_global.checkoutAddress?.zipcode ?? ''}}",
+                                                "country_code": "{{_global.checkoutAddress?.country_code ?? 'KR'}}"
+                                            }
+                                        },
+                                        "onSuccess": [
+                                            {
+                                                "handler": "refetchDataSource",
+                                                "params": {
+                                                    "dataSourceId": "checkoutData"
+                                                }
+                                            }
+                                        ],
+                                        "onError": [
+                                            {
+                                                "handler": "toast",
+                                                "params": {
+                                                    "type": "error",
+                                                    "message": "{{error.message}}"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
             }
         ]
     }

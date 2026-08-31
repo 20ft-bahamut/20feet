@@ -40,6 +40,13 @@ export interface OrderCompleteOrderData {
         quantity?: number;
         unit_price_formatted?: string;
         subtotal_price_formatted?: string;
+        /** 주문 시점 동결 스냅샷(OrderOptionResource) — 이름/추가금/커스텀 텍스트 */
+        additional_options?: Array<{
+            name?: string;
+            price_adjustment?: number | string;
+            custom_text?: string | null;
+        }>;
+        additional_options_total_formatted?: string;
     }>;
     orderer_email?: string;
 }
@@ -457,6 +464,36 @@ export function OrderCompletePage(props: OrderCompletePageProps): React.ReactEle
                                 >
                                     {item.unit_price_formatted ?? ''} × {item.quantity ?? 1}
                                 </Span>
+                                {item.product_option_name ? (
+                                    <Span
+                                        data-testid="order-complete-item-option"
+                                        style={{
+                                            fontSize: '0.8125rem',
+                                            color: 'var(--scm-text-muted, #8A837B)',
+                                        }}
+                                    >
+                                        {resolveLabel(item.product_option_name, locale)}
+                                    </Span>
+                                ) : null}
+                                {/* 추가옵션 — OrderOptionResource.additional_options 계약 */}
+                                {(item.additional_options ?? []).length > 0 ? (
+                                    <Div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                                        {(item.additional_options ?? []).map((ao, aoIdx) => (
+                                            <Span
+                                                key={aoIdx}
+                                                data-testid="order-complete-item-additional-option"
+                                                style={{
+                                                    fontSize: '0.8125rem',
+                                                    color: 'var(--scm-text-muted, #8A837B)',
+                                                }}
+                                            >
+                                                + {ao.name ?? ''}
+                                                {ao.custom_text ? `: ${ao.custom_text}` : ''}
+                                                {ao.price_adjustment ? ` (+${Number(ao.price_adjustment).toLocaleString()}원)` : ''}
+                                            </Span>
+                                        ))}
+                                    </Div>
+                                ) : null}
                             </Div>
                             <Span
                                 style={{

@@ -42,6 +42,13 @@ export interface OrderCompleteOrderData {
         quantity?: number;
         unit_price_formatted?: string;
         subtotal_price_formatted?: string;
+        /** 주문 시점 동결 스냅샷(OrderOptionResource) — 이름/추가금/커스텀 텍스트 */
+        additional_options?: Array<{
+            name?: string;
+            price_adjustment?: number | string;
+            custom_text?: string | null;
+        }>;
+        additional_options_total_formatted?: string;
     }>;
     orderer_email?: string;
 }

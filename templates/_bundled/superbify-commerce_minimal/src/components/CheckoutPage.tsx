@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { CheckoutForm, type CheckoutFormCheckoutPayload, type CheckoutPaymentMethod, type CheckoutSubmitPayload } from './CheckoutForm';
-import { Button, Div, P } from './basic';
+import {
+    CheckoutForm,
+    type CheckoutFormCheckoutPayload,
+    type CheckoutFormProps,
+    type CheckoutFormPaymentSettings,
+    type CheckoutFormShippingSettings,
+    type CheckoutPaymentMethod,
+    type CheckoutRecomputeFields,
+    type CheckoutSubmitPayload,
+} from './CheckoutForm';
+import { A, Button, Div, H1, P, Span } from './basic';
 
 export interface CheckoutPageCheckoutData extends CheckoutFormCheckoutPayload {
     temp_order_id?: string | number | null;
@@ -13,8 +22,14 @@ export interface CheckoutPageSettings {
 export interface CheckoutPageProps {
     /** data_source.checkoutData (unwrapped: { data: response.data.data }) */
     checkoutData?: { data?: CheckoutPageCheckoutData; loading?: boolean; error?: unknown } | null;
-    paymentSettings?: { data?: { order_settings?: CheckoutPageSettings } | null; loading?: boolean } | null;
-    shippingSettings?: { data?: { shipping?: { default_country?: string; international_shipping_enabled?: boolean } } | null; loading?: boolean } | null;
+    paymentSettings?: { data?: CheckoutFormPaymentSettings | null; loading?: boolean } | null;
+    shippingSettings?: { data?: CheckoutFormShippingSettings | null; loading?: boolean } | null;
+    /** userAddresses data source (회원 저장 배송지) — 게이트는 CheckoutForm 이 isLoggedIn 으로 처리 */
+    userAddresses?: { data?: { addresses?: { data?: unknown[] } }; loading?: boolean; error?: unknown } | null;
+    /** Address-manage modal id — "배송지 관리" 클릭 시 G7Core.modal.open 대상. */
+    addressManageModalId?: string;
+    /** Downloadable-coupon modal id. */
+    couponDownloadModalId?: string;
     isLoggedIn?: boolean;
     currentUserName?: string;
     currentUserPhone?: string;
@@ -30,6 +45,12 @@ export interface CheckoutPageProps {
     submitErrorTitle?: string;
     orderFailedFallback?: string;
     redirectingLabel?: string;
+    /** Progress indicator labels — cart › checkout › complete. */
+    progressCartLabel?: string;
+    progressCheckoutLabel?: string;
+    progressCompleteLabel?: string;
+    /** daum extension_point 주입 노드 — CheckoutForm 의 우편번호 행으로 통과한다. */
+    children?: React.ReactNode;
 }
 
 interface ApiError {
@@ -121,16 +142,50 @@ interface VerifyResponse {
     };
 }
 
+/** 주문 성공 후 complete 페이지 라우팅(redirect_url 우선). */
+function navigateToOrder(orderNumber?: string, redirectUrl?: string): void {
+    const finalRedirect =
+        redirectUrl ??
+        (orderNumber
+            ? `/shop/orders/${encodeURIComponent(orderNumber)}/complete`
+            : '/shop');
+    // Guest flow: forward guest token via URL query so the next page's
+    // init_action can hydrate _global.guestOrderToken (in-memory _global
+    // does not survive full-page navigation).
+    const tokenParam = (window as unknown as { G7Core?: { state?: { get?: () => { guestOrderToken?: string } } } })
+        .G7Core?.state?.get?.()?.guestOrderToken;
+    const finalUrl =
+        tokenParam
+            ? `${finalRedirect}${finalRedirect.includes('?') ? '&' : '?'}_gtoken=${encodeURIComponent(tokenParam)}`
+            : finalRedirect;
+    window.location.assign(finalUrl);
+}
+
+/** PG 결제 실패 후 복귀 쿼리(?error=...) → submitError 배너 메시지(default PG error 계약). */
+const PG_ERROR_LABELS: Record<string, string> = {
+    confirm_failed: '결제 승인에 실패했습니다. 다시 시도해 주세요.',
+    amount_mismatch: '결제 금액이 일치하지 않습니다. 주문을 다시 진행해 주세요.',
+    order_not_found: '주문 정보를 찾을 수 없습니다.',
+};
+
 export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
     const locale = props.locale ?? 'ko';
     const {
         checkoutData,
         paymentSettings,
         shippingSettings,
+        userAddresses,
+        addressManageModalId = 'checkoutAddressManageModal',
+        couponDownloadModalId = 'checkoutCouponDownloadModal',
         isLoggedIn = false,
         currentUserName,
         currentUserPhone,
         currentUserEmail,
+    } = props;
+    const {
+        progressCartLabel = '장바구니',
+        progressCheckoutLabel = '주문/결제',
+        progressCompleteLabel = '완료',
     } = props;
 
     const title = props.title ?? '결제';
@@ -145,10 +200,132 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
     const [creatingTemp, setCreatingTemp] = useState(false);
     const [resolvedLocale] = useState<string>(locale);
 
+    // PG 결제 실패 복귀 — ?error=confirm_failed|amount_mismatch|order_not_found 배너
+    // (default template PG error 계약의 Still Form 배너 동치 구현).
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const err = params.get('error');
+            if (!err) return;
+            setSubmitError(PG_ERROR_LABELS[err] ?? '결제 처리 중 문제가 발생했습니다.');
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('error');
+                window.history.replaceState({}, '', url.toString());
+            } catch {
+                /* ignore */
+            }
+        } catch {
+            /* ignore */
+        }
+    }, []);
+
     const resolvePaymentLabel = useCallback(
         (m: CheckoutPaymentMethod) => resolveLabel(m._cached_name, resolvedLocale) || m.id,
         [resolvedLocale],
     );
+
+    // G7 전역 토스트 — 쿠폰·적립금 적용 피드백(default template toast 계약).
+    const showToast = useCallback((type: 'success' | 'error' | 'info' | 'warning', message: string) => {
+        try {
+            const G7Core = (window as unknown as {
+                G7Core?: {
+                    toast?: ((msg?: unknown, opts?: unknown) => void)
+                        & { [k: string]: unknown };
+                };
+            }).G7Core;
+            const fn = G7Core?.toast;
+            if (typeof fn === 'function') {
+                fn(message, { type });
+                return;
+            }
+            const typed = typeof fn === 'object' && fn !== null ? (fn as Record<string, unknown>)[type] : undefined;
+            if (typeof typed === 'function') {
+                (typed as (m: string) => void)(message);
+            }
+        } catch {
+            /* G7 미로드 시 무시 */
+        }
+    }, []);
+
+    // PUT /checkout 재계산 — UpdateCheckoutRequest 계약 필드만 전송(쿠폰/적립금/우편번호/국가).
+    // 성공 시 checkoutData refetch 로 표시 금액이 서버 계산(SDoT)과 동기화된다.
+    const recomputeCheckout = useCallback(
+        async (fields: CheckoutRecomputeFields, opts?: { successMessage?: string }): Promise<boolean> => {
+            try {
+                const cartKey = readCartKey();
+                const body: Record<string, unknown> = {};
+                for (const [k, v] of Object.entries(fields)) {
+                    if (v !== undefined) body[k] = v;
+                }
+                const res = await fetchJson<{ success?: boolean; message?: string }>(
+                    '/api/modules/sirsoft-ecommerce/checkout',
+                    {
+                        method: 'PUT',
+                        headers: cartKey ? { 'X-Cart-Key': cartKey } : {},
+                        body: JSON.stringify(body),
+                    },
+                );
+                if (!res.ok || !res.body?.success) {
+                    const msg = res.body?.message ?? `HTTP ${res.status}`;
+                    showToast('error', msg);
+                    return false;
+                }
+                try {
+                    (window as unknown as { G7Core?: { dataSource?: { refetch?: (id: string) => void } } }).G7Core?.dataSource?.refetch?.('checkoutData');
+                } catch {
+                    /* ignore */
+                }
+                if (opts?.successMessage) showToast('success', opts.successMessage);
+                return true;
+            } catch (err) {
+                showToast('error', (err as Error).message ?? 'Network error');
+                return false;
+            }
+        },
+        [showToast],
+    );
+
+    // "배송지 관리" / "쿠폰 다운로드" — 레이아웃 선언 모달을 G7 전역 모달 API 로 연다.
+    const openAddressManager = useCallback(() => {
+        try {
+            (window as unknown as { G7Core?: { modal?: { open?: (id: string) => void } } }).G7Core?.modal?.open?.(
+                addressManageModalId,
+            );
+        } catch {
+            /* ignore */
+        }
+    }, [addressManageModalId]);
+
+    const openCouponDownload = useCallback(async () => {
+        try {
+            // 쿠폰 다운로드 데이터 선적재 → _global.downloadableCoupons 로 모달에 전달
+            // (default template 의 apiCall → openModal 시퀀스를 React composite 에서 재현).
+            const token = (window as unknown as { G7Core?: { api?: { getToken?: () => string | null } } }).G7Core?.api?.getToken?.() ?? null;
+            const res = await fetchJson<{ success?: boolean; data?: unknown; message?: string }>(
+                '/api/modules/sirsoft-ecommerce/user/coupons/downloadable?page=1&per_page=8',
+                { method: 'GET', headers: token ? { Authorization: `Bearer ${token}` } : {} },
+            );
+            const coupons = res.body?.data ?? null;
+            (window as unknown as { G7Core?: { state?: { set?: (u: Record<string, unknown>) => void } } })
+                .G7Core?.state?.set?.({ downloadableCoupons: coupons, downloadableCouponsLoading: false });
+        } catch {
+            try {
+                (window as unknown as { G7Core?: { state?: { set?: (u: Record<string, unknown>) => void } } })
+                    .G7Core?.state?.set?.({ downloadableCoupons: null, downloadableCouponsLoading: false });
+            } catch {
+                /* ignore */
+            }
+        }
+        try {
+            (window as unknown as { G7Core?: { modal?: { open?: (id: string) => void } } }).G7Core?.modal?.open?.(
+                couponDownloadModalId,
+            );
+        } catch {
+            /* ignore */
+        }
+    }, [couponDownloadModalId]);
 
     // Ensure a temp_order exists. If checkoutData is loaded but has no temp_order_id,
     // POST /checkout to create one. Mirrors sirsoft-basic's flow.
@@ -234,24 +411,25 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
             setSubmitError(null);
             try {
                 const cartKey = readCartKey();
+                // POST /user/orders body — CreateOrderRequest 계약 그대로(Form 이 조립).
+                // dbank 는 Form 이 선택한 실제 계좌로만 구성하고 하드코딩 계좌는 쓰지 않는다.
                 const body: Record<string, unknown> = {
+                    temp_order_id: payload.temp_order_id,
                     orderer: payload.orderer,
                     shipping: payload.shipping,
                     payment_method: payload.payment_method,
                     shipping_memo: payload.shipping_memo || null,
-                    depositor_name: payload.depositor_name,
+                    depositor_name: payload.depositor_name || payload.orderer.name,
+                    dbank: payload.dbank,
+                    refund_bank: payload.refund_bank,
+                    save_shipping_address: payload.save_shipping_address,
                     expected_total_amount: payload.expected_total_amount,
                 };
-                if (payload.temp_order_id) body.temp_order_id = payload.temp_order_id;
-
-                if (payload.payment_method === 'dbank') {
-                    // Use a single bank account placeholder — runtime config gap.
-                    // Real PG/bank routing requires admin to activate bank_accounts.
-                    body.dbank = {
-                        bank_code: '004',
-                        account_number: '004-123-4567',
-                        account_holder: payload.depositor_name,
-                    };
+                if (payload.cash_receipt?.requested) {
+                    body.cash_receipt_requested = true;
+                    body.cash_receipt_type = payload.cash_receipt.type ?? 'income';
+                    body.cash_receipt_identifier_type = payload.cash_receipt.identifier_type ?? 'phone';
+                    body.cash_receipt_identifier = payload.cash_receipt.identifier ?? '';
                 }
 
                 if (!isLoggedIn) {
@@ -275,10 +453,31 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
 
                 const orderNumber = res.body.data?.order?.order_number;
                 const redirectUrl = res.body.data?.redirect_url;
+                const pgHandler = res.body.data?.pg_payment_handler;
                 const requiresPg = !!res.body.data?.requires_pg_payment;
 
-                // Guest: auto verify to issue 30-min token (sirsoft-basic pattern).
-                if (!isLoggedIn && !requiresPg && orderNumber && payload.guest_lookup_password) {
+                // PG 결제 — provider-agnostic 동적 dispatch(default template 계약).
+                // 서버가 내려준 pg_payment_handler 를 G7Core.dispatch 로 그대로 호출한다.
+                if (requiresPg && pgHandler) {
+                    setSubmitting(false);
+                    try {
+                        (window as unknown as {
+                            G7Core?: { dispatch?: (action: Record<string, unknown>) => void };
+                        }).G7Core?.dispatch?.({
+                            handler: pgHandler,
+                            params: {
+                                pgPaymentData: res.body.data?.pg_payment_data,
+                            },
+                        });
+                    } catch {
+                        /* handler dispatch 실패 시 fallback navigate */
+                        navigateToOrder(orderNumber, redirectUrl);
+                    }
+                    return;
+                }
+
+                // Guest: auto verify to issue 30-min token (non-PG flow only — sirsoft-basic pattern).
+                if (!isLoggedIn && orderNumber && payload.guest_lookup_password) {
                     try {
                         const verifyRes = await fetchJson<VerifyResponse>(
                             '/api/modules/sirsoft-ecommerce/guest/orders/verify',
@@ -313,23 +512,7 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                     }
                 }
 
-                const finalRedirect =
-                    redirectUrl ??
-                    (orderNumber
-                        ? `/shop/orders/${encodeURIComponent(orderNumber)}/complete`
-                        : '/shop');
-                // Guest flow: forward guest token via URL query so the next page's
-                // init_action can hydrate _global.guestOrderToken (in-memory _global
-                // does not survive full-page navigation).
-                const tokenParam =
-                    !isLoggedIn &&
-                    (window as unknown as { G7Core?: { state?: { get?: () => { guestOrderToken?: string } } } })
-                        .G7Core?.state?.get?.()?.guestOrderToken;
-                const finalUrl =
-                    tokenParam
-                        ? `${finalRedirect}${finalRedirect.includes('?') ? '&' : '?'}_gtoken=${encodeURIComponent(tokenParam)}`
-                        : finalRedirect;
-                window.location.assign(finalUrl);
+                navigateToOrder(orderNumber, redirectUrl);
             } catch (err) {
                 setSubmitError((err as Error).message ?? 'Network error');
                 setSubmitting(false);
@@ -395,7 +578,17 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                     alignItems: 'center',
                 }}
             >
-                <H2like>{props.emptyTempOrderTitle ?? '주문 정보를 만들 수 없습니다'}</H2like>
+                <h2
+                    style={{
+                        fontFamily: 'var(--scm-font-display, system-ui)',
+                        fontSize: '1.5rem',
+                        fontWeight: 600,
+                        margin: 0,
+                        color: 'var(--scm-text-primary, #26221E)',
+                    }}
+                >
+                    {props.emptyTempOrderTitle ?? '주문 정보를 만들 수 없습니다'}
+                </h2>
                 <P style={{ margin: 0, color: 'var(--scm-text-body, #4A4643)' }}>
                     {createTempError}
                 </P>
@@ -433,30 +626,66 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                 paddingInline: 'var(--scm-gutter, 1rem)',
             }}
         >
-            <H2like style={{ marginBottom: 'var(--scm-spacing-lg, 1.5rem)' }}>{title}</H2like>
+            <Div className="scm-checkout-page-head" data-testid="checkout-page-head">
+                <nav className="scm-checkout-progress" aria-label={`${progressCartLabel} · ${progressCheckoutLabel} · ${progressCompleteLabel}`}>
+                    <A
+                        href="/cart"
+                        className="scm-checkout-progress-step"
+                        data-testid="checkout-progress-cart"
+                    >
+                        {progressCartLabel}
+                    </A>
+                    <Span className="scm-checkout-progress-sep" aria-hidden="true">›</Span>
+                    <Span
+                        className="scm-checkout-progress-step scm-checkout-progress-current"
+                        aria-current="step"
+                        data-testid="checkout-progress-checkout"
+                    >
+                        {progressCheckoutLabel}
+                    </Span>
+                    <Span className="scm-checkout-progress-sep" aria-hidden="true">›</Span>
+                    <Span className="scm-checkout-progress-step" data-testid="checkout-progress-complete">
+                        {progressCompleteLabel}
+                    </Span>
+                </nav>
+                <Div className="scm-checkout-title-row">
+                    <H1 className="scm-checkout-page-title">{title}</H1>
+                    <Button
+                        type="button"
+                        onClick={navigateBack}
+                        data-testid="checkout-back-to-cart"
+                        data-scm-interactive
+                        className="scm-checkout-back-button"
+                    >
+                        {props.backToShopLabel ?? '장바구니로 돌아가기'}
+                    </Button>
+                </Div>
+            </Div>
             <CheckoutForm
                 checkoutData={checkoutPayload}
                 checkoutLoading={isCheckoutLoading}
                 paymentSettings={paymentSettings?.data ?? null}
                 shippingSettings={shippingSettings?.data ?? null}
+                userAddresses={(userAddresses as unknown as CheckoutFormProps['userAddresses']) ?? null}
                 onSubmit={handleSubmit}
                 onNavigateBack={navigateBack}
+                onRecomputeCheckout={recomputeCheckout}
+                onOpenAddressManager={openAddressManager}
+                onOpenCouponDownload={openCouponDownload}
                 isSubmitting={submitting}
                 submitError={submitError}
                 isLoggedIn={isLoggedIn}
                 currentUserName={currentUserName}
                 currentUserPhone={currentUserPhone}
                 currentUserEmail={currentUserEmail}
+                locale={resolvedLocale}
                 resolvePaymentLabel={resolvePaymentLabel}
-            />
+            >
+                {props.children}
+            </CheckoutForm>
             {isLoggedIn ? null : (
                 <P
-                    style={{
-                        marginTop: 'var(--scm-spacing-md, 1rem)',
-                        color: 'var(--scm-text-muted, #8A837B)',
-                        fontSize: '0.8125rem',
-                        textAlign: 'center',
-                    }}
+                    className="scm-checkout-guest-note"
                 >
                     결제 진행 후 발급된 주문번호와 휴대폰, 조회 비밀번호로{' '}
                     <a href="/shop/guest/orders" style={{ color: 'var(--scm-text-primary, #26221E)' }}>
@@ -466,23 +695,6 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                 </P>
             )}
         </Div>
-    );
-}
-
-function H2like({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }): React.ReactElement {
-    return (
-        <h2
-            style={{
-                fontFamily: 'var(--scm-font-display, system-ui)',
-                fontSize: '1.5rem',
-                fontWeight: 600,
-                margin: 0,
-                color: 'var(--scm-text-primary, #26221E)',
-                ...(style ?? {}),
-            }}
-        >
-            {children}
-        </h2>
     );
 }
 

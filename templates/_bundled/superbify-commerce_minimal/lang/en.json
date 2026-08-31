@@ -530,7 +530,7 @@
                 "hint": "Used to look up this order later. Different from your member password."
             },
             "shipping": {
-                "title": "Shipping address",
+                "title": "Shipping details",
                 "recipient_name": "Recipient",
                 "recipient_name_placeholder": "Recipient name",
                 "recipient_phone": "Phone",
@@ -542,24 +542,62 @@
                 "address_detail": "Detail",
                 "address_detail_placeholder": "Building / unit / etc.",
                 "memo": "Shipping note",
-                "memo_placeholder": "Special requests"
+                "memo_placeholder": "Special requests",
+                "saved_addresses": "Saved addresses",
+                "manage": "Manage addresses",
+                "same_as_orderer": "Same as orderer",
+                "save_address": "Save this address",
+                "country": "Shipping country",
+                "intl_address": "Address (International)",
+                "intl_address1_placeholder": "Street address",
+                "intl_address2": "Address line 2",
+                "intl_address2_placeholder": "Apt, suite, unit",
+                "intl_city": "City",
+                "intl_city_placeholder": "City",
+                "intl_state": "State / Province / Region",
+                "intl_state_placeholder": "State / Province / Region",
+                "intl_postal_code": "Postal code",
+                "intl_postal_code_placeholder": "Postal code"
             },
             "payment": {
                 "title": "Payment method",
                 "select_method": "Select a payment method",
                 "dbank_depositor": "Depositor name",
                 "dbank_depositor_placeholder": "Name that will appear on the deposit",
-                "dbank_helper": "Ships after deposit is confirmed."
+                "dbank_helper": "Ships after deposit is confirmed.",
+                "dbank_accounts": "Deposit account",
+                "refund_bank": "Refund bank account",
+                "refund_bank_code": "Bank",
+                "refund_bank_account": "Account number",
+                "refund_bank_holder": "Account holder",
+                "bank_select": "Select deposit account",
+                "vbank_helper": "Orders are auto-cancelled after the deposit deadline.",
+                "cash_receipt_request": "Request cash receipt",
+                "cash_receipt_purpose": "Receipt type",
+                "cash_receipt_income": "Income deduction",
+                "cash_receipt_expense": "Business expense",
+                "cash_receipt_identifier_type": "Identifier type",
+                "cash_receipt_identifier": "Cash receipt number",
+                "cash_receipt_identifier_placeholder": "Mobile number or card number",
+                "cash_receipt_phone": "Mobile number",
+                "cash_receipt_card": "Cash receipt card",
+                "cash_receipt_business": "Business registration number"
             },
             "items": {
-                "title": "Order items"
+                "title": "Order items",
+                "quantity": "Qty"
             },
             "summary": {
                 "items": "Items",
-                "subtotal": "Subtotal",
+                "subtotal": "Item total",
                 "shipping": "Shipping",
                 "discount": "Discount",
-                "total": "Total"
+                "total": "Total",
+                "title": "Order summary",
+                "points_used": "Mileage",
+                "shipping_coupon": "Shipping coupon discount",
+                "unavailable_title": "Your order includes unavailable items",
+                "unavailable_message": "Remove sold-out or stopped items in the cart and try again."
             },
             "submit": "Place order",
             "submitting": "Processing…",
@@ -569,6 +607,38 @@
                 "email_format": "Invalid email",
                 "password_min": "Use at least 4 characters",
                 "password_mismatch": "Passwords do not match"
+            },
+            "page_title": "Checkout",
+            "progress": {
+                "cart": "Cart",
+                "checkout": "Checkout",
+                "complete": "Complete"
+            },
+            "discount": {
+                "title": "Discount · Coupons",
+                "download": "Download coupons",
+                "order_coupon": "Order coupon",
+                "shipping_coupon": "Shipping coupon",
+                "no_available": "No coupons available",
+                "count_suffix": " available",
+                "already_used": "Already applied",
+                "discount_code": "Discount code",
+                "discount_code_placeholder": "Enter discount code",
+                "apply": "Apply",
+                "select_placeholder": "Select a coupon"
+            },
+            "mileage": {
+                "title": "Mileage",
+                "available": "Available mileage",
+                "use_all": "Use all",
+                "apply": "Apply",
+                "input_placeholder": "Points to use"
+            },
+            "pg": {
+                "error_confirm_failed": "Payment confirmation failed. Please try again.",
+                "error_amount_mismatch": "Payment amount mismatch. Please place the order again.",
+                "error_order_not_found": "Order not found.",
+                "error_generic": "Something went wrong during payment."
             }
         },
         "order_complete": {

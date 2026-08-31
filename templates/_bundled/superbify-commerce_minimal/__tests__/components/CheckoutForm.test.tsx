@@ -65,9 +65,14 @@ describe('CheckoutForm children slot (daum address search)', () => {
         expect(findInput('address')).toBeInTheDocument();
     });
 
-    it('renders no slot wrapper when children are omitted', () => {
+    it('renders no injected search node inside the slot when children are omitted', () => {
         render(<CheckoutForm {...baseProps} />);
-        expect(screen.queryByTestId('checkout-address-search-slot')).not.toBeInTheDocument();
+        // The zip row (slot wrapper) always hosts the zipcode field; without
+        // the layout's extension node there is nothing to inject beside it.
+        const slot = screen.queryByTestId('checkout-address-search-slot');
+        expect(slot).toBeInTheDocument();
+        expect(slot).toContainElement(findInput('zipcode').closest('.scm-field'));
+        expect(slot?.querySelector('[data-testid="daum-address-search-node"]')).toBeNull();
     });
 });
 
@@ -154,24 +159,44 @@ describe('layouts/shop/checkout.json member bindings + daum extension node', () 
     it('binds isLoggedIn / currentUser* to _global.currentUser', () => {
         expect(page).toBeTruthy();
         const props = page.props ?? {};
-        expect(props.isLoggedIn).toContain('_global.currentUser');
+        // 비회원 401 suppress 가 currentUser 를 [] (truthy)로 초기화하므로 uuid 로 판정한다.
+        expect(props.isLoggedIn).toBe('{{_global?.currentUser?.uuid ? true : false}}');
         expect(props.currentUserName).toBe("{{_global.currentUser?.name ?? ''}}");
         expect(props.currentUserPhone).toBe("{{_global.currentUser?.phone ?? ''}}");
         expect(props.currentUserEmail).toBe("{{_global.currentUser?.email ?? ''}}");
-        // no hardcoded false — the member flow depends on the binding
-        expect(props.isLoggedIn).not.toBe(false);
     });
 
-    it('declares the address_search_slot extension_point node with the daum callbacks', () => {
-        const node = layout.slots?.content?.find(
-            (n: { id?: string }) => n?.id === 'checkout_address_search_slot',
-        );
+    it('declares the address_search_slot extension_point node INSIDE the CheckoutPage composite children', () => {
+        // CHECKOUT FINAL REDESIGN — the extension_point is no longer a
+        // slots.content sibling (that rendered the plugin button floating
+        // outside the form). It must be nested under the composite so the
+        // engine passes it to CheckoutPage as React children.
+        const findNode = (node: unknown): Record<string, unknown> | null => {
+            if (!node || typeof node !== 'object') return null;
+            const n = node as { id?: string; children?: unknown[] };
+            if (n.id === 'checkout_address_search_slot') return n as Record<string, unknown>;
+            if (Array.isArray(n.children)) {
+                for (const child of n.children) {
+                    const found = findNode(child);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        const node = findNode({ children: layout.slots?.content });
         expect(node).toBeTruthy();
-        expect(node.type).toBe('extension_point');
-        expect(node.name).toBe('address_search_slot');
-        expect(node.props?.readOnlyFields).toEqual(['zipcode', 'address']);
+        // ...and must NOT exist as a top-level sibling anymore.
+        expect(
+            (layout.slots?.content as Array<{ id?: string }>).some((n) => n?.id === 'checkout_address_search_slot'),
+        ).toBe(false);
+        expect(node!.type).toBe('extension_point');
+        expect(node!.name).toBe('address_search_slot');
+        expect((node! as { props?: { readOnlyFields?: string[] } }).props?.readOnlyFields).toEqual(
+            ['zipcode', 'address'],
+        );
 
-        const callback = node.callbacks?.onAddressSelect;
+        const callback = (node! as { callbacks?: { onAddressSelect?: Record<string, unknown> } }).callbacks
+            ?.onAddressSelect as { handler?: string; actions?: Array<{ handler?: string; params?: Record<string, unknown> }> } | undefined;
         expect(callback?.handler).toBe('sequence');
         const handlers = (callback?.actions ?? []).map((a: { 'handler'?: string }) => a?.handler);
         expect(handlers).toContain('setState');
@@ -179,16 +204,16 @@ describe('layouts/shop/checkout.json member bindings + daum extension node', () 
 
         const setStateAction = (callback?.actions ?? []).find(
             (a: { handler?: string }) => a.handler === 'setState',
-        );
-        expect(setStateAction.params?.target).toBe('global');
-        expect(JSON.stringify(setStateAction.params)).toContain('checkoutAddress');
+        ) as { params?: Record<string, any> } | undefined;
+        expect(setStateAction?.params?.target).toBe('global');
+        expect(JSON.stringify(setStateAction?.params)).toContain('checkoutAddress');
 
         const apiCallAction = (callback?.actions ?? []).find(
             (a: { handler?: string }) => a.handler === 'apiCall',
-        );
-        expect(apiCallAction.target).toBe('/api/modules/sirsoft-ecommerce/checkout');
-        expect(apiCallAction.params?.method).toBe('PUT');
-        expect(apiCallAction.onSuccess?.[0]?.handler).toBe('refetchDataSource');
-        expect(apiCallAction.onSuccess?.[0]?.params?.dataSourceId).toBe('checkoutData');
+        ) as { target?: string; params?: Record<string, any>; onSuccess?: Array<{ handler?: string; params?: Record<string, unknown> }> } | undefined;
+        expect(apiCallAction?.target).toBe('/api/modules/sirsoft-ecommerce/checkout');
+        expect(apiCallAction?.params?.method).toBe('PUT');
+        expect(apiCallAction?.onSuccess?.[0]?.handler).toBe('refetchDataSource');
+        expect(apiCallAction?.onSuccess?.[0]?.params?.dataSourceId).toBe('checkoutData');
     });
 });

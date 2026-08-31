@@ -20,6 +20,38 @@
     "slots": {
         "content": [
             {
+                "_comment": "회원이 비정상 경로로 본 폼에 진입한 경우 — 회원 주문은 본 폼으로 조회 불가. 마이페이지 주문 내역으로 안내(sirsoft-basic _redirect_if_member 패턴).",
+                "id": "checkout_member_redirect",
+                "type": "basic",
+                "name": "Div",
+                "lifecycle": {
+                    "onMount": {
+                        "handler": "sequence",
+                        "actions": [
+                            {
+                                "comment": "회원(_global.currentUser?.uuid)만 마이페이지 주문 내역으로 안내 — 비회원은 폼 그대로 사용.",
+                                "handler": "conditions",
+                                "conditions": [
+                                    {
+                                        "if": "{{_global?.currentUser?.uuid}}",
+                                        "then": {
+                                            "handler": "navigate",
+                                            "params": {
+                                                "path": "/mypage/orders"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "props": {
+                    "hidden": true,
+                    "aria-hidden": "true"
+                }
+            },
+            {
                 "id": "guest_order_form_root",
                 "type": "basic",
                 "name": "Section",
@@ -234,7 +266,8 @@
                                                     "type": "password",
                                                     "value": "{{_local.form?.guest_lookup_password ?? ''}}",
                                                     "placeholder": "$t:superbify.guest_order_form.password_placeholder",
-                                                    "disabled": "{{_local.isSubmitting}}"
+                                                    "disabled": "{{_local.isSubmitting}}",
+                                                    "name": "guest_lookup_password"
                                                 },
                                                 "style": {
                                                     "padding": "0.625rem 0.75rem",
@@ -388,5 +421,11 @@
                 ]
             }
         ]
-    }
+    },
+    "init_actions": [
+        {
+            "_comment": "clearGuestTokenOnEntry — 조회 폼 진입 시 sessionStorage 토큰 폐기(sirsoft-basic guest_order_form 동일 계약). 결제 직후 발급 토큰도 본 페이지 진입 시 폐기.",
+            "handler": "clearGuestTokenOnEntry"
+        }
+    ]
 }

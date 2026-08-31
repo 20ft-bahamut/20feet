@@ -530,7 +530,7 @@
                 "hint": "주문 조회 시 사용할 비밀번호입니다. 가입 시 비밀번호와 다릅니다."
             },
             "shipping": {
-                "title": "배송지",
+                "title": "배송지 정보",
                 "recipient_name": "받는 분",
                 "recipient_name_placeholder": "받는 분 이름",
                 "recipient_phone": "연락처",
@@ -542,24 +542,63 @@
                 "address_detail": "상세 주소",
                 "address_detail_placeholder": "동/호수 등",
                 "memo": "배송 메모",
-                "memo_placeholder": "배송 시 요청사항"
+                "memo_placeholder": "배송 시 요청사항",
+                "saved_addresses": "저장된 배송지",
+                "manage": "배송지 관리",
+                "same_as_orderer": "주문자 정보와 동일",
+                "save_address": "입력한 배송지를 저장합니다",
+                "country": "배송국가",
+                "intl_address": "주소 (해외)",
+                "intl_address1_placeholder": "주소 (Street address)",
+                "intl_address2": "주소 상세",
+                "intl_address2_placeholder": "아파트/동/호수 등 (Apt, suite, unit)",
+                "intl_city": "도시",
+                "intl_city_placeholder": "도시 (City)",
+                "intl_state": "주/도/지역",
+                "intl_state_placeholder": "주(State) / 도(Province) / 지역",
+                "intl_postal_code": "우편번호",
+                "intl_postal_code_placeholder": "우편번호 (Postal code)"
             },
             "payment": {
-                "title": "결제 방법",
+                "title": "결제 수단",
                 "select_method": "결제 방법을 선택해 주세요",
                 "dbank_depositor": "입금자명",
                 "dbank_depositor_placeholder": "실제 입금자 이름",
-                "dbank_helper": "입금 확인 후 배송이 시작됩니다."
+                "dbank_helper": "입금 확인 후 배송이 시작됩니다.",
+                "dbank_accounts": "입금 계좌",
+                "refund_bank": "환불 계좌",
+                "refund_bank_code": "은행",
+                "refund_bank_account": "계좌번호",
+                "refund_bank_holder": "예금주",
+                "bank_select": "입금 계좌 선택",
+                "vbank_helper": "직접 입금 기한 이후에는 주문이 자동 취소됩니다.",
+                "deposit_due": " (입금 기한 {{days}}일)",
+                "cash_receipt_request": "현금영수증 신청",
+                "cash_receipt_purpose": "증빙 용도",
+                "cash_receipt_income": "소득공제용",
+                "cash_receipt_expense": "지출증빙용",
+                "cash_receipt_identifier_type": "발급 수단",
+                "cash_receipt_identifier": "현금영수증 번호",
+                "cash_receipt_identifier_placeholder": "휴대폰 번호 또는 카드 번호",
+                "cash_receipt_phone": "휴대폰번호",
+                "cash_receipt_card": "현금영수증카드",
+                "cash_receipt_business": "사업자등록번호"
             },
             "items": {
-                "title": "주문 상품"
+                "title": "주문 상품",
+                "quantity": "수량"
             },
             "summary": {
                 "items": "상품 수",
-                "subtotal": "소계",
+                "subtotal": "상품금액",
                 "shipping": "배송비",
                 "discount": "할인",
-                "total": "총 결제금액"
+                "total": "총 결제금액",
+                "title": "주문 요약",
+                "points_used": "적립금 사용",
+                "shipping_coupon": "배송비 쿠폰 할인",
+                "unavailable_title": "주문할 수 없는 상품이 포함되어 있습니다",
+                "unavailable_message": "품절·판매중지된 상품을 장바구니에서 제외한 후 다시 시도해 주세요."
             },
             "submit": "결제하기",
             "submitting": "처리 중…",
@@ -569,6 +608,38 @@
                 "email_format": "올바른 이메일이 아닙니다",
                 "password_min": "4자리 이상 입력해 주세요",
                 "password_mismatch": "비밀번호가 일치하지 않습니다"
+            },
+            "page_title": "주문/결제",
+            "progress": {
+                "cart": "장바구니",
+                "checkout": "주문/결제",
+                "complete": "완료"
+            },
+            "discount": {
+                "title": "할인 · 쿠폰",
+                "download": "쿠폰 다운로드",
+                "order_coupon": "주문 쿠폰",
+                "shipping_coupon": "배송비 쿠폰",
+                "no_available": "사용 가능한 쿠폰이 없습니다",
+                "count_suffix": "개 보유",
+                "already_used": "이미 적용됨",
+                "select_placeholder": "쿠폰을 선택하세요",
+                "discount_code": "할인코드",
+                "discount_code_placeholder": "할인코드를 입력하세요",
+                "apply": "적용"
+            },
+            "mileage": {
+                "title": "적립금",
+                "available": "보유 적립금",
+                "use_all": "전액 사용",
+                "apply": "적용",
+                "input_placeholder": "사용할 적립금"
+            },
+            "pg": {
+                "error_confirm_failed": "결제 승인에 실패했습니다. 다시 시도해 주세요.",
+                "error_amount_mismatch": "결제 금액이 일치하지 않습니다. 주문을 다시 진행해 주세요.",
+                "error_order_not_found": "주문 정보를 찾을 수 없습니다.",
+                "error_generic": "결제 처리 중 문제가 발생했습니다."
             }
         },
         "order_complete": {

@@ -1,0 +1,306 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "체크아웃 쿠폰 다운로드 모달 — BASIC _modal_coupon_download.json 포크. SRC Modal 컴포지트로 렌더(isOpen/onClose 엔진 주입, props 는 title/size 만 노출). 데이터는 _global.downloadableCoupons / _global.downloadableCouponsLoading 를 사용 — CheckoutPage 가 모달 open 직전에 G7Core.state.set 으로 미리 적재한다(BASIC 의 apiCall→openModal 시퀀스를 React composite 보완). 다운로드 POST 후 refetch checkoutData 만 수행.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/shop/_modal_coupon_download.json"
+    },
+    "type": "composite",
+    "name": "Modal",
+    "id": "checkoutCouponDownloadModal",
+    "props": {
+        "title": "쿠폰 다운로드",
+        "size": "md"
+    },
+    "children": [
+        {
+            "_comment": "로딩 상태 — _global.downloadableCoupons 가 아직 없을 때만 스피너 노출(CheckoutPage 사전 fetch 진행 중)",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(_global.downloadableCouponsLoading ?? false) && !_global.downloadableCoupons?.data}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "padding": "var(--scm-spacing-xl, 2.5rem) var(--scm-spacing-md, 1rem)",
+                "gap": "var(--scm-spacing-sm, 0.75rem)"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "width": "2rem",
+                        "height": "2rem",
+                        "border": "2px solid var(--scm-hairline, 1px solid #E4DCCE)",
+                        "borderTopColor": "var(--scm-charcoal, #26221E)",
+                        "borderRadius": "var(--scm-radius-pill, 9999px)",
+                        "animation": "scm-spin 0.8s linear infinite"
+                    }
+                },
+                {
+                    "type": "basic",
+                    "name": "Span",
+                    "style": {
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "쿠폰을 불러오는 중..."
+                }
+            ]
+        },
+        {
+            "_comment": "빈 상태 — 로딩 끝났고 목록도 비어 있을 때",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{!(_global.downloadableCouponsLoading ?? false) && (!(_global.downloadableCoupons?.data ?? []).length)}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "alignItems": "center",
+                "justifyContent": "center",
+                "padding": "var(--scm-spacing-xl, 2.5rem) var(--scm-spacing-md, 1rem)",
+                "gap": "var(--scm-spacing-xs, 0.5rem)",
+                "color": "var(--scm-text-muted, #8A837B)",
+                "textAlign": "center"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "P",
+                    "style": {
+                        "margin": "0",
+                        "fontSize": "0.9375rem",
+                        "fontWeight": "500",
+                        "color": "var(--scm-text-body, #4A4643)"
+                    },
+                    "text": "다운로드 가능한 쿠폰이 없습니다."
+                },
+                {
+                    "type": "basic",
+                    "name": "P",
+                    "style": {
+                        "margin": "0",
+                        "fontSize": "0.8125rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "나중에 다시 확인해 주세요."
+                }
+            ]
+        },
+        {
+            "_comment": "쿠폰 카드 그리드 — _global.downloadableCoupons.data 배열(CheckoutPage 가 사전 fetch). 단순 1열(모바일 친화). 무한스크롤은 제외(BASIC 과 달리 checkout 컨텍스트에서는 단발 다운로드가 대부분).",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{(_global.downloadableCoupons?.data ?? []).length > 0}}",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "var(--scm-spacing-sm, 0.75rem)",
+                "maxHeight": "28rem",
+                "overflowY": "auto"
+            },
+            "children": [
+                {
+                    "type": "basic",
+                    "name": "Div",
+                    "iteration": {
+                        "source": "{{_global.downloadableCoupons?.data ?? []}}",
+                        "item_var": "coupon",
+                        "index_var": "couponIdx"
+                    },
+                    "props": { "className": "scm-panel" },
+                    "style": {
+                        "display": "flex",
+                        "flexDirection": "column",
+                        "gap": "var(--scm-spacing-xs, 0.5rem)",
+                        "padding": "var(--scm-spacing-md, 1rem)"
+                    },
+                    "children": [
+                        {
+                            "_comment": "혜택 — BASIC 의 multi_currency 우선 + 폴백 그대로",
+                            "type": "basic",
+                            "name": "Span",
+                            "style": {
+                                "fontSize": "1.125rem",
+                                "fontWeight": "700",
+                                "color": "var(--scm-charcoal, #26221E)"
+                            },
+                            "text": "{{coupon.benefit_formatted ?? coupon.multi_currency_benefit_formatted?.ko ?? ''}}"
+                        },
+                        {
+                            "_comment": "쿠폰명 — ko 폴백. localized_name 이 객체면 ko, 없으면 그대로",
+                            "type": "basic",
+                            "name": "P",
+                            "style": {
+                                "margin": "0",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "fontSize": "0.9375rem",
+                                "fontWeight": "600",
+                                "color": "var(--scm-text-primary, #26221E)"
+                            },
+                            "text": "{{coupon.localized_name?.ko ?? coupon.localized_name ?? coupon.name ?? ''}}"
+                        },
+                        {
+                            "_comment": "최소 주문 금액 (있을 때만)",
+                            "type": "basic",
+                            "name": "P",
+                            "if": "{{coupon.min_order_amount > 0 || coupon.multi_currency_min_order_amount}}",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.8125rem",
+                                "color": "var(--scm-text-body, #4A4643)"
+                            },
+                            "text": "{{coupon.multi_currency_min_order_amount?.ko?.formatted ?? ''}} {{coupon.multi_currency_min_order_amount?.ko?.formatted ? '이상 구매 시' : ''}}"
+                        },
+                        {
+                            "_comment": "유효기간 — expires_at / valid_to / valid_until 어느 키든",
+                            "type": "basic",
+                            "name": "P",
+                            "if": "{{coupon.expires_at ?? coupon.valid_to ?? coupon.valid_until}}",
+                            "style": {
+                                "margin": "0",
+                                "fontSize": "0.75rem",
+                                "color": "var(--scm-text-muted, #8A837B)"
+                            },
+                            "text": "{{(coupon.expires_at ?? coupon.valid_to ?? coupon.valid_until ?? '').toString().split('T')[0]}} 까지 사용 가능"
+                        },
+                        {
+                            "_comment": "다운로드 버튼 — 3가지 상태(다운로드됨 / 진행중 / 가능). POST /user/coupons/{id}/download 후 refetch checkoutData(쿠폰 셀렉트 반영).",
+                            "type": "basic",
+                            "name": "Button",
+                            "if": "{{coupon.is_downloaded ?? coupon.already_downloaded ?? false}}",
+                            "props": {
+                                "type": "button",
+                                "disabled": true,
+                                "data-testid": "checkout-coupon-already-downloaded"
+                            },
+                            "style": {
+                                "minHeight": "40px",
+                                "padding": "0 var(--scm-spacing-md, 1rem)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-muted, #8A837B)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontSize": "0.875rem",
+                                "fontWeight": "600",
+                                "cursor": "not-allowed"
+                            },
+                            "text": "이미 받음"
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Button",
+                            "if": "{{!(coupon.is_downloaded ?? coupon.already_downloaded ?? false) && (_global.downloadingCouponId === coupon.id)}}",
+                            "props": {
+                                "type": "button",
+                                "disabled": true,
+                                "data-testid": "checkout-coupon-downloading"
+                            },
+                            "style": {
+                                "minHeight": "40px",
+                                "padding": "0 var(--scm-spacing-md, 1rem)",
+                                "backgroundColor": "var(--scm-bg-secondary, #F4F0E6)",
+                                "color": "var(--scm-text-body, #4A4643)",
+                                "border": "var(--scm-hairline, 1px solid #E4DCCE)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontSize": "0.875rem",
+                                "fontWeight": "600",
+                                "cursor": "not-allowed",
+                                "opacity": "0.7"
+                            },
+                            "text": "다운로드 중..."
+                        },
+                        {
+                            "type": "basic",
+                            "name": "Button",
+                            "if": "{{!(coupon.is_downloaded ?? coupon.already_downloaded ?? false) && (_global.downloadingCouponId !== coupon.id)}}",
+                            "props": {
+                                "type": "button",
+                                "data-testid": "checkout-coupon-download"
+                            },
+                            "style": {
+                                "minHeight": "40px",
+                                "padding": "0 var(--scm-spacing-md, 1rem)",
+                                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                "color": "var(--scm-text-inverse, #FAF8F3)",
+                                "border": "1px solid var(--scm-charcoal, #26221E)",
+                                "borderRadius": "var(--scm-radius-sm, 4px)",
+                                "fontSize": "0.875rem",
+                                "fontWeight": "600",
+                                "cursor": "pointer"
+                            },
+                            "text": "다운로드",
+                            "actions": [
+                                {
+                                    "type": "click",
+                                    "handler": "sequence",
+                                    "actions": [
+                                        {
+                                            "handler": "setState",
+                                            "params": {
+                                                "target": "global",
+                                                "downloadingCouponId": "{{coupon.id}}"
+                                            }
+                                        },
+                                        {
+                                            "handler": "apiCall",
+                                            "auth_required": true,
+                                            "target": "/api/modules/sirsoft-ecommerce/user/coupons/{{coupon.id}}/download",
+                                            "params": { "method": "POST" },
+                                            "onSuccess": [
+                                                {
+                                                    "handler": "setState",
+                                                    "params": {
+                                                        "target": "global",
+                                                        "downloadingCouponId": null
+                                                    }
+                                                },
+                                                {
+                                                    "_comment": "다운로드 직후 즉시 _global.downloadableCoupons 의 해당 쿠폰을 is_downloaded=true 로 갱신(체크아웃 DS refetch 전 UI 피드백)",
+                                                    "handler": "setState",
+                                                    "params": {
+                                                        "target": "global",
+                                                        "downloadableCoupons": "{{Object.assign({}, _global.downloadableCoupons, { data: (_global.downloadableCoupons?.data ?? []).map(c => c.id === coupon.id ? Object.assign({}, c, { is_downloaded: true }) : c) })}}"
+                                                    }
+                                                },
+                                                {
+                                                    "_comment": "체크아웃 데이터 갱신 — 새로 받은 쿠폰이 셀렉트박스에 반영",
+                                                    "handler": "refetchDataSource",
+                                                    "params": { "dataSourceId": "checkoutData" }
+                                                },
+                                                {
+                                                    "handler": "toast",
+                                                    "params": {
+                                                        "type": "success",
+                                                        "message": "쿠폰이 다운로드되었습니다."
+                                                    }
+                                                }
+                                            ],
+                                            "onError": [
+                                                {
+                                                    "handler": "setState",
+                                                    "params": {
+                                                        "target": "global",
+                                                        "downloadingCouponId": null
+                                                    }
+                                                },
+                                                {
+                                                    "handler": "toast",
+                                                    "params": {
+                                                        "type": "error",
+                                                        "message": "{{error.message}}"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

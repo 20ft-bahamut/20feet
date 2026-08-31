@@ -31,7 +31,9 @@
             "headers": {
                 "X-Guest-Order-Token": "{{_global.guestOrderToken}}"
             },
-            "fallback": { "data": null }
+            "fallback": {
+                "data": null
+            }
         }
     ],
     "slots": {
@@ -42,8 +44,9 @@
                 "name": "OrderCompletePage",
                 "props": {
                     "orderData": "{{scmOrder}}",
-                    "isLoggedIn": false,
-                    "shopBase": "/shop"
+                    "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}",
+                    "shopBase": "/shop",
+                    "_comment isLoggedIn": "회원이면 member 분기(viewDetail → /mypage/orders/{n})"
                 }
             }
         ]
