@@ -12,7 +12,7 @@ page.on('requestfailed', req => logs.push(`REQUESTFAILED: ${req.url()} ${req.fai
 // 1. 로그인
 await page.goto('http://127.0.0.1:8000/admin/login', { waitUntil: 'networkidle' });
 await page.fill('input[type="email"], input[name="email"], input[name="user_id"]', 'test@test.com');
-await page.fill('input[type="password"], input[name="password"]', 'qwer1234');
+await page.fill('input[type="password"], input[name="password"]', '<redacted-pw>');
 await page.click('button[type="submit"]');
 await page.waitForTimeout(2000);
 

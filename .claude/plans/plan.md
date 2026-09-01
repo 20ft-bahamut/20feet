@@ -5,7 +5,7 @@
 - **Method 1 완료**: `/admin/board/portfolio|superbify|project-inquiry` 접근 가능
   - 원인: 프로그램 생성된 board에 `BoardPermissionService::ensureBoardPermissions()` 미호출로 동적 권한 부재
   - 조치: `TwentyftContentSeeder` 추가 → board 존재 시 권한 보장, 부재 시 `BoardService::createBoard()` 생성
-  - 검증: `test@test.com` / `qwer1234` 계정으로 `/admin/board/superbify` 정상 접근 및 게시글 목록 확인
+  - 검증: `test@test.com` / `<redacted-pw>` 계정으로 `/admin/board/superbify` 정상 접근 및 게시글 목록 확인
 
 - **Method 2 목표**: G7 board admin에 의존하지 않는 20ft Content 전용 관리자 UI 추가
   - 진입점: `/admin/20ft-content`
