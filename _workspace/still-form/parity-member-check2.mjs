@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 
 const BASE = 'http://127.0.0.1:8000';
-const MEMBER = { email: 'parity-bot@stillform.test', password: 'qwer1234parity!!!' };
+const MEMBER = { email: 'parity-bot@stillform.test', password: '<redacted-pw>parity!!!' };
 const OUT = '/home/bahamut/20feet/_workspace/still-form/visual-qa/checkout-parity';
 import { mkdirSync } from 'fs';
 mkdirSync(OUT, { recursive: true });

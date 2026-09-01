@@ -3,7 +3,7 @@ import { chromium } from 'playwright-core';
 const BASE = 'http://127.0.0.1:8000';
 const CHROME = process.env.CHROME_PATH;
 const OUT = '/home/bahamut/20feet/_workspace/still-form/visual-qa/member';
-const MEMBER = { name: 'QA멤버', email: 'qa-member@stillform.test', password: 'qwer1234member' };
+const MEMBER = { name: 'QA멤버', email: 'qa-member@stillform.test', password: '<redacted-pw>member' };
 
 const results = [];
 const log = (k, v) => { results.push({ k, v }); console.log(`[RESULT] ${k} :: ${v}`); };

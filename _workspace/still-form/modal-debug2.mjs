@@ -1,7 +1,7 @@
 import { chromium } from 'playwright-core';
 import { mkdirSync } from 'fs';
 const BASE = 'http://127.0.0.1:8000';
-const MEMBER = { email: 'parity-bot@stillform.test', password: 'qwer1234parity!!!' };
+const MEMBER = { email: 'parity-bot@stillform.test', password: '<redacted-pw>parity!!!' };
 const OUT = '/home/bahamut/20feet/_workspace/still-form/visual-qa/checkout-parity';
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true });
