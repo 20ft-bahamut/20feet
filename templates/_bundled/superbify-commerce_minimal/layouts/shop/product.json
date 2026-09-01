@@ -14,6 +14,7 @@
             "type": "api",
             "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}",
             "method": "GET",
+            "auth_mode": "optional",
             "auto_fetch": true,
             "loading_strategy": "progressive"
         },
@@ -23,6 +24,16 @@
             "type": "api",
             "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}/reviews",
             "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "productDownloadableCoupons",
+            "label_key": "$t:superbify.data_source.product_downloadable_coupons",
+            "type": "api",
+            "endpoint": "/api/modules/sirsoft-ecommerce/products/{{route.slug}}/downloadable-coupons",
+            "method": "GET",
+            "auth_mode": "optional",
             "auto_fetch": true,
             "loading_strategy": "progressive"
         },
@@ -94,7 +105,10 @@
                                 },
                                 "responsive": {
                                     "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
+                                        "style": {
+                                            "gridTemplateColumns": "1fr",
+                                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                                        }
                                     }
                                 },
                                 "children": [
@@ -132,19 +146,72 @@
                                                 "text": "{{product_detail?.data?.product_code ?? product_detail?.data?.sku ?? ''}}"
                                             },
                                             {
-                                                "id": "shop_product_title",
+                                                "id": "shop_product_title_row",
                                                 "type": "basic",
-                                                "name": "H1",
+                                                "name": "Div",
                                                 "style": {
-                                                    "fontFamily": "var(--scm-font-display, system-ui)",
-                                                    "fontSize": "1.75rem",
-                                                    "fontWeight": 600,
-                                                    "letterSpacing": "-0.015em",
-                                                    "lineHeight": 1.2,
-                                                    "color": "var(--scm-text-primary, #26221E)",
-                                                    "margin": 0
+                                                    "display": "flex",
+                                                    "alignItems": "flex-start",
+                                                    "justifyContent": "space-between",
+                                                    "gap": "var(--scm-spacing-sm, 0.75rem)",
+                                                    "width": "100%"
                                                 },
-                                                "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
+                                                "children": [
+                                                    {
+                                                        "id": "shop_product_title",
+                                                        "type": "basic",
+                                                        "name": "H1",
+                                                        "style": {
+                                                            "fontFamily": "var(--scm-font-display, system-ui)",
+                                                            "fontSize": "1.75rem",
+                                                            "fontWeight": 600,
+                                                            "letterSpacing": "-0.015em",
+                                                            "lineHeight": 1.2,
+                                                            "color": "var(--scm-text-primary, #26221E)",
+                                                            "margin": 0
+                                                        },
+                                                        "text": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}"
+                                                    },
+                                                    {
+                                                        "comment": "관리자 상품 수정 링크 — can_update 능력 보유 시에만 노출(새 탭)",
+                                                        "id": "shop_product_admin_edit",
+                                                        "type": "basic",
+                                                        "name": "A",
+                                                        "if": "{{product_detail?.data?.abilities?.can_update}}",
+                                                        "props": {
+                                                            "href": "/admin/ecommerce/products/{{product_detail?.data?.product_code ?? route.slug}}/edit",
+                                                            "target": "_blank",
+                                                            "rel": "noopener noreferrer",
+                                                            "title": "$t:superbify.product.admin_edit"
+                                                        },
+                                                        "style": {
+                                                            "display": "inline-flex",
+                                                            "alignItems": "center",
+                                                            "gap": "0.35rem",
+                                                            "padding": "0.3rem 0.65rem",
+                                                            "fontSize": "0.7rem",
+                                                            "fontWeight": 500,
+                                                            "fontFamily": "var(--scm-font-body, system-ui)",
+                                                            "color": "var(--scm-text-muted, #8A837B)",
+                                                            "background": "var(--scm-surface-2, #F4EFE6)",
+                                                            "borderRadius": "var(--scm-radius-sm, 4px)",
+                                                            "textDecoration": "none",
+                                                            "flexShrink": "0",
+                                                            "whiteSpace": "nowrap"
+                                                        },
+                                                        "text": "✎ $t:superbify.product.admin_edit"
+                                                    },
+                                                    {
+                                                        "id": "shop_product_wishlist",
+                                                        "type": "composite",
+                                                        "name": "WishlistHeart",
+                                                        "props": {
+                                                            "productId": "{{product_detail?.data?.id}}",
+                                                            "isWishlisted": "{{product_detail?.data?.is_wishlisted ?? false}}",
+                                                            "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}"
+                                                        }
+                                                    }
+                                                ]
                                             },
                                             {
                                                 "id": "shop_product_short_description",
@@ -252,6 +319,7 @@
                                                         "id": "shop_product_kv_shipping",
                                                         "type": "basic",
                                                         "name": "Tr",
+                                                        "if": "{{product_detail?.data?.shipping_policy}}",
                                                         "children": [
                                                             {
                                                                 "id": "shop_product_kv_shipping_th",
@@ -275,21 +343,98 @@
                                                                     "padding": "0.55rem 0",
                                                                     "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
                                                                 },
-                                                                "text": "{{product_detail?.data?.shipping_method_label ?? product_detail?.data?.shipping_label ?? ''}}"
+                                                                "text": "{{product_detail?.data?.shipping_policy?.name ?? product_detail?.data?.shipping_method_label ?? product_detail?.data?.shipping_label ?? ''}}"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "id": "shop_product_kv_shipping_fee",
+                                                        "type": "basic",
+                                                        "name": "Tr",
+                                                        "if": "{{product_detail?.data?.shipping_policy?.fee_summary}}",
+                                                        "children": [
+                                                            {
+                                                                "id": "shop_product_kv_shipping_fee_th",
+                                                                "type": "basic",
+                                                                "name": "Th",
+                                                                "style": {
+                                                                    "textAlign": "left",
+                                                                    "fontWeight": 500,
+                                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.shipping_fee"
+                                                            },
+                                                            {
+                                                                "id": "shop_product_kv_shipping_fee_td",
+                                                                "type": "basic",
+                                                                "name": "Td",
+                                                                "style": {
+                                                                    "color": "var(--scm-text-body, #4A4643)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "{{product_detail?.data?.shipping_policy?.fee_summary ?? ''}}"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "id": "shop_product_kv_free_shipping",
+                                                        "type": "basic",
+                                                        "name": "Tr",
+                                                        "if": "{{product_detail?.data?.shipping_policy?.free_threshold_formatted}}",
+                                                        "children": [
+                                                            {
+                                                                "id": "shop_product_kv_free_shipping_th",
+                                                                "type": "basic",
+                                                                "name": "Th",
+                                                                "style": {
+                                                                    "textAlign": "left",
+                                                                    "fontWeight": 500,
+                                                                    "color": "var(--scm-text-muted, #8A837B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.free_shipping_threshold"
+                                                            },
+                                                            {
+                                                                "id": "shop_product_kv_free_shipping_td",
+                                                                "type": "basic",
+                                                                "name": "Td",
+                                                                "style": {
+                                                                    "color": "var(--scm-success, #2E7D5B)",
+                                                                    "padding": "0.55rem 0",
+                                                                    "borderBottom": "1px solid var(--scm-line, #E4DCCE)"
+                                                                },
+                                                                "text": "$t:superbify.product.kv.free_shipping_over|amount={{product_detail?.data?.shipping_policy?.free_threshold_formatted ?? ''}}"
                                                             }
                                                         ]
                                                     }
                                                 ]
                                             },
                                             {
+                                                "id": "shop_product_coupon_badges",
+                                                "type": "composite",
+                                                "name": "CouponDownloadBadges",
+                                                "props": {
+                                                    "coupons": "{{productDownloadableCoupons?.data?.data ?? []}}",
+                                                    "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}",
+                                                    "guestMessage": "$t:superbify.product.coupon.guest_hint",
+                                                    "loginRequiredToastMessage": "$t:superbify.product.coupon.login_required_toast",
+                                                    "downloadSuccessMessage": "$t:superbify.product.coupon.download_success",
+                                                    "downloadFailedMessage": "$t:superbify.product.coupon.download_failed"
+                                                }
+                                            },
+                                            {
                                                 "id": "shop_product_addtocart",
                                                 "type": "composite",
-                                                "name": "AddToCartPanel",
+                                                "name": "PurchasePanel",
                                                 "props": {
                                                     "productId": "{{product_detail?.data?.id}}",
                                                     "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
                                                     "salesStatus": "{{product_detail?.data?.sales_status}}",
-                                                    "salesStatusLabel": "{{product_detail?.data?.sales_status_label}}",
+                                                    "productData": "{{product_detail?.data ?? null}}",
                                                     "addToCartLabel": "$t:superbify.cart.add_to_cart",
                                                     "buyNowLabel": "$t:superbify.cart.buy_now",
                                                     "quantityLabel": "$t:superbify.cart.quantity",
@@ -316,7 +461,10 @@
                                 },
                                 "responsive": {
                                     "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                        "style": {
+                                            "gridTemplateColumns": "1fr",
+                                            "gap": "var(--scm-spacing-md, 1rem)"
+                                        }
                                     }
                                 },
                                 "children": [
@@ -404,7 +552,10 @@
                                 },
                                 "responsive": {
                                     "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                        "style": {
+                                            "gridTemplateColumns": "1fr",
+                                            "gap": "var(--scm-spacing-md, 1rem)"
+                                        }
                                     }
                                 },
                                 "children": [
@@ -463,7 +614,9 @@
                                         },
                                         "responsive": {
                                             "mobile": {
-                                                "style": { "gridTemplateColumns": "minmax(0, 0.45fr) minmax(0, 1fr)" }
+                                                "style": {
+                                                    "gridTemplateColumns": "minmax(0, 0.45fr) minmax(0, 1fr)"
+                                                }
                                             }
                                         },
                                         "children": [
@@ -560,6 +713,16 @@
                                 ]
                             },
                             {
+                                "comment": "=== 공통정보 + 상품정보제공고시 섹션 (각각/sub가 비어 있으면 자동 숨김) ===",
+                                "id": "shop_product_common_info_notice",
+                                "type": "composite",
+                                "name": "ProductCommonInfo",
+                                "props": {
+                                    "commonInfo": "{{product_detail?.data?.common_info ?? null}}",
+                                    "notice": "{{product_detail?.data?.notice ?? null}}"
+                                }
+                            },
+                            {
                                 "id": "shop_product_shipping_section",
                                 "type": "basic",
                                 "name": "Section",
@@ -574,7 +737,10 @@
                                 },
                                 "responsive": {
                                     "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-md, 1rem)" }
+                                        "style": {
+                                            "gridTemplateColumns": "1fr",
+                                            "gap": "var(--scm-spacing-md, 1rem)"
+                                        }
                                     }
                                 },
                                 "children": [
@@ -634,6 +800,49 @@
                                         "text": "$t:superbify.product.shipping_body"
                                     }
                                 ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "shop_product_reviews",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_product_reviews_component",
+                                "type": "composite",
+                                "name": "ProductReviews",
+                                "props": {
+                                    "productCode": "{{route.slug}}",
+                                    "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "shop_product_qna",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "maxWidth": "var(--scm-max-width, 1200px)",
+                            "marginInline": "auto",
+                            "paddingInline": "var(--scm-gutter, 1rem)"
+                        },
+                        "children": [
+                            {
+                                "id": "shop_product_qna_component",
+                                "type": "composite",
+                                "name": "ProductQna",
+                                "props": {
+                                    "productCode": "{{route.slug}}",
+                                    "inquiryBoardSlug": "{{_global.modules?.['sirsoft-ecommerce']?.inquiry?.board_slug ?? ''}}",
+                                    "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}"
+                                }
                             }
                         ]
                     },

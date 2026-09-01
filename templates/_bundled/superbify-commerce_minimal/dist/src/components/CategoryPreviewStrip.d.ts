@@ -8,6 +8,8 @@ export interface CategoryPreviewStripProps {
     emptyLabel?: string;
     /** Label for the "all categories" chip (falls back to generic label). */
     allLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
 /**
  * Typographic category rail — no image dependency.
@@ -16,5 +18,5 @@ export interface CategoryPreviewStripProps {
  * admin-side category change is reflected without template edits. Visual
  * language mirrors the shop page's CategoryNav pills for consistency.
  */
-export declare function CategoryPreviewStrip({ items, title, eyebrow, className, emptyLabel, allLabel, }: CategoryPreviewStripProps): React.ReactElement;
+export declare function CategoryPreviewStrip({ items, title, eyebrow, className, emptyLabel, allLabel, shopBase, }: CategoryPreviewStripProps): React.ReactElement;
 export default CategoryPreviewStrip;

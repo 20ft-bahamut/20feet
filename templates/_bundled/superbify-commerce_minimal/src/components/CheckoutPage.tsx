@@ -9,6 +9,7 @@ import {
     type CheckoutRecomputeFields,
     type CheckoutSubmitPayload,
 } from './CheckoutForm';
+import { getShopBase } from '../config/shopBase';
 import { A, Button, Div, H1, P, Span } from './basic';
 
 export interface CheckoutPageCheckoutData extends CheckoutFormCheckoutPayload {
@@ -35,6 +36,8 @@ export interface CheckoutPageProps {
     currentUserPhone?: string;
     currentUserEmail?: string;
     locale?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 
     // i18n labels (Korean fallback)
     title?: string;
@@ -144,11 +147,13 @@ interface VerifyResponse {
 
 /** 주문 성공 후 complete 페이지 라우팅(redirect_url 우선). */
 function navigateToOrder(orderNumber?: string, redirectUrl?: string): void {
+    const shopBase = getShopBase();
+    const baseForLink = shopBase === '/' ? '' : shopBase;
     const finalRedirect =
         redirectUrl ??
         (orderNumber
-            ? `/shop/orders/${encodeURIComponent(orderNumber)}/complete`
-            : '/shop');
+            ? `${baseForLink}/orders/${encodeURIComponent(orderNumber)}/complete`
+            : `${baseForLink}/`);
     // Guest flow: forward guest token via URL query so the next page's
     // init_action can hydrate _global.guestOrderToken (in-memory _global
     // does not survive full-page navigation).
@@ -189,6 +194,14 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
     } = props;
 
     const title = props.title ?? '결제';
+
+    // shopBase resolution — defaults to getShopBase() (mirrors sirsoft-basic
+    // Header.tsx pattern). Layouts may also pass an explicit `shopBase` prop
+    // via JSON binding interpolation; if neither is provided the resolver
+    // falls back to '/shop' which preserves the demo contract.
+    const resolvedShopBase = props.shopBase ?? getShopBase();
+    const baseForLink = resolvedShopBase === '/' ? '' : resolvedShopBase;
+    const cartHref = `${baseForLink}/cart`;
 
     const checkoutPayload = checkoutData?.data ?? null;
     const hasTempOrder = !!(checkoutPayload?.temp_order_id);
@@ -522,7 +535,9 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
     );
 
     const navigateBack = useCallback(() => {
-        window.location.assign('/cart');
+        const shopBase = getShopBase();
+        const baseForLink = shopBase === '/' ? '' : shopBase;
+        window.location.assign(`${baseForLink}/cart`);
     }, []);
 
     // Loading state — initial fetch
@@ -629,7 +644,7 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
             <Div className="scm-checkout-page-head" data-testid="checkout-page-head">
                 <nav className="scm-checkout-progress" aria-label={`${progressCartLabel} · ${progressCheckoutLabel} · ${progressCompleteLabel}`}>
                     <A
-                        href="/cart"
+                        href={cartHref}
                         className="scm-checkout-progress-step"
                         data-testid="checkout-progress-cart"
                     >

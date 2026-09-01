@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, Span } from './basic';
+import { getShopBase } from '../config/shopBase';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryPreviewStripProps {
@@ -10,6 +11,8 @@ export interface CategoryPreviewStripProps {
     emptyLabel?: string;
     /** Label for the "all categories" chip (falls back to generic label). */
     allLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
 
 /**
@@ -26,8 +29,12 @@ export function CategoryPreviewStrip({
     className,
     emptyLabel,
     allLabel,
+    shopBase,
 }: CategoryPreviewStripProps): React.ReactElement {
     const list = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
+    const resolvedBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
+    const allHref = `${baseForLink}/`;
     return (
         <Div
             className={className}
@@ -98,7 +105,7 @@ export function CategoryPreviewStrip({
                 >
                     {allLabel ? (
                         <A
-                            href="/shop"
+                            href={allHref}
                             data-testid="category-preview-tile"
                             data-slug="all"
                             className="scm-category-strip-tile"
@@ -135,7 +142,7 @@ export function CategoryPreviewStrip({
                         return (
                             <A
                                 key={String(cat.id)}
-                                href={`/shop/category/${cat.slug}`}
+                                href={`${baseForLink}/category/${cat.slug}`}
                                 aria-label={nameText}
                                 data-testid="category-preview-tile"
                                 data-slug={cat.slug}

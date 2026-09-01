@@ -10,7 +10,9 @@ export interface StoreHeaderProps {
     signupLabel?: string;
     mypageLabel?: string;
     logoutLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
     className?: string;
 }
-export declare function StoreHeader({ brandName, tagline, cartCount, user, loginLabel, signupLabel, mypageLabel, logoutLabel, className, }: StoreHeaderProps): React.ReactElement;
+export declare function StoreHeader({ brandName, tagline, cartCount, user, loginLabel, signupLabel, mypageLabel, logoutLabel, shopBase, className, }: StoreHeaderProps): React.ReactElement;
 export default StoreHeader;

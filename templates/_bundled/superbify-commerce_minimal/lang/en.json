@@ -94,6 +94,7 @@
             "category_products": "Category products",
             "product_detail": "Product detail",
             "product_reviews": "Product reviews",
+            "product_downloadable_coupons": "Product downloadable coupons",
             "cart": "Cart",
             "cart_count": "Cart count",
             "notice_posts": "Store notices",
@@ -425,7 +426,17 @@
             "kv": {
                 "category": "Category",
                 "status": "Status",
-                "shipping": "Shipping"
+                "shipping": "Shipping",
+                "shipping_fee": "Shipping fee",
+                "free_shipping_threshold": "Free shipping",
+                "free_shipping_over": "Free over :amount"
+            },
+            "admin_edit": "Admin edit",
+            "coupon": {
+                "guest_hint": "Sign in to download coupons.",
+                "login_required_toast": "Sign-in required.",
+                "download_success": "Coupon downloaded.",
+                "download_failed": "Coupon download failed."
             }
         },
         "story": {

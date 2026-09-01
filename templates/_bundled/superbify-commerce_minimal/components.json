@@ -365,6 +365,42 @@
                 "type": "composite",
                 "description": "Layout modal shell (isOpen/onClose injected by engine)",
                 "path": "src/components/Modal.tsx"
+            },
+            {
+                "name": "PurchasePanel",
+                "type": "composite",
+                "description": "Phase 1 product purchase panel — cascading option selector + additional options + bulk items dispatch",
+                "path": "src/components/PurchasePanel.tsx"
+            },
+            {
+                "name": "WishlistHeart",
+                "type": "composite",
+                "description": "Phase 1 product detail wishlist heart toggle with optimistic update + login redirect",
+                "path": "src/components/WishlistHeart.tsx"
+            },
+            {
+                "name": "ProductReviews",
+                "type": "composite",
+                "description": "Phase 1 product reviews section with summary, filters, pagination, seller reply",
+                "path": "src/components/ProductReviews.tsx"
+            },
+            {
+                "name": "ProductQna",
+                "type": "composite",
+                "description": "Phase 1 product Q&A list + write/edit modal with secret mode handling",
+                "path": "src/components/ProductQna.tsx"
+            },
+            {
+                "name": "CouponDownloadBadges",
+                "type": "composite",
+                "description": "Phase 1 product detail downloadable coupon badge chips with guest redirect + member POST download + DS refetch",
+                "path": "src/components/CouponDownloadBadges.tsx"
+            },
+            {
+                "name": "ProductCommonInfo",
+                "type": "composite",
+                "description": "Product detail 공통 안내 + 상품정보제공고시 section with independent empty-state hiding per subsection",
+                "path": "src/components/ProductCommonInfo.tsx"
             }
         ],
         "layout": [

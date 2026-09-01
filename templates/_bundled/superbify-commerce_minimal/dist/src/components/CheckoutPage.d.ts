@@ -40,6 +40,8 @@ export interface CheckoutPageProps {
     currentUserPhone?: string;
     currentUserEmail?: string;
     locale?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
     title?: string;
     backToShopLabel?: string;
     loadingLabel?: string;

@@ -8,7 +8,7 @@ export interface ProductGridProps {
     emptyTitle?: string;
     emptyMessage?: string;
     className?: string;
-    /** Optional base href override; defaults to `/shop/product/{product_code|id}`. */
+    /** Optional base href override; defaults to `/shop/products/{product_code|id}`. */
     itemHrefBuilder?: (item: ProductItem) => string;
     /** Layout variant: 'standard' (uniform grid) or 'featured' (first item spans 2 cols). */
     variant?: 'standard' | 'featured';

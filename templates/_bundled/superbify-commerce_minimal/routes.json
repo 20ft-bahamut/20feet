@@ -21,6 +21,14 @@
             }
         },
         {
+            "path": "/shop/products",
+            "layout": "shop/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.shop.title"
+            }
+        },
+        {
             "_comment": "=== 카테고리 ===",
             "path": "/shop/category/:slug",
             "layout": "shop/category",
@@ -31,7 +39,7 @@
         },
         {
             "_comment": "=== 상품 상세 ===",
-            "path": "/shop/product/:slug",
+            "path": "/shop/products/:slug",
             "layout": "shop/product",
             "auth_required": false,
             "meta": {
@@ -92,9 +100,18 @@
             }
         },
         {
-            "_comment": "=== 장바구니 ===",
-            "path": "/cart",
+            "_comment": "=== 장바구니 (공식 정렬: /shop/cart + 레거시 /cart 동시 지원) ===",
+            "path": "/shop/cart",
             "layout": "cart",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:superbify.routes.cart.title"
+            }
+        },
+        {
+            "_comment": "레거시 /cart → /shop/cart 호환. 정적 카탈로그 라우터/외부 링크에서 옛 경로가 유입될 때 404를 막기 위함.",
+            "path": "/cart",
+            "redirect": "/shop/cart",
             "auth_required": false,
             "meta": {
                 "title": "$t:superbify.routes.cart.title"
@@ -107,15 +124,6 @@
             "auth_required": false,
             "meta": {
                 "title": "$t:superbify.routes.checkout.title"
-            }
-        },
-        {
-            "_comment": "=== 주문 완료 ===",
-            "path": "/shop/order/complete",
-            "layout": "shop/order_complete",
-            "auth_required": false,
-            "meta": {
-                "title": "$t:superbify.routes.order_complete.title"
             }
         },
         {
@@ -146,10 +154,11 @@
             }
         },
         {
-            "_comment": "=== 인증 (v0.2.0 member features) === auth_required:false — guest_only 엔진 강제가 없어 로그인 상태 진입은 auth partial(_redirect_if_logged_in)이 처리한다.",
+            "_comment": "=== 인증 (v0.2.0 member features) === guest_only: 로그인된 회원의 진입 차단 — engine 이 강제하지 않으면 _redirect_if_logged_in partial 이 보조한다.",
             "path": "/login",
             "layout": "auth/login",
             "auth_required": false,
+            "guest_only": true,
             "meta": {
                 "title": "$t:superbify.routes.login"
             }
@@ -158,6 +167,7 @@
             "path": "/register",
             "layout": "auth/register",
             "auth_required": false,
+            "guest_only": true,
             "meta": {
                 "title": "$t:superbify.routes.register"
             }
@@ -166,6 +176,7 @@
             "path": "/forgot-password",
             "layout": "auth/forgot_password",
             "auth_required": false,
+            "guest_only": true,
             "meta": {
                 "title": "$t:superbify.routes.forgot_password"
             }
@@ -174,6 +185,7 @@
             "path": "/reset-password",
             "layout": "auth/reset_password",
             "auth_required": false,
+            "guest_only": true,
             "meta": {
                 "title": "$t:superbify.routes.reset_password"
             }
@@ -268,9 +280,18 @@
             }
         },
         {
-            "_comment": "=== 재주문 (v0.2.0) — 마이페이지 주문 상세에서 담기 → /cart === 레이아웃은 onMount apiCall POST user/orders/{id}/reorder 로 처리 (WP4).",
-            "path": "/reorder/:id",
+            "_comment": "=== 재주문 (v0.2.0) — 마이페이지 주문 상세에서 담기 → /cart === shop prefix 하위로 정렬 (sirsoft-basic 정렬). 레이아웃은 onMount apiCall POST user/orders/{id}/reorder 로 처리 (WP4).",
+            "path": "/shop/reorder/:id",
             "layout": "shop/reorder",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:superbify.routes.reorder"
+            }
+        },
+        {
+            "_comment": "레거시 /reorder/:id → /shop/reorder/:id 호환.",
+            "path": "/reorder/:id",
+            "redirect": "/shop/reorder/:id",
             "auth_required": true,
             "meta": {
                 "title": "$t:superbify.routes.reorder"

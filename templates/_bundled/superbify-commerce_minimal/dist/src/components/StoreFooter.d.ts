@@ -17,8 +17,33 @@ export interface StoreFooterProps {
     shippingLabel?: string;
     /** Label of the external 사업자정보확인 link (from lang); only rendered when configured. */
     verificationLabel?: string;
-    /** Test/diagnostic injection point; defaults to businessFields() from config/business-info.json. */
+    /**
+     * Test/diagnostic injection point for the resolved field list.
+     * When supplied, the StoreFooter renders exactly this list and skips
+     * both the static seed AND the live admin fetch. Production layouts
+     * never set this prop; tests and Storybook do.
+     */
     infoFields?: BusinessField[];
+    /**
+     * Disable the live admin basic_info fetch even when `infoFields` is not
+     * supplied. Useful for SSR snapshots and test environments where the
+     * /shop-info endpoint is unreachable.
+     */
+    disableLiveShopInfo?: boolean;
+    /**
+     * Override the /shop-info endpoint URL. Defaults to
+     * `/api/plugins/superbify-commerce-compat/shop-info`. Tests may inject
+     * a per-test stub here.
+     */
+    shopInfoEndpoint?: string;
+    /**
+     * Test-only injection point for the fetch implementation.
+     * Signature: (url, init) => Promise<Response> (matches global fetch).
+     * Defaults to globalThis.fetch. Production never sets this.
+     */
+    fetchImpl?: typeof fetch;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
-export declare function StoreFooter({ brandName, tagline, copyright, className, navItems, demoNotice, termsLabel, privacyLabel, shippingLabel, verificationLabel, infoFields, }: StoreFooterProps): React.ReactElement;
+export declare function StoreFooter({ brandName, tagline, copyright, className, navItems, demoNotice, termsLabel, privacyLabel, shippingLabel, verificationLabel, infoFields, disableLiveShopInfo, shopInfoEndpoint, fetchImpl, shopBase, }: StoreFooterProps): React.ReactElement;
 export default StoreFooter;

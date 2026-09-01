@@ -1,5 +1,6 @@
 import React from 'react';
 import { A, Div, Nav, Span, Ul, Li } from './basic';
+import { getShopBase } from '../config/shopBase';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryNavProps {
@@ -17,6 +18,8 @@ export interface CategoryNavProps {
     /** Sort change handler. */
     onSortChange?: (value: string) => void;
     sortLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
 
 export function CategoryNav({
@@ -29,9 +32,13 @@ export function CategoryNav({
     sortValue,
     onSortChange,
     sortLabel,
+    shopBase,
 }: CategoryNavProps): React.ReactElement {
     const list = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const showSort = Array.isArray(sortOptions) && sortOptions.length > 0;
+    const resolvedBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
+    const allHref = `${baseForLink}/`;
     return (
         <Nav
             className={className}
@@ -125,7 +132,7 @@ export function CategoryNav({
             >
                 <Li>
                     <A
-                        href="/shop"
+                        href={allHref}
                         data-testid="category-nav-pill"
                         style={pillStyle(activeSlug == null)}
                     >
@@ -138,7 +145,7 @@ export function CategoryNav({
                     return (
                         <Li key={String(cat.id)}>
                             <A
-                                href={`/shop/category/${cat.slug}`}
+                                href={`${baseForLink}/category/${cat.slug}`}
                                 aria-current={isActive ? 'page' : undefined}
                                 data-testid="category-nav-pill"
                                 style={pillStyle(isActive)}

@@ -23,10 +23,11 @@ describe('CategoryNav', () => {
     });
 
     it('renders each category as a link to /shop/category/{slug}', () => {
+        // shopBase falls back to '/shop' in test env where G7Core is not seeded.
         render(<CategoryNav items={items} />);
         const links = screen.getAllByRole('link');
         const hrefs = links.map((l) => l.getAttribute('href'));
-        expect(hrefs).toContain('/shop');
+        expect(hrefs).toContain('/shop/');
         expect(hrefs).toContain('/shop/category/cups');
         expect(hrefs).toContain('/shop/category/lighting');
     });

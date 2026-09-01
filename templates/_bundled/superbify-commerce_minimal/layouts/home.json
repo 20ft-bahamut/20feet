@@ -450,7 +450,7 @@
                                             "marginTop": "var(--scm-spacing-sm, 0.75rem)",
                                             "boxShadow": "0 6px 18px -10px rgba(38, 34, 30, 0.45)"
                                         },
-                                        "href": "/shop",
+                                        "href": "{{_global.shopBase ?? '/shop'}}/",
                                         "text": "$t:superbify.home.final_cta.cta"
                                     }
                                 ]

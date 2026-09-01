@@ -45,7 +45,7 @@
                 "props": {
                     "orderData": "{{scmOrder}}",
                     "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}",
-                    "shopBase": "/shop",
+                    "shopBase": "{{_global.shopBase ?? '/shop'}}",
                     "_comment isLoggedIn": "회원이면 member 분기(viewDetail → /mypage/orders/{n})"
                 }
             }

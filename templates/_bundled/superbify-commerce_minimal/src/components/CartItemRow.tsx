@@ -35,6 +35,15 @@ export interface CartItemRowItem {
         selling_price?: number | string;
         selling_price_formatted?: string;
     } | null;
+    /** CartItemResource: selected additional options (추가옵션) with server-verified price. */
+    additional_options?: Array<{
+        additional_option_id?: number | string;
+        value_id?: number | string;
+        group_name?: string;
+        name?: string;
+        price_adjustment_formatted?: string;
+        custom_text?: string | null;
+    }> | null;
 }
 
 export interface CartItemRowProps {
@@ -212,6 +221,31 @@ export function CartItemRow({
                     >
                         옵션: {optionName}
                     </Span>
+                ) : null}
+                {Array.isArray(item.additional_options) && item.additional_options.length > 0 ? (
+                    item.additional_options.map((ao, aoIdx) => {
+                        const groupName = typeof ao.group_name === 'string' ? ao.group_name : '';
+                        const valueName = typeof ao.name === 'string' ? ao.name : '';
+                        const label = groupName && valueName && groupName !== valueName ? `${groupName}: ${valueName}` : valueName || groupName;
+                        const price = typeof ao.price_adjustment_formatted === 'string' ? ` (${ao.price_adjustment_formatted})` : '';
+                        const custom = ao.custom_text ? ` · ${ao.custom_text}` : '';
+                        return (
+                            <Span
+                                key={`addopt-${aoIdx}`}
+                                data-testid={`cart-additional-option-${aoIdx}`}
+                                style={{
+                                    fontFamily: 'var(--scm-font-body, system-ui)',
+                                    fontSize: '0.75rem',
+                                    color: 'var(--scm-text-muted, #8A837B)',
+                                    wordBreak: 'keep-all',
+                                    overflowWrap: 'break-word',
+                                    whiteSpace: 'normal',
+                                }}
+                            >
+                                추가옵션: {label}{custom}{price}
+                            </Span>
+                        );
+                    })
                 ) : null}
                 <Span
                     style={{

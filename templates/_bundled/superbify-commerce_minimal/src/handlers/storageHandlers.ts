@@ -109,14 +109,56 @@ export async function addToCartHandler(
     action?: unknown,
     _context?: unknown
 ): Promise<void> {
-    const detail = (action as { params?: { detail?: { productId?: number | string; quantity?: number; mode?: 'add' | 'buy'; productName?: string } } } | undefined)?.params?.detail;
+    const detail = (action as { params?: { detail?: {
+        productId?: number | string;
+        quantity?: number;
+        mode?: 'add' | 'buy';
+        productName?: string;
+        items?: Array<{
+            product_option_id?: number | string | null;
+            quantity: number;
+            additional_option_selections?: Array<{
+                additional_option_id: number | string;
+                value_id: number | string;
+                custom_text?: string | null;
+            }>;
+        }>;
+    } } } | undefined)?.params?.detail;
     if (!detail || (detail.productId === undefined || detail.productId === null)) {
         logger.warn('addToCart handler called without detail.productId');
         return;
     }
     const productId = detail.productId;
-    const quantity = Math.max(1, Math.min(99, Number(detail.quantity ?? 1)));
     const mode = detail.mode === 'buy' ? 'buy' : 'add';
+
+    // Normalize payload: prefer bulk items contract; fall back to legacy
+    // { quantity } shape (compat with old AddToCartPanel CustomEvents).
+    interface NormalizedItem {
+        product_option_id?: number | string | null;
+        quantity: number;
+        additional_option_selections?: Array<{
+            additional_option_id: number | string;
+            value_id: number | string;
+            custom_text?: string | null;
+        }>;
+    }
+    let normalizedItems: NormalizedItem[];
+    if (Array.isArray(detail.items) && detail.items.length > 0) {
+        normalizedItems = detail.items.map((it) => ({
+            product_option_id: it.product_option_id,
+            quantity: Math.max(1, Math.min(999, Number(it.quantity ?? 1))),
+            additional_option_selections: Array.isArray(it.additional_option_selections)
+                ? it.additional_option_selections.map((sel) => ({
+                    additional_option_id: sel.additional_option_id,
+                    value_id: sel.value_id,
+                    ...(sel.custom_text ? { custom_text: sel.custom_text } : {}),
+                }))
+                : undefined,
+        }));
+    } else {
+        const fallbackQty = Math.max(1, Math.min(999, Number(detail.quantity ?? 1)));
+        normalizedItems = [{ quantity: fallbackQty }];
+    }
 
     const G7Core = (window as any).G7Core;
     const readCartKey = (): string | null => {
@@ -130,12 +172,28 @@ export async function addToCartHandler(
         liveCartKey = readCartKey();
     }
 
+    const numericProductId = typeof productId === 'string' ? parseInt(productId, 10) : productId;
+
     try {
         // 바로구매(buy) — sirsoft-basic createDirectCheckout 계약: 카트에 담지 않고
         // POST /checkout direct_items 로 임시 주문을 만들어 /checkout 로 이동한다.
-        // (CheckoutRequest: item_ids OR direct_items)
+        // (CheckoutRequest: item_ids OR direct_items) — items 의 각 row 가
+        // product_option_id / additional_option_selections 을 포함하면 동일하게 전달.
         if (mode === 'buy') {
             const token = (G7Core as { api?: { getToken?: () => string | null } })?.api?.getToken?.() ?? null;
+            const directItems = normalizedItems.map((it) => {
+                const row: Record<string, unknown> = {
+                    product_id: numericProductId,
+                    quantity: it.quantity,
+                };
+                if (it.product_option_id != null) {
+                    row['product_option_id'] = it.product_option_id;
+                }
+                if (Array.isArray(it.additional_option_selections) && it.additional_option_selections.length > 0) {
+                    row['additional_option_selections'] = it.additional_option_selections;
+                }
+                return row;
+            });
             const checkoutRes = await fetch('/api/modules/sirsoft-ecommerce/checkout', {
                 method: 'POST',
                 credentials: 'same-origin',
@@ -143,14 +201,7 @@ export async function addToCartHandler(
                     ...buildCartHeaders(liveCartKey),
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
-                body: JSON.stringify({
-                    direct_items: [
-                        {
-                            product_id: typeof productId === 'string' ? parseInt(productId, 10) : productId,
-                            quantity,
-                        },
-                    ],
-                }),
+                body: JSON.stringify({ direct_items: directItems }),
             });
 
             if (!checkoutRes.ok) {
@@ -174,8 +225,8 @@ export async function addToCartHandler(
             credentials: 'same-origin',
             headers: buildCartHeaders(liveCartKey),
             body: JSON.stringify({
-                product_id: typeof productId === 'string' ? parseInt(productId, 10) : productId,
-                items: [{ quantity }],
+                product_id: numericProductId,
+                items: normalizedItems,
             }),
         });
 
@@ -236,9 +287,18 @@ export async function bindAddToCartListenerHandler(): Promise<void> {
     window.addEventListener('scm:add-to-cart', (evt: Event) => {
         const ce = evt as CustomEvent<{
             productId: number | string;
-            quantity: number;
+            quantity?: number;
             mode: 'add' | 'buy';
             productName?: string;
+            items?: Array<{
+                product_option_id?: number | string | null;
+                quantity: number;
+                additional_option_selections?: Array<{
+                    additional_option_id: number | string;
+                    value_id: number | string;
+                    custom_text?: string | null;
+                }>;
+            }>;
         }>;
         addToCartHandler({ params: { detail: ce.detail } });
     });

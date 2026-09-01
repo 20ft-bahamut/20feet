@@ -29,7 +29,9 @@ export interface CartSummaryProps {
     isOrdering?: boolean;
     onCheckout?: () => void;
     onContinueShopping?: () => void;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
     className?: string;
 }
-export declare function CartSummary({ itemCount, calculation, items, summaryTitle, itemsLabel, subtotalLabel, shippingLabel, totalLabel, checkoutLabel, continueShoppingLabel, isOrdering, onCheckout, onContinueShopping, className, }: CartSummaryProps): React.ReactElement;
+export declare function CartSummary({ itemCount, calculation, items, summaryTitle, itemsLabel, subtotalLabel, shippingLabel, totalLabel, checkoutLabel, continueShoppingLabel, isOrdering, onCheckout, onContinueShopping, shopBase, className, }: CartSummaryProps): React.ReactElement;
 export default CartSummary;

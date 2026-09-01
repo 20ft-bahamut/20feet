@@ -16,6 +16,11 @@ describe('config/business-info.json — demo seed values', () => {
         fs.readFileSync(path.join(TEMPLATE_ROOT, 'config/business-info.json'), 'utf8')
     ) as { shop: Record<string, string>; policies: Record<string, ReturnType<typeof getPolicyDocument>> };
 
+    // Fields the footer actually renders. hostingProvider lives in the JSON
+    // for forward compatibility (admin may add the input later) but is NOT
+    // in REQUIRED_FIELDS — the footer does not project it onto the render
+    // list because admin basic_info has no matching input. The JSON value
+    // is therefore not asserted here.
     const REQUIRED_FIELDS = [
         'shopName',
         'companyName',
@@ -26,7 +31,6 @@ describe('config/business-info.json — demo seed values', () => {
         'businessAddress',
         'customerServicePhone',
         'customerServiceEmail',
-        'hostingProvider',
         'businessVerificationUrl',
     ];
 
@@ -38,7 +42,6 @@ describe('config/business-info.json — demo seed values', () => {
         ecommerceRegistrationNumber: '2026-경남김해-1234호',
         businessAddress: '경남 김해시 장유로 362 쌍용예가2차 207동 604호',
         customerServicePhone: '070-123-1234',
-        hostingProvider: '가비아',
     };
 
     it('business fields exist; the shipped demo seed matches the approved literals', () => {
@@ -89,11 +92,14 @@ describe('businessFields()', () => {
                 'superbify.business.field.ecommerce_registration_number',
                 'superbify.business.field.business_address',
                 'superbify.business.field.customer_service_phone',
-                'superbify.business.field.hosting_provider',
             ].sort()
         );
         expect(hasBusinessInfo()).toBe(true);
-        expect(businessFields('ko').find((f) => f.label_key === 'superbify.business.field.hosting_provider')?.value).toBe('가비아');
+        // hostingProvider is intentionally excluded from FIELD_DEFINITIONS —
+        // admin basic_info has no matching input, so the footer never renders
+        // it. The value may still live in config/business-info.json for forward
+        // compatibility.
+        expect(fields.find((f) => f.label_key === 'superbify.business.field.hosting_provider')).toBeUndefined();
     });
 
     it('keeps labels stable for future i18n bindings (label_key contract)', () => {

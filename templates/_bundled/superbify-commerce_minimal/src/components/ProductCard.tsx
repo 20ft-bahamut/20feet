@@ -3,12 +3,20 @@ import { A, Div, Span, Img } from './basic';
 import { Price } from './Price';
 import { Badge } from './Badge';
 import { resolveStillLifeThumb } from './stillLifeSlot';
+import { getShopBase } from '../config/shopBase';
 import type { ProductItem } from '../types/template';
 
 export interface ProductCardProps {
     item: ProductItem;
     /** Override the link target, e.g. for fixture demos pointing at a static route. */
     href?: string;
+    /**
+     * Override the shop base URL. Defaults to `getShopBase()` so the
+     * template honors admin basic_info (no_route / route_path) without
+     * layouts having to pass the prop explicitly. Layouts may still bind
+     * `{{_global.shopBase}}` for static href interpolation.
+     */
+    shopBase?: string;
     className?: string;
     /** Optional quick-add label shown on hover/focus. Falls back to $t:superbify.product.quick_add. */
     quickAddLabel?: string;
@@ -48,6 +56,7 @@ function resolveThumbnail(item: ProductItem): { src: string; isFallback: boolean
 export function ProductCard({
     item,
     href,
+    shopBase,
     className,
     quickAddLabel = '담기',
     onQuickAdd,
@@ -61,7 +70,9 @@ export function ProductCard({
         // Fixtures are dev/test only — never render at runtime.
         return null;
     }
-    const link = href ?? `/shop/product/${item.product_code ?? item.id}`;
+    const resolvedBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
+    const link = href ?? `${baseForLink}/products/${item.product_code ?? item.id}`;
     const { src, isFallback } = resolveThumbnail(item);
     const stopped = isStopStatus(item.sales_status);
     const onSale = isOnSale(item.sales_status);

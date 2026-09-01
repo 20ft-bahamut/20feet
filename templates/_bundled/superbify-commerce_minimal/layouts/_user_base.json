@@ -26,6 +26,14 @@
         {
             "_comment": "localStorage의 g7_cart_key → _global.cartKey 주입. 비어 있으면 서버가 새 cart key를 응답 헤더로 내려준다.",
             "handler": "initCartKey"
+        },
+        {
+            "_comment": "shop base URL 주입 — sirsoft-basic 패턴 미러. admin basic_info(no_route/route_path) 변경 시 자동 반영. 모든 shop 링크(헤더/푸터/카테고리/카트/체크아웃)가 동일한 _global.shopBase 를 참조해 회귀 위험을 차단한다.",
+            "handler": "setState",
+            "params": {
+                "target": "global",
+                "shopBase": "{{_global.modules?.['sirsoft-ecommerce']?.basic_info?.no_route ? '' : ('/' + (_global.modules?.['sirsoft-ecommerce']?.basic_info?.route_path ?? 'shop'))}}"
+            }
         }
     ],
     "data_sources": [

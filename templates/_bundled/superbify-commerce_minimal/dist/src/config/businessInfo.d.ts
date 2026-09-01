@@ -82,12 +82,59 @@ export declare function localText(text: LocalizedText | null | undefined, locale
  * - Empty / whitespace-only values are skipped entirely.
  * - The verification URL is returned as an `external` field (opens in a new
  *   tab with rel="noopener noreferrer" — it is a user-controlled URL).
+ *
+ * If `override` is provided, non-empty fields on it win over the static
+ * `businessInfo.shop` seed. This is how the StoreFooter overlays admin-
+ * configured values onto the demo seed without re-fetching the static JSON
+ * at runtime. The mapping mirrors the public read-model exposed by
+ * /api/plugins/superbify-commerce-compat/shop-info.
  */
-export declare function businessFields(locale?: TemplateLocale): BusinessField[];
+export declare function businessFields(locale?: TemplateLocale, override?: Partial<ShopInfo> | null): BusinessField[];
+/**
+ * Public-safe basic_info payload shape returned by
+ * GET /api/plugins/superbify-commerce-compat/shop-info.
+ *
+ * Mirrors the controller's PUBLIC_SAFE_FIELDS whitelist. Anything outside
+ * this shape is ignored by `applyShopInfoOverride()`.
+ */
+export interface ShopInfoApiResponse {
+    shop_name?: string;
+    company_name?: string;
+    business_number?: string;
+    ceo_name?: string;
+    business_type?: string;
+    business_category?: string;
+    zipcode?: string;
+    base_address?: string;
+    detail_address?: string;
+    phone?: string;
+    fax?: string;
+    email?: string;
+    privacy_officer?: string;
+    privacy_officer_email?: string;
+    mail_order_number?: string;
+    telecom_number?: string;
+}
+/**
+ * Project a raw /shop-info API payload onto the ShopInfo shape the footer
+ * renders. Only fields consumed by StoreFooter are mapped; everything else
+ * (privacy_officer, telecom_number, business_type, business_category) is
+ * ignored for now but exposed in the type for forward compatibility.
+ *
+ * The output uses empty strings (not null) for unset values so the
+ * mergeShopInfo() priority rule treats them as "no admin value".
+ */
+export declare function applyShopInfoOverride(payload: ShopInfoApiResponse | null | undefined): Partial<ShopInfo>;
+/**
+ * Default endpoint for the admin shop-info overlay. Override in tests via
+ * `__setShopInfoEndpoint` or by passing `shopInfoEndpoint` to <StoreFooter>.
+ */
+export declare const DEFAULT_SHOP_INFO_ENDPOINT = "/api/plugins/superbify-commerce-compat/shop-info";
+export declare function __setShopInfoEndpoint(url: string | null): void;
+export declare function getShopInfoEndpoint(): string;
 /** True when at least one business field has a non-empty value. */
 export declare function hasBusinessInfo(): boolean;
 /** Resolve a policy document by page key ('shipping' maps to shippingReturns). */
 export declare function getPolicyDocument(key: PolicyDocumentKey): PolicyDocument;
-/** Policy page hrefs (single place so the footer and routes stay in sync). */
 export declare const POLICY_ROUTES: Record<PolicyDocumentKey, string>;
 export default businessInfo;

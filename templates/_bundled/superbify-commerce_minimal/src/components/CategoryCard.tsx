@@ -2,12 +2,15 @@ import React from 'react';
 import { A, Div, Img, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
 import { resolveDemoCategoryAsset } from './demoAssets';
+import { getShopBase } from '../config/shopBase';
 import type { CategoryItem } from '../types/template';
 
 export interface CategoryCardProps {
     item: CategoryItem;
     className?: string;
     fallbackSlot?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
 
 function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: string; isFallback: boolean } {
@@ -23,12 +26,15 @@ function resolveImageSrc(item: CategoryItem, fallbackSlot: string): { src: strin
     return { src: resolveSlotImage(fallbackSlot), isFallback: true };
 }
 
-export function CategoryCard({ item, className, fallbackSlot }: CategoryCardProps): React.ReactElement | null {
+export function CategoryCard({ item, className, fallbackSlot, shopBase }: CategoryCardProps): React.ReactElement | null {
     if (item.isFixture === true) return null;
     const slot = fallbackSlot ?? `category-${item.slug}`;
     const nameText = item.name_localized ?? item.name;
     const initial = resolveImageSrc(item, slot);
     const [src, setSrc] = React.useState(initial.src);
+    const resolvedBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
+    const link = `${baseForLink}/category/${item.slug}`;
 
     // If the asset somehow fails, swap to the kind default. resolveSlotImage
     // returns data URIs so this branch is rare — but keep it as a safety net.
@@ -39,7 +45,7 @@ export function CategoryCard({ item, className, fallbackSlot }: CategoryCardProp
 
     return (
         <A
-            href={`/shop/category/${item.slug}`}
+            href={link}
             className={className}
             aria-label={nameText}
             style={{

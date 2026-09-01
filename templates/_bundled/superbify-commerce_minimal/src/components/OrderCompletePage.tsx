@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Div, P, Span } from './basic';
+import { getShopBase } from '../config/shopBase';
 
 export interface OrderCompleteOrderData {
     order_number?: string;
@@ -97,8 +98,12 @@ export function OrderCompletePage(props: OrderCompletePageProps): React.ReactEle
     const {
         orderData,
         isLoggedIn = false,
-        shopBase = '/shop',
+        shopBase,
     } = props;
+    // Mirrors sirsoft-basic — defaults to getShopBase() when layouts do
+    // not bind shopBase explicitly. Layouts may override via prop.
+    const resolvedShopBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedShopBase === '/' ? '' : resolvedShopBase;
 
     const order = orderData?.data ?? null;
     const isLoading = !!orderData?.loading;
@@ -120,16 +125,16 @@ export function OrderCompletePage(props: OrderCompletePageProps): React.ReactEle
     }, [order]);
 
     const continueShopping = useCallback(() => {
-        window.location.assign('/shop');
-    }, []);
+        window.location.assign(`${baseForLink}/`);
+    }, [baseForLink]);
 
     const viewDetail = useCallback(() => {
         if (!orderNumber) return;
         const path = isLoggedIn
             ? `/mypage/orders/${orderNumber}`
-            : `${shopBase}/guest/orders/${orderNumber}`;
+            : `${baseForLink}/guest/orders/${orderNumber}`;
         window.location.assign(path);
-    }, [isLoggedIn, orderNumber, shopBase]);
+    }, [isLoggedIn, orderNumber, baseForLink]);
 
     if (isLoading && !order) {
         return (

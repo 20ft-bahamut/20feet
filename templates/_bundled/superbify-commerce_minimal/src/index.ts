@@ -78,6 +78,51 @@ export {
     type OrderCompleteOrderData,
 } from './components/OrderCompletePage';
 export { PolicyPage, type PolicyPageProps } from './components/PolicyPage';
+export {
+    PurchasePanel,
+    type PurchasePanelProps,
+    type PurchasePanelDispatchDetail,
+    type PurchasePanelItem,
+    type PurchasePanelAdditionalSelection,
+    type PurchasePanelProductData,
+    type PurchasePanelOptionGroup,
+    type PurchasePanelOption,
+    type PurchasePanelAdditionalOption,
+    type PurchasePanelAdditionalValue,
+    type PurchasePanelOptionValue,
+} from './components/PurchasePanel';
+export {
+    WishlistHeart,
+    type WishlistHeartProps,
+} from './components/WishlistHeart';
+export {
+    ProductReviews,
+    type ProductReviewsProps,
+    type ProductReviewsResponse,
+    type ProductReview,
+    type ProductReviewImage,
+    type ProductReviewOptionSnapshot,
+} from './components/ProductReviews';
+export {
+    ProductQna,
+    type ProductQnaProps,
+    type ProductQnaItem,
+    type ProductQnaResponse,
+    type ProductQnaMeta,
+    type ProductQnaBoardSettings,
+} from './components/ProductQna';
+export {
+    CouponDownloadBadges,
+    type CouponDownloadBadgesProps,
+    type CouponDownloadBadgesCoupon,
+} from './components/CouponDownloadBadges';
+export {
+    ProductCommonInfo,
+    type ProductCommonInfoProps,
+    type ProductCommonInfoData,
+    type ProductNoticeData,
+    type ProductNoticeItem,
+} from './components/ProductCommonInfo';
 
 // Business information single edit point (config/business-info.json)
 export {
@@ -169,6 +214,12 @@ import { CheckoutForm } from './components/CheckoutForm';
 import { CheckoutPage } from './components/CheckoutPage';
 import { OrderCompletePage } from './components/OrderCompletePage';
 import { PolicyPage } from './components/PolicyPage';
+import { PurchasePanel } from './components/PurchasePanel';
+import { WishlistHeart } from './components/WishlistHeart';
+import { ProductReviews } from './components/ProductReviews';
+import { ProductQna } from './components/ProductQna';
+import { CouponDownloadBadges } from './components/CouponDownloadBadges';
+import { ProductCommonInfo } from './components/ProductCommonInfo';
 import { CartSummary } from './components/CartSummary';
 import { CategoryCard } from './components/CategoryCard';
 import { CategoryNav } from './components/CategoryNav';
@@ -243,6 +294,12 @@ if (registry) {
     registry.register({ component: CheckoutPage, metadata: { name: 'CheckoutPage', type: 'composite' } });
     registry.register({ component: OrderCompletePage, metadata: { name: 'OrderCompletePage', type: 'composite' } });
     registry.register({ component: PolicyPage, metadata: { name: 'PolicyPage', type: 'composite' } });
+    registry.register({ component: PurchasePanel, metadata: { name: 'PurchasePanel', type: 'composite' } });
+    registry.register({ component: WishlistHeart, metadata: { name: 'WishlistHeart', type: 'composite' } });
+    registry.register({ component: ProductReviews, metadata: { name: 'ProductReviews', type: 'composite' } });
+    registry.register({ component: ProductQna, metadata: { name: 'ProductQna', type: 'composite' } });
+    registry.register({ component: CouponDownloadBadges, metadata: { name: 'CouponDownloadBadges', type: 'composite' } });
+    registry.register({ component: ProductCommonInfo, metadata: { name: 'ProductCommonInfo', type: 'composite' } });
     registry.register({ component: CartSummary, metadata: { name: 'CartSummary', type: 'composite' } });
     registry.register({ component: CategoryCard, metadata: { name: 'CategoryCard', type: 'composite' } });
     registry.register({ component: CategoryNav, metadata: { name: 'CategoryNav', type: 'composite' } });

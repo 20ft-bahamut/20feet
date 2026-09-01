@@ -117,7 +117,7 @@
                                                 "name": "A",
                                                 "id": "auth_login_guest_continue_cta",
                                                 "props": {
-                                                    "href": "/shop/guest/orders"
+                                                    "href": "{{_global.shopBase ?? '/shop'}}/guest/orders"
                                                 },
                                                 "style": {
                                                     "minHeight": "44px",

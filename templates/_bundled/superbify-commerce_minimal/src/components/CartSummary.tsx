@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, Div, Span } from './basic';
+import { getShopBase } from '../config/shopBase';
 
 export interface CartSummaryCalc {
     subtotal?: number | string | null;
@@ -32,6 +33,8 @@ export interface CartSummaryProps {
     isOrdering?: boolean;
     onCheckout?: () => void;
     onContinueShopping?: () => void;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
     className?: string;
 }
 
@@ -78,9 +81,12 @@ export function CartSummary({
     isOrdering,
     onCheckout,
     onContinueShopping,
+    shopBase,
     className,
 }: CartSummaryProps): React.ReactElement {
     const count = itemCount ?? (Array.isArray(items) ? items.length : 0);
+    const resolvedBase = shopBase ?? getShopBase();
+    const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
 
     const subtotalStr = pickPrice(
         calculation?.subtotal,
@@ -100,10 +106,10 @@ export function CartSummary({
     ) ?? subtotalStr;
 
     const checkout = onCheckout ?? (() => {
-        window.location.assign('/shop/checkout');
+        window.location.assign(`${baseForLink}/checkout`);
     });
     const continueShopping = onContinueShopping ?? (() => {
-        window.location.assign('/shop');
+        window.location.assign(`${baseForLink}/`);
     });
 
     return (

@@ -99,14 +99,14 @@ describe('layout JSONs', () => {
             ])
         );
         // Final CTA block has no composite (it's inline primitives); confirm
-        // the eyebrow / heading / cta i18n keys plus the /shop href are bound.
+        // the eyebrow / heading / cta i18n keys plus the shopBase-bound href are wired.
         const finalCta = home.slots?.content?.find((s: any) => s?.id === 'home_final_cta');
         expect(finalCta).toBeTruthy();
         const textBlob = JSON.stringify(finalCta);
         expect(textBlob).toContain('$t:superbify.home.final_cta.eyebrow');
         expect(textBlob).toContain('$t:superbify.home.final_cta.heading');
         expect(textBlob).toContain('$t:superbify.home.final_cta.cta');
-        expect(textBlob).toContain('"href":"/shop"');
+        expect(textBlob).toContain("_global.shopBase ?? '/shop'}}/");
     });
 
     it('shop/index.json uses products and categories data sources', () => {
@@ -131,7 +131,7 @@ describe('layout JSONs', () => {
         expect(list?.params?.category_slug).toBe('{{route.slug}}');
     });
 
-    it('shop/product.json binds route.slug into detail endpoint', () => {
+    it('shop/product.json binds route.product_code into detail endpoint', () => {
         const prod = JSON.parse(
             fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/product.json'), 'utf8')
         );
@@ -172,7 +172,7 @@ describe('layout JSONs', () => {
         expect(init.map((a) => a.handler)).toContain('scmBindCartPageListeners');
     });
 
-    it('shop/product.json includes AddToCartPanel + scmBindAddToCartListener init', () => {
+    it('shop/product.json includes PurchasePanel + scmBindAddToCartListener init', () => {
         const prod = JSON.parse(
             fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/product.json'), 'utf8')
         );
@@ -186,9 +186,41 @@ describe('layout JSONs', () => {
             return out;
         };
         const names = collectNames({ children: prod.slots?.content });
-        expect(names).toContain('AddToCartPanel');
+        // Phase 1 parity: AddToCartPanel composite was replaced by PurchasePanel
+        // (phase1-spec.md). AddToCartPanel still exists in the registry for fallback
+        // reuse, but product.json mounts PurchasePanel for option/additional-option
+        // parity.
+        expect(names).toContain('PurchasePanel');
+        expect(names).toContain('WishlistHeart');
+        expect(names).toContain('ProductReviews');
+        expect(names).toContain('ProductQna');
+        expect(names).toContain('CouponDownloadBadges');
         const init = (prod.init_actions as Array<{ handler: string }>) ?? [];
         expect(init.map((a) => a.handler)).toContain('scmBindAddToCartListener');
+    });
+
+    it('shop/product.json ships admin edit affordance + downloadable-coupons DS + shipping policy KV', () => {
+        const prod = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/product.json'), 'utf8')
+        );
+        const ids = (prod.data_sources as Array<{ id: string; endpoint: string }>).map((d) => d.id);
+        const coupons = (prod.data_sources as Array<{ id: string; endpoint: string }>).find(
+            (d) => d.id === 'productDownloadableCoupons',
+        );
+        expect(ids).toContain('productDownloadableCoupons');
+        expect(coupons?.endpoint).toBe(
+            '/api/modules/sirsoft-ecommerce/products/{{route.slug}}/downloadable-coupons',
+        );
+        // Admin edit link — target="_blank", gated by abilities.can_update, links to
+        // /admin/ecommerce/products/{product_code}/edit. Layout engine binds the
+        // single :slug route param as route.slug (no route.product_code exists).
+        const textBlob = JSON.stringify(prod.slots);
+        expect(textBlob).toContain('/admin/ecommerce/products/{{product_detail?.data?.product_code ?? route.slug}}/edit');
+        expect(textBlob).toContain('"target":"_blank"');
+        expect(textBlob).toContain('product_detail?.data?.abilities?.can_update');
+        // Shipping policy KV rows — fee_summary + free_threshold_formatted.
+        expect(textBlob).toContain('shipping_policy?.fee_summary');
+        expect(textBlob).toContain('shipping_policy?.free_threshold_formatted');
     });
 
     it('shop/checkout.json renders CheckoutPage composite with checkoutData + payment + shipping data sources', () => {
@@ -259,16 +291,57 @@ describe('layout JSONs', () => {
         expect(ds?.headers?.['X-Guest-Order-Token']).toBe('{{_global.guestOrderToken}}');
     });
 
-    it('routes.json declares /shop/checkout, /shop/order/complete, /shop/guest/orders, /shop/guest/orders/:order_number', () => {
+    it('routes.json declares /shop/checkout, /shop/cart (canonical) + /cart (legacy redirect), /shop/guest/orders, /shop/guest/orders/:order_number, /shop/reorder/:id, and drops the legacy /shop/order/complete', () => {
         const routes = JSON.parse(
             fs.readFileSync(path.join(TEMPLATE_ROOT, 'routes.json'), 'utf8')
         );
         const paths = (routes.routes as Array<{ path: string; layout: string }>).map((r) => r.path);
-        expect(paths).toContain('/cart');
+        expect(paths).toContain('/shop/cart');
+        expect(paths).toContain('/cart'); // legacy compatibility redirect
         expect(paths).toContain('/shop/checkout');
-        expect(paths).toContain('/shop/order/complete');
+        expect(paths).not.toContain('/shop/order/complete'); // legacy blank route removed
         expect(paths).toContain('/shop/guest/orders');
         expect(paths).toContain('/shop/guest/orders/:order_number');
+        expect(paths).toContain('/shop/reorder/:id'); // canonical under shop prefix
+    });
+
+    it('routes.json marks /login, /register, /forgot-password, /reset-password as guest_only', () => {
+        const routes = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'routes.json'), 'utf8')
+        );
+        const guestOnlyPaths = ['/login', '/register', '/forgot-password', '/reset-password'];
+        for (const p of guestOnlyPaths) {
+            const route = (routes.routes as Array<{ path: string; guest_only?: boolean }>).find((r) => r.path === p);
+            expect(route, `route ${p} missing`).toBeTruthy();
+            expect(route?.guest_only, `route ${p} must be guest_only`).toBe(true);
+        }
+    });
+
+    it('_user_base.json seeds _global.shopBase from module basic_info', () => {
+        const base = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/_user_base.json'), 'utf8')
+        );
+        const init = (base.init_actions as Array<{ handler: string; params?: Record<string, unknown> }>) ?? [];
+        const seed = init.find((a) => a.handler === 'setState' && a.params?.shopBase);
+        expect(seed).toBeTruthy();
+        const expr = seed?.params?.shopBase as string;
+        expect(expr).toContain("basic_info?.no_route");
+        expect(expr).toContain("basic_info?.route_path");
+    });
+
+    it('notice-detail back/prev/next links use _global.shopBase interpolation', () => {
+        const detail = JSON.parse(
+            fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/shop/notice-detail.json'), 'utf8')
+        );
+        const textBlob = JSON.stringify(detail.slots);
+        expect(textBlob).toContain("_global.shopBase ?? '/shop'");
+    });
+
+    it('home.json final CTA href uses _global.shopBase interpolation', () => {
+        const home = JSON.parse(fs.readFileSync(path.join(TEMPLATE_ROOT, 'layouts/home.json'), 'utf8'));
+        const finalCta = home.slots?.content?.find((s: any) => s?.id === 'home_final_cta');
+        const textBlob = JSON.stringify(finalCta);
+        expect(textBlob).toContain("_global.shopBase ?? '/shop'");
     });
 
     it('shop/notice.json wires page query param, row links, and pagination navigation', () => {
@@ -324,7 +397,7 @@ describe('layout JSONs', () => {
         // back link + meta labels are bound via i18n keys
         expect(textBlob).toContain('$t:superbify.notice.back_to_list');
         expect(textBlob).toContain('$t:superbify.notice.view_count');
-        expect(textBlob).toContain('"href":"/shop/notice"');
+        expect(textBlob).toContain("_global.shopBase ?? '/shop'}}/notice");
         // content html rendering goes through the sanitized composite, not raw layout text
         const content = findNodeByName(detail.slots?.content, 'HtmlContent');
         expect(content?.props?.content).toContain('notice_post?.data?.content');

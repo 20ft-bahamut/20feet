@@ -18,6 +18,8 @@ export interface CategoryNavProps {
     /** Sort change handler. */
     onSortChange?: (value: string) => void;
     sortLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
-export declare function CategoryNav({ items, activeSlug, className, title, allLabel, sortOptions, sortValue, onSortChange, sortLabel, }: CategoryNavProps): React.ReactElement;
+export declare function CategoryNav({ items, activeSlug, className, title, allLabel, sortOptions, sortValue, onSortChange, sortLabel, shopBase, }: CategoryNavProps): React.ReactElement;
 export default CategoryNav;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { A, Button, Div, Header, Img, Li, Nav, Span, Ul } from './basic';
 import { brandAssets, brandLogoInk } from './demoAssets';
+import { getShopBase } from '../config/shopBase';
 
 export interface StoreHeaderProps {
     brandName?: string;
@@ -13,15 +14,23 @@ export interface StoreHeaderProps {
     signupLabel?: string;
     mypageLabel?: string;
     logoutLabel?: string;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
     className?: string;
 }
 
-const NAV_ITEMS: { href: string; key: 'shop' | 'cart' | 'story' | 'notice' }[] = [
-    { href: '/shop', key: 'shop' },
-    { href: '/shop/story', key: 'story' },
-    { href: '/shop/notice', key: 'notice' },
-    { href: '/cart', key: 'cart' },
-];
+/** Build the primary nav links for a given shop base. Computed at render
+ *  time so changes to admin basic_info (no_route / route_path) flow
+ *  through automatically. */
+function buildNavItems(shopBase: string): { href: string; key: 'shop' | 'cart' | 'story' | 'notice' }[] {
+    const base = shopBase === '/' ? '' : shopBase;
+    return [
+        { href: `${base}/`, key: 'shop' },
+        { href: `${base}/story`, key: 'story' },
+        { href: `${base}/notice`, key: 'notice' },
+        { href: `${base}/cart`, key: 'cart' },
+    ];
+}
 
 function displayCount(n: number): string {
     if (n <= 0) return '0';
@@ -152,9 +161,12 @@ export function StoreHeader({
     signupLabel = 'Sign up',
     mypageLabel = 'My page',
     logoutLabel = 'Logout',
+    shopBase,
     className,
 }: StoreHeaderProps): React.ReactElement {
     const isLoggedIn = typeof user === 'string' && user.trim().length > 0;
+    const resolvedShopBase = shopBase ?? getShopBase();
+    const navItems = buildNavItems(resolvedShopBase);
     return (
         <Header
             className={className}
@@ -210,7 +222,7 @@ export function StoreHeader({
                             gap: 'var(--scm-spacing-2xs, 0.25rem)',
                         }}
                     >
-                        {NAV_ITEMS.map((it) => {
+                        {navItems.map((it) => {
                             const isCart = it.key === 'cart';
                             return (
                                 <Li key={it.key}>

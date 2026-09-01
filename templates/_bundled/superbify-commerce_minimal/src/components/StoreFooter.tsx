@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { A, Div, Footer, Li, Span, Ul } from './basic';
 import {
+    applyShopInfoOverride,
     businessFields,
+    getShopInfoEndpoint,
     POLICY_ROUTES,
     type BusinessField,
     type PolicyDocumentKey,
+    type ShopInfo,
+    type ShopInfoApiResponse,
 } from '../config/businessInfo';
+import { getShopBase } from '../config/shopBase';
 
 export interface StoreFooterProps {
     brandName?: string;
@@ -21,16 +26,45 @@ export interface StoreFooterProps {
     shippingLabel?: string;
     /** Label of the external 사업자정보확인 link (from lang); only rendered when configured. */
     verificationLabel?: string;
-    /** Test/diagnostic injection point; defaults to businessFields() from config/business-info.json. */
+    /**
+     * Test/diagnostic injection point for the resolved field list.
+     * When supplied, the StoreFooter renders exactly this list and skips
+     * both the static seed AND the live admin fetch. Production layouts
+     * never set this prop; tests and Storybook do.
+     */
     infoFields?: BusinessField[];
+    /**
+     * Disable the live admin basic_info fetch even when `infoFields` is not
+     * supplied. Useful for SSR snapshots and test environments where the
+     * /shop-info endpoint is unreachable.
+     */
+    disableLiveShopInfo?: boolean;
+    /**
+     * Override the /shop-info endpoint URL. Defaults to
+     * `/api/plugins/superbify-commerce-compat/shop-info`. Tests may inject
+     * a per-test stub here.
+     */
+    shopInfoEndpoint?: string;
+    /**
+     * Test-only injection point for the fetch implementation.
+     * Signature: (url, init) => Promise<Response> (matches global fetch).
+     * Defaults to globalThis.fetch. Production never sets this.
+     */
+    fetchImpl?: typeof fetch;
+    /** Override the shop base URL. Defaults to getShopBase(). */
+    shopBase?: string;
 }
 
-const DEFAULT_NAV: { href: string; label: string }[] = [
-    { href: '/shop', label: 'Shop' },
-    { href: '/shop/story', label: 'Story' },
-    { href: '/shop/notice', label: 'Notice' },
-    { href: '/cart', label: 'Cart' },
-];
+/** Build the default primary-nav links for a given shop base. */
+function buildDefaultNav(shopBase: string): { href: string; label: string }[] {
+    const base = shopBase === '/' ? '' : shopBase;
+    return [
+        { href: `${base}/`, label: 'Shop' },
+        { href: `${base}/story`, label: 'Story' },
+        { href: `${base}/notice`, label: 'Notice' },
+        { href: `${base}/cart`, label: 'Cart' },
+    ];
+}
 
 /** Policy page links — labels come from lang, hrefs from the single POLICY_ROUTES source. */
 const POLICY_LINKS: { key: PolicyDocumentKey; labelProp: keyof StoreFooterProps; fallback: string }[] = [
@@ -69,18 +103,76 @@ export function StoreFooter({
     tagline = '조용한 일상의 물건들',
     copyright = '© 2026 Still Form — demo store built on Gnuboard 7',
     className,
-    navItems = DEFAULT_NAV,
+    navItems,
     demoNotice,
     termsLabel,
     privacyLabel,
     shippingLabel,
     verificationLabel,
     infoFields,
+    disableLiveShopInfo = false,
+    shopInfoEndpoint,
+    fetchImpl,
+    shopBase,
 }: StoreFooterProps): React.ReactElement {
-    // Single source of truth: config/business-info.json via businessInfo.ts.
+    const resolvedShopBase = shopBase ?? getShopBase();
+    const resolvedNavItems = navItems ?? buildDefaultNav(resolvedShopBase);
+    // Live admin basic_info overlay. Kept as state so the footer re-renders
+    // when the async fetch resolves without disturbing the rest of the layout.
+    // null = not yet resolved OR fetch is disabled; empty object = resolved
+    // with no admin fields set (static seed still applies).
+    const [adminOverride, setAdminOverride] = useState<Partial<ShopInfo> | null>(null);
+
+    useEffect(() => {
+        // Two opt-outs: explicit disable, or the test-only infoFields prop
+        // (which bypasses both static seed and admin overlay entirely).
+        if (disableLiveShopInfo || infoFields) {
+            return;
+        }
+        // SSR / non-browser environment — fetch is unavailable, fall back
+        // to the static seed silently.
+        if (typeof globalThis.fetch !== 'function') {
+            return;
+        }
+        const endpoint = shopInfoEndpoint ?? getShopInfoEndpoint();
+        const fetcher = fetchImpl ?? globalThis.fetch.bind(globalThis);
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetcher(endpoint, {
+                    method: 'GET',
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin',
+                });
+                if (!res || !res.ok) {
+                    // Plugin offline / 4xx / 5xx → silent fallback to static.
+                    return;
+                }
+                const json = await res.json();
+                if (cancelled) return;
+                const payload = json?.data;
+                if (payload && typeof payload === 'object') {
+                    setAdminOverride(applyShopInfoOverride(payload as ShopInfoApiResponse));
+                }
+            } catch {
+                // Network error / parse error / plugin disabled → silent fallback.
+                // Per spec: no console noise.
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [disableLiveShopInfo, infoFields, shopInfoEndpoint, fetchImpl]);
+
+    // Single source of truth: config/business-info.json via businessInfo.ts,
+    // with the admin basic_info overlay applied (per-field priority:
+    // admin non-empty > static seed non-empty > empty).
     // infoFields is only an injection point for tests; it is never passed by layouts.
-    const resolved = (infoFields ?? businessFields()).filter((field) => !field.external);
-    const verification = (infoFields ?? businessFields()).find((field) => field.external);
+    const fields = infoFields ?? businessFields('ko', adminOverride);
+    const resolved = fields.filter((field) => !field.external);
+    const verification = fields.find((field) => field.external);
     const hasInfo = resolved.length > 0;
 
     return (
@@ -154,7 +246,7 @@ export function StoreFooter({
                             alignItems: 'center',
                         }}
                     >
-                        {navItems.map((item) => (
+                        {resolvedNavItems.map((item) => (
                             <Li key={item.href}>
                                 <A
                                     href={item.href}

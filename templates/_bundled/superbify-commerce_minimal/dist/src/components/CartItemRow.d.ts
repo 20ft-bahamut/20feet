@@ -31,6 +31,15 @@ export interface CartItemRowItem {
         selling_price?: number | string;
         selling_price_formatted?: string;
     } | null;
+    /** CartItemResource: selected additional options (추가옵션) with server-verified price. */
+    additional_options?: Array<{
+        additional_option_id?: number | string;
+        value_id?: number | string;
+        group_name?: string;
+        name?: string;
+        price_adjustment_formatted?: string;
+        custom_text?: string | null;
+    }> | null;
 }
 export interface CartItemRowProps {
     item: CartItemRowItem;
