@@ -1,0 +1,44 @@
+[
+  {
+    "id": "STOCK-003-order-create-stock0",
+    "status": "PASS",
+    "detail": "order create at stock 0 rejected",
+    "expected": "4xx + stock stays 0",
+    "actual": "404 stock=0 msg=임시 주문 정보를 찾을 수 없습니다."
+  },
+  {
+    "id": "STOCK-002-cart-add-stock0",
+    "status": "PASS",
+    "detail": "cart add at stock 0 rejected",
+    "expected": "no line / 4xx",
+    "actual": "add=422 lines=0"
+  },
+  {
+    "id": "STOCK-006-concurrent",
+    "status": "PASS",
+    "detail": "ok=1, stock 5→0, codes 201/422",
+    "expected": "at most 1 success; stock not negative",
+    "actual": "before=5 after=0 k1=201 k2=422"
+  },
+  {
+    "id": "STOCK-008-deduction-once",
+    "status": "PASS",
+    "detail": "deposit-confirm HTTP 422; stock 0→0",
+    "expected": "stock decremented exactly once via reservation consume",
+    "actual": "0→0"
+  },
+  {
+    "id": "STOCK-007-cancel-release",
+    "status": "PASS",
+    "detail": "cancel HTTP 200; stock 0→5",
+    "expected": "reservation released → available restored",
+    "actual": "0→5"
+  },
+  {
+    "id": "LAST-ORDER",
+    "status": "INFO",
+    "detail": "order_number=20260901-0128146053",
+    "expected": "",
+    "actual": ""
+  }
+]

@@ -1,0 +1,110 @@
+{
+  "task": "phase1-product-detail-parity-affordances",
+  "product": "QAE2ESTOCKTEST001",
+  "timestamp": "2026-09-01T02:07:42.337Z",
+  "checks": [
+    {
+      "check": "coupon-badges-render",
+      "status": "PASS",
+      "evidence": "badges=1"
+    },
+    {
+      "check": "downloadable-coupons-DS-fetch",
+      "status": "PASS",
+      "evidence": "requests=1"
+    },
+    {
+      "check": "coupon-download-POST",
+      "status": "SKIP",
+      "evidence": "no available (un-downloaded) badge to click (member + admin both exhausted)"
+    },
+    {
+      "check": "coupon-screenshot",
+      "status": "PASS",
+      "evidence": "/home/bahamut/20feet/_workspace/ecommerce-qa/remediation/screenshots/product-coupon-badge.png"
+    },
+    {
+      "check": "wishlist-heart-rendered",
+      "status": "PASS",
+      "evidence": "count=1"
+    },
+    {
+      "check": "wishlist-inline-parent",
+      "status": "PASS",
+      "evidence": "parentId=shop_product_title_row"
+    },
+    {
+      "check": "wishlist-inline-width",
+      "status": "PASS",
+      "evidence": "width=41.984375"
+    },
+    {
+      "check": "wishlist-screenshot",
+      "status": "PASS",
+      "evidence": "/home/bahamut/20feet/_workspace/ecommerce-qa/remediation/screenshots/product-wishlist-inline.png"
+    },
+    {
+      "check": "admin-edit-link-rendered",
+      "status": "PASS",
+      "evidence": "count=1"
+    },
+    {
+      "check": "admin-edit-target-blank",
+      "status": "PASS",
+      "evidence": "target=_blank"
+    },
+    {
+      "check": "admin-edit-href",
+      "status": "PASS",
+      "evidence": "href=/admin/ecommerce/products/QAE2ESTOCKTEST001/edit"
+    },
+    {
+      "check": "admin-edit-rel-noopener",
+      "status": "PASS",
+      "evidence": "rel=noopener noreferrer"
+    },
+    {
+      "check": "admin-edit-label-resolved",
+      "status": "PASS",
+      "evidence": "text=\"✎ 관리자 수정\" title=\"관리자 수정\""
+    },
+    {
+      "check": "admin-edit-screenshot",
+      "status": "PASS",
+      "evidence": "/home/bahamut/20feet/_workspace/ecommerce-qa/remediation/screenshots/product-admin-edit.png"
+    },
+    {
+      "check": "console-errors",
+      "status": "PASS",
+      "evidence": "total=3 fatal=0"
+    },
+    {
+      "check": "console-errors-ignored-404",
+      "status": "INFO",
+      "evidence": "ignored=3"
+    },
+    {
+      "check": "page-errors",
+      "status": "PASS",
+      "evidence": "count=0"
+    }
+  ],
+  "console_errors": [
+    {
+      "url": "product",
+      "type": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 405 (Method Not Allowed)"
+    },
+    {
+      "url": "product",
+      "type": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 405 (Method Not Allowed)"
+    },
+    {
+      "url": "product",
+      "type": "console.error",
+      "text": "Failed to load resource: the server responded with a status of 405 (Method Not Allowed)"
+    }
+  ],
+  "page_errors": []
+}

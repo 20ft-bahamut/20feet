@@ -1,0 +1,37 @@
+[
+  {
+    "id": "COUPON-SCOPE-002",
+    "status": "PASS",
+    "detail": "no 422 but discount 0 (non-eligible ignored)",
+    "expected": "4xx or 0",
+    "actual": "discount=0"
+  },
+  {
+    "id": "COUPON-SCOPE-001",
+    "status": "PASS",
+    "detail": "target coupon discount=10000",
+    "expected": ">= 10000",
+    "actual": "10000"
+  },
+  {
+    "id": "PAYMENT-VAL-002-card",
+    "status": "PASS",
+    "detail": "inactive card method rejected",
+    "expected": "4xx",
+    "actual": "422 수령인 이름을 입력해주세요. (and 7 more errors)"
+  },
+  {
+    "id": "PAYMENT-VAL-004-vbank",
+    "status": "PASS",
+    "detail": "vbank without PG provider rejected",
+    "expected": "4xx",
+    "actual": "422 수령인 이름을 입력해주세요. (and 8 more errors)"
+  },
+  {
+    "id": "PAYMENT-VAL-005-bogus",
+    "status": "PASS",
+    "detail": "arbitrary method string rejected",
+    "expected": "4xx",
+    "actual": "422"
+  }
+]

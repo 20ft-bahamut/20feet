@@ -1,0 +1,209 @@
+{
+  "steps": [
+    {
+      "name": "baseline /shop-info snapshot",
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "all_empty": false,
+        "note": "admin basic_info already held values from a prior run; restore target = \"Still Form\" (the only legal empty-like admin restore)",
+        "data": {
+          "shop_name": "Still Form",
+          "company_name": "",
+          "business_number": "",
+          "ceo_name": "",
+          "business_type": "",
+          "business_category": "",
+          "zipcode": "",
+          "base_address": "",
+          "detail_address": "",
+          "phone": "",
+          "fax": "",
+          "email": "",
+          "privacy_officer": "",
+          "privacy_officer_email": "",
+          "mail_order_number": "",
+          "telecom_number": ""
+        }
+      },
+      "ts": "2026-09-01T02:31:05.894Z"
+    },
+    {
+      "name": "admin login",
+      "ok": true,
+      "detail": "logged in (no creds in evidence)",
+      "ts": "2026-09-01T02:31:11.655Z"
+    },
+    {
+      "name": "PUT admin basic_info (QA values)",
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "body": "{\"success\":true,\"message\":\"설정이 저장되었습니다.\",\"data\":{\"basic_info\":{\"shop_name\":\"QA 스틸폼\",\"route_path\":\"shop\",\"no_route\":false,\"company_name\":\"QA 상점\",\"business_number\":\"000-00-00001\",\"ceo_name\":\"QA대표\",\"business_type\":null,\"business_category\":null,\"zipcode\":\"12345\",\"base_address\":\"테스트주소 1\",\"detail_address\""
+      },
+      "ts": "2026-09-01T02:31:12.305Z"
+    },
+    {
+      "name": "/shop-info reflects admin QA values",
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "data": {
+          "shop_name": "QA 스틸폼",
+          "company_name": "QA 상점",
+          "business_number": "000-00-00001",
+          "ceo_name": "QA대표",
+          "business_type": "",
+          "business_category": "",
+          "zipcode": "12345",
+          "base_address": "테스트주소 1",
+          "detail_address": "",
+          "phone": "070-0000-0000",
+          "fax": "",
+          "email": "qa@example.test",
+          "privacy_officer": "",
+          "privacy_officer_email": "",
+          "mail_order_number": "2026-QA-0001호",
+          "telecom_number": ""
+        }
+      },
+      "ts": "2026-09-01T02:31:12.909Z"
+    },
+    {
+      "name": "footer renders QA admin values",
+      "ok": true,
+      "detail": {
+        "present": true,
+        "seen_admin_substrings": [
+          "QA 스틸폼",
+          "QA 상점",
+          "QA대표",
+          "000-00-00001",
+          "2026-QA-0001호",
+          "070-0000-0000",
+          "qa@example.test"
+        ],
+        "missing": []
+      },
+      "ts": "2026-09-01T02:31:19.949Z"
+    },
+    {
+      "name": "restore original empty basic_info",
+      "ok": true,
+      "detail": {
+        "status": 200,
+        "body": "{\"success\":true,\"message\":\"설정이 저장되었습니다.\",\"data\":{\"basic_info\":{\"shop_name\":\"Still Form\",\"route_path\":\"shop\",\"no_route\":false,\"company_name\":null,\"business_number\":\"\",\"ceo_name\":null,\"business_type\":nu"
+      },
+      "ts": "2026-09-01T02:31:20.227Z"
+    },
+    {
+      "name": "footer falls back to business-info.json seed",
+      "ok": true,
+      "detail": {
+        "seen_seed_values": [
+          "상점명Still Form",
+          "상호Still Form",
+          "사업자등록번호12-345-67890",
+          "통신판매업신고번호2026-경남김해-1234호",
+          "사업장 주소경남 김해시 장유로 362 쌍용예가2차 207동 604호",
+          "고객센터 전화070-123-1234"
+        ],
+        "missing": []
+      },
+      "ts": "2026-09-01T02:31:24.204Z"
+    }
+  ],
+  "assertions": [
+    {
+      "name": "footer renders admin basic_info overlay",
+      "ok": true,
+      "screenshot": "/home/bahamut/20feet/_workspace/ecommerce-qa/remediation/screenshots/footer-admin-settings.png",
+      "details": {
+        "footerInfo": {
+          "present": true,
+          "texts": [
+            "상점명 QA 스틸폼",
+            "상호 QA 상점",
+            "대표자 QA대표",
+            "사업자등록번호 000-00-00001",
+            "통신판매업신고번호 2026-QA-0001호",
+            "사업장 주소 12345 테스트주소 1",
+            "고객센터 전화 070-0000-0000",
+            "고객센터 이메일 qa@example.test"
+          ]
+        },
+        "expectsAdmin": [
+          "QA 스틸폼",
+          "QA 상점",
+          "QA대표",
+          "000-00-00001",
+          "2026-QA-0001호",
+          "070-0000-0000",
+          "qa@example.test"
+        ]
+      }
+    },
+    {
+      "name": "footer falls back to static seed after restore",
+      "ok": true,
+      "screenshot": "/home/bahamut/20feet/_workspace/ecommerce-qa/remediation/screenshots/footer-fallback.png",
+      "details": {
+        "fallbackTexts": [
+          "상점명Still Form",
+          "상호Still Form",
+          "사업자등록번호12-345-67890",
+          "통신판매업신고번호2026-경남김해-1234호",
+          "사업장 주소경남 김해시 장유로 362 쌍용예가2차 207동 604호",
+          "고객센터 전화070-123-1234"
+        ],
+        "expectsSeed": [
+          "12-345-67890",
+          "070-123-1234",
+          "2026-경남김해-1234호"
+        ]
+      }
+    }
+  ],
+  "blockers": [],
+  "summary": {
+    "baseline_empty": false,
+    "admin_overlay_rendered": true,
+    "static_seed_restored": true,
+    "total_steps": 7,
+    "passed": 7,
+    "failed": 0,
+    "restore_strategy": "admin basic_info can never be made fully empty through the public API (StoreEcommerceSettingsRequest requires shop_name when basic_info is present); restore sets shop_name to the storefront brand \"Still Form\" and clears every other basic_info field so the static seed wins for business_number, mail_order_number, customer_service_phone, customer_service_email, business_address, representative, company_name, hosting_provider (never rendered)."
+  },
+  "shopInfoTraffic": [
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    },
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    },
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    },
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    },
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    },
+    {
+      "url": "http://localhost:8000/api/plugins/superbify-commerce-compat/shop-info",
+      "method": "GET",
+      "accept": "application/json"
+    }
+  ]
+}

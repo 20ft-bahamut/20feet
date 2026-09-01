@@ -1,0 +1,7 @@
+{
+  "checkoutUrl": "http://localhost:8000/shop/checkout",
+  "buttonCount": 1,
+  "hasDaumWiring": true,
+  "popupOrLayer": "inline_layer_or_noop",
+  "consoleErrors": []
+}

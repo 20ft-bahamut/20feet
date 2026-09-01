@@ -1,0 +1,251 @@
+{
+  "timestamp": "2026-09-01T04:04:02.197Z",
+  "base_url": "http://localhost:8000",
+  "routes_visited": [
+    {
+      "path": "/",
+      "label": "home"
+    },
+    {
+      "path": "/shop",
+      "label": "shop_index"
+    },
+    {
+      "path": "/shop/products",
+      "label": "shop_products"
+    },
+    {
+      "path": "/shop/products/QAE2ESTOCKTEST001",
+      "label": "shop_product_detail"
+    },
+    {
+      "path": "/shop/cart",
+      "label": "shop_cart_canonical"
+    },
+    {
+      "path": "/shop/checkout",
+      "label": "shop_checkout"
+    },
+    {
+      "path": "/shop/guest/orders/QAE2FREEship01",
+      "label": "shop_guest_order_show"
+    },
+    {
+      "path": "/mypage/orders",
+      "label": "mypage_orders"
+    },
+    {
+      "path": "/login",
+      "label": "login_page"
+    },
+    {
+      "path": "/cart",
+      "label": "legacy_cart_redirect"
+    },
+    {
+      "path": "/shop/reorder/QAE2FREEship01",
+      "label": "shop_reorder"
+    }
+  ],
+  "anonymous_runs": [
+    {
+      "path": "/",
+      "label": "home",
+      "status": 200,
+      "h1": "Quiet objects for\neveryday life",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop",
+      "label": "shop_index",
+      "status": 200,
+      "h1": "Shop",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/products",
+      "label": "shop_products",
+      "status": 200,
+      "h1": "Shop",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/products/QAE2ESTOCKTEST001",
+      "label": "shop_product_detail",
+      "status": 200,
+      "h1": "QA Stock Test Product",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/cart",
+      "label": "shop_cart_canonical",
+      "status": 200,
+      "h1": "Cart",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/checkout",
+      "label": "shop_checkout",
+      "status": 200,
+      "h1": "",
+      "empty": false,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "path": "/shop/guest/orders/QAE2FREEship01",
+      "label": "shop_guest_order_show",
+      "status": 200,
+      "h1": "Guest order lookup",
+      "empty": false,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "path": "/mypage/orders",
+      "label": "mypage_orders",
+      "status": 200,
+      "h1": "",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/login",
+      "label": "login_page",
+      "status": 200,
+      "h1": "",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/cart",
+      "label": "legacy_cart_redirect",
+      "status": 200,
+      "h1": "Cart",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/reorder/QAE2FREEship01",
+      "label": "shop_reorder",
+      "status": 200,
+      "h1": "",
+      "empty": false,
+      "errors": []
+    }
+  ],
+  "member_runs": [
+    {
+      "path": "/",
+      "label": "home",
+      "status": 200,
+      "h1": "조용한 일상의\n물건들",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop",
+      "label": "shop_index",
+      "status": 200,
+      "h1": "Shop",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/products",
+      "label": "shop_products",
+      "status": 200,
+      "h1": "Shop",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/products/QAE2ESTOCKTEST001",
+      "label": "shop_product_detail",
+      "status": 200,
+      "h1": "QA 재고 테스트 상품",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/cart",
+      "label": "shop_cart_canonical",
+      "status": 200,
+      "h1": "Cart",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/checkout",
+      "label": "shop_checkout",
+      "status": 200,
+      "h1": "주문/결제",
+      "empty": false,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "path": "/shop/guest/orders/QAE2FREEship01",
+      "label": "shop_guest_order_show",
+      "status": 200,
+      "h1": "비회원 주문 조회",
+      "empty": false,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "path": "/mypage/orders",
+      "label": "mypage_orders",
+      "status": 200,
+      "h1": "마이페이지",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/login",
+      "label": "login_page",
+      "status": 200,
+      "h1": "조용한 일상의\n물건들",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/cart",
+      "label": "legacy_cart_redirect",
+      "status": 200,
+      "h1": "Cart",
+      "empty": false,
+      "errors": []
+    },
+    {
+      "path": "/shop/reorder/QAE2FREEship01",
+      "label": "shop_reorder",
+      "status": 200,
+      "h1": "Cart",
+      "empty": false,
+      "errors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "summary": {
+    "anonymous_total": 11,
+    "anonymous_hydrated": 7,
+    "member_total": 11,
+    "member_hydrated": 11
+  },
+  "screenshots": [
+    "shop-cart-url.png",
+    "shopbase-product.png"
+  ]
+}

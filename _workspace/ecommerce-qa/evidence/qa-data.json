@@ -1,0 +1,125 @@
+{
+  "auth_method": {
+    "type": "sanctum_bearer",
+    "login_endpoint": "POST http://localhost:8000/api/auth/admin/login",
+    "login_body": {"email": "<admin email>", "password": "<admin password>"},
+    "header_format": "Authorization: Bearer <token>",
+    "response_field": "data.token",
+    "alt_cookie": "g7-session (httponly, samesite=lax) set on login; subsequent admin API calls accept either Bearer or cookie session",
+    "admin_test_email": "test@test.com (from /tmp/qa-creds.json — never print password)"
+  },
+  "db_channel": {
+    "tool": "php artisan tinker --execute='...'",
+    "table_prefix": "g7_ecommerce_* (use bare table names in DB::table('ecommerce_products') — Laravel applies g7_ prefix automatically)",
+    "writable_note": "READ-ONLY from this agent. Use admin API for mutations."
+  },
+  "shipping_model": "PER-SHIPPING-POLICY (not per-product fee). Product links to a ShippingPolicy via shipping_policy_id. ChargePolicyEnum supports fixed/free/conditional_free/range_*/api/per_*. We seeded shipping_types via php artisan db:seed --class=Modules\\\\Sirsoft\\\\Ecommerce\\\\Database\\\\Seeders\\\\ShippingTypeSeeder (table was empty on this install).",
+  "qa_data": {
+    "shipping_policies": [
+      {"id": 1, "name": "QA E2E 무료 배송", "charge_policy": "free", "base_fee": 0},
+      {"id": 2, "name": "QA E2E 유료 배송", "charge_policy": "fixed", "base_fee": 3000}
+    ],
+    "products": [
+      {
+        "code": "QA_E2E_STOCK_TEST_PRODUCT",
+        "product_id": 9,
+        "default_option_id": 9,
+        "has_options": false,
+        "stock_quantity": 5,
+        "list_price": 20000,
+        "selling_price": 20000,
+        "sales_status": "on_sale",
+        "display_status": "visible",
+        "shipping_policy_id": null
+      },
+      {
+        "code": "QA_E2E_SINGLE_OPT_PRODUCT",
+        "product_id": 10,
+        "has_options": true,
+        "option_groups": [{"name":"색상","values":["화이트","블랙"]}],
+        "options": [
+          {"id": 10, "code": "QA_E2E_SINGLE_OPT_WHITE", "values":{"색상":"화이트"}, "price_adjustment": 0, "stock": 5},
+          {"id": 11, "code": "QA_E2E_SINGLE_OPT_BLACK", "values":{"색상":"블랙"}, "price_adjustment": 1000, "stock": 5}
+        ]
+      },
+      {
+        "code": "QA_E2E_MULTI_OPT_PRODUCT",
+        "product_id": 11,
+        "has_options": true,
+        "option_groups": [{"name":"색상","values":["화이트","블랙"]},{"name":"사이즈","values":["S","M","L"]}],
+        "options": [
+          {"id": 12, "code": "QA_E2E_MULTI_WS", "values":{"색상":"화이트","사이즈":"S"}, "price_adjustment": 0, "stock": 3, "is_default": true},
+          {"id": 13, "code": "QA_E2E_MULTI_WM", "values":{"색상":"화이트","사이즈":"M"}, "price_adjustment": 0, "stock": 2},
+          {"id": 14, "code": "QA_E2E_MULTI_WL", "values":{"색상":"화이트","사이즈":"L"}, "price_adjustment": 3000, "stock": 5},
+          {"id": 15, "code": "QA_E2E_MULTI_BS", "values":{"색상":"블랙","사이즈":"S"}, "price_adjustment": 0, "stock": 1},
+          {"id": 16, "code": "QA_E2E_MULTI_BM", "values":{"색상":"블랙","사이즈":"M"}, "price_adjustment": 0, "stock": 5},
+          {"id": 17, "code": "QA_E2E_MULTI_BL", "values":{"색상":"블랙","사이즈":"L"}, "price_adjustment": 3000, "stock": 5}
+        ],
+        "dimension_limit_note": "Admin API accepts >=2 option groups; UI source shows only single-group management UI but POST /admin/products accepts multi-group array"
+      },
+      {
+        "code": "QA_E2E_ADDITIONAL_OPTION_PRODUCT",
+        "product_id": 12,
+        "default_option_id": 18,
+        "has_options": false,
+        "list_price": 10000,
+        "selling_price": 10000,
+        "additional_option_groups": [
+          {"group_id": 1, "name": "선물포장", "is_required": false, "values":[{"id": 1, "price_adjustment": 3000, "allow_custom_text": false}]},
+          {"group_id": 2, "name": "각인", "is_required": false, "values":[{"id": 2, "price_adjustment": 5000, "allow_custom_text": true}]}
+        ]
+      },
+      {
+        "code": "QA_E2E_COUPON_PRODUCT",
+        "product_id": 13,
+        "default_option_id": 19,
+        "has_options": false,
+        "list_price": 100000,
+        "selling_price": 100000,
+        "stock_quantity": 10
+      },
+      {
+        "code": "QA_E2E_FREE_SHIP_PRODUCT",
+        "product_id": 14,
+        "default_option_id": 20,
+        "has_options": false,
+        "list_price": 50000,
+        "selling_price": 50000,
+        "stock_quantity": 10,
+        "shipping_policy_id": 1
+      },
+      {
+        "code": "QA_E2E_PAID_SHIP_PRODUCT",
+        "product_id": 15,
+        "default_option_id": 21,
+        "has_options": false,
+        "list_price": 20000,
+        "selling_price": 20000,
+        "stock_quantity": 10,
+        "shipping_policy_id": 2
+      }
+    ],
+    "coupons": [
+      {
+        "coupon_id": 1,
+        "code": "QA_E2E_COUPON (admin resource id, no human coupon code field — use direct issue endpoint for members)",
+        "target_type": "order_amount",
+        "discount_type": "fixed",
+        "discount_value": 10000,
+        "per_user_limit": 1,
+        "total_quantity": 100,
+        "valid_from": "2026-08-01",
+        "valid_to": "2027-12-31",
+        "issue_from": "2026-08-01",
+        "issue_to": "2027-12-31",
+        "is_combinable": false,
+        "target_scope": "products",
+        "included_product_ids": [13]
+      }
+    ]
+  },
+  "existing_seed_untouched": {
+    "still_form_products_ids": [1,2,3,4,5,6,7,8],
+    "note": "Did not modify any pre-existing seed data"
+  }
+}

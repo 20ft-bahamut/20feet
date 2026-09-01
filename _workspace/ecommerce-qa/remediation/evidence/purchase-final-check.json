@@ -1,0 +1,56 @@
+{
+  "single": {
+    "panel": "옵션을 선택해 주세요.색상색상 선택블랙화이트총 결제 예상금액0원장바구니 담기바로구매",
+    "selectCount": 1,
+    "group1Options": [
+      "색상 선택",
+      "블랙",
+      "화이트"
+    ],
+    "afterSelect": "색상색상 선택블랙화이트블랙✕−+20,000원총 결제 예상금액20,000원장바구니 담기바로구매"
+  },
+  "multi": {
+    "selectCount": 2,
+    "group2": [
+      "사이즈 선택",
+      "L",
+      "M",
+      "S"
+    ],
+    "afterL": "색상색상 선택블랙화이트사이즈상위 옵션을 먼저 선택하세요LMS블랙 / L✕−+33,000원총 결제 예상금액33,000원장바구니 담기바로구매"
+  },
+  "addl": {
+    "blocks": [],
+    "panel": "옵션을 선택해 주세요.기본기본 선택기본총 결제 예상금액0원장바구니 담기바로구매"
+  },
+  "heartExists": 1,
+  "wishlistPosts": 2,
+  "reviews": {
+    "testids": [
+      "product-reviews",
+      "reviews-summary",
+      "reviews-summary-avg",
+      "reviews-filter-sort",
+      "reviews-filter-rating",
+      "reviews-filter-photo-only",
+      "review-card",
+      "product-qna",
+      "qna-write-button",
+      "qna-empty"
+    ]
+  },
+  "qna": {
+    "testids": [
+      "product-reviews",
+      "reviews-summary",
+      "reviews-summary-avg",
+      "reviews-filter-sort",
+      "reviews-filter-rating",
+      "reviews-filter-photo-only",
+      "review-card",
+      "product-qna",
+      "qna-write-button",
+      "qna-empty"
+    ]
+  }
+}

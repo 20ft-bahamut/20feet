@@ -1,0 +1,49 @@
+[
+  {
+    "slug": "QAE2ESTOCKTEST001",
+    "ciCount": 1,
+    "noticeRows": 9,
+    "wrapperCount": 1,
+    "ciHasText": true,
+    "ciTextSnippet": "일반 배송 안내• 배송 기간: 결제 완료 후 1~3일 (주말/공휴일 제외)• 배송 방법: CJ대한통운• 배송 지역: 전국 (도서산간 제외)• 배송 추적: 마이페이지 > 주문내역• 배송 비용: 3만원 이상 무료 / 미",
+    "noticeFirstLabel": "제품 소재(섬유의 조성 또는 혼용률)",
+    "expected": {
+      "commonInfo": true,
+      "commonInfoContains": "CJ대한통운",
+      "notice": true,
+      "noticeRows": 9
+    },
+    "pass": true
+  },
+  {
+    "slug": "QAE2EADDOPT0001",
+    "ciCount": 1,
+    "noticeRows": 11,
+    "wrapperCount": 1,
+    "ciHasText": true,
+    "ciTextSnippet": "일반 배송 안내• 배송 기간: 결제 완료 후 1~3일 (주말/공휴일 제외)• 배송 방법: CJ대한통운• 배송 지역: 전국 (도서산간 제외)• 배송 추적: 마이페이지 > 주문내역• 배송 비용: 3만원 이상 무료 / 미",
+    "noticeFirstLabel": "소재",
+    "expected": {
+      "commonInfo": true,
+      "commonInfoContains": "CJ대한통운",
+      "notice": true,
+      "noticeRows": 11
+    },
+    "pass": true
+  },
+  {
+    "slug": "QAE2E3LEVELOPT01",
+    "ciCount": 0,
+    "noticeRows": 0,
+    "wrapperCount": 0,
+    "ciHasText": false,
+    "ciTextSnippet": "",
+    "noticeFirstLabel": null,
+    "expected": {
+      "commonInfo": false,
+      "notice": false,
+      "noticeRows": 0
+    },
+    "pass": true
+  }
+]

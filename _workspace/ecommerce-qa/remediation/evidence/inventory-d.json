@@ -1,0 +1,101 @@
+{
+ "summary": "G7 stock lifecycle map for sirsoft-ecommerce 1.1.2 with evidence + official extension points; no existing reservation mechanism; minimal reservation design outline is officially hookable via stock.before_deduct / order.before_create + stock.after_deduct + temp_order.expiry pathway.",
+ "findings": [
+  {
+   "detail": "core/stock_quantity is the sole truth field on ProductOption.stock_quantity (migrations/2026_04_01_000005_create_ecommerce_products_table.php:25, 2026_04_01_000007_create_ecommerce_product_options_table.php:25). No reserved/reservation/stock_hold/hold_stock column exists anywhere; only matches found are shipping tracking URL literal 'reservation' in ShippingCarrierSeeder.php:63 and Sample/ProductCommonInfoSeeder.php:591,714 (product copy text). Product.stock_quantity is rebuilt from options sum via Product::calculateOptionStockSum (src/Models/Product.php:484-487) and synced via ProductService::syncStockFromOptions (src/Services/ProductService.php:861).",
+   "evidence": "modules/_bundled/sirsoft-ecommerce/database/migrations/2026_04_01_000007_create_ecommerce_product_options_table.php:25; src/Models/ProductOption.php:50-67; src/Models/Product.php:484-513; src/Services/ProductService.php:861",
+   "topic": "Stock model and storage"
+  },
+  {
+   "detail": "CartAddStockService behaviour (actually CartService::validateStock): clamps at option.stock_quantity (not net of other carts/pending orders). For 'add' (src/Services/CartService.php:222, 821-850), 'updateQuantity' (:360), 'changeOption' (:433,435): compare current+requested against ProductOption.stock_quantity alone. Guest merge mergeGuestCartToUser also uses only ProductOption.stock_quantity (:579, :589, :626) — same blind cap.",
+   "evidence": "modules/_bundled/sirsoft-ecommerce/src/Services/CartService.php:222, 360, 433, 435, 579, 589, 626, 821-850",
+   "topic": "Cart validation clamps to raw stock"
+  },
+  {
+   "detail": "Order-create stock check uses StockService::validateStock (src/Services/StockService.php:33-59): per-order-option quantity vs ProductOption.stock_quantity, no SUM-of-pending-orders subtraction. Called from HandlesOrderCreation::processOrderCreation (src/Http/Controllers/Traits/HandlesOrderCreation.php:77) BEFORE createFromTempOrder. Race window: between validateStock and OrderProcessingService::createFromTempOrder commit, two concurrent orders can both pass.",
+   "evidence": "src/Services/StockService.php:33-59; src/Http/Controllers/Traits/HandlesOrderCreation.php:75-99",
+   "topic": "Order-create validation"
+  },
+  {
+   "detail": "OrderProcessingService::createFromTempOrder conditionally deducts stock under DB::transaction with SELECT FOR UPDATE per option (src/Services/OrderProcessingService.php:165-228). Timing branch per payment_method.stock_deduction_timing: 'order_placed' deducts here (:215-220); 'payment_complete' deducts in completePayment (:1721-1727). For order_placed+no-stock race, InsufficientStockException is thrown and tx rolls back; deductStock is idempotent via order_options.is_stock_deducted flag (StockService.php:77, 105).",
+   "evidence": "src/Services/OrderProcessingService.php:165-228, 1721-1727; src/Services/StockService.php:68-116",
+   "topic": "Stock deduction at order placement"
+  },
+  {
+   "detail": "OrderProcessingService::completePayment (the PG callback settlement path) re-deducts under transaction with FOR UPDATE if timing='payment_complete' (src/Services/OrderProcessingService.php:1644-1728). Same race exists between validateStock at /checkout and completePayment callback. Reactivation path: StockService::redeductForReactivation (StockService.php:273-278) and redeductOrderOptionForReactivation (:297-334).",
+   "evidence": "src/Services/OrderProcessingService.php:1644-1728; src/Services/StockService.php:273-334",
+   "topic": "Payment-complete stock deduction"
+  },
+  {
+   "detail": "Order cancel/restore path: OrderCancellationService::cancel flow fires 'payment.before_cancel'+'order.before_cancel' (src/Services/OrderCancellationService.php:292, 295), then restoreStock for the cancelled option rows (StockService::restoreOptionStockForOrderOption StockService.php:234-256, OrderCancellationService.php:1127-1155). Partial cancel uses changeStatusWithQuantity which splits the order_option rows by qty and only restores the CANCELLED half's flag (OrderOptionService.php:112, 251). Cancelled/reactivation cycle uses redeductForReactivation to re-debit on admin reversal.",
+   "evidence": "src/Services/OrderCancellationService.php:292, 295, 376, 396, 1127-1155; src/Services/StockService.php:124-158, 234-256; src/Services/OrderOptionService.php:112, 251",
+   "topic": "Cancel restore path"
+  },
+  {
+   "detail": "Guest cart merge (CartService::mergeGuestCartToUser src/Services/CartService.php:547-668): each guest line is clamped to ProductOption.stock_quantity (:579, :589, :626) then write. No reservation/HOLD concept — concurrent guest carts can both pass validation then race on commit.",
+   "evidence": "src/Services/CartService.php:547-668",
+   "topic": "Guest cart merge"
+  },
+  {
+   "detail": "TempOrder TTL is fixed at 30 min (TempOrderService::EXPIRATION_MINUTES = 30, src/Services/TempOrderService.php:39; set at :120, :408, :443, :504). Pruned by artisan sirsoft-ecommerce:prune-temp-orders (Console/Commands/PruneExpiredTempOrdersCommand.php) scheduled HOURLY (module.php:2193). CheckoutController::extend (routes/api.php:230-231) re-stamps expires_at — extend just resets the clock, no stock impact.",
+   "evidence": "src/Services/TempOrderService.php:39, 120, 408, 443, 495-504; src/Console/Commands/PruneExpiredTempOrdersCommand.php; src/routes/api.php:230-231; module.php:2193",
+   "topic": "TempOrder TTL + prune"
+  },
+  {
+   "detail": "Payment-failure path: POST /api/modules/sirsoft-ecommerce/orders/{orderNumber}/cancel-payment -> PublicOrderController::cancelPayment (src/routes/api.php:320-323). In OrderProcessingService::markPaymentFailed the order is CANCELLED, mileage restored, fire 'sirsoft-ecommerce.order.payment_failed' (src/Services/OrderProcessingService.php:2003). Stock: order_placed timing had already deducted (is_stock_deducted=true); the flag stays — order sits CANCELLED but stock is NOT auto-restored here. Restoration is via the explicit cancel flow (OrderCancellationService).",
+   "evidence": "src/routes/api.php:320-323; src/Services/OrderProcessingService.php:1988-2003; src/Services/StockService.php:124-158",
+   "topic": "Payment-failure path"
+  },
+  {
+   "detail": "Auto-cancel of unpaid pending orders (vbank/dbank) runs daily via sirsoft-ecommerce:cancel-pending-orders (module.php:2171-2175). It reads order_settings.auto_cancel_expired (Console/Commands/CancelPendingPaymentOrdersCommand.php:53, defaults.json:242 default=true; auto_cancel_days=3 at defaults.json:243). Calls OrderProcessingService::cancelOrder -> OrderCancellationService::cancelOrder path -> restoreStock if stock_restore_on_cancel (defaults.json:245 default=true).",
+   "evidence": "src/Console/Commands/CancelPendingPaymentOrdersCommand.php:53, 99; module.php:2171-2175; config/settings/defaults.json:242-245",
+   "topic": "Auto-cancel schedule"
+  },
+  {
+   "detail": "Public product API returns raw stock_quantity: PublicProductResource.php:67, ProductResource.php:53, ProductOptionResource.php:58-62 (is_sold_out = stock_quantity<=0). ProductService.php:1592,1605 also returns raw. No public method subtracts pending carts/orders.",
+   "evidence": "src/Http/Resources/PublicProductResource.php:67; src/Http/Resources/ProductResource.php:53-54; src/Http/Resources/ProductOptionResource.php:58-62; src/Services/ProductService.php:1592-1605",
+   "topic": "Public stock display"
+  },
+  {
+   "detail": "Event/extension surfaces for stock lifecycle (HookManager::doAction): 'sirsoft-ecommerce.stock.before_deduct' (StockService.php:70), 'sirsoft-ecommerce.stock.after_deduct' (:115), 'sirsoft-ecommerce.stock.before_restore' (:126), 'sirsoft-ecommerce.stock.after_restore' (:157). Order lifecycle: 'sirsoft-ecommerce.order.before_create' (OrderProcessingService.php:112), '.after_create' (:232), '.after_payment_complete' (:1730), '.payment_failed' (:2003), '.before_cancel' (OrderCancellationService.php:295), '.after_cancel' (:396). Checkout hooks: '.checkout.before_payment' (HandlesOrderCreation.php:84). Cart hooks: '.cart.before_add'/'.after_add'/'.cart.after_merge'/'.cart.before_update_quantity' (CartService.php:188, 257, 549, 667, 371, 377). Filters: 'sirsoft-ecommerce.cart.filter_add_data' (CartService.php:190). HookManager is the official extension API (app/Extension/HookManager.php:43, 123, 151) — listeners register via HookListenerInterface::getSubscribedHooks() (e.g. plugins/_bundled/sirsoft-pay_kginicis/src/Listeners/RegisterPgProviderListener.php:34-48) and plugin's plugin.php getHookListeners() (e.g. plugins/_bundled/sirsoft-pay_kginicis/plugin.php:360-375).",
+   "evidence": "app/Extension/HookManager.php:43, 123, 151; src/Services/StockService.php:70, 115, 126, 157; src/Services/OrderProcessingService.php:112, 232, 1730, 2003; src/Services/OrderCancellationService.php:292, 295, 396; src/Http/Controllers/Traits/HandlesOrderCreation.php:84; src/Services/CartService.php:188, 257, 371, 377, 549, 667; plugins/_bundled/sirsoft-pay_kginicis/src/Listeners/RegisterPgProviderListener.php:34-48; plugins/_bundled/sirsoft-pay_kginicis/plugin.php:360-375",
+   "topic": "Hook points usable by a companion plugin"
+  },
+  {
+   "detail": "StockService::validateStock is a stock_compare READ-ONLY path that throws InsufficientStockException, NOT a hook-evaluated check. It does not consult any external reservation table — its only inputs are ProductOption.stock_quantity vs requested. Hooks around it: 'sirsoft-ecommerce.cart.before_add' fires BEFORE validateStock (CartService.php:188, 222). The order-create path: 'sirsoft-ecommerce.order.before_create' fires AFTER validateStock and AFTER createOrder (OrderProcessingService.php:112 vs :182) — too late to block on stock at this hook. Best hook to reserve before order DB write: 'sirsoft-ecommerce.cart.before_update_quantity' / '.cart.after_add' (cart intent) and '.checkout.before_payment' (HandlesOrderCreation.php:84, fires right before createFromTempOrder at :87).",
+   "evidence": "src/Services/CartService.php:188, 222; src/Http/Controllers/Traits/HandlesOrderCreation.php:77-99; src/Services/OrderProcessingService.php:112-182",
+   "topic": "Where a plugin could intercept"
+  },
+  {
+   "detail": "Repository contract that physically decrements stock: ProductOptionRepositoryInterface::decrementStock (Repositories/Contracts/ProductOptionRepositoryInterface.php:113). Implementation does atomic WHERE stock_quantity>=qty then decrement (Repositories/ProductOptionRepository.php:215-223). There is NO concurrency-safe composition (no SUM of pending) — concurrent process can each read 1, both pass, one commit decrements to 0, other fails. Reservation semantics are not modelled anywhere.",
+   "evidence": "src/Repositories/Contracts/ProductOptionRepositoryInterface.php:113; src/Repositories/ProductOptionRepository.php:215-235",
+   "topic": "Atomic stock mutations"
+  },
+  {
+   "detail": "No model observers are registered for Order/OrderOption/ProductOption/Cart/TempOrder in src/Providers or module.php (event listeners for Order/Coupon activity live under src/Listeners but they are HookManager action subscribers, not Eloquent observers). Route middleware examples (plugins/_bundled/sirsoft-pay_kginicis/plugin.php:345-358) follow ExtensionMiddlewareGate pattern, not Eloquent middleware. So plugin-level reservation must go through HookManager::addAction/addFilter, not Eloquent lifecycle.",
+   "evidence": "src/Listeners/* (all use HookManager); plugins/_bundled/sirsoft-pay_kginicis/plugin.php:345-358",
+   "topic": "Listener registration patterns"
+  },
+  {
+   "detail": "Minimal reservation design (officially hookable): new table `ecommerce_stock_reservations` (id, product_option_id, qty, cart_key?, user_id?, order_id?, status [active|consumed|expired], source [cart|temp_order|order], source_id, expires_at, created_at, updated_at) with unique partial index (product_option_id, status='active') to allow same option multiple active holds; companion service computes available = stock_quantity - SUM(active reservations where expires_at>NOW()) for each option. Enforced at: (a) CartService::addToCart via filter 'sirsoft-ecommerce.cart.filter_add_data' or via addAction on 'cart.before_add' (b) checkout at 'sirsoft-ecommerce.checkout.before_payment' (HandlesOrderCreation.php:84) — fire InsufficientStockException would block; or, more cleanly, on order create raise it inside validateStock path (no hook — see blockers). On completePayment, 'stock.before_deduct' (StockService.php:70) marks the matching active reservations consumed for that order. On 'order.before_cancel' (OrderCancellationService.php:295) revert active->expired or relink. On TempOrder extend/checkout, expire old holds: add a separate artisan scheduler 'sirsoft-ecommerce:expire-stock-holds' (sibling of CancelPendingPaymentOrdersCommand.php) running hourly, deleting holds where source='temp_order' AND expires_at<NOW(). Cart-line add: insert hold with source='cart', expires_at=NOW+30min; cart.delete/after_merge expire holds. 'order.before_create' can also be used to convert cart holds to order holds atomically inside the existing DB transaction (OrderProcessingService.php:165-229). Expiry policy is fully inside the plugin — no need to touch core settings. Public stock API: 'sirsoft-ecommerce.product.before_show' hook does not exist; PublicProductResource.php:67 reads stock_quantity directly. To display 'available' on storefront, the plugin must filter the resource output — there is no documented filter hook for this. The cleanest officially-supported hook is to wrap the product.show controller method via the plugin's getMiddleware or a custom route that decorates, but the public controller returns a Resource, not a hookable value. Blockers: the validateStock compare (StockService.php:33-59) is not hook-callable; there is no product-resource filter hook. The reservation layer MUST replicate that check via filters on cart/checkout hooks, not override it.",
+   "evidence": "src/Services/StockService.php:33-59, 70; src/Services/OrderProcessingService.php:112-229; src/Services/CartService.php:188-257, 371-377; src/Http/Controllers/Traits/HandlesOrderCreation.php:84; src/Services/OrderCancellationService.php:295; src/Http/Resources/PublicProductResource.php:67; module.php:2160-2226",
+   "topic": "Minimal reservation design outline"
+  }
+ ],
+ "recommendations": [
+  "Build the reservation table + service inside plugins/_bundled/superbify-commerce-compat/ (NOT in the module or template) — G7 rules forbid core/template mods; companion plugin is the only allowed home.",
+  "Register a HookListener that subscribes to 'sirsoft-ecommerce.cart.before_add', 'sirsoft-ecommerce.cart.after_add', 'sirsoft-ecommerce.cart.before_update_quantity', 'sirsoft-ecommerce.cart.after_delete', 'sirsoft-ecommerce.cart.after_merge', 'sirsoft-ecommerce.checkout.before_payment', 'sirsoft-ecommerce.order.before_create', 'sirsoft-ecommerce.stock.before_deduct', 'sirsoft-ecommerce.order.payment_failed', 'sirsoft-ecommerce.order.before_cancel'. Use the getSubscribedHooks() + HookListenerInterface pattern (see plugins/_bundled/sirsoft-pay_kginicis/src/Listeners/RegisterPgProviderListener.php:34-48).",
+  "Compute available = stock_quantity - SUM(qty where status='active' and expires_at>NOW()) with a SELECT ... FOR UPDATE on the option row inside the same DB::transaction used by createFromTempOrder (OrderProcessingService.php:165) — match the existing locking pattern.",
+  "Wire expiry as a scheduled artisan command inside the plugin (mirroring src/Console/Commands/CancelPendingPaymentOrdersCommand.php) and register it via the plugin's getScheduledCommands()/module-style schedule entry (see module.php:2160-2226 for the API shape) — note the plugin.php in kginicis shows a getMiddleware pattern but does not show getScheduledCommands; verify against app/Extension PluginContract or docs/extension/plugins.md before relying.",
+  "For 'checkout.before_payment' interception: throw a domain exception that the trait's catch-all maps to 422 (HandlesOrderCreation.php:214-220 returns generic 500 — exception type must be one of the caught ones, otherwise core returns 500). The cleanest is to extend the InsufficientStockException pathway; test compatibility before relying.",
+  "Public 'available' display requires either (a) a plugin-decorated controller response (no documented filter for resource output) or (b) read-side recompute in a frontend widget hitting the cart/checkout validation endpoint instead of the product detail endpoint. Treat 'available' on product detail page as known limitation: only 'in_stock' / 'is_sold_out' can be reported faithfully without core changes.",
+  "Do NOT modify Product.stock_quantity for reservations — keep physical stock column read-only outside StockService::deduct/restore. Reservations live in a separate table; the SUM is computed at read time, not denormalized."
+ ],
+ "blockersFound": [
+  "No existing reserved/reservation/stock_hold column or mechanism in module src, migrations, or seeders (search: 'reserved', 'reservation', 'stock_hold', 'hold_stock', 'pending_qty', 'active_qty', 'temp_reserve' — only literal 'reservation' in shipping carrier tracking URLs and product copy). Confirms SEC-STOCK-001 + OUT-OF-STOCK cannot reuse an existing mechanism.",
+  "StockService::validateStock (src/Services/StockService.php:33-59) compares requested against raw ProductOption.stock_quantity only. It is NOT hook-evaluated; cannot be filtered to add reservation awareness without modifying the core service. Plugin-level mitigation must add a pre-check at 'cart.before_add' / 'checkout.before_payment' and throw before validateStock runs.",
+  "PublicProductResource and ProductOptionResource (src/Http/Resources/PublicProductResource.php:67, src/Http/Resources/ProductOptionResource.php:58-62) emit stock_quantity/is_sold_out directly. No filter hook exists for product resource output. A reservation-aware 'available' field on the storefront requires either core modification (forbidden) or client-side recomputation from a separate plugin-exposed endpoint.",
+  "plugin.php does not appear to expose a getScheduledCommands()/scheduledCommands method on the bundled kginicis plugin (only getMiddleware, getHookListeners, getHooks visible). Reservation expiry scheduling via plugin may require a Laravel scheduler entry registered from a ServiceProvider boot — verify the plugin contract (app/Extension or docs/extension) before assuming CLI parity with the module's module.php:2160-2226 schedule entries.",
+  "'checkout.before_payment' is fired AFTER 'sirsoft-ecommerce.order.before_create' in some flows (HandlesOrderCreation.php:84 fires before createFromTempOrder at :87), but in the PG-flow the actual order row commit happens after PG callback in completePayment (OrderProcessingService.php:1644-1728) — there is NO 'checkout.before_payment' equivalent at PG callback, only 'sirsoft-ecommerce.order.before_payment_complete' (:1657). Reservation-to-order conversion at PG settlement must hook the latter; pre-existing holds need to be linked by (cart_key, user_id) lookup at that point."
+ ]
+}

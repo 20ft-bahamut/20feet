@@ -145,3 +145,6 @@ test-results/
 # 배포용 빌드는 `--production` 이 G7_BUILD_SOURCEMAP=0 을 주입해 생성 자체를 막는다.
 # 경로 한정 시 새 확장이 추가될 때 조용히 누락되므로 전역 규칙으로 둔다.
 *.map
+
+# Core build intermediate output (core:build)
+/dist/

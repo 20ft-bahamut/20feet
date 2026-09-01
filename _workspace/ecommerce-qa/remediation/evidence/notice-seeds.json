@@ -1,0 +1,111 @@
+{
+    "task": "Seed product common infos + product notice templates and render on Still Form product page",
+    "date": "2026-09-01",
+    "seeder": "admin login POST /api/auth/admin/login (Bearer token; re-login per session; 12h ttl)",
+    "seeds": {
+        "product_common_infos": [
+            { "id": 1, "name": "일반 배송 안내", "is_default": true, "is_active": true, "content_mode": "text", "summary": "5-bullet shipping guidance: 1-3 day, CJ대한통운, nationwide, my-page tracking, free over 30k" },
+            { "id": 2, "name": "당일 배송 안내", "is_default": false, "is_active": true, "content_mode": "text", "summary": "Same-day 2 PM cutoff, rocket delivery, Seoul metro, KRW 5,000" },
+            { "id": 3, "name": "무료 배송 조건", "is_default": false, "is_active": true, "content_mode": "text", "summary": "Free-shipping thresholds: 30k+ regular, VIP, subscription" }
+        ],
+        "product_notice_templates": [
+            { "id": 1, "name": "의류", "category": "fashion", "is_active": true, "fields_count": 9, "summary": "Apparel 9 fields per e-commerce law" },
+            { "id": 2, "name": "가구", "category": "furniture", "is_active": true, "fields_count": 11, "summary": "Furniture 11 fields (adds 크기/제품 구성/주의사항)" }
+        ]
+    },
+    "product_attaches": [
+        {
+            "product_id": 9,
+            "product_code": "QAE2ESTOCKTEST001",
+            "common_info_id": 1,
+            "notice_template_id": 1,
+            "notice_items_count": 9,
+            "method": "GET admin product 9 → modify common_info_id + notice_items[] → PUT admin product 9"
+        },
+        {
+            "product_id": 12,
+            "product_code": "QAE2EADDOPT0001",
+            "common_info_id": 1,
+            "notice_template_id": 2,
+            "notice_items_count": 11,
+            "method": "GET admin product 12 → modify common_info_id + notice_items[] → PUT admin product 12"
+        }
+    ],
+    "render_targets": {
+        "layout": "templates/_bundled/superbify-commerce_minimal/layouts/shop/product.json",
+        "added_node_id": "shop_product_common_info_notice",
+        "composite_component": "ProductCommonInfo (composite, src/components/ProductCommonInfo.tsx)"
+    },
+    "evidence_files": [
+        "runtime-verify.json",
+        "product-common-info_QAE2ESTOCKTEST001.png",
+        "product-notice-items_QAE2ESTOCKTEST001.png",
+        "product-common-info_QAE2EADDOPT0001.png",
+        "product-notice-items_QAE2EADDOPT0001.png"
+    ],
+    "runtime_verification": [
+        {
+            "product_code": "QAE2ESTOCKTEST001",
+            "wrapper_count": 1,
+            "common_info_count": 1,
+            "notice_count": 1,
+            "notice_rows": 9,
+            "notice_first_label": "제품 소재(섬유의 조성 또는 혼용률)",
+            "common_info_contains": "CJ대한통운",
+            "pass": true
+        },
+        {
+            "product_code": "QAE2EADDOPT0001",
+            "wrapper_count": 1,
+            "common_info_count": 1,
+            "notice_count": 1,
+            "notice_rows": 11,
+            "notice_first_label": "소재",
+            "common_info_contains": "CJ대한통운",
+            "pass": true
+        },
+        {
+            "product_code": "QAE2E3LEVELOPT01",
+            "wrapper_count": 0,
+            "common_info_count": 0,
+            "notice_count": 0,
+            "notice_rows": 0,
+            "pass": true,
+            "note": "Control case: no attach → wrapper and subsections all hidden"
+        }
+    ],
+    "tests": {
+        "files": 23,
+        "tests": 189,
+        "before": "22 files / 179 tests (baseline)",
+        "added": "1 file / 10 tests (__tests__/components/ProductCommonInfo.test.tsx)",
+        "all_passed": true,
+        "note": "Vitest ECONNREFUSED 127.0.0.1:3000 in CheckoutForm test is pre-existing and not related to this change."
+    },
+    "build": {
+        "vite_build": "OK",
+        "dist_js_iife": "269.02kB (gzip 67.05kB)",
+        "synced_to_runtime": true,
+        "template_refresh_layout": "OK (superbify-commerce_minimal completed)",
+        "template_cache_clear": "OK (217 caches cleared)"
+    },
+    "files_changed": [
+        "templates/_bundled/superbify-commerce_minimal/components.json",
+        "templates/_bundled/superbify-commerce_minimal/layouts/shop/product.json",
+        "templates/_bundled/superbify-commerce_minimal/src/index.ts",
+        "templates/_bundled/superbify-commerce_minimal/src/components/ProductCommonInfo.tsx (new)",
+        "templates/_bundled/superbify-commerce_minimal/__tests__/components/ProductCommonInfo.test.tsx (new)",
+        "templates/superbify-commerce_minimal/components.json (synced)",
+        "templates/superbify-commerce_minimal/layouts/shop/product.json (synced)",
+        "templates/superbify-commerce_minimal/src/index.ts (synced)",
+        "templates/superbify-commerce_minimal/src/components/ProductCommonInfo.tsx (synced)",
+        "templates/superbify-commerce_minimal/dist/js/components.iife.js (build artifact)",
+        "templates/superbify-commerce_minimal/dist/js/components.iife.js.map",
+        "templates/superbify-commerce_minimal/dist/css/components.css"
+    ],
+    "cleanup": {
+        "data_seeds_persisted": true,
+        "note": "These are intentional QA seed records (id 1/2/3 common infos + id 1/2 notice templates + product 9/12 attaches). They will be reused for runtime parity QA. Do not delete without coordination."
+    },
+    "blockers": []
+}

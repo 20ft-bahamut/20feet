@@ -1,0 +1,186 @@
+WISH-001 | product-detail | Wishlist toggle on product detail (heart icon)
+QNA-001 | product-detail | Product inquiry (Q&A tab) with write modal
+REVIEW-001 | product-detail | Product review list (rating/stats/filters) — write only via mypage orders modal
+REVIEW-002 | product-detail | Inline review write button on product detail page — ABSENT
+OPT-001 | product-detail | Multi-option selector (sequential, group-by-group)
+OPT-002 | product-detail | Additional option selector (per selected option) with custom text
+PRICE-001 | product-detail | Option price display (sale/list/discount) on detail
+STOCK-001 | product-detail | Stock display on product detail — limited to status banner + qty limits
+CART-001 | product-detail | Add-to-cart with selected options + additional options + quantity
+CART-002 | cart | Cart line items (select / qty / option change / delete)
+CART-003 | cart | Cart summary (subtotal / discount / shipping / tax)
+CART-004 | cart | Proceed-to-checkout (creates temp order, redirects to checkout)
+CHK-001 | checkout | Checkout page (items, discount, mileage, orderer, shipping, payment, summary)
+CHK-002 | checkout | Orderer info (name, phone, email) with optional guest lookup password
+CHK-003 | checkout | Coupon input (order coupon, shipping coupon, discount code)
+CHK-004 | checkout | Mileage/point input (use + apply)
+ADDR-001 | checkout | Address book quick-pick (saved address chips) on checkout
+CHK-005 | checkout | 주문자정보와동일 (same-as-orderer checkbox)
+CHK-006 | checkout | Save-shipping-address checkbox on checkout
+PAY-001 | checkout | Payment method list (dbank/card/vbank + plugin methods)
+PAY-002 | checkout | Payment method detail forms (card notice / vbank refund / dbank bank picker)
+PAY-003 | checkout | Pay button + final order create (member/guest) with PG dispatch
+GUEST-001 | guest-order | Guest order lookup (form with order_number + phone + password)
+ADDR-002 | mypage-address | Address book list (mypage/addresses)
+WISH-002 | mypage-wishlist | Wishlist list (mypage/wishlist)
+QNA-002 | mypage-inquiry | My inquiries list (mypage/inquiries)
+REORDER-001 | mypage-orders | Reorder from order detail
+REVIEW-003 | mypage-orders | Write review (from order detail, only when can_write_review)
+COUP-001 | coupon | Coupon types: fixed/rate, scope: product_amount/order_amount/shipping_fee, target_scope: all/products/categories, issue_
+COUP-002 | coupon | Coupon issuance: direct (admin -> users), download (user), auto (signup/first_purchase/birthday via signup/event trigger
+MILE-001 | point/mileage | Mileage ledger: 8 transaction types (purchase_earn, admin_earn, order_use, admin_deduct, expired, refund_restore, order_
+MILE-002 | point/mileage | Member mileage account: balance view (cached), max-usable at checkout (min_use_amount, use_unit, max_use_type percent/fi
+MLP-001 | member-level pricing | NOT IMPLEMENTED. Only DTO placeholders exist for an external plugin: CalculationInput.metadata.user_grade_id, Calculatio
+INQ-001 | Auxiliary ecommerce | Product inquiry (1:1 문의) — member auth required for write, public list incl. guest; admin/manager with inquiries.update 
+REV-001 | Auxiliary ecommerce | Product reviews (상품후기) — public list per product (rating stats + per-option filter, photo_only, sort, per_page≤50, ratin
+WIS-001 | Auxiliary ecommerce | Wishlist / favorite (찜) — member-only; toggle endpoint adds or removes; returns {added: bool}; validation requires produ
+REC-001 | Auxiliary ecommerce | Recent-viewed products (최근 본 상품) — client-driven (cookie/localStorage holds ids); server endpoint only resolves ids to P
+NOTIF-001 | Auxiliary ecommerce — notifications | Order & inquiry notifications — 10 declarative notification types in modules/sirsoft-ecommerce/module.php::getNotificati
+CART-001 | Auxiliary ecommerce — cart | Member cart merge on login (비회원→회원 장바구니 병합) — triggered by HookManager 'core.auth.after_login' (priority 20, sync=true —
+PERM-001 | Auxiliary ecommerce — permissions | Admin & user permission names (sirsoft-ecommerce.{category}.{action}) — defined in modules/sirsoft-ecommerce/module.php:
+QTY-001 | Auxiliary ecommerce — quantity validation | Quantity edge validation — FormRequests validate quantity: required, integer, min:1, max:config('sirsoft-ecommerce.cart.
+AUTH-001 | Auxiliary ecommerce — auth/CSRF | CSRF / auth middleware on shop API routes — API layer is Bearer-token (Sanctum), CSRF is intentionally NOT applied. Midd
+EXT-001 | Auxiliary ecommerce — GDPR + marketing plugins (in /plugins/_bundled) | Installed sirsoft-gdpr and sirsoft-marketing plugins (separate from ecommerce module). They are NOT present in /home/bah
+PARITY-001 | QA regression baseline | Existing parity/QA coverage summary. (1) _workspace/still-form/CHECKOUT_PARITY_MATRIX.md (67 lines, 2026-08-31) is a tab
+OPT-001 | product_options_inventory | Product option single dimension (free-form JSON)
+OPT-002 | product_options_inventory | Option combination row (variant)
+OPT-003 | product_options_inventory | Additional option (추가옵션) group + value model
+OPT-004 | product_options_inventory | Additional option value (price add only)
+OPT-005 | product_options_inventory | Option price add/subtract logic
+OPT-006 | product_options_inventory | Additional option total aggregation (per unit)
+OPT-007 | product_options_inventory | Per-option stock_quantity (integer) + safe_stock_quantity
+OPT-008 | product_options_inventory | Product-level stock mirror of option sum
+OPT-009 | product_options_inventory | Cart-level stock validation (add/update/changeOption)
+OPT-010 | product_options_inventory | Stock decrement (order-time) with lock + transaction
+OPT-011 | product_options_inventory | Idempotency flag is_stock_deducted
+OPT-012 | product_options_inventory | Stock restore on cancel (per order option)
+OPT-013 | product_options_inventory | Concurrent stock protection (row lock + atomic update)
+OPT-014 | product_options_inventory | Stock decrement timing (payment-method-based)
+OPT-015 | product_options_inventory | Stock rededuct on cancel-revert (per-option)
+OPT-016 | product_options_inventory | Order option source_type enum + self-referencing parent_option_id
+OPT-017 | product_options_inventory | Cart row (option-bound + additional option selections)
+OPT-018 | product_options_inventory | Additional option selection validation (server SSoT)
+OPT-019 | product_options_inventory | Product sales_status enum (4 states)
+OPT-020 | product_options_inventory | Product display_status enum (2 states)
+OPT-021 | product_options_inventory | Product tax_status enum + tax_rate
+OPT-022 | product_options_inventory | Product base schema (price/sku/sale/exposure/category/sort)
+OPT-023 | product_options_inventory | Product-Category many-to-many (with is_primary)
+OPT-024 | product_options_inventory | Category tree (parent_id + materialized path)
+OPT-025 | product_options_inventory | Product image (hash-based url + collection + is_thumbnail)
+OPT-026 | product_options_inventory | Stock consistency check (product vs options)
+OPT-027 | product_options_inventory | Admin bulk price/stock update (increase/decrease/set)
+OPT-028 | product_options_inventory | Admin bulk stock update with product mirror sync
+OPT-029 | product_options_inventory | Order option row schema (snapshot + discounts + multi-currency)
+OPT-030 | product_options_inventory | Stock hooks (deduct/restore before/after)
+OPT-031 | product_options_inventory | Option stock change → product sync (listener)
+OPT-032 | product_options_inventory | Per-product min/max purchase qty enforcement (cart)
+OPT-033 | product_options_inventory | Out-of-stock validation exception
+OPT-034 | product_options_inventory | SKU (product + per-option)
+MOD-VER-001 | ecommerce core | Module version + copy identity
+ORD-STATUS-001 | order lifecycle | OrderStatusEnum values + transitions + admin status-change gate
+PAY-STATUS-001 | order lifecycle | PaymentStatusEnum values
+SHIP-STATUS-001 | order lifecycle | ShippingStatusEnum values + carrier/tracking fields
+CANCEL-001 | order lifecycle | CancelStatusEnum + CancelOptionStatusEnum + CancelTypeEnum (full/partial)
+REFUND-001 | order lifecycle | RefundStatusEnum (requested/approved/processing/on_hold/completed/rejected) + RefundMethodEnum (pg/bank/points) + Refund
+CLAIM-001 | order lifecycle | ClaimReasonTypeEnum (refund only — exchange/return reserved) + ClaimReasonFaultTypeEnum (customer/seller/carrier)
+PAY-METHOD-001 | payment | PaymentMethodEnum (card/vbank/dbank/bank/phone/point/deposit/free) + ability methods (isPgPayment, needsPgProvider, need
+ORD-CREATE-001 | order lifecycle | Order creation flow (TempOrder → recalc → DB txn → hooks)
+ORD-PAYMENT-001 | order lifecycle | Order payment-completion SSoT (PG callback + admin manual)
+ORD-LIST-001 | order lifecycle | Admin order list — search by order_number / orderer/recipient name+phone / product_name / sku; date range by date_type; 
+ORD-DETAIL-001 | order lifecycle | Admin order detail with all relations (user, options, addresses, payment, shippings, cancels, cashReceipts)
+ORD-UPDATE-001 | order lifecycle | Admin order update — order_status (gate via OrderStatusEnum::canTransitionTo), admin_memo, recipient/domestic+intl addre
+ORD-BULK-001 | order lifecycle | Admin bulk order status update + shipping info bulk set (carrier_id/tracking_number); PENDING_ORDER excluded from bulk s
+ORD-OPT-BULK-001 | order lifecycle | Admin per-option status change with quantity split + carrier/tracking metadata
+ORD-PREVIEW-001 | order lifecycle | Admin refund preview (AdjustmentResult.toPreviewArray)
+ORD-DELETE-001 | order lifecycle | Admin order soft delete (explicit child deletion — no DB CASCADE)
+ORD-LOGS-001 | order lifecycle | Admin order activity log (order + options + addresses)
+ORD-EMAIL-001 | order lifecycle | Admin ad-hoc order email to customer (Mail::raw + subject)
+ORD-CANCEL-001 | order lifecycle | Admin order cancel (full/partial) — validates cancellable_statuses, refund_priority (pg_first/points_first), refund_bank
+ORD-DEPOSIT-001 | order lifecycle | Admin manual deposit confirmation (dbank only, exact-amount match, PaymentAmountMismatchException on mismatch)
+ORD-GUEST-PWD-001 | order lifecycle | Admin reset guest order lookup password (hash only, no plaintext)
+ORD-ADDR-001 | order lifecycle | Admin update shipping address (KR/intl side mutually exclusive; domestic is NOT NULL so intl side stored as empty string
+ORD-CONFIRM-001 | order lifecycle | Purchase-confirmation (per-option). Default confirmable_statuses = [shipping, delivered]
+ORD-PG-REFUND-001 | order lifecycle | PG refund hook — executePgRefund uses HookManager::applyFilters('sirsoft-ecommerce.payment.refund', $defaults, $order, $
+ORD-STATS-001 | order lifecycle | Order statistics — total count, status_counts (excludes hidden PENDING_ORDER), today_count, today_revenue, monthly_reven
+ORD-USER-STATS-001 | order lifecycle | Per-user order statistics — pending_payment, payment_complete, preparing (PREPARING+SHIPPING_READY aggregate), shipping,
+ORD-MILEAGE-TIMING-001 | order lifecycle | Mileage deduction timing — order_placed (default for dbank) vs payment_complete (default for card). Zero-amount orders a
+ORD-STOCK-TIMING-001 | order lifecycle | Stock deduction timing — order_placed (default for dbank) vs payment_complete (default for card/vbank)
+ORD-INIT-STATUS-001 | order lifecycle | Initial order status rules — PAYMENT_COMPLETE if final_amount≤0 (full mileage/deposit); PENDING_PAYMENT for vbank/dbank;
+ORD-SORT-001 | order lifecycle | Sortable columns — id/order_number/order_status/total_amount/total_shipping_amount/total_paid_amount/ordered_at/paid_at/
+ORD-GUEST-PWD-002 | order lifecycle | Guest lookup password — hashed only (Hash::make); never serialised; per-route bcrypt verify; resettable by admin
+ORD-PARTIAL-CONVERT-001 | order lifecycle | Full vs partial cancel — auto-converts to FULL when all active options covered. Partial requires active_options ≥ 2 (Ord
+ORD-CANCEL-SIDE-001 | order lifecycle | Cancel side-effects — coupon restore (hook), mileage restore (only if is_mileage_deducted=true, warning-logged on failur
+ORD-ROUTE-BIND-001 | order lifecycle | Route model binding — numeric {order} → id; non-numeric → order_number (unique)
+ORD-CASTS-001 | order lifecycle | Order hidden fields — guest_lookup_password_hash only (model-level privacy). MC columns cast as 'array' (JSON). All amou
+ORD-CANCEL-ELIGIBLE-001 | order lifecycle | Cancel eligibility — defaults [PENDING_ORDER, PENDING_PAYMENT, PAYMENT_COMPLETE]; admin may extend via cancellable_statu
+ORD-STATUS-GATE-001 | order lifecycle | Order status state-machine — 9 progress statuses (pending_order → pending_payment → payment_complete → shipping_hold → p
+ORD-HOOKS-001 | order lifecycle | Order lifecycle hooks — before_create/after_create/before_update/after_update/before_bulk_update/after_bulk_update/befor
+ORD-NOTIFY-001 | order lifecycle | Notification definitions — orderConfirmed, orderPendingDeposit, orderShipped, orderDelivered, orderCompleted, orderCance
+ORD-DELETE-POLICY-001 | order lifecycle | Order deletion policy — SoftDeletes (deleted_at). Admin must explicitly delete child relations first: taxInvoices, shipp
+ORD-CASHRECEIPT-001 | order lifecycle | Cash receipt sync after cancel — only dbank cash-equivalent amount. On full cancel, cancel receipt. On partial cancel, c
+CART-001 | cart | Cart line uniqueness (option + additional_option hash)
+CART-002 | cart | Guest cart merge on login
+CART-003 | checkout | Checkout (temp order) creation + live recalc
+ADDR-001 | address | Address book CRUD with default flag
+ADDR-002 | address | Save shipping address on checkout (save_shipping_address flag)
+ADDR-003 | address | 주문자정보와동일 (same_as_orderer) copy behavior
+SHIP-001 | shipping | Shipping charge policies (fix / free-over / range / per-unit / API)
+SHIP-002 | shipping | Shipping fee calculation server-side (island/remote area)
+SHIP-003 | shipping | Carriers and tracking support
+ADDR-004 | address | Daum postcode plugin integration point
+CART-004 | cart | Cart domain hooks/events
+CHK-001 | checkout | Server-side price recalculation / tamper defense on order creation
+CHK-002 | checkout | Server-side amount guard on PG callback
+PAY-KGINICIS-001 | payment-pg | Plugin identifier, settings, and registration
+PAY-KGINICIS-002 | payment-pg | KG이니시스 cancel/refund API method and supported payment methods
+PAY-KGINICIS-003 | payment-pg | KG이니시스 hooks, listeners and action registration
+PAY-NHNKCP-001 | payment-pg | NHN KCP plugin identifier, settings, supported methods, callbacks
+PAY-NHNKCP-002 | payment-pg | NHN KCP cancel/refund, partial cancel logic, escrow delivery, CLI execution
+PAY-NHNKCP-003 | payment-pg | NHN KCP hooks, listeners, easy-pay methods
+PAY-NICE-001 | payment-pg | NicePayments plugin identifier, settings, callbacks, supported methods
+PAY-NICE-002 | payment-pg | NicePayments cancel/refund and vbank completed refund flow
+PAY-NICE-003 | payment-pg | NicePayments hooks, listeners, easy-pay methods
+PAY-TOSS-001 | payment-pg | TossPayments plugin identifier, settings, redirect/webhook endpoints, supported methods
+PAY-TOSS-002 | payment-pg | TossPayments cancel/refund API and cash receipt flow
+PAY-TOSS-003 | payment-pg | TossPayments hooks, listeners, easy-pay methods
+PAY-BUILTIN-DBANK-001 | payment-builtin | Builtin PaymentMethodEnum and OrderSettings SSoT for dbank, banks list, and bank_accounts
+PAY-BUILTIN-METHODS-001 | payment-builtin | Builtin payment methods registry (card, vbank, dbank, bank, phone, point, deposit, free) and filter hook
+PAY-REGISTRY-001 | payment-registry | Plugin enablement registry (storage/app/plugins, plugins/_pending, plugins/_bundled)
+OPT-001 | Still Form (superbify-commerce_minimal) public commerce surface | Same-as-orderer checkbox (주문자 정보와 동일) — copies name/phone, blur-mirror on later edits
+OPT-002 | Still Form public commerce surface | Multi-option payment methods — dynamic from payment_settings.payment_methods[] (NO hardcoding)
+OPT-003 | Still Form public commerce surface | Bank account (dbank) radio selection — payload reflects genuinely selected account, no hardcode
+OPT-004 | Still Form public commerce surface | Refund bank (환불 계좌) — bank code select + account + holder, all-or-none validator
+OPT-005 | Still Form public commerce surface | Cash receipt (현금영수증) — dbank-only, conditional on cash_receipt_provider
+OPT-006 | Still Form public commerce surface | Coupon selection — order_coupon + shipping_coupon + item_coupons (max 2 per item, full merged map)
+OPT-007 | Still Form public commerce surface | Point (mileage) input — use_points recompute, 전액 사용 + 적용
+OPT-008 | Still Form public commerce surface | Discount code input — 할인코드 + 적용 버튼
+OPT-009 | Still Form public commerce surface | Address book pills — saved addresses (member-only) with select + recompute + 저장배송지 선택 시 save 체크박스 숨김
+OPT-010 | Still Form public commerce surface | Address manage modal (배송지 관리) — partial referenced; opens via G7Core.modal.open('checkoutAddressManageModal')
+OPT-011 | Still Form public commerce surface | Save address checkbox (입력한 배송지를 저장합니다) — member-only, hidden when saved-address pill selected
+OPT-012 | Still Form public commerce surface | Daum postcode (다음 우편번호) — extension_point 'address_search_slot' bridges via _global.checkoutAddress
+OPT-013 | Still Form public commerce surface | International shipping — country Select + intl fields (address_line_1/2, intl_city/state/postal_code)
+OPT-014 | Still Form public commerce surface | Guest checkout — non-member orderer info + 비밀번호 8자 validation + auto-verify for 30-min token
+OPT-015 | Still Form public commerce surface | PG dispatch — provider-agnostic via G7Core.dispatch(pg_payment_handler), no navigate fallback when PG
+OPT-016 | Still Form public commerce surface | Add-to-cart quantity stepper — min/max/disabled submit, salesStatus CTA override (품절/판매중지)
+OPT-017 | Still Form public commerce surface | Cart row — quantity stepper + 변경 button + delete (ConfirmDialog) + thumbnail + option name display
+OPT-018 | Still Form public commerce surface | Cart summary — itemCount, subtotal, shipping (zero-suppressed), total, 결제하기 / 쇼핑 계속하기 buttons
+OPT-019 | Still Form public commerce surface | Order summary in checkout — item name, option name, 수량, 추가옵션 group/name/custom_text/price_adjustment
+OPT-020 | Still Form public commerce surface | Product review UI — DATA SOURCE ONLY, no review list/write component exposed in slots.content
+OPT-021 | Still Form public commerce surface | Product inquiry (qna) UI — NOT EXPOSED on /shop/{slug} in Still Form (mypage/inquiries tab exists for list, no product-d
+OPT-022 | Still Form public commerce surface | Mypage tabs navigation — 8 tabs: profile / orders / addresses / wishlist / coupons / mileage / inquiries / change-passwo
+OPT-023 | Still Form public commerce surface | Product option selector UI (단일옵션/다중옵션) — NOT EXPOSED on /shop/{slug} in Still Form (GAP vs sirsoft-basic _product_option
+OPT-024 | Still Form public commerce surface | Product additional option (추가옵션) selector UI — NOT EXPOSED on /shop/{slug} (GAP vs sirsoft-basic _product_additional_opt
+OPT-025 | Still Form public commerce surface | Stock / out-of-stock display — sales_status 'sold_out' disables AddToCartPanel; no live stock_quantity display per optio
+OPT-026 | Still Form public commerce surface | Unshippable items banner (has_unshippable_items) — disables 결제하기 in checkout
+OPT-027 | Still Form public commerce surface | Coupon download modal — partial referenced from checkout.json (checkout-only, not product page)
+OPT-028 | Still Form public commerce surface | PG error query banner (?error=confirm_failed|amount_mismatch|order_not_found) on checkout return
+OPT-029 | Still Form public commerce surface | Shipping memo Select — door/security/parcel_box/call + custom textarea
+OPT-030 | Still Form public commerce surface | iOS-only payment method gating — requires_ios methods filtered by appConfig.isIos
+OPT-031 | Still Form public commerce surface | Order list / detail / cancel modal / payment / shipping partials (mypage orders)
+OPT-032 | Still Form public commerce surface | Address book management (mypage addresses) — list + modals (add/edit/delete/overwrite)
+OPT-033 | Still Form public commerce surface | Deposit name (입금자명) field — required when dbank/vbank, auto-fill from ordererName
+OPT-034 | Still Form public commerce surface | Empty cart / no payment methods / no coupons guard states
+OPT-035 | Still Form public commerce surface | Guest order lookup (/shop/guest/orders, /shop/guest/orders/show) — uses guest_order_form/show JSON, NOT in parity scope 
+OPT-036 | Still Form public commerce surface | Reorder layout — uses CartItemResource ordering from past order
+OPT-037 | Still Form public commerce surface | Orderer prefill from _global.currentUser (member) — name/phone/email auto-fill once
+OPT-038 | Still Form public commerce surface | Parity regression test — 10 axes locked (same_as_orderer / save_shipping_address / saved_address pills / dbank / core_pa

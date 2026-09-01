@@ -1,0 +1,133 @@
+{
+  "base": "http://localhost:8000",
+  "member": "mutzero@gmail.com",
+  "runtimeArtifactCheck": {
+    "runtimeLayoutHash": "md5 of templates/superbify-commerce_minimal/layouts/shop/product.json = 517b801b9ebf7664f7ab395e7c6894bb (byte-identical to _bundled)",
+    "runtimeComponentsHash": "42b46ae18fa064778e61d35107434721 (byte-identical to _bundled)",
+    "runtimeSrcIndexRegisteredComposites": [
+      "AddToCartPanel"
+    ],
+    "runtimeSrcIndexMissingComposites": [
+      "PurchasePanel",
+      "WishlistHeart",
+      "ProductReviews",
+      "ProductQna"
+    ],
+    "layoutReferencesMissingComposites": [
+      "layouts/shop/product.json:287 WishlistHeart",
+      "layouts/shop/product.json:297 PurchasePanel",
+      "layouts/shop/product.json:663 ProductReviews",
+      "layouts/shop/product.json:684 ProductQna"
+    ],
+    "componentsJsonRegistersMissingComposites": [
+      "components.json:370 PurchasePanel",
+      "components.json:376 WishlistHeart",
+      "components.json:382 ProductReviews",
+      "components.json:388 ProductQna"
+    ]
+  },
+  "findings": [
+    {
+      "check": "login_member",
+      "status": "PASS",
+      "evidence": "logged in as mutzero@gmail.com; landed on http://localhost:8000/"
+    },
+    {
+      "check": "check1_single_option",
+      "status": "FAIL",
+      "evidence": "price=\"—\" inputs=0 buttons=nav-logout testids=[store-header,nav-shop,nav-story,nav-notice,nav-cart,cart-count,nav-mypage,nav-user-name,nav-logout,product-gallery,price,brand-story-section,related-products,product-grid,product-card,product-card-name,store-footer,footer-business-info,footer-business-field,footer-demo-notice,footer-policy-row,footer-policy-terms,footer-policy-privacy,footer-policy-shipping]"
+    },
+    {
+      "check": "check2_multi_option",
+      "status": "FAIL",
+      "evidence": "price=\"—\" inputs=0 buttons=nav-logout testids=[store-header,nav-shop,nav-story,nav-notice,nav-cart,cart-count,nav-mypage,nav-user-name,nav-logout,product-gallery,price,brand-story-section,related-products,product-grid,product-card,product-card-name,store-footer,footer-business-info,footer-business-field,footer-demo-notice,footer-policy-row,footer-policy-terms,footer-policy-privacy,footer-policy-shipping] soldOutMarkers=0"
+    },
+    {
+      "check": "check3_additional_option",
+      "status": "FAIL",
+      "evidence": "price=\"—\" inputs=0 blockAdditional=0 blockLineTotal=0"
+    },
+    {
+      "check": "check4_review_section",
+      "status": "FAIL",
+      "evidence": "reviewBlock=0 allTestIds=[store-header,nav-shop,nav-story,nav-notice,nav-cart,cart-count,nav-mypage,nav-user-name,nav-logout,product-gallery,price,brand-story-section,related-products,product-grid,product-card,product-card-name,store-footer,footer-business-info,footer-business-field,footer-demo-notice,footer-policy-row,footer-policy-terms,footer-policy-privacy,footer-policy-shipping]"
+    },
+    {
+      "check": "check5_qna_section",
+      "status": "FAIL",
+      "evidence": "qnaBlock=0"
+    },
+    {
+      "check": "check6_wishlist_heart",
+      "status": "FAIL",
+      "evidence": "heartVisible=false wishlistPOST=none"
+    },
+    {
+      "check": "check7_mypage_tabs",
+      "status": "FAIL",
+      "evidence": "tabsFound=9 hasReviewsTab=false tabs=[마이페이지->/mypage | 프로필->/mypage/profile | 주문내역->/mypage/orders | 배송지 관리->/mypage/addresses | 찜한 상품->/mypage/wishlist | 쿠폰->/mypage/coupons | 마일리지->/mypage/mileage | 상품 문의->/mypage/inquiries | 비밀번호 변경->/mypage/change-password] /mypage/reviews=status=404 title=\"그누보드7\" reviewMatches=0"
+    },
+    {
+      "check": "check10_3level_product",
+      "status": "FAIL",
+      "evidence": "slug=QA_E2E_3LEVEL_OPT_PRODUCT price=\"—\" inputs=0 testids=[store-header,nav-shop,nav-story,nav-notice,nav-cart,cart-count,nav-mypage,nav-user-name,nav-logout,product-gallery,price,brand-story-section,related-products,product-grid,product-card,product-card-name,store-footer,footer-business-info,footer-business-field,footer-demo-notice,footer-policy-row,footer-policy-terms,footer-policy-privacy,footer-policy-shipping] bodyHasOptionKeyword=false"
+    },
+    {
+      "check": "check8_screenshots_evidence",
+      "status": "PASS",
+      "evidence": "files=_findings.json,checkout-address-search.png,mypage.png,product-3level.png,product-additional.png,product-multi.png,product-qna.png,product-review.png,product-single.png,product-wishlist.png"
+    },
+    {
+      "check": "check9_console_errors",
+      "status": "INFO",
+      "evidence": "consoleErrors=11 pageErrors=0 firstErrors=Failed to load resource: the server responded with a status of 404 (Not Found) || Failed to load resource: the server responded with a status of 404 (Not Found) || Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_SINGLE_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_SINGLE_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_MULTI_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_MULTI_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_ADDITIONAL_OPTION_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_ADDITIONAL_OPTION_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_SINGLE_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_SINGLE_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/mypage/reviews",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_3LEVEL_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    },
+    {
+      "url": "http://localhost:8000/shop/product/QA_E2E_3LEVEL_OPT_PRODUCT",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    }
+  ],
+  "pageErrors": []
+}
