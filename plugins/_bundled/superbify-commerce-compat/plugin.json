@@ -1,0 +1,25 @@
+{
+    "identifier": "superbify-commerce-compat",
+    "vendor": "superbify",
+    "name": {
+        "ko": "SuperBify 커머스 컴패터블",
+        "en": "SuperBify Commerce Compat"
+    },
+    "version": "1.0.0",
+    "license": "MIT",
+    "description": {
+        "ko": "sirsoft-ecommerce 1.1.2 upstream 결함 4종을 공식 Hook 확장점에서만 보완합니다.",
+        "en": "Patches 4 upstream defects in sirsoft-ecommerce 1.1.2 via official hook extension points only."
+    },
+    "g7_version": ">=7.0.8",
+    "dependencies": {
+        "modules": {
+            "sirsoft-ecommerce": "^1.1.2"
+        },
+        "plugins": {}
+    },
+    "loading": {
+        "strategy": "global",
+        "priority": 100
+    }
+}

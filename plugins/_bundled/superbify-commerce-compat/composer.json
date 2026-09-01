@@ -1,0 +1,19 @@
+{
+    "name": "superbify/commerce-compat",
+    "description": "Compat layer for sirsoft-ecommerce 1.1.2 upstream defects via official hook extension points.",
+    "type": "g7-plugin",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Plugins\\Superbify\\Commerce\\Compat\\": "src/"
+        },
+        "files": [
+            "tests/bootstrap.php"
+        ]
+    },
+    "extra": {
+        "g7": {
+            "plugin_path": "plugins/_bundled/superbify-commerce-compat"
+        }
+    }
+}
