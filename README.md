@@ -1,5 +1,27 @@
 <p align="center">English | <a href="README.ko.md">한국어</a></p>
 
+---
+
+## About 20ft
+
+**20ft** is a small software studio — `A SMALL SPACE. INFINITE POSSIBILITIES.`
+
+We plan and build websites, commerce systems, internal software, and Gnuboard 7 extension products ourselves, and we operate what we build.
+
+> **WEB / COMMERCE / SOFTWARE / GNUBOARD 7**
+
+This repository is our website codebase, forked from **[Gnuboard 7](https://github.com/gnuboard/g7)**. The Gnuboard 7 documentation and README below are kept as-is for the upstream project.
+
+In this fork, we build and maintain:
+
+- `templates/_bundled/twentyft-studio` — the 20ft official website template (Portfolio / SuperBify / Project Inquiry)
+- `templates/_bundled/superbify-commerce_minimal` — the SuperBify commerce template, rebuilt on the sirsoft-ecommerce module
+- `modules/_bundled/twentyft-content` — the content module powering the 20ft website (portfolio, superbify, inquiry data)
+
+Everything below this section is Gnuboard 7.
+
+---
+
 <p align="center">
   <img src="https://img.shields.io/badge/Gnuboard7-그누보드7-000000?style=for-the-badge&labelColor=0066FF&logoColor=white" height="200" alt="Gnuboard7 (그누보드7)">
 </p>

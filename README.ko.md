@@ -1,5 +1,27 @@
 <p align="center"><a href="README.md">English</a> | 한국어</p>
 
+---
+
+## About 20ft
+
+**20ft**는 작은 공간에서, 큰 가능성을 만듭니다. — `A SMALL SPACE. INFINITE POSSIBILITIES.`
+
+웹사이트, 커머스, 업무 시스템, 그누보드 7 확장 제품을 직접 기획하고 개발하고 운영하는 Software Studio입니다.
+
+> **WEB / COMMERCE / SOFTWARE / GNUBOARD 7**
+
+이 저장소는 20ft 공식 웹사이트 코드베이스로, **[그누보드 7](https://github.com/gnuboard/g7)** 에서 포크했습니다. 아래의 그누보드 7 소개와 문서는 원본 그대로 유지합니다.
+
+이 포크에서 만드는 것:
+
+- `templates/_bundled/twentyft-studio` — 20ft 공식 웹사이트 템플릿 (Portfolio / SuperBify / Project Inquiry)
+- `templates/_bundled/superbify-commerce_minimal` — sirsoft-ecommerce 모듈 기반으로 재구성한 SuperBify 커머스 템플릿
+- `modules/_bundled/twentyft-content` — 20ft 웹사이트 콘텐츠 모듈 (portfolio, superbify, inquiry 데이터)
+
+이 아래 내용은 전부 그누보드 7입니다.
+
+---
+
 <p align="center">
   <img src="https://img.shields.io/badge/그누보드7-Gnuboard7-000000?style=for-the-badge&labelColor=0066FF&logoColor=white" height="200" alt="그누보드7 (Gnuboard7)">
 </p>
