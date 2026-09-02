@@ -289,7 +289,8 @@
                                     "ctaHref": "/shop/story",
                                     "mediaSlot": "hero-mood-2",
                                     "layout": "split",
-                                    "stamp": true
+                                    "stamp": true,
+                                    "className": "scm-story-split"
                                 }
                             }
                         ]

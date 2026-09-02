@@ -2023,3 +2023,162 @@ a.scm-checkout-progress-step:focus-visible {
         padding: 1rem;
     }
 }
+
+/* ------------------------------------------------------------------
+   Mobile responsive reconstruction (≤767.98px)
+   - G7 engine responsive override는 props만 지원(inline style 미지원)이므로
+     구조 전환은 id/class + media query로 처리. Desktop(≥768)은 무변경.
+   - breakpoint: 템플릿 기존 토큰 체계(768 / 1024 / 1280)와 동일.
+------------------------------------------------------------------ */
+
+@media (max-width: 767.98px) {
+    /* Global gutter: 모바일 20px 통일 */
+    :root {
+        --scm-gutter: 1.25rem;
+    }
+
+    /* ---- Header: hamburger ---- */
+    .scm-header-bar {
+        position: relative;
+    }
+    .scm-header-menu-toggle {
+        display: inline-flex !important;
+    }
+    .scm-header-nav {
+        display: none !important;
+    }
+    .scm-header-bar > nav {
+        display: none;
+    }
+    .scm-header-bar > nav {
+        display: none;
+    }
+    .scm-header[data-menu-open="true"] .scm-header-bar > nav {
+        display: block;
+    }
+    .scm-header[data-menu-open="true"] .scm-header-nav {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 30;
+        background: var(--scm-paper, #FAF8F3);
+        border-bottom: 1px solid var(--scm-line, #E4DCCE);
+        padding: 0.25rem var(--scm-gutter) 0.75rem;
+        box-shadow: 0 22px 34px -26px rgba(38, 34, 30, 0.4);
+    }
+    .scm-header[data-menu-open="true"] .scm-header-nav .scm-header-nav-link {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        padding-inline: 0.25rem;
+        white-space: normal;
+    }
+    .scm-header[data-menu-open="true"] .scm-header-nav li {
+        border-bottom: 1px solid var(--scm-line, #E4DCCE);
+    }
+    .scm-header[data-menu-open="true"] .scm-header-nav li:last-child {
+        border-bottom: none;
+    }
+    .scm-header[data-menu-open="true"] .scm-header-cart-badge {
+        margin-left: auto !important;
+    }
+
+    /* ---- Product detail: 1-column commerce flow ---- */
+    #shop_product_grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+    }
+    #shop_product_description_section,
+    #shop_product_info_section,
+    #shop_product_shipping_section {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    #shop_product_info_list {
+        grid-template-columns: 1fr !important;
+        row-gap: 1rem !important;
+    }
+    /* 본문 가독성 — 정보 열이 콘텐츠 폭 전체 사용 */
+    #shop_product_info_section,
+    #shop_product_description_section,
+    #shop_product_shipping_section {
+        font-size: 1rem;
+    }
+    /* 한국어 단어 단위 파괴 방지 */
+    #shop_product_title_row,
+    #shop_product_short_description,
+    #shop_product_description_section,
+    #shop_product_info_section,
+    #shop_product_shipping_section {
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+
+    /* ---- Story / brand block: single column, text first ---- */
+    .scm-story-split {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+    .scm-story-split [data-scm-story-copy] {
+        order: 1;
+    }
+    .scm-story-split [data-scm-story-media] {
+        order: 2;
+        aspect-ratio: 4 / 3 !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .scm-header-menu-toggle {
+        display: none !important;
+    }
+}
+
+/* ---- Footer mobile hierarchy ---- */
+@media (max-width: 767.98px) {
+    .scm-footer-inner {
+        padding-block: 2rem;
+        gap: 1.25rem;
+    }
+    .scm-footer-top {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .scm-footer-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.375rem 1rem;
+        align-items: start;
+    }
+    .scm-footer-info-grid {
+        grid-template-columns: 1fr !important;
+        row-gap: 0.625rem !important;
+    }
+    .scm-footer-info-grid [data-testid="footer-business-field"] {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+    }
+    .scm-footer-info-grid [data-testid="footer-business-field"] > span:first-child,
+    .scm-footer-info-grid [data-testid="footer-business-field"] > span[data-scm-footer-label] {
+        flex: 0 0 auto;
+    }
+    [data-testid="footer-policy-row"] {
+        column-gap: 1.25rem !important;
+    }
+
+    /* Purchase CTA: full-width stack, touch height */
+    .scm-purchase-actions {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        max-width: none !important;
+    }
+    .scm-purchase-actions button {
+        width: 100%;
+        min-height: 50px;
+    }
+}

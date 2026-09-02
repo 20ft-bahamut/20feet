@@ -93,6 +93,7 @@ export function BrandStorySection({
         >
             {isSplit ? (
                 <Div
+                    data-scm-story-media=""
                     style={{
                         aspectRatio: '4 / 5',
                         backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
@@ -109,6 +110,7 @@ export function BrandStorySection({
                 </Div>
             ) : null}
             <Div
+                data-scm-story-copy=""
                 style={{
                     display: 'flex',
                     flexDirection: 'column',

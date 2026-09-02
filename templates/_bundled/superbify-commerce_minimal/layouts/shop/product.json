@@ -878,7 +878,8 @@
                                     "ctaLabel": "$t:superbify.home.hero.cta_secondary",
                                     "ctaHref": "/shop/story",
                                     "mediaSlot": "hero-mood-2",
-                                    "layout": "split"
+                                    "layout": "split",
+                                    "className": "scm-story-split"
                                 }
                             }
                         ]

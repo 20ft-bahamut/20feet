@@ -1239,6 +1239,7 @@ function PurchasePanelImpl(props: PurchasePanelProps): React.ReactElement {
 
             {/* CTA buttons */}
             <Div
+                className="scm-purchase-actions"
                 style={{
                     display: 'inline-flex',
                     flexWrap: 'wrap',

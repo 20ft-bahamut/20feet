@@ -36,7 +36,8 @@
                                     "heading": "$t:superbify.story.title",
                                     "body": "$t:superbify.story.body",
                                     "mediaSlot": "hero-mood-3",
-                                    "headingAs": "h1"
+                                    "headingAs": "h1",
+                                    "className": "scm-story-split"
                                 }
                             }
                         ]

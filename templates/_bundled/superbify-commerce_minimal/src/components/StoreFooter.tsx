@@ -199,6 +199,7 @@ export function StoreFooter({
             data-testid="store-footer"
         >
             <Div
+                className="scm-footer-inner"
                 style={{
                     maxWidth: 'var(--scm-max-width, 1200px)',
                     marginInline: 'auto',
@@ -211,6 +212,7 @@ export function StoreFooter({
             >
                 {/* Row 1: brand mark + tagline (left) | nav links (right) */}
                 <Div
+                    className="scm-footer-top"
                     style={{
                         display: 'flex',
                         flexDirection: 'row',
@@ -249,6 +251,7 @@ export function StoreFooter({
                         </Span>
                     </Div>
                     <Ul
+                        className="scm-footer-nav"
                         style={{
                             listStyle: 'none',
                             margin: 0,
@@ -295,7 +298,7 @@ export function StoreFooter({
                     >
                         {resolved.map((field) => (
                             <Div key={field.label_key} data-testid="footer-business-field" style={{ minWidth: 0 }}>
-                                <Span style={labelStyle}>{field.label}</Span>
+                                <Span data-scm-footer-label="" style={labelStyle}>{field.label}</Span>
                                 {field.href ? (
                                     <A
                                         href={field.href}

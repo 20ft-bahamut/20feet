@@ -174,6 +174,7 @@ export function StoreHeader({
     className,
 }: StoreHeaderProps): React.ReactElement {
     const isLoggedIn = typeof user === 'string' && user.trim().length > 0;
+    const [menuOpen, setMenuOpen] = React.useState(false);
     const navLabels: Record<ReturnType<typeof buildNavItems>[number]['key'], string> = {
         shop: shopLabel,
         story: storyLabel,
@@ -184,7 +185,7 @@ export function StoreHeader({
     const navItems = buildNavItems(resolvedShopBase);
     return (
         <Header
-            className={className}
+            className={className ? className + ' scm-header' : 'scm-header'}
             style={{
                 position: 'sticky',
                 top: 0,
@@ -193,6 +194,7 @@ export function StoreHeader({
                 borderBottom: '1px solid var(--scm-line, #E4DCCE)',
             }}
             data-testid="store-header"
+            data-menu-open={menuOpen ? 'true' : 'false'}
         >
             <Div
                 className="scm-header-bar"
@@ -225,7 +227,41 @@ export function StoreHeader({
                     <SrOnly>{brandName}</SrOnly>
                     {tagline ? <SrOnly>{tagline}</SrOnly> : null}
                 </A>
-                <Nav aria-label="Primary">
+                <Button
+                    type="button"
+                    className="scm-header-menu-toggle"
+                    aria-expanded={menuOpen}
+                    aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                    data-testid="header-menu-toggle"
+                    onClick={() => setMenuOpen((v) => !v)}
+                    style={{
+                        display: 'none',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 44,
+                        height: 44,
+                        padding: 0,
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--scm-text-primary, #26221E)',
+                    }}
+                >
+                    <Span
+                        aria-hidden
+                        style={{
+                            display: 'block',
+                            width: 20,
+                            height: 2,
+                            backgroundColor: 'currentColor',
+                            boxShadow: '0 6px 0 currentColor, 0 -6px 0 currentColor',
+                        }}
+                    />
+                </Button>
+                <Nav
+                    aria-label="Primary"
+                    onClickCapture={() => setMenuOpen(false)}
+                >
                     <Ul
                         className="scm-header-nav"
                         style={{
