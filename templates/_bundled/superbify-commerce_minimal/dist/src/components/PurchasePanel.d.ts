@@ -81,6 +81,8 @@ export interface PurchasePanelProps {
     productName?: string;
     salesStatus?: string | null;
     productData?: PurchasePanelProductData | null;
+    /** True while product data source is loading — renders skeleton. */
+    loading?: boolean;
     addToCartLabel?: string;
     buyNowLabel?: string;
     quantityLabel?: string;
@@ -99,6 +101,5 @@ export interface PurchasePanelProps {
     soldOutGroupValueLabel?: string;
     className?: string;
 }
-declare function PurchasePanel(props: PurchasePanelProps): React.ReactElement;
-export { PurchasePanel };
+export declare const PurchasePanel: (props: PurchasePanelProps) => React.ReactElement;
 export default PurchasePanel;

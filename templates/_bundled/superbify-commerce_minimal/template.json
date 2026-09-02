@@ -5,7 +5,7 @@
         "ko": "SuperBify Commerce Minimal",
         "en": "SuperBify Commerce Minimal"
     },
-    "version": "0.3.1",
+    "version": "0.3.2",
     "license": "MIT",
     "description": {
         "ko": "미니멀 D2C 데모 스토어용 사용자 템플릿 (sirsoft-ecommerce 기반)",

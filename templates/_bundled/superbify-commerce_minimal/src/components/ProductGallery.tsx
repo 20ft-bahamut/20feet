@@ -20,6 +20,8 @@ export interface ProductGalleryProps {
     images?: ProductGalleryImage[] | null;
     productName?: string;
     className?: string;
+    /** True while the product data source is still loading — renders a skeleton tile. */
+    loading?: boolean;
     /** Slot id of the primary image (used when no images are present). */
     fallbackSlot?: string;
     /** Optional product data; used to derive a category-aware still-life slot
@@ -70,7 +72,33 @@ function pickSrc(
     return { src: resolveSlotImage(slot), isFallback: true };
 }
 
-export function ProductGallery({ images, productName, className, fallbackSlot, product }: ProductGalleryProps): React.ReactElement {
+export function ProductGallery({ images, productName, className, fallbackSlot, product, loading }: ProductGalleryProps): React.ReactElement {
+    if (loading) {
+        return (
+            <Div
+                className={className}
+                data-testid="product-gallery-skeleton"
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr',
+                    gap: 'var(--scm-spacing-sm, 0.75rem)',
+                    width: '100%',
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                }}
+            >
+                <Div
+                    aria-hidden
+                    style={{
+                        aspectRatio: '1 / 1',
+                        width: '100%',
+                        backgroundColor: 'var(--scm-ivory, #F4F0E6)',
+                        borderRadius: 'var(--scm-radius, 4px)',
+                    }}
+                />
+            </Div>
+        );
+    }
     const derived = fallbackSlot ? null : pickStillLifeSlot(product ?? null);
     const dbImages: ProductGalleryImage[] =
         Array.isArray(images)

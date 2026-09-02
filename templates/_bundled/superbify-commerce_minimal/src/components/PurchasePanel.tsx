@@ -99,6 +99,8 @@ export interface PurchasePanelProps {
     productName?: string;
     salesStatus?: string | null;
     productData?: PurchasePanelProductData | null;
+    /** True while product data source is loading — renders skeleton. */
+    loading?: boolean;
     // Optional override labels (from $t: keys resolved server-side)
     addToCartLabel?: string;
     buyNowLabel?: string;
@@ -268,7 +270,42 @@ function isValueSoldOutForGroup(
     return hasCandidate && allCandidateSoldOut;
 }
 
-function PurchasePanel(props: PurchasePanelProps): React.ReactElement {
+function PurchasePanelSkeleton({ className }: { className?: string }): React.ReactElement {
+    const bar = (w: string, h: number): React.CSSProperties => ({
+        display: 'block',
+        width: w,
+        height: h,
+        borderRadius: 'var(--scm-radius-sm, 4px)',
+        backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+    });
+    return (
+        <Div
+            className={className}
+            data-testid="purchase-panel-skeleton"
+            aria-hidden
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--scm-spacing-md, 1rem)',
+            }}
+        >
+            <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--scm-spacing-sm, 0.75rem)' }}>
+                <Span style={bar('40%', 14)} />
+                <Span style={bar('24%', 14)} />
+            </Div>
+            <Div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Span style={bar('30%', 14)} />
+                <Span style={bar('20%', 20)} />
+            </Div>
+            <Div style={{ display: 'flex', gap: 'var(--scm-spacing-sm, 0.75rem)' }}>
+                <Div style={{ ...bar('50%', 52), borderRadius: 'var(--scm-radius, 4px)' }} />
+                <Div style={{ ...bar('24%', 52), borderRadius: 'var(--scm-radius, 4px)', border: '1px solid var(--scm-line, #E4DCCE)', backgroundColor: 'transparent' }} />
+            </Div>
+        </Div>
+    );
+}
+
+function PurchasePanelImpl(props: PurchasePanelProps): React.ReactElement {
     const {
         productId,
         productName,
@@ -1260,5 +1297,6 @@ function PurchasePanel(props: PurchasePanelProps): React.ReactElement {
     );
 }
 
-export { PurchasePanel };
+export const PurchasePanel = (props: PurchasePanelProps): React.ReactElement =>
+    props.loading ? <PurchasePanelSkeleton className={props.className} /> : <PurchasePanelImpl {...props} />;
 export default PurchasePanel;

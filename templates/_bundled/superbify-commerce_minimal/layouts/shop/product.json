@@ -120,7 +120,8 @@
                                             "images": "{{product_detail?.data?.images ?? []}}",
                                             "productName": "{{product_detail?.data?.name_localized ?? product_detail?.data?.name ?? ''}}",
                                             "fallbackSlot": "{{product_detail?.data?.thumbnail_slot ?? null}}",
-                                            "product": "{{product_detail?.data ?? null}}"
+                                            "product": "{{product_detail?.data ?? null}}",
+                                            "loading": "{{product_detail === undefined}}"
                                         }
                                     },
                                     {
@@ -143,7 +144,8 @@
                                                     "letterSpacing": "0.04em",
                                                     "color": "var(--scm-text-muted, #8A837B)"
                                                 },
-                                                "text": "{{product_detail?.data?.product_code ?? product_detail?.data?.sku ?? ''}}"
+                                                "text": "{{product_detail?.data?.product_code ?? product_detail?.data?.sku ?? ''}}",
+                                                "if": "{{product_detail !== undefined}}"
                                             },
                                             {
                                                 "id": "shop_product_title_row",
@@ -209,9 +211,11 @@
                                                             "productId": "{{product_detail?.data?.id}}",
                                                             "isWishlisted": "{{product_detail?.data?.is_wishlisted ?? false}}",
                                                             "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}"
-                                                        }
+                                                        },
+                                                        "if": "{{product_detail !== undefined}}"
                                                     }
-                                                ]
+                                                ],
+                                                "if": "{{product_detail !== undefined}}"
                                             },
                                             {
                                                 "id": "shop_product_short_description",
@@ -225,7 +229,8 @@
                                                     "margin": 0,
                                                     "maxWidth": "52ch"
                                                 },
-                                                "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}"
+                                                "text": "{{product_detail?.data?.short_description_localized ?? product_detail?.data?.short_description ?? product_detail?.data?.description_localized ?? product_detail?.data?.description ?? ''}}",
+                                                "if": "{{product_detail !== undefined}}"
                                             },
                                             {
                                                 "id": "shop_product_price",
@@ -237,7 +242,8 @@
                                                     "sellingPriceFormatted": "{{product_detail?.data?.selling_price_formatted}}",
                                                     "listPriceFormatted": "{{product_detail?.data?.list_price_formatted}}",
                                                     "discountRate": "{{product_detail?.data?.discount_rate}}"
-                                                }
+                                                },
+                                                "if": "{{product_detail !== undefined}}"
                                             },
                                             {
                                                 "id": "shop_product_kv",
@@ -282,7 +288,8 @@
                                                                 },
                                                                 "text": "{{product_detail?.data?.categories?.[0]?.name_localized ?? product_detail?.data?.categories?.[0]?.name ?? ''}}"
                                                             }
-                                                        ]
+                                                        ],
+                                                        "if": "{{product_detail !== undefined}}"
                                                     },
                                                     {
                                                         "id": "shop_product_kv_status",
@@ -313,7 +320,8 @@
                                                                 },
                                                                 "text": "{{product_detail?.data?.sales_status_label ?? ''}}"
                                                             }
-                                                        ]
+                                                        ],
+                                                        "if": "{{product_detail !== undefined}}"
                                                     },
                                                     {
                                                         "id": "shop_product_kv_shipping",
@@ -424,7 +432,8 @@
                                                     "loginRequiredToastMessage": "$t:superbify.product.coupon.login_required_toast",
                                                     "downloadSuccessMessage": "$t:superbify.product.coupon.download_success",
                                                     "downloadFailedMessage": "$t:superbify.product.coupon.download_failed"
-                                                }
+                                                },
+                                                "if": "{{product_detail !== undefined}}"
                                             },
                                             {
                                                 "id": "shop_product_addtocart",
@@ -439,7 +448,8 @@
                                                     "buyNowLabel": "$t:superbify.cart.buy_now",
                                                     "quantityLabel": "$t:superbify.cart.quantity",
                                                     "soldOutLabel": "$t:superbify.cart.sold_out",
-                                                    "stoppedLabel": "$t:superbify.cart.stopped"
+                                                    "stoppedLabel": "$t:superbify.cart.stopped",
+                                                    "loading": "{{product_detail === undefined}}"
                                                 }
                                             }
                                         ]

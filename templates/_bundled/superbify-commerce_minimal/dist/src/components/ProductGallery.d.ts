@@ -18,11 +18,13 @@ export interface ProductGalleryProps {
     images?: ProductGalleryImage[] | null;
     productName?: string;
     className?: string;
+    /** True while the product data source is still loading — renders a skeleton tile. */
+    loading?: boolean;
     /** Slot id of the primary image (used when no images are present). */
     fallbackSlot?: string;
     /** Optional product data; used to derive a category-aware still-life slot
      *  when `images` is empty and `fallbackSlot` is omitted. */
     product?: ProductItem | null;
 }
-export declare function ProductGallery({ images, productName, className, fallbackSlot, product }: ProductGalleryProps): React.ReactElement;
+export declare function ProductGallery({ images, productName, className, fallbackSlot, product, loading }: ProductGalleryProps): React.ReactElement;
 export default ProductGallery;
