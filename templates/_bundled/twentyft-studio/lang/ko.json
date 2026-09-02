@@ -4,8 +4,8 @@
         "base_layout_description": "20ft 공식 Website User Template (Portfolio / SuperBify / Project Inquiry)",
         "routes": {
             "home": {
-                "title": "20ft Studio",
-                "description": "20ft는 지속 가능한 웹 제품, 커머스 경험, 그누보드 7 확장을 설계하고 개발합니다."
+                "title": "20ft | Software Studio",
+                "description": "20ft는 웹사이트, 커머스, 업무 시스템, 그누보드 7 확장 제품을 직접 기획하고 개발하는 Software Studio입니다."
             },
             "portfolio": {
                 "title": "Portfolio — 20ft Studio",
@@ -17,7 +17,8 @@
             },
             "superbify": {
                 "title": "SuperBify — 20ft Studio",
-                "description": "그누보드 7용 재사용 가능한 확장 기능 목록입니다."
+                "description": "그누보드 7용 재사용 가능한 확장 기능 목록입니다.",
+                "og_description": "SuperBify는 20ft가 만드는 Gnuboard 7 확장 제품군입니다. Template, Module, Plugin과 재사용 가능한 개발 도구를 만들고 공개합니다."
             },
             "superbify_detail": {
                 "title": "SuperBify — 20ft Studio",
@@ -29,7 +30,7 @@
             },
             "inquiry": {
                 "title": "Project Inquiry — 20ft Studio",
-                "description": "프로젝트 문의 페이지입니다. 현재는 레이아웃 미리보기 상태입니다."
+                "description": "웹사이트, 커머스, 업무 시스템, 그누보드 7 확장 — 만들고 싶은 것을 편하게 이야기해주세요."
             }
         },
         "data_source": {

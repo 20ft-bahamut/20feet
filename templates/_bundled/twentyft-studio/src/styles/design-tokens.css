@@ -116,6 +116,8 @@ body {
     /* Responsive display helpers (used with inline styles referencing CSS vars) */
     --20ft-desktop-only: none;
     --20ft-mobile-only: flex;
+    --20ft-home-build-columns: 1fr;
+    --20ft-home-work-columns: 1fr;
     --20ft-hero-columns: 1fr;
     --20ft-hero-heading-size: clamp(2rem, 8vw, 4.5rem);
     --20ft-hero-heading-max: 100%;
@@ -173,6 +175,8 @@ body {
         --20ft-about-body-max: 56ch;
         --20ft-about-garage-columns: 1fr 1fr;
         --20ft-about-what-columns: 1fr 1fr;
+        --20ft-home-build-columns: repeat(2, 1fr);
+        --20ft-home-work-columns: repeat(2, 1fr);
     }
 }
 
@@ -199,12 +203,14 @@ body {
         --20ft-about-hero-symbol-align: flex-end;
         --20ft-about-body-max: 60ch;
         --20ft-about-what-columns: repeat(2, 1fr);
+        --20ft-home-build-columns: repeat(2, 1fr);
     }
 }
 
 @media (min-width: 1280px) {
     :root {
         --20ft-gutter: 3rem;
+        --20ft-home-work-columns: repeat(4, 1fr);
         --20ft-section-py-md: 5rem;
         --20ft-section-py-lg: 6rem;
         --20ft-section-py-xl: 6rem;
@@ -254,4 +260,23 @@ body {
         transform: none;
         transition: none;
     }
+}
+
+/* Keyboard focus visibility: gold ring on any natively focusable element.
+   Inline-style components that manage their own focus state keep precedence. */
+:focus-visible {
+    outline: 2px solid var(--20ft-heritage-gold, #B69B5F);
+    outline-offset: 2px;
+}
+
+/* Korean typography: never split Hangul words mid-syllable. Applied to
+   free-flowing body/headline text via a base rule that inline styles can
+   safely re-declare. */
+h1,
+h2,
+h3,
+p,
+li {
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }

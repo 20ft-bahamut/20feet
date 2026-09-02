@@ -85,7 +85,8 @@ export function HomeHero({ className, editorAttrs }: HomeHeroProps): React.React
                             }}
                             data-testid="hero-description"
                         >
-                            웹사이트와 커머스, 웹서비스와 그누보드 7 확장까지.
+                            웹사이트, 커머스, 업무 시스템, 그누보드 7 확장 제품을
+                            직접 기획하고 개발하는 Software Studio입니다.
                             <br />
                             필요한 것을 이해하고, 실제로 운영되는 결과물로 만듭니다.
                         </P>
@@ -101,9 +102,23 @@ export function HomeHero({ className, editorAttrs }: HomeHeroProps): React.React
                             alignItems: 'flex-start',
                         }}
                     >
-                        <PrimaryButton href="/portfolio" variant="primary" size="medium" data-testid="hero-cta">
-                            포트폴리오 보기
-                        </PrimaryButton>
+                        <Div
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: 'var(--20ft-content-gap-sm, 0.75rem)',
+                                alignItems: 'center',
+                                width: '100%',
+                                minWidth: 0,
+                            }}
+                        >
+                            <PrimaryButton href="/portfolio" variant="primary" size="medium" data-testid="hero-cta">
+                                프로젝트 보기
+                            </PrimaryButton>
+                            <PrimaryButton href="/inquiry" variant="secondary" size="medium" data-testid="hero-cta-inquiry">
+                                프로젝트 문의
+                            </PrimaryButton>
+                        </Div>
 
                         <Span
                             style={{

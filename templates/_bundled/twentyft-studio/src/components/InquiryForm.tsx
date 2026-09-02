@@ -1,5 +1,5 @@
 import React from 'react';
-import { Div, Form, H1, Input, Label, Option, Select, Textarea } from './basic';
+import { Div, Form, H1, Input, Label, Option, P, Select, Textarea } from './basic';
 import Container from './Container';
 import SectionEyebrow from './SectionEyebrow';
 import PrimaryButton from './PrimaryButton';
@@ -53,10 +53,31 @@ export function InquiryForm({ className, editorAttrs }: InquiryFormProps): React
                         fontWeight: 800,
                         fontSize: 'clamp(2rem, 4vw, 3rem)',
                         color: 'var(--20ft-deep-indigo, #102A4C)',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
                     }}
                 >
                     만들고 싶은 것을 이야기해주세요.
                 </H1>
+
+                <P
+                    style={{
+                        margin: 0,
+                        marginBottom: 'var(--20ft-spacing-xl, 2.5rem)',
+                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                        fontSize: '1rem',
+                        lineHeight: 1.75,
+                        letterSpacing: '-0.01em',
+                        color: 'var(--20ft-text-muted, #5E6063)',
+                        maxWidth: '56ch',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    무엇을 만들지 완벽하게 정리되어 있지 않아도 괜찮습니다.
+                    웹사이트, 커머스, 업무 시스템, 기존 서비스 개선 등
+                    현재 상황과 필요한 결과를 알려주시면 함께 구조부터 정리합니다.
+                </P>
 
                 <Div
                     data-testid="coming-soon-notice"

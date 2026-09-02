@@ -68,7 +68,7 @@ export function A(props: React.ComponentPropsWithoutRef<'a'>): React.ReactElemen
     return <a {...props} />;
 }
 
-export function Button(props: React.ComponentPropsWithoutRef<'button'>): React.ReactElement {
+export function Button(props: React.ComponentPropsWithRef<'button'>): React.ReactElement {
     return <button {...props} />;
 }
 

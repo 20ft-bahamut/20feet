@@ -5,7 +5,17 @@
     "extends": "_user_base",
     "meta": {
         "title": "$t:twentyft.routes.superbify_detail.title",
-        "description": "$t:twentyft.routes.superbify_detail.description"
+        "description": "$t:twentyft.routes.superbify_detail.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "superbify_detail",
+            "data_sources": ["superbify_item"],
+            "og": {
+                "type": "article",
+                "title": "{{superbify_item.data.title ?? 'SuperBify'}} | SuperBify | 20ft",
+                "description": "{{superbify_item.data.summary ?? '20ft가 만드는 Gnuboard 7 확장 제품입니다.'}}"
+            }
+        }
     },
     "data_sources": [
         {
@@ -25,10 +35,7 @@
                 "type": "composite",
                 "name": "SuperBifyDetail",
                 "props": {
-                    "item": "{{superbify_item?.data ?? null}}",
-                    "context": {
-                        "slug": "{{route.slug}}"
-                    }
+                    "item": "{{superbify_item?.data ?? null}}"
                 }
             }
         ]

@@ -283,6 +283,48 @@ function PersonStory(): React.ReactElement {
                             기술과 도구는 계속 바뀌었지만 가장 재미있는 순간은 지금도 비슷합니다.
                             아무것도 없던 곳에 실제로 작동하는 무언가가 생기는 순간입니다.
                         </P>
+                        <P style={bodyTextStyle}>
+                            20년 넘게 웹을 만들었습니다. 개발자로 시작해 서비스 기획과 프로젝트
+                            관리, 제품 구축까지 함께 해왔습니다.
+                        </P>
+                        <P style={bodyTextStyle}>
+                            PHP를 기반으로 다양한 웹 시스템을 개발해왔고, 프로젝트에 따라
+                            Node.js와 현대적인 Frontend 기술을 함께 사용합니다.
+                        </P>
+                    </Div>
+
+                    <Div
+                        role="list"
+                        style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                            width: '100%',
+                            minWidth: 0,
+                        }}
+                    >
+                        {['20+ YEARS / WEB DEVELOPMENT', 'DEVELOPMENT / PLANNING / PM', 'WEB / PRODUCT / SYSTEM'].map(
+                            (label) => (
+                                <Span
+                                    key={label}
+                                    role="listitem"
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        padding: '0.375rem 0.75rem',
+                                        borderRadius: 'var(--20ft-radius-sm, 0.25rem)',
+                                        border: '1px solid var(--20ft-line, #D8D0BF)',
+                                        fontFamily: 'var(--20ft-font-mono, monospace)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.08em',
+                                        color: 'var(--20ft-indigo, #183B6B)',
+                                    }}
+                                >
+                                    {label}
+                                </Span>
+                            ),
+                        )}
                     </Div>
                 </RevealGroup>
             </Container>

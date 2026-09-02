@@ -1,18 +1,19 @@
 import React from 'react';
 import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
+import LoadingRows from './LoadingRows';
 import Status from './Status';
-import type { PortfolioItem, RouteContext, EditorAttrs } from '../types/template';
+import type { PortfolioItem, EditorAttrs } from '../types/template';
 
 export interface PortfolioDetailProps {
     item?: PortfolioItem | null;
-    context?: RouteContext;
+    /** True while the detail data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-export function PortfolioDetail({ item = null, context, className, editorAttrs }: PortfolioDetailProps): React.ReactElement {
-    const isNotFound = item === null || item === undefined;
+export function PortfolioDetail({ item = null, loading = false, className, editorAttrs }: PortfolioDetailProps): React.ReactElement {
 
     return (
         <Article
@@ -26,24 +27,14 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
             data-testid="portfolio-detail-page"
         >
             <Container>
-                {isNotFound ? (
+                {loading ? (
+                    <LoadingRows rows={3} testId="portfolio-detail-loading" mediaAspect="21 / 9" />
+                ) : !item ? (
                     <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-md, 1rem)' }}>
                         <Status
                             title="프로젝트를 찾을 수 없습니다"
                             message="해당 프로젝트가 존재하지 않거나 아직 공개되지 않았습니다."
                         />
-                        {context?.slug && (
-                            <Span
-                                data-testid="portfolio-detail-slug"
-                                style={{
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--20ft-text-muted, #5A5A5A)',
-                                }}
-                            >
-                                slug: {context.slug}
-                            </Span>
-                        )}
                     </Div>
                 ) : (
                     <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-lg, 1.5rem)' }}>
@@ -79,6 +70,8 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                                 fontWeight: 800,
                                 fontSize: 'clamp(2rem, 4vw, 3rem)',
                                 color: 'var(--20ft-deep-indigo, #102A4C)',
+                                wordBreak: 'keep-all',
+                                overflowWrap: 'break-word',
                             }}
                         >
                             {item.title}
@@ -110,7 +103,7 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                             />
                         )}
 
-                        {(item.clientName || item.role?.length || item.techStack?.length || item.status || item.relatedUrl) && (
+                        {(item.clientName || item.techStack?.length || item.status) && (
                             <Div
                                 style={{
                                     display: 'grid',
@@ -124,40 +117,55 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                                 {item.clientName && (
                                     <MetaRow label="Client" value={item.clientName} />
                                 )}
-                                {item.role && item.role.length > 0 && (
-                                    <MetaRow label="Role" value={item.role.join(', ')} />
-                                )}
                                 {item.techStack && item.techStack.length > 0 && (
                                     <MetaRow label="Tech" value={item.techStack.join(', ')} />
                                 )}
                                 {item.status && <MetaRow label="Status" value={item.status} />}
-                                {item.relatedUrl && (
-                                    <Div>
-                                        <Span
+                            </Div>
+                        )}
+
+                        {item.role && item.role.length > 0 && (
+                            <Div>
+                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>What We Did</H2>
+                                <Ul
+                                    style={{
+                                        listStyle: 'none',
+                                        margin: 0,
+                                        padding: 0,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 'var(--20ft-spacing-xs, 0.5rem)',
+                                    }}
+                                >
+                                    {item.role.map((roleItem) => (
+                                        <Li
+                                            key={roleItem}
                                             style={{
-                                                display: 'block',
-                                                fontFamily: 'var(--20ft-font-mono, monospace)',
-                                                fontSize: '0.75rem',
-                                                color: 'var(--20ft-gray-500, #777A7D)',
-                                            }}
-                                        >
-                                            Related URL
-                                        </Span>
-                                        <A
-                                            href={item.relatedUrl}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'baseline',
+                                                gap: 'var(--20ft-spacing-sm, 0.5rem)',
                                                 fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                                fontSize: '0.9375rem',
-                                                color: 'var(--20ft-indigo, #183B6B)',
-                                                textDecoration: 'underline',
+                                                fontSize: '1rem',
+                                                lineHeight: 1.7,
+                                                color: 'var(--20ft-text-primary, #1A1A1A)',
+                                                wordBreak: 'keep-all',
+                                                overflowWrap: 'break-word',
                                             }}
                                         >
-                                            {item.relatedUrl}
-                                        </A>
-                                    </Div>
-                                )}
+                                            <Span
+                                                aria-hidden="true"
+                                                style={{
+                                                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                    fontSize: '0.8125rem',
+                                                    color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                                }}
+                                            >
+                                                —
+                                            </Span>
+                                            {roleItem}
+                                        </Li>
+                                    ))}
+                                </Ul>
                             </Div>
                         )}
 
@@ -180,7 +188,7 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
 
                         {item.galleryImageUrls && item.galleryImageUrls.length > 0 && (
                             <Div>
-                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Gallery</H2>
+                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Key Screens</H2>
                                 <Ul
                                     style={{
                                         listStyle: 'none',
@@ -209,22 +217,69 @@ export function PortfolioDetail({ item = null, context, className, editorAttrs }
                             </Div>
                         )}
 
-                        {context?.slug && (
-                            <Span
-                                data-testid="portfolio-detail-slug"
-                                style={{
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--20ft-text-muted, #5A5A5A)',
-                                }}
-                            >
-                                slug: {context.slug}
-                            </Span>
+                        {(item.relatedUrl || item.githubUrl) && (
+                            <Div>
+                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Related Links</H2>
+                                <Ul
+                                    style={{
+                                        listStyle: 'none',
+                                        margin: 0,
+                                        padding: 0,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 'var(--20ft-spacing-xs, 0.5rem)',
+                                    }}
+                                >
+                                    {item.relatedUrl && (
+                                        <Li>
+                                            <ExternalLinkRow href={item.relatedUrl} label="Project Site" />
+                                        </Li>
+                                    )}
+                                    {item.githubUrl && (
+                                        <Li>
+                                            <ExternalLinkRow href={item.githubUrl} label="GitHub" />
+                                        </Li>
+                                    )}
+                                </Ul>
+                            </Div>
                         )}
                     </Div>
                 )}
             </Container>
         </Article>
+    );
+}
+
+function ExternalLinkRow({ href, label }: { href: string; label: string }): React.ReactElement {
+    return (
+        <A
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+                display: 'inline-flex',
+                alignItems: 'baseline',
+                gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                fontFamily: 'var(--20ft-font-body, sans-serif)',
+                fontSize: '1rem',
+                color: 'var(--20ft-indigo, #183B6B)',
+                textDecoration: 'underline',
+                overflowWrap: 'anywhere',
+            }}
+        >
+            <Span
+                style={{
+                    fontFamily: 'var(--20ft-font-mono, monospace)',
+                    fontSize: '0.8125rem',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    color: 'var(--20ft-gray-500, #777A7D)',
+                }}
+            >
+                {label}
+            </Span>
+            {href}
+        </A>
     );
 }
 

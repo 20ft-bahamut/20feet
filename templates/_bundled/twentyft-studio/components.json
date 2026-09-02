@@ -181,6 +181,12 @@
                 "path": "src/components/BrandLogo.tsx"
             },
             {
+                "name": "LoadingRows",
+                "type": "composite",
+                "description": "Editorial skeleton placeholder for loading data sources",
+                "path": "src/components/LoadingRows.tsx"
+            },
+            {
                 "name": "SectionEyebrow",
                 "type": "composite",
                 "description": "Small uppercase section label",
@@ -215,6 +221,18 @@
                 "type": "composite",
                 "description": "Home hero section with capability line",
                 "path": "src/components/HomeHero.tsx"
+            },
+            {
+                "name": "HomeWhatWeBuild",
+                "type": "composite",
+                "description": "Home capability overview: WEB, COMMERCE, SOFTWARE, GNUBOARD 7",
+                "path": "src/components/HomeWhatWeBuild.tsx"
+            },
+            {
+                "name": "HomeHowWeWork",
+                "type": "composite",
+                "description": "Home work-process section: Understand, Structure, Build, Operate",
+                "path": "src/components/HomeHowWeWork.tsx"
             },
             {
                 "name": "SelectedPortfolio",

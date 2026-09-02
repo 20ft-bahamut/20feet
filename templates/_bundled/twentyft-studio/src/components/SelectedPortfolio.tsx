@@ -2,27 +2,33 @@ import React from 'react';
 import { A, Article, Div, H2, H3, Li, P, Section, Span, Ul } from './basic';
 import BrandLogo from './BrandLogo';
 import Container from './Container';
+import LoadingRows from './LoadingRows';
 import Status from './Status';
 import { useInView } from '../hooks/useInView';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import type { PortfolioItem, EditorAttrs } from '../types/template';
 
 export interface SelectedPortfolioProps {
-    items?: PortfolioItem[];
+    /** undefined/null = data source not resolved yet → skeleton (empty-state flash 방지). */
+    items?: PortfolioItem[] | null;
+    /** True while the featured-portfolio data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-function getVisibleItems(items: PortfolioItem[] | undefined): PortfolioItem[] {
-    return items && items.length > 0 ? items : [];
+function getVisibleItems(items: PortfolioItem[] | null | undefined): PortfolioItem[] {
+    return Array.isArray(items) ? items : [];
 }
 
 export function SelectedPortfolio({
     items,
+    loading = false,
     className,
     editorAttrs,
 }: SelectedPortfolioProps): React.ReactElement {
     const visibleItems = getVisibleItems(items);
+    const isPending = loading || items === undefined || items === null;
     const isEmpty = visibleItems.length === 0;
     const { ref: sectionRef, isInView } = useInView({ once: true, threshold: 0.05 });
 
@@ -111,7 +117,9 @@ export function SelectedPortfolio({
                         <PortfolioLink />
                     </Div>
 
-                    {isEmpty ? (
+                    {isPending ? (
+                        <LoadingRows rows={2} testId="selected-portfolio-loading" mediaAspect="21 / 9" />
+                    ) : isEmpty ? (
                         <Status
                             title="공개할 수 있는 프로젝트를 준비하고 있습니다."
                             message="전체 Portfolio는 곧 보여드릴 수 있을 것 같습니다."

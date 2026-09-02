@@ -4,8 +4,8 @@
         "base_layout_description": "20ft official website user template (Portfolio / SuperBify / Project Inquiry)",
         "routes": {
             "home": {
-                "title": "20ft Studio",
-                "description": "20ft designs and ships durable web products, commerce experiences, and Gnuboard 7 extensions."
+                "title": "20ft | Software Studio",
+                "description": "20ft plans and builds websites, commerce systems, in-house software, and Gnuboard 7 extensions."
             },
             "portfolio": {
                 "title": "Portfolio — 20ft Studio",
@@ -17,7 +17,8 @@
             },
             "superbify": {
                 "title": "SuperBify — 20ft Studio",
-                "description": "Reusable Gnuboard 7 extensions."
+                "description": "Reusable Gnuboard 7 extensions.",
+                "og_description": "SuperBify is a family of Gnuboard 7 extensions built by 20ft — Templates, Modules, Plugins, and reusable developer tools."
             },
             "superbify_detail": {
                 "title": "SuperBify — 20ft Studio",
@@ -29,7 +30,7 @@
             },
             "inquiry": {
                 "title": "Project Inquiry — 20ft Studio",
-                "description": "Project inquiry page. Currently a layout preview only."
+                "description": "Tell us what you want to build — websites, commerce, internal systems, or Gnuboard 7 extensions."
             }
         },
         "data_source": {

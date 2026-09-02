@@ -1,19 +1,20 @@
 import React from 'react';
 import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
+import LoadingRows from './LoadingRows';
 import Status from './Status';
 import Tag from './Tag';
-import type { SuperBifyItem, RouteContext, EditorAttrs } from '../types/template';
+import type { SuperBifyItem, EditorAttrs } from '../types/template';
 
 export interface SuperBifyDetailProps {
     item?: SuperBifyItem | null;
-    context?: RouteContext;
+    /** True while the detail data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-export function SuperBifyDetail({ item = null, context, className, editorAttrs }: SuperBifyDetailProps): React.ReactElement {
-    const isNotFound = item === null || item === undefined;
+export function SuperBifyDetail({ item = null, loading = false, className, editorAttrs }: SuperBifyDetailProps): React.ReactElement {
 
     return (
         <Article
@@ -27,24 +28,14 @@ export function SuperBifyDetail({ item = null, context, className, editorAttrs }
             data-testid="superbify-detail-page"
         >
             <Container>
-                {isNotFound ? (
+                {loading ? (
+                    <LoadingRows rows={3} testId="superbify-detail-loading" mediaAspect="21 / 9" />
+                ) : !item ? (
                     <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-md, 1rem)' }}>
                         <Status
                             title="제품을 찾을 수 없습니다"
                             message="해당 SuperBify 제품이 존재하지 않거나 아직 공개되지 않았습니다."
                         />
-                        {context?.slug && (
-                            <Span
-                                data-testid="superbify-detail-slug"
-                                style={{
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--20ft-text-muted, #5A5A5A)',
-                                }}
-                            >
-                                slug: {context.slug}
-                            </Span>
-                        )}
                     </Div>
                 ) : (
                     <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-lg, 1.5rem)' }}>
@@ -186,19 +177,6 @@ export function SuperBifyDetail({ item = null, context, className, editorAttrs }
                                     {item.links.demo && <ExternalLink label="Demo" url={item.links.demo} />}
                                 </Ul>
                             </Div>
-                        )}
-
-                        {context?.slug && (
-                            <Span
-                                data-testid="superbify-detail-slug"
-                                style={{
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    fontSize: '0.75rem',
-                                    color: 'var(--20ft-text-muted, #5A5A5A)',
-                                }}
-                            >
-                                slug: {context.slug}
-                            </Span>
                         )}
                     </Div>
                 )}

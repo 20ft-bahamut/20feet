@@ -1,0 +1,172 @@
+import React from 'react';
+import { Div, H2, P, Section, Span } from './basic';
+import Container from './Container';
+import SectionEyebrow from './SectionEyebrow';
+import { useInView } from '../hooks/useInView';
+import type { EditorAttrs } from '../types/template';
+
+export interface HomeHowWeWorkProps {
+    className?: string;
+    editorAttrs?: EditorAttrs;
+}
+
+interface WorkStep {
+    index: string;
+    title: string;
+    description: string;
+}
+
+const workSteps: WorkStep[] = [
+    {
+        index: '01',
+        title: 'UNDERSTAND',
+        description: '무엇을 만들어야 하는지보다 왜 필요한지부터 봅니다.',
+    },
+    {
+        index: '02',
+        title: 'STRUCTURE',
+        description: '기능, 데이터, 사용자 흐름을 먼저 구조화합니다.',
+    },
+    {
+        index: '03',
+        title: 'BUILD',
+        description: '필요한 만큼 빠르게 만들고 실제 환경에서 검증합니다.',
+    },
+    {
+        index: '04',
+        title: 'OPERATE',
+        description: '배포로 끝내지 않고 운영과 다음 개선까지 고려합니다.',
+    },
+];
+
+export function HomeHowWeWork({ className, editorAttrs }: HomeHowWeWorkProps): React.ReactElement {
+    const { ref: revealRef, isInView } = useInView({ once: true, threshold: 0.05 });
+
+    const revealClass = (stagger: number): string => {
+        const hidden = isInView ? 'is-visible' : 'is-hidden';
+        return `reveal ${hidden} reveal-stagger-${stagger}`;
+    };
+
+    return (
+        <Section
+            className={className}
+            {...editorAttrs}
+            style={{
+                paddingBlock: 'var(--20ft-section-py-xl, 5rem)',
+                backgroundColor: 'var(--20ft-paper-white, #FAF8F3)',
+            }}
+            data-testid="home-how-we-work"
+        >
+            <Container>
+                <div ref={revealRef}>
+                    <Div
+                        className={revealClass(1)}
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 'var(--20ft-content-gap-md, 1.25rem)',
+                            width: '100%',
+                            minWidth: 0,
+                        }}
+                    >
+                        <SectionEyebrow text="HOW WE WORK" />
+                        <H2
+                            style={{
+                                margin: 0,
+                                fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                                fontWeight: 700,
+                                letterSpacing: '-0.02em',
+                                lineHeight: 1.12,
+                                fontSize: 'clamp(1.75rem, 3.5vw, 2.75rem)',
+                                color: 'var(--20ft-deep-indigo, #102A4C)',
+                                wordBreak: 'keep-all',
+                                overflowWrap: 'break-word',
+                            }}
+                        >
+                            이렇게 만듭니다.
+                        </H2>
+                    </Div>
+
+                    <Div
+                        className={revealClass(2)}
+                        role="list"
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'var(--20ft-home-work-columns, 1fr)',
+                            gap: 'var(--20ft-spacing-lg, 1.5rem)',
+                            marginTop: 'var(--20ft-content-gap-lg, 1.75rem)',
+                            width: '100%',
+                            minWidth: 0,
+                        }}
+                    >
+                        {workSteps.map((step) => (
+                            <Div
+                                key={step.title}
+                                role="listitem"
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 'var(--20ft-spacing-xs, 0.5rem)',
+                                    paddingBlock: 'var(--20ft-spacing-md, 1rem)',
+                                    borderTop: '1px solid var(--20ft-line, #D8D0BF)',
+                                    width: '100%',
+                                    minWidth: 0,
+                                }}
+                            >
+                                <Div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'baseline',
+                                        gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                                        width: '100%',
+                                        minWidth: 0,
+                                    }}
+                                >
+                                    <Span
+                                        style={{
+                                            fontFamily: 'var(--20ft-font-mono, monospace)',
+                                            fontSize: '0.75rem',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.08em',
+                                            color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                        }}
+                                    >
+                                        {step.index}
+                                    </Span>
+                                    <Span
+                                        style={{
+                                            fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                            fontSize: '0.9375rem',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.08em',
+                                            textTransform: 'uppercase',
+                                            color: 'var(--20ft-deep-indigo, #102A4C)',
+                                        }}
+                                    >
+                                        {step.title}
+                                    </Span>
+                                </Div>
+                                <P
+                                    style={{
+                                        margin: 0,
+                                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                        fontSize: '1rem',
+                                        lineHeight: 1.7,
+                                        letterSpacing: '-0.01em',
+                                        color: 'var(--20ft-text-muted, #5E6063)',
+                                        wordBreak: 'keep-all',
+                                        overflowWrap: 'break-word',
+                                    }}
+                                >
+                                    {step.description}
+                                </P>
+                            </Div>
+                        ))}
+                    </Div>
+                </div>
+            </Container>
+        </Section>
+    );
+}
+
+export default HomeHowWeWork;

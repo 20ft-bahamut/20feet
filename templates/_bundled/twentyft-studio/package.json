@@ -1,6 +1,6 @@
 {
     "name": "@20ft/twentyft-studio",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "20ft Studio Gnuboard7 User Template (Portfolio / SuperBify / Project Inquiry)",
     "type": "module",
     "main": "dist/js/components.iife.js",

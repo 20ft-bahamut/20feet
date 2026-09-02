@@ -14,7 +14,22 @@ export interface SiteHeaderProps {
 
 export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.ReactElement {
     const [menuOpen, setMenuOpen] = React.useState(false);
+    const triggerRef = React.useRef<HTMLButtonElement>(null);
     const prefersReducedMotion = useReducedMotion();
+
+    React.useEffect(() => {
+        if (!menuOpen) {
+            return undefined;
+        }
+        const handleKeyDown = (event: KeyboardEvent): void => {
+            if (event.key === 'Escape') {
+                setMenuOpen(false);
+                triggerRef.current?.focus();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [menuOpen]);
 
     return (
         <Header
@@ -79,6 +94,9 @@ export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.R
                             <TextLink href="/superbify" data-testid="header-nav-superbify">
                                 SuperBify
                             </TextLink>
+                            <TextLink href="/about" data-testid="header-nav-about">
+                                About
+                            </TextLink>
                         </Nav>
 
                         <PrimaryButton href="/inquiry" variant="primary" size="small" data-testid="header-cta">
@@ -88,8 +106,10 @@ export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.R
 
                     <Button
                         type="button"
-                        aria-label="메뉴 열기"
+                        ref={triggerRef}
+                        aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'}
                         aria-expanded={menuOpen}
+                        aria-controls="site-mobile-menu"
                         onClick={() => setMenuOpen((s) => !s)}
                         style={{
                             display: 'var(--20ft-mobile-only, inline-flex)',
@@ -145,12 +165,16 @@ function MobileMenu({ onClose }: { onClose: () => void }): React.ReactElement {
                 zIndex: 50,
             }}
             data-testid="header-mobile-menu"
+            id="site-mobile-menu"
         >
             <MobileNavLink href="/portfolio" onClick={onClose}>
                 Portfolio
             </MobileNavLink>
             <MobileNavLink href="/superbify" onClick={onClose}>
                 SuperBify
+            </MobileNavLink>
+            <MobileNavLink href="/about" onClick={onClose}>
+                About
             </MobileNavLink>
             <MobileNavLink href="/inquiry" onClick={onClose}>
                 Project Inquiry

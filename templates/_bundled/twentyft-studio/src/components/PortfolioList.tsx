@@ -1,18 +1,24 @@
 import React from 'react';
 import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
+import LoadingRows from './LoadingRows';
 import SectionEyebrow from './SectionEyebrow';
 import Status from './Status';
 import type { PortfolioItem, EditorAttrs } from '../types/template';
 
 export interface PortfolioListProps {
-    items?: PortfolioItem[];
+    /** undefined/null = data source not resolved yet → skeleton (empty-state flash 방지). */
+    items?: PortfolioItem[] | null;
+    /** True while the portfolio data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-export function PortfolioList({ items = [], className, editorAttrs }: PortfolioListProps): React.ReactElement {
-    const isEmpty = items.length === 0;
+export function PortfolioList({ items, loading = false, className, editorAttrs }: PortfolioListProps): React.ReactElement {
+    const safeItems = Array.isArray(items) ? items : [];
+    const isPending = loading || items === undefined || items === null;
+    const isEmpty = safeItems.length === 0;
 
     return (
         <Div
@@ -30,17 +36,37 @@ export function PortfolioList({ items = [], className, editorAttrs }: PortfolioL
                 <H1
                     style={{
                         margin: 0,
-                        marginBottom: 'var(--20ft-spacing-xl, 2.5rem)',
                         fontFamily: 'var(--20ft-font-display, Georgia, serif)',
                         fontWeight: 800,
                         fontSize: 'clamp(2rem, 4vw, 3rem)',
                         color: 'var(--20ft-deep-indigo, #102A4C)',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
                     }}
                 >
-                    만든 것들
+                    우리가 만든 것들.
                 </H1>
+                <P
+                    style={{
+                        margin: 0,
+                        marginBottom: 'var(--20ft-spacing-xl, 2.5rem)',
+                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                        fontSize: '1rem',
+                        lineHeight: 1.7,
+                        letterSpacing: '-0.01em',
+                        color: 'var(--20ft-text-muted, #5E6063)',
+                        maxWidth: '56ch',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    외주, 자체 프로젝트, 제품과 오픈소스까지.
+                    20ft가 실제로 설계하고 개발한 작업을 정리합니다.
+                </P>
 
-                {isEmpty ? (
+                {isPending ? (
+                    <LoadingRows rows={3} testId="portfolio-list-loading" mediaAspect="21 / 9" />
+                ) : isEmpty ? (
                     <Status
                         title="공개할 수 있는 프로젝트를 준비하고 있습니다."
                         message="전체 Portfolio는 곧 보여드릴 수 있을 것 같습니다."
@@ -55,7 +81,7 @@ export function PortfolioList({ items = [], className, editorAttrs }: PortfolioL
                             gap: 'var(--20ft-spacing-xl, 2.5rem)',
                         }}
                     >
-                        {items.map((item) => (
+                        {safeItems.map((item) => (
                             <Li key={item.id}>
                                 <Article>
                                     <A

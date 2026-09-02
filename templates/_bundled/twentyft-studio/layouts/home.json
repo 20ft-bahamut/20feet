@@ -5,7 +5,21 @@
     "extends": "_user_base",
     "meta": {
         "title": "$t:twentyft.routes.home.title",
-        "description": "$t:twentyft.routes.home.description"
+        "description": "$t:twentyft.routes.home.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "home",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.home.title",
+                "description": "$t:twentyft.routes.home.description"
+            },
+            "structured_data": {
+                "@type": "Organization",
+                "name": "20ft",
+                "description": "$t:twentyft.routes.home.description"
+            }
+        }
     },
     "data_sources": [
         {
@@ -43,11 +57,16 @@
                 "name": "HomeHero"
             },
             {
+                "id": "home_what_we_build",
+                "type": "composite",
+                "name": "HomeWhatWeBuild"
+            },
+            {
                 "id": "home_selected_portfolio",
                 "type": "composite",
                 "name": "SelectedPortfolio",
                 "props": {
-                    "items": "{{portfolio_preview?.data ?? []}}"
+                    "items": "{{portfolio_preview?.data ?? null}}"
                 }
             },
             {
@@ -55,13 +74,18 @@
                 "type": "composite",
                 "name": "SuperBifyPreview",
                 "props": {
-                    "items": "{{superbify_preview?.data ?? []}}"
+                    "items": "{{superbify_preview?.data ?? null}}"
                 }
             },
             {
                 "id": "home_about_preview",
                 "type": "composite",
                 "name": "AboutPreview"
+            },
+            {
+                "id": "home_how_we_work",
+                "type": "composite",
+                "name": "HomeHowWeWork"
             },
             {
                 "id": "home_inquiry_motto_cta",

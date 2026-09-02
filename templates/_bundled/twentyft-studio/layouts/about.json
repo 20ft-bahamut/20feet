@@ -5,7 +5,16 @@
     "extends": "_user_base",
     "meta": {
         "title": "$t:twentyft.routes.about.title",
-        "description": "$t:twentyft.routes.about.description"
+        "description": "$t:twentyft.routes.about.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "about",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.about.title",
+                "description": "$t:twentyft.routes.about.description"
+            }
+        }
     },
     "data_sources": [],
     "slots": {

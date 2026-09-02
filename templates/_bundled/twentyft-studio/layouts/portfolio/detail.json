@@ -5,7 +5,17 @@
     "extends": "_user_base",
     "meta": {
         "title": "$t:twentyft.routes.portfolio_detail.title",
-        "description": "$t:twentyft.routes.portfolio_detail.description"
+        "description": "$t:twentyft.routes.portfolio_detail.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "portfolio_detail",
+            "data_sources": ["portfolio_item"],
+            "og": {
+                "type": "article",
+                "title": "{{portfolio_item.data.title ?? 'Portfolio'}} | Portfolio | 20ft",
+                "description": "{{portfolio_item.data.summary ?? '20ft가 직접 기획하고 개발한 프로젝트입니다.'}}"
+            }
+        }
     },
     "data_sources": [
         {
@@ -25,10 +35,7 @@
                 "type": "composite",
                 "name": "PortfolioDetail",
                 "props": {
-                    "item": "{{portfolio_item?.data ?? null}}",
-                    "context": {
-                        "slug": "{{route.slug}}"
-                    }
+                    "item": "{{portfolio_item?.data ?? null}}"
                 }
             }
         ]

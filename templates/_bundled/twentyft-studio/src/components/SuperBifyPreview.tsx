@@ -2,6 +2,7 @@ import React from 'react';
 import { A, Div, H2, H3, Li, P, Section, Span, Ul } from './basic';
 import Container from './Container';
 import PrimaryButton from './PrimaryButton';
+import LoadingRows from './LoadingRows';
 import Status from './Status';
 import Tag from './Tag';
 import { useInView } from '../hooks/useInView';
@@ -9,21 +10,26 @@ import { useReducedMotion } from '../hooks/useReducedMotion';
 import type { SuperBifyItem, EditorAttrs } from '../types/template';
 
 export interface SuperBifyPreviewProps {
-    items?: SuperBifyItem[];
+    /** undefined/null = data source not resolved yet → skeleton (empty-state flash 방지). */
+    items?: SuperBifyItem[] | null;
+    /** True while the featured-superbify data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-function getVisibleItems(items: SuperBifyItem[] | undefined): SuperBifyItem[] {
-    return items && items.length > 0 ? items : [];
+function getVisibleItems(items: SuperBifyItem[] | null | undefined): SuperBifyItem[] {
+    return Array.isArray(items) ? items : [];
 }
 
 export function SuperBifyPreview({
     items,
+    loading = false,
     className,
     editorAttrs,
 }: SuperBifyPreviewProps): React.ReactElement {
     const visibleItems = getVisibleItems(items);
+    const isPending = loading || items === undefined || items === null;
     const isEmpty = visibleItems.length === 0;
     const { ref: sectionRef, isInView } = useInView({ once: true, threshold: 0.05 });
 
@@ -135,7 +141,9 @@ export function SuperBifyPreview({
                         </Div>
 
                         <Div className={revealClass(2)}>
-                            {isEmpty ? (
+                            {isPending ? (
+                                <LoadingRows rows={2} testId="superbify-preview-loading" />
+                            ) : isEmpty ? (
                                 <Status
                                     title="첫 프로젝트를 만들고 있습니다."
                                     message="실제로 쓸 수 있을 때 공개합니다."

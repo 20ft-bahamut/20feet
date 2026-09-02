@@ -53,6 +53,7 @@ export interface PortfolioItem {
     role?: string[];
     techStack?: string[];
     relatedUrl?: string;
+    githubUrl?: string;
     coverImageUrl?: string;
     galleryImageUrls?: string[];
     /** Development-only fixture marker. Must not be exposed as production data. */

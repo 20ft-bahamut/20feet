@@ -14,7 +14,7 @@ export declare function H2(props: React.ComponentPropsWithoutRef<'h2'>): React.R
 export declare function H3(props: React.ComponentPropsWithoutRef<'h3'>): React.ReactElement;
 export declare function H4(props: React.ComponentPropsWithoutRef<'h4'>): React.ReactElement;
 export declare function A(props: React.ComponentPropsWithoutRef<'a'>): React.ReactElement;
-export declare function Button(props: React.ComponentPropsWithoutRef<'button'>): React.ReactElement;
+export declare function Button(props: React.ComponentPropsWithRef<'button'>): React.ReactElement;
 export declare function Img(props: React.ComponentPropsWithoutRef<'img'>): React.ReactElement;
 export declare function Ul(props: React.ComponentPropsWithoutRef<'ul'>): React.ReactElement;
 export declare function Ol(props: React.ComponentPropsWithoutRef<'ol'>): React.ReactElement;

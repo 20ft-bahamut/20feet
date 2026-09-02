@@ -48,6 +48,7 @@ export { Container, type ContainerProps } from './components/Container';
 
 // UI primitives
 export { SectionEyebrow, type SectionEyebrowProps } from './components/SectionEyebrow';
+export { LoadingRows, type LoadingRowsProps } from './components/LoadingRows';
 export { BrandLogo, type BrandLogoProps } from './components/BrandLogo';
 export { PrimaryButton, type PrimaryButtonProps } from './components/PrimaryButton';
 export { TextLink, type TextLinkProps } from './components/TextLink';
@@ -58,6 +59,8 @@ export { Status, type StatusProps } from './components/Status';
 export { SiteHeader, type SiteHeaderProps } from './components/SiteHeader';
 export { SiteFooter, type SiteFooterProps } from './components/SiteFooter';
 export { HomeHero, type HomeHeroProps } from './components/HomeHero';
+export { HomeWhatWeBuild, type HomeWhatWeBuildProps } from './components/HomeWhatWeBuild';
+export { HomeHowWeWork, type HomeHowWeWorkProps } from './components/HomeHowWeWork';
 export { SelectedPortfolio, type SelectedPortfolioProps } from './components/SelectedPortfolio';
 export { SuperBifyPreview, type SuperBifyPreviewProps } from './components/SuperBifyPreview';
 export { AboutPreview, type AboutPreviewProps } from './components/AboutPreview';
@@ -104,6 +107,7 @@ import {
 } from './components/basic';
 import { Container } from './components/Container';
 import { SectionEyebrow } from './components/SectionEyebrow';
+import { LoadingRows } from './components/LoadingRows';
 import { BrandLogo } from './components/BrandLogo';
 import { PrimaryButton } from './components/PrimaryButton';
 import { TextLink } from './components/TextLink';
@@ -112,6 +116,8 @@ import { Status } from './components/Status';
 import { SiteHeader } from './components/SiteHeader';
 import { SiteFooter } from './components/SiteFooter';
 import { HomeHero } from './components/HomeHero';
+import { HomeWhatWeBuild } from './components/HomeWhatWeBuild';
+import { HomeHowWeWork } from './components/HomeHowWeWork';
 import { SelectedPortfolio } from './components/SelectedPortfolio';
 import { SuperBifyPreview } from './components/SuperBifyPreview';
 import { AboutPreview } from './components/AboutPreview';
@@ -158,6 +164,7 @@ if (registry) {
 
     // Composite components
     registry.register({ component: SectionEyebrow, metadata: { name: 'SectionEyebrow', type: 'composite' } });
+    registry.register({ component: LoadingRows, metadata: { name: 'LoadingRows', type: 'composite' } });
     registry.register({ component: BrandLogo, metadata: { name: 'BrandLogo', type: 'composite' } });
     registry.register({ component: PrimaryButton, metadata: { name: 'PrimaryButton', type: 'composite' } });
     registry.register({ component: TextLink, metadata: { name: 'TextLink', type: 'composite' } });
@@ -166,6 +173,8 @@ if (registry) {
     registry.register({ component: SiteHeader, metadata: { name: 'SiteHeader', type: 'composite' } });
     registry.register({ component: SiteFooter, metadata: { name: 'SiteFooter', type: 'composite' } });
     registry.register({ component: HomeHero, metadata: { name: 'HomeHero', type: 'composite' } });
+    registry.register({ component: HomeWhatWeBuild, metadata: { name: 'HomeWhatWeBuild', type: 'composite' } });
+    registry.register({ component: HomeHowWeWork, metadata: { name: 'HomeHowWeWork', type: 'composite' } });
     registry.register({ component: SelectedPortfolio, metadata: { name: 'SelectedPortfolio', type: 'composite' } });
     registry.register({ component: SuperBifyPreview, metadata: { name: 'SuperBifyPreview', type: 'composite' } });
     registry.register({ component: AboutPreview, metadata: { name: 'AboutPreview', type: 'composite' } });

@@ -1,19 +1,25 @@
 import React from 'react';
 import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
 import Container from './Container';
+import LoadingRows from './LoadingRows';
 import SectionEyebrow from './SectionEyebrow';
 import Status from './Status';
 import Tag from './Tag';
 import type { SuperBifyItem, EditorAttrs } from '../types/template';
 
 export interface SuperBifyListProps {
-    items?: SuperBifyItem[];
+    /** undefined/null = data source not resolved yet → skeleton (empty-state flash 방지). */
+    items?: SuperBifyItem[] | null;
+    /** True while the superbify data source is still loading. */
+    loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-export function SuperBifyList({ items = [], className, editorAttrs }: SuperBifyListProps): React.ReactElement {
-    const isEmpty = items.length === 0;
+export function SuperBifyList({ items, loading = false, className, editorAttrs }: SuperBifyListProps): React.ReactElement {
+    const safeItems = Array.isArray(items) ? items : [];
+    const isPending = loading || items === undefined || items === null;
+    const isEmpty = safeItems.length === 0;
 
     return (
         <Div
@@ -31,17 +37,38 @@ export function SuperBifyList({ items = [], className, editorAttrs }: SuperBifyL
                 <H1
                     style={{
                         margin: 0,
-                        marginBottom: 'var(--20ft-spacing-xl, 2.5rem)',
                         fontFamily: 'var(--20ft-font-display, Georgia, serif)',
                         fontWeight: 800,
                         fontSize: 'clamp(2rem, 4vw, 3rem)',
                         color: 'var(--20ft-deep-indigo, #102A4C)',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
                     }}
                 >
                     그누보드 7 확장
                 </H1>
+                <P
+                    style={{
+                        margin: 0,
+                        marginBottom: 'var(--20ft-spacing-xl, 2.5rem)',
+                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                        fontSize: '1rem',
+                        lineHeight: 1.7,
+                        letterSpacing: '-0.01em',
+                        color: 'var(--20ft-text-muted, #5E6063)',
+                        maxWidth: '56ch',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'break-word',
+                    }}
+                >
+                    SuperBify는 20ft가 만드는 Gnuboard 7 확장 제품군입니다.
+                    실제 프로젝트에서 필요한 Template, Module, Plugin과
+                    재사용 가능한 개발 도구를 만들고 공개합니다.
+                </P>
 
-                {isEmpty ? (
+                {isPending ? (
+                    <LoadingRows rows={3} testId="superbify-list-loading" mediaAspect="21 / 9" />
+                ) : isEmpty ? (
                     <Status
                         title="첫 프로젝트를 만들고 있습니다."
                         message="실제로 쓸 수 있을 때 공개합니다."
@@ -56,7 +83,7 @@ export function SuperBifyList({ items = [], className, editorAttrs }: SuperBifyL
                             gap: 'var(--20ft-spacing-lg, 1.5rem)',
                         }}
                     >
-                        {items.map((item) => (
+                        {safeItems.map((item) => (
                             <Li key={item.id}>
                                 <Article>
                                     <A
