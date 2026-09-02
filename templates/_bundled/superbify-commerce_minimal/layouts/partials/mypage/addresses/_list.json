@@ -318,7 +318,7 @@
             "comment": "빈 상태 — SRC EmptyState 컴포지트",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{!(addresses?.data?.addresses?.data ?? []).length}}",
+            "if": "{{addresses !== undefined && !(addresses?.data?.addresses?.data ?? []).length}}",
             "props": {
                 "title": "$t:superbify.mypage.addresses.title",
                 "message": "$t:superbify.mypage.addresses.empty"

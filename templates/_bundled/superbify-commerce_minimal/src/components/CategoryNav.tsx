@@ -34,6 +34,7 @@ export function CategoryNav({
     sortLabel,
     shopBase,
 }: CategoryNavProps): React.ReactElement {
+    const isPending = items === undefined; // undefined = 데이터 미로딩 — 빈 empty가 아니라 skeleton 표시
     const list = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const showSort = Array.isArray(sortOptions) && sortOptions.length > 0;
     const resolvedBase = shopBase ?? getShopBase();
@@ -159,7 +160,31 @@ export function CategoryNav({
                     );
                 })}
             </Ul>
-            {list.length === 0 ? (
+            {isPending ? (
+                <Div
+                    aria-hidden
+                    style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 'var(--scm-spacing-2xs, 0.25rem)',
+                        padding: 'var(--scm-spacing-sm, 0.75rem) 0',
+                    }}
+                    data-testid="category-nav-skeleton"
+                >
+                    {[64, 88, 72, 80].map((w, i) => (
+                        <Span
+                            key={i}
+                            style={{
+                                display: 'inline-block',
+                                width: w,
+                                height: 36,
+                                borderRadius: 'var(--scm-radius-pill, 9999px)',
+                                backgroundColor: 'var(--scm-bg-secondary, #F4F0E6)',
+                            }}
+                        />
+                    ))}
+                </Div>
+            ) : list.length === 0 ? (
                 <Div
                     style={{
                         fontFamily: 'var(--scm-font-body, system-ui)',

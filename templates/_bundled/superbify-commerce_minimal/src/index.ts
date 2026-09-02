@@ -237,6 +237,7 @@ import { Price } from './components/Price';
 import { ProductCard } from './components/ProductCard';
 import { ProductGallery } from './components/ProductGallery';
 import { ProductGrid } from './components/ProductGrid';
+import { PageLoading } from './components/PageLoading';
 import { PromoBanner } from './components/PromoBanner';
 import { RelatedProducts } from './components/RelatedProducts';
 import { StoreFooter } from './components/StoreFooter';
@@ -312,6 +313,7 @@ if (registry) {
     registry.register({ component: HeroBanner, metadata: { name: 'HeroBanner', type: 'composite' } });
     registry.register({ component: HtmlContent, metadata: { name: 'HtmlContent', type: 'composite' } });
     registry.register({ component: Pagination, metadata: { name: 'Pagination', type: 'composite' } });
+    registry.register({ component: PageLoading, metadata: { name: 'PageLoading', type: 'composite' } });
     registry.register({ component: NoticeList, metadata: { name: 'NoticeList', type: 'composite' } });
     registry.register({ component: Price, metadata: { name: 'Price', type: 'composite' } });
     registry.register({ component: ProductCard, metadata: { name: 'ProductCard', type: 'composite' } });

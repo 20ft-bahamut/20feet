@@ -113,7 +113,7 @@
             "comment": "보유 쿠폰 없음",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{!(my_coupons?.data?.data ?? my_coupons?.data?.coupons?.data ?? []).length}}",
+            "if": "{{my_coupons !== undefined && !(my_coupons?.data?.data ?? my_coupons?.data?.coupons?.data ?? []).length}}",
             "props": {
                 "title": "$t:superbify.mypage.coupons.title",
                 "message": "$t:superbify.mypage.coupons.empty"
@@ -263,7 +263,7 @@
         {
             "type": "basic",
             "name": "P",
-            "if": "{{!(available_coupons?.data?.data ?? available_coupons?.data?.coupons ?? []).length}}",
+            "if": "{{available_coupons !== undefined && !(available_coupons?.data?.data ?? available_coupons?.data?.coupons ?? []).length}}",
             "style": {
                 "margin": "0",
                 "fontSize": "0.875rem",

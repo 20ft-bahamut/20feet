@@ -17,7 +17,14 @@
             "auto_fetch": true,
             "auth_mode": "optional",
             "loading_strategy": "progressive",
-            "fallback": { "data": { "items": [], "item_ids": [], "item_count": 0, "calculation": null } }
+            "fallback": {
+                "data": {
+                    "items": [],
+                    "item_ids": [],
+                    "item_count": 0,
+                    "calculation": null
+                }
+            }
         },
         {
             "id": "cart_cross_sell",
@@ -129,7 +136,10 @@
                                 },
                                 "responsive": {
                                     "mobile": {
-                                        "style": { "gridTemplateColumns": "1fr", "gap": "var(--scm-spacing-lg, 1.5rem)" }
+                                        "style": {
+                                            "gridTemplateColumns": "1fr",
+                                            "gap": "var(--scm-spacing-lg, 1.5rem)"
+                                        }
                                     }
                                 },
                                 "children": [
@@ -137,7 +147,9 @@
                                         "id": "cart_page_items",
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "id": "scm-cart-items-card" },
+                                        "props": {
+                                            "id": "scm-cart-items-card"
+                                        },
                                         "style": {
                                             "display": "flex",
                                             "flexDirection": "column",
@@ -151,7 +163,10 @@
                                                 "id": "cart_page_items_iter",
                                                 "type": "composite",
                                                 "name": "CartItemRow",
-                                                "iteration": { "source": "{{cart.data.items ?? []}}", "item_var": "item" },
+                                                "iteration": {
+                                                    "source": "{{cart.data.items ?? []}}",
+                                                    "item_var": "item"
+                                                },
                                                 "props": {
                                                     "item": "{{item}}",
                                                     "quantityLabel": "$t:superbify.cart.quantity",
@@ -202,5 +217,17 @@
                 ]
             }
         ]
+    },
+    "transition_overlay": {
+        "enabled": true,
+        "style": "spinner",
+        "wait_for": [
+            "cart"
+        ],
+        "target": "main_content_area",
+        "spinner": {
+            "component": "PageLoading"
+        },
+        "_comment": "데이터 로딩 중 빈 empty-state 플래시 방지 — progressive 소스 fetch 동안 콘텐츠 영역에 PageLoading 표시(sirsoft-basic transition_overlay 패턴)."
     }
 }

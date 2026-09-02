@@ -27,7 +27,9 @@
             "auto_fetch": true,
             "auth_required": true,
             "loading_strategy": "progressive",
-            "fallback": { "data": null }
+            "fallback": {
+                "data": null
+            }
         },
         {
             "comment": "배송지 목록 — BASIC show.json 과 동일. 주문 상세 화면 자체는 읽기전용이지만 주문 배송지 변경 모달 생략에 따른 최소 유지 비용이 없어 잔존시킨다.",
@@ -40,7 +42,9 @@
             "auto_fetch": true,
             "auth_required": true,
             "loading_strategy": "progressive",
-            "fallback": { "data": [] }
+            "fallback": {
+                "data": []
+            }
         },
         {
             "comment": "취소 사유 목록 — user/orders/{id}/cancel 의 reason 은 claim-reasons(type=refund, 사용자 선택 가능) 코드 존재 검증을 한다.",
@@ -52,8 +56,12 @@
             "method": "GET",
             "auto_fetch": true,
             "auth_required": true,
-            "params": { "type": "refund" },
-            "fallback": { "data": [] }
+            "params": {
+                "type": "refund"
+            },
+            "fallback": {
+                "data": []
+            }
         }
     ],
     "slots": {
@@ -85,7 +93,9 @@
                                 "type": "basic",
                                 "name": "A",
                                 "className": "scm-notice-nav-link",
-                                "props": { "href": "/mypage/orders" },
+                                "props": {
+                                    "href": "/mypage/orders"
+                                },
                                 "style": {
                                     "display": "inline-flex",
                                     "alignItems": "center",
@@ -105,7 +115,9 @@
                                         "comment": "audit:allow layout-list-context-navigate-merge-query 주문 목록 복귀 — 상태를 물려받으면 필터가 꼬이므로 query 없이 이동한다.",
                                         "type": "click",
                                         "handler": "navigate",
-                                        "params": { "path": "/mypage/orders" }
+                                        "params": {
+                                            "path": "/mypage/orders"
+                                        }
                                     }
                                 ]
                             },
@@ -140,11 +152,21 @@
                                     "maxWidth": "48rem"
                                 },
                                 "children": [
-                                    { "partial": "partials/mypage/orders/_status_header.json" },
-                                    { "partial": "partials/mypage/orders/_items.json" },
-                                    { "partial": "partials/mypage/orders/_shipping.json" },
-                                    { "partial": "partials/mypage/orders/_payment.json" },
-                                    { "partial": "partials/mypage/orders/_history.json" },
+                                    {
+                                        "partial": "partials/mypage/orders/_status_header.json"
+                                    },
+                                    {
+                                        "partial": "partials/mypage/orders/_items.json"
+                                    },
+                                    {
+                                        "partial": "partials/mypage/orders/_shipping.json"
+                                    },
+                                    {
+                                        "partial": "partials/mypage/orders/_payment.json"
+                                    },
+                                    {
+                                        "partial": "partials/mypage/orders/_history.json"
+                                    },
                                     {
                                         "comment": "주문 취소 인라인 패널 (BASIC _modal_cancel.json 의 SRC 치환 — Modal 없이 확장 패널 + ConfirmDialog)",
                                         "partial": "partials/mypage/orders/_modal_cancel.json"
@@ -155,7 +177,9 @@
                                         "type": "basic",
                                         "name": "Button",
                                         "if": "{{(order.data.order_status ?? '') === 'cancelled'}}",
-                                        "props": { "type": "button" },
+                                        "props": {
+                                            "type": "button"
+                                        },
                                         "style": {
                                             "display": "inline-flex",
                                             "alignItems": "center",
@@ -177,7 +201,9 @@
                                                 "comment": "audit:allow layout-list-context-navigate-merge-query 재주문 — /reorder/:id 경로가 주문을 장바구니에 담고 /cart 로 보낸다. 주문 목록 query 를 물려주지 않는다.",
                                                 "type": "click",
                                                 "handler": "navigate",
-                                                "params": { "path": "/reorder/{{order.data.id ?? ''}}" }
+                                                "params": {
+                                                    "path": "/reorder/{{order.data.id ?? ''}}"
+                                                }
                                             }
                                         ],
                                         "text": "$t:superbify.mypage.orders.reorder"
@@ -189,5 +215,19 @@
                 ]
             }
         ]
+    },
+    "transition_overlay": {
+        "enabled": true,
+        "style": "spinner",
+        "wait_for": [
+            "order",
+            "userAddresses",
+            "refundReasons"
+        ],
+        "target": "main_content_area",
+        "spinner": {
+            "component": "PageLoading"
+        },
+        "_comment": "데이터 로딩 중 빈 empty-state 플래시 방지 — progressive 소스 fetch 동안 콘텐츠 영역에 PageLoading 표시(sirsoft-basic transition_overlay 패턴)."
     }
 }

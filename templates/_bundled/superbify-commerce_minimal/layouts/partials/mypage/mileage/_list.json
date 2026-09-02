@@ -348,7 +348,7 @@
             "comment": "내역 없음 — SRC EmptyState",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{mileage_balance?.data?.mileage?.enabled !== false && !(mileage_history?.data?.transactions?.data ?? []).length}}",
+            "if": "{{mileage_balance !== undefined && mileage_balance?.data?.mileage?.enabled !== false && mileage_history !== undefined && !(mileage_history?.data?.transactions?.data ?? []).length}}",
             "props": {
                 "title": "$t:superbify.mypage.mileage.history",
                 "message": "$t:superbify.mypage.mileage.empty"

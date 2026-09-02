@@ -372,7 +372,7 @@
             "comment": "빈 상태 — SRC EmptyState",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{!(myInquiries?.data?.items ?? []).length}}",
+            "if": "{{myInquiries !== undefined && !(myInquiries?.data?.items ?? []).length}}",
             "props": {
                 "title": "$t:superbify.mypage.inquiries.title",
                 "message": "$t:superbify.mypage.inquiries.empty"

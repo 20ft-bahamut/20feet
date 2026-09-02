@@ -31,6 +31,7 @@ export function CategoryPreviewStrip({
     allLabel,
     shopBase,
 }: CategoryPreviewStripProps): React.ReactElement {
+    const isPending = items === undefined; // undefined = 데이터 미로딩 — 빈 empty가 아니라 skeleton 표시
     const list = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const resolvedBase = shopBase ?? getShopBase();
     const baseForLink = resolvedBase === '/' ? '' : resolvedBase;
@@ -81,7 +82,7 @@ export function CategoryPreviewStrip({
                     ) : null}
                 </Div>
             ) : null}
-            {list.length === 0 ? (
+            {isPending ? null : list.length === 0 ? (
                 <Div
                     style={{
                         fontFamily: 'var(--scm-font-body, system-ui)',

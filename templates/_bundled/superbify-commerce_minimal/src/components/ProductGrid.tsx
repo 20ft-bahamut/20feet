@@ -104,10 +104,11 @@ export function ProductGrid({
     featuredCtaLabel,
     featuredEyebrow,
 }: ProductGridProps): React.ReactElement {
+    const isPending = items === undefined; // undefined = 데이터 미로딩 — empty-state 플래시 방지
     const safeItems = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const visible = typeof limit === 'number' ? safeItems.slice(0, limit) : safeItems;
 
-    if (!loading && visible.length === 0) {
+    if (!loading && !isPending && visible.length === 0) {
         return (
             <Div className={className} data-testid="product-grid" data-variant={variant}>
                 <EmptyState title={emptyTitle} message={emptyMessage} />
@@ -133,10 +134,10 @@ export function ProductGrid({
                       }
             }
             data-testid="product-grid"
-            data-loading={loading ? 'true' : 'false'}
+            data-loading={loading || isPending ? 'true' : 'false'}
             data-variant={variant}
         >
-            {loading
+            {loading || isPending
                 ? variant === 'featured'
                     ? (
                           <>

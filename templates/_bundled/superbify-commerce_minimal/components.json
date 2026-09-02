@@ -401,6 +401,12 @@
                 "type": "composite",
                 "description": "Product detail 공통 안내 + 상품정보제공고시 section with independent empty-state hiding per subsection",
                 "path": "src/components/ProductCommonInfo.tsx"
+            },
+            {
+                "name": "PageLoading",
+                "type": "composite",
+                "description": "Full-content-area loading spinner for transition_overlay",
+                "path": "src/components/PageLoading.tsx"
             }
         ],
         "layout": [

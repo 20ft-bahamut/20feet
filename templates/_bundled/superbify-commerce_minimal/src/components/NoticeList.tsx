@@ -68,7 +68,8 @@ export function NoticeList({
     const safeItems = Array.isArray(items) ? items.filter((it) => it && it.isFixture !== true) : [];
     const visible = typeof limit === 'number' ? safeItems.slice(0, limit) : safeItems;
 
-    if (!loading && visible.length === 0) {
+    const isPending = items === undefined; // undefined = 데이터 미로딩
+    if (!loading && !isPending && visible.length === 0) {
         return (
             <Div className={className} data-testid="notice-list" data-state="empty">
                 <EmptyState title={emptyTitle} message={emptyMessage} />
@@ -85,9 +86,9 @@ export function NoticeList({
                 borderTop: '1px solid var(--scm-line, #E4DCCE)',
             }}
             data-testid="notice-list"
-            data-loading={loading ? 'true' : 'false'}
+            data-loading={loading || isPending ? 'true' : 'false'}
         >
-            {loading
+            {loading || isPending
                 ? Array.from({ length: 4 }).map((_, idx) => <SkeletonRow key={`skeleton-${idx}`} />)
                 : visible.map((item) => (
                       <A

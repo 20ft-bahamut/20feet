@@ -267,7 +267,7 @@
             "id": "mypage_orders_empty",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{!(orders?.loading ?? false) && ((orders?.data?.data?.length ?? 0) === 0)}}",
+            "if": "{{orders !== undefined && (orders?.data?.data?.length ?? 0) === 0}}",
             "props": {
                 "title": "$t:superbify.mypage.orders.empty",
                 "ctaLabel": "$t:superbify.cart.cta_shop",

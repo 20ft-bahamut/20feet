@@ -890,7 +890,7 @@
                                 "props": {
                                     "title": "$t:superbify.product.related_title",
                                     "eyebrow": "$t:superbify.product.related_eyebrow",
-                                    "items": "{{related_products?.data?.data ?? related_products?.data ?? []}}",
+                                    "items": "{{related_products?.data?.data ?? related_products?.data}}",
                                     "limit": 4
                                 }
                             }
@@ -899,5 +899,17 @@
                 ]
             }
         ]
+    },
+    "transition_overlay": {
+        "enabled": true,
+        "style": "spinner",
+        "wait_for": [
+            "product_detail"
+        ],
+        "target": "main_content_area",
+        "spinner": {
+            "component": "PageLoading"
+        },
+        "_comment": "데이터 로딩 중 빈 empty-state 플래시 방지 — progressive 소스 fetch 동안 콘텐츠 영역에 PageLoading 표시(sirsoft-basic transition_overlay 패턴)."
     }
 }

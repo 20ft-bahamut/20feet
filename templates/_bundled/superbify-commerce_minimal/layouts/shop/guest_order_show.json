@@ -26,8 +26,19 @@
                     "handler": "sequence",
                     "params": {
                         "actions": [
-                            { "handler": "setState", "params": { "target": "global", "guestOrderToken": "" } },
-                            { "handler": "navigate", "params": { "path": "/shop/guest/orders" } }
+                            {
+                                "handler": "setState",
+                                "params": {
+                                    "target": "global",
+                                    "guestOrderToken": ""
+                                }
+                            },
+                            {
+                                "handler": "navigate",
+                                "params": {
+                                    "path": "/shop/guest/orders"
+                                }
+                            }
                         ]
                     }
                 },
@@ -35,13 +46,26 @@
                     "handler": "sequence",
                     "params": {
                         "actions": [
-                            { "handler": "setState", "params": { "target": "global", "guestOrderToken": "" } },
-                            { "handler": "navigate", "params": { "path": "/shop/guest/orders" } }
+                            {
+                                "handler": "setState",
+                                "params": {
+                                    "target": "global",
+                                    "guestOrderToken": ""
+                                }
+                            },
+                            {
+                                "handler": "navigate",
+                                "params": {
+                                    "path": "/shop/guest/orders"
+                                }
+                            }
                         ]
                     }
                 }
             },
-            "fallback": { "data": null }
+            "fallback": {
+                "data": null
+            }
         }
     ],
     "slots": {
@@ -59,5 +83,17 @@
                 }
             }
         ]
+    },
+    "transition_overlay": {
+        "enabled": true,
+        "style": "spinner",
+        "wait_for": [
+            "scmGuestOrder"
+        ],
+        "target": "main_content_area",
+        "spinner": {
+            "component": "PageLoading"
+        },
+        "_comment": "데이터 로딩 중 빈 empty-state 플래시 방지 — progressive 소스 fetch 동안 콘텐츠 영역에 PageLoading 표시(sirsoft-basic transition_overlay 패턴)."
     }
 }

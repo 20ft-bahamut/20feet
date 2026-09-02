@@ -104,7 +104,7 @@
             "comment": "빈 상태 — SRC EmptyState (BASIC go_shopping 버튼 대신 안내 문구)",
             "type": "composite",
             "name": "EmptyState",
-            "if": "{{!(wishlist?.data?.data ?? []).length}}",
+            "if": "{{wishlist !== undefined && !(wishlist?.data?.data ?? []).length}}",
             "props": {
                 "title": "$t:superbify.mypage.wishlist.title",
                 "message": "$t:superbify.mypage.wishlist.empty"
