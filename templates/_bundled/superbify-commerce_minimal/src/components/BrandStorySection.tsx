@@ -1,5 +1,5 @@
 import React from 'react';
-import { A, Div, H2, Img, P, Span } from './basic';
+import { A, Div, H1, H2, Img, P, Span } from './basic';
 import { resolveSlotImage } from './imageSlots';
 import { brandAssets, brandLogoInk, demoAssets } from './demoAssets';
 
@@ -18,6 +18,8 @@ export interface BrandStorySectionProps {
     layout?: 'split' | 'stacked';
     /** Render the small Still Form emblem stamp under the copy (default off). */
     stamp?: boolean;
+    /** Heading tag. 'h2' (default) for in-page sections; 'h1' for a page hero (e.g. /shop/story). */
+    headingAs?: 'h1' | 'h2';
     /** Stamp visual ink height in px (default 80). */
     stampHeight?: number;
 }
@@ -74,6 +76,7 @@ export function BrandStorySection({
     layout = 'split',
     stamp = false,
     stampHeight = 80,
+    headingAs: HeadingAs = 'h2',
 }: BrandStorySectionProps): React.ReactElement {
     const src = mediaSrc ?? demoAssets.brandStory ?? resolveSlotImage(mediaSlot);
     const isSplit = layout === 'split';
@@ -135,8 +138,10 @@ export function BrandStorySection({
                     }}
                     aria-hidden
                 />
-                {heading ? (
-                    <H2
+                {heading ? (() => {
+                    const HeadingTag = HeadingAs === 'h1' ? H1 : H2;
+                    return (
+                    <HeadingTag
                         style={{
                             fontFamily: 'var(--scm-font-display, system-ui)',
                             fontSize: 'clamp(1.75rem, 3.6vw, 2.625rem)',
@@ -146,11 +151,14 @@ export function BrandStorySection({
                             color: 'var(--scm-text-primary, #26221E)',
                             margin: 0,
                             maxWidth: '20ch',
+                            whiteSpace: 'pre-line',
+                            wordBreak: 'keep-all',
                         }}
                     >
                         {heading}
-                    </H2>
-                ) : null}
+                    </HeadingTag>
+                    );
+                })() : null}
                 {body ? (
                     <P
                         style={{
@@ -159,7 +167,9 @@ export function BrandStorySection({
                             color: 'var(--scm-text-body, #4A4643)',
                             lineHeight: 1.85,
                             margin: 0,
-                            maxWidth: '52ch',
+                            maxWidth: '36em',
+                            whiteSpace: 'pre-line',
+                            wordBreak: 'keep-all',
                         }}
                     >
                         {body}

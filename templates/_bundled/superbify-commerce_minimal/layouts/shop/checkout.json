@@ -119,6 +119,7 @@
                     "refundBankAccountLabel": "$t:superbify.checkout.payment.refund_bank_account",
                     "refundBankHolderLabel": "$t:superbify.checkout.payment.refund_bank_holder",
                     "vbankHelperLabel": "$t:superbify.checkout.payment.vbank_helper",
+                    "depositDueSuffixLabel": "$t:superbify.checkout.payment.deposit_due",
                     "isLoggedIn": "{{_global?.currentUser?.uuid ? true : false}}",
                     "currentUserName": "{{_global.currentUser?.name ?? ''}}",
                     "currentUserPhone": "{{_global.currentUser?.phone ?? ''}}",

@@ -17,6 +17,11 @@ export interface StoreFooterProps {
     shippingLabel?: string;
     /** Label of the external 사업자정보확인 link (from lang); only rendered when configured. */
     verificationLabel?: string;
+    /** Primary nav labels from lang (superbify.nav.*). Defaults keep the English nav. */
+    shopLabel?: string;
+    storyLabel?: string;
+    noticeLabel?: string;
+    cartLabel?: string;
     /**
      * Test/diagnostic injection point for the resolved field list.
      * When supplied, the StoreFooter renders exactly this list and skips
@@ -45,5 +50,5 @@ export interface StoreFooterProps {
     /** Override the shop base URL. Defaults to getShopBase(). */
     shopBase?: string;
 }
-export declare function StoreFooter({ brandName, tagline, copyright, className, navItems, demoNotice, termsLabel, privacyLabel, shippingLabel, verificationLabel, infoFields, disableLiveShopInfo, shopInfoEndpoint, fetchImpl, shopBase, }: StoreFooterProps): React.ReactElement;
+export declare function StoreFooter({ brandName, tagline, copyright, className, navItems, demoNotice, termsLabel, privacyLabel, shippingLabel, verificationLabel, shopLabel, storyLabel, noticeLabel, cartLabel, infoFields, disableLiveShopInfo, shopInfoEndpoint, fetchImpl, shopBase, }: StoreFooterProps): React.ReactElement;
 export default StoreFooter;

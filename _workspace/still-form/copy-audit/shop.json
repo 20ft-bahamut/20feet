@@ -1,0 +1,1436 @@
+{
+ "area": "shop",
+ "entries": [
+  {
+   "flag": "",
+   "key": "routes.shop.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/index.json:7 (meta.title)",
+   "page": "shop",
+   "text_en": "Shop — Still Form",
+   "text_ko": "Shop — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.shop.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/index.json:8 (meta.description)",
+   "page": "shop",
+   "text_en": "All products",
+   "text_ko": "전체 상품 목록"
+  },
+  {
+   "flag": "",
+   "key": "shop.title",
+   "kind": "heading",
+   "location": "layouts/shop/index.json:93 (shop_index_heading)",
+   "page": "shop",
+   "text_en": "Shop",
+   "text_ko": "Shop"
+  },
+  {
+   "flag": "",
+   "key": "home.featured_categories.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/index.json:79 (shop_index_eyebrow)",
+   "page": "shop",
+   "text_en": "CATEGORIES",
+   "text_ko": "CATEGORIES"
+  },
+  {
+   "flag": "",
+   "key": "shop.filter_label",
+   "kind": "label",
+   "location": "layouts/shop/index.json:102 (CategoryNav.title)",
+   "page": "shop",
+   "text_en": "Categories",
+   "text_ko": "카테고리"
+  },
+  {
+   "flag": "",
+   "key": "common.all",
+   "kind": "label",
+   "location": "layouts/shop/index.json:103 (CategoryNav.allLabel)",
+   "page": "shop",
+   "text_en": "All",
+   "text_ko": "전체"
+  },
+  {
+   "flag": "",
+   "key": "shop.empty_title",
+   "kind": "empty-state",
+   "location": "layouts/shop/index.json:115 (ProductGrid.emptyTitle)",
+   "page": "shop",
+   "text_en": "No products yet",
+   "text_ko": "아직 등록된 상품이 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "shop.empty_message",
+   "kind": "empty-state",
+   "location": "layouts/shop/index.json:116 (ProductGrid.emptyMessage)",
+   "page": "shop",
+   "text_en": "Add products in admin and they will appear here.",
+   "text_ko": "관리자에서 상품을 등록하면 이 자리에 표시됩니다."
+  },
+  {
+   "flag": "",
+   "key": "product.quick_add",
+   "kind": "button",
+   "location": "layouts/shop/index.json:117 (ProductGrid.quickAddLabel)",
+   "page": "shop",
+   "text_en": "Add",
+   "text_ko": "담기"
+  },
+  {
+   "flag": "하드코딩 영문 + 미사용 ko 키 — ko.json의 category.count_label '{{count}}개 상품'이 정의되어 있으나 category.json:80에서 '+ ' items'' 영문 리터럴이 그대로 노출됨",
+   "key": "inline literal",
+   "kind": "label",
+   "location": "layouts/shop/category.json:80 (shop_category_count)",
+   "page": "category",
+   "text_en": "items",
+   "text_ko": "+ ' items' (영문 하드코딩, ko 카피 부재)"
+  },
+  {
+   "flag": "",
+   "key": "routes.category.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/category.json:7 (meta.title)",
+   "page": "category",
+   "text_en": "Category — Still Form",
+   "text_ko": "Category — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.category.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/category.json:8 (meta.description)",
+   "page": "category",
+   "text_en": "Products in this category",
+   "text_ko": "카테고리별 상품"
+  },
+  {
+   "flag": "",
+   "key": "category.empty_title",
+   "kind": "empty-state",
+   "location": "layouts/shop/category.json:89 (ProductGrid.emptyTitle)",
+   "page": "category",
+   "text_en": "No products in this category",
+   "text_ko": "이 카테고리에 등록된 상품이 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "category.empty_message",
+   "kind": "empty-state",
+   "location": "layouts/shop/category.json:90 (ProductGrid.emptyMessage)",
+   "page": "category",
+   "text_en": "Try another category or check back later.",
+   "text_ko": "다른 카테고리를 둘러보거나, 잠시 후 다시 확인해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "routes.product.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/product.json:7 (meta.title)",
+   "page": "product",
+   "text_en": "Product — Still Form",
+   "text_ko": "Product — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.product.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/product.json:8 (meta.description)",
+   "page": "product",
+   "text_en": "Product detail",
+   "text_ko": "상품 상세"
+  },
+  {
+   "flag": "",
+   "key": "product.admin_edit",
+   "kind": "label",
+   "location": "layouts/shop/product.json:185 (shop_product_admin_edit title)",
+   "page": "product",
+   "text_en": "Admin edit",
+   "text_ko": "관리자 수정"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.category",
+   "kind": "label",
+   "location": "layouts/shop/product.json:272 (shop_product_kv_category_th)",
+   "page": "product",
+   "text_en": "Category",
+   "text_ko": "분류"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.status",
+   "kind": "label",
+   "location": "layouts/shop/product.json:303 (shop_product_kv_status_th)",
+   "page": "product",
+   "text_en": "Status",
+   "text_ko": "상태"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.shipping",
+   "kind": "label",
+   "location": "layouts/shop/product.json:335 (shop_product_kv_shipping_th)",
+   "page": "product",
+   "text_en": "Shipping",
+   "text_ko": "배송"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.shipping_fee",
+   "kind": "label",
+   "location": "layouts/shop/product.json:367 (shop_product_kv_shipping_fee_th)",
+   "page": "product",
+   "text_en": "Shipping fee",
+   "text_ko": "배송비"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.free_shipping_threshold",
+   "kind": "label",
+   "location": "layouts/shop/product.json:399 (shop_product_kv_free_shipping_th)",
+   "page": "product",
+   "text_en": "Free shipping",
+   "text_ko": "무료배송"
+  },
+  {
+   "flag": "",
+   "key": "product.kv.free_shipping_over",
+   "kind": "label",
+   "location": "layouts/shop/product.json:410 (shop_product_kv_free_shipping_td)",
+   "page": "product",
+   "text_en": "Free over :amount",
+   "text_ko": ":amount 이상 무료"
+  },
+  {
+   "flag": "",
+   "key": "product.coupon.guest_hint",
+   "kind": "toast/error",
+   "location": "layouts/shop/product.json:423 (CouponDownloadBadges.guestMessage)",
+   "page": "product",
+   "text_en": "Sign in to download coupons.",
+   "text_ko": "로그인 후 다운로드할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "product.coupon.login_required_toast",
+   "kind": "toast/error",
+   "location": "layouts/shop/product.json:424 (CouponDownloadBadges.loginRequiredToastMessage)",
+   "page": "product",
+   "text_en": "Sign-in required.",
+   "text_ko": "로그인이 필요합니다."
+  },
+  {
+   "flag": "",
+   "key": "product.coupon.download_success",
+   "kind": "toast/error",
+   "location": "layouts/shop/product.json:425 (CouponDownloadBadges.downloadSuccessMessage)",
+   "page": "product",
+   "text_en": "Coupon downloaded.",
+   "text_ko": "쿠폰이 다운로드되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "product.coupon.download_failed",
+   "kind": "toast/error",
+   "location": "layouts/shop/product.json:426 (CouponDownloadBadges.downloadFailedMessage)",
+   "page": "product",
+   "text_en": "Coupon download failed.",
+   "text_ko": "쿠폰 다운로드에 실패했습니다."
+  },
+  {
+   "flag": "",
+   "key": "cart.add_to_cart",
+   "kind": "button",
+   "location": "layouts/shop/product.json:438 (PurchasePanel.addToCartLabel)",
+   "page": "product",
+   "text_en": "Add to cart",
+   "text_ko": "장바구니 담기"
+  },
+  {
+   "flag": "",
+   "key": "cart.buy_now",
+   "kind": "button",
+   "location": "layouts/shop/product.json:439 (PurchasePanel.buyNowLabel)",
+   "page": "product",
+   "text_en": "Buy now",
+   "text_ko": "바로구매"
+  },
+  {
+   "flag": "",
+   "key": "cart.quantity",
+   "kind": "label",
+   "location": "layouts/shop/product.json:440 (PurchasePanel.quantityLabel)",
+   "page": "product",
+   "text_en": "Quantity",
+   "text_ko": "수량"
+  },
+  {
+   "flag": "",
+   "key": "cart.sold_out",
+   "kind": "label",
+   "location": "layouts/shop/product.json:441 (PurchasePanel.soldOutLabel)",
+   "page": "product",
+   "text_en": "Sold out",
+   "text_ko": "품절"
+  },
+  {
+   "flag": "",
+   "key": "cart.stopped",
+   "kind": "label",
+   "location": "layouts/shop/product.json:442 (PurchasePanel.stoppedLabel)",
+   "page": "product",
+   "text_en": "Stopped",
+   "text_ko": "판매중지"
+  },
+  {
+   "flag": "",
+   "key": "product.description_label",
+   "kind": "label",
+   "location": "layouts/shop/product.json:493 (shop_product_description_eyebrow)",
+   "page": "product",
+   "text_en": "PRODUCT",
+   "text_ko": "PRODUCT"
+  },
+  {
+   "flag": "",
+   "key": "product.description_title",
+   "kind": "heading",
+   "location": "layouts/shop/product.json:507 (shop_product_description_title)",
+   "page": "product",
+   "text_en": "Description",
+   "text_ko": "상품 설명"
+  },
+  {
+   "flag": "",
+   "key": "product.info_label",
+   "kind": "label",
+   "location": "layouts/shop/product.json:584 (shop_product_info_eyebrow)",
+   "page": "product",
+   "text_en": "INFO",
+   "text_ko": "INFO"
+  },
+  {
+   "flag": "",
+   "key": "product.info_title",
+   "kind": "heading",
+   "location": "layouts/shop/product.json:598 (shop_product_info_title)",
+   "page": "product",
+   "text_en": "Information",
+   "text_ko": "안내"
+  },
+  {
+   "flag": "",
+   "key": "product.info.material",
+   "kind": "label",
+   "location": "layouts/shop/product.json:636 (shop_product_info_material_label)",
+   "page": "product",
+   "text_en": "Material",
+   "text_ko": "소재"
+  },
+  {
+   "flag": "",
+   "key": "product.info.material_body",
+   "kind": "policy/longform",
+   "location": "layouts/shop/product.json:651 (shop_product_info_material_body)",
+   "page": "product",
+   "text_en": "Material-specific care instructions are listed on the product detail page. Store away from direct sunlight in a well-ventilated space.",
+   "text_ko": "상품 상세 페이지에서 재질별 관리 방법을 안내합니다. 일반적으로 직사광선을 피해 통풍이 잘 되는 곳에서 보관해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "product.info.size",
+   "kind": "label",
+   "location": "layouts/shop/product.json:666 (shop_product_info_size_label)",
+   "page": "product",
+   "text_en": "Size",
+   "text_ko": "사이즈"
+  },
+  {
+   "flag": "",
+   "key": "product.info.size_body",
+   "kind": "policy/longform",
+   "location": "layouts/shop/product.json:681 (shop_product_info_size_body)",
+   "page": "product",
+   "text_en": "Refer to the size chart on the product detail page. Allow 1–2 cm variance depending on how each piece is measured.",
+   "text_ko": "상세 사이즈는 상품 상세 정보의 치수 표를 참고해 주세요. 측정 방법에 따라 1~2cm의 오차가 생길 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "product.info.care",
+   "kind": "label",
+   "location": "layouts/shop/product.json:695 (shop_product_info_care_label)",
+   "page": "product",
+   "text_en": "Care",
+   "text_ko": "관리"
+  },
+  {
+   "flag": "",
+   "key": "product.info.care_body",
+   "kind": "policy/longform",
+   "location": "layouts/shop/product.json:709 (shop_product_info_care_body)",
+   "page": "product",
+   "text_en": "Wipe gently with a soft dry cloth before first use. Avoid harsh detergents or abrasives; a soft cloth is enough for daily care.",
+   "text_ko": "사용 전 부드러운 천으로 가볍게 닦아 주세요. 강한 세제나 연마제는 사용하지 마시고, 필요할 때 부드러운 행주로 관리해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "product.shipping_label",
+   "kind": "label",
+   "location": "layouts/shop/product.json:769 (shop_product_shipping_eyebrow)",
+   "page": "product",
+   "text_en": "SHIPPING",
+   "text_ko": "SHIPPING"
+  },
+  {
+   "flag": "",
+   "key": "product.shipping_title",
+   "kind": "heading",
+   "location": "layouts/shop/product.json:783 (shop_product_shipping_title)",
+   "page": "product",
+   "text_en": "Shipping & returns",
+   "text_ko": "배송 안내"
+  },
+  {
+   "flag": "",
+   "key": "product.shipping_body",
+   "kind": "policy/longform",
+   "location": "layouts/shop/product.json:800 (shop_product_shipping_body)",
+   "page": "product",
+   "text_en": "Orders ship within 2–3 business days and typically arrive 1–2 days after dispatch. Shipping fees are shown at checkout. Remote areas may incur an additional surcharge.",
+   "text_ko": "평일 기준 2~3일 내 출고되며, 출고 후 1~2일 내 배송이 완료됩니다. 배송비는 결제 단계에서 안내됩니다. 도서산간 지역은 추가 비용이 발생할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "home.story.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/product.json:865 (BrandStorySection.eyebrow)",
+   "page": "product",
+   "text_en": "BRAND STORY",
+   "text_ko": "BRAND STORY"
+  },
+  {
+   "flag": "",
+   "key": "home.story.heading",
+   "kind": "heading",
+   "location": "layouts/shop/product.json:866 (BrandStorySection.heading)",
+   "page": "product",
+   "text_en": "Things that grow better with time",
+   "text_ko": "오래 쓸수록 익어지는 것들"
+  },
+  {
+   "flag": "",
+   "key": "home.story.body",
+   "kind": "main-copy",
+   "location": "layouts/shop/product.json:867 (BrandStorySection.body)",
+   "page": "product",
+   "text_en": "Still Form gathers objects that hold their character through years of use.",
+   "text_ko": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 목재, 리넨, 도자기 — 손에 닿는 재질이 스스로 말을 거는 물건을 골라 천천히 소개합니다. 화려함보다 차분함, 새것보다 익은 것을 우선합니다."
+  },
+  {
+   "flag": "",
+   "key": "home.hero.cta_secondary",
+   "kind": "button",
+   "location": "layouts/shop/product.json:868 (BrandStorySection.ctaLabel)",
+   "page": "product",
+   "text_en": "Brand Story",
+   "text_ko": "Brand Story"
+  },
+  {
+   "flag": "",
+   "key": "product.related_title",
+   "kind": "heading",
+   "location": "layouts/shop/product.json:891 (RelatedProducts.title)",
+   "page": "product",
+   "text_en": "You might also like",
+   "text_ko": "함께 보면 좋은 것들"
+  },
+  {
+   "flag": "",
+   "key": "product.related_eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/product.json:892 (RelatedProducts.eyebrow)",
+   "page": "product",
+   "text_en": "RELATED",
+   "text_ko": "RELATED"
+  },
+  {
+   "flag": "",
+   "key": "routes.cart.title",
+   "kind": "seo/meta",
+   "location": "layouts/cart.json:7 (meta.title)",
+   "page": "cart",
+   "text_en": "Cart — Still Form",
+   "text_ko": "Cart — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.cart.description",
+   "kind": "seo/meta",
+   "location": "layouts/cart.json:8 (meta.description)",
+   "page": "cart",
+   "text_en": "Shopping cart",
+   "text_ko": "장바구니"
+  },
+  {
+   "flag": "번역투 — 영문 식 eyebrow 'SHOPPING BAG'를 한국어 화면에 그대로 노출",
+   "key": "cart.eyebrow",
+   "kind": "label",
+   "location": "layouts/cart.json:86 (cart_page_eyebrow)",
+   "page": "cart",
+   "text_en": "SHOPPING BAG",
+   "text_ko": "SHOPPING BAG"
+  },
+  {
+   "flag": "",
+   "key": "cart.title",
+   "kind": "heading",
+   "location": "layouts/cart.json:100 (cart_page_title)",
+   "page": "cart",
+   "text_en": "Cart",
+   "text_ko": "Cart"
+  },
+  {
+   "flag": "",
+   "key": "cart.empty_title",
+   "kind": "empty-state",
+   "location": "layouts/cart.json:110 (EmptyState.title)",
+   "page": "cart",
+   "text_en": "Your cart is empty",
+   "text_ko": "장바구니가 비어 있습니다"
+  },
+  {
+   "flag": "",
+   "key": "cart.empty_message",
+   "kind": "empty-state",
+   "location": "layouts/cart.json:111 (EmptyState.message)",
+   "page": "cart",
+   "text_en": "Browse the shop and add something you like.",
+   "text_ko": "Shop 페이지에서 상품을 담아보세요."
+  },
+  {
+   "flag": "",
+   "key": "cart.cta_shop",
+   "kind": "button",
+   "location": "layouts/cart.json:112 (EmptyState.ctaLabel)",
+   "page": "cart",
+   "text_en": "Go to Shop",
+   "text_ko": "Shop으로 이동"
+  },
+  {
+   "flag": "",
+   "key": "cart.quantity",
+   "kind": "label",
+   "location": "layouts/cart.json:157 (CartItemRow.quantityLabel)",
+   "page": "cart",
+   "text_en": "Quantity",
+   "text_ko": "수량"
+  },
+  {
+   "flag": "",
+   "key": "cart.delete",
+   "kind": "button",
+   "location": "layouts/cart.json:158 (CartItemRow.deleteLabel)",
+   "page": "cart",
+   "text_en": "Delete",
+   "text_ko": "삭제"
+  },
+  {
+   "flag": "",
+   "key": "cart.apply",
+   "kind": "button",
+   "location": "layouts/cart.json:159 (CartItemRow.applyLabel)",
+   "page": "cart",
+   "text_en": "Apply",
+   "text_ko": "변경"
+  },
+  {
+   "flag": "",
+   "key": "cart.delete_confirm_title",
+   "kind": "label",
+   "location": "layouts/cart.json:160 (CartItemRow.deleteConfirmTitle)",
+   "page": "cart",
+   "text_en": "Delete this item?",
+   "text_ko": "상품을 삭제할까요?"
+  },
+  {
+   "flag": "확인 모달 메시지인데 평서문 종결 — 의문형/경고 톤 부재",
+   "key": "cart.delete_confirm_single",
+   "kind": "policy/longform",
+   "location": "layouts/cart.json:161 (CartItemRow.deleteConfirmMessage)",
+   "page": "cart",
+   "text_en": "The selected item will be removed from your cart.",
+   "text_ko": "선택한 상품을 장바구니에서 삭제합니다."
+  },
+  {
+   "flag": "",
+   "key": "common.cancel",
+   "kind": "button",
+   "location": "layouts/cart.json:163 (CartItemRow.deleteConfirmCancelLabel)",
+   "page": "cart",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "flag": "번역투 — 영문 식 eyebrow를 한국어 화면에 그대로 노출",
+   "key": "cart.cross_sell.eyebrow",
+   "kind": "label",
+   "location": "layouts/cart.json:173 (CrossSellStrip.eyebrow)",
+   "page": "cart",
+   "text_en": "YOU MAY ALSO LIKE",
+   "text_ko": "YOU MAY ALSO LIKE"
+  },
+  {
+   "flag": "",
+   "key": "cart.cross_sell.title",
+   "kind": "heading",
+   "location": "layouts/cart.json:174 (CrossSellStrip.title)",
+   "page": "cart",
+   "text_en": "You may also like",
+   "text_ko": "함께 보면 좋은 상품"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_title",
+   "kind": "heading",
+   "location": "layouts/cart.json:189 (CartSummary.summaryTitle)",
+   "page": "cart",
+   "text_en": "Order summary",
+   "text_ko": "주문 요약"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_items",
+   "kind": "label",
+   "location": "layouts/cart.json:190 (CartSummary.itemsLabel)",
+   "page": "cart",
+   "text_en": "Items",
+   "text_ko": "상품 수"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_subtotal",
+   "kind": "label",
+   "location": "layouts/cart.json:191 (CartSummary.subtotalLabel)",
+   "page": "cart",
+   "text_en": "Subtotal",
+   "text_ko": "소계"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_shipping",
+   "kind": "label",
+   "location": "layouts/cart.json:192 (CartSummary.shippingLabel)",
+   "page": "cart",
+   "text_en": "Shipping",
+   "text_ko": "배송비"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_total",
+   "kind": "label",
+   "location": "layouts/cart.json:193 (CartSummary.totalLabel)",
+   "page": "cart",
+   "text_en": "Total",
+   "text_ko": "총 결제금액"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_checkout",
+   "kind": "button",
+   "location": "layouts/cart.json:194 (CartSummary.checkoutLabel)",
+   "page": "cart",
+   "text_en": "Checkout",
+   "text_ko": "결제하기"
+  },
+  {
+   "flag": "",
+   "key": "cart.summary_continue_shopping",
+   "kind": "button",
+   "location": "layouts/cart.json:195 (CartSummary.continueShoppingLabel)",
+   "page": "cart",
+   "text_en": "Continue shopping",
+   "text_ko": "쇼핑 계속하기"
+  },
+  {
+   "flag": "",
+   "key": "routes.checkout.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/checkout.json:7 (meta.title)",
+   "page": "checkout",
+   "text_en": "Checkout — Still Form",
+   "text_ko": "Checkout — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.checkout.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/checkout.json:8 (meta.description)",
+   "page": "checkout",
+   "text_en": "Checkout",
+   "text_ko": "결제"
+  },
+  {
+   "flag": "",
+   "key": "checkout.shipping.saved_addresses",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:94 (CheckoutPage.savedAddressTitle)",
+   "page": "checkout",
+   "text_en": "Saved addresses",
+   "text_ko": "저장된 배송지"
+  },
+  {
+   "flag": "",
+   "key": "checkout.shipping.manage",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:95 (CheckoutPage.manageAddressesLabel)",
+   "page": "checkout",
+   "text_en": "Manage addresses",
+   "text_ko": "배송지 관리"
+  },
+  {
+   "flag": "",
+   "key": "checkout.shipping.same_as_orderer",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:96 (CheckoutPage.sameAsOrdererLabel)",
+   "page": "checkout",
+   "text_en": "Same as orderer",
+   "text_ko": "주문자 정보와 동일"
+  },
+  {
+   "flag": "체크박스 라벨인데 평서문 종결 — 라벨/체크 항목 톤과 불일치",
+   "key": "checkout.shipping.save_address",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:97 (CheckoutPage.saveAddressLabel)",
+   "page": "checkout",
+   "text_en": "Save this address",
+   "text_ko": "입력한 배송지를 저장합니다"
+  },
+  {
+   "flag": "",
+   "key": "checkout.shipping.country",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:98 (CheckoutPage.countryLabel)",
+   "page": "checkout",
+   "text_en": "Shipping country",
+   "text_ko": "배송국가"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.title",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:99 (CheckoutPage.discountSectionTitle)",
+   "page": "checkout",
+   "text_en": "Discount · Coupons",
+   "text_ko": "할인 · 쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.download",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:100 (CheckoutPage.couponDownloadLabel)",
+   "page": "checkout",
+   "text_en": "Download coupons",
+   "text_ko": "쿠폰 다운로드"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.order_coupon",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:101 (CheckoutPage.orderCouponLabel)",
+   "page": "checkout",
+   "text_en": "Order coupon",
+   "text_ko": "주문 쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.shipping_coupon",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:102 (CheckoutPage.shippingCouponLabel)",
+   "page": "checkout",
+   "text_en": "Shipping coupon",
+   "text_ko": "배송비 쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.no_available",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:103 (CheckoutPage.couponNoAvailableLabel)",
+   "page": "checkout",
+   "text_en": "No coupons available",
+   "text_ko": "사용 가능한 쿠폰이 없습니다"
+  },
+  {
+   "flag": "단독 노출 시 '개 보유' 어순이 어색 — 수량 단위와 결합되어야 자연스러움",
+   "key": "checkout.discount.count_suffix",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:104 (CheckoutPage.couponCountSuffixLabel)",
+   "page": "checkout",
+   "text_en": "available",
+   "text_ko": "개 보유"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.already_used",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:105 (CheckoutPage.couponAlreadyUsedLabel)",
+   "page": "checkout",
+   "text_en": "Already applied",
+   "text_ko": "이미 적용됨"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.select_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/checkout.json:106 (CheckoutPage.couponSelectPlaceholder)",
+   "page": "checkout",
+   "text_en": "Select a coupon",
+   "text_ko": "쿠폰을 선택하세요"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.discount_code",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:107 (CheckoutPage.discountCodeLabel)",
+   "page": "checkout",
+   "text_en": "Discount code",
+   "text_ko": "할인코드"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.discount_code_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/checkout.json:108 (CheckoutPage.discountCodePlaceholder)",
+   "page": "checkout",
+   "text_en": "Enter discount code",
+   "text_ko": "할인코드를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "checkout.discount.apply",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:109 (CheckoutPage.discountCodeApplyLabel)",
+   "page": "checkout",
+   "text_en": "Apply",
+   "text_ko": "적용"
+  },
+  {
+   "flag": "",
+   "key": "checkout.mileage.title",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:110 (CheckoutPage.mileageSectionTitle)",
+   "page": "checkout",
+   "text_en": "Mileage",
+   "text_ko": "적립금"
+  },
+  {
+   "flag": "",
+   "key": "checkout.mileage.available",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:111 (CheckoutPage.mileageAvailableLabel)",
+   "page": "checkout",
+   "text_en": "Available mileage",
+   "text_ko": "보유 적립금"
+  },
+  {
+   "flag": "",
+   "key": "checkout.mileage.use_all",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:112 (CheckoutPage.mileageUseAllLabel)",
+   "page": "checkout",
+   "text_en": "Use all",
+   "text_ko": "전액 사용"
+  },
+  {
+   "flag": "",
+   "key": "checkout.mileage.apply",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:113 (CheckoutPage.mileageApplyLabel)",
+   "page": "checkout",
+   "text_en": "Apply",
+   "text_ko": "적용"
+  },
+  {
+   "flag": "",
+   "key": "checkout.mileage.input_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/checkout.json:114 (CheckoutPage.mileageInputPlaceholder)",
+   "page": "checkout",
+   "text_en": "Points to use",
+   "text_ko": "사용할 적립금"
+  },
+  {
+   "flag": "",
+   "key": "checkout.summary.points_used",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:115 (CheckoutPage.pointsUsedLabel)",
+   "page": "checkout",
+   "text_en": "Mileage",
+   "text_ko": "적립금 사용"
+  },
+  {
+   "flag": "",
+   "key": "checkout.summary.shipping_coupon",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:116 (CheckoutPage.shippingCouponDiscountLabel)",
+   "page": "checkout",
+   "text_en": "Shipping coupon discount",
+   "text_ko": "배송비 쿠폰 할인"
+  },
+  {
+   "flag": "",
+   "key": "checkout.payment.refund_bank",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:117 (CheckoutPage.refundBankTitle)",
+   "page": "checkout",
+   "text_en": "Refund bank account",
+   "text_ko": "환불 계좌"
+  },
+  {
+   "flag": "",
+   "key": "checkout.payment.refund_bank_code",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:118 (CheckoutPage.refundBankCodeLabel)",
+   "page": "checkout",
+   "text_en": "Bank",
+   "text_ko": "은행"
+  },
+  {
+   "flag": "",
+   "key": "checkout.payment.refund_bank_account",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:119 (CheckoutPage.refundBankAccountLabel)",
+   "page": "checkout",
+   "text_en": "Account number",
+   "text_ko": "계좌번호"
+  },
+  {
+   "flag": "",
+   "key": "checkout.payment.refund_bank_holder",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:120 (CheckoutPage.refundBankHolderLabel)",
+   "page": "checkout",
+   "text_en": "Account holder",
+   "text_ko": "예금주"
+  },
+  {
+   "flag": "번역투 — 영문 helper 직역, '직접 입금' 표현이 '가상계좌'와 의미상 미스매치",
+   "key": "checkout.payment.vbank_helper",
+   "kind": "policy/longform",
+   "location": "layouts/shop/checkout.json:121 (CheckoutPage.vbankHelperLabel)",
+   "page": "checkout",
+   "text_en": "Orders are auto-cancelled after the deposit deadline.",
+   "text_ko": "직접 입금 기한 이후에는 주문이 자동 취소됩니다."
+  },
+  {
+   "flag": "",
+   "key": "checkout.page_title",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:127 (CheckoutPage.title)",
+   "page": "checkout",
+   "text_en": "Checkout",
+   "text_ko": "주문/결제"
+  },
+  {
+   "flag": "",
+   "key": "checkout.loading",
+   "kind": "empty-state",
+   "location": "layouts/shop/checkout.json:128 (CheckoutPage.loadingLabel)",
+   "page": "checkout",
+   "text_en": "Loading checkout…",
+   "text_ko": "주문 정보를 불러오는 중…"
+  },
+  {
+   "flag": "",
+   "key": "checkout.empty_title",
+   "kind": "heading",
+   "location": "layouts/shop/checkout.json:129 (CheckoutPage.emptyTempOrderTitle)",
+   "page": "checkout",
+   "text_en": "Cannot create checkout",
+   "text_ko": "주문 정보를 만들 수 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "checkout.back_to_cart",
+   "kind": "button",
+   "location": "layouts/shop/checkout.json:130 (CheckoutPage.backToShopLabel)",
+   "page": "checkout",
+   "text_en": "Back to cart",
+   "text_ko": "장바구니로 돌아가기"
+  },
+  {
+   "flag": "",
+   "key": "checkout.submit_error_title",
+   "kind": "toast/error",
+   "location": "layouts/shop/checkout.json:131 (CheckoutPage.submitErrorTitle)",
+   "page": "checkout",
+   "text_en": "Something went wrong while placing your order",
+   "text_ko": "주문 처리 중 문제가 발생했습니다"
+  },
+  {
+   "flag": "",
+   "key": "checkout.order_failed_fallback",
+   "kind": "toast/error",
+   "location": "layouts/shop/checkout.json:132 (CheckoutPage.orderFailedFallback)",
+   "page": "checkout",
+   "text_en": "Please try again in a moment.",
+   "text_ko": "잠시 후 다시 시도해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "checkout.progress.cart",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:133 (CheckoutPage.progressCartLabel)",
+   "page": "checkout",
+   "text_en": "Cart",
+   "text_ko": "장바구니"
+  },
+  {
+   "flag": "",
+   "key": "checkout.progress.checkout",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:134 (CheckoutPage.progressCheckoutLabel)",
+   "page": "checkout",
+   "text_en": "Checkout",
+   "text_ko": "주문/결제"
+  },
+  {
+   "flag": "",
+   "key": "checkout.progress.complete",
+   "kind": "label",
+   "location": "layouts/shop/checkout.json:135 (CheckoutPage.progressCompleteLabel)",
+   "page": "checkout",
+   "text_en": "Complete",
+   "text_ko": "완료"
+  },
+  {
+   "flag": "",
+   "key": "routes.guest_order_form.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/guest_order_form.json:7 (meta.title)",
+   "page": "guest_order_form",
+   "text_en": "Guest Order Lookup — Still Form",
+   "text_ko": "비회원 주문 조회 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.guest_order_form.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/guest_order_form.json:8 (meta.description)",
+   "page": "guest_order_form",
+   "text_en": "Look up your order by order number",
+   "text_ko": "주문번호로 주문 내역을 확인합니다"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.title",
+   "kind": "heading",
+   "location": "layouts/shop/guest_order_form.json:96 (H1)",
+   "page": "guest_order_form",
+   "text_en": "Guest order lookup",
+   "text_ko": "비회원 주문 조회"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.subtitle",
+   "kind": "main-copy",
+   "location": "layouts/shop/guest_order_form.json:107 (P)",
+   "page": "guest_order_form",
+   "text_en": "Use your order number, phone, and lookup password to see your order again.",
+   "text_ko": "주문 시 입력한 주문번호와 휴대폰, 조회 비밀번호로 주문 내역을 다시 확인할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.not_found",
+   "kind": "toast/error",
+   "location": "layouts/shop/guest_order_form.json:125 (guest_order_form_error)",
+   "page": "guest_order_form",
+   "text_en": "Order not found. Please check your details and try again.",
+   "text_ko": "주문을 찾을 수 없습니다. 주문번호, 휴대폰, 비밀번호를 다시 확인해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.order_number",
+   "kind": "label",
+   "location": "layouts/shop/guest_order_form.json:159 (Label)",
+   "page": "guest_order_form",
+   "text_en": "Order number",
+   "text_ko": "주문번호"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.order_number_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/guest_order_form.json:167 (Input.placeholder)",
+   "page": "guest_order_form",
+   "text_en": "Order number",
+   "text_ko": "주문번호 입력"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.orderer_phone",
+   "kind": "label",
+   "location": "layouts/shop/guest_order_form.json:210 (Label)",
+   "page": "guest_order_form",
+   "text_en": "Orderer phone",
+   "text_ko": "주문자 휴대폰"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.orderer_phone_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/guest_order_form.json:218 (Input.placeholder)",
+   "page": "guest_order_form",
+   "text_en": "010-0000-0000",
+   "text_ko": "010-0000-0000"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.password",
+   "kind": "label",
+   "location": "layouts/shop/guest_order_form.json:260 (Label)",
+   "page": "guest_order_form",
+   "text_en": "Lookup password",
+   "text_ko": "조회 비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.password_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/shop/guest_order_form.json:268 (Input.placeholder)",
+   "page": "guest_order_form",
+   "text_en": "Password set at checkout",
+   "text_ko": "결제 시 설정한 비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.password_hint",
+   "kind": "main-copy",
+   "location": "layouts/shop/guest_order_form.json:299 (P)",
+   "page": "guest_order_form",
+   "text_en": "Set per order at checkout.",
+   "text_ko": "비밀번호는 주문마다 새로 설정한 값입니다."
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.submit",
+   "kind": "button",
+   "location": "layouts/shop/guest_order_form.json:324 (Button.text)",
+   "page": "guest_order_form",
+   "text_en": "Look up order",
+   "text_ko": "주문 조회"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.submitting",
+   "kind": "button",
+   "location": "layouts/shop/guest_order_form.json:324 (Button.text — submitting branch)",
+   "page": "guest_order_form",
+   "text_en": "Checking…",
+   "text_ko": "확인 중…"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_form.notice",
+   "kind": "policy/longform",
+   "location": "layouts/shop/guest_order_form.json:415 (P)",
+   "page": "guest_order_form",
+   "text_en": "After lookup, you have 30 minutes to view the order or change the shipping address.",
+   "text_ko": "조회 후 주문 상세에서 30분간 주문 조회/배송지 변경이 가능합니다. 30분이 지나면 다시 조회하셔야 합니다."
+  },
+  {
+   "flag": "",
+   "key": "routes.guest_order_show.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/guest_order_show.json:7 (meta.title)",
+   "page": "guest_order_show",
+   "text_en": "Guest Order Detail — Still Form",
+   "text_ko": "비회원 주문 상세 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.guest_order_show.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/guest_order_show.json:8 (meta.description)",
+   "page": "guest_order_show",
+   "text_en": "View your guest order details",
+   "text_ko": "비회원 주문 상세 보기"
+  },
+  {
+   "flag": "",
+   "key": "guest_order_show.title",
+   "kind": "heading",
+   "location": "layouts/shop/guest_order_show.json:57 (OrderCompletePage.title)",
+   "page": "guest_order_show",
+   "text_en": "Guest order detail",
+   "text_ko": "비회원 주문 상세"
+  },
+  {
+   "flag": "정적 페이지 부제인데 진행형 어미('~있습니다') 사용 — 페이지 상태 묘사와 불일치",
+   "key": "guest_order_show.subtitle",
+   "kind": "main-copy",
+   "location": "layouts/shop/guest_order_show.json:58 (OrderCompletePage.successMessage)",
+   "page": "guest_order_show",
+   "text_en": "Re-viewing your order.",
+   "text_ko": "주문 내역을 다시 확인하고 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "routes.order_complete.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/order_complete.json:7 (meta.title)",
+   "page": "order_complete",
+   "text_en": "Order Complete — Still Form",
+   "text_ko": "주문 완료 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.order_complete.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/order_complete.json:8 (meta.description)",
+   "page": "order_complete",
+   "text_en": "Your order has been placed",
+   "text_ko": "주문이 접수되었습니다"
+  },
+  {
+   "flag": "",
+   "key": "routes.reorder",
+   "kind": "seo/meta",
+   "location": "layouts/shop/reorder.json:8 (meta.title)",
+   "page": "reorder",
+   "text_en": "Reorder",
+   "text_ko": "재주문"
+  },
+  {
+   "flag": "",
+   "key": "mypage.orders.processing",
+   "kind": "main-copy",
+   "location": "layouts/shop/reorder.json:46 (reorder_message P)",
+   "page": "reorder",
+   "text_en": "Processing…",
+   "text_ko": "처리 중…"
+  },
+  {
+   "flag": "",
+   "key": "mypage.orders.reorder_success",
+   "kind": "toast/error",
+   "location": "layouts/shop/reorder.json:66 (toast success)",
+   "page": "reorder",
+   "text_en": "The items were added to your cart.",
+   "text_ko": "상품을 장바구니에 담았습니다."
+  },
+  {
+   "flag": "",
+   "key": "errors.server_error_title",
+   "kind": "toast/error",
+   "location": "layouts/shop/reorder.json:84 (toast error fallback)",
+   "page": "reorder",
+   "text_en": "Something went wrong",
+   "text_ko": "문제가 발생했습니다"
+  },
+  {
+   "flag": "",
+   "key": "routes.notice.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/notice.json:7 (meta.title)",
+   "page": "notice",
+   "text_en": "Notice — Still Form",
+   "text_ko": "Notice — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.notice.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/notice.json:8 (meta.description)",
+   "page": "notice",
+   "text_en": "Notices",
+   "text_ko": "공지사항"
+  },
+  {
+   "flag": "",
+   "key": "notice.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:61 (shop_notice_eyebrow)",
+   "page": "notice",
+   "text_en": "NOTICE",
+   "text_ko": "NOTICE"
+  },
+  {
+   "flag": "",
+   "key": "notice.title",
+   "kind": "heading",
+   "location": "layouts/shop/notice.json:74 (shop_notice_title H1)",
+   "page": "notice",
+   "text_en": "Notice",
+   "text_ko": "Notice"
+  },
+  {
+   "flag": "",
+   "key": "notice.fixed_badge",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:83 (NoticeList.fixedLabel)",
+   "page": "notice",
+   "text_en": "Pinned",
+   "text_ko": "고정"
+  },
+  {
+   "flag": "",
+   "key": "notice.empty_title",
+   "kind": "empty-state",
+   "location": "layouts/shop/notice.json:84 (NoticeList.emptyTitle)",
+   "page": "notice",
+   "text_en": "No notices yet",
+   "text_ko": "등록된 공지가 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "notice.empty_message",
+   "kind": "empty-state",
+   "location": "layouts/shop/notice.json:85 (NoticeList.emptyMessage)",
+   "page": "notice",
+   "text_en": "This is a demo template. Real notice data can be added from admin.",
+   "text_ko": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "notice.row_aria",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:87 (NoticeList.rowAriaLabel)",
+   "page": "notice",
+   "text_en": "Open notice: :t",
+   "text_ko": "공지 열기: :t"
+  },
+  {
+   "flag": "",
+   "key": "notice.prev_page_aria",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:98 (Pagination.prevLabel)",
+   "page": "notice",
+   "text_en": "Previous page",
+   "text_ko": "이전 페이지"
+  },
+  {
+   "flag": "",
+   "key": "notice.next_page_aria",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:99 (Pagination.nextLabel)",
+   "page": "notice",
+   "text_en": "Next page",
+   "text_ko": "다음 페이지"
+  },
+  {
+   "flag": "",
+   "key": "notice.page_aria",
+   "kind": "label",
+   "location": "layouts/shop/notice.json:100 (Pagination.pageLabel)",
+   "page": "notice",
+   "text_en": "Page :n",
+   "text_ko": ":n 페이지"
+  },
+  {
+   "flag": "",
+   "key": "routes.notice_detail.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/notice-detail.json:7 (meta.title)",
+   "page": "notice_detail",
+   "text_en": "Notice detail — Still Form",
+   "text_ko": "공지 상세 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.notice_detail.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/notice-detail.json:8 (meta.description)",
+   "page": "notice_detail",
+   "text_en": "Store notice detail",
+   "text_ko": "스토어 공지 상세 보기"
+  },
+  {
+   "flag": "",
+   "key": "notice.back_to_list",
+   "kind": "button",
+   "location": "layouts/shop/notice-detail.json:93 (A inner Span)",
+   "page": "notice_detail",
+   "text_en": "Back to list",
+   "text_ko": "목록으로"
+  },
+  {
+   "flag": "",
+   "key": "notice.view_count",
+   "kind": "label",
+   "location": "layouts/shop/notice-detail.json:181 (shop_name span)",
+   "page": "notice_detail",
+   "text_en": "views",
+   "text_ko": "조회"
+  },
+  {
+   "flag": "",
+   "key": "notice.prev_post",
+   "kind": "label",
+   "location": "layouts/shop/notice-detail.json:241 (prev nav Span)",
+   "page": "notice_detail",
+   "text_en": "Previous",
+   "text_ko": "이전 공지"
+  },
+  {
+   "flag": "",
+   "key": "notice.next_post",
+   "kind": "label",
+   "location": "layouts/shop/notice-detail.json:298 (next nav Span)",
+   "page": "notice_detail",
+   "text_en": "Next",
+   "text_ko": "다음 공지"
+  },
+  {
+   "flag": "",
+   "key": "routes.story.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/story.json:7 (meta.title)",
+   "page": "shop_story",
+   "text_en": "Story — Still Form",
+   "text_ko": "Story — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.story.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/story.json:8 (meta.description)",
+   "page": "shop_story",
+   "text_en": "About the brand",
+   "text_ko": "브랜드 소개"
+  },
+  {
+   "flag": "",
+   "key": "story.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/story.json:35 (BrandStorySection.eyebrow)",
+   "page": "shop_story",
+   "text_en": "STORY",
+   "text_ko": "STORY"
+  },
+  {
+   "flag": "",
+   "key": "story.title",
+   "kind": "heading",
+   "location": "layouts/shop/story.json:36 (BrandStorySection.heading)",
+   "page": "shop_story",
+   "text_en": "Brand Story",
+   "text_ko": "Brand Story"
+  },
+  {
+   "flag": "",
+   "key": "story.body",
+   "kind": "main-copy",
+   "location": "layouts/shop/story.json:37 (BrandStorySection.body)",
+   "page": "shop_story",
+   "text_en": "Still Form is a small house of objects that hold their character through years of use.",
+   "text_ko": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다."
+  }
+ ]
+}

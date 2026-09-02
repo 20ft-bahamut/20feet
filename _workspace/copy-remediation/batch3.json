@@ -1,0 +1,15 @@
+[
+  {"id":"AUTH-001","key":"auth.register.has_account","page":"register","action":"TERM_NORMALIZE","problem":"'계정'→'회원'(glossary Member). login 측 already_member와 동일 의문 통일","ko":"이미 회원이신가요?","en":"Already a member?"},
+  {"id":"AUTH-002","key":"auth.already_member","page":"auth","action":"REMOVE","problem":"layout/component 미참조 dead key (register.has_account와 중복)","ko":null},
+  {"id":"AUTH-003","key":"auth.login_form.no_account","page":"login","action":"REMOVE","problem":"layout/component 미참조 dead key","ko":null},
+  {"id":"AUTH-004","key":"auth.reset_password.submit","page":"reset-password","action":"TERM_NORMALIZE","problem":"페이지 '비밀번호 재설정'인데 버튼 '비밀번호 변경' — 용어 통일","ko":"비밀번호 재설정","en":"Reset password"},
+  {"id":"AUTH-005","key":"auth.reset_password.processing","page":"reset-password","action":"TERM_NORMALIZE","problem":"'변경 중...' — 재설정 용어 + ellipsis 통일","ko":"재설정 중…","en":"Resetting…"},
+  {"id":"AUTH-006","key":"auth.reset_password.success","page":"reset-password","action":"TERM_NORMALIZE","problem":"'변경되었습니다' → 재설정 용어 통일","ko":"비밀번호가 재설정되었습니다.","en":"Your password has been reset."},
+  {"id":"AUTH-007","key":"auth.login_form.processing","page":"login","action":"TERM_NORMALIZE","problem":"ellipsis '...' → '…' 전체 통일","ko":"로그인 중…","en":"Logging in…"},
+  {"id":"AUTH-008","key":"auth.register.processing","page":"register","action":"TERM_NORMALIZE","problem":"ellipsis 통일 (약관/개인정보 모달 로딩 상태 재사용 키)","ko":"가입 중…","en":"Signing up…"},
+  {"id":"AUTH-009","key":"auth.forgot_password.processing","page":"forgot-password","action":"TERM_NORMALIZE","problem":"ellipsis 통일","ko":"전송 중…","en":"Sending…"},
+  {"id":"MYP-001","key":"mypage.tabs.orders","page":"mypage","action":"TERM_NORMALIZE","problem":"'주문내역' → '주문 내역' 띄어쓰기 통일","ko":"주문 내역","en":"Orders"},
+  {"id":"MYP-002","key":"routes.mypage_orders","page":"mypage-meta","action":"TERM_NORMALIZE","problem":"'주문내역' → '주문 내역' 띄어쓰기 통일","ko":"주문 내역 — 마이페이지","en":"Orders — My Page"},
+  {"id":"MYP-003","key":"mypage.orders.phone","page":"mypage-orders","action":"TERM_NORMALIZE","problem":"en 'Contact' vs addresses.phone 'Phone' — 용어 통일","ko":"연락처","en":"Phone"},
+  {"id":"MYP-004","key":"mypage.orders.cancel_confirm_body","page":"mypage-orders","action":"REWRITE","problem":"confirm 본문 평서문('이 주문을 취소합니다.') — 의문형으로","ko":"주문을 취소하면 되돌릴 수 없습니다. 취소하시겠어요?","en":"This order cannot be restored after cancellation. Cancel it?"}
+]

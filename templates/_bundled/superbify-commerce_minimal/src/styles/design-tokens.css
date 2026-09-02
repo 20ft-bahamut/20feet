@@ -702,6 +702,109 @@ body {
     color: var(--scm-text-primary, #26221E);
 }
 
+/* ------------------------------------------------------------------
+   Auth — editorial split login (layouts/auth/login.json)
+   - Desktop (>=1024px): lifestyle visual LEFT (~54%) / form panel
+     RIGHT (~46%), one auth composition inside a 1120px shell.
+   - Mobile: compact 16:9 lifestyle banner above the form — the form
+     stays the main action and the heading must stay in the first
+     viewport.
+   - The visual carries no dark overlay / gradient; only a small
+     paper label chip with the approved brand copy sits bottom-left.
+   ------------------------------------------------------------------ */
+
+.scm-auth-page {
+    display: flex;
+    justify-content: center;
+    min-height: calc(100vh - 16rem);
+    min-height: calc(100svh - 16rem);
+    padding-block: 2.5rem 3.5rem;
+    padding-inline: var(--scm-gutter, 1rem);
+}
+
+.scm-auth-shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.scm-auth-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.scm-auth-visual {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--scm-radius, 8px);
+    overflow: hidden;
+    background-color: var(--scm-bg-secondary, #F4F0E6);
+}
+
+.scm-auth-panel {
+    display: flex;
+    justify-content: center;
+}
+
+.scm-auth-panel-inner {
+    width: 100%;
+    max-width: 420px;
+}
+
+@media (min-width: 1024px) {
+    .scm-auth-page {
+        padding-block: 4rem 5rem;
+    }
+
+    .scm-auth-split {
+        grid-template-columns: minmax(0, 1.17fr) minmax(0, 1fr);
+        gap: clamp(2.5rem, 4vw, 3.5rem);
+    }
+
+    .scm-auth-visual {
+        aspect-ratio: auto;
+        height: clamp(600px, 74svh, 680px);
+    }
+
+    .scm-auth-panel {
+        align-items: center;
+    }
+
+    .scm-auth-panel-inner {
+        max-width: 400px;
+    }
+}
+
+/* Register variant (layouts/auth/register.json) — the form is taller than
+   login (account + profile + agreements), so the desktop visual pins with
+   position: sticky while the form column scrolls, and the panel widens to
+   480px (within the 440-520px register form range) to keep the agreement
+   rows and language select comfortable. Mobile keeps the shared 16:9 banner
+   + single-column form from .scm-auth-* above. */
+.scm-auth-split--register {
+    align-items: start;
+}
+
+.scm-auth-panel--register {
+    align-items: flex-start;
+}
+
+.scm-auth-panel-inner--register {
+    max-width: 480px;
+}
+
+@media (min-width: 1024px) {
+    .scm-auth-visual--register {
+        align-self: start;
+        position: sticky;
+        top: 5.5rem;
+        height: clamp(560px, 70svh, 660px);
+    }
+}
+
 /* My page generic panel (forms, detail sections, inline replaces of Modal) */
 .scm-panel {
     padding: var(--scm-spacing-lg, 1.5rem);

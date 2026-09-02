@@ -51,7 +51,11 @@
                 "key": "cartCount",
                 "path": "count"
             },
-            "fallback": { "data": { "count": 0 } }
+            "fallback": {
+                "data": {
+                    "count": 0
+                }
+            }
         },
         {
             "_comment": "로그인 사용자 — StoreHeader 인증 상태(이름/마이페이지/로그아웃)에 사용. 비회원의 401은 정상 상태이므로 suppress 로 레이아웃 에러 전파를 막고 fallback 을 쓴다 (sirsoft-basic _user_base 패턴 복제).",
@@ -64,7 +68,9 @@
             "auth_required": true,
             "loading_strategy": "progressive",
             "initGlobal": "currentUser",
-            "fallback": { "data": [] },
+            "fallback": {
+                "data": []
+            },
             "errorHandling": {
                 "401": {
                     "handler": "suppress"
@@ -101,7 +107,11 @@
                         "loginLabel": "$t:superbify.auth.login",
                         "signupLabel": "$t:superbify.auth.signup",
                         "mypageLabel": "$t:superbify.mypage.title",
-                        "logoutLabel": "$t:superbify.auth.logout"
+                        "logoutLabel": "$t:superbify.auth.logout",
+                        "shopLabel": "$t:superbify.nav.shop",
+                        "storyLabel": "$t:superbify.nav.story",
+                        "noticeLabel": "$t:superbify.nav.notice",
+                        "cartLabel": "$t:superbify.nav.cart"
                     }
                 },
                 {
@@ -133,7 +143,11 @@
                         "termsLabel": "$t:superbify.business.links.terms",
                         "privacyLabel": "$t:superbify.business.links.privacy",
                         "shippingLabel": "$t:superbify.business.links.shipping",
-                        "verificationLabel": "$t:superbify.business.links.verification"
+                        "verificationLabel": "$t:superbify.business.links.verification",
+                        "shopLabel": "$t:superbify.nav.shop",
+                        "storyLabel": "$t:superbify.nav.story",
+                        "noticeLabel": "$t:superbify.nav.notice",
+                        "cartLabel": "$t:superbify.nav.cart"
                     }
                 }
             ]

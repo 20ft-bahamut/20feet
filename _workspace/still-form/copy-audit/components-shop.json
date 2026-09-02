@@ -1,0 +1,1513 @@
+{
+ "area": "components-shop",
+ "notes": "검증 결과: 1) 'checkout-couponCountSuffixLabel'(개 보유) 플래그 제거 - 접미사 단독 사용으로 띄어쓰기 문제 없음. 2) CartSummary '소계' vs CheckoutForm '상품금액' 용어 불일치 플래그는 유지. 3) 'checkout-emptyMethodsMessage' 번역투 플래그 유지. 4) EmptyState/CrossSellStrip의 하드코딩 영문 기본값 추가 플래그. 5) LOCKED/금지 표현 발견 없음.",
+ "entries": [
+  {
+   "key": "addToCartLabel",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:39",
+   "page": "product-detail",
+   "text_en": "Add to cart",
+   "text_ko": "장바구니 담기"
+  },
+  {
+   "key": "buyNowLabel",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:40",
+   "page": "product-detail",
+   "text_en": "Buy now",
+   "text_ko": "바로구매"
+  },
+  {
+   "key": "quantityLabel",
+   "kind": "label",
+   "location": "AddToCartPanel.tsx:41",
+   "page": "product-detail",
+   "text_en": "Quantity",
+   "text_ko": "수량"
+  },
+  {
+   "key": "soldOutLabel",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:42",
+   "page": "product-detail",
+   "text_en": "Sold out",
+   "text_ko": "품절"
+  },
+  {
+   "key": "stoppedLabel",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:43",
+   "page": "product-detail",
+   "text_en": "Stopped",
+   "text_ko": "판매중지"
+  },
+  {
+   "key": "add-panel-submitting-add",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:224",
+   "page": "product-detail",
+   "text_en": "Adding…",
+   "text_ko": "담는 중…"
+  },
+  {
+   "key": "add-panel-submitting-buy",
+   "kind": "button",
+   "location": "AddToCartPanel.tsx:247",
+   "page": "product-detail",
+   "text_en": "Redirecting…",
+   "text_ko": "이동 중…"
+  },
+  {
+   "key": "cart-quantityLabel",
+   "kind": "label",
+   "location": "CartItemRow.tsx:77",
+   "page": "cart",
+   "text_en": "Quantity",
+   "text_ko": "수량"
+  },
+  {
+   "key": "cart-deleteLabel",
+   "kind": "button",
+   "location": "CartItemRow.tsx:78",
+   "page": "cart",
+   "text_en": "Delete",
+   "text_ko": "삭제"
+  },
+  {
+   "key": "cart-applyLabel",
+   "kind": "button",
+   "location": "CartItemRow.tsx:81",
+   "page": "cart",
+   "text_en": "Apply",
+   "text_ko": "변경"
+  },
+  {
+   "key": "cart-deleteConfirmTitle",
+   "kind": "label",
+   "location": "CartItemRow.tsx:82",
+   "page": "cart",
+   "text_en": "Delete this item?",
+   "text_ko": "상품을 삭제할까요?"
+  },
+  {
+   "key": "cart-deleteConfirmMessage",
+   "kind": "empty-state",
+   "location": "CartItemRow.tsx:83",
+   "page": "cart",
+   "text_en": "This will remove the selected item from your cart.",
+   "text_ko": "선택한 상품을 장바구니에서 삭제합니다."
+  },
+  {
+   "key": "cart-deleteConfirmConfirmLabel",
+   "kind": "button",
+   "location": "CartItemRow.tsx:84",
+   "page": "cart",
+   "text_en": "Delete",
+   "text_ko": "삭제"
+  },
+  {
+   "key": "cart-deleteConfirmCancelLabel",
+   "kind": "button",
+   "location": "CartItemRow.tsx:85",
+   "page": "cart",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "key": "cart-option-prefix",
+   "kind": "label",
+   "location": "CartItemRow.tsx:222",
+   "page": "cart",
+   "text_en": "Option: {optionName}",
+   "text_ko": "옵션: {optionName}"
+  },
+  {
+   "key": "cart-additional-option-prefix",
+   "kind": "label",
+   "location": "CartItemRow.tsx:245",
+   "page": "cart",
+   "text_en": "Additional option: {label}{custom}{price}",
+   "text_ko": "추가옵션: {label}{custom}{price}"
+  },
+  {
+   "key": "cart-summaryTitle",
+   "kind": "heading",
+   "location": "CartSummary.tsx:74",
+   "page": "cart",
+   "text_en": "Order summary",
+   "text_ko": "주문 요약"
+  },
+  {
+   "key": "cart-itemsLabel",
+   "kind": "label",
+   "location": "CartSummary.tsx:75",
+   "page": "cart",
+   "text_en": "Items",
+   "text_ko": "상품 수"
+  },
+  {
+   "key": "cart-subtotalLabel",
+   "kind": "label",
+   "location": "CartSummary.tsx:76",
+   "page": "cart",
+   "text_en": "Subtotal",
+   "text_ko": "소계"
+  },
+  {
+   "key": "cart-shippingLabel",
+   "kind": "label",
+   "location": "CartSummary.tsx:77",
+   "page": "cart",
+   "text_en": "Shipping",
+   "text_ko": "배송비"
+  },
+  {
+   "key": "cart-totalLabel",
+   "kind": "label",
+   "location": "CartSummary.tsx:78",
+   "page": "cart",
+   "text_en": "Total",
+   "text_ko": "총 결제금액"
+  },
+  {
+   "key": "cart-checkoutLabel",
+   "kind": "button",
+   "location": "CartSummary.tsx:79",
+   "page": "cart",
+   "text_en": "Checkout",
+   "text_ko": "결제하기"
+  },
+  {
+   "key": "cart-continueShoppingLabel",
+   "kind": "button",
+   "location": "CartSummary.tsx:80",
+   "page": "cart",
+   "text_en": "Continue shopping",
+   "text_ko": "쇼핑 계속하기"
+  },
+  {
+   "key": "checkout-ordererInfoTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:416",
+   "page": "checkout",
+   "text_en": "Orderer information",
+   "text_ko": "주문자 정보"
+  },
+  {
+   "key": "checkout-ordererNameLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:417",
+   "page": "checkout",
+   "text_en": "Name",
+   "text_ko": "이름"
+  },
+  {
+   "key": "checkout-ordererNamePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:418",
+   "page": "checkout",
+   "text_en": "Orderer name",
+   "text_ko": "주문자 이름"
+  },
+  {
+   "key": "checkout-ordererPhoneLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:419",
+   "page": "checkout",
+   "text_en": "Phone",
+   "text_ko": "연락처"
+  },
+  {
+   "key": "checkout-ordererPhonePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:420",
+   "page": "checkout",
+   "text_en": "010-0000-0000",
+   "text_ko": "010-0000-0000"
+  },
+  {
+   "key": "checkout-ordererEmailLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:421",
+   "page": "checkout",
+   "text_en": "Email",
+   "text_ko": "이메일"
+  },
+  {
+   "key": "checkout-ordererEmailPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:422",
+   "page": "checkout",
+   "text_en": "name@example.com",
+   "text_ko": "name@example.com"
+  },
+  {
+   "key": "checkout-guestLookupPasswordLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:423",
+   "page": "checkout",
+   "text_en": "Guest lookup password",
+   "text_ko": "비회원 조회 비밀번호"
+  },
+  {
+   "key": "checkout-guestLookupPasswordPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:424",
+   "page": "checkout",
+   "text_en": "8+ characters",
+   "text_ko": "8자 이상"
+  },
+  {
+   "key": "checkout-guestLookupConfirmLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:425",
+   "page": "checkout",
+   "text_en": "Confirm password",
+   "text_ko": "비밀번호 확인"
+  },
+  {
+   "key": "checkout-guestLookupConfirmPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:426",
+   "page": "checkout",
+   "text_en": "Re-enter",
+   "text_ko": "다시 입력"
+  },
+  {
+   "key": "checkout-guestLookupHint",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:427",
+   "page": "checkout",
+   "text_en": "Password for order lookup (8+ characters)",
+   "text_ko": "주문 조회 시 사용할 비밀번호 (8자 이상)"
+  },
+  {
+   "key": "checkout-guestLookupSectionTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:428",
+   "page": "checkout",
+   "text_en": "Guest order lookup password",
+   "text_ko": "비회원 주문 조회 비밀번호"
+  },
+  {
+   "key": "checkout-shippingInfoTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:429",
+   "page": "checkout",
+   "text_en": "Shipping information",
+   "text_ko": "배송지 정보"
+  },
+  {
+   "key": "checkout-savedAddressTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:430",
+   "page": "checkout",
+   "text_en": "Saved addresses",
+   "text_ko": "저장된 배송지"
+  },
+  {
+   "key": "checkout-manageAddressesLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:431",
+   "page": "checkout",
+   "text_en": "Manage addresses",
+   "text_ko": "배송지 관리"
+  },
+  {
+   "key": "checkout-sameAsOrdererLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:432",
+   "page": "checkout",
+   "text_en": "Same as orderer",
+   "text_ko": "주문자 정보와 동일"
+  },
+  {
+   "key": "checkout-saveAddressLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:433",
+   "page": "checkout",
+   "text_en": "Save the entered address",
+   "text_ko": "입력한 배송지를 저장합니다"
+  },
+  {
+   "key": "checkout-recipientNameLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:434",
+   "page": "checkout",
+   "text_en": "Recipient",
+   "text_ko": "받는 분"
+  },
+  {
+   "key": "checkout-recipientNamePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:435",
+   "page": "checkout",
+   "text_en": "Recipient name",
+   "text_ko": "받는 분 이름"
+  },
+  {
+   "key": "checkout-recipientPhoneLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:436",
+   "page": "checkout",
+   "text_en": "Phone",
+   "text_ko": "연락처"
+  },
+  {
+   "key": "checkout-recipientPhonePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:437",
+   "page": "checkout",
+   "text_en": "010-0000-0000",
+   "text_ko": "010-0000-0000"
+  },
+  {
+   "key": "checkout-countryLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:438",
+   "page": "checkout",
+   "text_en": "Country",
+   "text_ko": "배송국가"
+  },
+  {
+   "key": "checkout-zipcodeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:439",
+   "page": "checkout",
+   "text_en": "Postal code",
+   "text_ko": "우편번호"
+  },
+  {
+   "key": "checkout-zipcodePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:440",
+   "page": "checkout",
+   "text_en": "Postal code",
+   "text_ko": "우편번호"
+  },
+  {
+   "key": "checkout-addressLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:441",
+   "page": "checkout",
+   "text_en": "Address",
+   "text_ko": "주소"
+  },
+  {
+   "key": "checkout-addressPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:442",
+   "page": "checkout",
+   "text_en": "Base address",
+   "text_ko": "기본 주소"
+  },
+  {
+   "key": "checkout-addressDetailLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:443",
+   "page": "checkout",
+   "text_en": "Detail address",
+   "text_ko": "상세 주소"
+  },
+  {
+   "key": "checkout-addressDetailPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:444",
+   "page": "checkout",
+   "text_en": "Building/room etc.",
+   "text_ko": "동/호수 등"
+  },
+  {
+   "key": "checkout-intlAddressLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:445",
+   "page": "checkout",
+   "text_en": "Address (Intl)",
+   "text_ko": "주소 (해외)"
+  },
+  {
+   "key": "checkout-intlAddress1Placeholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:446",
+   "page": "checkout",
+   "text_en": "Address (Street address)",
+   "text_ko": "주소 (Street address)"
+  },
+  {
+   "key": "checkout-intlAddress2Label",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:447",
+   "page": "checkout",
+   "text_en": "Address detail",
+   "text_ko": "주소 상세"
+  },
+  {
+   "key": "checkout-intlAddress2Placeholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:448",
+   "page": "checkout",
+   "text_en": "Apt, suite, unit etc.",
+   "text_ko": "아파트/동/호수 등 (Apt, suite, unit)"
+  },
+  {
+   "key": "checkout-intlCityLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:449",
+   "page": "checkout",
+   "text_en": "City",
+   "text_ko": "도시"
+  },
+  {
+   "key": "checkout-intlCityPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:450",
+   "page": "checkout",
+   "text_en": "City",
+   "text_ko": "도시 (City)"
+  },
+  {
+   "key": "checkout-intlStateLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:451",
+   "page": "checkout",
+   "text_en": "State / Province / Region",
+   "text_ko": "주/도/지역"
+  },
+  {
+   "key": "checkout-intlStatePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:452",
+   "page": "checkout",
+   "text_en": "State / Province / Region",
+   "text_ko": "주(State) / 도(Province) / 지역"
+  },
+  {
+   "key": "checkout-intlPostalCodeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:453",
+   "page": "checkout",
+   "text_en": "Postal code",
+   "text_ko": "우편번호"
+  },
+  {
+   "key": "checkout-intlPostalCodePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:454",
+   "page": "checkout",
+   "text_en": "Postal code",
+   "text_ko": "우편번호 (Postal code)"
+  },
+  {
+   "key": "checkout-memoLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:455",
+   "page": "checkout",
+   "text_en": "Delivery memo",
+   "text_ko": "배송 메모"
+  },
+  {
+   "key": "checkout-memoPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:456",
+   "page": "checkout",
+   "text_en": "Select a delivery memo",
+   "text_ko": "배송 메모를 선택하세요"
+  },
+  {
+   "key": "checkout-memo-door",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:1415",
+   "page": "checkout",
+   "text_en": "Please leave at the door",
+   "text_ko": "문 앞에 두고 가주세요"
+  },
+  {
+   "key": "checkout-memo-security",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:1416",
+   "page": "checkout",
+   "text_en": "Leave at the front desk",
+   "text_ko": "경비실에 맡겨주세요"
+  },
+  {
+   "key": "checkout-memo-parcel-box",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:1417",
+   "page": "checkout",
+   "text_en": "Place in the parcel locker",
+   "text_ko": "택배함에 넣어주세요"
+  },
+  {
+   "key": "checkout-memo-call",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:1418",
+   "page": "checkout",
+   "text_en": "Please contact before delivery",
+   "text_ko": "배송 전 연락 부탁드립니다"
+  },
+  {
+   "key": "checkout-memo-custom-placeholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:1427",
+   "page": "checkout",
+   "text_en": "Please enter a delivery memo",
+   "text_ko": "배송 메모를 입력해 주세요"
+  },
+  {
+   "key": "checkout-paymentMethodTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:457",
+   "page": "checkout",
+   "text_en": "Payment method",
+   "text_ko": "결제 수단"
+  },
+  {
+   "key": "checkout-depositorNameLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:458",
+   "page": "checkout",
+   "text_en": "Depositor name",
+   "text_ko": "입금자명"
+  },
+  {
+   "key": "checkout-depositorNamePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:459",
+   "page": "checkout",
+   "text_en": "Depositor name",
+   "text_ko": "입금자명"
+  },
+  {
+   "key": "checkout-bankAccountsTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:460",
+   "page": "checkout",
+   "text_en": "Deposit account",
+   "text_ko": "입금 계좌"
+  },
+  {
+   "key": "checkout-bankSelectLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:461",
+   "page": "checkout",
+   "text_en": "Select a deposit account",
+   "text_ko": "입금 계좌 선택"
+  },
+  {
+   "key": "checkout-dbankHelperLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:462",
+   "page": "checkout",
+   "text_en": "Shipping starts after deposit is confirmed.",
+   "text_ko": "입금 확인 후 배송이 시작됩니다."
+  },
+  {
+   "key": "checkout-vbankHelperLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:463",
+   "page": "checkout",
+   "text_en": "If the deposit deadline passes, the order is auto-cancelled.",
+   "text_ko": "입금 기한이 지나면 주문이 자동 취소됩니다."
+  },
+  {
+   "key": "checkout-refundBankTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:464",
+   "page": "checkout",
+   "text_en": "Refund account",
+   "text_ko": "환불 계좌"
+  },
+  {
+   "key": "checkout-refundBankCodeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:465",
+   "page": "checkout",
+   "text_en": "Bank",
+   "text_ko": "은행"
+  },
+  {
+   "key": "checkout-refundBankAccountLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:466",
+   "page": "checkout",
+   "text_en": "Account number",
+   "text_ko": "계좌번호"
+  },
+  {
+   "key": "checkout-refundBankHolderLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:467",
+   "page": "checkout",
+   "text_en": "Account holder",
+   "text_ko": "예금주"
+  },
+  {
+   "key": "checkout-cashReceiptRequestLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:468",
+   "page": "checkout",
+   "text_en": "Request cash receipt",
+   "text_ko": "현금영수증 신청"
+  },
+  {
+   "key": "checkout-cashReceiptPurposeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:469",
+   "page": "checkout",
+   "text_en": "Proof purpose",
+   "text_ko": "증빙 용도"
+  },
+  {
+   "key": "checkout-cashReceiptIncomeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:470",
+   "page": "checkout",
+   "text_en": "For income deduction",
+   "text_ko": "소득공제용"
+  },
+  {
+   "key": "checkout-cashReceiptExpenseLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:471",
+   "page": "checkout",
+   "text_en": "For expense proof",
+   "text_ko": "지출증빙용"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierTypeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:472",
+   "page": "checkout",
+   "text_en": "Issue method",
+   "text_ko": "발급 수단"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:473",
+   "page": "checkout",
+   "text_en": "Cash receipt number",
+   "text_ko": "현금영수증 번호"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:474",
+   "page": "checkout",
+   "text_en": "Phone number or card number",
+   "text_ko": "휴대폰 번호 또는 카드 번호"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierPhoneLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:475",
+   "page": "checkout",
+   "text_en": "Mobile number",
+   "text_ko": "휴대폰번호"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierCardLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:476",
+   "page": "checkout",
+   "text_en": "Cash receipt card",
+   "text_ko": "현금영수증카드"
+  },
+  {
+   "key": "checkout-cashReceiptIdentifierBusinessLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:477",
+   "page": "checkout",
+   "text_en": "Business registration number",
+   "text_ko": "사업자등록번호"
+  },
+  {
+   "key": "checkout-discountSectionTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:478",
+   "page": "checkout",
+   "text_en": "Discount & coupons",
+   "text_ko": "할인 · 쿠폰"
+  },
+  {
+   "key": "checkout-couponDownloadLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:479",
+   "page": "checkout",
+   "text_en": "Download coupons",
+   "text_ko": "쿠폰 다운로드"
+  },
+  {
+   "key": "checkout-orderCouponLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:480",
+   "page": "checkout",
+   "text_en": "Order coupon",
+   "text_ko": "주문 쿠폰"
+  },
+  {
+   "key": "checkout-shippingCouponLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:481",
+   "page": "checkout",
+   "text_en": "Shipping coupon",
+   "text_ko": "배송비 쿠폰"
+  },
+  {
+   "key": "checkout-couponNoAvailableLabel",
+   "kind": "empty-state",
+   "location": "CheckoutForm.tsx:482",
+   "page": "checkout",
+   "text_en": "No coupons available",
+   "text_ko": "사용 가능한 쿠폰이 없습니다"
+  },
+  {
+   "key": "checkout-couponCountSuffixLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:483",
+   "page": "checkout",
+   "text_en": "owned",
+   "text_ko": "개 보유"
+  },
+  {
+   "key": "checkout-couponAlreadyUsedLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:484",
+   "page": "checkout",
+   "text_en": "Already applied",
+   "text_ko": "이미 적용됨"
+  },
+  {
+   "key": "checkout-couponSelectPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:485",
+   "page": "checkout",
+   "text_en": "Select a coupon",
+   "text_ko": "쿠폰을 선택하세요"
+  },
+  {
+   "key": "checkout-discountCodeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:486",
+   "page": "checkout",
+   "text_en": "Discount code",
+   "text_ko": "할인코드"
+  },
+  {
+   "key": "checkout-discountCodePlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:487",
+   "page": "checkout",
+   "text_en": "Enter a discount code",
+   "text_ko": "할인코드를 입력하세요"
+  },
+  {
+   "key": "checkout-discountCodeApplyLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:488",
+   "page": "checkout",
+   "text_en": "Apply",
+   "text_ko": "적용"
+  },
+  {
+   "key": "checkout-mileageSectionTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:489",
+   "page": "checkout",
+   "text_en": "Points",
+   "text_ko": "적립금"
+  },
+  {
+   "key": "checkout-mileageAvailableLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:490",
+   "page": "checkout",
+   "text_en": "Available points",
+   "text_ko": "보유 적립금"
+  },
+  {
+   "key": "checkout-mileageUseAllLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:491",
+   "page": "checkout",
+   "text_en": "Use all",
+   "text_ko": "전액 사용"
+  },
+  {
+   "key": "checkout-mileageApplyLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:492",
+   "page": "checkout",
+   "text_en": "Apply",
+   "text_ko": "적용"
+  },
+  {
+   "key": "checkout-mileageInputPlaceholder",
+   "kind": "placeholder",
+   "location": "CheckoutForm.tsx:493",
+   "page": "checkout",
+   "text_en": "Points to use",
+   "text_ko": "사용할 적립금"
+  },
+  {
+   "key": "checkout-pointsUsedLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:494",
+   "page": "checkout",
+   "text_en": "Points used",
+   "text_ko": "적립금 사용"
+  },
+  {
+   "key": "checkout-shippingCouponDiscountLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:495",
+   "page": "checkout",
+   "text_en": "Shipping coupon discount",
+   "text_ko": "배송비 쿠폰 할인"
+  },
+  {
+   "key": "checkout-unavailableTitle",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:496",
+   "page": "checkout",
+   "text_en": "Order contains unavailable items",
+   "text_ko": "주문할 수 없는 상품이 포함되어 있습니다"
+  },
+  {
+   "key": "checkout-unavailableMessage",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:497",
+   "page": "checkout",
+   "text_en": "Please remove sold-out/stopped items from your cart and try again.",
+   "text_ko": "품절·판매중지된 상품을 장바구니에서 제외한 후 다시 시도해 주세요."
+  },
+  {
+   "key": "checkout-summaryTitle",
+   "kind": "heading",
+   "location": "CheckoutForm.tsx:499",
+   "page": "checkout",
+   "text_en": "Order summary",
+   "text_ko": "주문 요약"
+  },
+  {
+   "flag": "CartSummary는 '소계', CheckoutForm은 '상품금액'. 동일 위치(상품 합계) 다른 용어",
+   "key": "checkout-subtotalLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:500",
+   "page": "checkout",
+   "text_en": "Item amount",
+   "text_ko": "상품금액"
+  },
+  {
+   "key": "checkout-discountLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:501",
+   "page": "checkout",
+   "text_en": "Discount",
+   "text_ko": "할인"
+  },
+  {
+   "key": "checkout-shippingFeeLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:502",
+   "page": "checkout",
+   "text_en": "Shipping",
+   "text_ko": "배송비"
+  },
+  {
+   "key": "checkout-totalAmountLabel",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:503",
+   "page": "checkout",
+   "text_en": "Total",
+   "text_ko": "총 결제금액"
+  },
+  {
+   "key": "checkout-termsAgreement",
+   "kind": "label",
+   "location": "CheckoutForm.tsx:504",
+   "page": "checkout",
+   "text_en": "By proceeding with payment, you confirm and accept the order.",
+   "text_ko": "결제 진행 시 주문 내용 확인 및 결제에 동의합니다."
+  },
+  {
+   "key": "checkout-payButtonLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:505",
+   "page": "checkout",
+   "text_en": "Pay",
+   "text_ko": "결제하기"
+  },
+  {
+   "key": "checkout-submittingLabel",
+   "kind": "button",
+   "location": "CheckoutForm.tsx:506",
+   "page": "checkout",
+   "text_en": "Processing…",
+   "text_ko": "처리 중…"
+  },
+  {
+   "key": "checkout-emptyMethodsTitle",
+   "kind": "empty-state",
+   "location": "CheckoutForm.tsx:514",
+   "page": "checkout",
+   "text_en": "No payment methods available",
+   "text_ko": "결제 수단이 없습니다"
+  },
+  {
+   "flag": "번역투 - 직역된 '~을/를 확인해 주세요' 톤이 관리자 안내로 부자연스러움",
+   "key": "checkout-emptyMethodsMessage",
+   "kind": "empty-state",
+   "location": "CheckoutForm.tsx:515",
+   "page": "checkout",
+   "text_en": "Please check the payment settings in the admin.",
+   "text_ko": "관리자에서 결제 설정을 확인해 주세요."
+  },
+  {
+   "key": "checkout-err-orderer-name",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:879",
+   "page": "checkout",
+   "text_en": "Please enter a name.",
+   "text_ko": "이름을 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-orderer-phone",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:880",
+   "page": "checkout",
+   "text_en": "Please enter a phone number.",
+   "text_ko": "연락처를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-orderer-email",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:882",
+   "page": "checkout",
+   "text_en": "Please enter an email.",
+   "text_ko": "이메일을 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-recipient-name",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:884",
+   "page": "checkout",
+   "text_en": "Please enter a recipient name.",
+   "text_ko": "받는 분 이름을 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-recipient-phone",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:885",
+   "page": "checkout",
+   "text_en": "Please enter a recipient phone number.",
+   "text_ko": "받는 분 연락처를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-zipcode",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:887",
+   "page": "checkout",
+   "text_en": "Please enter a postal code.",
+   "text_ko": "우편번호를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-address",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:888",
+   "page": "checkout",
+   "text_en": "Please enter an address.",
+   "text_ko": "주소를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-intl-city",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:891",
+   "page": "checkout",
+   "text_en": "Please enter a city.",
+   "text_ko": "도시를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-intl-postal",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:892",
+   "page": "checkout",
+   "text_en": "Please enter a postal code.",
+   "text_ko": "우편번호를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-payment-method",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:894",
+   "page": "checkout",
+   "text_en": "Please select a payment method.",
+   "text_ko": "결제 수단을 선택해 주세요."
+  },
+  {
+   "key": "checkout-err-depositor-name",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:896",
+   "page": "checkout",
+   "text_en": "Please enter a depositor name.",
+   "text_ko": "입금자명을 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-dbank-bank-code",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:899",
+   "page": "checkout",
+   "text_en": "Please select a deposit account.",
+   "text_ko": "입금 계좌를 선택해 주세요."
+  },
+  {
+   "key": "checkout-err-refund-bank",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:904",
+   "page": "checkout",
+   "text_en": "Please fill in all refund account fields.",
+   "text_ko": "환불 계좌 정보를 모두 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-cash-receipt-identifier",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:908",
+   "page": "checkout",
+   "text_en": "Please enter a cash receipt number.",
+   "text_ko": "현금영수증 번호를 입력해 주세요."
+  },
+  {
+   "key": "checkout-err-guest-password-len",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:912",
+   "page": "checkout",
+   "text_en": "Password must be at least 8 characters.",
+   "text_ko": "비밀번호는 8자 이상이어야 합니다."
+  },
+  {
+   "key": "checkout-err-guest-password-match",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:915",
+   "page": "checkout",
+   "text_en": "Passwords do not match.",
+   "text_ko": "비밀번호가 일치하지 않습니다."
+  },
+  {
+   "key": "checkout-toast-order-coupon-applied",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:943",
+   "page": "checkout",
+   "text_en": "Order coupon applied.",
+   "text_ko": "주문 쿠폰이 적용되었습니다."
+  },
+  {
+   "key": "checkout-toast-order-coupon-removed",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:943",
+   "page": "checkout",
+   "text_en": "Order coupon removed.",
+   "text_ko": "주문 쿠폰이 해제되었습니다."
+  },
+  {
+   "key": "checkout-toast-shipping-coupon-applied",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:951",
+   "page": "checkout",
+   "text_en": "Shipping coupon applied.",
+   "text_ko": "배송비 쿠폰이 적용되었습니다."
+  },
+  {
+   "key": "checkout-toast-shipping-coupon-removed",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:951",
+   "page": "checkout",
+   "text_en": "Shipping coupon removed.",
+   "text_ko": "배송비 쿠폰이 해제되었습니다."
+  },
+  {
+   "key": "checkout-toast-item-coupon-applied",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:975",
+   "page": "checkout",
+   "text_en": "Item coupon applied.",
+   "text_ko": "상품 쿠폰이 적용되었습니다."
+  },
+  {
+   "key": "checkout-toast-item-coupon-removed",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:975",
+   "page": "checkout",
+   "text_en": "Item coupon removed.",
+   "text_ko": "상품 쿠폰이 해제되었습니다."
+  },
+  {
+   "key": "checkout-toast-mileage-applied",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:981",
+   "page": "checkout",
+   "text_en": "Points applied.",
+   "text_ko": "적립금이 적용되었습니다."
+  },
+  {
+   "key": "checkout-toast-mileage-removed",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:981",
+   "page": "checkout",
+   "text_en": "Points usage cancelled.",
+   "text_ko": "적립금 사용이 취소되었습니다."
+  },
+  {
+   "key": "checkout-toast-discount-code-applied",
+   "kind": "toast/error",
+   "location": "CheckoutForm.tsx:986",
+   "page": "checkout",
+   "text_en": "Discount code applied.",
+   "text_ko": "할인코드가 적용되었습니다."
+  },
+  {
+   "key": "purchase-err-additional-option",
+   "kind": "toast/error",
+   "location": "PurchasePanel.tsx:577",
+   "page": "product-detail",
+   "text_en": "Please select required additional option '{name}'.",
+   "text_ko": "'{name}' 필수 추가 옵션을 선택해 주세요."
+  },
+  {
+   "key": "purchase-err-additional-option-custom",
+   "kind": "toast/error",
+   "location": "PurchasePanel.tsx:581",
+   "page": "product-detail",
+   "text_en": "Please enter a custom value for '{name}'.",
+   "text_ko": "'{name}' 직접 입력 값을 입력해 주세요."
+  },
+  {
+   "key": "purchase-err-no-option",
+   "kind": "toast/error",
+   "location": "PurchasePanel.tsx:645",
+   "page": "product-detail",
+   "text_en": "Please select an option.",
+   "text_ko": "옵션을 선택해 주세요."
+  },
+  {
+   "key": "checkout-coupon-empty-cart-message",
+   "kind": "empty-state",
+   "location": "CheckoutPage.tsx:362",
+   "page": "checkout",
+   "text_en": "Your cart is empty.",
+   "text_ko": "장바구니가 비어 있습니다."
+  },
+  {
+   "key": "checkout-progressCartLabel",
+   "kind": "label",
+   "location": "CheckoutPage.tsx:191",
+   "page": "checkout",
+   "text_en": "Cart",
+   "text_ko": "장바구니"
+  },
+  {
+   "key": "checkout-progressCheckoutLabel",
+   "kind": "label",
+   "location": "CheckoutPage.tsx:192",
+   "page": "checkout",
+   "text_en": "Order / Payment",
+   "text_ko": "주문/결제"
+  },
+  {
+   "key": "checkout-progressCompleteLabel",
+   "kind": "label",
+   "location": "CheckoutPage.tsx:193",
+   "page": "checkout",
+   "text_en": "Complete",
+   "text_ko": "완료"
+  },
+  {
+   "key": "checkout-title",
+   "kind": "heading",
+   "location": "CheckoutPage.tsx:196",
+   "page": "checkout",
+   "text_en": "Checkout",
+   "text_ko": "결제"
+  },
+  {
+   "key": "checkout-loadingLabel",
+   "kind": "empty-state",
+   "location": "CheckoutPage.tsx:554,574",
+   "page": "checkout",
+   "text_en": "Loading order information…",
+   "text_ko": "주문 정보를 불러오는 중…"
+  },
+  {
+   "key": "checkout-preparingLabel",
+   "kind": "empty-state",
+   "location": "CheckoutPage.tsx:574",
+   "page": "checkout",
+   "text_en": "Preparing…",
+   "text_ko": "준비 중…"
+  },
+  {
+   "key": "checkout-PG-error-confirm-failed",
+   "kind": "toast/error",
+   "location": "CheckoutPage.tsx:171",
+   "page": "checkout",
+   "text_en": "Payment approval failed. Please try again.",
+   "text_ko": "결제 승인에 실패했습니다. 다시 시도해 주세요."
+  },
+  {
+   "key": "checkout-PG-error-amount-mismatch",
+   "kind": "toast/error",
+   "location": "CheckoutPage.tsx:172",
+   "page": "checkout",
+   "text_en": "Payment amount mismatch. Please place the order again.",
+   "text_ko": "결제 금액이 일치하지 않습니다. 주문을 다시 진행해 주세요."
+  },
+  {
+   "key": "checkout-PG-error-order-not-found",
+   "kind": "toast/error",
+   "location": "CheckoutPage.tsx:173",
+   "page": "checkout",
+   "text_en": "Order information not found.",
+   "text_ko": "주문 정보를 찾을 수 없습니다."
+  },
+  {
+   "key": "checkout-PG-error-default",
+   "kind": "toast/error",
+   "location": "CheckoutPage.tsx:224",
+   "page": "checkout",
+   "text_en": "A problem occurred while processing payment.",
+   "text_ko": "결제 처리 중 문제가 발생했습니다."
+  },
+  {
+   "key": "checkout-emptyTempOrderTitle",
+   "kind": "empty-state",
+   "location": "CheckoutPage.tsx:605",
+   "page": "checkout",
+   "text_en": "Cannot create order information",
+   "text_ko": "주문 정보를 만들 수 없습니다"
+  },
+  {
+   "key": "checkout-emptyTempOrderHelper",
+   "kind": "empty-state",
+   "location": "CheckoutPage.tsx:611",
+   "page": "checkout",
+   "text_en": "Your cart may be empty or no payable items are available.",
+   "text_ko": "장바구니가 비어 있거나 결제 가능한 상품이 없을 수 있습니다."
+  },
+  {
+   "key": "checkout-backToShopLabel",
+   "kind": "button",
+   "location": "CheckoutPage.tsx:628,675",
+   "page": "checkout",
+   "text_en": "Back to cart",
+   "text_ko": "장바구니로 돌아가기"
+  },
+  {
+   "key": "checkout-guest-order-note",
+   "kind": "label",
+   "location": "CheckoutPage.tsx:705-709",
+   "page": "checkout",
+   "text_en": "After checkout, you can re-check via Guest Order Lookup with your order number, phone and lookup password.",
+   "text_ko": "결제 진행 후 발급된 주문번호와 휴대폰, 조회 비밀번호로 비회원 주문 조회 에서 다시 확인할 수 있습니다."
+  },
+  {
+   "key": "checkout-guest-order-note-link",
+   "kind": "button",
+   "location": "CheckoutPage.tsx:707",
+   "page": "checkout",
+   "text_en": "Guest order lookup",
+   "text_ko": "비회원 주문 조회"
+  },
+  {
+   "key": "confirm-confirmLabel",
+   "kind": "button",
+   "location": "ConfirmDialog.tsx:31",
+   "page": "global-modal",
+   "text_en": "Confirm",
+   "text_ko": "확인"
+  },
+  {
+   "key": "confirm-cancelLabel",
+   "kind": "button",
+   "location": "ConfirmDialog.tsx:32",
+   "page": "global-modal",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "key": "confirm-busy",
+   "kind": "button",
+   "location": "ConfirmDialog.tsx:155",
+   "page": "global-modal",
+   "text_en": "Processing…",
+   "text_ko": "처리 중…"
+  },
+  {
+   "key": "coupon-guestMessage",
+   "kind": "label",
+   "location": "CouponDownloadBadges.tsx:118",
+   "page": "product-detail",
+   "text_en": "Login required.",
+   "text_ko": "로그인이 필요합니다."
+  },
+  {
+   "key": "coupon-loginRequiredToastMessage",
+   "kind": "toast/error",
+   "location": "CouponDownloadBadges.tsx:120",
+   "page": "product-detail",
+   "text_en": "Login required.",
+   "text_ko": "로그인이 필요합니다."
+  },
+  {
+   "key": "coupon-downloadSuccessMessage",
+   "kind": "toast/error",
+   "location": "CouponDownloadBadges.tsx:121",
+   "page": "product-detail",
+   "text_en": "Coupon downloaded.",
+   "text_ko": "쿠폰이 다운로드되었습니다."
+  },
+  {
+   "key": "coupon-downloadFailedMessage",
+   "kind": "toast/error",
+   "location": "CouponDownloadBadges.tsx:122",
+   "page": "product-detail",
+   "text_en": "Coupon download failed.",
+   "text_ko": "쿠폰 다운로드에 실패했습니다."
+  },
+  {
+   "key": "cross-sell-title",
+   "kind": "heading",
+   "location": "CrossSellStrip.tsx:23",
+   "page": "product-detail / cart",
+   "text_en": "You may also like",
+   "text_ko": "함께 보면 좋은 상품"
+  },
+  {
+   "flag": "영문 리터럴이 그대로 노출됨 - 한국어 페이지에서 부자연스러움",
+   "key": "cross-sell-eyebrow",
+   "kind": "label",
+   "location": "CrossSellStrip.tsx:24",
+   "page": "product-detail / cart",
+   "text_en": "YOU MAY ALSO LIKE",
+   "text_ko": "YOU MAY ALSO LIKE"
+  },
+  {
+   "key": "modal-close",
+   "kind": "button",
+   "location": "Modal.tsx:98",
+   "page": "global-modal",
+   "text_en": "Close",
+   "text_ko": "닫기"
+  },
+  {
+   "key": "order-complete-title",
+   "kind": "heading",
+   "location": "OrderCompletePage.tsx:112",
+   "page": "order-complete",
+   "text_en": "Your order has been received",
+   "text_ko": "주문이 접수되었습니다"
+  },
+  {
+   "key": "order-complete-successMessage",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:113",
+   "page": "order-complete",
+   "text_en": "Your order has been received successfully.",
+   "text_ko": "주문이 정상적으로 접수되었습니다."
+  },
+  {
+   "key": "order-complete-bankDepositMessage",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:116",
+   "page": "order-complete",
+   "text_en": "Shipping starts after deposit is confirmed. Please deposit by the due date.",
+   "text_ko": "입금 확인 후 배송이 시작됩니다. 아래 계좌로 입금 기한까지 금액을 입금해 주세요."
+  },
+  {
+   "key": "order-complete-loadingLabel",
+   "kind": "empty-state",
+   "location": "OrderCompletePage.tsx:149",
+   "page": "order-complete",
+   "text_en": "Loading order information…",
+   "text_ko": "주문 정보를 불러오는 중…"
+  },
+  {
+   "key": "order-complete-errorTitle",
+   "kind": "empty-state",
+   "location": "OrderCompletePage.tsx:172",
+   "page": "order-complete",
+   "text_en": "Order information not found",
+   "text_ko": "주문 정보를 찾을 수 없습니다"
+  },
+  {
+   "key": "order-complete-orderNumberLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:275",
+   "page": "order-complete",
+   "text_en": "Order number",
+   "text_ko": "주문번호"
+  },
+  {
+   "key": "order-complete-bankDepositInfoTitle",
+   "kind": "heading",
+   "location": "OrderCompletePage.tsx:313",
+   "page": "order-complete",
+   "text_en": "Deposit instructions",
+   "text_ko": "입금 안내"
+  },
+  {
+   "key": "order-complete-vbankInfoTitle",
+   "kind": "heading",
+   "location": "OrderCompletePage.tsx:314",
+   "page": "order-complete",
+   "text_en": "Virtual account deposit instructions",
+   "text_ko": "가상계좌 입금 안내"
+  },
+  {
+   "key": "order-complete-depositBankLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:317",
+   "page": "order-complete",
+   "text_en": "Bank",
+   "text_ko": "은행"
+  },
+  {
+   "key": "order-complete-depositAccountLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:320",
+   "page": "order-complete",
+   "text_en": "Account number",
+   "text_ko": "계좌번호"
+  },
+  {
+   "key": "order-complete-depositHolderLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:323",
+   "page": "order-complete",
+   "text_en": "Account holder",
+   "text_ko": "예금주"
+  },
+  {
+   "key": "order-complete-depositorNameLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:326",
+   "page": "order-complete",
+   "text_en": "Depositor name",
+   "text_ko": "입금자명"
+  },
+  {
+   "key": "order-complete-depositAmountLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:338",
+   "page": "order-complete",
+   "text_en": "Deposit amount",
+   "text_ko": "입금 금액"
+  },
+  {
+   "key": "order-complete-depositDueLabel",
+   "kind": "label",
+   "location": "OrderCompletePage.tsx:344",
+   "page": "order-complete",
+   "text_en": "Deposit due",
+   "text_ko": "입금"
+  }
+ ]
+}

@@ -1,0 +1,1496 @@
+{
+ "area": "lang-1",
+ "notes": "ko.json / en.json 1~250줄 구간 검증. template default 브랜드(Still Form / 조용한 일상의 물건들 / Quiet objects for everyday life)는 commerce template 기본 카피로 20ft LOCKED COPY가 아니다. LOCKED COPY/금지 표현 사용 없음. 20ft copy policy 적용 대상은 20ft active runtime(twentyft-studio)이므로 이 영역은 flag 대상이 아니다. 사용자 노출 카피 기준으로 추출 누락 없음. line 87~106 data_source는 내부 키명 라벨로 사용자 화면 텍스트가 아니므로 제외.",
+ "lines_scanned": {
+  "ko": "1-250",
+  "en": "1-250"
+ },
+ "skipped_data_source_keys": [
+  "superbify.data_source.new_arrivals",
+  "superbify.data_source.popular_products",
+  "superbify.data_source.featured_categories",
+  "superbify.data_source.categories",
+  "superbify.data_source.products",
+  "superbify.data_source.category_detail",
+  "superbify.data_source.category_products",
+  "superbify.data_source.product_detail",
+  "superbify.data_source.product_reviews",
+  "superbify.data_source.product_downloadable_coupons",
+  "superbify.data_source.cart",
+  "superbify.data_source.cart_count",
+  "superbify.data_source.termsContent",
+  "superbify.data_source.privacyContent",
+  "superbify.data_source.notice_posts",
+  "superbify.data_source.current_user",
+  "superbify.data_source.token_validation"
+ ],
+ "entries": [
+  {
+   "flag": "",
+   "key": "superbify.base_layout_title",
+   "kind": "seo/meta",
+   "location": "ko.json:3 / en.json:3",
+   "page": "global-meta",
+   "text_en": "Still Form",
+   "text_ko": "Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.base_layout_description",
+   "kind": "seo/meta",
+   "location": "ko.json:4 / en.json:4",
+   "page": "global-meta",
+   "text_en": "Home & lifestyle store — SuperBify Commerce Minimal",
+   "text_ko": "Home & lifestyle store — SuperBify Commerce Minimal"
+  },
+  {
+   "flag": "",
+   "key": "superbify.brand.name",
+   "kind": "brand-intro",
+   "location": "ko.json:6 / en.json:6",
+   "page": "global-brand",
+   "text_en": "Still Form",
+   "text_ko": "Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.brand.tagline",
+   "kind": "brand-intro",
+   "location": "ko.json:7 / en.json:7",
+   "page": "global-brand",
+   "text_en": "Quiet objects for everyday life",
+   "text_ko": "조용한 일상의 물건들"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.home.title",
+   "kind": "seo/meta",
+   "location": "ko.json:11 / en.json:11",
+   "page": "home",
+   "text_en": "Still Form — Quiet objects for everyday life",
+   "text_ko": "Still Form — 조용한 일상의 물건들"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.home.description",
+   "kind": "seo/meta",
+   "location": "ko.json:12 / en.json:12",
+   "page": "home",
+   "text_en": "A small collection of objects for everyday spaces.",
+   "text_ko": "일상의 한 자리에 머무는 사물을 모은 자리."
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.shop.title",
+   "kind": "seo/meta",
+   "location": "ko.json:15 / en.json:15",
+   "page": "shop",
+   "text_en": "Shop — Still Form",
+   "text_ko": "Shop — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.shop.description",
+   "kind": "seo/meta",
+   "location": "ko.json:16 / en.json:16",
+   "page": "shop",
+   "text_en": "All products",
+   "text_ko": "전체 상품 목록"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.category.title",
+   "kind": "seo/meta",
+   "location": "ko.json:19 / en.json:19",
+   "page": "category",
+   "text_en": "Category — Still Form",
+   "text_ko": "Category — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.category.description",
+   "kind": "seo/meta",
+   "location": "ko.json:20 / en.json:20",
+   "page": "category",
+   "text_en": "Products in this category",
+   "text_ko": "카테고리별 상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.product.title",
+   "kind": "seo/meta",
+   "location": "ko.json:23 / en.json:23",
+   "page": "product",
+   "text_en": "Product — Still Form",
+   "text_ko": "Product — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.product.description",
+   "kind": "seo/meta",
+   "location": "ko.json:24 / en.json:24",
+   "page": "product",
+   "text_en": "Product detail",
+   "text_ko": "상품 상세"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.notice.title",
+   "kind": "seo/meta",
+   "location": "ko.json:27 / en.json:27",
+   "page": "notice",
+   "text_en": "Notice — Still Form",
+   "text_ko": "Notice — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.notice.description",
+   "kind": "seo/meta",
+   "location": "ko.json:28 / en.json:28",
+   "page": "notice",
+   "text_en": "Notices",
+   "text_ko": "공지사항"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.story.title",
+   "kind": "seo/meta",
+   "location": "ko.json:31 / en.json:31",
+   "page": "story",
+   "text_en": "Story — Still Form",
+   "text_ko": "Story — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.story.description",
+   "kind": "seo/meta",
+   "location": "ko.json:32 / en.json:32",
+   "page": "story",
+   "text_en": "About the brand",
+   "text_ko": "브랜드 소개"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.cart.title",
+   "kind": "seo/meta",
+   "location": "ko.json:35 / en.json:35",
+   "page": "cart",
+   "text_en": "Cart — Still Form",
+   "text_ko": "Cart — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.cart.description",
+   "kind": "seo/meta",
+   "location": "ko.json:36 / en.json:36",
+   "page": "cart",
+   "text_en": "Shopping cart",
+   "text_ko": "장바구니"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.checkout.title",
+   "kind": "seo/meta",
+   "location": "ko.json:39 / en.json:39",
+   "page": "checkout",
+   "text_en": "Checkout — Still Form",
+   "text_ko": "Checkout — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.checkout.description",
+   "kind": "seo/meta",
+   "location": "ko.json:40 / en.json:40",
+   "page": "checkout",
+   "text_en": "Checkout",
+   "text_ko": "결제"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.order_complete.title",
+   "kind": "seo/meta",
+   "location": "ko.json:43 / en.json:43",
+   "page": "order-complete",
+   "text_en": "Order Complete — Still Form",
+   "text_ko": "주문 완료 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.order_complete.description",
+   "kind": "seo/meta",
+   "location": "ko.json:44 / en.json:44",
+   "page": "order-complete",
+   "text_en": "Your order has been placed",
+   "text_ko": "주문이 접수되었습니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.guest_order_form.title",
+   "kind": "seo/meta",
+   "location": "ko.json:47 / en.json:47",
+   "page": "guest-order",
+   "text_en": "Guest Order Lookup — Still Form",
+   "text_ko": "비회원 주문 조회 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.guest_order_form.description",
+   "kind": "seo/meta",
+   "location": "ko.json:48 / en.json:48",
+   "page": "guest-order",
+   "text_en": "Look up your order by order number",
+   "text_ko": "주문번호로 주문 내역을 확인합니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.guest_order_show.title",
+   "kind": "seo/meta",
+   "location": "ko.json:51 / en.json:51",
+   "page": "guest-order-detail",
+   "text_en": "Guest Order Detail — Still Form",
+   "text_ko": "비회원 주문 상세 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.guest_order_show.description",
+   "kind": "seo/meta",
+   "location": "ko.json:52 / en.json:52",
+   "page": "guest-order-detail",
+   "text_en": "View your guest order details",
+   "text_ko": "비회원 주문 상세 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.terms.title",
+   "kind": "seo/meta",
+   "location": "ko.json:55 / en.json:55",
+   "page": "terms",
+   "text_en": "Terms of Service — Still Form",
+   "text_ko": "이용약관 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.terms.description",
+   "kind": "seo/meta",
+   "location": "ko.json:56 / en.json:56",
+   "page": "terms",
+   "text_en": "Store terms of service",
+   "text_ko": "스토어 이용약관 안내"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.privacy.title",
+   "kind": "seo/meta",
+   "location": "ko.json:59 / en.json:59",
+   "page": "privacy",
+   "text_en": "Privacy Policy — Still Form",
+   "text_ko": "개인정보처리방침 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.privacy.description",
+   "kind": "seo/meta",
+   "location": "ko.json:60 / en.json:60",
+   "page": "privacy",
+   "text_en": "Privacy policy information",
+   "text_ko": "개인정보처리방침 안내"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.shipping_policy.title",
+   "kind": "seo/meta",
+   "location": "ko.json:63 / en.json:63",
+   "page": "shipping-policy",
+   "text_en": "Shipping, Returns & Exchanges — Still Form",
+   "text_ko": "배송·교환·반품 안내 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.shipping_policy.description",
+   "kind": "seo/meta",
+   "location": "ko.json:64 / en.json:64",
+   "page": "shipping-policy",
+   "text_en": "Shipping, exchange, and return information",
+   "text_ko": "배송, 교환, 반품 안내"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.notice_detail.title",
+   "kind": "seo/meta",
+   "location": "ko.json:67 / en.json:67",
+   "page": "notice-detail",
+   "text_en": "Notice detail — Still Form",
+   "text_ko": "공지 상세 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.notice_detail.description",
+   "kind": "seo/meta",
+   "location": "ko.json:68 / en.json:68",
+   "page": "notice-detail",
+   "text_en": "Store notice detail",
+   "text_ko": "스토어 공지 상세 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.login",
+   "kind": "seo/meta",
+   "location": "ko.json:70 / en.json:70",
+   "page": "login",
+   "text_en": "Login — Still Form",
+   "text_ko": "로그인 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.register",
+   "kind": "seo/meta",
+   "location": "ko.json:71 / en.json:71",
+   "page": "register",
+   "text_en": "Sign up — Still Form",
+   "text_ko": "회원가입 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.forgot_password",
+   "kind": "seo/meta",
+   "location": "ko.json:72 / en.json:72",
+   "page": "forgot-password",
+   "text_en": "Forgot password — Still Form",
+   "text_ko": "비밀번호 찾기 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.reset_password",
+   "kind": "seo/meta",
+   "location": "ko.json:73 / en.json:73",
+   "page": "reset-password",
+   "text_en": "Reset password — Still Form",
+   "text_ko": "비밀번호 재설정 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage",
+   "kind": "seo/meta",
+   "location": "ko.json:74 / en.json:74",
+   "page": "mypage",
+   "text_en": "My Page — Still Form",
+   "text_ko": "마이페이지 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_profile",
+   "kind": "seo/meta",
+   "location": "ko.json:75 / en.json:75",
+   "page": "mypage-profile",
+   "text_en": "Profile — My Page",
+   "text_ko": "프로필 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_profile_edit",
+   "kind": "seo/meta",
+   "location": "ko.json:76 / en.json:76",
+   "page": "mypage-profile-edit",
+   "text_en": "Edit Profile — My Page",
+   "text_ko": "프로필 수정 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_change_password",
+   "kind": "seo/meta",
+   "location": "ko.json:77 / en.json:77",
+   "page": "mypage-change-password",
+   "text_en": "Change Password — My Page",
+   "text_ko": "비밀번호 변경 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_orders",
+   "kind": "seo/meta",
+   "location": "ko.json:78 / en.json:78",
+   "page": "mypage-orders",
+   "text_en": "Orders — My Page",
+   "text_ko": "주문내역 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_order",
+   "kind": "seo/meta",
+   "location": "ko.json:79 / en.json:79",
+   "page": "mypage-order",
+   "text_en": "Order Detail — My Page",
+   "text_ko": "주문 상세 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_addresses",
+   "kind": "seo/meta",
+   "location": "ko.json:80 / en.json:80",
+   "page": "mypage-addresses",
+   "text_en": "Addresses — My Page",
+   "text_ko": "배송지 관리 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_wishlist",
+   "kind": "seo/meta",
+   "location": "ko.json:81 / en.json:81",
+   "page": "mypage-wishlist",
+   "text_en": "Wishlist — My Page",
+   "text_ko": "찜한 상품 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_coupons",
+   "kind": "seo/meta",
+   "location": "ko.json:82 / en.json:82",
+   "page": "mypage-coupons",
+   "text_en": "Coupons — My Page",
+   "text_ko": "쿠폰 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_mileage",
+   "kind": "seo/meta",
+   "location": "ko.json:83 / en.json:83",
+   "page": "mypage-mileage",
+   "text_en": "Mileage — My Page",
+   "text_ko": "마일리지 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_inquiries",
+   "kind": "seo/meta",
+   "location": "ko.json:84 / en.json:84",
+   "page": "mypage-inquiries",
+   "text_en": "Product Inquiries — My Page",
+   "text_ko": "상품 문의 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.reorder",
+   "kind": "seo/meta",
+   "location": "ko.json:85 / en.json:85",
+   "page": "reorder",
+   "text_en": "Reorder",
+   "text_ko": "재주문"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.not_found_title",
+   "kind": "toast/error",
+   "location": "ko.json:107 / en.json:107",
+   "page": "error-404",
+   "text_en": "Page not found",
+   "text_ko": "페이지를 찾을 수 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.not_found_description",
+   "kind": "toast/error",
+   "location": "ko.json:108 / en.json:108",
+   "page": "error-404",
+   "text_en": "The page you requested does not exist or has been moved.",
+   "text_ko": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.forbidden_title",
+   "kind": "toast/error",
+   "location": "ko.json:109 / en.json:109",
+   "page": "error-403",
+   "text_en": "Access denied",
+   "text_ko": "접근 권한이 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.forbidden_description",
+   "kind": "toast/error",
+   "location": "ko.json:110 / en.json:110",
+   "page": "error-403",
+   "text_en": "You don't have permission to access this page.",
+   "text_ko": "이 페이지에 접근할 수 있는 권한이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.server_error_title",
+   "kind": "toast/error",
+   "location": "ko.json:111 / en.json:111",
+   "page": "error-500",
+   "text_en": "Something went wrong",
+   "text_ko": "문제가 발생했습니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.server_error_description",
+   "kind": "toast/error",
+   "location": "ko.json:112 / en.json:112",
+   "page": "error-500",
+   "text_en": "Please try again in a moment.",
+   "text_ko": "잠시 후 다시 시도해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.unauthorized_title",
+   "kind": "toast/error",
+   "location": "ko.json:113 / en.json:113",
+   "page": "error-401",
+   "text_en": "Sign-in required",
+   "text_ko": "로그인이 필요합니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.unauthorized_message",
+   "kind": "toast/error",
+   "location": "ko.json:114 / en.json:114",
+   "page": "error-401",
+   "text_en": "This page is for members. Please sign in and try again.",
+   "text_ko": "회원 전용 페이지입니다. 로그인 후 다시 이용해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.unauthorized_cta_login",
+   "kind": "button",
+   "location": "ko.json:115 / en.json:115",
+   "page": "error-401",
+   "text_en": "Go to sign in",
+   "text_ko": "로그인하러 가기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.unauthorized_cta_home",
+   "kind": "button",
+   "location": "ko.json:116 / en.json:116",
+   "page": "error-401",
+   "text_en": "Go to home",
+   "text_ko": "홈으로 가기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login",
+   "kind": "label",
+   "location": "ko.json:119 / en.json:119",
+   "page": "login",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.signup",
+   "kind": "label",
+   "location": "ko.json:120 / en.json:120",
+   "page": "login",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.logout",
+   "kind": "button",
+   "location": "ko.json:121 / en.json:121",
+   "page": "mypage",
+   "text_en": "Log out",
+   "text_ko": "로그아웃"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register_link",
+   "kind": "label",
+   "location": "ko.json:122 / en.json:122",
+   "page": "login",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.already_member",
+   "kind": "label",
+   "location": "ko.json:123 / en.json:123",
+   "page": "login",
+   "text_en": "Already a member?",
+   "text_ko": "이미 회원이신가요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password_link",
+   "kind": "label",
+   "location": "ko.json:124 / en.json:124",
+   "page": "login",
+   "text_en": "Forgot your password?",
+   "text_ko": "비밀번호를 잊으셨나요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_success",
+   "kind": "toast/error",
+   "location": "ko.json:125 / en.json:125",
+   "page": "login",
+   "text_en": "You are signed in.",
+   "text_ko": "로그인되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register_success",
+   "kind": "toast/error",
+   "location": "ko.json:126 / en.json:126",
+   "page": "register",
+   "text_en": "Your account has been created.",
+   "text_ko": "회원가입이 완료되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.already_logged_in",
+   "kind": "toast/error",
+   "location": "ko.json:127 / en.json:127",
+   "page": "login",
+   "text_en": "You are already signed in.",
+   "text_ko": "이미 로그인되어 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.title",
+   "kind": "heading",
+   "location": "ko.json:129 / en.json:129",
+   "page": "login",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.subtitle",
+   "kind": "main-copy",
+   "location": "ko.json:130 / en.json:130",
+   "page": "login",
+   "text_en": "Sign in to your account",
+   "text_ko": "계정에 로그인하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.email",
+   "kind": "label",
+   "location": "ko.json:131 / en.json:131",
+   "page": "login",
+   "text_en": "Email",
+   "text_ko": "이메일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.email_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:132 / en.json:132",
+   "page": "login",
+   "text_en": "Enter your email address",
+   "text_ko": "이메일 주소를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.password",
+   "kind": "label",
+   "location": "ko.json:133 / en.json:133",
+   "page": "login",
+   "text_en": "Password",
+   "text_ko": "비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.password_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:134 / en.json:134",
+   "page": "login",
+   "text_en": "Enter your password",
+   "text_ko": "비밀번호를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.remember",
+   "kind": "label",
+   "location": "ko.json:135 / en.json:135",
+   "page": "login",
+   "text_en": "Keep me signed in",
+   "text_ko": "로그인 상태 유지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.submit",
+   "kind": "button",
+   "location": "ko.json:136 / en.json:136",
+   "page": "login",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.processing",
+   "kind": "button",
+   "location": "ko.json:137 / en.json:137",
+   "page": "login",
+   "text_en": "Signing in...",
+   "text_ko": "로그인 중..."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.no_account",
+   "kind": "label",
+   "location": "ko.json:138 / en.json:138",
+   "page": "login",
+   "text_en": "Don't have an account?",
+   "text_ko": "계정이 없으신가요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.error.invalid",
+   "kind": "toast/error",
+   "location": "ko.json:140 / en.json:140",
+   "page": "login",
+   "text_en": "The email or password is incorrect.",
+   "text_ko": "이메일 또는 비밀번호가 올바르지 않습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.error.email_required",
+   "kind": "toast/error",
+   "location": "ko.json:141 / en.json:141",
+   "page": "login",
+   "text_en": "Please enter your email.",
+   "text_ko": "이메일을 입력해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.error.email_invalid",
+   "kind": "toast/error",
+   "location": "ko.json:142 / en.json:142",
+   "page": "login",
+   "text_en": "Please enter a valid email address.",
+   "text_ko": "올바른 이메일 형식이 아닙니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.login_form.error.password_required",
+   "kind": "toast/error",
+   "location": "ko.json:143 / en.json:143",
+   "page": "login",
+   "text_en": "Please enter your password.",
+   "text_ko": "비밀번호를 입력해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.title",
+   "kind": "heading",
+   "location": "ko.json:147 / en.json:147",
+   "page": "register",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.subtitle",
+   "kind": "main-copy",
+   "location": "ko.json:148 / en.json:148",
+   "page": "register",
+   "text_en": "Create a new account",
+   "text_ko": "새 계정을 만드세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.email",
+   "kind": "label",
+   "location": "ko.json:149 / en.json:149",
+   "page": "register",
+   "text_en": "Email",
+   "text_ko": "이메일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.email_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:150 / en.json:150",
+   "page": "register",
+   "text_en": "Enter your email address",
+   "text_ko": "이메일 주소를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.password",
+   "kind": "label",
+   "location": "ko.json:151 / en.json:151",
+   "page": "register",
+   "text_en": "Password",
+   "text_ko": "비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.password_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:152 / en.json:152",
+   "page": "register",
+   "text_en": "Enter your password",
+   "text_ko": "비밀번호를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.password_confirm",
+   "kind": "label",
+   "location": "ko.json:153 / en.json:153",
+   "page": "register",
+   "text_en": "Confirm password",
+   "text_ko": "비밀번호 확인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.password_confirm_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:154 / en.json:154",
+   "page": "register",
+   "text_en": "Enter your password again",
+   "text_ko": "비밀번호를 다시 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.nickname",
+   "kind": "label",
+   "location": "ko.json:155 / en.json:155",
+   "page": "register",
+   "text_en": "Nickname",
+   "text_ko": "닉네임"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.nickname_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:156 / en.json:156",
+   "page": "register",
+   "text_en": "Enter a nickname (optional)",
+   "text_ko": "닉네임을 입력하세요 (선택)"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.name",
+   "kind": "label",
+   "location": "ko.json:157 / en.json:157",
+   "page": "register",
+   "text_en": "Name",
+   "text_ko": "이름"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.name_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:158 / en.json:158",
+   "page": "register",
+   "text_en": "Enter your name",
+   "text_ko": "이름을 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.mobile",
+   "kind": "label",
+   "location": "ko.json:159 / en.json:159",
+   "page": "register",
+   "text_en": "Mobile phone",
+   "text_ko": "휴대폰 번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.mobile_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:160 / en.json:160",
+   "page": "register",
+   "text_en": "Enter your mobile phone number (optional)",
+   "text_ko": "휴대폰 번호를 입력하세요 (선택)"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.phone",
+   "kind": "label",
+   "location": "ko.json:161 / en.json:161",
+   "page": "register",
+   "text_en": "Phone",
+   "text_ko": "전화번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.phone_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:162 / en.json:162",
+   "page": "register",
+   "text_en": "Enter your phone number (optional)",
+   "text_ko": "전화번호를 입력하세요 (선택)"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.language",
+   "kind": "label",
+   "location": "ko.json:163 / en.json:163",
+   "page": "register",
+   "text_en": "Language",
+   "text_ko": "언어"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.section_account",
+   "kind": "heading",
+   "location": "ko.json:164 / en.json:164",
+   "page": "register",
+   "text_en": "Account",
+   "text_ko": "계정 정보"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.section_profile",
+   "kind": "heading",
+   "location": "ko.json:165 / en.json:165",
+   "page": "register",
+   "text_en": "Profile",
+   "text_ko": "프로필"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.section_agreements",
+   "kind": "heading",
+   "location": "ko.json:166 / en.json:166",
+   "page": "register",
+   "text_en": "Agreements",
+   "text_ko": "약관 동의"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.agree_required",
+   "kind": "label",
+   "location": "ko.json:167 / en.json:167",
+   "page": "register",
+   "text_en": "(required)",
+   "text_ko": "(필수)"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.password_hint",
+   "kind": "label",
+   "location": "ko.json:168 / en.json:168",
+   "page": "register",
+   "text_en": "Password must be at least 8 characters.",
+   "text_ko": "비밀번호는 8자 이상이어야 합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.terms_agree",
+   "kind": "label",
+   "location": "ko.json:169 / en.json:169",
+   "page": "register",
+   "text_en": "I agree to the Terms of Service.",
+   "text_ko": "이용약관에 동의합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.privacy_agree",
+   "kind": "label",
+   "location": "ko.json:170 / en.json:170",
+   "page": "register",
+   "text_en": "I agree to the Privacy Policy.",
+   "text_ko": "개인정보처리방침에 동의합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.terms_link",
+   "kind": "label",
+   "location": "ko.json:171 / en.json:171",
+   "page": "register",
+   "text_en": "View Terms of Service",
+   "text_ko": "이용약관 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.privacy_link",
+   "kind": "label",
+   "location": "ko.json:172 / en.json:172",
+   "page": "register",
+   "text_en": "View Privacy Policy",
+   "text_ko": "개인정보처리방침 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.submit",
+   "kind": "button",
+   "location": "ko.json:173 / en.json:173",
+   "page": "register",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.processing",
+   "kind": "button",
+   "location": "ko.json:174 / en.json:174",
+   "page": "register",
+   "text_en": "Creating account...",
+   "text_ko": "가입 중..."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.has_account",
+   "kind": "label",
+   "location": "ko.json:175 / en.json:175",
+   "page": "register",
+   "text_en": "Already have an account?",
+   "text_ko": "이미 계정이 있으신가요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.email_required",
+   "kind": "toast/error",
+   "location": "ko.json:177 / en.json:177",
+   "page": "register",
+   "text_en": "Please enter your email.",
+   "text_ko": "이메일을 입력해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.email_invalid",
+   "kind": "toast/error",
+   "location": "ko.json:178 / en.json:178",
+   "page": "register",
+   "text_en": "Please enter a valid email address.",
+   "text_ko": "올바른 이메일 형식이 아닙니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.email_exists",
+   "kind": "toast/error",
+   "location": "ko.json:179 / en.json:179",
+   "page": "register",
+   "text_en": "This email is already in use.",
+   "text_ko": "이미 사용 중인 이메일입니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.password_required",
+   "kind": "toast/error",
+   "location": "ko.json:180 / en.json:180",
+   "page": "register",
+   "text_en": "Please enter a password.",
+   "text_ko": "비밀번호를 입력해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.password_min",
+   "kind": "toast/error",
+   "location": "ko.json:181 / en.json:181",
+   "page": "register",
+   "text_en": "Password must be at least {{count}} characters.",
+   "text_ko": "비밀번호는 {{count}}자 이상이어야 합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.password_mismatch",
+   "kind": "toast/error",
+   "location": "ko.json:182 / en.json:182",
+   "page": "register",
+   "text_en": "Passwords do not match.",
+   "text_ko": "비밀번호가 일치하지 않습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.terms_required",
+   "kind": "toast/error",
+   "location": "ko.json:183 / en.json:183",
+   "page": "register",
+   "text_en": "Please agree to the Terms of Service.",
+   "text_ko": "이용약관에 동의해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.register.error.privacy_required",
+   "kind": "toast/error",
+   "location": "ko.json:184 / en.json:184",
+   "page": "register",
+   "text_en": "Please agree to the Privacy Policy.",
+   "text_ko": "개인정보처리방침에 동의해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.title",
+   "kind": "heading",
+   "location": "ko.json:188 / en.json:188",
+   "page": "forgot-password",
+   "text_en": "Forgot password",
+   "text_ko": "비밀번호 찾기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.subtitle",
+   "kind": "main-copy",
+   "location": "ko.json:189 / en.json:189",
+   "page": "forgot-password",
+   "text_en": "We will email you a password reset link",
+   "text_ko": "이메일로 비밀번호 재설정 링크를 보내드립니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.email",
+   "kind": "label",
+   "location": "ko.json:190 / en.json:190",
+   "page": "forgot-password",
+   "text_en": "Email",
+   "text_ko": "이메일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.email_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:191 / en.json:191",
+   "page": "forgot-password",
+   "text_en": "Enter the email address you registered with",
+   "text_ko": "가입한 이메일 주소를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.submit",
+   "kind": "button",
+   "location": "ko.json:192 / en.json:192",
+   "page": "forgot-password",
+   "text_en": "Send reset link",
+   "text_ko": "재설정 링크 보내기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.processing",
+   "kind": "button",
+   "location": "ko.json:193 / en.json:193",
+   "page": "forgot-password",
+   "text_en": "Sending...",
+   "text_ko": "전송 중..."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.success",
+   "kind": "toast/error",
+   "location": "ko.json:194 / en.json:194",
+   "page": "forgot-password",
+   "text_en": "A password reset email has been sent.",
+   "text_ko": "비밀번호 재설정 이메일을 보냈습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.forgot_password.back_to_login",
+   "kind": "label",
+   "location": "ko.json:195 / en.json:195",
+   "page": "forgot-password",
+   "text_en": "Back to login",
+   "text_ko": "로그인으로 돌아가기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.title",
+   "kind": "heading",
+   "location": "ko.json:198 / en.json:198",
+   "page": "reset-password",
+   "text_en": "Reset password",
+   "text_ko": "비밀번호 재설정"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.subtitle",
+   "kind": "main-copy",
+   "location": "ko.json:199 / en.json:199",
+   "page": "reset-password",
+   "text_en": "Enter a new password",
+   "text_ko": "새 비밀번호를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.password",
+   "kind": "label",
+   "location": "ko.json:200 / en.json:200",
+   "page": "reset-password",
+   "text_en": "New password",
+   "text_ko": "새 비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.password_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:201 / en.json:201",
+   "page": "reset-password",
+   "text_en": "Enter the new password",
+   "text_ko": "새 비밀번호를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.password_confirm",
+   "kind": "label",
+   "location": "ko.json:202 / en.json:202",
+   "page": "reset-password",
+   "text_en": "Confirm password",
+   "text_ko": "비밀번호 확인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.password_confirm_placeholder",
+   "kind": "placeholder",
+   "location": "ko.json:203 / en.json:203",
+   "page": "reset-password",
+   "text_en": "Enter the new password again",
+   "text_ko": "새 비밀번호를 다시 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.submit",
+   "kind": "button",
+   "location": "ko.json:204 / en.json:204",
+   "page": "reset-password",
+   "text_en": "Change password",
+   "text_ko": "비밀번호 변경"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.processing",
+   "kind": "button",
+   "location": "ko.json:205 / en.json:205",
+   "page": "reset-password",
+   "text_en": "Updating...",
+   "text_ko": "변경 중..."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.success",
+   "kind": "toast/error",
+   "location": "ko.json:206 / en.json:206",
+   "page": "reset-password",
+   "text_en": "Your password has been changed.",
+   "text_ko": "비밀번호가 변경되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.token_invalid",
+   "kind": "toast/error",
+   "location": "ko.json:207 / en.json:207",
+   "page": "reset-password",
+   "text_en": "This link is invalid or expired. Please request a password reset again.",
+   "text_ko": "유효하지 않거나 만료된 링크입니다. 비밀번호 찾기를 다시 요청해주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.go_to_login",
+   "kind": "button",
+   "location": "ko.json:208 / en.json:208",
+   "page": "reset-password",
+   "text_en": "Log in",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.reset_password.go_to_home",
+   "kind": "button",
+   "location": "ko.json:209 / en.json:209",
+   "page": "reset-password",
+   "text_en": "Go to home",
+   "text_ko": "홈으로"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.guest_continue.title",
+   "kind": "heading",
+   "location": "ko.json:212 / en.json:212",
+   "page": "guest-order",
+   "text_en": "Guest order lookup",
+   "text_ko": "비회원 주문 조회"
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.guest_continue.hint",
+   "kind": "main-copy",
+   "location": "ko.json:213 / en.json:213",
+   "page": "guest-order",
+   "text_en": "You can look up your order with the order number you received.",
+   "text_ko": "주문 시 받은 주문번호로 주문 내역을 확인할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.auth.guest_continue.cta",
+   "kind": "button",
+   "location": "ko.json:214 / en.json:214",
+   "page": "guest-order",
+   "text_en": "Guest order lookup",
+   "text_ko": "비회원 주문 조회"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.title",
+   "kind": "heading",
+   "location": "ko.json:218 / en.json:218",
+   "page": "mypage",
+   "text_en": "My Page",
+   "text_ko": "마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.logout_success",
+   "kind": "toast/error",
+   "location": "ko.json:219 / en.json:219",
+   "page": "mypage",
+   "text_en": "You have been signed out.",
+   "text_ko": "로그아웃되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.cancel",
+   "kind": "button",
+   "location": "ko.json:220 / en.json:220",
+   "page": "mypage",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.delete",
+   "kind": "button",
+   "location": "ko.json:221 / en.json:221",
+   "page": "mypage",
+   "text_en": "Delete",
+   "text_ko": "삭제"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.profile",
+   "kind": "label",
+   "location": "ko.json:223 / en.json:223",
+   "page": "mypage",
+   "text_en": "Profile",
+   "text_ko": "프로필"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.orders",
+   "kind": "label",
+   "location": "ko.json:224 / en.json:224",
+   "page": "mypage",
+   "text_en": "Orders",
+   "text_ko": "주문내역"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.addresses",
+   "kind": "label",
+   "location": "ko.json:225 / en.json:225",
+   "page": "mypage",
+   "text_en": "Addresses",
+   "text_ko": "배송지 관리"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.wishlist",
+   "kind": "label",
+   "location": "ko.json:226 / en.json:226",
+   "page": "mypage",
+   "text_en": "Wishlist",
+   "text_ko": "찜한 상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.coupons",
+   "kind": "label",
+   "location": "ko.json:227 / en.json:227",
+   "page": "mypage",
+   "text_en": "Coupons",
+   "text_ko": "쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.mileage",
+   "kind": "label",
+   "location": "ko.json:228 / en.json:228",
+   "page": "mypage",
+   "text_en": "Mileage",
+   "text_ko": "마일리지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.inquiries",
+   "kind": "label",
+   "location": "ko.json:229 / en.json:229",
+   "page": "mypage",
+   "text_en": "Inquiries",
+   "text_ko": "상품 문의"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.password",
+   "kind": "label",
+   "location": "ko.json:230 / en.json:230",
+   "page": "mypage",
+   "text_en": "Change password",
+   "text_ko": "비밀번호 변경"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.empty",
+   "kind": "empty-state",
+   "location": "ko.json:233 / en.json:233",
+   "page": "mypage-orders",
+   "text_en": "No orders yet.",
+   "text_ko": "주문 내역이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.order_no",
+   "kind": "label",
+   "location": "ko.json:234 / en.json:234",
+   "page": "mypage-orders",
+   "text_en": "Order number",
+   "text_ko": "주문번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.status",
+   "kind": "label",
+   "location": "ko.json:235 / en.json:235",
+   "page": "mypage-orders",
+   "text_en": "Status",
+   "text_ko": "상태"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.item",
+   "kind": "label",
+   "location": "ko.json:236 / en.json:236",
+   "page": "mypage-orders",
+   "text_en": "Items",
+   "text_ko": "상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.total",
+   "kind": "label",
+   "location": "ko.json:237 / en.json:237",
+   "page": "mypage-orders",
+   "text_en": "Total",
+   "text_ko": "결제금액"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.date",
+   "kind": "label",
+   "location": "ko.json:238 / en.json:238",
+   "page": "mypage-orders",
+   "text_en": "Order date",
+   "text_ko": "주문일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.shipping_to",
+   "kind": "label",
+   "location": "ko.json:239 / en.json:239",
+   "page": "mypage-orders",
+   "text_en": "Shipping to",
+   "text_ko": "배송지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.payment",
+   "kind": "label",
+   "location": "ko.json:240 / en.json:240",
+   "page": "mypage-orders",
+   "text_en": "Payment",
+   "text_ko": "결제 방법"
+  }
+ ]
+}

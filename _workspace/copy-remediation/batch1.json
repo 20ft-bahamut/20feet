@@ -1,0 +1,77 @@
+[
+  {
+    "id": "BRAND-001", "key": "home.hero.sub", "page": "home-hero", "action": "REWRITE",
+    "problem": "AI 감성 누적(손에 익는 재질/변화하는 결/머무는 사물/차곡차곡). Hero 역할=브랜드/쇼핑몰 소개로 정리",
+    "ko": "생활 가까이에서 쓰는 물건을 모은 온라인 스토어입니다.",
+    "en": "An online store for objects used in everyday life."
+  },
+  {
+    "id": "BRAND-002", "key": "home.story.heading", "page": "home-story", "action": "REWRITE",
+    "problem": "'오래 쓸수록 익어지는 것들' — 금지 표현군. Section 역할을 상품 선정 기준으로 명확화",
+    "ko": "Still Form이 고르는 기준",
+    "en": "How Still Form chooses"
+  },
+  {
+    "id": "BRAND-003", "key": "home.story.body", "page": "home-story", "action": "REWRITE",
+    "problem": "의인화(재질이 스스로 말을 거는), '익은 것', '천천히 소개합니다' — 금지 표현군. 실제 선택 기준으로 교체",
+    "ko": "매일 쓰는 물건일수록 재질과 형태, 쓰임을 봅니다. 집과 책상 가까이에 두고 오래 사용할 수 있는 제품을 고릅니다.",
+    "en": "For things used every day, we look at the material, the form, and how they are used. We pick products that can be kept close at home and used for a long time."
+  },
+  {
+    "id": "BRAND-004", "key": "home.editorial.heading", "page": "home-editorial", "action": "REWRITE",
+    "problem": "'조용히, 그러나 단단하게.' — 금지 표현. 사용자 확정 방향 적용",
+    "ko": "매일 손이 가는 물건들",
+    "en": "Things you reach for every day"
+  },
+  {
+    "id": "BRAND-005", "key": "home.editorial.body", "page": "home-editorial", "action": "REWRITE",
+    "problem": "'머무는 사물', '시간이 흐를수록', '익어지는 물건', '차분히' — 금지 표현군. Editorial 역할=실제 생활 제품 소개. 선택 기준 문장은 Story와 중복이라 제외",
+    "ko": "컵과 접시, 조명과 패브릭처럼 생활 가까이에 두고 자주 쓰는 물건을 소개합니다.",
+    "en": "Cups, plates, lighting, and fabrics — objects you keep close and use often."
+  },
+  {
+    "id": "BRAND-006", "key": "home.final_cta.heading", "page": "home-final-cta", "action": "REWRITE",
+    "problem": "'조용한 일상의 모든 물건을 한 자리에서' — tagline 단어 반복 + 추상 표현. 사용자 확정 방향 적용",
+    "ko": "Still Form의 모든 상품",
+    "en": "All Still Form products"
+  },
+  {
+    "id": "BRAND-007", "key": "home.final_cta.body", "page": "home-final-cta", "action": "REWRITE",
+    "problem": "'오래 머무를 한 가지 물건' — 금지 표현군. 판매 중 상품 탐색 안내로 교체",
+    "ko": "컵, 조명, 트레이, 패브릭 등 현재 판매 중인 상품을 한 번에 확인해 보세요.",
+    "en": "Cups, lighting, trays, fabrics and more — see everything currently for sale in one place."
+  },
+  {
+    "id": "BRAND-008", "key": "home.final_cta.cta", "page": "home-final-cta", "action": "TERM_NORMALIZE",
+    "problem": "'Shop 전체 보기' — 영문 혼용. 사용자 확정 CTA 적용",
+    "ko": "전체 상품 보기",
+    "en": "View all products"
+  },
+  {
+    "id": "TERM-001", "key": "home.new_arrivals.heading", "page": "home-new-arrivals", "action": "TERM_NORMALIZE",
+    "problem": "'새로 들어온 것들' — 상품임을 명시(용어 통일)",
+    "ko": "새로 들어온 상품",
+    "en": "New arrivals"
+  },
+  {
+    "id": "TERM-002", "key": "product.related_title", "page": "product-detail", "action": "TERM_NORMALIZE",
+    "problem": "'함께 보면 좋은 것들' — cart.cross_sell.title '함께 보면 좋은 상품'과 용어 불일치",
+    "ko": "함께 보면 좋은 상품",
+    "en": "You may also like"
+  },
+  {
+    "id": "DEAD-001", "key": "home.promo.eyebrow", "page": "home-promo", "action": "REMOVE",
+    "problem": "home.promo.* 3개 키 전체가 layout/component에서 미참조하는 dead key. '오늘의 한 권' 책 비유 카피도 여기에 있음",
+    "ko": null
+  },
+  {
+    "id": "DEAD-001", "key": "home.promo.title", "page": "home-promo", "action": "REMOVE",
+    "problem": "dead key (미참조). 책 비유 카피",
+    "ko": null
+  },
+  {
+    "id": "DEAD-001", "key": "home.promo.description", "page": "home-promo", "action": "REMOVE",
+    "problem": "dead key (미참조). 책 비유 카피",
+    "ko": null
+  }
+]

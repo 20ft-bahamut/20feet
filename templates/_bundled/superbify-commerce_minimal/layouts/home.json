@@ -171,7 +171,6 @@
                                     "loading": "{{new_arrivals?.loading ?? false}}",
                                     "variant": "standard",
                                     "emptyTitle": "$t:superbify.shop.empty_title",
-                                    "emptyMessage": "$t:superbify.shop.empty_message",
                                     "quickAddLabel": "$t:superbify.product.quick_add"
                                 }
                             }
@@ -251,7 +250,6 @@
                                     "loading": "{{popular_products?.loading ?? false}}",
                                     "variant": "featured",
                                     "emptyTitle": "$t:superbify.shop.empty_title",
-                                    "emptyMessage": "$t:superbify.shop.empty_message",
                                     "quickAddLabel": "$t:superbify.product.quick_add",
                                     "featuredCtaLabel": "$t:superbify.product.view_detail",
                                     "featuredEyebrow": "$t:superbify.product.featured_eyebrow"
@@ -287,7 +285,7 @@
                                     "eyebrow": "$t:superbify.home.story.eyebrow",
                                     "heading": "$t:superbify.home.story.heading",
                                     "body": "$t:superbify.home.story.body",
-                                    "ctaLabel": "$t:superbify.home.hero.cta_secondary",
+                                    "ctaLabel": "$t:superbify.home.story.cta",
                                     "ctaHref": "/shop/story",
                                     "mediaSlot": "hero-mood-2",
                                     "layout": "split",
@@ -410,7 +408,9 @@
                                             "color": "var(--scm-text-primary, #26221E)",
                                             "margin": 0,
                                             "letterSpacing": "-0.015em",
-                                            "lineHeight": 1.2
+                                            "lineHeight": 1.2,
+                                            "whiteSpace": "pre-line",
+                                            "wordBreak": "keep-all"
                                         },
                                         "text": "$t:superbify.home.final_cta.heading"
                                     },
@@ -425,7 +425,9 @@
                                             "lineHeight": 1.75,
                                             "margin": 0,
                                             "maxWidth": "44ch",
-                                            "marginInline": "auto"
+                                            "marginInline": "auto",
+                                            "whiteSpace": "pre-line",
+                                            "wordBreak": "keep-all"
                                         },
                                         "text": "$t:superbify.home.final_cta.body"
                                     },
@@ -450,8 +452,10 @@
                                             "marginTop": "var(--scm-spacing-sm, 0.75rem)",
                                             "boxShadow": "0 6px 18px -10px rgba(38, 34, 30, 0.45)"
                                         },
-                                        "href": "{{_global.shopBase ?? '/shop'}}/",
-                                        "text": "$t:superbify.home.final_cta.cta"
+                                        "text": "$t:superbify.home.final_cta.cta",
+                                        "props": {
+                                            "href": "{{_global.shopBase ?? '/shop'}}/"
+                                        }
                                     }
                                 ]
                             }

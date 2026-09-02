@@ -1,0 +1,68 @@
+[
+  {
+    "id": "FINAL-HERO", "key": "home.hero.sub", "page": "home-hero", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim)",
+    "ko": "눈에 띄기보다 곁에 오래 남는 것.\n매일 손이 가고, 쓰일수록 편안해지는 생활의 도구를 고릅니다.",
+    "en": "Less about standing out, more about staying close for long.\nWe choose everyday tools that are used daily and grow comfortable with use."
+  },
+  {
+    "id": "FINAL-STORY-H", "key": "home.story.heading", "page": "home-story", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim)",
+    "ko": "오래 두고 쓰는 물건에는\n이유가 있습니다.",
+    "en": "Things kept and used for years\nhave their reasons."
+  },
+  {
+    "id": "FINAL-STORY-B", "key": "home.story.body", "page": "home-story", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim). 2 paragraph — pre-line 렌더",
+    "ko": "재질은 손에 닿는 감촉으로,\n형태는 실제 쓰임으로 봅니다.\n\nStill Form은 유행보다 오래 쓰이고,\n생활 속에 자연스럽게 남는 물건을 고릅니다.",
+    "en": "Material is judged by how it feels in the hand,\nform by how it actually works.\n\nStill Form picks objects that outlast trends\nand stay naturally in everyday life."
+  },
+  {
+    "id": "FINAL-STORY-CTA", "key": "home.story.cta", "page": "home-story", "action": "I18N_FIX",
+    "problem": "사용자 확정 CTA — 기존 hero.cta_secondary 재사용('Brand Story')을 신규 키로 분리. href /shop/story 유지",
+    "ko": "Still Form의 기준",
+    "en": "How Still Form chooses"
+  },
+  {
+    "id": "FINAL-EDIT-H", "key": "home.editorial.heading", "page": "home-editorial", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim)",
+    "ko": "자주 쓰는 것일수록,\n더 단순하게.",
+    "en": "The more often you use it,\nthe simpler it should be."
+  },
+  {
+    "id": "FINAL-EDIT-B", "key": "home.editorial.body", "page": "home-editorial", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim). 2 paragraph — pre-line 렌더",
+    "ko": "컵 하나, 조명 하나, 트레이 하나도\n매일 손이 가는 방식은 다릅니다.\n\n복잡한 장식보다 쓰기 편하고,\n곁에 두기 좋은 형태를 고릅니다.",
+    "en": "Even a single cup, lamp, or tray\nis handled differently each day.\n\nRather than heavy decoration, we choose forms\nthat are easy to use and easy to keep nearby."
+  },
+  {
+    "id": "FINAL-EDIT-CTA", "key": "home.editorial.cta", "page": "home-editorial", "action": "TERM_NORMALIZE",
+    "problem": "사용자 확정 CTA — href /shop 유지",
+    "ko": "상품 둘러보기",
+    "en": "Browse products"
+  },
+  {
+    "id": "FINAL-CTA-H", "key": "home.final_cta.heading", "page": "home-final-cta", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim)",
+    "ko": "매일 쓰는 물건부터\n천천히 골라보세요.",
+    "en": "Start with the things you use every day.\nTake your time choosing."
+  },
+  {
+    "id": "FINAL-CTA-B", "key": "home.final_cta.body", "page": "home-final-cta", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim)",
+    "ko": "컵, 조명, 트레이, 패브릭처럼\n생활 가까이에 두는 물건을 한곳에서 만나보세요.",
+    "en": "Cups, lighting, trays, fabrics —\nthe objects you keep close to daily life, in one place."
+  },
+  {
+    "id": "FINAL-PAGE-T", "key": "story.title", "page": "story-hero", "action": "REWRITE",
+    "problem": "사용자 확정 Story H1로 교체 (verbatim). BrandStorySection headingAs h1 적용",
+    "ko": "오래 곁에 둘 물건을\n고릅니다.",
+    "en": "We choose objects\nto keep for long."
+  },
+  {
+    "id": "FINAL-PAGE-B", "key": "story.body", "page": "story", "action": "REWRITE",
+    "problem": "사용자 확정 브랜드 카피로 교체 (verbatim). 2 paragraph — pre-line 렌더",
+    "ko": "Still Form은 생활 가까이에서\n매일 쓰는 물건을 다룹니다.\n\n화려함보다 쓰임을,\n유행보다 오래 남는 형태를,\n장식보다 손에 닿는 재질을 먼저 봅니다.",
+    "en": "Still Form works with everyday objects,\nused close to daily life.\n\nUse over flash,\nform that outlasts trends,\nand material you can feel in the hand — we look there first."
+  }
+]

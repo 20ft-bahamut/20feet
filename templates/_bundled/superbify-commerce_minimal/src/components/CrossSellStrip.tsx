@@ -21,7 +21,7 @@ export interface CrossSellStripProps {
 export function CrossSellStrip({
     items,
     title = '함께 보면 좋은 상품',
-    eyebrow = 'YOU MAY ALSO LIKE',
+    eyebrow = 'RELATED',
     className,
     onQuickAdd,
     quickAddLabel,

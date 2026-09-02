@@ -5,14 +5,17 @@
         "ko": "SuperBify Commerce Minimal",
         "en": "SuperBify Commerce Minimal"
     },
-    "version": "0.2.0",
+    "version": "0.3.0",
     "license": "MIT",
     "description": {
         "ko": "미니멀 D2C 데모 스토어용 사용자 템플릿 (sirsoft-ecommerce 기반)",
         "en": "Minimal D2C demo store user template (built on sirsoft-ecommerce)"
     },
     "type": "user",
-    "locales": ["ko", "en"],
+    "locales": [
+        "ko",
+        "en"
+    ],
     "author": {
         "name": "SuperBify"
     },
@@ -27,8 +30,12 @@
         }
     },
     "assets": {
-        "css": ["dist/css/components.css"],
-        "js": ["dist/js/components.iife.js"],
+        "css": [
+            "dist/css/components.css"
+        ],
+        "js": [
+            "dist/js/components.iife.js"
+        ],
         "fonts": [],
         "images": [
             "images/demo/1.jpg",

@@ -1,0 +1,1185 @@
+{
+ "area": "mypage",
+ "notes": "mypage 영역 카피 인벤토리(검증 완료). 검증 절차: (1) lang/ko.json 전수 확인, (2) layouts/mypage/** JSON에서 실제 사용 컨텍스트 확인. 결과: (a) 일부 entry에서 flag 과다 — 자연스러운 한국어(예: '비밀번호가 변경되었습니다', '찜 목록에서 삭제했습니다', '같은 이름의 배송지를 새 정보로 덮어쓸까요?' 등)에 잘못된 '번역투 의심' flag가 붙어 있어 정리. (b) 'addresses.confirm_delete_body' entry가 손상된 텍스트('삭제한된配送지')로 기록됨 — 실제 ko.json:290은 '삭제한 배송지는 복구할 수 없습니다.'로 정상. (c) 단순 KO↔EN 라벨 쌍(이름/Name, 저장/Save, 연락처/Phone 등)에 'term inconsistency' flag가 다수 부착되었으나 동일 페이지 내 같은 대상에 다른 명칭이 사용되는 사례가 아니므로 정리. (d) 실제 잔존 이슈: (i) '주문내역'(tabs.orders, meta title)과 '주문 내역'(orders.empty)의 띄어쓰기 불일치 — 동일 페이지 mypage-orders 내 발생, (ii) 'orders.phone' 영문 'Contact' vs 'addresses.phone' 영문 'Phone' — 같은 '연락처' 의미인데 영문 표기가 다름, (iii) 'Shop으로 이동' 영문 'Go to Shop' 사용 — 브랜드 영문 라벨 유지 정책상 의도된 것으로 보임(flag 유지 안 함). (e) LOCKED COPY/금지 표현은 발견되지 않음. (f) 동일 항목 중복(verify_message, cancel_confirm_body, mypage.title) 제거 후 통합.",
+ "entries": [
+  {
+   "flag": "",
+   "key": "superbify.mypage.title",
+   "kind": "heading",
+   "location": "layouts/mypage/profile.json:72 / orders.json:91 / addresses.json:84 / wishlist.json:79 / mileage.json:94 / inquiries.json:86 / change_password.json:67 / coupons.json:79",
+   "page": "mypage (all tabs except profile_edit)",
+   "text_en": "My Page",
+   "text_ko": "마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.edit_title",
+   "kind": "heading",
+   "location": "layouts/mypage/profile_edit.json:87",
+   "page": "mypage-profile-edit",
+   "text_en": "Edit profile",
+   "text_ko": "프로필 수정"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.logout_success",
+   "kind": "toast/error",
+   "location": "layouts/mypage/*.json",
+   "page": "mypage (all tabs)",
+   "text_en": "You have been signed out.",
+   "text_ko": "로그아웃되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.cancel",
+   "kind": "button",
+   "location": "layouts/mypage/change_password.json:338; profile/_edit.json:395; profile/_password_verify_section.json:191; addresses/_modal_address.json:475",
+   "page": "mypage multiple",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.delete",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_list.json:256; addresses/_modal_confirm_delete.json:14",
+   "page": "mypage-addresses",
+   "text_en": "Delete",
+   "text_ko": "삭제"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.profile",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-profile",
+   "text_en": "Profile",
+   "text_ko": "프로필"
+  },
+  {
+   "flag": "term inconsistency: '주문내역'(tabs.orders, meta title)과 '주문 내역'(orders.empty)의 띄어쓰기 불일치 — 동일 페이지 mypage-orders 내 발생",
+   "key": "superbify.mypage.tabs.orders",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json:72",
+   "page": "mypage-orders",
+   "text_en": "Orders",
+   "text_ko": "주문내역"
+  },
+  {
+   "flag": "term inconsistency: '주문 내역'(orders.empty)과 '주문내역'(tabs.orders)의 띄어쓰기 불일치",
+   "key": "superbify.mypage.orders.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/orders/_list.json:272",
+   "page": "mypage-orders",
+   "text_en": "No orders yet.",
+   "text_ko": "주문 내역이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.addresses",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-addresses",
+   "text_en": "Addresses",
+   "text_ko": "배송지 관리"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.wishlist",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-wishlist",
+   "text_en": "Wishlist",
+   "text_ko": "찜한 상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.coupons",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-coupons",
+   "text_en": "Coupons",
+   "text_ko": "쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.mileage",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-mileage",
+   "text_en": "Mileage",
+   "text_ko": "마일리지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.inquiries",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json",
+   "page": "mypage-inquiries",
+   "text_en": "Product inquiries",
+   "text_ko": "상품 문의"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.tabs.password",
+   "kind": "label",
+   "location": "layouts/partials/mypage/_tabs.json:228",
+   "page": "mypage-change-password",
+   "text_en": "Change password",
+   "text_ko": "비밀번호 변경"
+  },
+  {
+   "flag": "term inconsistency: 'orders.recipient'(받는 분)과 'addresses.recipient'(받는 분) 중복 키 — 같은 의미 두 곳에 노출",
+   "key": "superbify.mypage.orders.recipient",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_shipping.json:49",
+   "page": "mypage-order-show",
+   "text_en": "Recipient",
+   "text_ko": "받는 분"
+  },
+  {
+   "flag": "term inconsistency: 'orders.phone' 영문 'Contact' vs 'addresses.phone' 영문 'Phone' — 같은 '연락처' 의미인데 영문 표기가 다름",
+   "key": "superbify.mypage.orders.phone",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_shipping.json:81",
+   "page": "mypage-order-show",
+   "text_en": "Contact",
+   "text_ko": "연락처"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.address",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_shipping.json:114",
+   "page": "mypage-order-show",
+   "text_en": "Address",
+   "text_ko": "주소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.memo",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_shipping.json:148",
+   "page": "mypage-order-show",
+   "text_en": "Delivery memo",
+   "text_ko": "배송 메모"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.shipping_to",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/orders/_shipping.json:30",
+   "page": "mypage-order-show",
+   "text_en": "Shipping to",
+   "text_ko": "배송지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.item",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/orders/_items.json:30",
+   "page": "mypage-order-show",
+   "text_en": "Items",
+   "text_ko": "상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.payment",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_payment.json:30;54",
+   "page": "mypage-order-show",
+   "text_en": "Payment",
+   "text_ko": "결제 방법"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.total",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_payment.json:206",
+   "page": "mypage-order-show",
+   "text_en": "Total",
+   "text_ko": "결제금액"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.free_shipping",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_payment.json:139",
+   "page": "mypage-order-show",
+   "text_en": "Free shipping",
+   "text_ko": "무료배송"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.order_no",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_status_header.json:81",
+   "page": "mypage-order-show",
+   "text_en": "Order number",
+   "text_ko": "주문번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.status",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_status_header.json",
+   "page": "mypage-order-show",
+   "text_en": "Status",
+   "text_ko": "상태"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.history",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/orders/_history.json:30",
+   "page": "mypage-order-show",
+   "text_en": "Order history",
+   "text_ko": "주문 진행"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.date",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_history.json:54",
+   "page": "mypage-order-show",
+   "text_en": "Order date",
+   "text_ko": "주문일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.payment_date",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_history.json:92",
+   "page": "mypage-order-show",
+   "text_en": "Payment date",
+   "text_ko": "결제일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancelled_at",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_history.json:130",
+   "page": "mypage-order-show",
+   "text_en": "Cancelled at",
+   "text_ko": "취소일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancel_reason",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:55; _history.json:171",
+   "page": "mypage-order-show",
+   "text_en": "Cancellation reason",
+   "text_ko": "취소 사유"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.reason_placeholder",
+   "kind": "placeholder",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:91",
+   "page": "mypage-order-show",
+   "text_en": "Select a cancellation reason.",
+   "text_ko": "취소 사유를 선택해 주세요."
+  },
+  {
+   "flag": "번역투 의심: 'A cancelled order cannot be restored. This order will be cancelled.' 직역체. 영문 구조 단편적/반복. 한국어는 '취소한 주문은 되돌릴 수 없습니다. 이 주문을 취소합니다.'로 의미 전달은 되지만 영문 패턴이 어색해 카피 일관성 측면에서 재검토 대상",
+   "key": "superbify.mypage.orders.cancel_confirm_body",
+   "kind": "policy/longform",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:147",
+   "page": "mypage-order-show",
+   "text_en": "A cancelled order cannot be restored. This order will be cancelled.",
+   "text_ko": "취소한 주문은 되돌릴 수 없습니다. 이 주문을 취소합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancel_confirm_title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:146",
+   "page": "mypage-order-show",
+   "text_en": "Cancel this order?",
+   "text_ko": "주문을 취소할까요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancel",
+   "kind": "button",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:31;137;148",
+   "page": "mypage-order-show",
+   "text_en": "Cancel order",
+   "text_ko": "주문 취소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancel_success",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:186",
+   "page": "mypage-order-show",
+   "text_en": "Your order has been cancelled.",
+   "text_ko": "주문이 취소되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.cancelled",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/*",
+   "page": "mypage-order-show",
+   "text_en": "Cancelled",
+   "text_ko": "취소됨"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.reorder",
+   "kind": "button",
+   "location": "layouts/mypage/order_show.json:183",
+   "page": "mypage-order-show",
+   "text_en": "Reorder",
+   "text_ko": "재주문"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.reorder_success",
+   "kind": "toast/error",
+   "location": "layouts/mypage/order_show.json",
+   "page": "mypage-order-show",
+   "text_en": "Items added to cart.",
+   "text_ko": "상품을 장바구니에 담았습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.detail",
+   "kind": "button",
+   "location": "layouts/partials/mypage/orders/_list.json:257",
+   "page": "mypage-orders",
+   "text_en": "View detail",
+   "text_ko": "상세 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.orders.processing",
+   "kind": "other",
+   "location": "layouts/mypage/order_show.json:128",
+   "page": "mypage-order-show",
+   "text_en": "Processing…",
+   "text_ko": "처리 중…"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.name",
+   "kind": "label",
+   "location": "layouts/partials/mypage/profile/_view.json:126; _edit.json:70",
+   "page": "mypage-profile",
+   "text_en": "Name",
+   "text_ko": "이름"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.email",
+   "kind": "label",
+   "location": "layouts/partials/mypage/profile/_view.json; _edit.json",
+   "page": "mypage-profile",
+   "text_en": "Email",
+   "text_ko": "이메일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.phone",
+   "kind": "label",
+   "location": "layouts/partials/mypage/profile/_view.json; _edit.json",
+   "page": "mypage-profile",
+   "text_en": "Mobile",
+   "text_ko": "휴대폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.nickname",
+   "kind": "label",
+   "location": "layouts/partials/mypage/profile/_view.json; _edit.json",
+   "page": "mypage-profile",
+   "text_en": "Nickname",
+   "text_ko": "닉네임"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.joined",
+   "kind": "label",
+   "location": "layouts/partials/mypage/profile/_view.json:260",
+   "page": "mypage-profile",
+   "text_en": "Joined",
+   "text_ko": "가입일"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.save",
+   "kind": "button",
+   "location": "layouts/partials/mypage/profile/_edit.json:425",
+   "page": "mypage-profile-edit",
+   "text_en": "Save",
+   "text_ko": "저장"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.edit",
+   "kind": "button",
+   "location": "layouts/partials/mypage/profile/_view.json:94",
+   "page": "mypage-profile",
+   "text_en": "Edit",
+   "text_ko": "수정"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.updated",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/profile/_edit.json:346",
+   "page": "mypage-profile-edit",
+   "text_en": "Your profile has been saved.",
+   "text_ko": "프로필을 저장했습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.verify_title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/profile/_password_verify_section.json:39",
+   "page": "mypage-profile-edit",
+   "text_en": "Confirm password",
+   "text_ko": "비밀번호 확인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.verify_message",
+   "kind": "other",
+   "location": "layouts/partials/mypage/profile/_password_verify_section.json:49",
+   "page": "mypage-profile-edit",
+   "text_en": "Enter your current password before editing your profile.",
+   "text_ko": "정보를 수정하기 전 현재 비밀번호를 다시 확인합니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.verify_error",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/profile/_password_verify_section.json:161",
+   "page": "mypage-profile-edit",
+   "text_en": "The password does not match.",
+   "text_ko": "비밀번호가 일치하지 않습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.profile.verify_submit",
+   "kind": "button",
+   "location": "layouts/partials/mypage/profile/_password_verify_section.json:220",
+   "page": "mypage-profile-edit",
+   "text_en": "Confirm",
+   "text_ko": "확인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.password.current",
+   "kind": "label",
+   "location": "layouts/mypage/change_password.json:196",
+   "page": "mypage-change-password",
+   "text_en": "Current password",
+   "text_ko": "현재 비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.password.new",
+   "kind": "label",
+   "location": "layouts/mypage/change_password.json:231",
+   "page": "mypage-change-password",
+   "text_en": "New password",
+   "text_ko": "새 비밀번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.password.confirm",
+   "kind": "label",
+   "location": "layouts/mypage/change_password.json:267",
+   "page": "mypage-change-password",
+   "text_en": "Confirm new password",
+   "text_ko": "새 비밀번호 확인"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.password.submit",
+   "kind": "button",
+   "location": "layouts/mypage/change_password.json:317",
+   "page": "mypage-change-password",
+   "text_en": "Change password",
+   "text_ko": "비밀번호 변경"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.password.changed",
+   "kind": "toast/error",
+   "location": "layouts/mypage/change_password.json:99",
+   "page": "mypage-change-password",
+   "text_en": "Your password has been changed.",
+   "text_ko": "비밀번호가 변경되었습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/addresses/_list.json:323",
+   "page": "mypage-addresses",
+   "text_en": "Addresses",
+   "text_ko": "배송지 관리"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/addresses/_list.json:324",
+   "page": "mypage-addresses",
+   "text_en": "No saved addresses yet.",
+   "text_ko": "등록된 배송지가 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.add",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_list.json:38",
+   "page": "mypage-addresses",
+   "text_en": "Add address",
+   "text_ko": "배송지 추가"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.edit",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:28",
+   "page": "mypage-addresses",
+   "text_en": "Edit",
+   "text_ko": "수정"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.save",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:504",
+   "page": "mypage-addresses",
+   "text_en": "Save",
+   "text_ko": "저장"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.default",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_list.json:130",
+   "page": "mypage-addresses",
+   "text_en": "Default address",
+   "text_ko": "기본 배송지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.set_default",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:407; _list.json:162",
+   "page": "mypage-addresses",
+   "text_en": "Set as default",
+   "text_ko": "기본 배송지로 설정"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.confirm_delete_title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_delete.json:12",
+   "page": "mypage-addresses",
+   "text_en": "Delete this address?",
+   "text_ko": "배송지를 삭제할까요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.confirm_delete_body",
+   "kind": "policy/longform",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_delete.json:13",
+   "page": "mypage-addresses",
+   "text_en": "A deleted address cannot be restored.",
+   "text_ko": "삭제한 배송지는 복구할 수 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.deleted",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_delete.json:46",
+   "page": "mypage-addresses",
+   "text_en": "The address has been deleted.",
+   "text_ko": "배송지를 삭제했습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.saved",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:535; _modal_confirm_overwrite.json:63",
+   "page": "mypage-addresses",
+   "text_en": "The address has been saved.",
+   "text_ko": "배송지를 저장했습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.default_saved",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/addresses/_list.json:174",
+   "page": "mypage-addresses",
+   "text_en": "The default address has been updated.",
+   "text_ko": "기본 배송지로 설정했습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.conflict_title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_overwrite.json:12",
+   "page": "mypage-addresses",
+   "text_en": "This address label is already in use.",
+   "text_ko": "이미 사용 중인 배송지명입니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.conflict_body",
+   "kind": "policy/longform",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_overwrite.json:13",
+   "page": "mypage-addresses",
+   "text_en": "Overwrite the existing address with this one?",
+   "text_ko": "같은 이름의 배송지를 새 정보로 덮어쓸까요?"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.conflict_confirm",
+   "kind": "button",
+   "location": "layouts/partials/mypage/addresses/_modal_confirm_overwrite.json:14",
+   "page": "mypage-addresses",
+   "text_en": "Overwrite",
+   "text_ko": "덮어쓰기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.name",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:52",
+   "page": "mypage-addresses",
+   "text_en": "Label",
+   "text_ko": "배송지명"
+  },
+  {
+   "flag": "term inconsistency: 'addresses.recipient'(받는 분)과 'orders.recipient'(받는 분) 중복 키 — 같은 의미 두 곳에 노출",
+   "key": "superbify.mypage.addresses.recipient",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:103",
+   "page": "mypage-addresses",
+   "text_en": "Recipient",
+   "text_ko": "받는 분"
+  },
+  {
+   "flag": "term inconsistency: 'addresses.phone' 영문 'Phone' vs 'orders.phone' 영문 'Contact' — 같은 '연락처' 의미인데 영문 표기가 다름",
+   "key": "superbify.mypage.addresses.phone",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:144",
+   "page": "mypage-addresses",
+   "text_en": "Phone",
+   "text_ko": "연락처"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.zipcode",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json",
+   "page": "mypage-addresses",
+   "text_en": "Postal code",
+   "text_ko": "우편번호"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.address",
+   "kind": "label",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:189; _edit.json:185",
+   "page": "mypage-addresses",
+   "text_en": "Address",
+   "text_ko": "주소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.addresses.address_detail",
+   "kind": "placeholder",
+   "location": "layouts/partials/mypage/addresses/_modal_address.json:277",
+   "page": "mypage-addresses",
+   "text_en": "Address detail",
+   "text_ko": "상세 주소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.wishlist.title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/wishlist/_list.json:109",
+   "page": "mypage-wishlist",
+   "text_en": "Wishlist",
+   "text_ko": "찜한 상품"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.wishlist.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/wishlist/_list.json:110",
+   "page": "mypage-wishlist",
+   "text_en": "Your wishlist is empty.",
+   "text_ko": "찜한 상품이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.wishlist.remove",
+   "kind": "other",
+   "location": "layouts/partials/mypage/wishlist/_list.json:52",
+   "page": "mypage-wishlist",
+   "text_en": "Remove",
+   "text_ko": "삭제"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.wishlist.removed",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/wishlist/_list.json:87",
+   "page": "mypage-wishlist",
+   "text_en": "Removed from your wishlist.",
+   "text_ko": "찜 목록에서 삭제했습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.wishlist.add_to_cart_note",
+   "kind": "other",
+   "location": "layouts/partials/mypage/wishlist/_list.json:122",
+   "page": "mypage-wishlist",
+   "text_en": "To add to the cart, add the item from its product page.",
+   "text_ko": "장바구니에 담으려면 상품 페이지에서 담아 주세요."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/coupons/_list.json:118",
+   "page": "mypage-coupons",
+   "text_en": "Coupons",
+   "text_ko": "쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/coupons/_list.json:119",
+   "page": "mypage-coupons",
+   "text_en": "You have no coupons.",
+   "text_ko": "보유한 쿠폰이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.available",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/coupons/_list.json:133",
+   "page": "mypage-coupons",
+   "text_en": "Available coupons",
+   "text_ko": "다운로드 가능한 쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.owned",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/coupons/_list.json:26",
+   "page": "mypage-coupons",
+   "text_en": "My coupons",
+   "text_ko": "보유 쿠폰"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.expires",
+   "kind": "label",
+   "location": "layouts/partials/mypage/coupons/_list.json:94;200",
+   "page": "mypage-coupons",
+   "text_en": "Valid until",
+   "text_ko": "사용 기한"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.download",
+   "kind": "button",
+   "location": "layouts/partials/mypage/coupons/_list.json:234",
+   "page": "mypage-coupons",
+   "text_en": "Download",
+   "text_ko": "쿠폰 받기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.coupons.downloaded",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/coupons/_list.json:247",
+   "page": "mypage-coupons",
+   "text_en": "Downloaded",
+   "text_ko": "받기 완료"
+  },
+  {
+   "flag": "번역투 의심: 'No coupons to download right now.' 직역. 'right now' 부사 불필요 가능 — 한국 카피 '다운로드 가능한 쿠폰이 없습니다.'는 자연스러우나 영문 보조구 right now는 어색",
+   "key": "superbify.mypage.coupons.no_available",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/coupons/_list.json:272",
+   "page": "mypage-coupons",
+   "text_en": "No coupons to download right now.",
+   "text_ko": "다운로드 가능한 쿠폰이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/mileage/_list.json:21",
+   "page": "mypage-mileage",
+   "text_en": "Mileage",
+   "text_ko": "마일리지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.disabled",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/mileage/_list.json:22",
+   "page": "mypage-mileage",
+   "text_en": "Mileage is currently disabled.",
+   "text_ko": "마일리지 기능이 비활성화되어 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.balance",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json:50",
+   "page": "mypage-mileage",
+   "text_en": "Mileage balance",
+   "text_ko": "보유 마일리지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.earned",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json:79",
+   "page": "mypage-mileage",
+   "text_en": "Earned",
+   "text_ko": "적립"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.used",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json",
+   "page": "mypage-mileage",
+   "text_en": "Used",
+   "text_ko": "사용"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.date",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json",
+   "page": "mypage-mileage",
+   "text_en": "Date",
+   "text_ko": "날짜"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.history",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/mileage/_list.json:353",
+   "page": "mypage-mileage",
+   "text_en": "Mileage history",
+   "text_ko": "적립 내역"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/mileage/_list.json:354",
+   "page": "mypage-mileage",
+   "text_en": "No mileage history yet.",
+   "text_ko": "적립 내역이 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.filter.all",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json:153",
+   "page": "mypage-mileage",
+   "text_en": "All",
+   "text_ko": "전체"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.filter.earn",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json:193",
+   "page": "mypage-mileage",
+   "text_en": "Earned",
+   "text_ko": "적립"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.mileage.filter.use",
+   "kind": "label",
+   "location": "layouts/partials/mypage/mileage/_list.json:233",
+   "page": "mypage-mileage",
+   "text_en": "Used",
+   "text_ko": "사용"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.title",
+   "kind": "heading",
+   "location": "layouts/partials/mypage/inquiries/_list.json:377",
+   "page": "mypage-inquiries",
+   "text_en": "Product inquiries",
+   "text_ko": "상품 문의"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.empty",
+   "kind": "empty-state",
+   "location": "layouts/partials/mypage/inquiries/_list.json:378",
+   "page": "mypage-inquiries",
+   "text_en": "No product inquiries yet.",
+   "text_ko": "등록한 상품 문의가 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.status_answered",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json:267",
+   "page": "mypage-inquiries",
+   "text_en": "Answered",
+   "text_ko": "답변 완료"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.status_waiting",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json:267",
+   "page": "mypage-inquiries",
+   "text_en": "Awaiting reply",
+   "text_ko": "답변 대기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.question",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json:301",
+   "page": "mypage-inquiries",
+   "text_en": "Question",
+   "text_ko": "문의 내용"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.reply",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json:337",
+   "page": "mypage-inquiries",
+   "text_en": "Seller reply",
+   "text_ko": "판매자 답변"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.view_product",
+   "kind": "button",
+   "location": "layouts/partials/mypage/inquiries/_list.json",
+   "page": "mypage-inquiries",
+   "text_en": "View product",
+   "text_ko": "상품 보기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.filter.all",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json",
+   "page": "mypage-inquiries",
+   "text_en": "All",
+   "text_ko": "전체"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.filter.pending",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json",
+   "page": "mypage-inquiries",
+   "text_en": "Awaiting reply",
+   "text_ko": "답변 대기"
+  },
+  {
+   "flag": "",
+   "key": "superbify.mypage.inquiries.filter.answered",
+   "kind": "label",
+   "location": "layouts/partials/mypage/inquiries/_list.json",
+   "page": "mypage-inquiries",
+   "text_en": "Answered",
+   "text_ko": "답변 완료"
+  },
+  {
+   "flag": "",
+   "key": "superbify.checkout.summary.subtotal",
+   "kind": "label",
+   "location": "layouts/partials/mypage/orders/_payment.json:90",
+   "page": "mypage-order-show",
+   "text_en": "Item total",
+   "text_ko": "상품금액"
+  },
+  {
+   "flag": "",
+   "key": "superbify.cart.cta_shop",
+   "kind": "button",
+   "location": "layouts/partials/mypage/orders/_list.json:273",
+   "page": "mypage-orders",
+   "text_en": "Go to Shop",
+   "text_ko": "Shop으로 이동"
+  },
+  {
+   "flag": "term inconsistency: cart.delete_cancel(취소)을 orders._modal_cancel confirm dialog의 cancelLabel로 재사용 — cart 영역 키를 mypage에 재사용",
+   "key": "superbify.cart.delete_cancel",
+   "kind": "button",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:149",
+   "page": "mypage-order-show",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "flag": "",
+   "key": "superbify.errors.server_error_title",
+   "kind": "toast/error",
+   "location": "layouts/partials/mypage/orders/_modal_cancel.json:208",
+   "page": "mypage-order-show",
+   "text_en": "Something went wrong",
+   "text_ko": "문제가 발생했습니다"
+  },
+  {
+   "flag": "",
+   "key": "superbify.notice.back_to_list",
+   "kind": "other",
+   "location": "layouts/mypage/order_show.json:102",
+   "page": "mypage-order-show",
+   "text_en": "Back to list",
+   "text_ko": "목록으로"
+  },
+  {
+   "flag": "",
+   "key": "superbify.notice.prev_page_aria",
+   "kind": "other",
+   "location": "layouts/partials/mypage/inquiries/_list.json:389; mileage/_list.json:365; wishlist/_list.json:132; orders/_list.json:285",
+   "page": "mypage pagination",
+   "text_en": "Previous page",
+   "text_ko": "이전 페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.notice.next_page_aria",
+   "kind": "other",
+   "location": "layouts/partials/mypage/inquiries/_list.json:390; mileage/_list.json:366; wishlist/_list.json:133; orders/_list.json:286",
+   "page": "mypage pagination",
+   "text_en": "Next page",
+   "text_ko": "다음 페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.notice.page_aria",
+   "kind": "other",
+   "location": "layouts/partials/mypage/inquiries/_list.json:391; mileage/_list.json:367; wishlist/_list.json:134; orders/_list.json:287",
+   "page": "mypage pagination",
+   "text_en": "Page :n",
+   "text_ko": ":n 페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_profile",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/profile.json",
+   "page": "mypage-profile",
+   "text_en": "Profile — My Page",
+   "text_ko": "프로필 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_profile_edit",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/profile_edit.json",
+   "page": "mypage-profile-edit",
+   "text_en": "Edit profile — My Page",
+   "text_ko": "프로필 수정 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_change_password",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/change_password.json",
+   "page": "mypage-change-password",
+   "text_en": "Change password — My Page",
+   "text_ko": "비밀번호 변경 — 마이페이지"
+  },
+  {
+   "flag": "term inconsistency: routes.mypage_orders 메타 타이틀의 '주문내역'은 tabs.orders와 동일하지만, 같은 페이지의 orders.empty는 '주문 내역'(띄어쓰기)을 사용 — 동일 페이지 mypage-orders 내 일관성 위화감",
+   "key": "superbify.routes.mypage_orders",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/orders.json:11",
+   "page": "mypage-orders",
+   "text_en": "Orders — My Page",
+   "text_ko": "주문내역 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_order",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/order_show.json:11",
+   "page": "mypage-order-show",
+   "text_en": "Order Detail — My Page",
+   "text_ko": "주문 상세 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_addresses",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/addresses.json",
+   "page": "mypage-addresses",
+   "text_en": "Addresses — My Page",
+   "text_ko": "배송지 관리 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_wishlist",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/wishlist.json",
+   "page": "mypage-wishlist",
+   "text_en": "Wishlist — My Page",
+   "text_ko": "찜한 상품 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_coupons",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/coupons.json",
+   "page": "mypage-coupons",
+   "text_en": "Coupons — My Page",
+   "text_ko": "쿠폰 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_mileage",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/mileage.json",
+   "page": "mypage-mileage",
+   "text_en": "Mileage — My Page",
+   "text_ko": "마일리지 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.routes.mypage_inquiries",
+   "kind": "seo/meta",
+   "location": "layouts/mypage/inquiries.json",
+   "page": "mypage-inquiries",
+   "text_en": "Product inquiries — My Page",
+   "text_ko": "상품 문의 — 마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "superbify.data_source.current_user",
+   "kind": "other",
+   "location": "layouts/mypage/profile.json:14 / profile_edit.json:14 / addresses.json:14 / wishlist.json:14",
+   "page": "mypage data source",
+   "text_en": "Signed-in user",
+   "text_ko": "로그인 사용자"
+  }
+ ]
+}

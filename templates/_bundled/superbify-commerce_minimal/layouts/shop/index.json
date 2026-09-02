@@ -113,7 +113,6 @@
                                     "loading": "{{products?.loading ?? false}}",
                                     "variant": "standard",
                                     "emptyTitle": "$t:superbify.shop.empty_title",
-                                    "emptyMessage": "$t:superbify.shop.empty_message",
                                     "quickAddLabel": "$t:superbify.product.quick_add"
                                 }
                             }

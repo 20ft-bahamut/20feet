@@ -35,7 +35,8 @@
                                     "eyebrow": "$t:superbify.story.eyebrow",
                                     "heading": "$t:superbify.story.title",
                                     "body": "$t:superbify.story.body",
-                                    "mediaSlot": "hero-mood-3"
+                                    "mediaSlot": "hero-mood-3",
+                                    "headingAs": "h1"
                                 }
                             }
                         ]

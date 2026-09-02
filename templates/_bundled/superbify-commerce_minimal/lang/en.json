@@ -1,7 +1,7 @@
 {
     "superbify": {
         "base_layout_title": "Still Form",
-        "base_layout_description": "Home & lifestyle store — SuperBify Commerce Minimal",
+        "base_layout_description": "An online store for objects used in everyday life — Still Form",
         "brand": {
             "name": "Still Form",
             "tagline": "Quiet objects for everyday life"
@@ -9,7 +9,7 @@
         "routes": {
             "home": {
                 "title": "Still Form — Quiet objects for everyday life",
-                "description": "A small collection of objects for everyday spaces."
+                "description": "An online store for objects used in everyday life."
             },
             "shop": {
                 "title": "Shop — Still Form",
@@ -97,6 +97,8 @@
             "product_downloadable_coupons": "Product downloadable coupons",
             "cart": "Cart",
             "cart_count": "Cart count",
+            "termsContent": "Terms content",
+            "privacyContent": "Privacy policy content",
             "notice_posts": "Store notices",
             "current_user": "Signed-in user",
             "token_validation": "Password reset token validation"
@@ -118,7 +120,6 @@
             "signup": "Sign up",
             "logout": "Log out",
             "register_link": "Sign up",
-            "already_member": "Already a member?",
             "forgot_password_link": "Forgot your password?",
             "login_success": "You are signed in.",
             "register_success": "Your account has been created.",
@@ -132,8 +133,7 @@
                 "password_placeholder": "Enter your password",
                 "remember": "Keep me signed in",
                 "submit": "Login",
-                "processing": "Signing in...",
-                "no_account": "Don't have an account?",
+                "processing": "Logging in…",
                 "error": {
                     "invalid": "The email or password is incorrect.",
                     "email_required": "Please enter your email.",
@@ -153,14 +153,24 @@
                 "nickname": "Nickname",
                 "nickname_placeholder": "Enter a nickname (optional)",
                 "name": "Name",
-                "name_placeholder": "Enter your name (optional)",
+                "name_placeholder": "Enter your name",
+                "mobile": "Mobile phone",
+                "mobile_placeholder": "Enter your mobile phone number (optional)",
+                "phone": "Phone",
+                "phone_placeholder": "Enter your phone number (optional)",
+                "language": "Language",
+                "section_account": "Account",
+                "section_profile": "Profile",
+                "section_agreements": "Agreements",
+                "agree_required": "(required)",
+                "password_hint": "Password must be at least 8 characters.",
                 "terms_agree": "I agree to the Terms of Service.",
                 "privacy_agree": "I agree to the Privacy Policy.",
                 "terms_link": "View Terms of Service",
                 "privacy_link": "View Privacy Policy",
                 "submit": "Sign up",
-                "processing": "Creating account...",
-                "has_account": "Already have an account?",
+                "processing": "Signing up…",
+                "has_account": "Already a member?",
                 "error": {
                     "email_required": "Please enter your email.",
                     "email_invalid": "Please enter a valid email address.",
@@ -168,7 +178,8 @@
                     "password_required": "Please enter a password.",
                     "password_min": "Password must be at least {{count}} characters.",
                     "password_mismatch": "Passwords do not match.",
-                    "terms_required": "Please agree to the Terms of Service."
+                    "terms_required": "Please agree to the Terms of Service.",
+                    "privacy_required": "Please agree to the Privacy Policy."
                 }
             },
             "forgot_password": {
@@ -177,7 +188,7 @@
                 "email": "Email",
                 "email_placeholder": "Enter the email address you registered with",
                 "submit": "Send reset link",
-                "processing": "Sending...",
+                "processing": "Sending…",
                 "success": "A password reset email has been sent.",
                 "back_to_login": "Back to login"
             },
@@ -188,9 +199,9 @@
                 "password_placeholder": "Enter the new password",
                 "password_confirm": "Confirm password",
                 "password_confirm_placeholder": "Enter the new password again",
-                "submit": "Change password",
-                "processing": "Updating...",
-                "success": "Your password has been changed.",
+                "submit": "Reset password",
+                "processing": "Resetting…",
+                "success": "Your password has been reset.",
                 "token_invalid": "This link is invalid or expired. Please request a password reset again.",
                 "go_to_login": "Log in",
                 "go_to_home": "Go to home"
@@ -229,13 +240,13 @@
                 "detail": "View detail",
                 "cancel": "Cancel order",
                 "cancel_confirm_title": "Cancel this order?",
-                "cancel_confirm_body": "A cancelled order cannot be restored. This order will be cancelled.",
+                "cancel_confirm_body": "This order cannot be restored after cancellation. Cancel it?",
                 "cancel_reason": "Cancellation reason",
                 "cancelled": "Cancelled",
                 "reorder": "Reorder",
                 "reorder_success": "The items were added to your cart.",
                 "recipient": "Recipient",
-                "phone": "Contact",
+                "phone": "Phone",
                 "address": "Address",
                 "memo": "Delivery memo",
                 "payment_date": "Payment date",
@@ -347,7 +358,7 @@
             "hero": {
                 "eyebrow": "HOME & LIFESTYLE",
                 "headline": "Quiet objects for\neveryday life",
-                "sub": "Materials that grow familiar with use. Forms that quietly improve with time. A small, careful collection for everyday spaces.",
+                "sub": "Less about standing out, more about staying close for long.\nWe choose everyday tools that are used daily and grow comfortable with use.",
                 "cta_primary": "Browse Shop",
                 "cta_secondary": "Brand Story"
             },
@@ -366,32 +377,27 @@
             },
             "story": {
                 "eyebrow": "BRAND STORY",
-                "heading": "Things that grow better with time",
-                "body": "Still Form gathers objects that hold their character through years of use. Wood that softens, linen that deepens, ceramics that darken at the rim. We choose pieces whose materials speak for themselves."
+                "heading": "Things kept and used for years\nhave their reasons.",
+                "body": "Material is judged by how it feels in the hand,\nform by how it actually works.\n\nStill Form picks objects that outlast trends\nand stay naturally in everyday life.",
+                "cta": "How Still Form chooses"
             },
             "editorial": {
                 "eyebrow": "EDITORIAL",
-                "heading": "Quietly, but firmly.",
-                "body": "Some objects in a room only get better with time. Still Form is a small, careful collection of those long-keeping things.",
-                "cta": "Browse Shop"
-            },
-            "promo": {
-                "eyebrow": "LIFESTYLE",
-                "title": "One piece at a time",
-                "description": "Like a single volume on a shelf — objects earn their place by being used, day after day."
+                "heading": "The more often you use it,\nthe simpler it should be.",
+                "body": "Even a single cup, lamp, or tray\nis handled differently each day.\n\nRather than heavy decoration, we choose forms\nthat are easy to use and easy to keep nearby.",
+                "cta": "Browse products"
             },
             "final_cta": {
                 "eyebrow": "EXPLORE",
-                "heading": "Everyday quiet objects, in one place",
-                "body": "Browse the full Shop and find one piece that will stay with you for years.",
-                "cta": "Browse all of Shop"
+                "heading": "Start with the things you use every day.\nTake your time choosing.",
+                "body": "Cups, lighting, trays, fabrics —\nthe objects you keep close to daily life, in one place.",
+                "cta": "View all products"
             }
         },
         "shop": {
             "title": "Shop",
             "filter_label": "Categories",
-            "empty_title": "No products yet",
-            "empty_message": "Add products in admin and they will appear here."
+            "empty_title": "No products yet"
         },
         "category": {
             "count_label": "{{count}} items",
@@ -418,7 +424,7 @@
             },
             "shipping_body": "Orders ship within 2–3 business days and typically arrive 1–2 days after dispatch. Shipping fees are shown at checkout. Remote areas may incur an additional surcharge.",
             "quick_add": "Add",
-            "related_title": "You might also like",
+            "related_title": "You may also like",
             "related_eyebrow": "RELATED",
             "status_soldout": "Sold out",
             "status_stopped": "Stopped",
@@ -440,16 +446,15 @@
             }
         },
         "story": {
-            "title": "Brand Story",
+            "title": "We choose objects\nto keep for long.",
             "eyebrow": "STORY",
-            "body": "Still Form is a small house of objects that hold their character through years of use. Wood that softens, linen that deepens, ceramics that darken at the rim — pieces whose materials speak for themselves."
+            "body": "Still Form works with everyday objects,\nused close to daily life.\n\nUse over flash,\nform that outlasts trends,\nand material you can feel in the hand — we look there first."
         },
         "notice": {
             "title": "Notice",
             "eyebrow": "NOTICE",
             "fixed_badge": "Pinned",
             "empty_title": "No notices yet",
-            "empty_message": "This is a demo template. Real notice data can be added from admin.",
             "back_to_list": "Back to list",
             "view_count": "views",
             "prev_page_aria": "Previous page",
@@ -461,7 +466,7 @@
         },
         "cart": {
             "title": "Cart",
-            "eyebrow": "SHOPPING BAG",
+            "eyebrow": "CART",
             "empty_title": "Your cart is empty",
             "empty_message": "Browse the shop and add something you like.",
             "cta_shop": "Go to Shop",
@@ -474,7 +479,7 @@
             "buy_now_toast": "Added to cart. Redirecting to checkout.",
             "summary_title": "Order summary",
             "summary_items": "Items",
-            "summary_subtotal": "Subtotal",
+            "summary_subtotal": "Item total",
             "summary_shipping": "Shipping",
             "summary_total": "Total",
             "summary_checkout": "Checkout",
@@ -482,8 +487,8 @@
             "delete": "Delete",
             "apply": "Apply",
             "delete_confirm_title": "Delete this item?",
-            "delete_confirm_single": "The selected item will be removed from your cart.",
-            "delete_confirm_multiple": "The selected items will be removed from your cart.",
+            "delete_confirm_single": "Remove the selected item from your cart?",
+            "delete_confirm_multiple": "Remove the selected items from your cart?",
             "delete_cancel": "Cancel",
             "items_deleted": "Removed from cart.",
             "checkout_title": "Checkout",
@@ -492,7 +497,7 @@
             "update_failed": "Failed to update quantity.",
             "delete_failed": "Failed to delete item.",
             "cross_sell": {
-                "eyebrow": "YOU MAY ALSO LIKE",
+                "eyebrow": "RELATED",
                 "title": "You may also like"
             }
         },
@@ -500,10 +505,21 @@
             "all": "All",
             "view_all": "View all",
             "demo_marker": "demo",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "close": "Close"
+        },
+        "policy": {
+            "terms": {
+                "title": "Terms of Service"
+            },
+            "privacy": {
+                "title": "Privacy Policy"
+            },
+            "published_at": "Effective",
+            "no_content": "No content available."
         },
         "business": {
-            "demo_notice": "Demo store. Business information can be configured in the template's config/business-info.json.",
+            "demo_notice": "Demo store.",
             "links": {
                 "terms": "Terms of Service",
                 "privacy": "Privacy Policy",
@@ -519,7 +535,7 @@
             "title": "Checkout",
             "logged_in_as": "Ordering as {{name}}",
             "loading": "Loading checkout…",
-            "empty_title": "Cannot create checkout",
+            "empty_title": "Cannot proceed with checkout",
             "back_to_cart": "Back to cart",
             "submit_error_title": "Something went wrong while placing your order",
             "order_failed_fallback": "Please try again in a moment.",
@@ -538,7 +554,7 @@
                 "password_placeholder": "4+ characters",
                 "password_confirm": "Confirm lookup password",
                 "password_confirm_placeholder": "Re-enter password",
-                "hint": "Used to look up this order later. Different from your member password."
+                "hint": "Used to look up this order later. This password is separate from your member password."
             },
             "shipping": {
                 "title": "Shipping details",
@@ -592,7 +608,8 @@
                 "cash_receipt_identifier_placeholder": "Mobile number or card number",
                 "cash_receipt_phone": "Mobile number",
                 "cash_receipt_card": "Cash receipt card",
-                "cash_receipt_business": "Business registration number"
+                "cash_receipt_business": "Business registration number",
+                "deposit_due": " (Deposit due in {{days}} days)"
             },
             "items": {
                 "title": "Order items",
@@ -654,7 +671,7 @@
         },
         "order_complete": {
             "title": "Order placed",
-            "subtitle": "Your order has been received.",
+            "subtitle": "Check your order details and deposit information below.",
             "bank_title": "Deposit information",
             "bank_message": "Ships once deposit is confirmed. Transfer the amount to the account below before the deadline.",
             "bank_label": "Bank",
@@ -665,7 +682,7 @@
             "due_label": "Due by",
             "vbank_notice": "Order auto-cancels if not deposited by the deadline.",
             "guest_notice_title": "Guest order",
-            "guest_notice_lookup": "Look up this order anytime with the order number, your phone, and the lookup password.",
+            "guest_notice_lookup": "Look up this order anytime with the order number, the phone number used at checkout, and the lookup password.",
             "order_number": "Order number",
             "items_title": "Order items",
             "shipping_title": "Shipping address",
@@ -686,11 +703,11 @@
             "submit": "Look up order",
             "submitting": "Checking…",
             "not_found": "Order not found. Please check your details and try again.",
-            "notice": "After lookup, you have 30 minutes to view the order or change the shipping address."
+            "notice": "After lookup, you have 30 minutes to view the order or change the shipping address. After that, look up the order again."
         },
         "guest_order_show": {
             "title": "Guest order detail",
-            "subtitle": "Re-viewing your order."
+            "subtitle": "Check your order details."
         }
     }
 }

@@ -1,7 +1,7 @@
 {
     "superbify": {
         "base_layout_title": "Still Form",
-        "base_layout_description": "Home & lifestyle store — SuperBify Commerce Minimal",
+        "base_layout_description": "생활 가까이에서 쓰는 물건을 모은 온라인 스토어 — Still Form",
         "brand": {
             "name": "Still Form",
             "tagline": "조용한 일상의 물건들"
@@ -9,34 +9,34 @@
         "routes": {
             "home": {
                 "title": "Still Form — 조용한 일상의 물건들",
-                "description": "일상의 한 자리에 머무는 사물을 모은 자리."
+                "description": "생활 가까이에서 쓰는 물건을 모은 온라인 스토어."
             },
             "shop": {
                 "title": "Shop — Still Form",
                 "description": "전체 상품 목록"
             },
             "category": {
-                "title": "Category — Still Form",
+                "title": "카테고리 — Still Form",
                 "description": "카테고리별 상품"
             },
             "product": {
-                "title": "Product — Still Form",
+                "title": "상품 — Still Form",
                 "description": "상품 상세"
             },
             "notice": {
-                "title": "Notice — Still Form",
+                "title": "공지사항 — Still Form",
                 "description": "공지사항"
             },
             "story": {
-                "title": "Story — Still Form",
+                "title": "스토리 — Still Form",
                 "description": "브랜드 소개"
             },
             "cart": {
-                "title": "Cart — Still Form",
+                "title": "장바구니 — Still Form",
                 "description": "장바구니"
             },
             "checkout": {
-                "title": "Checkout — Still Form",
+                "title": "주문/결제 — Still Form",
                 "description": "결제"
             },
             "order_complete": {
@@ -75,7 +75,7 @@
             "mypage_profile": "프로필 — 마이페이지",
             "mypage_profile_edit": "프로필 수정 — 마이페이지",
             "mypage_change_password": "비밀번호 변경 — 마이페이지",
-            "mypage_orders": "주문내역 — 마이페이지",
+            "mypage_orders": "주문 내역 — 마이페이지",
             "mypage_order": "주문 상세 — 마이페이지",
             "mypage_addresses": "배송지 관리 — 마이페이지",
             "mypage_wishlist": "찜한 상품 — 마이페이지",
@@ -97,6 +97,8 @@
             "product_downloadable_coupons": "상품 다운로드 가능 쿠폰",
             "cart": "장바구니",
             "cart_count": "장바구니 수량",
+            "termsContent": "이용약관 내용",
+            "privacyContent": "개인정보처리방침 내용",
             "notice_posts": "스토어 공지",
             "current_user": "로그인 사용자",
             "token_validation": "비밀번호 재설정 토큰 검증"
@@ -118,7 +120,6 @@
             "signup": "회원가입",
             "logout": "로그아웃",
             "register_link": "회원가입",
-            "already_member": "이미 회원이신가요?",
             "forgot_password_link": "비밀번호를 잊으셨나요?",
             "login_success": "로그인되었습니다.",
             "register_success": "회원가입이 완료되었습니다.",
@@ -132,8 +133,7 @@
                 "password_placeholder": "비밀번호를 입력하세요",
                 "remember": "로그인 상태 유지",
                 "submit": "로그인",
-                "processing": "로그인 중...",
-                "no_account": "계정이 없으신가요?",
+                "processing": "로그인 중…",
                 "error": {
                     "invalid": "이메일 또는 비밀번호가 올바르지 않습니다.",
                     "email_required": "이메일을 입력해주세요.",
@@ -153,14 +153,24 @@
                 "nickname": "닉네임",
                 "nickname_placeholder": "닉네임을 입력하세요 (선택)",
                 "name": "이름",
-                "name_placeholder": "이름을 입력하세요 (선택)",
+                "name_placeholder": "이름을 입력하세요",
+                "mobile": "휴대폰 번호",
+                "mobile_placeholder": "휴대폰 번호를 입력하세요 (선택)",
+                "phone": "전화번호",
+                "phone_placeholder": "전화번호를 입력하세요 (선택)",
+                "language": "언어",
+                "section_account": "계정 정보",
+                "section_profile": "프로필",
+                "section_agreements": "약관 동의",
+                "agree_required": "(필수)",
+                "password_hint": "비밀번호는 8자 이상이어야 합니다.",
                 "terms_agree": "이용약관에 동의합니다.",
                 "privacy_agree": "개인정보처리방침에 동의합니다.",
                 "terms_link": "이용약관 보기",
                 "privacy_link": "개인정보처리방침 보기",
                 "submit": "회원가입",
-                "processing": "가입 중...",
-                "has_account": "이미 계정이 있으신가요?",
+                "processing": "가입 중…",
+                "has_account": "이미 회원이신가요?",
                 "error": {
                     "email_required": "이메일을 입력해주세요.",
                     "email_invalid": "올바른 이메일 형식이 아닙니다.",
@@ -168,7 +178,8 @@
                     "password_required": "비밀번호를 입력해주세요.",
                     "password_min": "비밀번호는 {{count}}자 이상이어야 합니다.",
                     "password_mismatch": "비밀번호가 일치하지 않습니다.",
-                    "terms_required": "이용약관에 동의해주세요."
+                    "terms_required": "이용약관에 동의해주세요.",
+                    "privacy_required": "개인정보처리방침에 동의해주세요."
                 }
             },
             "forgot_password": {
@@ -177,7 +188,7 @@
                 "email": "이메일",
                 "email_placeholder": "가입한 이메일 주소를 입력하세요",
                 "submit": "재설정 링크 보내기",
-                "processing": "전송 중...",
+                "processing": "전송 중…",
                 "success": "비밀번호 재설정 이메일을 보냈습니다.",
                 "back_to_login": "로그인으로 돌아가기"
             },
@@ -188,9 +199,9 @@
                 "password_placeholder": "새 비밀번호를 입력하세요",
                 "password_confirm": "비밀번호 확인",
                 "password_confirm_placeholder": "새 비밀번호를 다시 입력하세요",
-                "submit": "비밀번호 변경",
-                "processing": "변경 중...",
-                "success": "비밀번호가 변경되었습니다.",
+                "submit": "비밀번호 재설정",
+                "processing": "재설정 중…",
+                "success": "비밀번호가 재설정되었습니다.",
                 "token_invalid": "유효하지 않거나 만료된 링크입니다. 비밀번호 찾기를 다시 요청해주세요.",
                 "go_to_login": "로그인",
                 "go_to_home": "홈으로"
@@ -208,7 +219,7 @@
             "delete": "삭제",
             "tabs": {
                 "profile": "프로필",
-                "orders": "주문내역",
+                "orders": "주문 내역",
                 "addresses": "배송지 관리",
                 "wishlist": "찜한 상품",
                 "coupons": "쿠폰",
@@ -229,7 +240,7 @@
                 "detail": "상세 보기",
                 "cancel": "주문 취소",
                 "cancel_confirm_title": "주문을 취소할까요?",
-                "cancel_confirm_body": "취소한 주문은 되돌릴 수 없습니다. 이 주문을 취소합니다.",
+                "cancel_confirm_body": "주문을 취소하면 되돌릴 수 없습니다. 취소하시겠어요?",
                 "cancel_reason": "취소 사유",
                 "cancelled": "취소됨",
                 "reorder": "재주문",
@@ -339,15 +350,15 @@
         },
         "nav": {
             "shop": "Shop",
-            "story": "Story",
-            "notice": "Notice",
-            "cart": "Cart"
+            "story": "스토리",
+            "notice": "공지사항",
+            "cart": "장바구니"
         },
         "home": {
             "hero": {
                 "eyebrow": "HOME & LIFESTYLE",
                 "headline": "조용한 일상의\n물건들",
-                "sub": "손에 익는 재질, 변화하는 결, 천천히 좋아지는 형태. 일상의 한 자리에 머무는 사물을 차곡차곡 모아 봅니다.",
+                "sub": "눈에 띄기보다 곁에 오래 남는 것.\n매일 손이 가고, 쓰일수록 편안해지는 생활의 도구를 고릅니다.",
                 "cta_primary": "Shop 둘러보기",
                 "cta_secondary": "Brand Story"
             },
@@ -358,7 +369,7 @@
             },
             "new_arrivals": {
                 "eyebrow": "NEW",
-                "heading": "새로 들어온 것들"
+                "heading": "새로 들어온 상품"
             },
             "popular": {
                 "eyebrow": "POPULAR",
@@ -366,32 +377,27 @@
             },
             "story": {
                 "eyebrow": "BRAND STORY",
-                "heading": "오래 쓸수록 익어지는 것들",
-                "body": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 목재, 리넨, 도자기 — 손에 닿는 재질이 스스로 말을 거는 물건을 골라 천천히 소개합니다. 화려함보다 차분함, 새것보다 익은 것을 우선합니다."
+                "heading": "오래 두고 쓰는 물건에는\n이유가 있습니다.",
+                "body": "재질은 손에 닿는 감촉으로,\n형태는 실제 쓰임으로 봅니다.\n\nStill Form은 유행보다 오래 쓰이고,\n생활 속에 자연스럽게 남는 물건을 고릅니다.",
+                "cta": "Still Form의 기준"
             },
             "editorial": {
                 "eyebrow": "EDITORIAL",
-                "heading": "조용히, 그러나 단단하게.",
-                "body": "공간에 머무는 사물은 시간이 흐를수록 더 좋아지는 종류가 있습니다. Still Form은 오래 쓸수록 익어지는 물건을 차분히 모은 자리입니다.",
-                "cta": "Shop 둘러보기"
-            },
-            "promo": {
-                "eyebrow": "LIFESTYLE",
-                "title": "오늘의 한 권",
-                "description": "책꽂이 위에 머무는 단행본 한 권처럼, 일상에 한 점 더해지는 물건을 소개합니다."
+                "heading": "자주 쓰는 것일수록,\n더 단순하게.",
+                "body": "컵 하나, 조명 하나, 트레이 하나도\n매일 손이 가는 방식은 다릅니다.\n\n복잡한 장식보다 쓰기 편하고,\n곁에 두기 좋은 형태를 고릅니다.",
+                "cta": "상품 둘러보기"
             },
             "final_cta": {
                 "eyebrow": "EXPLORE",
-                "heading": "조용한 일상의 모든 물건을 한 자리에서",
-                "body": "지금 전체 Shop을 둘러보고, 오래 머무를 한 가지 물건을 골라보세요.",
-                "cta": "Shop 전체 보기"
+                "heading": "매일 쓰는 물건부터\n천천히 골라보세요.",
+                "body": "컵, 조명, 트레이, 패브릭처럼\n생활 가까이에 두는 물건을 한곳에서 만나보세요.",
+                "cta": "전체 상품 보기"
             }
         },
         "shop": {
             "title": "Shop",
             "filter_label": "카테고리",
-            "empty_title": "아직 등록된 상품이 없습니다",
-            "empty_message": "관리자에서 상품을 등록하면 이 자리에 표시됩니다."
+            "empty_title": "등록된 상품이 없습니다"
         },
         "category": {
             "count_label": "{{count}}개 상품",
@@ -418,7 +424,7 @@
             },
             "shipping_body": "평일 기준 2~3일 내 출고되며, 출고 후 1~2일 내 배송이 완료됩니다. 배송비는 결제 단계에서 안내됩니다. 도서산간 지역은 추가 비용이 발생할 수 있습니다.",
             "quick_add": "담기",
-            "related_title": "함께 보면 좋은 것들",
+            "related_title": "함께 보면 좋은 상품",
             "related_eyebrow": "RELATED",
             "status_soldout": "품절",
             "status_stopped": "판매중지",
@@ -440,16 +446,15 @@
             }
         },
         "story": {
-            "title": "Brand Story",
+            "title": "오래 곁에 둘 물건을\n고릅니다.",
             "eyebrow": "STORY",
-            "body": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 손에 익는 목재, 결이 살아있는 리넨, 묵직한 도자기 — 재질이 스스로 말을 거는 물건을 골라 차곡차곡 소개합니다."
+            "body": "Still Form은 생활 가까이에서\n매일 쓰는 물건을 다룹니다.\n\n화려함보다 쓰임을,\n유행보다 오래 남는 형태를,\n장식보다 손에 닿는 재질을 먼저 봅니다."
         },
         "notice": {
             "title": "Notice",
             "eyebrow": "NOTICE",
             "fixed_badge": "고정",
             "empty_title": "등록된 공지가 없습니다",
-            "empty_message": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다.",
             "back_to_list": "목록으로",
             "view_count": "조회",
             "prev_page_aria": "이전 페이지",
@@ -460,8 +465,8 @@
             "next_post": "다음 공지"
         },
         "cart": {
-            "title": "Cart",
-            "eyebrow": "SHOPPING BAG",
+            "title": "장바구니",
+            "eyebrow": "CART",
             "empty_title": "장바구니가 비어 있습니다",
             "empty_message": "Shop 페이지에서 상품을 담아보세요.",
             "cta_shop": "Shop으로 이동",
@@ -474,7 +479,7 @@
             "buy_now_toast": "장바구니에 담고 결제 페이지로 이동합니다.",
             "summary_title": "주문 요약",
             "summary_items": "상품 수",
-            "summary_subtotal": "소계",
+            "summary_subtotal": "상품 금액",
             "summary_shipping": "배송비",
             "summary_total": "총 결제금액",
             "summary_checkout": "결제하기",
@@ -482,17 +487,17 @@
             "delete": "삭제",
             "apply": "변경",
             "delete_confirm_title": "상품을 삭제할까요?",
-            "delete_confirm_single": "선택한 상품을 장바구니에서 삭제합니다.",
-            "delete_confirm_multiple": "선택한 상품을 장바구니에서 삭제합니다.",
+            "delete_confirm_single": "선택한 상품을 장바구니에서 삭제하시겠어요?",
+            "delete_confirm_multiple": "선택한 상품을 장바구니에서 삭제하시겠어요?",
             "delete_cancel": "취소",
             "items_deleted": "장바구니에서 삭제했습니다.",
-            "checkout_title": "Checkout",
+            "checkout_title": "주문/결제",
             "checkout_placeholder_title": "결제 단계 준비 중",
             "checkout_placeholder_message": "결제/배송지/쿠폰 단계는 데모 환경에서 제한적으로 동작합니다. 데모용 템플릿이므로 실제 결제는 진행되지 않습니다.",
             "update_failed": "수량 변경에 실패했습니다.",
             "delete_failed": "삭제에 실패했습니다.",
             "cross_sell": {
-                "eyebrow": "YOU MAY ALSO LIKE",
+                "eyebrow": "RELATED",
                 "title": "함께 보면 좋은 상품"
             }
         },
@@ -500,10 +505,21 @@
             "all": "전체",
             "view_all": "전체 보기",
             "demo_marker": "demo",
-            "cancel": "취소"
+            "cancel": "취소",
+            "close": "닫기"
+        },
+        "policy": {
+            "terms": {
+                "title": "이용약관"
+            },
+            "privacy": {
+                "title": "개인정보처리방침"
+            },
+            "published_at": "시행일",
+            "no_content": "내용이 없습니다."
         },
         "business": {
-            "demo_notice": "데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다.",
+            "demo_notice": "데모 스토어입니다.",
             "links": {
                 "terms": "이용약관",
                 "privacy": "개인정보처리방침",
@@ -519,7 +535,7 @@
             "title": "결제",
             "logged_in_as": "{{name}}님으로 주문합니다",
             "loading": "주문 정보를 불러오는 중…",
-            "empty_title": "주문 정보를 만들 수 없습니다",
+            "empty_title": "주문을 진행할 수 없습니다",
             "back_to_cart": "장바구니로 돌아가기",
             "submit_error_title": "주문 처리 중 문제가 발생했습니다",
             "order_failed_fallback": "잠시 후 다시 시도해 주세요.",
@@ -538,7 +554,7 @@
                 "password_placeholder": "4자리 이상",
                 "password_confirm": "조회 비밀번호 확인",
                 "password_confirm_placeholder": "비밀번호 재입력",
-                "hint": "주문 조회 시 사용할 비밀번호입니다. 가입 시 비밀번호와 다릅니다."
+                "hint": "주문 조회 시 사용할 비밀번호입니다. 회원 비밀번호와 별도로 사용하는 비밀번호입니다."
             },
             "shipping": {
                 "title": "배송지 정보",
@@ -549,7 +565,7 @@
                 "zipcode": "우편번호",
                 "zipcode_placeholder": "우편번호",
                 "address": "주소",
-                "address_placeholder": "기본 주소",
+                "address_placeholder": "도로명 주소",
                 "address_detail": "상세 주소",
                 "address_detail_placeholder": "동/호수 등",
                 "memo": "배송 메모",
@@ -557,7 +573,7 @@
                 "saved_addresses": "저장된 배송지",
                 "manage": "배송지 관리",
                 "same_as_orderer": "주문자 정보와 동일",
-                "save_address": "입력한 배송지를 저장합니다",
+                "save_address": "배송지 저장",
                 "country": "배송국가",
                 "intl_address": "주소 (해외)",
                 "intl_address1_placeholder": "주소 (Street address)",
@@ -582,7 +598,7 @@
                 "refund_bank_account": "계좌번호",
                 "refund_bank_holder": "예금주",
                 "bank_select": "입금 계좌 선택",
-                "vbank_helper": "직접 입금 기한 이후에는 주문이 자동 취소됩니다.",
+                "vbank_helper": "입금 기한이 지나면 주문이 자동으로 취소됩니다.",
                 "deposit_due": " (입금 기한 {{days}}일)",
                 "cash_receipt_request": "현금영수증 신청",
                 "cash_receipt_purpose": "증빙 용도",
@@ -591,8 +607,8 @@
                 "cash_receipt_identifier_type": "발급 수단",
                 "cash_receipt_identifier": "현금영수증 번호",
                 "cash_receipt_identifier_placeholder": "휴대폰 번호 또는 카드 번호",
-                "cash_receipt_phone": "휴대폰번호",
-                "cash_receipt_card": "현금영수증카드",
+                "cash_receipt_phone": "휴대폰 번호",
+                "cash_receipt_card": "현금영수증 카드",
                 "cash_receipt_business": "사업자등록번호"
             },
             "items": {
@@ -601,12 +617,12 @@
             },
             "summary": {
                 "items": "상품 수",
-                "subtotal": "상품금액",
+                "subtotal": "상품 금액",
                 "shipping": "배송비",
                 "discount": "할인",
                 "total": "총 결제금액",
                 "title": "주문 요약",
-                "points_used": "적립금 사용",
+                "points_used": "마일리지 사용",
                 "shipping_coupon": "배송비 쿠폰 할인",
                 "unavailable_title": "주문할 수 없는 상품이 포함되어 있습니다",
                 "unavailable_message": "품절·판매중지된 상품을 장바구니에서 제외한 후 다시 시도해 주세요."
@@ -617,7 +633,7 @@
                 "required": "필수 입력 항목입니다",
                 "phone_format": "올바른 휴대폰 번호가 아닙니다",
                 "email_format": "올바른 이메일이 아닙니다",
-                "password_min": "4자리 이상 입력해 주세요",
+                "password_min": "4자 이상 입력해 주세요",
                 "password_mismatch": "비밀번호가 일치하지 않습니다"
             },
             "page_title": "주문/결제",
@@ -634,17 +650,17 @@
                 "no_available": "사용 가능한 쿠폰이 없습니다",
                 "count_suffix": "개 보유",
                 "already_used": "이미 적용됨",
-                "select_placeholder": "쿠폰을 선택하세요",
-                "discount_code": "할인코드",
-                "discount_code_placeholder": "할인코드를 입력하세요",
+                "select_placeholder": "쿠폰을 선택해 주세요",
+                "discount_code": "할인 코드",
+                "discount_code_placeholder": "할인 코드를 입력해 주세요",
                 "apply": "적용"
             },
             "mileage": {
-                "title": "적립금",
-                "available": "보유 적립금",
+                "title": "마일리지",
+                "available": "보유 마일리지",
                 "use_all": "전액 사용",
                 "apply": "적용",
-                "input_placeholder": "사용할 적립금"
+                "input_placeholder": "사용할 마일리지"
             },
             "pg": {
                 "error_confirm_failed": "결제 승인에 실패했습니다. 다시 시도해 주세요.",
@@ -655,7 +671,7 @@
         },
         "order_complete": {
             "title": "주문이 접수되었습니다",
-            "subtitle": "주문이 정상적으로 접수되었습니다.",
+            "subtitle": "아래에서 주문 내역과 입금 안내를 확인해 주세요.",
             "bank_title": "입금 안내",
             "bank_message": "입금 확인 후 배송이 시작됩니다. 아래 계좌로 입금 기한까지 금액을 입금해 주세요.",
             "bank_label": "은행",
@@ -666,7 +682,7 @@
             "due_label": "입금 기한",
             "vbank_notice": "입금 기한 내 미입금 시 주문이 자동 취소될 수 있습니다.",
             "guest_notice_title": "비회원 주문 안내",
-            "guest_notice_lookup": "주문번호와 가입하신 휴대폰, 조회 비밀번호로 비회원 주문 조회 페이지에서 다시 확인할 수 있습니다.",
+            "guest_notice_lookup": "주문번호와 주문 시 입력한 휴대폰 번호, 조회 비밀번호로 비회원 주문 조회 페이지에서 다시 확인할 수 있습니다.",
             "order_number": "주문번호",
             "items_title": "주문 상품",
             "shipping_title": "배송지",
@@ -687,11 +703,11 @@
             "submit": "주문 조회",
             "submitting": "확인 중…",
             "not_found": "주문을 찾을 수 없습니다. 주문번호, 휴대폰, 비밀번호를 다시 확인해 주세요.",
-            "notice": "조회 후 주문 상세에서 30분간 주문 조회/배송지 변경이 가능합니다. 30분이 지나면 다시 조회하셔야 합니다."
+            "notice": "조회 후 30분 동안 주문 상세에서 주문 조회와 배송지 변경이 가능합니다. 30분이 지나면 다시 조회해 주세요."
         },
         "guest_order_show": {
             "title": "비회원 주문 상세",
-            "subtitle": "주문 내역을 다시 확인하고 있습니다."
+            "subtitle": "주문 내역을 확인해 주세요."
         }
     }
 }

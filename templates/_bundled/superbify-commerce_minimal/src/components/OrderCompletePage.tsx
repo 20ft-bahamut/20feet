@@ -110,7 +110,7 @@ export function OrderCompletePage(props: OrderCompletePageProps): React.ReactEle
     const locale = 'ko';
 
     const title = props.title ?? '주문이 접수되었습니다';
-    const successMessage = props.successMessage ?? '주문이 정상적으로 접수되었습니다.';
+    const successMessage = props.successMessage ?? '아래에서 주문 내역과 입금 안내를 확인해 주세요.';
     const bankDepositMessage =
         props.bankDepositMessage ??
         '입금 확인 후 배송이 시작됩니다. 아래 계좌로 입금 기한까지 금액을 입금해 주세요.';
@@ -394,7 +394,7 @@ export function OrderCompletePage(props: OrderCompletePageProps): React.ReactEle
                         }}
                     >
                         {props.guestNoticeLookup ??
-                            '주문번호와 가입하신 휴대폰, 조회 비밀번호로 비회원 주문 조회 페이지에서 다시 확인할 수 있습니다.'}
+                            '주문번호와 주문 시 입력한 휴대폰 번호, 조회 비밀번호로 비회원 주문 조회 페이지에서 다시 확인할 수 있습니다.'}
                     </P>
                 </Div>
             ) : null}

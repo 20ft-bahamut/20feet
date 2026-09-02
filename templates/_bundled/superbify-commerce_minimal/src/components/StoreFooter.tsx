@@ -26,6 +26,11 @@ export interface StoreFooterProps {
     shippingLabel?: string;
     /** Label of the external 사업자정보확인 link (from lang); only rendered when configured. */
     verificationLabel?: string;
+    /** Primary nav labels from lang (superbify.nav.*). Defaults keep the English nav. */
+    shopLabel?: string;
+    storyLabel?: string;
+    noticeLabel?: string;
+    cartLabel?: string;
     /**
      * Test/diagnostic injection point for the resolved field list.
      * When supplied, the StoreFooter renders exactly this list and skips
@@ -56,13 +61,16 @@ export interface StoreFooterProps {
 }
 
 /** Build the default primary-nav links for a given shop base. */
-function buildDefaultNav(shopBase: string): { href: string; label: string }[] {
+function buildDefaultNav(
+    shopBase: string,
+    labels: { shop: string; story: string; notice: string; cart: string },
+): { href: string; label: string }[] {
     const base = shopBase === '/' ? '' : shopBase;
     return [
-        { href: `${base}/`, label: 'Shop' },
-        { href: `${base}/story`, label: 'Story' },
-        { href: `${base}/notice`, label: 'Notice' },
-        { href: `${base}/cart`, label: 'Cart' },
+        { href: `${base}/`, label: labels.shop },
+        { href: `${base}/story`, label: labels.story },
+        { href: `${base}/notice`, label: labels.notice },
+        { href: `${base}/cart`, label: labels.cart },
     ];
 }
 
@@ -109,6 +117,10 @@ export function StoreFooter({
     privacyLabel,
     shippingLabel,
     verificationLabel,
+    shopLabel = 'Shop',
+    storyLabel = 'Story',
+    noticeLabel = 'Notice',
+    cartLabel = 'Cart',
     infoFields,
     disableLiveShopInfo = false,
     shopInfoEndpoint,
@@ -116,7 +128,8 @@ export function StoreFooter({
     shopBase,
 }: StoreFooterProps): React.ReactElement {
     const resolvedShopBase = shopBase ?? getShopBase();
-    const resolvedNavItems = navItems ?? buildDefaultNav(resolvedShopBase);
+    const resolvedNavItems =
+        navItems ?? buildDefaultNav(resolvedShopBase, { shop: shopLabel, story: storyLabel, notice: noticeLabel, cart: cartLabel });
     // Live admin basic_info overlay. Kept as state so the footer re-renders
     // when the async fetch resolves without disturbing the rest of the layout.
     // null = not yet resolved OR fetch is disabled; empty object = resolved

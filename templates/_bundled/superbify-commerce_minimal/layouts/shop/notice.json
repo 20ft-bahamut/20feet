@@ -82,7 +82,6 @@
                                     "loading": "{{notice_posts?.loading ?? false}}",
                                     "fixedLabel": "$t:superbify.notice.fixed_badge",
                                     "emptyTitle": "$t:superbify.notice.empty_title",
-                                    "emptyMessage": "$t:superbify.notice.empty_message",
                                     "detailBasePath": "/shop/notice",
                                     "rowAriaLabel": "$t:superbify.notice.row_aria"
                                 }

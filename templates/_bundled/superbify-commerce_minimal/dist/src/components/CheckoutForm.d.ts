@@ -300,6 +300,7 @@ export interface CheckoutFormProps {
     bankSelectLabel?: string;
     dbankHelperLabel?: string;
     vbankHelperLabel?: string;
+    depositDueSuffixLabel?: string;
     refundBankTitle?: string;
     refundBankCodeLabel?: string;
     refundBankAccountLabel?: string;

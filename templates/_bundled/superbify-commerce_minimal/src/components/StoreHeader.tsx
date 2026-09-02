@@ -14,6 +14,11 @@ export interface StoreHeaderProps {
     signupLabel?: string;
     mypageLabel?: string;
     logoutLabel?: string;
+    /** Primary nav labels from lang (superbify.nav.*). Defaults keep the English nav. */
+    shopLabel?: string;
+    storyLabel?: string;
+    noticeLabel?: string;
+    cartLabel?: string;
     /** Override the shop base URL. Defaults to getShopBase(). */
     shopBase?: string;
     className?: string;
@@ -161,10 +166,20 @@ export function StoreHeader({
     signupLabel = 'Sign up',
     mypageLabel = 'My page',
     logoutLabel = 'Logout',
+    shopLabel = 'Shop',
+    storyLabel = 'Story',
+    noticeLabel = 'Notice',
+    cartLabel = 'Cart',
     shopBase,
     className,
 }: StoreHeaderProps): React.ReactElement {
     const isLoggedIn = typeof user === 'string' && user.trim().length > 0;
+    const navLabels: Record<ReturnType<typeof buildNavItems>[number]['key'], string> = {
+        shop: shopLabel,
+        story: storyLabel,
+        notice: noticeLabel,
+        cart: cartLabel,
+    };
     const resolvedShopBase = shopBase ?? getShopBase();
     const navItems = buildNavItems(resolvedShopBase);
     return (
@@ -233,7 +248,7 @@ export function StoreHeader({
                                         style={NAV_LINK_STYLE}
                                         data-testid={isCart ? 'nav-cart' : `nav-${it.key}`}
                                     >
-                                        {it.key === 'shop' ? 'Shop' : it.key === 'story' ? 'Story' : it.key === 'notice' ? 'Notice' : 'Cart'}
+                                        {navLabels[it.key]}
                                         {isCart && typeof cartCount === 'number' ? (
                                             <Span
                                                 aria-hidden

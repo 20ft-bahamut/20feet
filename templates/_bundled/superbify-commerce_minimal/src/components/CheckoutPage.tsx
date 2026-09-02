@@ -602,7 +602,7 @@ export function CheckoutPage(props: CheckoutPageProps): React.ReactElement {
                         color: 'var(--scm-text-primary, #26221E)',
                     }}
                 >
-                    {props.emptyTempOrderTitle ?? '주문 정보를 만들 수 없습니다'}
+                    {props.emptyTempOrderTitle ?? '주문을 진행할 수 없습니다'}
                 </h2>
                 <P style={{ margin: 0, color: 'var(--scm-text-body, #4A4643)' }}>
                     {createTempError}

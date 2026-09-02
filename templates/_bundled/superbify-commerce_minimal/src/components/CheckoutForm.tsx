@@ -306,6 +306,7 @@ export interface CheckoutFormProps {
     bankSelectLabel?: string;
     dbankHelperLabel?: string;
     vbankHelperLabel?: string;
+    depositDueSuffixLabel?: string;
     refundBankTitle?: string;
     refundBankCodeLabel?: string;
     refundBankAccountLabel?: string;
@@ -430,7 +431,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         savedAddressTitle = '저장된 배송지',
         manageAddressesLabel = '배송지 관리',
         sameAsOrdererLabel = '주문자 정보와 동일',
-        saveAddressLabel = '입력한 배송지를 저장합니다',
+        saveAddressLabel = '배송지 저장',
         recipientNameLabel = '받는 분',
         recipientNamePlaceholder = '받는 분 이름',
         recipientPhoneLabel = '연락처',
@@ -439,7 +440,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         zipcodeLabel = '우편번호',
         zipcodePlaceholder = '우편번호',
         addressLabel = '주소',
-        addressPlaceholder = '기본 주소',
+        addressPlaceholder = '도로명 주소',
         addressDetailLabel = '상세 주소',
         addressDetailPlaceholder = '동/호수 등',
         intlAddressLabel = '주소 (해외)',
@@ -453,7 +454,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         intlPostalCodeLabel = '우편번호',
         intlPostalCodePlaceholder = '우편번호 (Postal code)',
         memoLabel = '배송 메모',
-        memoPlaceholder = '배송 메모를 선택하세요',
+        memoPlaceholder = '배송 시 요청사항',
         paymentMethodTitle = '결제 수단',
         depositorNameLabel = '입금자명',
         depositorNamePlaceholder = '입금자명',
@@ -461,6 +462,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         bankSelectLabel = '입금 계좌 선택',
         dbankHelperLabel = '입금 확인 후 배송이 시작됩니다.',
         vbankHelperLabel = '입금 기한이 지나면 주문이 자동 취소됩니다.',
+        depositDueSuffixLabel = ' (입금 기한 {{days}}일)',
         refundBankTitle = '환불 계좌',
         refundBankCodeLabel = '은행',
         refundBankAccountLabel = '계좌번호',
@@ -472,8 +474,8 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         cashReceiptIdentifierTypeLabel = '발급 수단',
         cashReceiptIdentifierLabel = '현금영수증 번호',
         cashReceiptIdentifierPlaceholder = '휴대폰 번호 또는 카드 번호',
-        cashReceiptIdentifierPhoneLabel = '휴대폰번호',
-        cashReceiptIdentifierCardLabel = '현금영수증카드',
+        cashReceiptIdentifierPhoneLabel = '휴대폰 번호',
+        cashReceiptIdentifierCardLabel = '현금영수증 카드',
         cashReceiptIdentifierBusinessLabel = '사업자등록번호',
         discountSectionTitle = '할인 · 쿠폰',
         couponDownloadLabel = '쿠폰 다운로드',
@@ -482,22 +484,22 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         couponNoAvailableLabel = '사용 가능한 쿠폰이 없습니다',
         couponCountSuffixLabel = '개 보유',
         couponAlreadyUsedLabel = '이미 적용됨',
-        couponSelectPlaceholder = '쿠폰을 선택하세요',
-        discountCodeLabel = '할인코드',
-        discountCodePlaceholder = '할인코드를 입력하세요',
+        couponSelectPlaceholder = '쿠폰을 선택해 주세요',
+        discountCodeLabel = '할인 코드',
+        discountCodePlaceholder = '할인 코드를 입력해 주세요',
         discountCodeApplyLabel = '적용',
-        mileageSectionTitle = '적립금',
-        mileageAvailableLabel = '보유 적립금',
+        mileageSectionTitle = '마일리지',
+        mileageAvailableLabel = '보유 마일리지',
         mileageUseAllLabel = '전액 사용',
         mileageApplyLabel = '적용',
-        mileageInputPlaceholder = '사용할 적립금',
-        pointsUsedLabel = '적립금 사용',
+        mileageInputPlaceholder = '사용할 마일리지',
+        pointsUsedLabel = '마일리지 사용',
         shippingCouponDiscountLabel = '배송비 쿠폰 할인',
         unavailableTitle = '주문할 수 없는 상품이 포함되어 있습니다',
         unavailableMessage = '품절·판매중지된 상품을 장바구니에서 제외한 후 다시 시도해 주세요.',
         quantityLabel = '수량',
         summaryTitle = '주문 요약',
-        subtotalLabel = '상품금액',
+        subtotalLabel = '상품 금액',
         discountLabel = '할인',
         shippingFeeLabel = '배송비',
         totalAmountLabel = '총 결제금액',
@@ -512,7 +514,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
         isSubmitting = false,
         submitError,
         emptyMethodsTitle = '결제 수단이 없습니다',
-        emptyMethodsMessage = '관리자에서 결제 설정을 확인해 주세요.',
+        emptyMethodsMessage = '사용 가능한 결제 수단이 없습니다.',
         isLoggedIn = false,
         currentUserName,
         currentUserPhone,
@@ -978,12 +980,12 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
 
     const handleApplyMileage = useCallback((value: string) => {
         const points = Math.max(0, Math.floor(Number(value) || 0));
-        void recompute({ use_points: points }, { successMessage: points > 0 ? '적립금이 적용되었습니다.' : '적립금 사용이 취소되었습니다.' });
+        void recompute({ use_points: points }, { successMessage: points > 0 ? '마일리지가 적용되었습니다.' : '마일리지 사용이 취소되었습니다.' });
     }, [recompute]);
 
     const handleApplyDiscountCode = useCallback(() => {
         if (!discountCode.trim()) return;
-        void recompute({ discount_code: discountCode.trim() }, { successMessage: '할인코드가 적용되었습니다.' });
+        void recompute({ discount_code: discountCode.trim() }, { successMessage: '할인 코드가 적용되었습니다.' });
     }, [discountCode, recompute]);
 
     // 결제수단 전환 — 환불계좌/현금영수증 상태 초기화(sirsoft-basic method switch 정책 동일).
@@ -1791,7 +1793,7 @@ export function CheckoutForm(props: CheckoutFormProps): React.ReactElement {
                                                         <P className="scm-checkout-method-helper">
                                                             {mCore === 'vbank' ? vbankHelperLabel : dbankHelperLabel}
                                                             {typeof autoCancelDays === 'number' && autoCancelDays > 0
-                                                                ? ` (입금 기한 ${autoCancelDays}일)`
+                                                                ? depositDueSuffixLabel.replace('{{days}}', String(autoCancelDays))
                                                                 : ''}
                                                         </P>
                                                     ) : null}

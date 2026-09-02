@@ -140,7 +140,7 @@ export function ProductQna(props: ProductQnaProps): React.ReactElement | null {
         cancelLabel = '취소',
         deleteLabel = '삭제',
         deleteConfirmTitle = '문의 삭제',
-        deleteConfirmMessage = '이 문의를 삭제하시겠습니까?',
+        deleteConfirmMessage = '이 문의를 삭제하시겠어요?',
         answeredLabel = '답변완료',
         pendingLabel = '답변대기',
         sellerReplyLabel = '판매자 답변',

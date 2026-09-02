@@ -127,6 +127,7 @@ export function HeroBanner({
                                 margin: 0,
                                 maxWidth: '16ch',
                                 whiteSpace: 'pre-line',
+                                wordBreak: 'keep-all',
                             }}
                         >
                             {headline}
@@ -149,7 +150,9 @@ export function HeroBanner({
                                 lineHeight: 1.85,
                                 color: 'var(--scm-text-body, #4A4643)',
                                 margin: 0,
-                                maxWidth: '44ch',
+                                maxWidth: '36em',
+                                whiteSpace: 'pre-line',
+                                wordBreak: 'keep-all',
                             }}
                         >
                             {sub}

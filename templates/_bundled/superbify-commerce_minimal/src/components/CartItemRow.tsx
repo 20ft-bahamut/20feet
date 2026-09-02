@@ -80,7 +80,7 @@ export function CartItemRow({
     increaseLabel = 'increase quantity',
     applyLabel = '변경',
     deleteConfirmTitle = '상품을 삭제할까요?',
-    deleteConfirmMessage = '선택한 상품을 장바구니에서 삭제합니다.',
+    deleteConfirmMessage = '선택한 상품을 장바구니에서 삭제하시겠어요?',
     deleteConfirmConfirmLabel = '삭제',
     deleteConfirmCancelLabel = '취소',
     minQuantity = 1,

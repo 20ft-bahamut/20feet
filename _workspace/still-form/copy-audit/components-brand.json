@@ -1,0 +1,1194 @@
+{
+ "area": "components-brand",
+ "notes": "총 1개 영역: components-brand (superbify-commerce_minimal 템플릿의 브랜드·랜딩 카피, 데모 카피, 라벨/버튼/placeholder/empty-state, 정책/페이지 타이틀까지 모두 포함). LOCKED COPY 없음(Still Form은 superbify 데모 브랜드). 금지 표현 매치 0건. LOCKED 카피 매치 0건. 어색 카피: 일부 영문 ko가 데모 브랜드에 묶여 있어 '조용한 일상의 물건들'(브랜드 톤) 자체는 OK이나 '오래 쓸수록 익어지는 것들'은 행동지향 표현으로 데모 카피 톤(조용/차분)과 부분 불일치 — flag. 그 외 ko/en 톤 일관적, 가격 \"원\" 표기 통화 일관. 스토리 헤딩 en ('Things that grow better with time')/ko ('오래 쓸수록 익어지는 것들') 의역 차이는 합리적 범위. 일반적으로 번역투·불완전 문장 없음. 스토어 푸터 영문 copyright \"© 2026 Still Form — demo store built on Gnuboard 7\" 노출 — 데모 표시. 영문 cart.toast ko 표기와 일치 ('Added to cart.') OK. 어색 flag 항목 외 전체 자연스러움.",
+ "entries": [
+  {
+   "flag": "동사의 과도한 행동성 — '조용한 일상의 물건들' 브랜드 톤(차분/관찰)과 헤딩의 '오래 쓸수록 익어지는' 주체 행위가 미세 불일치 (스토리 헤딩)",
+   "key": "home.story.heading",
+   "kind": "heading",
+   "location": "src/components/Home 조립(layouts/pages/home.json)에서 lang.superbify.home.story.heading 사용 — ko.json:382 / en.json:382",
+   "page": "home",
+   "text_en": "Things that grow better with time",
+   "text_ko": "오래 쓸수록 익어지는 것들"
+  },
+  {
+   "flag": "동작·행위 주체의 중의성 — ko에서 '모은/소개합니다'가 단순 과거형처럼 읽힘(브랜드 보이스: 현재 시제 권장). 톤 자체는 OK",
+   "key": "home.story.body",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:383 / lang/en.json:383 — home.story.body",
+   "page": "home",
+   "text_en": "Still Form gathers objects that hold their character through years of use. Wood that softens, linen that deepens, ceramics that darken at the rim. We choose pieces whose materials speak for themselves.",
+   "text_ko": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 목재, 리넨, 도자기 — 손에 닿는 재질이 스스로 말을 거는 물건을 골라 천천히 소개합니다. 화려함보다 차분함, 새것보다 익은 것을 우선합니다."
+  },
+  {
+   "flag": "",
+   "key": "home.hero.headline",
+   "kind": "main-copy",
+   "location": "lang/ko.json:362 / lang/en.json:362 — home.hero.headline",
+   "page": "home",
+   "text_en": "Quiet objects for\\neveryday life",
+   "text_ko": "조용한 일상의\\n물건들"
+  },
+  {
+   "flag": "",
+   "key": "home.hero.sub",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:363 / lang/en.json:363 — home.hero.sub",
+   "page": "home",
+   "text_en": "Materials that grow familiar with use. Forms that quietly improve with time. A small, careful collection for everyday spaces.",
+   "text_ko": "손에 익는 재질, 변화하는 결, 천천히 좋아지는 형태. 일상의 한 자리에 머무는 사물을 차곡차곡 모아 봅니다."
+  },
+  {
+   "flag": "",
+   "key": "home.hero.cta_primary",
+   "kind": "button",
+   "location": "lang/ko.json:364 / lang/en.json:364",
+   "page": "home",
+   "text_en": "Browse Shop",
+   "text_ko": "Shop 둘러보기"
+  },
+  {
+   "flag": "",
+   "key": "home.hero.cta_secondary",
+   "kind": "button",
+   "location": "lang/ko.json:365 / lang/en.json:365",
+   "page": "home",
+   "text_en": "Brand Story",
+   "text_ko": "Brand Story"
+  },
+  {
+   "flag": "",
+   "key": "home.editorial.heading",
+   "kind": "heading",
+   "location": "lang/ko.json:387 / lang/en.json:387",
+   "page": "home",
+   "text_en": "Quietly, but firmly.",
+   "text_ko": "조용히, 그러나 단단하게."
+  },
+  {
+   "flag": "",
+   "key": "home.editorial.body",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:388 / lang/en.json:388",
+   "page": "home",
+   "text_en": "Some objects in a room only get better with time. Still Form is a small, careful collection of those long-keeping things.",
+   "text_ko": "공간에 머무는 사물은 시간이 흐를수록 더 좋아지는 종류가 있습니다. Still Form은 오래 쓸수록 익어지는 물건을 차분히 모은 자리입니다."
+  },
+  {
+   "flag": "",
+   "key": "home.editorial.cta",
+   "kind": "button",
+   "location": "lang/ko.json:389 / lang/en.json:389",
+   "page": "home",
+   "text_en": "Browse Shop",
+   "text_ko": "Shop 둘러보기"
+  },
+  {
+   "flag": "",
+   "key": "home.promo.title",
+   "kind": "heading",
+   "location": "lang/ko.json:393 / lang/en.json:393",
+   "page": "home",
+   "text_en": "One piece at a time",
+   "text_ko": "오늘의 한 권"
+  },
+  {
+   "flag": "ko/en 의미 1:1 매칭 약함 — en 'one piece at a time'은 물건 단위, ko '오늘의 한 권'은 책 단위(책 한 권/표지). 의역 차이 flag",
+   "key": "home.promo.description",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:394 / lang/en.json:394",
+   "page": "home",
+   "text_en": "Like a single volume on a shelf — objects earn their place by being used, day after day.",
+   "text_ko": "책꽂이 위에 머무는 단행본 한 권처럼, 일상에 한 점 더해지는 물건을 소개합니다."
+  },
+  {
+   "flag": "",
+   "key": "home.final_cta.heading",
+   "kind": "heading",
+   "location": "lang/ko.json:398 / lang/en.json:398",
+   "page": "home",
+   "text_en": "Everyday quiet objects, in one place",
+   "text_ko": "조용한 일상의 모든 물건을 한 자리에서"
+  },
+  {
+   "flag": "",
+   "key": "home.final_cta.body",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:399 / lang/en.json:399",
+   "page": "home",
+   "text_en": "Browse the full Shop and find one piece that will stay with you for years.",
+   "text_ko": "지금 전체 Shop을 둘러보고, 오래 머무를 한 가지 물건을 골라보세요."
+  },
+  {
+   "flag": "",
+   "key": "home.final_cta.cta",
+   "kind": "button",
+   "location": "lang/ko.json:400 / lang/en.json:400",
+   "page": "home",
+   "text_en": "Browse all of Shop",
+   "text_ko": "Shop 전체 보기"
+  },
+  {
+   "flag": "",
+   "key": "brand.tagline",
+   "kind": "main-copy",
+   "location": "lang/ko.json:7 / lang/en.json:7 (superbify.brand.tagline) + StoreFooter default ko:103",
+   "page": "global-footer / global-header",
+   "text_en": "Quiet objects for everyday life",
+   "text_ko": "조용한 일상의 물건들"
+  },
+  {
+   "flag": "",
+   "key": "brand.name",
+   "kind": "main-copy",
+   "location": "lang/ko.json:6 / lang/en.json:6 + StoreHeader default (en: 'Still Form') + StoreFooter default (en: 'Still Form')",
+   "page": "global",
+   "text_en": "Still Form",
+   "text_ko": "Still Form"
+  },
+  {
+   "flag": "저작권 표기 데모 명시 — 'demo store built on Gnuboard 7' 노출",
+   "key": "copyright",
+   "kind": "other",
+   "location": "src/components/StoreFooter.tsx:104 (default) / lang super-bify footer 카피 없음 — 기본값 노출",
+   "page": "global-footer",
+   "text_en": "© 2026 Still Form — demo store built on Gnuboard 7",
+   "text_ko": "© 2026 Still Form — demo store built on Gnuboard 7"
+  },
+  {
+   "flag": "데모 안내문 (사업자 정보 미설정 시 노출)",
+   "key": "business.demo_notice",
+   "kind": "other",
+   "location": "lang/ko.json:530 / lang/en.json:530",
+   "page": "global-footer",
+   "text_en": "Demo store. Business information can be configured in the template's config/business-info.json.",
+   "text_ko": "데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다."
+  },
+  {
+   "flag": "정책 시안 문구 명시 — 운영 전 검토 필요 안내",
+   "key": "business.policy.note",
+   "kind": "policy/longform",
+   "location": "lang/ko.json:539 / lang/en.json:539",
+   "page": "policy",
+   "text_en": "This document is template placeholder wording. Before launching a real store, terms must be written to match the operator's situation and reviewed legally.",
+   "text_ko": "본 문서는 템플릿 시안 문구입니다. 실제 운영 전 사업자 상황에 맞는 약관 작성 및 법적 검토가 필요합니다."
+  },
+  {
+   "flag": "",
+   "key": "nav.shop",
+   "kind": "label",
+   "location": "lang/ko.json:354 / lang/en.json:354",
+   "page": "global-header",
+   "text_en": "Shop",
+   "text_ko": "Shop"
+  },
+  {
+   "flag": "",
+   "key": "nav.story",
+   "kind": "label",
+   "location": "lang/ko.json:355 / lang/en.json:355",
+   "page": "global-header",
+   "text_en": "Story",
+   "text_ko": "Story"
+  },
+  {
+   "flag": "",
+   "key": "nav.notice",
+   "kind": "label",
+   "location": "lang/ko.json:356 / lang/en.json:356",
+   "page": "global-header",
+   "text_en": "Notice",
+   "text_ko": "Notice"
+  },
+  {
+   "flag": "",
+   "key": "nav.cart",
+   "kind": "label",
+   "location": "lang/ko.json:357 / lang/en.json:357",
+   "page": "global-header",
+   "text_en": "Cart",
+   "text_ko": "Cart"
+  },
+  {
+   "flag": "",
+   "key": "auth.login.label",
+   "kind": "button",
+   "location": "StoreHeader.tsx:160 (default) / lang.superbify.auth.login (ko.json:119 / en.json:119)",
+   "page": "global-header",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "auth.signup.label",
+   "kind": "button",
+   "location": "StoreHeader.tsx:161 (default 'Sign up') / lang.superbify.auth.signup (ko.json:120 / en.json:120)",
+   "page": "global-header",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "auth.logout.label",
+   "kind": "button",
+   "location": "StoreHeader.tsx:163 (default 'Logout') / lang.superbify.auth.logout (ko.json:121 / en.json:121)",
+   "page": "global-header",
+   "text_en": "Log out",
+   "text_ko": "로그아웃"
+  },
+  {
+   "flag": "",
+   "key": "auth.mypage.label",
+   "kind": "label",
+   "location": "StoreHeader.tsx:162 (default 'My page') / lang.superbify.mypage.title (ko.json:218 / en.json:218)",
+   "page": "global-header",
+   "text_en": "My Page",
+   "text_ko": "마이페이지"
+  },
+  {
+   "flag": "",
+   "key": "home.hero.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:361 / lang/en.json:361",
+   "page": "home",
+   "text_en": "HOME & LIFESTYLE",
+   "text_ko": "HOME & LIFESTYLE"
+  },
+  {
+   "flag": "",
+   "key": "home.featured_categories.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:368 / lang/en.json:368",
+   "page": "home",
+   "text_en": "CATEGORIES",
+   "text_ko": "CATEGORIES"
+  },
+  {
+   "flag": "",
+   "key": "home.featured_categories.heading",
+   "kind": "heading",
+   "location": "lang/ko.json:369 / lang/en.json:369",
+   "page": "home",
+   "text_en": "Categories",
+   "text_ko": "카테고리"
+  },
+  {
+   "flag": "",
+   "key": "home.featured_categories.empty_label",
+   "kind": "empty-state",
+   "location": "lang/ko.json:370 / lang/en.json:370",
+   "page": "home",
+   "text_en": "No categories to display.",
+   "text_ko": "표시할 카테고리가 없습니다."
+  },
+  {
+   "flag": "",
+   "key": "home.new_arrivals.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:373 / lang/en.json:373",
+   "page": "home",
+   "text_en": "NEW",
+   "text_ko": "NEW"
+  },
+  {
+   "flag": "",
+   "key": "home.new_arrivals.heading",
+   "kind": "heading",
+   "location": "lang/ko.json:374 / lang/en.json:374",
+   "page": "home",
+   "text_en": "New arrivals",
+   "text_ko": "새로 들어온 것들"
+  },
+  {
+   "flag": "",
+   "key": "home.popular.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:377 / lang/en.json:377",
+   "page": "home",
+   "text_en": "POPULAR",
+   "text_ko": "POPULAR"
+  },
+  {
+   "flag": "",
+   "key": "home.popular.heading",
+   "kind": "heading",
+   "location": "lang/ko.json:378 / lang/en.json:378",
+   "page": "home",
+   "text_en": "Best Sellers",
+   "text_ko": "인기 상품"
+  },
+  {
+   "flag": "",
+   "key": "home.story.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:381 / lang/en.json:381",
+   "page": "home",
+   "text_en": "BRAND STORY",
+   "text_ko": "BRAND STORY"
+  },
+  {
+   "flag": "",
+   "key": "home.editorial.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:386 / lang/en.json:386",
+   "page": "home",
+   "text_en": "EDITORIAL",
+   "text_ko": "EDITORIAL"
+  },
+  {
+   "flag": "",
+   "key": "home.promo.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:392 / lang/en.json:392",
+   "page": "home",
+   "text_en": "LIFESTYLE",
+   "text_ko": "LIFESTYLE"
+  },
+  {
+   "flag": "",
+   "key": "home.final_cta.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:397 / lang/en.json:397",
+   "page": "home",
+   "text_en": "EXPLORE",
+   "text_ko": "EXPLORE"
+  },
+  {
+   "flag": "",
+   "key": "story.title",
+   "kind": "heading",
+   "location": "lang/ko.json:456 / lang/en.json:456",
+   "page": "story",
+   "text_en": "Brand Story",
+   "text_ko": "Brand Story"
+  },
+  {
+   "flag": "",
+   "key": "story.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:457 / lang/en.json:457",
+   "page": "story",
+   "text_en": "STORY",
+   "text_ko": "STORY"
+  },
+  {
+   "flag": "",
+   "key": "story.body",
+   "kind": "brand-intro",
+   "location": "lang/ko.json:458 / lang/en.json:458",
+   "page": "story",
+   "text_en": "Still Form is a small house of objects that hold their character through years of use. Wood that softens, linen that deepens, ceramics that darken at the rim — pieces whose materials speak for themselves.",
+   "text_ko": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 손에 익는 목재, 결이 살아있는 리넨, 묵직한 도자기 — 재질이 스스로 말을 거는 물건을 골라 차곡차곡 소개합니다."
+  },
+  {
+   "flag": "",
+   "key": "notice.title",
+   "kind": "heading",
+   "location": "lang/ko.json:461 / lang/en.json:461",
+   "page": "notice",
+   "text_en": "Notice",
+   "text_ko": "Notice"
+  },
+  {
+   "flag": "",
+   "key": "notice.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:462 / lang/en.json:462",
+   "page": "notice",
+   "text_en": "NOTICE",
+   "text_ko": "NOTICE"
+  },
+  {
+   "flag": "",
+   "key": "notice.fixed_badge",
+   "kind": "label",
+   "location": "lang/ko.json:463 / lang/en.json:463 + NoticeList.tsx default '고정'",
+   "page": "notice",
+   "text_en": "Pinned",
+   "text_ko": "고정"
+  },
+  {
+   "flag": "",
+   "key": "notice.empty_title",
+   "kind": "empty-state",
+   "location": "lang/ko.json:464 / lang/en.json:464",
+   "page": "notice",
+   "text_en": "No notices yet",
+   "text_ko": "등록된 공지가 없습니다"
+  },
+  {
+   "flag": "데모 명시 문구",
+   "key": "notice.empty_message",
+   "kind": "empty-state",
+   "location": "lang/ko.json:465 / lang/en.json:465",
+   "page": "notice",
+   "text_en": "This is a demo template. Real notice data can be added from admin.",
+   "text_ko": "데모용 템플릿입니다. 실제 공지사항 데이터는 관리자에서 추가할 수 있습니다."
+  },
+  {
+   "flag": "",
+   "key": "shop.title",
+   "kind": "heading",
+   "location": "lang/ko.json:404 / lang/en.json:404",
+   "page": "shop",
+   "text_en": "Shop",
+   "text_ko": "Shop"
+  },
+  {
+   "flag": "",
+   "key": "shop.filter_label",
+   "kind": "label",
+   "location": "lang/ko.json:405 / lang/en.json:405",
+   "page": "shop",
+   "text_en": "Categories",
+   "text_ko": "카테고리"
+  },
+  {
+   "flag": "",
+   "key": "shop.empty_title",
+   "kind": "empty-state",
+   "location": "lang/ko.json:406 / lang/en.json:406",
+   "page": "shop",
+   "text_en": "No products yet",
+   "text_ko": "아직 등록된 상품이 없습니다"
+  },
+  {
+   "flag": "데모 명시 문구",
+   "key": "shop.empty_message",
+   "kind": "empty-state",
+   "location": "lang/ko.json:407 / lang/en.json:407",
+   "page": "shop",
+   "text_en": "Add products in admin and they will appear here.",
+   "text_ko": "관리자에서 상품을 등록하면 이 자리에 표시됩니다."
+  },
+  {
+   "flag": "",
+   "key": "category.count_label",
+   "kind": "label",
+   "location": "lang/ko.json:410 / lang/en.json:410",
+   "page": "category",
+   "text_en": "{{count}} items",
+   "text_ko": "{{count}}개 상품"
+  },
+  {
+   "flag": "",
+   "key": "category.empty_title",
+   "kind": "empty-state",
+   "location": "lang/ko.json:411 / lang/en.json:411",
+   "page": "category",
+   "text_en": "No products in this category",
+   "text_ko": "이 카테고리에 등록된 상품이 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "category.empty_message",
+   "kind": "empty-state",
+   "location": "lang/ko.json:412 / lang/en.json:412",
+   "page": "category",
+   "text_en": "Try another category or check back later.",
+   "text_ko": "다른 카테고리를 둘러보거나, 잠시 후 다시 확인해 주세요."
+  },
+  {
+   "flag": "CategoryNav.tsx의 '(no categories)' 하드코딩 — lang 매핑 없음",
+   "key": "category.empty_inline_fallback",
+   "kind": "empty-state",
+   "location": "src/components/CategoryNav.tsx:171 (하드코딩, en 문맥)",
+   "page": "category",
+   "text_en": "(no categories)",
+   "text_ko": "(no categories)"
+  },
+  {
+   "flag": "",
+   "key": "common.all",
+   "kind": "label",
+   "location": "lang/ko.json:513 / lang/en.json:513 + CategoryNav default 'All'",
+   "page": "global",
+   "text_en": "All",
+   "text_ko": "전체"
+  },
+  {
+   "flag": "",
+   "key": "common.view_all",
+   "kind": "label",
+   "location": "lang/ko.json:514 / lang/en.json:514",
+   "page": "global",
+   "text_en": "View all",
+   "text_ko": "전체 보기"
+  },
+  {
+   "flag": "",
+   "key": "common.cancel",
+   "kind": "button",
+   "location": "lang/ko.json:516 / lang/en.json:516",
+   "page": "global",
+   "text_en": "Cancel",
+   "text_ko": "취소"
+  },
+  {
+   "flag": "",
+   "key": "common.close",
+   "kind": "button",
+   "location": "lang/ko.json:517 / lang/en.json:517",
+   "page": "global",
+   "text_en": "Close",
+   "text_ko": "닫기"
+  },
+  {
+   "flag": "데모 식별자",
+   "key": "common.demo_marker",
+   "kind": "label",
+   "location": "lang/ko.json:515 / lang/en.json:515",
+   "page": "global",
+   "text_en": "demo",
+   "text_ko": "demo"
+  },
+  {
+   "flag": "데모 카테고리 이름 (fixtures/categories.json)",
+   "key": "fixture.category.cups",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:5-7",
+   "page": "category",
+   "text_en": "Cups",
+   "text_ko": "컵"
+  },
+  {
+   "flag": "",
+   "key": "fixture.category.lighting",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:14-17",
+   "page": "category",
+   "text_en": "Lighting",
+   "text_ko": "조명"
+  },
+  {
+   "flag": "",
+   "key": "fixture.category.trays",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:23-26",
+   "page": "category",
+   "text_en": "Trays",
+   "text_ko": "트레이"
+  },
+  {
+   "flag": "",
+   "key": "fixture.category.fabric",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:32-35",
+   "page": "category",
+   "text_en": "Fabric",
+   "text_ko": "패브릭"
+  },
+  {
+   "flag": "",
+   "key": "fixture.category.scent",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:41-44",
+   "page": "category",
+   "text_en": "Scent",
+   "text_ko": "향"
+  },
+  {
+   "flag": "",
+   "key": "fixture.category.furniture",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:50-53",
+   "page": "category",
+   "text_en": "Furniture",
+   "text_ko": "소형 가구"
+  },
+  {
+   "flag": "데모 카테고리명 ko/en 표현 차이 — '데스크 액세서리' vs 'Desk'. 일반 '데스크' 약어와 혼용",
+   "key": "fixture.category.desk",
+   "kind": "label",
+   "location": "src/components/fixtures/categories.json:59-62",
+   "page": "category",
+   "text_en": "Desk",
+   "text_ko": "데스크 액세서리"
+  },
+  {
+   "flag": "데모 상품명/카피 (fixtures/products.json)",
+   "key": "fixture.product.mug",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:7-9",
+   "page": "product",
+   "text_en": "Stoneware Mug",
+   "text_ko": "머그컵"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.mug.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:22",
+   "page": "product",
+   "text_en": "Heavyweight stoneware mug for daily coffee and tea.",
+   "text_ko": "Heavyweight stoneware mug for daily coffee and tea."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.glass_cup",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:26-28",
+   "page": "product",
+   "text_en": "Clear Glass Cup",
+   "text_ko": "글라스 컵"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.glass_cup.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:42",
+   "page": "product",
+   "text_en": "Hand-blown clear glass cup, 240ml capacity.",
+   "text_ko": "Hand-blown clear glass cup, 240ml capacity."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.lamp",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:46-48",
+   "page": "product",
+   "text_en": "Table Lamp",
+   "text_ko": "테이블 램프"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.lamp.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:62",
+   "page": "product",
+   "text_en": "Linen shade table lamp with warm 2700K LED bulb.",
+   "text_ko": "Linen shade table lamp with warm 2700K LED bulb."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.tray",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:66-68",
+   "page": "product",
+   "text_en": "Wooden Tray",
+   "text_ko": "우드 트레이"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.tray.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:82",
+   "page": "product",
+   "text_en": "Solid oak tray with rounded handles, 38 × 24 cm.",
+   "text_ko": "Solid oak tray with rounded handles, 38 × 24 cm."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.cushion",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:86-88",
+   "page": "product",
+   "text_en": "Linen Cushion Cover",
+   "text_ko": "쿠션 커버"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.cushion.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:102",
+   "page": "product",
+   "text_en": "Stonewashed linen cushion cover, 45 × 45 cm.",
+   "text_ko": "Stonewashed linen cushion cover, 45 × 45 cm."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.diffuser",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:106-108",
+   "page": "product",
+   "text_en": "Reed Diffuser",
+   "text_ko": "리드 디퓨저"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.diffuser.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:122",
+   "page": "product",
+   "text_en": "Reed diffuser with cedar and citrus, 200ml.",
+   "text_ko": "Reed diffuser with cedar and citrus, 200ml."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.pen_stand",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:126-128",
+   "page": "product",
+   "text_en": "Pen Stand",
+   "text_ko": "펜 스탠드"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.pen_stand.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:142",
+   "page": "product",
+   "text_en": "Brass pen stand with cork base, 10 cm height.",
+   "text_ko": "Brass pen stand with cork base, 10 cm height."
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.book_stand",
+   "kind": "label",
+   "location": "src/components/fixtures/products.json:146-148",
+   "page": "product",
+   "text_en": "Book Stand",
+   "text_ko": "북 스탠드"
+  },
+  {
+   "flag": "",
+   "key": "fixture.product.book_stand.short_description",
+   "kind": "other",
+   "location": "src/components/fixtures/products.json:162",
+   "page": "product",
+   "text_en": "Folding walnut book stand, adjustable angle.",
+   "text_ko": "Folding walnut book stand, adjustable angle."
+  },
+  {
+   "flag": "meta description — 데모 템플릿 설명",
+   "key": "template.description.ko",
+   "kind": "seo/meta",
+   "location": "template.json:11",
+   "page": "global-meta",
+   "text_en": "Minimal D2C demo store user template (built on sirsoft-ecommerce)",
+   "text_ko": "미니멀 D2C 데모 스토어용 사용자 템플릿 (sirsoft-ecommerce 기반)"
+  },
+  {
+   "flag": "",
+   "key": "template.name",
+   "kind": "seo/meta",
+   "location": "template.json:5-7",
+   "page": "global-meta",
+   "text_en": "SuperBify Commerce Minimal",
+   "text_ko": "SuperBify Commerce Minimal"
+  },
+  {
+   "flag": "base_layout_description",
+   "key": "routes.home.description",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:12 / lang/en.json:12",
+   "page": "home",
+   "text_en": "A small collection of objects for everyday spaces.",
+   "text_ko": "일상의 한 자리에 머무는 사물을 모은 자리."
+  },
+  {
+   "flag": "",
+   "key": "routes.home.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:11 / lang/en.json:11",
+   "page": "home",
+   "text_en": "Still Form — Quiet objects for everyday life",
+   "text_ko": "Still Form — 조용한 일상의 물건들"
+  },
+  {
+   "flag": "",
+   "key": "routes.shop.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:15 / lang/en.json:15",
+   "page": "shop",
+   "text_en": "Shop — Still Form",
+   "text_ko": "Shop — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.shop.description",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:16 / lang/en.json:16",
+   "page": "shop",
+   "text_en": "All products",
+   "text_ko": "전체 상품 목록"
+  },
+  {
+   "flag": "",
+   "key": "routes.category.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:19 / lang/en.json:19",
+   "page": "category",
+   "text_en": "Category — Still Form",
+   "text_ko": "Category — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.category.description",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:20 / lang/en.json:20",
+   "page": "category",
+   "text_en": "Products in this category",
+   "text_ko": "카테고리별 상품"
+  },
+  {
+   "flag": "",
+   "key": "routes.product.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:23 / lang/en.json:23",
+   "page": "product",
+   "text_en": "Product — Still Form",
+   "text_ko": "Product — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.notice.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:27 / lang/en.json:27",
+   "page": "notice",
+   "text_en": "Notice — Still Form",
+   "text_ko": "Notice — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.story.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:31 / lang/en.json:31",
+   "page": "story",
+   "text_en": "Story — Still Form",
+   "text_ko": "Story — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.cart.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:35 / lang/en.json:35",
+   "page": "cart",
+   "text_en": "Cart — Still Form",
+   "text_ko": "Cart — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.checkout.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:39 / lang/en.json:39",
+   "page": "checkout",
+   "text_en": "Checkout — Still Form",
+   "text_ko": "Checkout — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "routes.order_complete.title",
+   "kind": "seo/meta",
+   "location": "lang/ko.json:43 / lang/en.json:43",
+   "page": "order-complete",
+   "text_en": "Order Complete — Still Form",
+   "text_ko": "주문 완료 — Still Form"
+  },
+  {
+   "flag": "",
+   "key": "policy.terms.title",
+   "kind": "policy/longform",
+   "location": "lang/ko.json:521 / lang/en.json:521",
+   "page": "policy",
+   "text_en": "Terms of Service",
+   "text_ko": "이용약관"
+  },
+  {
+   "flag": "",
+   "key": "policy.privacy.title",
+   "kind": "policy/longform",
+   "location": "lang/ko.json:525 / lang/en.json:525",
+   "page": "policy",
+   "text_en": "Privacy Policy",
+   "text_ko": "개인정보처리방침"
+  },
+  {
+   "flag": "",
+   "key": "policy.no_content",
+   "kind": "policy/longform",
+   "location": "lang/ko.json:527 / lang/en.json:527",
+   "page": "policy",
+   "text_en": "No content available.",
+   "text_ko": "내용이 없습니다."
+  },
+  {
+   "flag": "푸터 정책 링크 라벨 (StoreFooter.tsx default fallback 동일)",
+   "key": "business.links.terms",
+   "kind": "label",
+   "location": "lang/ko.json:532 / lang/en.json:532",
+   "page": "global-footer",
+   "text_en": "Terms of Service",
+   "text_ko": "이용약관"
+  },
+  {
+   "flag": "",
+   "key": "business.links.privacy",
+   "kind": "label",
+   "location": "lang/ko.json:533 / lang/en.json:533",
+   "page": "global-footer",
+   "text_en": "Privacy Policy",
+   "text_ko": "개인정보처리방침"
+  },
+  {
+   "flag": "",
+   "key": "business.links.shipping",
+   "kind": "label",
+   "location": "lang/ko.json:534 / lang/en.json:534",
+   "page": "global-footer",
+   "text_en": "Shipping, Returns & Exchanges",
+   "text_ko": "배송·교환·반품 안내"
+  },
+  {
+   "flag": "",
+   "key": "business.links.verification",
+   "kind": "label",
+   "location": "lang/ko.json:535 / lang/en.json:535",
+   "page": "global-footer",
+   "text_en": "Verify business info",
+   "text_ko": "사업자정보확인"
+  },
+  {
+   "flag": "",
+   "key": "cart.title",
+   "kind": "heading",
+   "location": "lang/ko.json:476 / lang/en.json:476",
+   "page": "cart",
+   "text_en": "Cart",
+   "text_ko": "Cart"
+  },
+  {
+   "flag": "",
+   "key": "cart.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:477 / lang/en.json:477",
+   "page": "cart",
+   "text_en": "SHOPPING BAG",
+   "text_ko": "SHOPPING BAG"
+  },
+  {
+   "flag": "",
+   "key": "cart.empty_title",
+   "kind": "empty-state",
+   "location": "lang/ko.json:478 / lang/en.json:478",
+   "page": "cart",
+   "text_en": "Your cart is empty",
+   "text_ko": "장바구니가 비어 있습니다"
+  },
+  {
+   "flag": "",
+   "key": "cart.empty_message",
+   "kind": "empty-state",
+   "location": "lang/ko.json:479 / lang/en.json:479",
+   "page": "cart",
+   "text_en": "Browse the shop and add something you like.",
+   "text_ko": "Shop 페이지에서 상품을 담아보세요."
+  },
+  {
+   "flag": "",
+   "key": "cart.cta_shop",
+   "kind": "button",
+   "location": "lang/ko.json:480 / lang/en.json:480",
+   "page": "cart",
+   "text_en": "Go to Shop",
+   "text_ko": "Shop으로 이동"
+  },
+  {
+   "flag": "",
+   "key": "cart.add_to_cart",
+   "kind": "button",
+   "location": "lang/ko.json:481 / lang/en.json:481",
+   "page": "cart",
+   "text_en": "Add to cart",
+   "text_ko": "장바구니 담기"
+  },
+  {
+   "flag": "",
+   "key": "cart.buy_now",
+   "kind": "button",
+   "location": "lang/ko.json:482 / lang/en.json:482",
+   "page": "cart",
+   "text_en": "Buy now",
+   "text_ko": "바로구매"
+  },
+  {
+   "flag": "",
+   "key": "cart.added_toast",
+   "kind": "toast/error",
+   "location": "lang/ko.json:486 / lang/en.json:486",
+   "page": "cart",
+   "text_en": "Added to cart.",
+   "text_ko": "장바구니에 담았습니다."
+  },
+  {
+   "flag": "",
+   "key": "cart.cross_sell.eyebrow",
+   "kind": "label",
+   "location": "lang/ko.json:508 / lang/en.json:508",
+   "page": "cart",
+   "text_en": "YOU MAY ALSO LIKE",
+   "text_ko": "YOU MAY ALSO LIKE"
+  },
+  {
+   "flag": "",
+   "key": "cart.cross_sell.title",
+   "kind": "heading",
+   "location": "lang/ko.json:509 / lang/en.json:509",
+   "page": "cart",
+   "text_en": "You may also like",
+   "text_ko": "함께 보면 좋은 상품"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.title",
+   "kind": "heading",
+   "location": "lang/ko.json:129 / lang/en.json:129",
+   "page": "login",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.subtitle",
+   "kind": "label",
+   "location": "lang/ko.json:130 / lang/en.json:130",
+   "page": "login",
+   "text_en": "Sign in to your account",
+   "text_ko": "계정에 로그인하세요"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.email_placeholder",
+   "kind": "placeholder",
+   "location": "lang/ko.json:132 / lang/en.json:132",
+   "page": "login",
+   "text_en": "Enter your email address",
+   "text_ko": "이메일 주소를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.password_placeholder",
+   "kind": "placeholder",
+   "location": "lang/ko.json:134 / lang/en.json:134",
+   "page": "login",
+   "text_en": "Enter your password",
+   "text_ko": "비밀번호를 입력하세요"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.remember",
+   "kind": "label",
+   "location": "lang/ko.json:135 / lang/en.json:135",
+   "page": "login",
+   "text_en": "Keep me signed in",
+   "text_ko": "로그인 상태 유지"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.submit",
+   "kind": "button",
+   "location": "lang/ko.json:136 / lang/en.json:136",
+   "page": "login",
+   "text_en": "Login",
+   "text_ko": "로그인"
+  },
+  {
+   "flag": "",
+   "key": "auth.login_form.no_account",
+   "kind": "label",
+   "location": "lang/ko.json:138 / lang/en.json:138",
+   "page": "login",
+   "text_en": "Don't have an account?",
+   "text_ko": "계정이 없으신가요?"
+  },
+  {
+   "flag": "",
+   "key": "auth.register.title",
+   "kind": "heading",
+   "location": "lang/ko.json:147 / lang/en.json:147",
+   "page": "register",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "",
+   "key": "auth.register.subtitle",
+   "kind": "label",
+   "location": "lang/ko.json:148 / lang/en.json:148",
+   "page": "register",
+   "text_en": "Create a new account",
+   "text_ko": "새 계정을 만드세요"
+  },
+  {
+   "flag": "",
+   "key": "auth.register.password_hint",
+   "kind": "placeholder",
+   "location": "lang/ko.json:168 / lang/en.json:168",
+   "page": "register",
+   "text_en": "Password must be at least 8 characters.",
+   "text_ko": "비밀번호는 8자 이상이어야 합니다."
+  },
+  {
+   "flag": "",
+   "key": "auth.register.submit",
+   "kind": "button",
+   "location": "lang/ko.json:173 / lang/en.json:173",
+   "page": "register",
+   "text_en": "Sign up",
+   "text_ko": "회원가입"
+  },
+  {
+   "flag": "errors.unauthorized_title 등",
+   "key": "errors.unauthorized_title",
+   "kind": "toast/error",
+   "location": "lang/ko.json:113 / lang/en.json:113",
+   "page": "global",
+   "text_en": "Sign-in required",
+   "text_ko": "로그인이 필요합니다"
+  },
+  {
+   "flag": "",
+   "key": "errors.unauthorized_message",
+   "kind": "toast/error",
+   "location": "lang/ko.json:114 / lang/en.json:114",
+   "page": "global",
+   "text_en": "This page is for members. Please sign in and try again.",
+   "text_ko": "회원 전용 페이지입니다. 로그인 후 다시 이용해 주세요."
+  },
+  {
+   "flag": "",
+   "key": "errors.not_found_title",
+   "kind": "toast/error",
+   "location": "lang/ko.json:107 / lang/en.json:107",
+   "page": "global",
+   "text_en": "Page not found",
+   "text_ko": "페이지를 찾을 수 없습니다"
+  },
+  {
+   "flag": "",
+   "key": "errors.server_error_title",
+   "kind": "toast/error",
+   "location": "lang/ko.json:111 / lang/en.json:111",
+   "page": "global",
+   "text_en": "Something went wrong",
+   "text_ko": "문제가 발생했습니다"
+  },
+  {
+   "flag": "NoticeList의 'No notices yet'은 en.json NoticeList default('No notices yet') 와 lang.notice.empty_title('No notices yet') 중복이지만 동일 — OK",
+   "key": "notice.empty_title_default",
+   "kind": "empty-state",
+   "location": "src/components/NoticeList.tsx:62 (default 'No notices yet')",
+   "page": "notice",
+   "text_en": "No notices yet",
+   "text_ko": "No notices yet"
+  },
+  {
+   "flag": "sr-only 라벨, aria 문자열 (데이터 속성 아님, 시각 노출되는 alt/sr-only 텍스트만) — brand wordmark PNG alt는 부모 brandName 사용",
+   "key": "brand.logo.aria_default",
+   "kind": "other",
+   "location": "src/components/StoreHeader.tsx:198, 209 (aria-label `${brandName} Home`, alt={brandName})",
+   "page": "global-header",
+   "text_en": "{brandName} Home",
+   "text_ko": "{brandName} Home"
+  },
+  {
+   "flag": "sr-only brand/tagline 텍스트 노출 (시각 X, a11y 트리)",
+   "key": "brand.sr_only_brand",
+   "kind": "other",
+   "location": "src/components/StoreHeader.tsx:210-211 (SrOnly brandName/tagline)",
+   "page": "global-header",
+   "text_en": "—",
+   "text_ko": "{brandName} / {tagline} — sr-only (a11y)"
+  }
+ ]
+}

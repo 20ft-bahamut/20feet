@@ -118,7 +118,9 @@ export function EditorialBanner({
                                 lineHeight: 1.75,
                                 color: 'var(--scm-text-body, #4A4643)',
                                 margin: 0,
-                                maxWidth: '52ch',
+                                maxWidth: '36em',
+                                whiteSpace: 'pre-line',
+                                wordBreak: 'keep-all',
                             }}
                         >
                             {body}
@@ -209,6 +211,7 @@ export function EditorialBanner({
                             color: 'var(--scm-text-primary, #26221E)',
                             maxWidth: '20ch',
                             whiteSpace: 'pre-line',
+                            wordBreak: 'keep-all',
                         }}
                     >
                         {heading}
@@ -221,7 +224,9 @@ export function EditorialBanner({
                                 lineHeight: 1.75,
                                 color: 'var(--scm-text-body, #4A4643)',
                                 margin: 0,
-                                maxWidth: '52ch',
+                                maxWidth: '36em',
+                                whiteSpace: 'pre-line',
+                                wordBreak: 'keep-all',
                             }}
                         >
                             {body}

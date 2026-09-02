@@ -1,0 +1,1 @@
+[{"id": "DEMO-001", "key": "business.demo_notice", "page": "global-footer", "action": "DEMO_ONLY", "problem": "데모 안내에 developer 경로(config/business-info.json) 노출 — rule 28 분리. 데모 라인은 유지", "ko": "데모 스토어입니다.", "en": "Demo store."}]

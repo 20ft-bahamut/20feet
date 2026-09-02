@@ -1,0 +1,584 @@
+{
+ "area": "policy",
+ "notes": "입력 inventory 검토 후 수정 사항: (1) errors 영역 5건의 flag가 모두 잘못된 판단 — 모든 한국어 메시지는 일관되게 존댓말 종결(~습니다/~입니다/~세요) 사용. \"평어/혼용\" 플래그 전부 제거. (2) \"데모 스토어\" 용어 단일 출현 flag 2건 잘못 — privacy sections[1]과 demo_notice에도 동일 표기되어 의도적 구분이므로 제거. (3) 누락 항목 추가: 정책 문단 표제 15개 + 모달에서 사용되는 published_at/no_content/policy.terms.title/policy.privacy.title 4개. (4) shippingReturns sections[1]에서 \"수령 후 7일\"과 \"수령일 이전 7일\"이 같은 \"7일\"을 다른 기산점으로 사용 — 시간 기준 모호함 신규 flag. LOCKED COPY/금지 표현 해당 없음 (Still Form 브랜드, 20ft LOCKED와 무관).",
+ "entries": [
+  {
+   "key": "superbify.errors.not_found_description",
+   "kind": "empty-state",
+   "location": "layouts/errors/404.json + lang/ko.json:108, lang/en.json:108",
+   "page": "errors-404",
+   "text_en": "The page you requested does not exist or has been moved.",
+   "text_ko": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다."
+  },
+  {
+   "key": "superbify.errors.not_found_title",
+   "kind": "heading",
+   "location": "layouts/errors/404.json + lang/ko.json:107, lang/en.json:107",
+   "page": "errors-404",
+   "text_en": "Page not found",
+   "text_ko": "페이지를 찾을 수 없습니다"
+  },
+  {
+   "key": "superbify.nav.shop",
+   "kind": "button",
+   "location": "layouts/errors/404.json (EmptyState ctaLabel)",
+   "page": "errors-404",
+   "text_en": "Shop",
+   "text_ko": "Shop"
+  },
+  {
+   "key": "superbify.errors.forbidden_description",
+   "kind": "empty-state",
+   "location": "layouts/errors/403.json + lang/ko.json:110, lang/en.json:110",
+   "page": "errors-403",
+   "text_en": "You don't have permission to access this page.",
+   "text_ko": "이 페이지에 접근할 수 있는 권한이 없습니다."
+  },
+  {
+   "key": "superbify.errors.forbidden_title",
+   "kind": "heading",
+   "location": "layouts/errors/403.json + lang/ko.json:109, lang/en.json:109",
+   "page": "errors-403",
+   "text_en": "Access denied",
+   "text_ko": "접근 권한이 없습니다"
+  },
+  {
+   "key": "superbify.errors.server_error_description",
+   "kind": "empty-state",
+   "location": "layouts/errors/500.json + lang/ko.json:112, lang/en.json:112",
+   "page": "errors-500",
+   "text_en": "Please try again in a moment.",
+   "text_ko": "잠시 후 다시 시도해 주세요."
+  },
+  {
+   "key": "superbify.errors.server_error_title",
+   "kind": "heading",
+   "location": "layouts/errors/500.json + lang/ko.json:111, lang/en.json:111",
+   "page": "errors-500",
+   "text_en": "Something went wrong",
+   "text_ko": "문제가 발생했습니다"
+  },
+  {
+   "key": "superbify.errors.unauthorized_message",
+   "kind": "empty-state",
+   "location": "layouts/errors/401.json + lang/ko.json:114, lang/en.json:114",
+   "page": "errors-401",
+   "text_en": "This page is for members. Please sign in and try again.",
+   "text_ko": "회원 전용 페이지입니다. 로그인 후 다시 이용해 주세요."
+  },
+  {
+   "key": "superbify.errors.unauthorized_title",
+   "kind": "heading",
+   "location": "layouts/errors/401.json + lang/ko.json:113, lang/en.json:113",
+   "page": "errors-401",
+   "text_en": "Sign-in required",
+   "text_ko": "로그인이 필요합니다"
+  },
+  {
+   "key": "superbify.errors.unauthorized_cta_login",
+   "kind": "button",
+   "location": "layouts/errors/401.json (error_401_login_link text) + lang/ko.json:115, lang/en.json:115",
+   "page": "errors-401",
+   "text_en": "Go to sign in",
+   "text_ko": "로그인하러 가기"
+  },
+  {
+   "key": "superbify.errors.unauthorized_cta_home",
+   "kind": "button",
+   "location": "layouts/errors/401.json (error_401_home_link text) + lang/ko.json:116, lang/en.json:116",
+   "page": "errors-401",
+   "text_en": "Go to home",
+   "text_ko": "홈으로 가기"
+  },
+  {
+   "key": "superbify.routes.story.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/story.json meta.title + lang/ko.json:31, lang/en.json:31",
+   "page": "shop-story",
+   "text_en": "Story — Still Form",
+   "text_ko": "Story — Still Form"
+  },
+  {
+   "key": "superbify.routes.story.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/story.json meta.description + lang/ko.json:32, lang/en.json:32",
+   "page": "shop-story",
+   "text_en": "About the brand",
+   "text_ko": "브랜드 소개"
+  },
+  {
+   "key": "superbify.story.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/story.json (BrandStorySection props.eyebrow) + lang/ko.json:457, lang/en.json:457",
+   "page": "shop-story",
+   "text_en": "STORY",
+   "text_ko": "STORY"
+  },
+  {
+   "key": "superbify.story.title",
+   "kind": "heading",
+   "location": "layouts/shop/story.json (BrandStorySection props.heading) + lang/ko.json:456, lang/en.json:456",
+   "page": "shop-story",
+   "text_en": "Brand Story",
+   "text_ko": "Brand Story"
+  },
+  {
+   "key": "superbify.story.body",
+   "kind": "brand-intro",
+   "location": "layouts/shop/story.json (BrandStorySection props.body) + lang/ko.json:458, lang/en.json:458",
+   "page": "shop-story",
+   "text_en": "Still Form is a small house of objects that hold their character through years of use. Wood that softens, linen that deepens, ceramics that darken at the rim — pieces whose materials speak for themselves.",
+   "text_ko": "Still Form은 시간이 지나도 변하지 않는 사물을 모은 자리입니다. 손에 익는 목재, 결이 살아있는 리넨, 묵직한 도자기 — 재질이 스스로 말을 거는 물건을 골라 차곡차곡 소개합니다."
+  },
+  {
+   "key": "superbify.routes.terms.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/terms.json meta.title + lang/ko.json:55, lang/en.json:55",
+   "page": "shop-terms",
+   "text_en": "Terms of Service — Still Form",
+   "text_ko": "이용약관 — Still Form"
+  },
+  {
+   "key": "superbify.routes.terms.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/terms.json meta.description + lang/ko.json:56, lang/en.json:56",
+   "page": "shop-terms",
+   "text_en": "Store terms of service",
+   "text_ko": "스토어 이용약관 안내"
+  },
+  {
+   "key": "superbify.routes.privacy.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/privacy.json meta.title + lang/ko.json:59, lang/en.json:59",
+   "page": "shop-privacy",
+   "text_en": "Privacy Policy — Still Form",
+   "text_ko": "개인정보처리방침 — Still Form"
+  },
+  {
+   "key": "superbify.routes.privacy.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/privacy.json meta.description + lang/ko.json:60, lang/en.json:60",
+   "page": "shop-privacy",
+   "text_en": "Privacy policy information",
+   "text_ko": "개인정보처리방침 안내"
+  },
+  {
+   "key": "superbify.routes.shipping_policy.title",
+   "kind": "seo/meta",
+   "location": "layouts/shop/shipping-policy.json meta.title + lang/ko.json:63, lang/en.json:63",
+   "page": "shop-shipping-policy",
+   "text_en": "Shipping, Returns & Exchanges — Still Form",
+   "text_ko": "배송·교환·반품 안내 — Still Form"
+  },
+  {
+   "key": "superbify.routes.shipping_policy.description",
+   "kind": "seo/meta",
+   "location": "layouts/shop/shipping-policy.json meta.description + lang/ko.json:64, lang/en.json:64",
+   "page": "shop-shipping-policy",
+   "text_en": "Shipping, exchange, and return information",
+   "text_ko": "배송, 교환, 반품 안내"
+  },
+  {
+   "key": "superbify.business.policy.eyebrow",
+   "kind": "label",
+   "location": "layouts/shop/{terms,privacy,shipping-policy}.json (PolicyPage props.eyebrow) + lang/ko.json:538, lang/en.json:538",
+   "page": "policy-chrome",
+   "text_en": "POLICY",
+   "text_ko": "POLICY"
+  },
+  {
+   "key": "superbify.business.policy.note",
+   "kind": "policy/longform",
+   "location": "layouts/shop/{terms,privacy,shipping-policy}.json (PolicyPage props.note) + lang/ko.json:539, lang/en.json:539",
+   "page": "policy-chrome",
+   "text_en": "This document is template placeholder wording. Before launching a real store, terms must be written to match the operator's situation and reviewed legally.",
+   "text_ko": "본 문서는 템플릿 시안 문구입니다. 실제 운영 전 사업자 상황에 맞는 약관 작성 및 법적 검토가 필요합니다."
+  },
+  {
+   "key": "config.policies.terms.title",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.title)",
+   "page": "shop-terms",
+   "text_en": "Terms of Service",
+   "text_ko": "이용약관"
+  },
+  {
+   "key": "config.policies.terms.sections[0]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[0])",
+   "page": "shop-terms",
+   "text_en": "These terms govern the conditions and procedures for using the services and products of the Still Form online store (the 'Store'), and the rights, duties, and responsibilities of the Store and its users.",
+   "text_ko": "이 약관은 스틸폼(이하 '스토어')이 운영하는 온라인 쇼핑몰에서 제공하는 서비스와 상품의 이용 조건 및 절차, 스토어와 이용자의 권리·의무, 책임 사항 등을 규정함을 목적으로 합니다."
+  },
+  {
+   "key": "config.policies.terms.sections[1]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[1])",
+   "page": "shop-terms",
+   "text_en": "The Store provides online shopping services including product display, purchase, and order confirmation. Services operate year-round and may be suspended temporarily for system maintenance.",
+   "text_ko": "스토어는 상품 전시, 구매, 주문 확인 등 온라인 쇼핑몰 서비스를 제공합니다. 서비스는 연중무휴 운영을 원칙으로 하며, 시스템 점검 등 불가피한 사유로 일시 중단될 수 있습니다."
+  },
+  {
+   "key": "config.policies.terms.sections[2]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[2])",
+   "page": "shop-terms",
+   "text_en": "Product prices, options, and stock levels are based on the time of order. Cart items are held as a temporary order for a limited period and are confirmed once payment is completed.",
+   "text_ko": "상품의 가격, 옵션, 재고 등은 주문 시점을 기준으로 합니다. 장바구니에 담긴 상품은 일정 기간 임시 주문으로 보관되며, 결제가 완료되면 주문이 확정됩니다."
+  },
+  {
+   "key": "config.policies.terms.sections[2].paragraphs[1]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[2].paragraphs[1])",
+   "page": "shop-terms",
+   "text_en": "Some product images and descriptions in this demo store are template sample assets.",
+   "text_ko": "데모 스토어에 게시된 상품 이미지와 설명 중 일부는 템플릿 출하용 예시 자산입니다."
+  },
+  {
+   "key": "config.policies.terms.sections[3]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[3])",
+   "page": "shop-terms",
+   "text_en": "The Store shall not act in violation of applicable law, these terms, or public order and morals, and shall strive to provide products and services continuously and reliably.",
+   "text_ko": "스토어는 관련 법령과 이 약관이 금지하거나 공서양속에 반하는 행위를 하지 않고, 지속적이고 안정적으로 상품과 서비스를 제공하기 위해 노력합니다."
+  },
+  {
+   "key": "config.policies.terms.sections[4]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[4])",
+   "page": "shop-terms",
+   "text_en": "Rights over and responsibility for postings, photos, and reviews rest with their authors. The Store may moderate postings to the extent necessary to operate the service.",
+   "text_ko": "스토어에 게시된 공지, 사진, 리뷰 등 콘텐츠에 대한 권리와 관리 책임은 게시 주체에게 있으며, 스토어는 서비스 운영을 위해 필요한 범위에서 게시물을 관리할 수 있습니다."
+  },
+  {
+   "key": "config.policies.terms.sections[5]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.terms.sections[5])",
+   "page": "shop-terms",
+   "text_en": "These terms are template scaffolding. Replace all placeholder text and obtain legal review before launching a real store.",
+   "text_ko": "본 약관은 템플릿 시안 문구입니다. 운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다."
+  },
+  {
+   "key": "config.policies.privacy.title",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.title)",
+   "page": "shop-privacy",
+   "text_en": "Privacy Policy",
+   "text_ko": "개인정보처리방침"
+  },
+  {
+   "key": "config.policies.privacy.sections[0]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[0])",
+   "page": "shop-privacy",
+   "text_en": "The Store processes only the minimum personal information necessary to provide services such as product ordering, delivery, handling customer inquiries, and postings.",
+   "text_ko": "스토어는 상품 주문 및 배송, 고객 문의 응대, 게시물 이용 등 서비스 제공에 필요한 최소한의 개인정보만을 처리합니다."
+  },
+  {
+   "key": "config.policies.privacy.sections[1]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[1])",
+   "page": "shop-privacy",
+   "text_en": "During ordering the store may collect name, contact details, delivery address, and information needed for payment. Nickname and email may be processed for postings. This demo store does not perform real payments or deliveries.",
+   "text_ko": "주문 과정에서 이름, 연락처, 배송지 주소, 결제에 필요한 정보가 수집될 수 있습니다. 게시물 작성 시 닉네임과 이메일이 처리될 수 있습니다. 이 데모 스토어는 실제 결제나 배송이 발생하지 않습니다."
+  },
+  {
+   "key": "config.policies.privacy.sections[2]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[2])",
+   "page": "shop-privacy",
+   "text_en": "Personal information is destroyed without delay once the purpose of collection and use is fulfilled. Where retention is required by applicable law, it is kept securely for the statutory period.",
+   "text_ko": "개인정보는 수집·이용 목적이 달성되면 해당 정보를 지체 없이 파기합니다. 관련 법령에 따라 보존이 필요한 경우 정해진 기간 동안 안전하게 보관합니다."
+  },
+  {
+   "key": "config.policies.privacy.sections[3]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[3])",
+   "page": "shop-privacy",
+   "text_en": "You may request to view, correct, delete, or suspend the processing of your personal information. Contact customer service for the process.",
+   "text_ko": "이용자는 자신의 개인정보에 대해 열람, 정정·삭제, 처리정지를 요청할 수 있으며, 고객센터를 통해 절차 안내를 받을 수 있습니다."
+  },
+  {
+   "key": "config.policies.privacy.sections[4]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[4])",
+   "page": "shop-privacy",
+   "text_en": "For questions about personal information, contact customer service at 070-123-1234.",
+   "text_ko": "개인정보 처리 관련 문의는 고객센터(070-123-1234)로 연락할 수 있습니다."
+  },
+  {
+   "key": "config.policies.privacy.sections[5]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.privacy.sections[5])",
+   "page": "shop-privacy",
+   "text_en": "This privacy policy is template scaffolding. Replace all placeholder text and obtain legal review before launching a real store.",
+   "text_ko": "본 개인정보처리방침은 템플릿 시안 문구입니다. 운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다."
+  },
+  {
+   "key": "config.policies.shippingReturns.title",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.shippingReturns.title)",
+   "page": "shop-shipping-policy",
+   "text_en": "Shipping, Returns & Exchanges",
+   "text_ko": "배송·교환·반품 안내"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[0]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.shippingReturns.sections[0])",
+   "page": "shop-shipping-policy",
+   "text_en": "Orders ship within 2–3 business days after payment confirmation and typically arrive 1–2 days after dispatch. Shipping fees follow the amount shown at checkout. Additional fees may apply to remote areas.",
+   "text_ko": "결제 완료 후 상품을 확인하고 평일 기준 2~3일 내에 출고하며, 출고 후 1~2일 내에 수령하실 수 있습니다. 배송비는 주문 화면에 표시되는 금액을 따릅니다. 도서산간 지역은 추가 배송비가 발생할 수 있습니다."
+  },
+  {
+   "flag": "시간 기산점 모호 — 동일 문장에서 \"수령 후 7일 이내\"와 \"수령일 이전 7일 이내\"가 같은 \"7일\"을 서로 다른 기준일로 사용",
+   "key": "config.policies.shippingReturns.sections[1]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.shippingReturns.sections[1])",
+   "page": "shop-shipping-policy",
+   "text_en": "Exchanges and returns may be requested within 7 days of receipt for unused products in original condition. A purchase may be cancelled within 7 days of receipt.",
+   "text_ko": "상품 수령 후 7일 이내에 미사용 상품에 한하여 교환·반품을 요청할 수 있습니다. 상품 수령일 이전에 구매의사를 철회하는 경우에도 7일 이내에 취소를 요청할 수 있습니다."
+  },
+  {
+   "flag": "내용-문맥 불일치 — 배송·교환·반품 정책의 마감 문단인데 \"이용약관/개인정보처리방침 작성 및 법적 검토\"만 언급, 배송 관련 내용은 없음",
+   "key": "config.policies.shippingReturns.sections[3]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.shippingReturns.sections[3])",
+   "page": "shop-shipping-policy",
+   "text_en": "Replace all placeholder text before launching a real store.",
+   "text_ko": "운영 전 실제 이용약관/개인정보처리방침 작성 및 법적 검토가 필요합니다."
+  },
+  {
+   "key": "superbify.business.links.terms",
+   "kind": "label",
+   "location": "lang/ko.json:532, lang/en.json:532 (footer link label)",
+   "page": "global-footer",
+   "text_en": "Terms of Service",
+   "text_ko": "이용약관"
+  },
+  {
+   "key": "superbify.business.links.privacy",
+   "kind": "label",
+   "location": "lang/ko.json:533, lang/en.json:533 (footer link label)",
+   "page": "global-footer",
+   "text_en": "Privacy Policy",
+   "text_ko": "개인정보처리방침"
+  },
+  {
+   "key": "superbify.business.links.shipping",
+   "kind": "label",
+   "location": "lang/ko.json:534, lang/en.json:534 (footer link label)",
+   "page": "global-footer",
+   "text_en": "Shipping, Returns & Exchanges",
+   "text_ko": "배송·교환·반품 안내"
+  },
+  {
+   "key": "superbify.business.links.verification",
+   "kind": "label",
+   "location": "lang/ko.json:535, lang/en.json:535 (footer link label)",
+   "page": "global-footer",
+   "text_en": "Verify business info",
+   "text_ko": "사업자정보확인"
+  },
+  {
+   "key": "superbify.business.demo_notice",
+   "kind": "main-copy",
+   "location": "lang/ko.json:530, lang/en.json:530 (footer demo banner)",
+   "page": "global-footer",
+   "text_en": "Demo store. Business information can be configured in the template's config/business-info.json.",
+   "text_ko": "데모 스토어입니다. 사업자 정보는 템플릿 config/business-info.json에서 설정할 수 있습니다."
+  },
+  {
+   "key": "config.business-info.json updated (terms)",
+   "kind": "label",
+   "location": "config/business-info.json (policies.terms.updated)",
+   "page": "shop-terms",
+   "text_en": "2026-09-01",
+   "text_ko": "2026-09-01"
+  },
+  {
+   "key": "config.business-info.json updated (privacy)",
+   "kind": "label",
+   "location": "config/business-info.json (policies.privacy.updated)",
+   "page": "shop-privacy",
+   "text_en": "2026-09-01",
+   "text_ko": "2026-09-01"
+  },
+  {
+   "key": "config.business-info.json updated (shippingReturns)",
+   "kind": "label",
+   "location": "config/business-info.json (policies.shippingReturns.updated)",
+   "page": "shop-shipping-policy",
+   "text_en": "2026-09-01",
+   "text_ko": "2026-09-01"
+  },
+  {
+   "key": "config.policies.terms.sections[0].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[0].heading)",
+   "page": "shop-terms",
+   "text_en": "Article 1 (Purpose)",
+   "text_ko": "제1조 (목적)"
+  },
+  {
+   "key": "config.policies.terms.sections[1].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[1].heading)",
+   "page": "shop-terms",
+   "text_en": "Article 2 (Use of the service)",
+   "text_ko": "제2조 (서비스 이용)"
+  },
+  {
+   "key": "config.policies.terms.sections[2].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[2].heading)",
+   "page": "shop-terms",
+   "text_en": "Article 3 (Product information and purchase)",
+   "text_ko": "제3조 (상품 정보 및 구매)"
+  },
+  {
+   "key": "config.policies.terms.sections[3].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[3].heading)",
+   "page": "shop-terms",
+   "text_en": "Article 4 (Duties of the Store)",
+   "text_ko": "제4조 (스토어의 의무)"
+  },
+  {
+   "key": "config.policies.terms.sections[4].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[4].heading)",
+   "page": "shop-terms",
+   "text_en": "Article 5 (Postings and content)",
+   "text_ko": "제5조 (게시물 및 콘텐츠)"
+  },
+  {
+   "key": "config.policies.terms.sections[5].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.terms.sections[5].heading)",
+   "page": "shop-terms",
+   "text_en": "Before launching a real store",
+   "text_ko": "실제 운영 전 확인"
+  },
+  {
+   "key": "config.policies.privacy.sections[0].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[0].heading)",
+   "page": "shop-privacy",
+   "text_en": "Article 1 (Purpose of processing)",
+   "text_ko": "제1조 (개인정보의 처리 목적)"
+  },
+  {
+   "key": "config.policies.privacy.sections[1].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[1].heading)",
+   "page": "shop-privacy",
+   "text_en": "Article 2 (Items collected)",
+   "text_ko": "제2조 (수집하는 개인정보 항목)"
+  },
+  {
+   "key": "config.policies.privacy.sections[2].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[2].heading)",
+   "page": "shop-privacy",
+   "text_en": "Article 3 (Retention and disposal)",
+   "text_ko": "제3조 (보관 기간 및 파기)"
+  },
+  {
+   "key": "config.policies.privacy.sections[3].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[3].heading)",
+   "page": "shop-privacy",
+   "text_en": "Article 4 (Your rights)",
+   "text_ko": "제4조 (이용자 권리)"
+  },
+  {
+   "key": "config.policies.privacy.sections[4].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[4].heading)",
+   "page": "shop-privacy",
+   "text_en": "Article 5 (Privacy officer)",
+   "text_ko": "제5조 (개인정보 보호책임자)"
+  },
+  {
+   "key": "config.policies.privacy.sections[5].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.privacy.sections[5].heading)",
+   "page": "shop-privacy",
+   "text_en": "Before launching a real store",
+   "text_ko": "실제 운영 전 확인"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[0].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.shippingReturns.sections[0].heading)",
+   "page": "shop-shipping-policy",
+   "text_en": "Shipping",
+   "text_ko": "배송 안내"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[1].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.shippingReturns.sections[1].heading)",
+   "page": "shop-shipping-policy",
+   "text_en": "Exchanges and returns",
+   "text_ko": "교환 및 반품"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[2].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.shippingReturns.sections[2].heading)",
+   "page": "shop-shipping-policy",
+   "text_en": "Exceptions",
+   "text_ko": "예외 사항"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[3].heading",
+   "kind": "heading",
+   "location": "config/business-info.json (policies.shippingReturns.sections[3].heading)",
+   "page": "shop-shipping-policy",
+   "text_en": "Before launching a real store",
+   "text_ko": "실제 운영 전 확인"
+  },
+  {
+   "key": "config.policies.shippingReturns.sections[2]",
+   "kind": "policy/longform",
+   "location": "config/business-info.json (policies.shippingReturns.sections[2])",
+   "page": "shop-shipping-policy",
+   "text_en": "Exchanges and returns may be limited if the product is damaged by the user, has lost value over time, or if packaging of a duplicable product has been opened. For details, contact customer service at 070-123-1234.",
+   "text_ko": "이용자 책임 사유로 상품이 훼손된 경우, 시간 경과로 재판매가 곤란할 정도로 가치가 훼손된 경우, 복제가 가능한 상품의 포장을 개봉한 경우에는 교환·반품이 제한될 수 있습니다. 자세한 사항은 고객센터(070-123-1234)로 문의해 주세요."
+  },
+  {
+   "key": "superbify.policy.published_at",
+   "kind": "label",
+   "location": "layouts/partials/auth/_modal_terms.json + _modal_privacy.json:49 + lang/ko.json:526, lang/en.json:526",
+   "page": "auth-modal-terms-privacy",
+   "text_en": "Effective",
+   "text_ko": "시행일"
+  },
+  {
+   "key": "superbify.policy.no_content",
+   "kind": "empty-state",
+   "location": "layouts/partials/auth/_modal_terms.json + _modal_privacy.json:96 + lang/ko.json:527, lang/en.json:527",
+   "page": "auth-modal-terms-privacy",
+   "text_en": "No content available.",
+   "text_ko": "내용이 없습니다."
+  },
+  {
+   "key": "superbify.policy.terms.title",
+   "kind": "heading",
+   "location": "layouts/partials/auth/_modal_terms.json:11 + lang/ko.json:521, lang/en.json:521",
+   "page": "auth-modal-terms",
+   "text_en": "Terms of Service",
+   "text_ko": "이용약관"
+  },
+  {
+   "key": "superbify.policy.privacy.title",
+   "kind": "heading",
+   "location": "layouts/partials/auth/_modal_privacy.json:11 + lang/ko.json:524, lang/en.json:524",
+   "page": "auth-modal-privacy",
+   "text_en": "Privacy Policy",
+   "text_ko": "개인정보처리방침"
+  }
+ ]
+}

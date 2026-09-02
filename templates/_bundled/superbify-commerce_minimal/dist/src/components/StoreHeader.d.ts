@@ -10,9 +10,14 @@ export interface StoreHeaderProps {
     signupLabel?: string;
     mypageLabel?: string;
     logoutLabel?: string;
+    /** Primary nav labels from lang (superbify.nav.*). Defaults keep the English nav. */
+    shopLabel?: string;
+    storyLabel?: string;
+    noticeLabel?: string;
+    cartLabel?: string;
     /** Override the shop base URL. Defaults to getShopBase(). */
     shopBase?: string;
     className?: string;
 }
-export declare function StoreHeader({ brandName, tagline, cartCount, user, loginLabel, signupLabel, mypageLabel, logoutLabel, shopBase, className, }: StoreHeaderProps): React.ReactElement;
+export declare function StoreHeader({ brandName, tagline, cartCount, user, loginLabel, signupLabel, mypageLabel, logoutLabel, shopLabel, storyLabel, noticeLabel, cartLabel, shopBase, className, }: StoreHeaderProps): React.ReactElement;
 export default StoreHeader;

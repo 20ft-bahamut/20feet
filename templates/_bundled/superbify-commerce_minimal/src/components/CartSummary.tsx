@@ -73,7 +73,7 @@ export function CartSummary({
     items,
     summaryTitle = '주문 요약',
     itemsLabel = '상품 수',
-    subtotalLabel = '소계',
+    subtotalLabel = '상품 금액',
     shippingLabel = '배송비',
     totalLabel = '총 결제금액',
     checkoutLabel = '결제하기',

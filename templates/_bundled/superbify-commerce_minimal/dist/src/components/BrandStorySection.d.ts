@@ -14,8 +14,10 @@ export interface BrandStorySectionProps {
     layout?: 'split' | 'stacked';
     /** Render the small Still Form emblem stamp under the copy (default off). */
     stamp?: boolean;
+    /** Heading tag. 'h2' (default) for in-page sections; 'h1' for a page hero (e.g. /shop/story). */
+    headingAs?: 'h1' | 'h2';
     /** Stamp visual ink height in px (default 80). */
     stampHeight?: number;
 }
-export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, mediaSrc, layout, stamp, stampHeight, }: BrandStorySectionProps): React.ReactElement;
+export declare function BrandStorySection({ eyebrow, heading, body, ctaLabel, ctaHref, className, mediaSlot, mediaSrc, layout, stamp, stampHeight, headingAs: HeadingAs, }: BrandStorySectionProps): React.ReactElement;
 export default BrandStorySection;

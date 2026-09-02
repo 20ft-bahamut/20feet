@@ -1,0 +1,139 @@
+{
+    "meta": {
+        "is_partial": true,
+        "description": "개인정보처리방침 모달 — BASIC _modal_privacy.json 포크. 등록 페이지 '개인정보처리방침 보기' 클릭 시 refetchDataSource(privacyContent) 후 openModal 로 열린다. 내용은 G7 sirsoft-page 모듈 CMS 페이지(slug privacy)에서 실시간 조회 — 템플릿에 문구를 하드코딩하지 않는다. 스타일은 scm 토큰 inline.",
+        "fork_source": "templates/_bundled/sirsoft-basic/layouts/partials/auth/_modal_privacy.json"
+    },
+    "id": "privacyModal",
+    "type": "composite",
+    "name": "Modal",
+    "props": {
+        "title": "$t:superbify.policy.privacy.title",
+        "size": "lg"
+    },
+    "children": [
+        {
+            "comment": "내부 레이아웃 (flex column, 본문 스크롤)",
+            "type": "basic",
+            "name": "Div",
+            "style": {
+                "display": "flex",
+                "flexDirection": "column"
+            },
+            "children": [
+                {
+                    "comment": "로딩 상태 — template CSS 에 @keyframes 가 없어 텍스트 상태로 표시(제출 버튼 전환과 동일 규칙)",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{privacyContent?.loading}}",
+                    "style": {
+                        "padding": "3rem 0",
+                        "textAlign": "center",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.auth.register.processing"
+                },
+                {
+                    "comment": "발행일 (고정)",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{!privacyContent?.loading && privacyContent?.data?.published_at}}",
+                    "style": {
+                        "flexShrink": 0,
+                        "marginBottom": "0.75rem",
+                        "fontSize": "0.75rem",
+                        "color": "var(--scm-text-muted, #8A837B)",
+                        "fontVariantNumeric": "tabular-nums"
+                    },
+                    "text": "$t:superbify.policy.published_at: {{privacyContent?.data?.published_at | date}}"
+                },
+                {
+                    "comment": "개인정보 내용 (스크롤) — G7 agreement source 를 그대로 렌더",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{!privacyContent?.loading && privacyContent?.data}}",
+                    "style": {
+                        "flex": 1,
+                        "minHeight": 0,
+                        "maxHeight": "24rem",
+                        "overflowY": "auto",
+                        "paddingRight": "0.25rem"
+                    },
+                    "children": [
+                        {
+                            "id": "privacy_html_content",
+                            "type": "extension_point",
+                            "name": "html_content",
+                            "props": {
+                                "content": "{{privacyContent?.data?.content ?? ''}}",
+                                "isHtml": "{{(privacyContent?.data?.content_mode ?? 'html') === 'html'}}"
+                            },
+                            "default": [
+                                {
+                                    "type": "composite",
+                                    "name": "HtmlContent",
+                                    "props": {
+                                        "content": "{{privacyContent?.data?.content ?? ''}}",
+                                        "isHtml": "{{(privacyContent?.data?.content_mode ?? 'html') === 'html'}}"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "comment": "내용 없음 — CMS 페이지 미설치/미발행 시 (체크박스 서버 검증은 별개로 유지)",
+                    "type": "basic",
+                    "name": "Div",
+                    "if": "{{!privacyContent?.loading && !privacyContent?.data}}",
+                    "style": {
+                        "padding": "2rem 0",
+                        "textAlign": "center",
+                        "fontSize": "0.875rem",
+                        "color": "var(--scm-text-muted, #8A837B)"
+                    },
+                    "text": "$t:superbify.policy.no_content"
+                },
+                {
+                    "comment": "푸터 버튼 (고정)",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "flexShrink": 0,
+                        "display": "flex",
+                        "justifyContent": "flex-end",
+                        "marginTop": "1rem",
+                        "paddingTop": "1rem",
+                        "borderTop": "var(--scm-hairline, 1px solid #E4DCCE)"
+                    },
+                    "children": [
+                        {
+                            "type": "basic",
+                            "name": "Button",
+                            "props": {
+                                "type": "button"
+                            },
+                            "style": {
+                                "minHeight": "44px",
+                                "padding": "0.625rem 1.25rem",
+                                "backgroundColor": "var(--scm-charcoal, #26221E)",
+                                "color": "var(--scm-text-inverse, #FAF8F3)",
+                                "border": "1px solid var(--scm-charcoal, #26221E)",
+                                "borderRadius": "var(--scm-radius, 8px)",
+                                "fontWeight": 600,
+                                "fontSize": "0.9375rem",
+                                "fontFamily": "var(--scm-font-body, system-ui)",
+                                "cursor": "pointer"
+                            },
+                            "text": "$t:superbify.common.close",
+                            "actions": [
+                                { "type": "click", "handler": "closeModal" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
