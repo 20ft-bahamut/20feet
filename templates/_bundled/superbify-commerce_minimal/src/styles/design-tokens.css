@@ -2043,6 +2043,14 @@ a.scm-checkout-progress-step:focus-visible {
     }
     .scm-header-menu-toggle {
         display: inline-flex !important;
+        outline: none;
+    }
+    .scm-header-menu-toggle:focus:not(:focus-visible) {
+        outline: none;
+    }
+    .scm-header-menu-toggle:focus-visible {
+        outline: 2px solid var(--scm-charcoal, #26221E);
+        outline-offset: 2px;
     }
     .scm-header-nav {
         display: none !important;
