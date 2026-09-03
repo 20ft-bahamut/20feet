@@ -5,7 +5,7 @@
         "ko": "SuperBify Commerce Minimal",
         "en": "SuperBify Commerce Minimal"
     },
-    "version": "0.4.0",
+    "version": "0.4.7",
     "license": "MIT",
     "description": {
         "ko": "미니멀 D2C 데모 스토어용 사용자 템플릿 (sirsoft-ecommerce 기반)",
@@ -19,14 +19,15 @@
     "author": {
         "name": "SuperBify"
     },
-    "release_date": "2026-08-27",
+    "release_date": "2026-09-03",
     "g7_version": ">=7.0.0",
     "dependencies": {
         "modules": {
             "sirsoft-ecommerce": ">=1.1.0"
         },
         "plugins": {
-            "sirsoft-daum_postcode": ">=1.0.0"
+            "sirsoft-daum_postcode": ">=1.0.0",
+            "superbify-commerce-compat": ">=1.0.0"
         }
     },
     "assets": {

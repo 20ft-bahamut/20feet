@@ -41,8 +41,8 @@
  * Brand marks live in `brandAssets` (`images/brand/*.png`, alpha preserved).
  */
 
-const ASSET_BASE = '/api/templates/assets/superbify-commerce_minimal/images/demo';
-const BRAND_ASSET_BASE = '/api/templates/assets/superbify-commerce_minimal/images/brand';
+const ASSET_BASE = '/api/templates/assets/superbify-commerce_minimal?file=images/demo';
+const BRAND_ASSET_BASE = '/api/templates/assets/superbify-commerce_minimal?file=images/brand';
 
 function url(filename: string): string {
     return `${ASSET_BASE}/${filename}`;

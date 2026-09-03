@@ -40,7 +40,7 @@ describe('config/business-info.json — demo seed values', () => {
     const DEMO_SEED: Partial<Record<string, string>> = {
         businessRegistrationNumber: '12-345-67890',
         ecommerceRegistrationNumber: '2026-경남김해-1234호',
-        businessAddress: '경남 김해시 장유로 362 쌍용예가2차 207동 604호',
+        businessAddress: '경남 김해시 장유로 362',
         customerServicePhone: '070-123-1234',
     };
 

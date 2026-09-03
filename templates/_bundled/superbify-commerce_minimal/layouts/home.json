@@ -326,7 +326,7 @@
                                     "ctaLabel": "$t:superbify.home.editorial.cta",
                                     "ctaHref": "/shop",
                                     "variant": "panel",
-                                    "mediaSrc": "/api/templates/assets/superbify-commerce_minimal/images/demo/editorial.jpg"
+                                    "mediaSrc": "/api/templates/assets/superbify-commerce_minimal?file=images/demo/editorial.jpg"
                                 }
                             }
                         ]
