@@ -515,7 +515,7 @@
             "privacy": {
                 "title": "개인정보처리방침"
             },
-            "published_at": "시행일",
+            "published_at": "시행일 {{value}}",
             "no_content": "내용이 없습니다."
         },
         "business": {

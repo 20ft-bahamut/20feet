@@ -515,7 +515,7 @@
             "privacy": {
                 "title": "Privacy Policy"
             },
-            "published_at": "Effective",
+            "published_at": "Effective {{value}}",
             "no_content": "No content available."
         },
         "business": {

@@ -4,6 +4,17 @@ All notable changes to the **SuperBify Commerce Minimal** (Still Form) template
 are documented here. Format follows [Keep a Changelog](https://keepachangelog.com/);
 versioning follows [SemVer](https://semver.org/).
 
+## [0.4.8] - 2026-09-03
+
+### Fixed
+- 데모 시드에 상품↔카테고리 피벗(`ecommerce_product_categories`) 8행 누락 —
+  카테고리별 상품 수가 전부 0으로 표시되고 카테고리 페이지가 비어 보이던 문제.
+  시드 재실행(INSERT IGNORE)만으로 보완됨.
+- 카테고리 페이지 카운트 문구의 번역 토큰 문법 오류 —
+  `$t:key:{{expr}}` (콜론) 를 `$t:key|count={{expr}}` (파이프, 공식 문법)로 수정.
+  `{{count}}`가 리터럴로 노출되던 문제. 약관/개인정보 모달의 시행일 토큰도 동일 수정
+  (미지원 `| date` 필터 제거, lang 라벨에 `{{value}}` 플레이스홀더 추가).
+
 ## [0.4.7] - 2026-09-03
 
 ### Fixed

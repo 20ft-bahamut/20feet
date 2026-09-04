@@ -77,7 +77,7 @@
                                     "fontSize": "0.875rem",
                                     "color": "var(--scm-text-muted, #8A837B)"
                                 },
-                                "text": "$t:superbify.category.count_label:{{((category_products?.data?.data ?? category_products?.data ?? []).length)}}"
+                                "text": "$t:superbify.category.count_label|count={{((category_products?.data?.data ?? category_products?.data ?? []).length)}}"
                             },
                             {
                                 "id": "shop_category_grid",

@@ -46,7 +46,7 @@
                         "color": "var(--scm-text-muted, #8A837B)",
                         "fontVariantNumeric": "tabular-nums"
                     },
-                    "text": "$t:superbify.policy.published_at: {{termsContent?.data?.published_at | date}}"
+                    "text": "$t:superbify.policy.published_at|value={{termsContent?.data?.published_at}}"
                 },
                 {
                     "comment": "약관 내용 (스크롤) — G7 agreement source 를 그대로 렌더",
