@@ -1,3 +1,0 @@
-
-   INFO  The application environment is [production].  
-

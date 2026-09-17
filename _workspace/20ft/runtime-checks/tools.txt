@@ -1,3 +1,0 @@
-/usr/local/node/bin/npx
-/usr/local/node/bin/node
-v20.17.0
