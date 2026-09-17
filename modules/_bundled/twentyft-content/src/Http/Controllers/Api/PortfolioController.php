@@ -123,6 +123,10 @@ class PortfolioController extends Controller
 
         $metaByPost = $this->metaService->allByBoard($board->id, 'portfolio');
 
+        // 공개 글만 모아 두고 두 번 훑는다.
+        // 예전에는 '저장된 slug 또는 제목에서 만든 slug' 를 한 번에 비교해 먼저 걸린 글이 이겼다.
+        // 그래서 관리자가 정한 slug 와 다른 글이 제목 때문에 먼저 걸리면 다른 사례가 열렸다.
+        $public = [];
         foreach ($posts as $post) {
             $meta = PostMetaService::portfolioMetaFromArray($metaByPost[$post->id] ?? []);
 
@@ -130,13 +134,25 @@ class PortfolioController extends Controller
                 continue;
             }
 
-            if (($meta['slug'] ?? '') !== $slug && $this->slugFromTitle($post) !== $slug) {
-                continue;
-            }
+            $public[] = [$post, $meta];
+        }
 
-            return response()->json([
-                'data' => new PortfolioDetailResource($this->mapDetailItem($post, $meta)),
-            ]);
+        // 1) 게시판에 저장된 slug 를 먼저 본다 — 관리자가 정한 값이 유일한 기준이다.
+        foreach ($public as [$post, $meta]) {
+            if (($meta['slug'] ?? '') !== '' && $meta['slug'] === $slug) {
+                return response()->json([
+                    'data' => new PortfolioDetailResource($this->mapDetailItem($post, $meta)),
+                ]);
+            }
+        }
+
+        // 2) slug 를 저장한 적 없는 글만 제목에서 만든 값으로 찾는다.
+        foreach ($public as [$post, $meta]) {
+            if (($meta['slug'] ?? '') === '' && $this->slugFromTitle($post) === $slug) {
+                return response()->json([
+                    'data' => new PortfolioDetailResource($this->mapDetailItem($post, $meta)),
+                ]);
+            }
         }
 
         return response()->json(['message' => 'Not found'], 404);

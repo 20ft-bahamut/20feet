@@ -121,6 +121,9 @@ class SuperBifyController extends Controller
 
         $metaByPost = $this->metaService->allByBoard($board->id, 'superbify');
 
+        // Portfolio 와 같은 규칙 — 저장된 slug 를 먼저 보고, 저장된 값이 없는 글만
+        // 제목에서 만든 slug 로 찾는다. 그래야 관리자가 정한 주소가 다른 글에 가려지지 않는다.
+        $public = [];
         foreach ($posts as $post) {
             $meta = PostMetaService::superbifyMetaFromArray($metaByPost[$post->id] ?? []);
 
@@ -128,13 +131,23 @@ class SuperBifyController extends Controller
                 continue;
             }
 
-            if (($meta['slug'] ?? '') !== $slug && $this->slugFromTitle($post) !== $slug) {
-                continue;
-            }
+            $public[] = [$post, $meta];
+        }
 
-            return response()->json([
-                'data' => new SuperBifyDetailResource($this->mapDetailItem($post, $meta)),
-            ]);
+        foreach ($public as [$post, $meta]) {
+            if (($meta['slug'] ?? '') !== '' && $meta['slug'] === $slug) {
+                return response()->json([
+                    'data' => new SuperBifyDetailResource($this->mapDetailItem($post, $meta)),
+                ]);
+            }
+        }
+
+        foreach ($public as [$post, $meta]) {
+            if (($meta['slug'] ?? '') === '' && $this->slugFromTitle($post) === $slug) {
+                return response()->json([
+                    'data' => new SuperBifyDetailResource($this->mapDetailItem($post, $meta)),
+                ]);
+            }
         }
 
         return response()->json(['message' => 'Not found'], 404);

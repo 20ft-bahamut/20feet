@@ -5,6 +5,21 @@ All notable changes to this module will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2026-09-17
+
+### Fixed
+- 공개 상세 조회가 '저장된 slug **또는** 제목에서 만든 slug' 를 한 번에 비교해 **먼저 걸린 글**을
+  돌려주던 문제 — 저장된 slug 를 먼저 훑고, 저장된 값이 없는 글만 제목 파생값으로 찾도록 2단계로 바꿨다.
+  관리자가 정한 slug 가 다른 글의 제목 때문에 가려지지 않는다.
+  (`PortfolioController::show`, `SuperBifyController::show` — 같은 구조라 함께 적용)
+
+  배경: 템플릿의 정적 라우트가 일반 slug 라우트를 가려 생긴 404 를 고친 뒤에도, 조회 기준이
+  두 개인 구조는 같은 종류의 사고를 남긴다. 예를 들어 제목이 `PUREPOL SaaS` 인 공개 글이 있으면
+  파생 slug 가 `purepol-saas` 라서 다른 글에 같은 slug 를 저장해도 그 글이 먼저 열린다.
+
+  부작용: slug 를 저장한 글은 제목 파생 주소로는 더 이상 열리지 않는다(한 글에 주소 두 개 방지).
+  저장된 slug 가 없는 글은 이전과 같이 제목 파생값으로 열린다.
+
 ## [0.1.4] - 2026-09-17
 
 ### Added
