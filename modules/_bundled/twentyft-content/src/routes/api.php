@@ -122,7 +122,15 @@ Route::prefix('admin/inquiries')
             ->middleware('permission:admin,twentyft-content.inquiries.read')
             ->name('index');
 
+        // 숫자가 아닌 구간은 컨트롤러의 int 파라미터에서 TypeError → 500 이 된다.
+        // 라우트 단계에서 걸러 404 로 떨어뜨린다.
+        Route::get('/{post_id}', [InquiryAdminController::class, 'show'])
+            ->where('post_id', '[0-9]+')
+            ->middleware('permission:admin,twentyft-content.inquiries.read')
+            ->name('show');
+
         Route::patch('/{post_id}/status', [InquiryAdminController::class, 'updateStatus'])
+            ->where('post_id', '[0-9]+')
             ->middleware('permission:admin,twentyft-content.inquiries.update')
             ->name('status');
     });

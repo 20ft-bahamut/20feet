@@ -24,9 +24,12 @@ class InquiryAdminListResource extends JsonResource
             'phone' => $this->resource['phone'],
             'company' => $this->resource['company'],
             'projectType' => $this->resource['project_type'],
+            'projectTypeLabel' => $this->resource['project_type_label'],
             'budgetRange' => $this->resource['budget_range'],
             'internalStatus' => $this->resource['internal_status'],
+            'internalStatusLabel' => $this->resource['internal_status_label'],
             'createdAt' => $this->resource['created_at'],
+            'createdAtLabel' => $this->resource['created_at_label'],
         ];
     }
 }

@@ -28,6 +28,8 @@ class PortfolioListResource extends JsonResource
             'types' => $this->resource['types'],
             'status' => $this->resource['status'],
             'featured' => $this->resource['is_featured'],
+            'role' => $this->resource['role'],
+            'techStack' => $this->resource['tech_stack'],
             'coverImageUrl' => $this->resource['cover_image_url'],
         ];
     }

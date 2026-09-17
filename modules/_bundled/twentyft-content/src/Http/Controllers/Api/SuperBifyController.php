@@ -171,6 +171,10 @@ class SuperBifyController extends Controller
      */
     private function mapDetailItem(Post $post, array $meta): array
     {
+        // 커버를 한 번만 해석해 스크린샷 목록에서 같은 첨부를 제외합니다.
+        // (제외하지 않으면 대표 화면과 '화면' 첫 장이 같은 파일이 됩니다)
+        $cover = $this->coverAttachment($post, $meta);
+
         return [
             'public_id' => $this->publicId($post),
             'slug' => $meta['slug'] ?? $this->slugFromTitle($post),
@@ -190,8 +194,12 @@ class SuperBifyController extends Controller
             'demo_url' => $meta['demo_url'],
             'download_url' => $meta['download_url'],
             'purchase_url' => $meta['purchase_url'],
-            'cover_image_url' => $this->coverImageUrl($post, $meta),
-            'screenshot_image_urls' => $this->galleryUrls($meta['screenshot_attachment_ids'] ?? [], $post),
+            'cover_image_url' => $this->attachmentUrl($cover),
+            'screenshot_image_urls' => $this->galleryUrls(
+                $meta['screenshot_attachment_ids'] ?? [],
+                $post,
+                $cover?->id
+            ),
         ];
     }
 
@@ -217,35 +225,62 @@ class SuperBifyController extends Controller
      * 커버 이미지 URL — 메타 지정 attachment 우선, 없으면 게시글 첨부 중 첫 이미지.
      * 이미지가 아닌 첨부파일(preview_url 미제공)이 <img> 를 깨지 않도록 is_image 로 필터합니다.
      */
-    private function coverImageUrl(Post $post, array $meta): ?string
+    /**
+     * 커버로 쓸 첨부 — 메타 지정 우선, 없으면 순서상 첫 이미지.
+     *
+     * 이미지가 아닌 첨부파일(preview_url 미제공)이 <img> 를 깨지 않도록 is_image 로 거릅니다.
+     */
+    private function coverAttachment(Post $post, array $meta): ?Attachment
     {
-        $attachment = null;
-
         $coverAttachmentId = $meta['cover_image_attachment_id'] ?? null;
+
+        $attachment = null;
         if ($coverAttachmentId) {
             $attachment = $post->attachments->firstWhere('id', (int) $coverAttachmentId)
                 ?? Attachment::find((int) $coverAttachmentId);
         }
 
         if (! $attachment) {
-            $attachment = $post->attachments->first(fn (Attachment $a): bool => $a->is_image);
+            $attachment = $post->attachments
+                ->filter(fn (Attachment $a): bool => $a->is_image)
+                ->sortBy('order')
+                ->first();
         }
 
-        if (! $attachment || ! $attachment->is_image) {
+        return $attachment && $attachment->is_image ? $attachment : null;
+    }
+
+    /**
+     * 커버 이미지 URL
+     */
+    private function coverImageUrl(Post $post, array $meta): ?string
+    {
+        return $this->attachmentUrl($this->coverAttachment($post, $meta));
+    }
+
+    private function attachmentUrl(?Attachment $attachment): ?string
+    {
+        if (! $attachment) {
             return null;
         }
 
         return $attachment->preview_url ?? $attachment->download_url;
     }
 
-    private function galleryUrls(array $attachmentIds, Post $post): array
+    /**
+     * 화면 이미지 URL 목록 조회
+     *
+     * 커버로 쓰인 첨부는 제외합니다 — 같은 화면을 두 번 보여주지 않기 위해서입니다.
+     * 제외하고 남는 이미지가 없으면 빈 배열이고, 화면은 그 섹션을 그리지 않습니다.
+     */
+    private function galleryUrls(array $attachmentIds, Post $post, ?int $excludeAttachmentId = null): array
     {
-        // 메타 미지정 시 게시글의 이미지 첨부 전체를 순서대로 사용합니다.
+        // 메타 미지정 시 게시글의 이미지 첨부를 순서대로 사용합니다.
         if (empty($attachmentIds)) {
             return $post->attachments
-                ->filter(fn (Attachment $a): bool => $a->is_image)
+                ->filter(fn (Attachment $a): bool => $a->is_image && $a->id !== $excludeAttachmentId)
                 ->sortBy('order')
-                ->map(fn (Attachment $a): ?string => $a->preview_url ?? $a->download_url)
+                ->map(fn (Attachment $a): ?string => $this->attachmentUrl($a))
                 ->filter()
                 ->values()
                 ->all();
@@ -253,12 +288,13 @@ class SuperBifyController extends Controller
 
         $urls = [];
         foreach ($attachmentIds as $id) {
-            $attachment = Attachment::find((int) $id);
-            if ($attachment) {
-                $url = $attachment->preview_url ?? $attachment->download_url;
-                if ($url) {
-                    $urls[] = $url;
-                }
+            if ($excludeAttachmentId !== null && (int) $id === $excludeAttachmentId) {
+                continue;
+            }
+
+            $url = $this->attachmentUrl(Attachment::find((int) $id));
+            if ($url) {
+                $urls[] = $url;
             }
         }
 

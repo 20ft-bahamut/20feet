@@ -1,0 +1,737 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_inquiry_detail",
+    "permissions": [
+        "twentyft-content.inquiries.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:twentyft-content.admin.inquiries.detail_title",
+        "description": "$t:twentyft-content.admin.inquiries.detail_description"
+    },
+    "state": {
+        "isSaving": false,
+        "errors": null
+    },
+    "data_sources": [
+        {
+            "id": "inquiry",
+            "label_key": "$t:twentyft-content.editor.data_source.inquiry_admin",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/admin/inquiries/{{route.post_id}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "initLocal": "form",
+            "loading_strategy": "blocking",
+            "errorHandling": {
+                "404": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                },
+                "403": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "detail_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "dataKey": "form",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "{{_local.form?.title ?? '$t:twentyft-content.admin.inquiries.detail_title'}}",
+                            "description": "$t:twentyft-content.admin.inquiries.detail_description"
+                        },
+                        "children": [
+                            {
+                                "id": "edit_in_board",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/board/project-inquiry/{{route.post_id}}/edit",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.admin.inquiries.actions.edit_in_board"
+                            },
+                            {
+                                "id": "back_to_list",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/20ft-content/inquiries",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:twentyft-content.common.back_to_list"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "receipt_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.receipt_info"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-3 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.created_at"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.createdAtLabel || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.post_id"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.postId ?? '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.privacy_consent"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.privacyConsent ? '$t:twentyft-content.admin.fields.privacy_consented' : '$t:twentyft-content.admin.fields.privacy_not_consented'}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "inquirer_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.inquirer_info"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.name"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.name || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.company"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.company || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.email"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "if": "{{(_local.form?.email ?? '') !== ''}}",
+                                                "props": {
+                                                    "href": "mailto:{{_local.form?.email}}",
+                                                    "className": "block text-sm text-blue-600 dark:text-blue-400 break-all"
+                                                },
+                                                "text": "{{_local.form?.email}}"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "if": "{{(_local.form?.email ?? '') === ''}}",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "-"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.phone"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.phone || '-'}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "request_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.request_info"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.project_type"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.projectTypeLabel || _local.form?.projectType || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.budget_range"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.budgetRangeLabel || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.desired_schedule"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.desiredSchedule || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.current_site_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "if": "{{(_local.form?.currentSiteUrl ?? '') !== ''}}",
+                                                "props": {
+                                                    "href": "{{_local.form?.currentSiteUrl}}",
+                                                    "className": "block text-sm text-blue-600 dark:text-blue-400 break-all"
+                                                },
+                                                "text": "{{_local.form?.currentSiteUrl}}"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "if": "{{(_local.form?.currentSiteUrl ?? '') === ''}}",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "-"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.reference_url"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "A",
+                                                "if": "{{(_local.form?.referenceUrl ?? '') !== ''}}",
+                                                "props": {
+                                                    "href": "{{_local.form?.referenceUrl}}",
+                                                    "className": "block text-sm text-blue-600 dark:text-blue-400 break-all"
+                                                },
+                                                "text": "{{_local.form?.referenceUrl}}"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "if": "{{(_local.form?.referenceUrl ?? '') === ''}}",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "-"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "space-y-1 pt-2"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Label",
+                                        "props": {
+                                            "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        },
+                                        "text": "$t:twentyft-content.admin.fields.inquiry_content"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "text-sm text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed"
+                                        },
+                                        "text": "{{_local.form?.content || '-'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "status_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "permissions": [
+                            "twentyft-content.inquiries.update"
+                        ],
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "$t:twentyft-content.admin.sections.internal_status"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "P",
+                                "props": {
+                                    "className": "text-sm text-gray-500 dark:text-gray-400"
+                                },
+                                "text": "$t:twentyft-content.admin.hints.internal_status"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.internal_status"
+                                            },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "internalStatus",
+                                                    "options": [
+                                                        {
+                                                            "value": "NEW",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.new"
+                                                        },
+                                                        {
+                                                            "value": "REVIEWING",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.reviewing"
+                                                        },
+                                                        {
+                                                            "value": "REPLIED",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.replied"
+                                                        },
+                                                        {
+                                                            "value": "MEETING",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.meeting"
+                                                        },
+                                                        {
+                                                            "value": "ESTIMATING",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.estimating"
+                                                        },
+                                                        {
+                                                            "value": "CLOSED",
+                                                            "label": "$t:twentyft-content.admin.inquiry_status.closed"
+                                                        }
+                                                    ],
+                                                    "className": "w-full"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "$t:twentyft-content.admin.fields.current_status"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.internalStatusLabel || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Button",
+                                                "props": {
+                                                    "disabled": "{{_local.isSaving}}",
+                                                    "className": "w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                },
+                                                "actions": [
+                                                    {
+                                                        "type": "click",
+                                                        "handler": "sequence",
+                                                        "params": {
+                                                            "actions": [
+                                                                {
+                                                                    "handler": "setState",
+                                                                    "params": {
+                                                                        "target": "local",
+                                                                        "isSaving": true,
+                                                                        "errors": null
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "apiCall",
+                                                                    "auth_required": true,
+                                                                    "target": "/api/modules/twentyft-content/admin/inquiries/{{route.post_id}}/status",
+                                                                    "params": {
+                                                                        "method": "PATCH",
+                                                                        "body": {
+                                                                            "status": "{{_local.form.internalStatus}}"
+                                                                        }
+                                                                    },
+                                                                    "onSuccess": [
+                                                                        {
+                                                                            "handler": "setState",
+                                                                            "params": {
+                                                                                "target": "local",
+                                                                                "isSaving": false,
+                                                                                "errors": null
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "handler": "toast",
+                                                                            "params": {
+                                                                                "type": "success",
+                                                                                "message": "$t:twentyft-content.admin.messages.status_success"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "handler": "navigate",
+                                                                            "params": {
+                                                                                "path": "/admin/20ft-content/inquiries",
+                                                                                "mergeQuery": true,
+                                                                                "query": {}
+                                                                            }
+                                                                        }
+                                                                    ],
+                                                                    "onError": [
+                                                                        {
+                                                                            "handler": "setState",
+                                                                            "params": {
+                                                                                "target": "local",
+                                                                                "isSaving": false,
+                                                                                "errors": "{{error.errors}}"
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "handler": "toast",
+                                                                            "params": {
+                                                                                "type": "error",
+                                                                                "message": "{{error.message ?? '$t:twentyft-content.admin.messages.status_failed'}}"
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    }
+                                                ],
+                                                "children": [
+                                                    {
+                                                        "type": "basic",
+                                                        "name": "Span",
+                                                        "text": "{{_local.isSaving ? '$t:twentyft-content.common.saving' : '$t:twentyft-content.admin.status.update'}}"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

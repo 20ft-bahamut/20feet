@@ -54,6 +54,15 @@
                 "title": "$t:twentyft-content.admin.inquiries.title",
                 "permission": "twentyft-content.inquiries.read"
             }
+        },
+        {
+            "path": "*/admin/20ft-content/inquiries/:post_id",
+            "layout": "admin_inquiry_detail",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:twentyft-content.admin.inquiries.detail_title",
+                "permission": "twentyft-content.inquiries.read"
+            }
         }
     ]
 }

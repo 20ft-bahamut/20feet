@@ -5,7 +5,8 @@
         "edit_board": "Edit Post",
         "save": "Save",
         "saving": "Saving…",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "back_to_list": "Back to list"
     },
     "admin": {
         "dashboard": {
@@ -35,8 +36,11 @@
         "inquiries": {
             "title": "Project Inquiries",
             "description": "Project inquiry list.",
+            "detail_title": "Inquiry Detail",
+            "detail_description": "Review the received inquiry, its request details, and handling status.",
             "actions": {
-                "manage_in_board": "Manage in Board Admin"
+                "manage_in_board": "Manage in Board Admin",
+                "edit_in_board": "Edit post in Board Admin"
             }
         },
         "sections": {
@@ -44,7 +48,11 @@
             "meta_info": "Meta Info",
             "project_details": "Project Details",
             "product_details": "Product Details",
-            "attachments": "Project Images"
+            "attachments": "Project Images",
+            "receipt_info": "Receipt",
+            "inquirer_info": "Contact",
+            "request_info": "Request",
+            "internal_status": "Handling Status"
         },
         "fields": {
             "title": "Title",
@@ -82,21 +90,41 @@
             "budget_range": "Budget Range",
             "internal_status": "Status",
             "created_at": "Created",
-            "cover_image": "Cover Image"
+            "cover_image": "Cover Image",
+            "post_id": "Post ID",
+            "desired_schedule": "Desired Schedule",
+            "current_site_url": "Current Site",
+            "reference_url": "Reference Link",
+            "privacy_consent": "Privacy Consent",
+            "privacy_consented": "Consented",
+            "privacy_not_consented": "No consent record",
+            "inquiry_content": "Inquiry",
+            "current_status": "Current Status"
         },
         "hints": {
             "attachment_id": "Find the attachment ID in file management",
             "comma_separated": "Separate values with commas",
             "cover_image": "Choose the image to use as the cover",
             "attachments_desc": "Upload images. If no cover is selected, the first image is used.",
-            "cover_none": "None (use first image)"
+            "cover_none": "None (use first image)",
+            "internal_status": "Track how far this inquiry has been handled. Not shown to the sender."
+        },
+        "inquiry_status": {
+            "new": "New",
+            "reviewing": "Reviewing",
+            "replied": "Replied",
+            "meeting": "Meeting",
+            "estimating": "Estimating",
+            "closed": "Closed"
         },
         "status": {
             "update": "Update Status"
         },
         "messages": {
             "save_success": "Saved.",
-            "save_failed": "Save failed."
+            "save_failed": "Save failed.",
+            "status_success": "Handling status updated.",
+            "status_failed": "Failed to update handling status."
         }
     },
     "editor": {

@@ -90,8 +90,8 @@
                                     { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.name" },
                                     { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.company" },
                                     { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.project_type" },
-                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2" }, "text": "$t:twentyft-content.admin.fields.internal_status" },
-                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-1" }, "text": "$t:twentyft-content.admin.fields.created_at" }
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-1" }, "text": "$t:twentyft-content.admin.fields.internal_status" },
+                                    { "type": "basic", "name": "Div", "props": { "className": "col-span-2 whitespace-nowrap" }, "text": "$t:twentyft-content.admin.fields.created_at" }
                                 ]
                             },
                             {
@@ -99,7 +99,7 @@
                                 "type": "basic",
                                 "name": "A",
                                 "props": {
-                                    "href": "/admin/board/project-inquiry/{{item.postId}}/edit",
+                                    "href": "/admin/20ft-content/inquiries/{{item.postId}}",
                                     "className": "grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors no-underline items-center"
                                 },
                                 "iteration": {
@@ -130,19 +130,19 @@
                                         "type": "basic",
                                         "name": "Div",
                                         "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
-                                        "text": "{{item.projectType ?? '-'}}"
+                                        "text": "{{item.projectTypeLabel ?? item.projectType ?? '-'}}"
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "col-span-2 text-gray-600 dark:text-gray-300" },
-                                        "text": "{{item.internalStatus ?? '-'}}"
+                                        "props": { "className": "col-span-1 text-gray-600 dark:text-gray-300" },
+                                        "text": "{{item.internalStatusLabel ?? item.internalStatus ?? '-'}}"
                                     },
                                     {
                                         "type": "basic",
                                         "name": "Div",
-                                        "props": { "className": "col-span-1 text-gray-500 dark:text-gray-400" },
-                                        "text": "{{item.createdAt ?? '-'}}"
+                                        "props": { "className": "col-span-2 whitespace-nowrap text-gray-500 dark:text-gray-400" },
+                                        "text": "{{item.createdAtLabel ?? item.createdAt ?? '-'}}"
                                     }
                                 ]
                             }

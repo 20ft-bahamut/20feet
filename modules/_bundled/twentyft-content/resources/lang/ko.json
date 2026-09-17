@@ -5,7 +5,8 @@
         "edit_board": "본문 수정",
         "save": "저장",
         "saving": "저장 중…",
-        "cancel": "취소"
+        "cancel": "취소",
+        "back_to_list": "목록으로"
     },
     "admin": {
         "dashboard": {
@@ -35,8 +36,11 @@
         "inquiries": {
             "title": "프로젝트 문의",
             "description": "프로젝트 문의 목록입니다.",
+            "detail_title": "문의 상세",
+            "detail_description": "접수된 문의 내용과 요청 정보, 처리 상태를 확인합니다.",
             "actions": {
-                "manage_in_board": "게시판 관리에서 수정"
+                "manage_in_board": "게시판 관리에서 수정",
+                "edit_in_board": "게시판에서 본문 수정"
             }
         },
         "sections": {
@@ -44,7 +48,11 @@
             "meta_info": "메타 정보",
             "project_details": "프로젝트 상세",
             "product_details": "제품 상세",
-            "attachments": "프로젝트 이미지"
+            "attachments": "프로젝트 이미지",
+            "receipt_info": "접수 정보",
+            "inquirer_info": "문의자 정보",
+            "request_info": "요청 정보",
+            "internal_status": "처리 상태"
         },
         "fields": {
             "title": "제목",
@@ -82,21 +90,41 @@
             "budget_range": "예산 범위",
             "internal_status": "처리 상태",
             "created_at": "작성일",
-            "cover_image": "대표 이미지"
+            "cover_image": "대표 이미지",
+            "post_id": "게시글 번호",
+            "desired_schedule": "희망 일정",
+            "current_site_url": "현재 사이트",
+            "reference_url": "참고 링크",
+            "privacy_consent": "개인정보 수집 동의",
+            "privacy_consented": "동의함",
+            "privacy_not_consented": "동의 기록 없음",
+            "inquiry_content": "문의 내용",
+            "current_status": "현재 상태"
         },
         "hints": {
             "attachment_id": "첨부파일 관리에서 ID를 확인하세요",
             "comma_separated": "쉼표로 구분하여 입력하세요",
             "cover_image": "업로드한 이미지 중 대표로 사용할 이미지를 선택하세요",
             "attachments_desc": "이미지를 업로드하세요. 대표 이미지를 지정하지 않으면 첫 번째 이미지가 사용됩니다.",
-            "cover_none": "선택 안 함 (첫 번째 이미지 사용)"
+            "cover_none": "선택 안 함 (첫 번째 이미지 사용)",
+            "internal_status": "이 문의를 어디까지 처리했는지 기록합니다. 문의자에게는 표시되지 않습니다."
+        },
+        "inquiry_status": {
+            "new": "신규",
+            "reviewing": "검토 중",
+            "replied": "회신함",
+            "meeting": "미팅 진행",
+            "estimating": "견적 작성",
+            "closed": "종료"
         },
         "status": {
             "update": "상태 변경"
         },
         "messages": {
             "save_success": "저장되었습니다.",
-            "save_failed": "저장에 실패했습니다."
+            "save_failed": "저장에 실패했습니다.",
+            "status_success": "처리 상태를 변경했습니다.",
+            "status_failed": "처리 상태 변경에 실패했습니다."
         }
     },
     "editor": {
