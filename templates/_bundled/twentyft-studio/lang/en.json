@@ -1,45 +1,69 @@
 {
     "twentyft": {
-        "base_layout_title": "20ft Studio",
-        "base_layout_description": "20ft official website user template (Portfolio / SuperBify / Project Inquiry)",
+        "base_layout_title": "20ft",
+        "base_layout_description": "Websites, online stores, and custom web applications — 20ft",
         "routes": {
             "home": {
-                "title": "20ft | Software Studio",
-                "description": "20ft plans and builds websites, commerce systems, in-house software, and Gnuboard 7 extensions."
+                "title": "Websites, online stores, and custom web applications | 20ft",
+                "description": "We plan and build company websites, online stores, and custom web applications for internal work. You can start without a written specification."
+            },
+            "services": {
+                "title": "Services — Websites, stores, web applications | 20ft",
+                "description": "Website production, online store production, and custom web application development."
+            },
+            "services_website": {
+                "title": "Website production | 20ft",
+                "description": "We build websites that introduce a company, its services, and its brand. New builds and redesigns of existing sites are both welcome."
+            },
+            "services_commerce": {
+                "title": "Online store production | 20ft",
+                "description": "From product pages to cart and checkout, we build an online store that fits your brand."
+            },
+            "services_web_development": {
+                "title": "Custom web application development | 20ft",
+                "description": "We build web tools that manage customers, contracts, bookings, and work schedules."
             },
             "portfolio": {
-                "title": "Portfolio — 20ft Studio",
-                "description": "Selected projects 20ft is ready to share."
+                "title": "Work | 20ft",
+                "description": "Websites, internal systems, and commerce screens built in-house."
             },
             "portfolio_detail": {
-                "title": "Portfolio — 20ft Studio",
-                "description": "Project details."
+                "title": "Work | 20ft",
+                "description": "Project details and the role covered."
             },
-            "superbify": {
-                "title": "SuperBify — 20ft Studio",
-                "description": "Reusable Gnuboard 7 extensions.",
-                "og_description": "SuperBify is a family of Gnuboard 7 extensions built by 20ft — Templates, Modules, Plugins, and reusable developer tools."
-            },
-            "superbify_detail": {
-                "title": "SuperBify — 20ft Studio",
-                "description": "SuperBify product details."
+            "process": {
+                "title": "How we work — from inquiry to launch | 20ft",
+                "description": "Consultation, scope and estimate, build and review, then QA and launch."
             },
             "about": {
-                "title": "About — 20ft Studio",
-                "description": "The story behind the name 20ft, Software Studio, and Digital Garage."
+                "title": "About 20ft | 20ft",
+                "description": "More than 20 years of web experience, selected projects, how work is done, and where the name 20ft comes from."
             },
             "inquiry": {
-                "title": "Project Inquiry — 20ft Studio",
-                "description": "Tell us what you want to build — websites, commerce, internal systems, or Gnuboard 7 extensions."
+                "title": "Project inquiry | 20ft",
+                "description": "Tell us about the website, online store, or web application you have in mind."
+            },
+            "superbify": {
+                "title": "SuperBify — products built in-house | 20ft",
+                "description": "Commerce templates and Gnuboard 7 extensions developed in-house by 20ft.",
+                "og_description": "SuperBify is a family of Gnuboard 7 extension products built by 20ft."
+            },
+            "superbify_detail": {
+                "title": "SuperBify — products built in-house | 20ft",
+                "description": "Details of a product built in-house by 20ft."
             }
         },
         "data_source": {
-            "portfolio_preview": "Portfolio preview data",
-            "superbify_preview": "SuperBify preview data",
-            "portfolio_items": "Portfolio list data",
-            "portfolio_item": "Portfolio detail data",
+            "portfolio_preview": "Work preview data",
+            "superbify_preview": "In-house product preview data",
+            "portfolio_items": "Work list data",
+            "portfolio_item": "Work detail data",
             "superbify_items": "SuperBify list data",
-            "superbify_item": "SuperBify detail data"
+            "superbify_item": "SuperBify detail data",
+            "commerce_demos": "Commerce demo data",
+            "software_cases": "Internal system case data",
+            "about_cases": "About page project data",
+            "portfolio_demos": "In-house demo data for the work list"
         },
         "errors": {
             "not_found_title": "Page not found",
@@ -49,69 +73,32 @@
             "server_error_title": "Something went wrong",
             "server_error_description": "Please try again in a moment."
         },
+        "nav": {
+            "services": "Services",
+            "portfolio": "Work",
+            "process": "Process",
+            "about": "About",
+            "superbify": "SuperBify",
+            "inquiry": "Project inquiry"
+        },
         "inquiry": {
             "eyebrow": "PROJECT INQUIRY",
-            "heading": "Tell us about your project",
-            "notice": "Online inquiry submission is currently being prepared.",
-            "label_name": "Name",
-            "label_email": "Email",
+            "heading": "Tell us what you want to build and where you are now.",
+            "introduction": "We can discuss websites, online stores, web applications, and improvements to an existing site. It is fine if some parts are still unclear.",
+            "label_name": "Name or company",
+            "label_email": "Reply email",
             "label_project_type": "Project type",
-            "label_message": "Message",
-            "placeholder_name": "Your name",
-            "placeholder_email": "your@email.com",
-            "placeholder_message": "Briefly describe what you are building",
-            "option_web_commerce": "Web / Commerce",
-            "option_software_system": "Software / System",
-            "option_gnuboard": "Gnuboard 7 extension",
-            "option_other": "Other collaboration",
-            "submit": "Send Inquiry"
+            "label_description": "Message",
+            "label_current_site": "Current site URL",
+            "label_schedule": "Preferred timeline",
+            "label_privacy": "I agree to the collection of my name, email, and message for the purpose of responding to this inquiry.",
+            "submit": "Send inquiry",
+            "submitting": "Sending…",
+            "success_heading": "Your inquiry has been received.",
+            "success_body": "We will reply to the email address you provided."
         },
-        "nav": {
-            "portfolio": "Portfolio",
-            "superbify": "SuperBify",
-            "inquiry": "Project Inquiry"
-        },
-        "home": {
-            "hero": {
-                "eyebrow": "20FT / SOFTWARE STUDIO",
-                "headline": "We make big possibilities from a small space.",
-                "sub": "Websites, commerce, web services, and Gnuboard 7 extensions. We understand what is needed and turn it into something that actually runs.",
-                "cta_primary": "Project Inquiry",
-                "cta_secondary": "View Portfolio"
-            },
-            "portfolio": {
-                "eyebrow": "SELECTED PORTFOLIO",
-                "heading": "Things we have made.",
-                "lead": "We think the most accurate way to show what we do is through the work itself.",
-                "empty_title": "We are preparing projects that can be shared publicly.",
-                "empty_message": "The full portfolio will be available soon."
-            },
-            "superbify": {
-                "eyebrow": "OPEN SOURCE / G7",
-                "heading": "SuperBify",
-                "lead": "When the tools we use fall short, we sometimes build our own.",
-                "body": "SuperBify is a 20ft project that creates Extensions, Developer Tools, and Experiments to make Gnuboard 7 easier to extend and use.",
-                "cta": "View SuperBify",
-                "empty_title": "We are building the first project.",
-                "empty_message": "It will be shared once it is ready to use."
-            },
-            "about": {
-                "eyebrow": "ABOUT 20FT",
-                "heading": "We make possibilities from a small space.",
-                "body": "The name 20ft started with a small 20-foot space. Today it continues as a Digital Garage where we build web and software, tools, and ideas.",
-                "cta": "About 20ft"
-            },
-            "inquiry_cta": {
-                "eyebrow": "JUST FOR FUN.",
-                "motto": "We find interesting problems, build them ourselves, and make them actually work. That is why 20ft keeps making things.",
-                "heading": "Do you have something you want to build?",
-                "sub": "Homepage, shopping mall, web service, Gnuboard 7 development, or improving an existing system. Tell us what you need.",
-                "cta": "Project Inquiry"
-            },
-            "common": {
-                "capability_line": "WEB / COMMERCE / SOFTWARE / GNUBOARD 7",
-                "signature": "A SMALL SPACE. INFINITE POSSIBILITIES."
-            }
+        "footer": {
+            "intro": "Websites, online stores, and custom web applications."
         }
     }
 }

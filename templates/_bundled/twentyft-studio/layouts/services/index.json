@@ -1,0 +1,30 @@
+{
+    "version": "1.0.0",
+    "layout_name": "services/index",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.services.title",
+        "description": "$t:twentyft.routes.services.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "services",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.services.title",
+                "description": "$t:twentyft.routes.services.description"
+            }
+        }
+    },
+    "data_sources": [],
+    "slots": {
+        "content": [
+            {
+                "comment": "F-201: 제작 서비스 목록 — 세 분야 비교와 상세 진입",
+                "id": "services_list",
+                "type": "composite",
+                "name": "ServicesList"
+            }
+        ]
+    }
+}

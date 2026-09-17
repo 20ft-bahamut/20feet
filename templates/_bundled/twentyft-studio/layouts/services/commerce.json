@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "layout_name": "services/commerce",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.services_commerce.title",
+        "description": "$t:twentyft.routes.services_commerce.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "services_commerce",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.services_commerce.title",
+                "description": "$t:twentyft.routes.services_commerce.description"
+            }
+        }
+    },
+    "data_sources": [
+        {
+            "id": "commerce_demos",
+            "label_key": "$t:twentyft.data_source.commerce_demos",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/superbify/projects",
+            "method": "GET",
+            "params": {
+                "type": "TEMPLATE",
+                "per_page": "3"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "comment": "F-221: 쇼핑몰 제작 상세 — 자체 제작 데모는 데이터에서 가져온다",
+                "id": "service_commerce",
+                "type": "composite",
+                "name": "ServicePage",
+                "props": {
+                    "service": "commerce",
+                    "demos": "{{commerce_demos?.data ?? null}}"
+                }
+            }
+        ]
+    }
+}

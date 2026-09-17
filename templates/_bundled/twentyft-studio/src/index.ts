@@ -1,7 +1,7 @@
 /**
  * 20ft Studio Gnuboard7 User Template
  *
- * Portfolio / SuperBify / Project Inquiry
+ * 제작 서비스 · 제작 사례 · 진행 안내 · 이십피트 소개 · 제작 문의
  */
 
 import './styles/design-tokens.css';
@@ -53,24 +53,45 @@ export { BrandLogo, type BrandLogoProps } from './components/BrandLogo';
 export { PrimaryButton, type PrimaryButtonProps } from './components/PrimaryButton';
 export { TextLink, type TextLinkProps } from './components/TextLink';
 export { Tag, type TagProps } from './components/Tag';
+export { ZoomableImage, type ZoomableImageProps } from './components/ZoomableImage';
 export { Status, type StatusProps } from './components/Status';
 
-// Composite page components
+// Shared site chrome
 export { SiteHeader, type SiteHeaderProps } from './components/SiteHeader';
 export { SiteFooter, type SiteFooterProps } from './components/SiteFooter';
+
+// Home sections
 export { HomeHero, type HomeHeroProps } from './components/HomeHero';
-export { HomeWhatWeBuild, type HomeWhatWeBuildProps } from './components/HomeWhatWeBuild';
-export { HomeHowWeWork, type HomeHowWeWorkProps } from './components/HomeHowWeWork';
-export { SelectedPortfolio, type SelectedPortfolioProps } from './components/SelectedPortfolio';
-export { SuperBifyPreview, type SuperBifyPreviewProps } from './components/SuperBifyPreview';
-export { AboutPreview, type AboutPreviewProps } from './components/AboutPreview';
-export { InquiryMottoCTA, type InquiryMottoCTAProps } from './components/InquiryMottoCTA';
+export { HomeServices, type HomeServicesProps } from './components/HomeServices';
+export { HomeCases, type HomeCasesProps } from './components/HomeCases';
+export { HomeExperience, type HomeExperienceProps } from './components/HomeExperience';
+export { HomeProcess, type HomeProcessProps } from './components/HomeProcess';
+export { HomeFaq, type HomeFaqProps } from './components/HomeFaq';
+export { HomeInquiryCTA, type HomeInquiryCTAProps } from './components/HomeInquiryCTA';
+
+// Service pages
+export { ServicesList, type ServicesListProps } from './components/ServicesList';
+export { ServicePage, type ServicePageProps } from './components/ServicePage';
+export { ProcessPage, type ProcessPageProps } from './components/ProcessPage';
+
+// Portfolio
 export { PortfolioList, type PortfolioListProps } from './components/PortfolioList';
 export { PortfolioDetail, type PortfolioDetailProps } from './components/PortfolioDetail';
+
+// SuperBify
 export { SuperBifyList, type SuperBifyListProps } from './components/SuperBifyList';
 export { SuperBifyDetail, type SuperBifyDetailProps } from './components/SuperBifyDetail';
-export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
+
+// About / Inquiry
 export { AboutPage, type AboutPageProps } from './components/AboutPage';
+export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
+
+// Content definitions (used by the components above; exported for reuse/testing)
+export { SERVICES, getService } from './content/services';
+export type { ServiceDefinition, ServiceKey } from './content/services';
+export { INQUIRY_ENDPOINT, INQUIRY_TYPE_OPTIONS, validateInquiryForm, toInquiryPayload } from './content/inquiry';
+export { PROCESS_STEPS, FAQ_ITEMS } from './content/process';
+export { PRIMARY_NAV, PRIMARY_ACTION, FOOTER_COLUMNS } from './content/nav';
 
 // Template metadata
 import templateMetadata from '../template.json';
@@ -112,22 +133,26 @@ import { BrandLogo } from './components/BrandLogo';
 import { PrimaryButton } from './components/PrimaryButton';
 import { TextLink } from './components/TextLink';
 import { Tag } from './components/Tag';
+import { ZoomableImage } from './components/ZoomableImage';
 import { Status } from './components/Status';
 import { SiteHeader } from './components/SiteHeader';
 import { SiteFooter } from './components/SiteFooter';
 import { HomeHero } from './components/HomeHero';
-import { HomeWhatWeBuild } from './components/HomeWhatWeBuild';
-import { HomeHowWeWork } from './components/HomeHowWeWork';
-import { SelectedPortfolio } from './components/SelectedPortfolio';
-import { SuperBifyPreview } from './components/SuperBifyPreview';
-import { AboutPreview } from './components/AboutPreview';
-import { InquiryMottoCTA } from './components/InquiryMottoCTA';
+import { HomeServices } from './components/HomeServices';
+import { HomeCases } from './components/HomeCases';
+import { HomeExperience } from './components/HomeExperience';
+import { HomeProcess } from './components/HomeProcess';
+import { HomeFaq } from './components/HomeFaq';
+import { HomeInquiryCTA } from './components/HomeInquiryCTA';
+import { ServicesList } from './components/ServicesList';
+import { ServicePage } from './components/ServicePage';
+import { ProcessPage } from './components/ProcessPage';
 import { PortfolioList } from './components/PortfolioList';
 import { PortfolioDetail } from './components/PortfolioDetail';
 import { SuperBifyList } from './components/SuperBifyList';
 import { SuperBifyDetail } from './components/SuperBifyDetail';
-import { InquiryForm } from './components/InquiryForm';
 import { AboutPage } from './components/AboutPage';
+import { InquiryForm } from './components/InquiryForm';
 
 const registry = (window as any).G7Core?.templateEngine?.ComponentRegistry?.getInstance?.();
 if (registry) {
@@ -169,22 +194,26 @@ if (registry) {
     registry.register({ component: PrimaryButton, metadata: { name: 'PrimaryButton', type: 'composite' } });
     registry.register({ component: TextLink, metadata: { name: 'TextLink', type: 'composite' } });
     registry.register({ component: Tag, metadata: { name: 'Tag', type: 'composite' } });
+    registry.register({ component: ZoomableImage, metadata: { name: 'ZoomableImage', type: 'composite' } });
     registry.register({ component: Status, metadata: { name: 'Status', type: 'composite' } });
     registry.register({ component: SiteHeader, metadata: { name: 'SiteHeader', type: 'composite' } });
     registry.register({ component: SiteFooter, metadata: { name: 'SiteFooter', type: 'composite' } });
     registry.register({ component: HomeHero, metadata: { name: 'HomeHero', type: 'composite' } });
-    registry.register({ component: HomeWhatWeBuild, metadata: { name: 'HomeWhatWeBuild', type: 'composite' } });
-    registry.register({ component: HomeHowWeWork, metadata: { name: 'HomeHowWeWork', type: 'composite' } });
-    registry.register({ component: SelectedPortfolio, metadata: { name: 'SelectedPortfolio', type: 'composite' } });
-    registry.register({ component: SuperBifyPreview, metadata: { name: 'SuperBifyPreview', type: 'composite' } });
-    registry.register({ component: AboutPreview, metadata: { name: 'AboutPreview', type: 'composite' } });
-    registry.register({ component: InquiryMottoCTA, metadata: { name: 'InquiryMottoCTA', type: 'composite' } });
+    registry.register({ component: HomeServices, metadata: { name: 'HomeServices', type: 'composite' } });
+    registry.register({ component: HomeCases, metadata: { name: 'HomeCases', type: 'composite' } });
+    registry.register({ component: HomeExperience, metadata: { name: 'HomeExperience', type: 'composite' } });
+    registry.register({ component: HomeProcess, metadata: { name: 'HomeProcess', type: 'composite' } });
+    registry.register({ component: HomeFaq, metadata: { name: 'HomeFaq', type: 'composite' } });
+    registry.register({ component: HomeInquiryCTA, metadata: { name: 'HomeInquiryCTA', type: 'composite' } });
+    registry.register({ component: ServicesList, metadata: { name: 'ServicesList', type: 'composite' } });
+    registry.register({ component: ServicePage, metadata: { name: 'ServicePage', type: 'composite' } });
+    registry.register({ component: ProcessPage, metadata: { name: 'ProcessPage', type: 'composite' } });
     registry.register({ component: PortfolioList, metadata: { name: 'PortfolioList', type: 'composite' } });
     registry.register({ component: PortfolioDetail, metadata: { name: 'PortfolioDetail', type: 'composite' } });
     registry.register({ component: SuperBifyList, metadata: { name: 'SuperBifyList', type: 'composite' } });
     registry.register({ component: SuperBifyDetail, metadata: { name: 'SuperBifyDetail', type: 'composite' } });
-    registry.register({ component: InquiryForm, metadata: { name: 'InquiryForm', type: 'composite' } });
     registry.register({ component: AboutPage, metadata: { name: 'AboutPage', type: 'composite' } });
+    registry.register({ component: InquiryForm, metadata: { name: 'InquiryForm', type: 'composite' } });
     logger.log('Registered 20ft Studio components');
 } else {
     logger.warn('ComponentRegistry not available — skipping auto-registration');

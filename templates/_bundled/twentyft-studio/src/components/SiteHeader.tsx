@@ -4,6 +4,7 @@ import BrandLogo from './BrandLogo';
 import Container from './Container';
 import PrimaryButton from './PrimaryButton';
 import TextLink from './TextLink';
+import { PRIMARY_ACTION, PRIMARY_NAV } from '../content/nav';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import type { EditorAttrs } from '../types/template';
 
@@ -83,24 +84,25 @@ export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.R
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: 'var(--20ft-spacing-xl, 2.5rem)',
+                                gap: 'var(--20ft-spacing-lg, 1.75rem)',
                             }}
                             data-testid="header-nav"
-                            aria-label="Main"
+                            aria-label="주요 메뉴"
                         >
-                            <TextLink href="/portfolio" data-testid="header-nav-portfolio">
-                                Portfolio
-                            </TextLink>
-                            <TextLink href="/superbify" data-testid="header-nav-superbify">
-                                SuperBify
-                            </TextLink>
-                            <TextLink href="/about" data-testid="header-nav-about">
-                                About
-                            </TextLink>
+                            {PRIMARY_NAV.map((item) => (
+                                <TextLink key={item.href} href={item.href} data-testid={item['data-testid']}>
+                                    {item.label}
+                                </TextLink>
+                            ))}
                         </Nav>
 
-                        <PrimaryButton href="/inquiry" variant="primary" size="small" data-testid="header-cta">
-                            프로젝트 문의
+                        <PrimaryButton
+                            href={PRIMARY_ACTION.href}
+                            variant="primary"
+                            size="small"
+                            data-testid={PRIMARY_ACTION['data-testid']}
+                        >
+                            {PRIMARY_ACTION.label}
                         </PrimaryButton>
                     </Div>
 
@@ -128,7 +130,7 @@ export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.R
                         }}
                         data-testid="header-menu-trigger"
                     >
-                        <MenuIcon />
+                        <MenuIcon open={menuOpen} />
                     </Button>
                 </Div>
             </Container>
@@ -138,12 +140,21 @@ export function SiteHeader({ className, editorAttrs }: SiteHeaderProps): React.R
     );
 }
 
-function MenuIcon(): React.ReactElement {
+function MenuIcon({ open }: { open: boolean }): React.ReactElement {
     return (
         <svg width="22" height="16" viewBox="0 0 20 14" fill="none" aria-hidden="true" focusable="false">
-            <path d="M0 1H20" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M0 7H20" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M0 13H20" stroke="currentColor" strokeWidth="1.5" />
+            {open ? (
+                <>
+                    <path d="M2 1L18 13" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M18 1L2 13" stroke="currentColor" strokeWidth="1.5" />
+                </>
+            ) : (
+                <>
+                    <path d="M0 1H20" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M0 7H20" stroke="currentColor" strokeWidth="1.5" />
+                    <path d="M0 13H20" stroke="currentColor" strokeWidth="1.5" />
+                </>
+            )}
         </svg>
     );
 }
@@ -163,22 +174,22 @@ function MobileMenu({ onClose }: { onClose: () => void }): React.ReactElement {
                 flexDirection: 'column',
                 gap: 'var(--20ft-spacing-md, 1rem)',
                 zIndex: 50,
+                boxShadow: '0 12px 24px rgba(16, 42, 76, 0.08)',
             }}
             data-testid="header-mobile-menu"
             id="site-mobile-menu"
         >
-            <MobileNavLink href="/portfolio" onClick={onClose}>
-                Portfolio
-            </MobileNavLink>
-            <MobileNavLink href="/superbify" onClick={onClose}>
-                SuperBify
-            </MobileNavLink>
-            <MobileNavLink href="/about" onClick={onClose}>
-                About
-            </MobileNavLink>
-            <MobileNavLink href="/inquiry" onClick={onClose}>
-                Project Inquiry
-            </MobileNavLink>
+            {PRIMARY_NAV.map((item) => (
+                <MobileNavLink key={item.href} href={item.href} onClick={onClose}>
+                    {item.label}
+                </MobileNavLink>
+            ))}
+
+            <Div style={{ marginTop: 'var(--20ft-spacing-xs, 0.5rem)' }}>
+                <PrimaryButton href={PRIMARY_ACTION.href} variant="primary" data-testid="header-mobile-cta">
+                    {PRIMARY_ACTION.label}
+                </PrimaryButton>
+            </Div>
         </Div>
     );
 }

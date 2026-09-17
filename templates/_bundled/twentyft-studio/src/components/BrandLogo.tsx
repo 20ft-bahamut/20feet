@@ -67,6 +67,10 @@ export function BrandLogo({
         height: height ?? (variant === 'badge' ? '3rem' : '1.5rem'),
         width: 'auto',
         maxWidth: '100%',
+        // 세로 flex 컨테이너에 그대로 들어가면 align-items: stretch가 가로 폭을 늘려
+        // 로고가 가로로 찌그러진다(푸터에서 비율 3.9 → 21.2로 늘어난 것을 확인).
+        alignSelf: 'flex-start',
+        objectFit: 'contain',
         ...style,
     };
 

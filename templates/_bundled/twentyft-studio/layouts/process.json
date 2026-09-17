@@ -1,0 +1,30 @@
+{
+    "version": "1.0.0",
+    "layout_name": "process",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.process.title",
+        "description": "$t:twentyft.routes.process.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "process",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.process.title",
+                "description": "$t:twentyft.routes.process.description"
+            }
+        }
+    },
+    "data_sources": [],
+    "slots": {
+        "content": [
+            {
+                "comment": "F-301: 진행 안내와 자주 묻는 질문",
+                "id": "process_page",
+                "type": "composite",
+                "name": "ProcessPage"
+            }
+        ]
+    }
+}

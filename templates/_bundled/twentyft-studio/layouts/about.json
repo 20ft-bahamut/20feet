@@ -16,13 +16,30 @@
             }
         }
     },
-    "data_sources": [],
+    "data_sources": [
+        {
+            "id": "about_cases",
+            "label_key": "$t:twentyft.data_source.about_cases",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/portfolio/projects",
+            "method": "GET",
+            "params": {
+                "per_page": "6"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
     "slots": {
         "content": [
             {
+                "comment": "F-401: 이십피트 소개 — 해온 일, 담당 범위, 일하는 방식",
                 "id": "about_page",
                 "type": "composite",
-                "name": "AboutPage"
+                "name": "AboutPage",
+                "props": {
+                    "cases": "{{about_cases?.data ?? null}}"
+                }
             }
         ]
     }

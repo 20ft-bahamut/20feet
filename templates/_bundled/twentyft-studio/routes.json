@@ -1,6 +1,6 @@
 {
-    "version": "1.0.0",
-    "description": "twentyft-studio 사용자 템플릿 라우트 정의 (Portfolio / SuperBify / Project Inquiry)",
+    "version": "1.1.0",
+    "description": "twentyft-studio 사용자 템플릿 라우트 정의 (제작 서비스 / 제작 사례 / 진행 안내 / 이십피트 소개 / 제작 문의 / SuperBify)",
     "routes": [
         {
             "_comment": "=== 홈 ===",
@@ -12,7 +12,43 @@
             }
         },
         {
-            "_comment": "=== 포트폴리오 목록 ===",
+            "_comment": "=== 제작 서비스 목록 ===",
+            "path": "/services",
+            "layout": "services/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.services.title"
+            }
+        },
+        {
+            "_comment": "=== 홈페이지 제작 상세 ===",
+            "path": "/services/website",
+            "layout": "services/website",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.services_website.title"
+            }
+        },
+        {
+            "_comment": "=== 쇼핑몰 제작 상세 ===",
+            "path": "/services/commerce",
+            "layout": "services/commerce",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.services_commerce.title"
+            }
+        },
+        {
+            "_comment": "=== 맞춤형 웹프로그램 개발 상세 ===",
+            "path": "/services/web-development",
+            "layout": "services/web-development",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.services_web_development.title"
+            }
+        },
+        {
+            "_comment": "=== 제작 사례 목록 (기존 경로 보존) ===",
             "path": "/portfolio",
             "layout": "portfolio/index",
             "auth_required": false,
@@ -21,7 +57,16 @@
             }
         },
         {
-            "_comment": "=== 포트폴리오 상세 ===",
+            "_comment": "=== 퓨어폴 이전 공개 주소 — 같은 사례를 그대로 보여준다 (canonical 은 대표 주소) ===",
+            "path": "/portfolio/purepol-saas",
+            "layout": "portfolio/purepol-saas",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.portfolio_detail.title"
+            }
+        },
+        {
+            "_comment": "=== 제작 사례 상세 (기존 경로 보존) ===",
             "path": "/portfolio/:slug",
             "layout": "portfolio/detail",
             "auth_required": false,
@@ -30,25 +75,16 @@
             }
         },
         {
-            "_comment": "=== SuperBify 목록 ===",
-            "path": "/superbify",
-            "layout": "superbify/index",
+            "_comment": "=== 진행 안내 ===",
+            "path": "/process",
+            "layout": "process",
             "auth_required": false,
             "meta": {
-                "title": "$t:twentyft.routes.superbify.title"
+                "title": "$t:twentyft.routes.process.title"
             }
         },
         {
-            "_comment": "=== SuperBify 상세 ===",
-            "path": "/superbify/:slug",
-            "layout": "superbify/detail",
-            "auth_required": false,
-            "meta": {
-                "title": "$t:twentyft.routes.superbify_detail.title"
-            }
-        },
-        {
-            "_comment": "=== About ===",
+            "_comment": "=== 이십피트 소개 ===",
             "path": "/about",
             "layout": "about",
             "auth_required": false,
@@ -57,12 +93,30 @@
             }
         },
         {
-            "_comment": "=== 프로젝트 문의 ===",
+            "_comment": "=== 제작 문의 ===",
             "path": "/inquiry",
             "layout": "inquiry",
             "auth_required": false,
             "meta": {
                 "title": "$t:twentyft.routes.inquiry.title"
+            }
+        },
+        {
+            "_comment": "=== SuperBify 목록 (개발자 유입 경로 보존) ===",
+            "path": "/superbify",
+            "layout": "superbify/index",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.superbify.title"
+            }
+        },
+        {
+            "_comment": "=== SuperBify 상세 (기존 경로 보존) ===",
+            "path": "/superbify/:slug",
+            "layout": "superbify/detail",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:twentyft.routes.superbify_detail.title"
             }
         },
         {

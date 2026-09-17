@@ -29,16 +29,31 @@
             },
             "auto_fetch": true,
             "loading_strategy": "progressive"
+        },
+        {
+            "comment": "자체 제작 데모도 같은 목록에서 보여준다 — 배지로 성격을 구분한다.",
+            "id": "portfolio_demos",
+            "label_key": "$t:twentyft.data_source.portfolio_demos",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/superbify/projects",
+            "method": "GET",
+            "params": {
+                "per_page": "6"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
         }
     ],
     "slots": {
         "content": [
             {
+                "comment": "F-501: 제작 사례 목록 — 기존 /portfolio 경로 보존",
                 "id": "portfolio_list",
                 "type": "composite",
                 "name": "PortfolioList",
                 "props": {
-                    "items": "{{portfolio_items?.data ?? null}}"
+                    "items": "{{portfolio_items?.data ?? null}}",
+                    "demos": "{{portfolio_demos?.data ?? null}}"
                 }
             }
         ]

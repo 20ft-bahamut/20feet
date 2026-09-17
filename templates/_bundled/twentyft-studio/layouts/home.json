@@ -43,7 +43,7 @@
             "method": "GET",
             "params": {
                 "featured": "1",
-                "per_page": "3"
+                "per_page": "2"
             },
             "auto_fetch": true,
             "loading_strategy": "progressive"
@@ -52,45 +52,47 @@
     "slots": {
         "content": [
             {
+                "comment": "F-101: 첫 화면 — 제목·설명·행동만",
                 "id": "home_hero",
                 "type": "composite",
                 "name": "HomeHero"
             },
             {
-                "id": "home_what_we_build",
+                "comment": "F-102: 주요 제작 사례 — 실제 화면을 첫 화면 바로 다음에 둔다",
+                "id": "home_cases",
                 "type": "composite",
-                "name": "HomeWhatWeBuild"
-            },
-            {
-                "id": "home_selected_portfolio",
-                "type": "composite",
-                "name": "SelectedPortfolio",
+                "name": "HomeCases",
                 "props": {
-                    "items": "{{portfolio_preview?.data ?? null}}"
+                    "items": "{{portfolio_preview?.data ?? null}}",
+                    "demos": "{{superbify_preview?.data ?? null}}"
                 }
             },
             {
-                "id": "home_superbify_preview",
+                "comment": "F-103: 제작 서비스 3종 — 제공 내용 한 줄 + 상세 링크",
+                "id": "home_services",
                 "type": "composite",
-                "name": "SuperBifyPreview",
+                "name": "HomeServices"
+            },
+            {
+                "comment": "F-104: 담당자 경험 — 확인된 경력 + 관련 사례·소개 연결",
+                "id": "home_experience",
+                "type": "composite",
+                "name": "HomeExperience",
                 "props": {
-                    "items": "{{superbify_preview?.data ?? null}}"
+                    "cases": "{{portfolio_preview?.data ?? null}}"
                 }
             },
             {
-                "id": "home_about_preview",
+                "comment": "F-105: 진행 방법 — 단계마다 한 문장",
+                "id": "home_process",
                 "type": "composite",
-                "name": "AboutPreview"
+                "name": "HomeProcess"
             },
             {
-                "id": "home_how_we_work",
+                "comment": "F-107: 문의",
+                "id": "home_inquiry_cta",
                 "type": "composite",
-                "name": "HomeHowWeWork"
-            },
-            {
-                "id": "home_inquiry_motto_cta",
-                "type": "composite",
-                "name": "InquiryMottoCTA"
+                "name": "HomeInquiryCTA"
             }
         ]
     }

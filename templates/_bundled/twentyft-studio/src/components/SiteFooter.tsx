@@ -2,19 +2,13 @@ import React from 'react';
 import { A, Div, Footer as FooterEl, Nav, Span } from './basic';
 import BrandLogo from './BrandLogo';
 import Container from './Container';
+import { FOOTER_COLUMNS } from '../content/nav';
 import type { EditorAttrs } from '../types/template';
 
 export interface SiteFooterProps {
     className?: string;
     editorAttrs?: EditorAttrs;
 }
-
-const navLinks = [
-    { label: 'Portfolio', href: '/portfolio' },
-    { label: 'SuperBify', href: '/superbify' },
-    { label: 'About', href: '/about' },
-    { label: 'Project Inquiry', href: '/inquiry' },
-];
 
 function FooterLink({ label, href }: { label: string; href: string }): React.ReactElement {
     const [isHovered, setIsHovered] = React.useState(false);
@@ -23,13 +17,16 @@ function FooterLink({ label, href }: { label: string; href: string }): React.Rea
         <A
             href={href}
             style={{
+                display: 'inline-block',
+                paddingBlock: '0.3125rem',
                 color: isHovered ? 'var(--20ft-heritage-gold, #B69B5F)' : 'inherit',
                 textDecoration: 'none',
                 fontFamily: 'var(--20ft-font-body, sans-serif)',
                 fontSize: '0.875rem',
-                fontWeight: 600,
+                fontWeight: 500,
                 lineHeight: 1.5,
-                transition: `color var(--20ft-duration-base) var(--20ft-ease-out)`,
+                whiteSpace: 'nowrap',
+                transition: 'color var(--20ft-duration-base) var(--20ft-ease-out)',
             }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -39,13 +36,20 @@ function FooterLink({ label, href }: { label: string; href: string }): React.Rea
     );
 }
 
+/**
+ * 공통 푸터.
+ *
+ * 왼쪽은 로고·사업 설명 한 문장·저작권만, 오른쪽은 세 개의 짧은 링크 열.
+ * 확인된 연락처가 없으므로 연락처 줄은 두지 않는다.
+ * 문의 유도 버튼을 되풀이하지 않아 본문보다 강조되지 않게 한다.
+ */
 export function SiteFooter({ className, editorAttrs }: SiteFooterProps): React.ReactElement {
     return (
         <FooterEl
             className={className}
             {...editorAttrs}
             style={{
-                paddingBlock: 'var(--20ft-section-py-md, 4rem)',
+                paddingBlock: 'var(--20ft-footer-py, 3.5rem)',
                 backgroundColor: 'var(--20ft-charcoal, #1A1A1A)',
                 color: 'var(--20ft-paper-white, #FAF8F3)',
             }}
@@ -56,7 +60,7 @@ export function SiteFooter({ className, editorAttrs }: SiteFooterProps): React.R
                     style={{
                         display: 'grid',
                         gridTemplateColumns: 'var(--20ft-footer-columns, 1fr)',
-                        gap: 'var(--20ft-spacing-xl, 2.5rem)',
+                        gap: 'var(--20ft-footer-gap, 2rem)',
                         alignItems: 'start',
                         width: '100%',
                         minWidth: 0,
@@ -66,45 +70,33 @@ export function SiteFooter({ className, editorAttrs }: SiteFooterProps): React.R
                         style={{
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                            gap: 'var(--20ft-spacing-xs, 0.5rem)',
                             width: '100%',
                             minWidth: 0,
                         }}
                     >
-                        <BrandLogo variant="compact" surface="dark" height="1.75rem" />
+                        <BrandLogo variant="compact" surface="dark" height="1.625rem" />
 
                         <Span
                             style={{
                                 fontFamily: 'var(--20ft-font-body, sans-serif)',
                                 fontSize: '0.9375rem',
-                                opacity: 0.72,
-                                lineHeight: 1.65,
+                                opacity: 0.78,
+                                lineHeight: 1.7,
                                 letterSpacing: '-0.005em',
+                                maxWidth: 'var(--20ft-footer-intro-max, 32ch)',
+                                wordBreak: 'keep-all',
                             }}
+                            data-testid="footer-intro"
                         >
-                            Software Studio / Digital Garage
-                        </Span>
-
-                        <Span
-                            style={{
-                                fontFamily: 'var(--20ft-font-mono, monospace)',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                letterSpacing: '0.04em',
-                                textTransform: 'uppercase',
-                                color: 'var(--20ft-heritage-gold, #B69B5F)',
-                                opacity: 0.85,
-                            }}
-                            data-testid="footer-tagline"
-                        >
-                            A SMALL SPACE. INFINITE POSSIBILITIES.
+                            홈페이지·쇼핑몰과 맞춤형 웹프로그램을 제작합니다.
                         </Span>
 
                         <Span
                             style={{
                                 fontFamily: 'var(--20ft-font-body, sans-serif)',
                                 fontSize: '0.75rem',
-                                opacity: 0.5,
+                                opacity: 0.45,
                                 letterSpacing: '-0.005em',
                             }}
                             data-testid="footer-signature"
@@ -113,40 +105,52 @@ export function SiteFooter({ className, editorAttrs }: SiteFooterProps): React.R
                         </Span>
                     </Div>
 
-                    <Nav
-                        aria-label="Footer navigation"
+                    <Div
                         style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 'var(--20ft-spacing-xs, 0.5rem)',
-                            alignItems: 'var(--20ft-footer-nav-align, flex-start)',
+                            display: 'grid',
+                            gridTemplateColumns: 'var(--20ft-footer-link-columns, 1fr)',
+                            gap: 'var(--20ft-footer-link-gap, 1.5rem)',
+                            width: '100%',
+                            minWidth: 0,
                         }}
                     >
-                        {navLinks.map((link) => (
-                            <FooterLink key={link.href} label={link.label} href={link.href} />
+                        {FOOTER_COLUMNS.map((column) => (
+                            <Nav
+                                key={column.heading}
+                                aria-label={column.heading}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                    width: '100%',
+                                    minWidth: 0,
+                                }}
+                            >
+                                <Span
+                                    style={{
+                                        marginBottom: 'var(--20ft-spacing-xs, 0.5rem)',
+                                        fontFamily: 'var(--20ft-font-mono, monospace)',
+                                        fontSize: '0.6875rem',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase',
+                                        color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                        opacity: 0.85,
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {column.heading}
+                                </Span>
+                                {column.items.map((item) => (
+                                    <FooterLink
+                                        key={`${column.heading}-${item.href}`}
+                                        label={item.label}
+                                        href={item.href}
+                                    />
+                                ))}
+                            </Nav>
                         ))}
-                    </Nav>
-                </Div>
-
-                <Div
-                    style={{
-                        marginTop: 'var(--20ft-spacing-xl, 2.5rem)',
-                        paddingTop: 'var(--20ft-spacing-lg, 1.5rem)',
-                        borderTop: '1px solid var(--20ft-border-inverse, rgba(244, 240, 230, 0.12))',
-                    }}
-                >
-                    <Span
-                        style={{
-                            display: 'block',
-                            fontFamily: 'var(--20ft-font-mono, monospace)',
-                            fontSize: '0.75rem',
-                            letterSpacing: '0.08em',
-                            opacity: 0.5,
-                        }}
-                        data-testid="footer-capability"
-                    >
-                        WEB / COMMERCE / SOFTWARE / GNUBOARD 7
-                    </Span>
+                    </Div>
                 </Div>
             </Container>
         </FooterEl>

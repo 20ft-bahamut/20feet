@@ -1,310 +1,488 @@
 import React from 'react';
-import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
+import { A, Article, Div, H1, H2, Li, P, Section, Span, Ul } from './basic';
 import Container from './Container';
 import LoadingRows from './LoadingRows';
+import PrimaryButton from './PrimaryButton';
 import Status from './Status';
+import ZoomableImage from './ZoomableImage';
+import { resolveLegacySlug } from '../content/portfolio';
+import { detailMeta } from '../content/seo';
+import { usePageMeta } from '../hooks/usePageMeta';
+import { sanitizeHtml } from '../utils/sanitizeHtml';
 import type { PortfolioItem, EditorAttrs } from '../types/template';
 
 export interface PortfolioDetailProps {
     item?: PortfolioItem | null;
+    /** 현재 주소의 slug. 예전 주소로 들어온 방문자를 안내하는 데만 쓴다. */
+    slug?: string;
+    /**
+     * 대표 주소. 이전 주소로 열린 화면은 대표 주소를 canonical 로 가리킨다.
+     * 지정하지 않으면 현재 경로를 그대로 쓴다.
+     */
+    canonicalPath?: string;
     /** True while the detail data source is still loading. */
     loading?: boolean;
     className?: string;
     editorAttrs?: EditorAttrs;
 }
 
-export function PortfolioDetail({ item = null, loading = false, className, editorAttrs }: PortfolioDetailProps): React.ReactElement {
+const FIELD_LABEL: Record<string, string> = {
+    WEB: '홈페이지',
+    COMMERCE: '쇼핑몰',
+    SOFTWARE: '업무 시스템',
+    OPEN_SOURCE: '오픈소스',
+};
+
+/** 어떤 유형으로 문의를 이어갈지, 버튼에 무엇이라고 쓸지 정한다. */
+const TYPE_TO_INQUIRY: Record<string, { type: string; label: string }> = {
+    WEB: { type: 'WEB', label: '홈페이지 제작 문의' },
+    COMMERCE: { type: 'COMMERCE', label: '쇼핑몰 제작 문의' },
+    SOFTWARE: { type: 'INTERNAL_SYSTEM', label: '웹프로그램 개발 문의' },
+    OPEN_SOURCE: { type: 'OTHER', label: '제작 문의하기' },
+};
+
+const DEFAULT_INQUIRY = { type: 'OTHER', label: '제작 문의하기' };
+
+export function PortfolioDetail({
+    item = null,
+    slug,
+    canonicalPath,
+    loading = false,
+    className,
+    editorAttrs,
+}: PortfolioDetailProps): React.ReactElement {
+    const legacyTarget = !item && slug ? resolveLegacySlug(slug) : null;
+
+    usePageMeta({
+        ...detailMeta(item?.title, '/portfolio', item?.summary),
+        canonicalPath,
+    });
 
     return (
         <Article
             className={className}
             {...editorAttrs}
-            style={{
-                paddingBlock: 'var(--20ft-spacing-3xl, 6rem)',
-                backgroundColor: 'var(--20ft-paper-white, #FAF8F3)',
-                minHeight: '60vh',
-            }}
+            style={{ backgroundColor: 'var(--20ft-paper-white, #FAF8F3)' }}
             data-testid="portfolio-detail-page"
         >
-            <Container>
-                {loading ? (
-                    <LoadingRows rows={3} testId="portfolio-detail-loading" mediaAspect="21 / 9" />
-                ) : !item ? (
-                    <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-md, 1rem)' }}>
-                        <Status
-                            title="프로젝트를 찾을 수 없습니다"
-                            message="해당 프로젝트가 존재하지 않거나 아직 공개되지 않았습니다."
-                        />
-                    </Div>
-                ) : (
-                    <Div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--20ft-spacing-lg, 1.5rem)' }}>
-                        <Span
+            <Section
+                style={{
+                    paddingTop: 'var(--20ft-hero-py, 4rem)',
+                    paddingBottom: 'var(--20ft-section-py-lg, 4.5rem)',
+                }}
+            >
+                <Container>
+                    {loading ? (
+                        <LoadingRows rows={3} testId="portfolio-detail-loading" mediaAspect="16 / 9" />
+                    ) : !item ? (
+                        <Div
                             style={{
-                                fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                letterSpacing: '0.12em',
-                                textTransform: 'uppercase',
-                                color: 'var(--20ft-heritage-gold, #B69B5F)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 'var(--20ft-spacing-md, 1rem)',
                             }}
+                            data-testid="portfolio-detail-missing"
                         >
-                            Portfolio
-                        </Span>
-
-                        {item.types && item.types.length > 0 && item.year && (
-                            <Span
-                                style={{
-                                    fontFamily: 'var(--20ft-font-mono, monospace)',
-                                    fontSize: '0.8125rem',
-                                    color: 'var(--20ft-gray-500, #777A7D)',
-                                }}
-                            >
-                                {item.types.join(' / ')} / {item.year}
-                            </Span>
-                        )}
-
-                        <H1
-                            style={{
-                                margin: 0,
-                                fontFamily: 'var(--20ft-font-display, Georgia, serif)',
-                                fontWeight: 800,
-                                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                                color: 'var(--20ft-deep-indigo, #102A4C)',
-                                wordBreak: 'keep-all',
-                                overflowWrap: 'break-word',
-                            }}
-                        >
-                            {item.title}
-                        </H1>
-
-                        {item.summary && (
-                            <P
-                                style={{
-                                    margin: 0,
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    fontSize: '1.125rem',
-                                    color: 'var(--20ft-text-muted, #5A5A5A)',
-                                }}
-                            >
-                                {item.summary}
-                            </P>
-                        )}
-
-                        {item.coverImageUrl && (
-                            <Img
-                                src={item.coverImageUrl}
-                                alt={`${item.title} hero`}
-                                style={{
-                                    width: '100%',
-                                    aspectRatio: '21 / 9',
-                                    objectFit: 'cover',
-                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
-                                }}
+                            <Status
+                                title="프로젝트를 찾을 수 없습니다"
+                                message="해당 프로젝트가 존재하지 않거나 아직 공개되지 않았습니다."
                             />
-                        )}
-
-                        {(item.clientName || item.techStack?.length || item.status) && (
+                            {legacyTarget && (
+                                <P
+                                    style={{
+                                        margin: 0,
+                                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                        fontSize: '0.9375rem',
+                                        lineHeight: 1.8,
+                                        color: 'var(--20ft-text-muted, #5E6063)',
+                                        wordBreak: 'keep-all',
+                                    }}
+                                    data-testid="portfolio-detail-legacy-notice"
+                                >
+                                    찾으시는 사례의 주소가 바뀌었습니다.{' '}
+                                    <A
+                                        href={`/portfolio/${legacyTarget}`}
+                                        style={{
+                                            color: 'var(--20ft-indigo, #183B6B)',
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        현재 주소로 보기
+                                    </A>
+                                </P>
+                            )}
+                            <Div>
+                                <PrimaryButton href="/portfolio" variant="secondary">
+                                    제작 사례 목록으로
+                                </PrimaryButton>
+                            </Div>
+                        </Div>
+                    ) : (
+                        <Div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 'var(--20ft-spacing-xl, 2.5rem)',
+                                width: '100%',
+                                minWidth: 0,
+                            }}
+                        >
                             <Div
                                 style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                    gap: 'var(--20ft-spacing-md, 1rem)',
-                                    padding: 'var(--20ft-spacing-md, 1rem)',
-                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
-                                    backgroundColor: 'var(--20ft-bg-secondary, #F4F0E6)',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 'var(--20ft-content-gap-md, 1.25rem)',
+                                    width: '100%',
+                                    minWidth: 0,
                                 }}
                             >
-                                {item.clientName && (
-                                    <MetaRow label="Client" value={item.clientName} />
-                                )}
-                                {item.techStack && item.techStack.length > 0 && (
-                                    <MetaRow label="Tech" value={item.techStack.join(', ')} />
-                                )}
-                                {item.status && <MetaRow label="Status" value={item.status} />}
-                            </Div>
-                        )}
-
-                        {item.role && item.role.length > 0 && (
-                            <Div>
-                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>What We Did</H2>
-                                <Ul
+                                <Div
                                     style={{
-                                        listStyle: 'none',
-                                        margin: 0,
-                                        padding: 0,
                                         display: 'flex',
-                                        flexDirection: 'column',
+                                        flexWrap: 'wrap',
+                                        alignItems: 'center',
                                         gap: 'var(--20ft-spacing-xs, 0.5rem)',
                                     }}
                                 >
-                                    {item.role.map((roleItem) => (
-                                        <Li
-                                            key={roleItem}
+                                    <Span
+                                        style={{
+                                            display: 'inline-flex',
+                                            padding: '0.1875rem 0.5rem',
+                                            borderRadius: 'var(--20ft-radius-sm, 2px)',
+                                            borderWidth: '1px',
+                                            borderStyle: 'solid',
+                                            borderColor: 'var(--20ft-indigo, #183B6B)',
+                                            color: 'var(--20ft-indigo, #183B6B)',
+                                            fontFamily: 'var(--20ft-font-mono, monospace)',
+                                            fontSize: '0.6875rem',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.06em',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                        data-testid="portfolio-detail-kind"
+                                    >
+                                        고객 프로젝트
+                                    </Span>
+                                    <Span
+                                        style={{
+                                            fontFamily: 'var(--20ft-font-mono, monospace)',
+                                            fontSize: '0.6875rem',
+                                            letterSpacing: '0.06em',
+                                            color: 'var(--20ft-gray-500, #777A7D)',
+                                        }}
+                                    >
+                                        {[
+                                            item.types?.map((t) => FIELD_LABEL[t] ?? t).join(' · '),
+                                            item.year,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' · ')}
+                                    </Span>
+                                </Div>
+
+                                <H1
+                                    style={{
+                                        margin: 0,
+                                        fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                                        fontWeight: 700,
+                                        fontSize: 'clamp(1.75rem, 3.6vw, 2.75rem)',
+                                        lineHeight: 1.2,
+                                        letterSpacing: '-0.02em',
+                                        color: 'var(--20ft-deep-indigo, #102A4C)',
+                                        wordBreak: 'keep-all',
+                                        overflowWrap: 'break-word',
+                                    }}
+                                >
+                                    {item.title}
+                                </H1>
+
+                                {item.summary && (
+                                    <Div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 'var(--20ft-content-gap-sm, 0.75rem)',
+                                            width: '100%',
+                                            minWidth: 0,
+                                        }}
+                                        data-testid="portfolio-detail-purpose"
+                                    >
+                                        <H2
                                             style={{
-                                                display: 'flex',
-                                                alignItems: 'baseline',
-                                                gap: 'var(--20ft-spacing-sm, 0.5rem)',
+                                                margin: 0,
+                                                fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                                                fontWeight: 600,
+                                                fontSize: 'var(--20ft-h2-size, 1.5rem)',
+                                                letterSpacing: '-0.015em',
+                                                lineHeight: 1.3,
+                                                color: 'var(--20ft-deep-indigo, #102A4C)',
+                                                wordBreak: 'keep-all',
+                                            }}
+                                        >
+                                            어떤 업무를 위한 시스템인가
+                                        </H2>
+                                        <P
+                                            style={{
+                                                margin: 0,
                                                 fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                                fontSize: '1rem',
-                                                lineHeight: 1.7,
-                                                color: 'var(--20ft-text-primary, #1A1A1A)',
+                                                fontSize: '1.0625rem',
+                                                lineHeight: 1.8,
+                                                letterSpacing: '-0.01em',
+                                                color: 'var(--20ft-text-muted, #5E6063)',
+                                                maxWidth: '62ch',
                                                 wordBreak: 'keep-all',
                                                 overflowWrap: 'break-word',
                                             }}
                                         >
-                                            <Span
-                                                aria-hidden="true"
-                                                style={{
-                                                    fontFamily: 'var(--20ft-font-mono, monospace)',
-                                                    fontSize: '0.8125rem',
-                                                    color: 'var(--20ft-heritage-gold, #B69B5F)',
-                                                }}
-                                            >
-                                                —
-                                            </Span>
-                                            {roleItem}
-                                        </Li>
-                                    ))}
-                                </Ul>
+                                            {item.summary}
+                                        </P>
+                                    </Div>
+                                )}
                             </Div>
-                        )}
 
-                        {item.description && (
+                            {item.coverImageUrl && (
+                                <ZoomableImage
+                                    src={item.coverImageUrl}
+                                    alt={`${item.title} 화면`}
+                                    loading="eager"
+                                    testId="portfolio-detail-cover"
+                                    style={{
+                                        display: 'block',
+                                        width: '100%',
+                                        aspectRatio: 'var(--20ft-detail-hero-aspect, 16 / 9)',
+                                        objectFit: 'cover',
+                                        borderRadius: 'var(--20ft-radius, 6px)',
+                                        border: '1px solid var(--20ft-border, rgba(16, 42, 76, 0.12))',
+                                    }}
+                                />
+                            )}
+
+                            <DetailBlock heading="프로젝트 정보">
+                                <MetaTable item={item} />
+                            </DetailBlock>
+
+                            {item.description && (
+                                <DetailBlock heading="프로젝트 설명">
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                                            fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                            fontSize: '1rem',
+                                            lineHeight: 1.85,
+                                            color: 'var(--20ft-text-primary, #1A1A1A)',
+                                            wordBreak: 'keep-all',
+                                            overflowWrap: 'break-word',
+                                        }}
+                                        // 관리자 게시판 본문. sanitizeHtml이 허용 태그·속성만 남긴다.
+                                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(item.description) }}
+                                    />
+                                </DetailBlock>
+                            )}
+
+                            {item.galleryImageUrls && item.galleryImageUrls.length > 0 && (
+                                <DetailBlock heading="실제 화면">
+                                    <Ul
+                                        style={{
+                                            listStyle: 'none',
+                                            margin: 0,
+                                            padding: 0,
+                                            display: 'grid',
+                                            gridTemplateColumns: 'var(--20ft-detail-gallery-columns, 1fr)',
+                                            gap: 'var(--20ft-spacing-md, 1rem)',
+                                            width: '100%',
+                                            minWidth: 0,
+                                        }}
+                                    >
+                                        {item.galleryImageUrls.map((url, index) => (
+                                            <Li key={`${url}-${index}`} style={{ minWidth: 0 }}>
+                                                <ZoomableImage
+                                                    src={url}
+                                                    alt={`${item.title} 화면 ${index + 1}`}
+                                                    testId={`portfolio-detail-shot-${index}`}
+                                                    style={{
+                                                        display: 'block',
+                                                        width: '100%',
+                                                        aspectRatio: 'var(--20ft-detail-gallery-aspect, 16 / 9)',
+                                                        objectFit: 'cover',
+                                                        borderRadius: 'var(--20ft-radius, 6px)',
+                                                        border: '1px solid var(--20ft-border, rgba(16, 42, 76, 0.12))',
+                                                    }}
+                                                />
+                                            </Li>
+                                        ))}
+                                    </Ul>
+                                </DetailBlock>
+                            )}
+
+                            {item.relatedUrl && (
+                                <DetailBlock heading="관련 링크">
+                                    <A
+                                        href={item.relatedUrl}
+                                        target="_blank"
+                                        rel="noreferrer noopener"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'baseline',
+                                            gap: 'var(--20ft-spacing-xs, 0.5rem)',
+                                            fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                            fontSize: '1rem',
+                                            color: 'var(--20ft-indigo, #183B6B)',
+                                            textDecoration: 'underline',
+                                            overflowWrap: 'anywhere',
+                                        }}
+                                    >
+                                        <Span
+                                            style={{
+                                                fontFamily: 'var(--20ft-font-mono, monospace)',
+                                                fontSize: '0.75rem',
+                                                letterSpacing: '0.06em',
+                                                textTransform: 'uppercase',
+                                                color: 'var(--20ft-gray-500, #777A7D)',
+                                            }}
+                                        >
+                                            서비스 주소
+                                        </Span>
+                                        {item.relatedUrl}
+                                    </A>
+                                </DetailBlock>
+                            )}
+
                             <Div
                                 style={{
-                                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                    lineHeight: 1.7,
-                                    color: 'var(--20ft-text-primary, #1A1A1A)',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                                    paddingTop: 'var(--20ft-spacing-lg, 1.5rem)',
+                                    borderTop: '1px solid var(--20ft-line, #D8D0BF)',
                                 }}
                             >
-                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Project Story</H2>
-                                <div
-                                    style={{ margin: 0 }}
-                                    // eslint-disable-next-line react/no-danger
-                                    dangerouslySetInnerHTML={{ __html: item.description }}
-                                />
-                            </Div>
-                        )}
-
-                        {item.galleryImageUrls && item.galleryImageUrls.length > 0 && (
-                            <Div>
-                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Key Screens</H2>
-                                <Ul
-                                    style={{
-                                        listStyle: 'none',
-                                        margin: 0,
-                                        padding: 0,
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                                        gap: 'var(--20ft-spacing-md, 1rem)',
-                                    }}
+                                <PrimaryButton
+                                    href={`/inquiry?type=${
+                                        (TYPE_TO_INQUIRY[item.types?.[0] ?? ''] ?? DEFAULT_INQUIRY).type
+                                    }`}
+                                    variant="primary"
+                                    size="medium"
+                                    data-testid="portfolio-detail-inquiry"
                                 >
-                                    {item.galleryImageUrls.map((url, index) => (
-                                        <Li key={index}>
-                                            <Img
-                                                src={url}
-                                                alt={`${item.title} gallery ${index + 1}`}
-                                                style={{
-                                                    width: '100%',
-                                                    aspectRatio: '16 / 9',
-                                                    objectFit: 'cover',
-                                                    borderRadius: 'var(--20ft-radius, 0.5rem)',
-                                                }}
-                                            />
-                                        </Li>
-                                    ))}
-                                </Ul>
-                            </Div>
-                        )}
-
-                        {(item.relatedUrl || item.githubUrl) && (
-                            <Div>
-                                <H2 style={{ fontSize: '1.25rem', color: 'var(--20ft-indigo, #183B6B)' }}>Related Links</H2>
-                                <Ul
-                                    style={{
-                                        listStyle: 'none',
-                                        margin: 0,
-                                        padding: 0,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: 'var(--20ft-spacing-xs, 0.5rem)',
-                                    }}
+                                    {(TYPE_TO_INQUIRY[item.types?.[0] ?? ''] ?? DEFAULT_INQUIRY).label}
+                                </PrimaryButton>
+                                <PrimaryButton
+                                    href="/portfolio"
+                                    variant="secondary"
+                                    size="medium"
+                                    data-testid="portfolio-detail-back"
                                 >
-                                    {item.relatedUrl && (
-                                        <Li>
-                                            <ExternalLinkRow href={item.relatedUrl} label="Project Site" />
-                                        </Li>
-                                    )}
-                                    {item.githubUrl && (
-                                        <Li>
-                                            <ExternalLinkRow href={item.githubUrl} label="GitHub" />
-                                        </Li>
-                                    )}
-                                </Ul>
+                                    제작 사례 목록으로
+                                </PrimaryButton>
                             </Div>
-                        )}
-                    </Div>
-                )}
-            </Container>
+                        </Div>
+                    )}
+                </Container>
+            </Section>
         </Article>
     );
 }
 
-function ExternalLinkRow({ href, label }: { href: string; label: string }): React.ReactElement {
+function DetailBlock({
+    heading,
+    children,
+}: {
+    heading: string;
+    children: React.ReactNode;
+}): React.ReactElement {
     return (
-        <A
-            href={href}
-            target="_blank"
-            rel="noreferrer"
+        <Div
             style={{
-                display: 'inline-flex',
-                alignItems: 'baseline',
-                gap: 'var(--20ft-spacing-sm, 0.5rem)',
-                fontFamily: 'var(--20ft-font-body, sans-serif)',
-                fontSize: '1rem',
-                color: 'var(--20ft-indigo, #183B6B)',
-                textDecoration: 'underline',
-                overflowWrap: 'anywhere',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 'var(--20ft-content-gap-sm, 0.75rem)',
+                width: '100%',
+                minWidth: 0,
             }}
         >
-            <Span
+            <H2
                 style={{
-                    fontFamily: 'var(--20ft-font-mono, monospace)',
-                    fontSize: '0.8125rem',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    color: 'var(--20ft-gray-500, #777A7D)',
+                    margin: 0,
+                    fontFamily: 'var(--20ft-font-display, Georgia, serif)',
+                    fontWeight: 600,
+                    fontSize: 'var(--20ft-h2-size, 1.5rem)',
+                    letterSpacing: '-0.015em',
+                    lineHeight: 1.3,
+                    color: 'var(--20ft-deep-indigo, #102A4C)',
+                    wordBreak: 'keep-all',
                 }}
             >
-                {label}
-            </Span>
-            {href}
-        </A>
+                {heading}
+            </H2>
+            {children}
+        </Div>
     );
 }
 
-function MetaRow({ label, value }: { label: string; value: string }): React.ReactElement {
+/**
+ * 프로젝트 정보.
+ *
+ * `role` 은 게시판에 적힌 직함이다. 실제 담당 범위를 뜻하지 않으므로
+ * '역할'로 표기하고, 확인되지 않은 기여 범위는 덧붙이지 않는다.
+ */
+function MetaTable({ item }: { item: PortfolioItem }): React.ReactElement | null {
+    const rows: Array<[string, string]> = [];
+
+    if (item.role && item.role.length > 0) {
+        rows.push(['역할', item.role.join(' · ')]);
+    }
+    if (item.year) {
+        rows.push(['진행 시기', item.year]);
+    }
+    if (item.techStack && item.techStack.length > 0) {
+        rows.push(['사용 기술', item.techStack.join(' · ')]);
+    }
+    if (rows.length === 0) {
+        return null;
+    }
+
     return (
-        <Div>
-            <Span
-                style={{
-                    display: 'block',
-                    fontFamily: 'var(--20ft-font-mono, monospace)',
-                    fontSize: '0.75rem',
-                    color: 'var(--20ft-gray-500, #777A7D)',
-                }}
-            >
-                {label}
-            </Span>
-            <Span
-                style={{
-                    fontFamily: 'var(--20ft-font-body, sans-serif)',
-                    fontSize: '0.9375rem',
-                    color: 'var(--20ft-text-primary, #1A1A1A)',
-                }}
-            >
-                {value}
-            </Span>
+        <Div
+            style={{
+                display: 'grid',
+                gridTemplateColumns: 'var(--20ft-detail-meta-columns, 1fr)',
+                gap: 'var(--20ft-spacing-md, 1rem)',
+                padding: 'var(--20ft-spacing-lg, 1.5rem)',
+                borderRadius: 'var(--20ft-radius, 6px)',
+                backgroundColor: 'var(--20ft-warm-ivory, #F4F0E6)',
+                width: '100%',
+                minWidth: 0,
+            }}
+            data-testid="portfolio-detail-meta"
+        >
+            {rows.map(([label, value]) => (
+                <Div key={label} style={{ minWidth: 0 }}>
+                    <Span
+                        style={{
+                            display: 'block',
+                            fontFamily: 'var(--20ft-font-mono, monospace)',
+                            fontSize: '0.6875rem',
+                            letterSpacing: '0.06em',
+                            textTransform: 'uppercase',
+                            color: 'var(--20ft-gray-500, #777A7D)',
+                        }}
+                    >
+                        {label}
+                    </Span>
+                    <Span
+                        style={{
+                            fontFamily: 'var(--20ft-font-body, sans-serif)',
+                            fontSize: '0.9375rem',
+                            fontWeight: 600,
+                            color: 'var(--20ft-text-primary, #1A1A1A)',
+                        }}
+                    >
+                        {value}
+                    </Span>
+                </Div>
+            ))}
         </Div>
     );
 }

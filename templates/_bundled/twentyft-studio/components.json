@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "templateId": "twentyft-studio",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "components": {
         "basic": [
             {
@@ -165,13 +165,13 @@
             {
                 "name": "SiteHeader",
                 "type": "composite",
-                "description": "Top navigation with Portfolio, SuperBify, Project Inquiry links",
+                "description": "Top navigation: 제작 서비스 / 제작 사례 / 진행 안내 / 이십피트 소개 + 제작 문의 CTA, with mobile menu",
                 "path": "src/components/SiteHeader.tsx"
             },
             {
                 "name": "SiteFooter",
                 "type": "composite",
-                "description": "Site footer with brand logo, signature, capability line, navigation, and copyright (About link removed in v1)",
+                "description": "Footer with brand, inquiry CTA, service/site/product link columns",
                 "path": "src/components/SiteFooter.tsx"
             },
             {
@@ -211,6 +211,12 @@
                 "path": "src/components/Tag.tsx"
             },
             {
+                "name": "ZoomableImage",
+                "type": "composite",
+                "description": "Image that opens at full size when pressed",
+                "path": "src/components/ZoomableImage.tsx"
+            },
+            {
                 "name": "Status",
                 "type": "composite",
                 "description": "Status badge / empty state notice",
@@ -219,55 +225,73 @@
             {
                 "name": "HomeHero",
                 "type": "composite",
-                "description": "Home hero section with capability line",
+                "description": "Home hero: service statement, primary/secondary CTA, and a real work screenshot",
                 "path": "src/components/HomeHero.tsx"
             },
             {
-                "name": "HomeWhatWeBuild",
+                "name": "HomeServices",
                 "type": "composite",
-                "description": "Home capability overview: WEB, COMMERCE, SOFTWARE, GNUBOARD 7",
-                "path": "src/components/HomeWhatWeBuild.tsx"
+                "description": "Home section: the three production services with detail links",
+                "path": "src/components/HomeServices.tsx"
             },
             {
-                "name": "HomeHowWeWork",
+                "name": "HomeCases",
                 "type": "composite",
-                "description": "Home work-process section: Understand, Structure, Build, Operate",
-                "path": "src/components/HomeHowWeWork.tsx"
+                "description": "Home section: representative work, labelling client projects and in-house demos separately",
+                "path": "src/components/HomeCases.tsx"
             },
             {
-                "name": "SelectedPortfolio",
+                "name": "HomeExperience",
                 "type": "composite",
-                "description": "Home selected portfolio preview",
-                "path": "src/components/SelectedPortfolio.tsx"
+                "description": "Home section: who builds it, with the in-house product link",
+                "path": "src/components/HomeExperience.tsx"
             },
             {
-                "name": "SuperBifyPreview",
+                "name": "HomeProcess",
                 "type": "composite",
-                "description": "Home SuperBify product preview",
-                "path": "src/components/SuperBifyPreview.tsx"
+                "description": "Home section: consultation to launch summary",
+                "path": "src/components/HomeProcess.tsx"
             },
             {
-                "name": "AboutPreview",
+                "name": "HomeFaq",
                 "type": "composite",
-                "description": "Home about section with id=about",
-                "path": "src/components/AboutPreview.tsx"
+                "description": "Home section: frequently asked questions as details/summary rows",
+                "path": "src/components/HomeFaq.tsx"
             },
             {
-                "name": "InquiryMottoCTA",
+                "name": "HomeInquiryCTA",
                 "type": "composite",
-                "description": "Home bottom inquiry motto and CTA",
-                "path": "src/components/InquiryMottoCTA.tsx"
+                "description": "Home closing inquiry call to action",
+                "path": "src/components/HomeInquiryCTA.tsx"
+            },
+            {
+                "name": "ServicesList",
+                "type": "composite",
+                "description": "Service list page: compares the three services",
+                "path": "src/components/ServicesList.tsx"
+            },
+            {
+                "name": "ServicePage",
+                "type": "composite",
+                "description": "Service detail page, driven by the service prop (website | commerce | web-development)",
+                "path": "src/components/ServicePage.tsx"
+            },
+            {
+                "name": "ProcessPage",
+                "type": "composite",
+                "description": "Process page: step detail and FAQ",
+                "path": "src/components/ProcessPage.tsx"
             },
             {
                 "name": "PortfolioList",
                 "type": "composite",
-                "description": "Portfolio list page",
+                "description": "Work list page",
                 "path": "src/components/PortfolioList.tsx"
             },
             {
                 "name": "PortfolioDetail",
                 "type": "composite",
-                "description": "Portfolio detail page",
+                "description": "Work detail page with sanitized board HTML",
                 "path": "src/components/PortfolioDetail.tsx"
             },
             {
@@ -279,20 +303,20 @@
             {
                 "name": "SuperBifyDetail",
                 "type": "composite",
-                "description": "SuperBify detail page",
+                "description": "SuperBify detail page with sanitized board HTML",
                 "path": "src/components/SuperBifyDetail.tsx"
-            },
-            {
-                "name": "InquiryForm",
-                "type": "composite",
-                "description": "Disabled project inquiry form",
-                "path": "src/components/InquiryForm.tsx"
             },
             {
                 "name": "AboutPage",
                 "type": "composite",
-                "description": "About page brand story",
+                "description": "About page: experience, project roles, working method, name story, in-house product",
                 "path": "src/components/AboutPage.tsx"
+            },
+            {
+                "name": "InquiryForm",
+                "type": "composite",
+                "description": "Working project inquiry form posting to the twentyft-content inquiries API",
+                "path": "src/components/InquiryForm.tsx"
             }
         ],
         "layout": [

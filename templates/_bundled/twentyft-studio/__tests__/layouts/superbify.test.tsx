@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import SuperBifyList from '../../src/components/SuperBifyList';
 import SuperBifyDetail from '../../src/components/SuperBifyDetail';
+import type { SuperBifyItem } from '../../src/types/template';
 
 describe('superbify layout components', () => {
     it('list route renders empty state and no fake projects', () => {
@@ -9,7 +10,6 @@ describe('superbify layout components', () => {
 
         expect(screen.getByTestId('superbify-list-page')).toBeInTheDocument();
         expect(screen.getByTestId('status')).toBeInTheDocument();
-        expect(screen.getByText('첫 프로젝트를 만들고 있습니다.')).toBeInTheDocument();
         expect(screen.queryByTestId('superbify-preview-item')).not.toBeInTheDocument();
     });
 
@@ -34,9 +34,43 @@ describe('superbify layout components', () => {
         expect(screen.queryByText('제품을 찾을 수 없습니다')).not.toBeInTheDocument();
     });
 
-    it('list page explains what SuperBify is', () => {
+    it('describes SuperBify as an in-house product without repeating the disclaimer', () => {
         render(<SuperBifyList />);
 
-        expect(screen.getByText(/SuperBify는 20ft가 만드는 Gnuboard 7 확장 제품군입니다/)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('직접 개발한 제품과 템플릿');
+        expect(screen.getByTestId('superbify-list-page')).toHaveTextContent(
+            '이십피트가 직접 만드는 그누보드 7 확장 제품군입니다.'
+        );
+        expect(screen.getByTestId('superbify-list-page').textContent).not.toContain('납품한 결과물이 아니라');
+    });
+
+    it('renders the board HTML body as markup rather than showing raw tags', () => {
+        const item: SuperBifyItem = {
+            id: 's1',
+            slug: 'demo',
+            title: 'SuperBify Demo',
+            type: 'TEMPLATE',
+            description: '<p><strong>Gnuboard 7</strong>용 템플릿</p>',
+        };
+
+        const { container } = render(<SuperBifyDetail item={item} />);
+
+        expect(container.querySelector('strong')).not.toBeNull();
+        expect(container.textContent).not.toContain('<p>');
+    });
+
+    it('strips scripts out of the board body', () => {
+        const item: SuperBifyItem = {
+            id: 's2',
+            slug: 'demo-2',
+            title: 'SuperBify Demo 2',
+            type: 'TEMPLATE',
+            description: '<p>정상 본문</p><script>alert(1)</script>',
+        };
+
+        const { container } = render(<SuperBifyDetail item={item} />);
+
+        expect(container.querySelector('script')).toBeNull();
+        expect(container.textContent).toContain('정상 본문');
     });
 });

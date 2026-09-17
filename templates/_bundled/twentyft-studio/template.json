@@ -5,11 +5,11 @@
         "ko": "20ft Studio",
         "en": "20ft Studio"
     },
-    "version": "0.2.0",
+    "version": "0.3.0",
     "license": "MIT",
     "description": {
-        "ko": "20ft 공식 Website User Template (Portfolio / SuperBify / Project Inquiry)",
-        "en": "20ft official website user template (Portfolio / SuperBify / Project Inquiry)"
+        "ko": "이십피트 공식 Website User Template (제작 서비스 / 제작 사례 / 진행 안내 / 소개 / 제작 문의)",
+        "en": "20ft official website user template (Services / Work / Process / About / Project Inquiry)"
     },
     "type": "user",
     "locales": [
@@ -87,17 +87,23 @@
             "TextLink",
             "Tag",
             "Status",
+            "LoadingRows",
             "HomeHero",
-            "SelectedPortfolio",
-            "SuperBifyPreview",
-            "AboutPreview",
-            "InquiryMottoCTA",
+            "HomeServices",
+            "HomeCases",
+            "HomeExperience",
+            "HomeProcess",
+            "HomeFaq",
+            "HomeInquiryCTA",
+            "ServicesList",
+            "ServicePage",
+            "ProcessPage",
             "PortfolioList",
             "PortfolioDetail",
             "SuperBifyList",
             "SuperBifyDetail",
-            "InquiryForm",
-            "AboutPage"
+            "AboutPage",
+            "InquiryForm"
         ],
         "layout": [
             "Container"

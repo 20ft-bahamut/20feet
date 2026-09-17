@@ -13,9 +13,9 @@ export function SectionEyebrow({ text, className }: SectionEyebrowProps): React.
             style={{
                 display: 'block',
                 fontFamily: 'var(--20ft-font-body, sans-serif)',
-                fontSize: '0.75rem',
+                fontSize: '0.8125rem',
                 fontWeight: 600,
-                letterSpacing: '0.12em',
+                letterSpacing: '0.06em',
                 textTransform: 'uppercase',
                 color: 'var(--20ft-heritage-gold, #B69B5F)',
                 marginBottom: 'var(--20ft-spacing-md, 1rem)',

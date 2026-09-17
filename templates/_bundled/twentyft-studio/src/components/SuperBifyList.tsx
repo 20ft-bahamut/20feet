@@ -1,11 +1,19 @@
 import React from 'react';
 import { A, Article, Div, H1, H2, Img, Li, P, Span, Ul } from './basic';
+import { PAGE_META } from '../content/seo';
+import { usePageMeta } from '../hooks/usePageMeta';
 import Container from './Container';
 import LoadingRows from './LoadingRows';
 import SectionEyebrow from './SectionEyebrow';
 import Status from './Status';
 import Tag from './Tag';
 import type { SuperBifyItem, EditorAttrs } from '../types/template';
+
+const TYPE_LABEL: Record<string, string> = {
+    TEMPLATE: '쇼핑몰',
+    MODULE: '자체 개발 제품',
+    PLUGIN: '자체 개발 제품',
+};
 
 export interface SuperBifyListProps {
     /** undefined/null = data source not resolved yet → skeleton (empty-state flash 방지). */
@@ -17,6 +25,8 @@ export interface SuperBifyListProps {
 }
 
 export function SuperBifyList({ items, loading = false, className, editorAttrs }: SuperBifyListProps): React.ReactElement {
+    usePageMeta(PAGE_META['/superbify']);
+
     const safeItems = Array.isArray(items) ? items : [];
     const isPending = loading || items === undefined || items === null;
     const isEmpty = safeItems.length === 0;
@@ -33,7 +43,7 @@ export function SuperBifyList({ items, loading = false, className, editorAttrs }
             data-testid="superbify-list-page"
         >
             <Container>
-                <SectionEyebrow text="SuperBify" />
+                <SectionEyebrow text="자체 개발 제품 · SuperBify" />
                 <H1
                     style={{
                         margin: 0,
@@ -45,7 +55,7 @@ export function SuperBifyList({ items, loading = false, className, editorAttrs }
                         overflowWrap: 'break-word',
                     }}
                 >
-                    그누보드 7 확장
+                    직접 개발한 제품과 템플릿
                 </H1>
                 <P
                     style={{
@@ -61,9 +71,8 @@ export function SuperBifyList({ items, loading = false, className, editorAttrs }
                         overflowWrap: 'break-word',
                     }}
                 >
-                    SuperBify는 20ft가 만드는 Gnuboard 7 확장 제품군입니다.
-                    실제 프로젝트에서 필요한 Template, Module, Plugin과
-                    재사용 가능한 개발 도구를 만들고 공개합니다.
+                    SuperBify는 이십피트가 직접 만드는 그누보드 7 확장 제품군입니다.
+                    실제 프로젝트에서 반복해 필요했던 기능을 다시 쓸 수 있는 형태로 만들어 공개합니다.
                 </P>
 
                 {isPending ? (
@@ -108,8 +117,7 @@ export function SuperBifyList({ items, loading = false, className, editorAttrs }
                                                 flexWrap: 'wrap',
                                             }}
                                         >
-                                            <Tag label={item.type} />
-                                            {item.status && <Tag label={item.status} />}
+                                            <Tag label={TYPE_LABEL[item.type] ?? item.type} />
                                         </Div>
                                         {item.coverImageUrl && (
                                             <Img

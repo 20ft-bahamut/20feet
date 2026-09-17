@@ -10,7 +10,14 @@ export interface PrimaryButtonProps {
     onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
     type?: 'button' | 'submit' | 'reset';
     className?: string;
-    variant?: 'primary' | 'secondary';
+    /**
+     * primary   — 주 행동 (signal red)
+     * secondary — 보조 행동, 밝은 배경용 (indigo 외곽선)
+     * inverse   — 보조 행동, 어두운 배경용 (paper white 외곽선)
+     *
+     * 어두운 섹션에서 secondary를 쓰면 남색 외곽선이 배경에 묻혀 보이지 않는다.
+     */
+    variant?: 'primary' | 'secondary' | 'inverse';
     size?: 'default' | 'medium' | 'small';
     'data-testid'?: string;
     editorAttrs?: EditorAttrs;
@@ -29,14 +36,23 @@ export function PrimaryButton({
     editorAttrs,
 }: PrimaryButtonProps): React.ReactElement {
     const isPrimary = variant === 'primary';
+    const isInverse = variant === 'inverse';
     const isSmall = size === 'small';
     const isMedium = size === 'medium';
     const prefersReducedMotion = useReducedMotion();
     const [isHovered, setIsHovered] = React.useState(false);
     const [isFocused, setIsFocused] = React.useState(false);
 
-    const baseColor = isPrimary ? 'var(--20ft-signal-red, #E7482D)' : 'var(--20ft-indigo, #183B6B)';
-    const hoverColor = isPrimary ? '#c93e27' : 'var(--20ft-deep-indigo, #102A4C)';
+    const baseColor = isPrimary
+        ? 'var(--20ft-signal-red, #E7482D)'
+        : isInverse
+          ? 'var(--20ft-paper-white, #FAF8F3)'
+          : 'var(--20ft-indigo, #183B6B)';
+    const hoverColor = isPrimary
+        ? '#c93e27'
+        : isInverse
+          ? 'var(--20ft-heritage-gold, #B69B5F)'
+          : 'var(--20ft-deep-indigo, #102A4C)';
 
     const style: React.CSSProperties = {
         display: 'inline-flex',
@@ -47,7 +63,10 @@ export function PrimaryButton({
         padding: isSmall ? '0.625rem 1.25rem' : isMedium ? '0.75rem 1.75rem' : '0.875rem 1.5rem',
         fontSize: isMedium ? '1rem' : '0.875rem',
         borderRadius: 'var(--20ft-radius, 6px)',
-        border: `1px solid ${baseColor}`,
+        // border 단축 속성은 var()와 함께 쓰면 일부 파서에서 값이 갈라진다.
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        borderColor: baseColor,
         backgroundColor: isPrimary ? baseColor : 'transparent',
         color: isPrimary ? 'var(--20ft-paper-white, #FAF8F3)' : baseColor,
         fontFamily: 'var(--20ft-font-body, sans-serif)',

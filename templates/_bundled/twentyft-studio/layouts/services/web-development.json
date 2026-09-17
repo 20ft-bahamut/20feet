@@ -1,0 +1,48 @@
+{
+    "version": "1.0.0",
+    "layout_name": "services/web-development",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:twentyft.routes.services_web_development.title",
+        "description": "$t:twentyft.routes.services_web_development.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "services_web_development",
+            "og": {
+                "type": "website",
+                "title": "$t:twentyft.routes.services_web_development.title",
+                "description": "$t:twentyft.routes.services_web_development.description"
+            }
+        }
+    },
+    "data_sources": [
+        {
+            "id": "software_cases",
+            "label_key": "$t:twentyft.data_source.software_cases",
+            "type": "api",
+            "endpoint": "/api/modules/twentyft-content/portfolio/projects",
+            "method": "GET",
+            "params": {
+                "type": "SOFTWARE",
+                "per_page": "3"
+            },
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "comment": "F-231: 맞춤형 웹프로그램 개발 상세 — 실제 업무 시스템 사례 연결",
+                "id": "service_web_development",
+                "type": "composite",
+                "name": "ServicePage",
+                "props": {
+                    "service": "web-development",
+                    "cases": "{{software_cases?.data ?? null}}"
+                }
+            }
+        ]
+    }
+}
