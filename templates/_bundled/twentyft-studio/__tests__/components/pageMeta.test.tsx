@@ -63,16 +63,21 @@ describe('page meta', () => {
     });
 
     it('titles a work detail with the project name', () => {
-        render(<PortfolioDetail item={portfolioItem} slug="saas" />);
+        render(<PortfolioDetail item={portfolioItem} />);
 
         expect(document.title).toBe('퓨어폴 SaaS | 이십피트');
     });
 
-    it('points the old address at the representative one', () => {
-        render(<PortfolioDetail item={portfolioItem} slug="saas" canonicalPath="/portfolio/saas" />);
+    /**
+     * 이전 주소 전용 레이아웃을 없앴으므로 canonical 은 항상 현재 주소를 가리킨다.
+     * (슬러그는 게시판에 저장된 값 하나이고, 그 값이 곧 주소다)
+     */
+    it('points canonical at the address being viewed', () => {
+        render(<PortfolioDetail item={portfolioItem} />);
 
         const canonical = document.head.querySelector('link[rel=canonical]')?.getAttribute('href') ?? '';
-        expect(canonical.endsWith('/portfolio/saas')).toBe(true);
+        // canonicalPath 를 넘기지 않으므로 현재 주소 그대로다 (하드코딩된 경로가 붙지 않는다)
+        expect(canonical).toBe(`${window.location.origin}${window.location.pathname}`);
     });
 
     it('titles a product detail with the product name', () => {

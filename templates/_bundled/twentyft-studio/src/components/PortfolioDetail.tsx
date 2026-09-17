@@ -5,7 +5,6 @@ import LoadingRows from './LoadingRows';
 import PrimaryButton from './PrimaryButton';
 import Status from './Status';
 import ZoomableImage from './ZoomableImage';
-import { resolveLegacySlug } from '../content/portfolio';
 import { detailMeta } from '../content/seo';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { sanitizeHtml } from '../utils/sanitizeHtml';
@@ -13,8 +12,6 @@ import type { PortfolioItem, EditorAttrs } from '../types/template';
 
 export interface PortfolioDetailProps {
     item?: PortfolioItem | null;
-    /** 현재 주소의 slug. 예전 주소로 들어온 방문자를 안내하는 데만 쓴다. */
-    slug?: string;
     /**
      * 대표 주소. 이전 주소로 열린 화면은 대표 주소를 canonical 로 가리킨다.
      * 지정하지 않으면 현재 경로를 그대로 쓴다.
@@ -45,14 +42,11 @@ const DEFAULT_INQUIRY = { type: 'OTHER', label: '제작 문의하기' };
 
 export function PortfolioDetail({
     item = null,
-    slug,
     canonicalPath,
     loading = false,
     className,
     editorAttrs,
 }: PortfolioDetailProps): React.ReactElement {
-    const legacyTarget = !item && slug ? resolveLegacySlug(slug) : null;
-
     usePageMeta({
         ...detailMeta(item?.title, '/portfolio', item?.summary),
         canonicalPath,
@@ -87,30 +81,6 @@ export function PortfolioDetail({
                                 title="프로젝트를 찾을 수 없습니다"
                                 message="해당 프로젝트가 존재하지 않거나 아직 공개되지 않았습니다."
                             />
-                            {legacyTarget && (
-                                <P
-                                    style={{
-                                        margin: 0,
-                                        fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                        fontSize: '0.9375rem',
-                                        lineHeight: 1.8,
-                                        color: 'var(--20ft-text-muted, #5E6063)',
-                                        wordBreak: 'keep-all',
-                                    }}
-                                    data-testid="portfolio-detail-legacy-notice"
-                                >
-                                    찾으시는 사례의 주소가 바뀌었습니다.{' '}
-                                    <A
-                                        href={`/portfolio/${legacyTarget}`}
-                                        style={{
-                                            color: 'var(--20ft-indigo, #183B6B)',
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        현재 주소로 보기
-                                    </A>
-                                </P>
-                            )}
                             <Div>
                                 <PrimaryButton href="/portfolio" variant="secondary">
                                     제작 사례 목록으로

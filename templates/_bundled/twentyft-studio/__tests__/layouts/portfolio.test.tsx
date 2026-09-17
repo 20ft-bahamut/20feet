@@ -102,28 +102,26 @@ describe('portfolio detail', () => {
     });
 
     it('renders a not-found state with null data', () => {
-        render(<PortfolioDetail item={null} slug="unknown" />);
+        render(<PortfolioDetail item={null} />);
 
         expect(screen.getByTestId('portfolio-detail-missing')).toBeInTheDocument();
         expect(screen.getByText('프로젝트를 찾을 수 없습니다')).toBeInTheDocument();
     });
 
-    it('keeps the previous public address working by pointing to the current one', () => {
-        render(<PortfolioDetail item={null} slug="purepol-saas" />);
-
-        const notice = screen.getByTestId('portfolio-detail-legacy-notice');
-        expect(notice).toHaveTextContent('주소가 바뀌었습니다');
-        expect(notice.querySelector('a')).toHaveAttribute('href', '/portfolio/saas');
-    });
-
-    it('does not add a legacy notice for an unrelated unknown slug', () => {
-        render(<PortfolioDetail item={null} slug="no-such-case" />);
+    /**
+     * 2026-09-17: 이전 주소 전용 정적 라우트와 하드코딩 별칭을 없앴다.
+     * 목록·상세·API 가 모두 게시판에 저장된 slug 하나만 본다 — 화면에 별도 안내를 두지 않는다.
+     */
+    it('shows only the plain not-found state, with no hardcoded alias notice', () => {
+        render(<PortfolioDetail item={null} />);
 
         expect(screen.queryByTestId('portfolio-detail-legacy-notice')).not.toBeInTheDocument();
+        expect(screen.getByText('프로젝트를 찾을 수 없습니다')).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: '제작 사례 목록으로' })).toHaveAttribute('href', '/portfolio');
     });
 
     it('labels the recorded title as a role, not as the delivered scope', () => {
-        render(<PortfolioDetail item={item} slug="saas" />);
+        render(<PortfolioDetail item={item} />);
 
         const meta = screen.getByTestId('portfolio-detail-meta');
         expect(meta).toHaveTextContent('역할');
@@ -132,14 +130,14 @@ describe('portfolio detail', () => {
     });
 
     it('does not claim solo delivery or invent results', () => {
-        const { container } = render(<PortfolioDetail item={item} slug="saas" />);
+        const { container } = render(<PortfolioDetail item={item} />);
         const text = container.textContent ?? '';
 
         expect(text).not.toMatch(/단독|혼자|1인 개발|절감|향상|%|배 이상/);
     });
 
     it('shows the real project facts and links to the live service', () => {
-        render(<PortfolioDetail item={item} slug="saas" />);
+        render(<PortfolioDetail item={item} />);
 
         const page = screen.getByTestId('portfolio-detail-page');
         expect(page.textContent).toContain('2026');
@@ -157,7 +155,7 @@ describe('portfolio detail', () => {
             description: '<p><strong>PurePol SaaS</strong>는 B2B SaaS입니다.</p><script>alert(1)</script>',
         };
 
-        const { container } = render(<PortfolioDetail item={withHtml} slug="saas" />);
+        const { container } = render(<PortfolioDetail item={withHtml} />);
 
         expect(container.querySelector('strong')).not.toBeNull();
         expect(container.querySelector('script')).toBeNull();

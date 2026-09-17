@@ -9,7 +9,9 @@
         "seo": {
             "enabled": true,
             "page_type": "portfolio_detail",
-            "data_sources": ["portfolio_item"],
+            "data_sources": [
+                "portfolio_item"
+            ],
             "og": {
                 "type": "article",
                 "title": "{{portfolio_item.data.title ?? 'Portfolio'}} | Portfolio | 20ft",
@@ -35,8 +37,7 @@
                 "type": "composite",
                 "name": "PortfolioDetail",
                 "props": {
-                    "item": "{{portfolio_item?.data ?? null}}",
-                    "slug": "{{route.slug}}"
+                    "item": "{{portfolio_item?.data ?? null}}"
                 }
             }
         ]
