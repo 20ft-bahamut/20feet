@@ -82,8 +82,8 @@ describe('service detail pages', () => {
         render(<ServicePage service="commerce" demos={[demo]} />);
 
         const block = screen.getByTestId('service-demo-evidence');
-        expect(block).toHaveTextContent('자체 제작 데모');
-        expect(block).toHaveTextContent('미니멀 쇼핑몰 데모');
+        expect(block).toHaveTextContent('자체 제작');
+        expect(block).toHaveTextContent('미니멀 쇼핑몰 제작 예시');
         // 제품명과 호환성 정보는 일반 고객용 화면에서 앞세우지 않는다.
         expect(block).toHaveTextContent('제품명 SuperBify Commerce Minimal');
         expect(block).not.toHaveTextContent('7.0.0+');
@@ -131,7 +131,7 @@ describe('service detail pages', () => {
 
         const page = screen.getByTestId('service-page-commerce');
         const text = page.textContent ?? '';
-        expect(text.indexOf('쇼핑몰 데모 화면')).toBeGreaterThan(-1);
-        expect(text.indexOf('쇼핑몰 데모 화면')).toBeLessThan(text.indexOf('미니멀 쇼핑몰 데모'));
+        expect(text.indexOf('쇼핑몰 제작 예시')).toBeGreaterThan(-1);
+        expect(text.indexOf('쇼핑몰 제작 예시')).toBeLessThan(text.lastIndexOf('미니멀 쇼핑몰 제작 예시'));
     });
 });

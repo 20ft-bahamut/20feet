@@ -88,7 +88,7 @@ export function HomeExperience({ cases, className, editorAttrs }: HomeExperience
                                 }}
                             >
                                 웹사이트 제작부터 서비스 기획, 프로젝트 관리, 업무 시스템 구축과 운영까지
-                                해왔습니다. 요구사항을 정리하는 단계부터 실제로 쓰이는 상태까지 직접 맡습니다.
+                                해왔습니다. 필요한 기능을 정리하는 단계부터 화면 설계와 개발을 맡습니다.
                             </P>
 
                             <Div

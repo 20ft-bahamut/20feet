@@ -189,6 +189,49 @@ export function SuperBifyDetail({
                                 />
                             )}
 
+                            {/*
+                             * 문의를 기술 정보보다 앞에 둔다. 대표 화면을 본 직후가 문의 동선이다.
+                             * 아래쪽에는 같은 안내와 버튼을 다시 두지 않는다.
+                             */}
+                            <Div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 'var(--20ft-spacing-md, 1rem)',
+                                    width: '100%',
+                                    minWidth: 0,
+                                }}
+                                data-testid="superbify-detail-inquiry-block"
+                            >
+                                <Span
+                                    style={{
+                                        fontFamily: 'var(--20ft-font-body, sans-serif)',
+                                        fontSize: '0.9375rem',
+                                        lineHeight: 1.75,
+                                        color: 'var(--20ft-text-muted, #5E6063)',
+                                        wordBreak: 'keep-all',
+                                    }}
+                                >
+                                    이런 쇼핑몰이 필요하다면 문의해주세요.
+                                </Span>
+                                <Div
+                                    style={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 'var(--20ft-spacing-sm, 0.75rem)',
+                                    }}
+                                >
+                                    <PrimaryButton
+                                        href="/inquiry?type=COMMERCE"
+                                        variant="primary"
+                                        size="medium"
+                                        data-testid="superbify-detail-inquiry"
+                                    >
+                                        쇼핑몰 제작 문의
+                                    </PrimaryButton>
+                                </Div>
+                            </Div>
+
                             {uiScreens.length > 0 && (
                                 <DetailBlock heading="화면">
                                     <Ul
@@ -318,17 +361,6 @@ export function SuperBifyDetail({
                                 }}
                                 data-testid="superbify-detail-next"
                             >
-                                <Span
-                                    style={{
-                                        fontFamily: 'var(--20ft-font-body, sans-serif)',
-                                        fontSize: '0.9375rem',
-                                        lineHeight: 1.75,
-                                        color: 'var(--20ft-text-muted, #5E6063)',
-                                        wordBreak: 'keep-all',
-                                    }}
-                                >
-                                    비슷한 쇼핑몰 제작을 상담할 수 있습니다.
-                                </Span>
                                 <Div
                                     style={{
                                         display: 'flex',
@@ -336,14 +368,6 @@ export function SuperBifyDetail({
                                         gap: 'var(--20ft-spacing-sm, 0.75rem)',
                                     }}
                                 >
-                                    <PrimaryButton
-                                        href="/inquiry?type=COMMERCE"
-                                        variant="primary"
-                                        size="medium"
-                                        data-testid="superbify-detail-inquiry"
-                                    >
-                                        쇼핑몰 제작 문의
-                                    </PrimaryButton>
                                     <PrimaryButton
                                         href="/services/commerce"
                                         variant="secondary"

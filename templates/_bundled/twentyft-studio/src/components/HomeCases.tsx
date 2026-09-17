@@ -63,13 +63,13 @@ function toDemoCase(item: SuperBifyItem): CaseEntry {
     return {
         key: `demo-${item.id}`,
         kind: 'own',
-        kindLabel: '자체 제작 데모',
+        kindLabel: '자체 제작',
         meta: field,
         title: display.title,
         summary: display.summary,
         productName: item.title,
         href: `/superbify/${item.slug}`,
-        linkLabel: '제품 자세히 보기',
+        linkLabel: '제작 화면 보기',
         coverImageUrl: item.coverImageUrl,
     };
 }

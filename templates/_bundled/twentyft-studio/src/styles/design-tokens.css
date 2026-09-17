@@ -176,6 +176,8 @@ body {
     --20ft-footer-link-gap: 0.875rem;
 
     /* About page */
+    /* 소개 마무리: 슬로건을 뺀 링크 묶음만 남아 여백을 줄인다 */
+    --20ft-about-final-py: 2.5rem;
     /* 소개 히어로: 모바일에서는 로고와 설명을 붙여 읽히게 한다 */
     --20ft-about-hero-gap: 1.5rem;
     --20ft-about-columns: 1fr;
@@ -213,6 +215,7 @@ body {
         --20ft-footer-gap: 3rem;
         --20ft-footer-link-gap: 1.5rem;
         --20ft-about-hero-gap: 3.5rem;
+        --20ft-about-final-py: 3.5rem;
         --20ft-about-columns: 1fr 1fr;
         --20ft-about-body-max: 56ch;
         --20ft-about-what-columns: 1fr 1fr;

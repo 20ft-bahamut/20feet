@@ -99,18 +99,33 @@ describe('about layout component', () => {
         expect(screen.getByTestId('about-final-process')).toHaveAttribute('href', '/process');
     });
 
-    it('keeps the locked brand copy, each line only once', () => {
+    /**
+     * 2026-09-17 사용자 지시로 이름 유래의 컨테이너 설명·영문 문구와 마무리 슬로건을 뺐다.
+     * 대체 슬로건은 만들지 않았고, 마무리 영역에는 링크 묶음만 남는다.
+     */
+    it('keeps the name story short, without the removed brand slogans', () => {
         const { container } = render(<AboutPage />);
 
-        expect(screen.getByTestId('about-name')).toHaveTextContent('20ft라는 이름은 작은 공간에서 시작했습니다.');
-        expect(screen.getByTestId('about-name')).toHaveTextContent('JUST FOR FUN.');
-        expect(screen.getByTestId('about-final-cta')).toHaveTextContent('작은 공간에서, 큰 가능성을 만듭니다.');
-        expect(screen.getByTestId('about-final-cta')).toHaveTextContent('A SMALL SPACE.');
-        expect(screen.getByTestId('about-final-cta')).toHaveTextContent('INFINITE POSSIBILITIES.');
+        expect(screen.getByTestId('about-name')).toHaveTextContent('이십피트라는 이름에 담은 뜻');
+        expect(screen.getByTestId('about-name')).toHaveTextContent(
+            '이십피트라는 이름은 20피트 공간에서 시작했습니다.'
+        );
 
         const text = container.textContent ?? '';
-        expect(text.split('A SMALL SPACE.').length - 1).toBe(1);
-        expect(text.split('JUST FOR FUN.').length - 1).toBe(1);
+        expect(text).not.toContain('JUST FOR FUN.');
+        expect(text).not.toContain('A SMALL SPACE.');
+        expect(text).not.toContain('Software Studio');
+        expect(text).not.toContain('작은 공간에서, 큰 가능성을 만듭니다.');
+    });
+
+    it('ends with the link row only, with no leftover slogan', () => {
+        render(<AboutPage />);
+
+        const cta = screen.getByTestId('about-final-cta');
+        expect(cta).not.toHaveTextContent('작은 공간에서');
+        expect(screen.getByTestId('about-final-inquiry')).toHaveAttribute('href', '/inquiry');
+        expect(screen.getByTestId('about-final-portfolio')).toHaveAttribute('href', '/portfolio');
+        expect(screen.getByTestId('about-final-process')).toHaveAttribute('href', '/process');
     });
 
     it('renders the brand symbol without exposing it to assistive tech', () => {

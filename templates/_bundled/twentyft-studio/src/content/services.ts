@@ -138,7 +138,7 @@ export const SERVICES: ServiceDefinition[] = [
                 note: '사용할 결제 수단과 배송 방식에 맞춰 연동 범위를 안내합니다.',
             },
             {
-                heading: '쇼핑몰 데모 화면',
+                heading: '쇼핑몰 제작 예시',
                 lead: '이십피트가 직접 만든 쇼핑몰 화면을 먼저 살펴보세요.',
                 evidence: 'demos',
             },

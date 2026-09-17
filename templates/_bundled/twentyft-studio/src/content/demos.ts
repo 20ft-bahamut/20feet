@@ -17,9 +17,9 @@ export interface DemoDisplay {
 
 export const DEMO_DISPLAY: Record<string, DemoDisplay> = {
     'superbify-commerce-minimal': {
-        title: '미니멀 쇼핑몰 데모',
+        title: '미니멀 쇼핑몰 제작 예시',
         summary:
-            '상품 목록과 상세, 장바구니, 주문서까지 쇼핑몰의 기본 구매 흐름을 구성한 화면입니다.',
+            '상품 목록과 상세, 장바구니, 주문 화면을 담은 쇼핑몰 제작 예시입니다.',
     },
 };
 

@@ -314,11 +314,11 @@ function DemoEvidence({ demos }: { demos?: SuperBifyItem[] | null }): React.Reac
                     <Li key={item.id} style={{ display: 'flex', minWidth: 0 }}>
                         <EvidenceCard
                             href={`/superbify/${item.slug}`}
-                            kindLabel="자체 제작 데모"
+                            kindLabel="자체 제작"
                             title={display.title}
                             summary={display.summary}
                             footnote={`제품명 ${item.title}`}
-                            linkLabel="제품 자세히 보기"
+                            linkLabel="제작 화면 보기"
                             coverImageUrl={item.coverImageUrl}
                         />
                     </Li>

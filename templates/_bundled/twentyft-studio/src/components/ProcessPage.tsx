@@ -45,7 +45,7 @@ export function ProcessPage({ className, editorAttrs }: ProcessPageProps): React
                             overflowWrap: 'break-word',
                         }}
                     >
-                        문의부터 제작까지의 진행 안내
+                        문의부터 오픈까지
                     </H1>
                     <P
                         style={{
@@ -60,8 +60,7 @@ export function ProcessPage({ className, editorAttrs }: ProcessPageProps): React
                             overflowWrap: 'break-word',
                         }}
                     >
-                        문의를 보내면 상담부터 시작합니다. 각 단계에서 무엇을 하는지 미리
-                        확인하실 수 있습니다.
+                        문의 내용을 확인한 뒤 제작 범위와 일정, 견적을 안내합니다.
                     </P>
                 </Container>
             </Section>

@@ -51,7 +51,7 @@ describe('portfolio list', () => {
         render(<PortfolioList items={[item]} demos={[demo]} />);
 
         const badges = screen.getAllByTestId('portfolio-item-kind').map((el) => el.textContent);
-        expect(badges).toEqual(['고객 프로젝트', '자체 제작 데모']);
+        expect(badges).toEqual(['고객 프로젝트', '자체 제작']);
         expect(screen.getAllByTestId('portfolio-item')).toHaveLength(2);
     });
 

@@ -135,7 +135,7 @@ describe('home layout', () => {
         render(<HomeCases items={[portfolioItem]} demos={[demoItem]} />);
 
         const labels = screen.getAllByTestId('home-case-label').map((el) => el.textContent);
-        expect(labels).toEqual(['고객 프로젝트 · 업무 시스템 · 2006', '자체 제작 데모 · 쇼핑몰']);
+        expect(labels).toEqual(['고객 프로젝트 · 업무 시스템 · 2006', '자체 제작 · 쇼핑몰']);
         expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('주요 제작 사례');
 
         expect(screen.getByText('퓨어폴 SaaS')).toBeInTheDocument();
