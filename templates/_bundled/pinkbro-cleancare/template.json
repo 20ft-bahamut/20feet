@@ -36,7 +36,16 @@
             "dist/js/components.iife.js"
         ],
         "fonts": [],
-        "images": []
+        "images": [
+            "dist/images/brand-logo.webp",
+            "dist/images/og-image.png",
+            "dist/images/service-floor-care.webp",
+            "dist/images/service-glass-care.webp",
+            "dist/images/service-awning-care.webp",
+            "dist/images/service-sign-care.webp",
+            "dist/images/service-kitchen-care.webp",
+            "dist/images/service-air-care.webp"
+        ]
     },
     "components": {
         "basic": [
