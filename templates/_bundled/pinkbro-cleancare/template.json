@@ -37,19 +37,33 @@
         ],
         "fonts": [],
         "images": [
-            "dist/images/brand-logo.webp",
-            "dist/images/og-image.png",
-            "dist/images/service-floor-care.webp",
-            "dist/images/service-glass-care.webp",
-            "dist/images/service-awning-care.webp",
-            "dist/images/service-sign-care.webp",
-            "dist/images/service-kitchen-care.webp",
-            "dist/images/service-air-care.webp"
+            "images/brand-logo.webp",
+            "images/og-image.png",
+            "images/service-floor-care.webp",
+            "images/service-glass-care.webp",
+            "images/service-awning-care.webp",
+            "images/service-sign-care.webp",
+            "images/service-kitchen-care.webp",
+            "images/service-air-care.webp"
         ]
     },
     "components": {
         "basic": [
-            "Div"
+            "Div",
+            "Button",
+            "H2",
+            "H3",
+            "H4",
+            "P",
+            "A",
+            "Img",
+            "Span",
+            "Details",
+            "Summary",
+            "Input",
+            "Select",
+            "Textarea",
+            "Label"
         ],
         "composite": [],
         "layout": []

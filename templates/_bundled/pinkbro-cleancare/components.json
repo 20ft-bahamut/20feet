@@ -9,6 +9,90 @@
                 "type": "basic",
                 "description": "HTML div element wrapper",
                 "path": "src/components/basic/Div.tsx"
+            },
+            {
+                "name": "Button",
+                "type": "basic",
+                "description": "HTML button element wrapper",
+                "path": "src/components/basic/Button.tsx"
+            },
+            {
+                "name": "H2",
+                "type": "basic",
+                "description": "HTML h2 heading element wrapper",
+                "path": "src/components/basic/H2.tsx"
+            },
+            {
+                "name": "H3",
+                "type": "basic",
+                "description": "HTML h3 heading element wrapper",
+                "path": "src/components/basic/H3.tsx"
+            },
+            {
+                "name": "H4",
+                "type": "basic",
+                "description": "HTML h4 heading element wrapper",
+                "path": "src/components/basic/H4.tsx"
+            },
+            {
+                "name": "P",
+                "type": "basic",
+                "description": "HTML paragraph element wrapper",
+                "path": "src/components/basic/P.tsx"
+            },
+            {
+                "name": "A",
+                "type": "basic",
+                "description": "HTML anchor element wrapper",
+                "path": "src/components/basic/A.tsx"
+            },
+            {
+                "name": "Img",
+                "type": "basic",
+                "description": "HTML img element wrapper",
+                "path": "src/components/basic/Img.tsx"
+            },
+            {
+                "name": "Span",
+                "type": "basic",
+                "description": "HTML span element wrapper",
+                "path": "src/components/basic/Span.tsx"
+            },
+            {
+                "name": "Details",
+                "type": "basic",
+                "description": "HTML details element wrapper",
+                "path": "src/components/basic/Details.tsx"
+            },
+            {
+                "name": "Summary",
+                "type": "basic",
+                "description": "HTML summary element wrapper",
+                "path": "src/components/basic/Summary.tsx"
+            },
+            {
+                "name": "Input",
+                "type": "basic",
+                "description": "HTML input element wrapper",
+                "path": "src/components/basic/Input.tsx"
+            },
+            {
+                "name": "Select",
+                "type": "basic",
+                "description": "HTML select element wrapper",
+                "path": "src/components/basic/Select.tsx"
+            },
+            {
+                "name": "Textarea",
+                "type": "basic",
+                "description": "HTML textarea element wrapper",
+                "path": "src/components/basic/Textarea.tsx"
+            },
+            {
+                "name": "Label",
+                "type": "basic",
+                "description": "HTML label element wrapper",
+                "path": "src/components/basic/Label.tsx"
             }
         ],
         "composite": [],

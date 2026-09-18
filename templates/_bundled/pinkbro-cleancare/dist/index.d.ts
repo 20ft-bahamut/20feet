@@ -1,1 +1,15 @@
 export { Div, type DivProps } from './components/basic/Div';
+export { Button, type ButtonProps } from './components/basic/Button';
+export { H2, type H2Props } from './components/basic/H2';
+export { H3, type H3Props } from './components/basic/H3';
+export { H4, type H4Props } from './components/basic/H4';
+export { P, type PProps } from './components/basic/P';
+export { A, type AProps } from './components/basic/A';
+export { Img, type ImgProps } from './components/basic/Img';
+export { Span, type SpanProps } from './components/basic/Span';
+export { Details, type DetailsProps } from './components/basic/Details';
+export { Summary, type SummaryProps } from './components/basic/Summary';
+export { Input, type InputProps } from './components/basic/Input';
+export { Select, type SelectProps } from './components/basic/Select';
+export { Textarea, type TextareaProps } from './components/basic/Textarea';
+export { Label, type LabelProps } from './components/basic/Label';
