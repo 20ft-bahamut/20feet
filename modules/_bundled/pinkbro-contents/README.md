@@ -36,8 +36,20 @@ upgrades/                                    업그레이드 스텝
 
 ## 상태
 
-모듈 골격 단계입니다. 권한·메뉴 선언과 라우트 파일 위치까지 등록되어 있고,
-콘텐츠 API·관리자 레이아웃·시더는 이후 작업에서 추가됩니다.
+콘텐츠 기반까지 구현했습니다. 권한·메뉴 선언, 메타 저장소(`pinkbro_meta`),
+미디어 슬롯 레지스트리, 그리고 게시판 6종과 콘텐츠를 주입하는 시더
+(`database/seeders/PinkbroContentsSeeder.php`, `module.php::getSeeders()`)가 동작합니다.
+공개 API 컨트롤러·관리자 레이아웃은 이후 작업에서 추가됩니다.
+
+시더가 주입하는 내용:
+
+- 게시판 6종 — `pinkbro_service` / `pinkbro_package` / `pinkbro_case` /
+  `pinkbro_faq` / `pinkbro_inquiry` / `pinkbro_media`
+- 서비스 6종 · 패키지 3종 · 작업사례 4종 · FAQ 8종 (게시글 + `pinkbro_meta`)
+- 사이트 레벨 메타 — `site` · `copy` · `discount`
+
+카피는 `_workspace/pinkbro/reference/content/*.json` 원문 그대로이며,
+시더는 그 파일을 런타임에 읽지 않습니다(배포 사이트에 존재하지 않음).
 
 ## 설치
 

@@ -4,6 +4,7 @@ namespace Modules\Pinkbro\Contents;
 
 use App\Extension\AbstractModule;
 use Illuminate\Database\Seeder;
+use Modules\Pinkbro\Contents\Database\Seeders\PinkbroContentsSeeder;
 
 /**
  * PinkBro Contents 모듈
@@ -246,9 +247,7 @@ class Module extends AbstractModule
      */
     public function getSeeders(): array
     {
-        // 시더(PinkbroContentsSeeder)는 이후 태스크에서 추가한다.
-        // 지금 참조하면 아직 없는 클래스라 모듈 오토로드 시 class-not-found 가 난다.
-        return [];
+        return [PinkbroContentsSeeder::class];
     }
 
     /**
