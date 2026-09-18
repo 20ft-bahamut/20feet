@@ -2,10 +2,12 @@
 
 namespace Modules\Pinkbro\Contents\Tests\Unit;
 
+use Illuminate\Support\Str;
 use Modules\Pinkbro\Contents\Enums\MetaDomain;
 use Modules\Pinkbro\Contents\Services\ContentMetaService;
 use Modules\Pinkbro\Contents\Services\MediaSlotService;
 use Modules\Pinkbro\Contents\Tests\PinkbroContentsTestCase;
+use Modules\Sirsoft\Board\Models\Attachment;
 
 class MediaSlotServiceTest extends PinkbroContentsTestCase
 {
@@ -39,7 +41,8 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
     public function test_resolve_returns_null_url_when_attachment_row_is_gone(): void
     {
         $service = app(MediaSlotService::class);
-        // 존재하지 않는 첨부 id 를 직접 메타에 심는다 — 삭제된 첨부 방어 검증
+        // 존재하지 않는 첨부 id 를 직접 메타에 심는다 — 삭제된 첨부 방어 검증.
+        // 이 hash 는 board_attachments 에 저장되지 않으므로 컬럼 폭과 무관하다.
         app(ContentMetaService::class)
             ->set(null, null, MetaDomain::MEDIA, 'hero_main', [
                 'attachment_id' => 999999,
@@ -74,11 +77,15 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
 
         app(MediaSlotService::class)->link('hero_main', $attachment->id, '히어로 대체 텍스트');
 
-        $this->assertSame([
-            'attachment_id' => $attachment->id,
-            'hash' => $attachment->hash,
-            'alt' => '히어로 대체 텍스트',
-        ], app(ContentMetaService::class)->get(null, null, MetaDomain::MEDIA, 'hero_main'));
+        $stored = app(ContentMetaService::class)->get(null, null, MetaDomain::MEDIA, 'hero_main');
+
+        // payload 모양 고정 — 키가 늘거나 줄면 실패한다(순서는 계약이 아니다).
+        $this->assertEqualsCanonicalizing(['attachment_id', 'hash', 'alt'], array_keys($stored));
+        $this->assertSame($attachment->id, $stored['attachment_id']);
+        // 해시는 픽스처가 계산한 값이 아니라 DB 에 실제로 저장된 행의 값과 비교한다
+        // — board_attachments.hash 는 12자 컬럼이라 폭이 바뀌어도 어긋나지 않는다.
+        $this->assertSame($attachment->fresh()->hash, $stored['hash']);
+        $this->assertSame('히어로 대체 텍스트', $stored['alt']);
     }
 
     public function test_link_rejects_missing_attachment(): void
@@ -103,6 +110,8 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
         $resolved = $service->resolve('hero_main');
 
         $this->assertNotNull($resolved['url']);
+        // URL 이 그 첨부의 해시로 조립된다 — 아무 URL 이나 돌아오면 실패한다.
+        $this->assertStringContainsString($attachment->hash, $resolved['url']);
         $this->assertSame('대체 텍스트', $resolved['alt']);
     }
 
@@ -118,7 +127,10 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
         $service->unlink('hero_main');
 
         $this->assertSame(['url' => null, 'alt' => null], $service->resolve('hero_main'));
-        $this->assertNotNull($service->resolve('hero_sub')['url']);
+        // 살아남은 슬롯이 "그 첨부" 를 그대로 가리키는지까지 본다.
+        $surviving = $service->resolve('hero_sub');
+        $this->assertNotNull($surviving['url']);
+        $this->assertStringContainsString($second->hash, $surviving['url']);
     }
 
     public function test_unlink_rejects_unknown_slot(): void
@@ -136,18 +148,23 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
 
         $this->assertCount(16, $all);
         $this->assertNotNull($all['case_1']['url']);
+        $this->assertStringContainsString($attachment->hash, $all['case_1']['url']);
         $this->assertSame(['url' => null, 'alt' => null], $all['case_2']);
     }
 
     /**
      * 슬롯 해석 검증용 최소 첨부 행. 저장소·디스크는 건드리지 않는다.
+     *
+     * hash 는 board_attachments 의 `string('hash', 12)` 컬럼에 맞춘 12자다.
+     * 모델의 정식 생성기(Attachment::generateUniqueHash)와 같은 폭을 쓴다 —
+     * 길이를 늘리면 strict 모드에서 SQLSTATE[22001] 로 죽는다.
      */
-    private function createAttachment(): \Modules\Sirsoft\Board\Models\Attachment
+    private function createAttachment(): Attachment
     {
-        return \Modules\Sirsoft\Board\Models\Attachment::create([
+        return Attachment::create([
             'board_id' => 0,
             'post_id' => null,
-            'hash' => \Illuminate\Support\Str::random(32),
+            'hash' => Str::random(12),
             'original_filename' => 'photo.jpg',
             'stored_filename' => 'photo.jpg',
             'disk' => 'public',

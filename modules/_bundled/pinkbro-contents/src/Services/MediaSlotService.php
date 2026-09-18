@@ -59,7 +59,17 @@ class MediaSlotService
         }
     }
 
-    public function resolve(string $slot): ?array
+    /**
+     * 슬롯 하나를 서빙 URL 로 해석한다.
+     *
+     * 알려진 슬롯에는 항상 배열을 돌려준다 — 슬롯 미설정이나 첨부 행 소실은
+     * `['url' => null, 'alt' => null]` 로 표현하지 `null` 로 표현하지 않는다.
+     *
+     * @return array{url: string|null, alt: string|null}
+     *
+     * @throws InvalidArgumentException 알 수 없는 슬롯 키
+     */
+    public function resolve(string $slot): array
     {
         self::assertKnown($slot);
 
