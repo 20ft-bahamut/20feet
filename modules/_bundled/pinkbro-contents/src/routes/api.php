@@ -18,6 +18,7 @@
 */
 
 use Illuminate\Support\Facades\Route;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\MediaController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\SiteController;
 
@@ -33,3 +34,16 @@ Route::get('site', [SiteController::class, 'site'])->name('site');
 Route::get('copy', [SiteController::class, 'copy'])->name('copy');
 Route::get('discount', [SiteController::class, 'discount'])->name('discount');
 Route::get('media-slots', [MediaController::class, 'slots'])->name('media-slots');
+
+/*
+| 콘텐츠 목록 공개 API — 무인증 읽기 (권한 미들웨어 없음)
+|
+| GET api/modules/pinkbro-contents/services
+| GET api/modules/pinkbro-contents/packages
+| GET api/modules/pinkbro-contents/cases
+| GET api/modules/pinkbro-contents/faq
+*/
+Route::get('services', [ContentController::class, 'services'])->name('services');
+Route::get('packages', [ContentController::class, 'packages'])->name('packages');
+Route::get('cases', [ContentController::class, 'cases'])->name('cases');
+Route::get('faq', [ContentController::class, 'faq'])->name('faq');

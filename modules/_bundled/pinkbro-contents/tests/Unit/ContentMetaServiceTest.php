@@ -8,7 +8,6 @@ use Modules\Pinkbro\Contents\Tests\PinkbroContentsTestCase;
 
 class ContentMetaServiceTest extends PinkbroContentsTestCase
 {
-
     private function service(): ContentMetaService
     {
         return app(ContentMetaService::class);

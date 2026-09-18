@@ -14,9 +14,7 @@ use Modules\Pinkbro\Contents\Repositories\PinkbroMetaRepository;
  */
 class ContentMetaService
 {
-    public function __construct(private readonly PinkbroMetaRepository $repository)
-    {
-    }
+    public function __construct(private readonly PinkbroMetaRepository $repository) {}
 
     public function set(?int $boardId, ?int $postId, MetaDomain $domain, string $key, mixed $value): PinkbroMeta
     {

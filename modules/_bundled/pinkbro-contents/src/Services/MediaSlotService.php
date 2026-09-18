@@ -37,9 +37,7 @@ class MediaSlotService
         'services_air' => ['ko' => '에어컨 분해세척 사진', 'en' => 'Air care photo'],
     ];
 
-    public function __construct(private readonly ContentMetaService $meta)
-    {
-    }
+    public function __construct(private readonly ContentMetaService $meta) {}
 
     /** @return string[] */
     public static function slotKeys(): array
