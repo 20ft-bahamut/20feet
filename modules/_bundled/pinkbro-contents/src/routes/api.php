@@ -19,6 +19,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\InquiryController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\MediaController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\SiteController;
 
@@ -47,3 +48,16 @@ Route::get('services', [ContentController::class, 'services'])->name('services')
 Route::get('packages', [ContentController::class, 'packages'])->name('packages');
 Route::get('cases', [ContentController::class, 'cases'])->name('cases');
 Route::get('faq', [ContentController::class, 'faq'])->name('faq');
+
+/*
+| 문의 접수 공개 API — 무인증 쓰기
+|
+| POST api/modules/pinkbro-contents/inquiry
+|
+| 비회원도 제출하므로 권한 미들웨어를 두지 않는다. 스로틀은 선례
+| (twentyft-content 문의 store)와 같은 IP당 분당 10건이다. 검증 실패는
+| 422 `{message, errors}`, 게시판 미비는 503, 초과는 429 다.
+*/
+Route::post('inquiry', [InquiryController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('inquiry');
