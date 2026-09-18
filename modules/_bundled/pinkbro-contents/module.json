@@ -1,0 +1,39 @@
+{
+    "identifier": "pinkbro-contents",
+    "vendor": "pinkbro",
+    "name": {
+        "ko": "핑크브로 콘텐츠",
+        "en": "PinkBro Contents"
+    },
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": {
+        "ko": "핑크브로클린케어 랜딩의 콘텐츠·문의·미디어 슬롯 관리 모듈",
+        "en": "Content, inquiry and media slot management for PinkBro CleanCare"
+    },
+    "type": "module",
+    "locales": ["ko", "en"],
+    "author": {
+        "name": "20ft"
+    },
+    "release_date": "2026-09-18",
+    "g7_version": ">=7.0.0",
+    "internal": true,
+    "dependencies": {
+        "modules": {
+            "sirsoft-board": ">=1.0.0"
+        },
+        "plugins": {}
+    },
+    "assets": {
+        "js": [],
+        "css": [],
+        "fonts": [],
+        "images": []
+    },
+    "components": {
+        "basic": [],
+        "composite": [],
+        "layout": []
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "name": "modules/pinkbro-contents",
+    "description": "PinkBro CleanCare landing content module for Gnuboard7",
+    "type": "library",
+    "version": "0.1.0",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Modules\\Pinkbro\\Contents\\": "src/",
+            "Modules\\Pinkbro\\Contents\\Database\\Seeders\\": "database/seeders/",
+            "Modules\\Pinkbro\\Contents\\Database\\Factories\\": "database/factories/",
+            "Modules\\Pinkbro\\Contents\\Upgrades\\": "upgrades/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Pinkbro\\Contents\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^8.2"
+    }
+}

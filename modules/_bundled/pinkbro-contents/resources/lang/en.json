@@ -1,0 +1,12 @@
+{
+    "name": "PinkBro Contents",
+    "description": "Content, inquiry and media slot management for PinkBro CleanCare",
+    "menu": {
+        "dashboard": "PinkBro Contents",
+        "content": "Content",
+        "inquiry": "Inquiries",
+        "media": "Media",
+        "site": "Site",
+        "copy": "Copy"
+    }
+}
