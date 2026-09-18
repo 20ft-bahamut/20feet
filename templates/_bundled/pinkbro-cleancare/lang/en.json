@@ -1,0 +1,12 @@
+{
+    "pinkbro": {
+        "base_layout_title": "PinkBro CleanCare",
+        "base_layout_description": "PinkBro CleanCare landing page",
+        "meta": {
+            "home_title": "PinkBro CleanCare Home"
+        },
+        "nav": {
+            "home": "Home"
+        }
+    }
+}

@@ -1,0 +1,64 @@
+{
+    "identifier": "pinkbro-cleancare",
+    "vendor": "pinkbro",
+    "name": {
+        "ko": "PinkBro CleanCare",
+        "en": "PinkBro CleanCare"
+    },
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": {
+        "ko": "핑크브로클린케어 랜딩 페이지 Gnuboard 7 사용자 템플릿",
+        "en": "PinkBro CleanCare landing page Gnuboard 7 user template"
+    },
+    "type": "user",
+    "locales": [
+        "ko",
+        "en"
+    ],
+    "author": {
+        "name": "pinkbro"
+    },
+    "release_date": "2026-09-18",
+    "g7_version": ">=7.0.0",
+    "dependencies": {
+        "modules": {
+            "pinkbro-contents": ">=0.1.0",
+            "sirsoft-board": ">=1.0.0"
+        },
+        "plugins": {}
+    },
+    "assets": {
+        "css": [
+            "dist/css/components.css"
+        ],
+        "js": [
+            "dist/js/components.iife.js"
+        ],
+        "fonts": [],
+        "images": []
+    },
+    "components": {
+        "basic": [
+            "Div"
+        ],
+        "composite": [],
+        "layout": []
+    },
+    "error_config": {
+        "layouts": {
+            "401": "errors/401",
+            "403": "errors/403",
+            "404": "errors/404",
+            "500": "errors/500",
+            "503": "errors/503",
+            "maintenance": "errors/maintenance"
+        }
+    },
+    "features": {
+        "dark_mode": false,
+        "responsive": true,
+        "multi_language": true,
+        "multi_currency": false
+    }
+}

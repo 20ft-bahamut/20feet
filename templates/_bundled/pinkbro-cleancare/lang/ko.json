@@ -1,0 +1,12 @@
+{
+    "pinkbro": {
+        "base_layout_title": "핑크브로클린케어",
+        "base_layout_description": "핑크브로클린케어 랜딩 페이지",
+        "meta": {
+            "home_title": "핑크브로클린케어 홈"
+        },
+        "nav": {
+            "home": "홈"
+        }
+    }
+}

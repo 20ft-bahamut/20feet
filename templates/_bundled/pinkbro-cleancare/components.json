@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "templateId": "pinkbro-cleancare",
+    "version": "0.1.0",
+    "components": {
+        "basic": [
+            {
+                "name": "Div",
+                "type": "basic",
+                "description": "HTML div element wrapper",
+                "path": "src/components/basic/Div.tsx"
+            }
+        ],
+        "composite": [],
+        "layout": []
+    }
+}

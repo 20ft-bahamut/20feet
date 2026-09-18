@@ -1,0 +1,55 @@
+/**
+ * PinkBro CleanCare — Design Tokens
+ *
+ * 값 출처(추출 원문): _workspace/pinkbro/source/styles.css `:root` 블록.
+ *   --bg / --soft / --soft-2 / --ink / --ink-2 / --muted / --line
+ *   --pink / --pink-2 / --pink-soft / --max / --radius-xl / --radius-lg / --radius-md / --shadow
+ * 템플릿 내 충돌 방지를 위해 모든 커스텀 프로퍼티에 `--pb-` 접두사를 붙인다(값은 원문 그대로).
+ *
+ * Fonts: Google Fonts CDN 로딩(파일 번들 없음 → template.json `assets.fonts` 는 빈 배열).
+ *   원문 head.html 의 stylesheet 링크와 동일한 패밀리/웨이트를 @import 로 옮긴 것.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap');
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:root {
+    /* ---- Surface / text (원문 styles.css :root) ---- */
+    --pb-bg: #ffffff;
+    --pb-soft: #f6f7fb;
+    --pb-soft-2: #fafbfe;
+    --pb-ink: #161922;
+    --pb-ink-2: #222632;
+    --pb-muted: #686e7c;
+    --pb-line: rgba(19, 22, 30, 0.1);
+
+    /* ---- Brand pink ---- */
+    --pb-pink: #ff2d86;
+    --pb-pink-2: #ff6cae;
+    --pb-pink-soft: #fff1f7;
+
+    /* ---- Layout ---- */
+    --pb-max: 1280px;
+
+    /* ---- Radius / shadow ---- */
+    --pb-radius-xl: 36px;
+    --pb-radius-lg: 28px;
+    --pb-radius-md: 22px;
+    --pb-shadow: 0 28px 72px rgba(15, 17, 24, 0.1);
+
+    /* ---- Typography (원문 body / .mono font-family) ---- */
+    --pb-font-body: 'Noto Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo',
+        'Malgun Gothic', Arial, sans-serif;
+    --pb-font-latin: 'Manrope', 'Noto Sans KR', system-ui, sans-serif;
+}

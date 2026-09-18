@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "description": "PinkBro CleanCare landing routes",
+    "routes": [
+        {
+            "_comment": "=== 홈 (유일한 일반 라우트) ===",
+            "path": "/",
+            "layout": "home",
+            "auth_required": false,
+            "meta": {
+                "title": "$t:pinkbro.meta.home_title"
+            }
+        }
+    ]
+}
