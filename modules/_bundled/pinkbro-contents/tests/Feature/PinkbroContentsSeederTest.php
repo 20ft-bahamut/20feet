@@ -48,6 +48,12 @@ class PinkbroContentsSeederTest extends PinkbroContentsTestCase
      * 설치 시더와 같은 출처(config('core.roles'))로 역할 행을 먼저 만든 뒤 시딩한다.
      * BoardPermissionService 는 존재하지 않는 역할을 조용히 건너뛰므로 이 사전 조건이
      * 없으면 부여 자체가 일어나지 않아 검증이 성립하지 않는다.
+     *
+     * 전체 집합을 등호로 비교하지 않는다 — 게시판을 BoardService::createBoard 로 만들면
+     * 게시판 스코프 manager/step 역할이 모든 권한에 추가 주입된다
+     * (BoardService::injectBoardRolesToPermissions; 선례
+     * sirsoft-board tests/Feature/Admin/BoardManagementTest.php::test_custom_permissions_still_include_manager_step).
+     * 주입은 더하기만 하므로, 시더가 선언한 역할이 실제로 붙었는지를 포함 검사로 본다.
      */
     public function test_inquiry_board_grants_guest_write_permissions(): void
     {
@@ -59,10 +65,17 @@ class PinkbroContentsSeederTest extends PinkbroContentsTestCase
             $permission = Permission::where('identifier', "sirsoft-board.pinkbro_inquiry.{$action}")->first();
 
             $this->assertNotNull($permission, "권한 sirsoft-board.pinkbro_inquiry.{$action} 이 생성되지 않았습니다.");
-            $this->assertEqualsCanonicalizing(
-                ['admin', 'user', 'guest'],
-                $permission->roles()->pluck('identifier')->all()
-            );
+
+            $roleIdentifiers = $permission->roles()->pluck('identifier')->all();
+
+            // 시더가 선언한 역할. guest 가 빠지면 이 루프가 실패한다 — 이것이 요구사항이다.
+            foreach (['admin', 'user', 'guest'] as $identifier) {
+                $this->assertContains(
+                    $identifier,
+                    $roleIdentifiers,
+                    "sirsoft-board.pinkbro_inquiry.{$action} 에 {$identifier} 역할이 부여되지 않았습니다."
+                );
+            }
         }
     }
 
