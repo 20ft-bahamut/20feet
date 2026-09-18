@@ -2,10 +2,12 @@
 
 namespace Modules\Pinkbro\Contents\Services;
 
+use Illuminate\Support\Facades\DB;
 use Modules\Pinkbro\Contents\Enums\InquiryStatus;
 use Modules\Pinkbro\Contents\Enums\MetaDomain;
 use Modules\Sirsoft\Board\Enums\PostStatus;
 use Modules\Sirsoft\Board\Models\Board;
+use Modules\Sirsoft\Board\Models\Post;
 use Modules\Sirsoft\Board\Services\PostService;
 use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
@@ -17,6 +19,8 @@ use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
  * 저장은 게시판의 공식 쓰기 경로(`PostService::createPost`)를 지난다. 그래야
  * before/after_create 훅이 발화하고, 게시판 `notify_admin_on_post` 플래그가
  * 관리자 알림을 걸 수 있다 — 이 모듈에는 알림 코드가 없다.
+ *
+ * 게시글과 메타는 한 트랜잭션으로 묶는다: 둘 중 하나만 남으면 문의가 깨진다.
  */
 class InquiryService
 {
@@ -51,25 +55,35 @@ class InquiryService
 
         // 비밀글 + 게시 상태. `secret_mode: always` 는 게시판 설정이며
         // 게시글의 is_secret 을 대신 세우지 않는다 — 명시적으로 넘긴다.
-        $post = $this->posts->createPost(self::BOARD_SLUG, [
-            'title' => $this->buildTitle($validated),
-            'content' => $validated['message'] ?? '',
-            'content_mode' => 'text',
-            'author_name' => $validated['contact'],
-            'ip_address' => $ipAddress,
-            'is_secret' => true,
-            'status' => PostStatus::Published->value,
-        ]);
+        //
+        // 게시글 생성과 메타 저장은 한 트랜잭션이다. createPost 가 내부에서
+        // DB::beginTransaction()/commit() 를 직접 부르지만, 바깥 트랜잭션이 열려
+        // 있으면 Laravel 은 그 짝을 SAVEPOINT(trans2)로 낮춘다 — 실제 커밋은
+        // 바깥에서 한 번만 일어난다. 그래서 메타 저장이 실패하면 "연락처가 담긴
+        // 비밀글만 남고 메타가 비는" 부분 저장이 되지 않는다.
+        $post = DB::transaction(function () use ($board, $validated, $ipAddress): Post {
+            $post = $this->posts->createPost(self::BOARD_SLUG, [
+                'title' => $this->buildTitle($validated),
+                'content' => $validated['message'] ?? '',
+                'content_mode' => 'text',
+                'author_name' => $validated['contact'],
+                'ip_address' => $ipAddress,
+                'is_secret' => true,
+                'status' => PostStatus::Published->value,
+            ]);
 
-        $this->meta->setMany($board->id, $post->id, MetaDomain::INQUIRY, [
-            'business_type' => $validated['business_type'],
-            // 목록 선택은 순서가 있는 배열이다 — list 로 정규화해 저장한다.
-            'services' => array_values($validated['services']),
-            'store_size' => $validated['store_size'] ?? null,
-            'contact' => $validated['contact'],
-            'message' => $validated['message'] ?? null,
-            'status' => InquiryStatus::NEW->value,
-        ]);
+            $this->meta->setMany($board->id, $post->id, MetaDomain::INQUIRY, [
+                'business_type' => $validated['business_type'],
+                // 목록 선택은 순서가 있는 배열이다 — list 로 정규화해 저장한다.
+                'services' => array_values($validated['services']),
+                'store_size' => $validated['store_size'] ?? null,
+                'contact' => $validated['contact'],
+                'message' => $validated['message'] ?? null,
+                'status' => InquiryStatus::NEW->value,
+            ]);
+
+            return $post;
+        });
 
         return [
             'post_id' => $post->id,
