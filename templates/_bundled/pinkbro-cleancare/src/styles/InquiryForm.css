@@ -27,10 +27,30 @@
     box-shadow: var(--pb-shadow);
 }
 
+/* 슬롯(estimate_bg) 이미지 / 슬롯이 비었을 때의 중립 CSS 폴백 */
+.pb-inquiry-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.pb-inquiry-bg-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(160deg, #1a1d27 0%, #101219 100%);
+}
+
+/* 소스의 .estimate-shell::before 는 그라디언트 오버레이 + Unsplash 스톡 이미지였다.
+   스톡 URL 은 제거하고, 업로드된 배경 위에 남는 그라디언트 오버레이만 유지한다. */
 .pb-inquiry-shell::before {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 1;
     background: linear-gradient(
         120deg,
         rgba(10, 11, 15, 0.88) 0%,
@@ -41,7 +61,7 @@
 
 .pb-inquiry-grid {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: grid;
     grid-template-columns: 0.96fr 1.04fr;
     gap: 24px;
@@ -273,62 +293,8 @@
     margin-top: 18px;
 }
 
-.pb-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 56px;
-    padding: 0 24px;
-    border-radius: 999px;
-    border: 1px solid var(--pb-ink);
-    background: #fff;
-    color: var(--pb-ink);
-    font-size: 15px;
-    font-weight: 800;
-    transition: 0.24s ease;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.pb-btn--dark {
-    background: var(--pb-ink);
-    border-color: var(--pb-ink);
-    color: #fff;
-}
-
-.pb-btn--dark:hover:not(:disabled) {
-    transform: translateY(-2px);
-    background: #0d0f14;
-}
-
-.pb-btn--dark:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.pb-btn--kakao {
-    background: #fee500;
-    border-color: #fee500;
-    color: #191919;
-    font-weight: 900;
-}
-
-.pb-btn--kakao:hover {
-    background: #f2d900;
-    border-color: #f2d900;
-    color: #191919;
-    transform: translateY(-2px);
-}
-
-.pb-btn--ghost {
-    background: transparent;
-}
-
-.pb-btn--ghost:hover {
-    border-color: var(--pb-pink);
-    color: var(--pb-pink);
-}
+/* 버튼 시스템(.pb-btn / --dark / --ghost / --kakao)은 design-tokens.css 에 단일 정의.
+   이 파일은 레이아웃만 얹는다. */
 
 /* ---- 스켈레톤 (site/services 로딩 중) — 중립 CSS ---- */
 
@@ -341,34 +307,30 @@
     padding: 62px;
 }
 
-.pb-skeleton-block {
+.pb-inquiry .pb-skeleton-block {
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.08);
     animation: pb-skeleton-pulse 1.4s ease-in-out infinite;
 }
 
-.pb-skeleton-block--title {
+.pb-inquiry .pb-skeleton-block--title {
     height: 34px;
     width: 55%;
 }
 
-.pb-skeleton-block--line {
+.pb-inquiry .pb-skeleton-block--line {
     height: 14px;
     width: 80%;
 }
 
-.pb-skeleton-block--panel {
+.pb-inquiry .pb-skeleton-block--panel {
     min-height: 420px;
     background: rgba(255, 255, 255, 0.12);
 }
 
-@keyframes pb-skeleton-pulse {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.45;
+@media (prefers-reduced-motion: reduce) {
+    .pb-inquiry .pb-skeleton-block {
+        animation: none;
     }
 }
 

@@ -1,8 +1,55 @@
 /*
  * PackageList 섹션 스타일.
- * 값은 _workspace/pinkbro/source/styles.css 의 #package / .pkg-* 원문에서
+ * 값은 _workspace/pinkbro/source/styles.css 의 #package / .package-* / .pkg-* 원문에서
  * 가져오고, 클래스 접두사만 pb- 로 바꿨다. 색·폰트·반경은 --pb-* 토큰을 쓴다.
+ *
+ * .pb-package-stage 는 원문 .package-stage 이식 — 모듈 슬롯 `package_stage` 의 자리다.
+ * 원문의 Unsplash 스톡 배경은 제거하고(스펙 §8), 슬롯 URL → 중립 CSS 폴백으로 대체한다.
  */
+
+.pb-package-stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  border-radius: 34px;
+  background: #11131a;
+  box-shadow: var(--pb-shadow);
+}
+
+/* 슬롯(package_stage) 이미지 / 슬롯이 비었을 때의 중립 CSS 폴백 */
+.pb-package-stage-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.pb-package-stage-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(160deg, #1a1d27 0%, #101219 100%);
+}
+
+.pb-package-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
+  padding: 62px;
+  color: #fff;
+}
+
+/* 스테이지 안에서는 원문 .package-copy .h2 / .sub 처럼 밝은 색을 쓴다 */
+.pb-package-copy .pb-packages-intro {
+  color: #fff;
+}
+
+.pb-package-copy .pb-packages-sub {
+  margin-top: 18px;
+  color: rgba(255, 255, 255, 0.78);
+}
 
 .pb-packages-intro {
   margin: 0 0 20px;
@@ -96,6 +143,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  /* 원문 .package-grid — 스테이지 아래쪽에 카드가 겹쳐 올라온다 */
+  margin-top: -92px;
+  position: relative;
+  z-index: 2;
 }
 
 .pb-pkg-card {
@@ -223,6 +274,8 @@
 @media (max-width: 1100px) {
   .pb-package-grid {
     grid-template-columns: 1fr;
+    /* 원문과 동일 — 좁은 화면에서는 겹치지 않는다 */
+    margin-top: 24px;
   }
 
   .pb-benefit-grid {
@@ -231,6 +284,14 @@
 }
 
 @media (max-width: 720px) {
+  .pb-package-stage {
+    border-radius: 24px;
+  }
+
+  .pb-package-copy {
+    padding: 30px 20px;
+  }
+
   .pb-pkg-card {
     border-radius: var(--pb-radius-md);
     min-height: 0;

@@ -10,13 +10,13 @@ describe('AboutSection', () => {
         { title: '업종에 맞는 핵심 서비스', body: '설명 1' },
         { title: '기본가격 공개', body: '설명 2' },
       ],
-    } as any} />);
+    } as any} media={null} />);
     expect(screen.getByText('좋은 매장은 공간의 컨디션까지 다릅니다.')).toBeInTheDocument();
     expect(screen.getByText('업종에 맞는 핵심 서비스')).toBeInTheDocument();
   });
 
   it('renders a loading skeleton when copy is null', () => {
-    render(<AboutSection copy={null} />);
+    render(<AboutSection copy={null} media={null} />);
     expect(screen.getByTestId('about-skeleton')).toBeInTheDocument();
   });
 
@@ -31,6 +31,7 @@ describe('AboutSection', () => {
             about_perspectives: [],
           } as any
         }
+        media={null}
       />,
     );
 
@@ -50,9 +51,55 @@ describe('AboutSection', () => {
   });
 
   it('omits the stage heading and why-content heading when the copy keys are null', () => {
-    render(<AboutSection copy={{ about_message: '본문', about_perspectives: [] } as any} />);
+    render(<AboutSection copy={{ about_message: '본문', about_perspectives: [] } as any} media={null} />);
     expect(screen.queryByTestId('about-heading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('about-side-heading')).not.toBeInTheDocument();
     expect(screen.getByTestId('about-message')).toHaveTextContent('본문');
+  });
+
+  it('renders the stage image from the why_stage media slot when the admin uploaded one', () => {
+    render(
+      <AboutSection
+        copy={{ about_message: '본문', about_perspectives: [] } as any}
+        media={{ why_stage: { url: '/uploads/stage.webp', alt: '매장' } }}
+      />,
+    );
+
+    const img = screen.getByTestId('about-media');
+    expect(img.tagName).toBe('IMG');
+    expect(img).toHaveAttribute('src', '/uploads/stage.webp');
+    expect(img).toHaveAttribute('alt', '매장');
+    expect(screen.queryByTestId('about-media-fallback')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the neutral css block when why_stage is empty or media is null', () => {
+    const { unmount } = render(
+      <AboutSection
+        copy={{ about_message: '본문', about_perspectives: [] } as any}
+        media={{ why_stage: { url: null, alt: null } }}
+      />,
+    );
+    expect(screen.getByTestId('about-media-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('about-media')).not.toBeInTheDocument();
+    unmount();
+
+    render(
+      <AboutSection
+        copy={{ about_message: '본문', about_perspectives: [] } as any}
+        media={null}
+      />,
+    );
+    expect(screen.getByTestId('about-media-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('about-media')).not.toBeInTheDocument();
+  });
+
+  it('renders no section anchor id — the layout owns anchor targets', () => {
+    const { container } = render(
+      <AboutSection
+        copy={{ about_message: '본문', about_perspectives: [] } as any}
+        media={null}
+      />,
+    );
+    expect(container.querySelector('#about')).toBeNull();
   });
 });

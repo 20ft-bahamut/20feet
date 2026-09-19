@@ -230,7 +230,8 @@ export function EstimateCalculator({
           </div>
 
           <div className="pb-estimate-summary-actions">
-            <a className="pb-estimate-option-price" href="#inquiry">
+            {/* 앵커 목적지는 견적/문의 섹션(#estimate)이다 — 레이아웃이 그 id 를 소유한다 */}
+            <a className="pb-estimate-option-price" href="#estimate">
               이 구성으로 견적 문의하기
             </a>
             {site?.kakao_channel ? (

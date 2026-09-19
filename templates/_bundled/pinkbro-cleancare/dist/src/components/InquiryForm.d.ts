@@ -1,10 +1,12 @@
 import { default as React } from 'react';
-import { ServiceItem, SiteData } from '../lib/types';
+import { MediaSlots, ServiceItem, SiteData } from '../lib/types';
 export interface InquiryFormProps {
     /** 사이트 기본 정보. null 이면 아직 로딩 중 — 스켈레톤. */
     site: SiteData | null;
     /** 서비스 목록. null 이면 아직 로딩 중 — 스켈레톤(스펙 5.4: null → 필드 숨김). */
     services: ServiceItem[] | null;
+    /** 미디어 슬롯 키 → 슬롯. null = 아직 로딩 중. `estimate_bg` 가 이 섹션의 배경 이미지다. */
+    media: MediaSlots | null;
     /** 섹션 제목(copy: estimate_intro). null 이면 제목 없이 렌더한다. */
     intro: string | null;
     /** 섹션 보조 문구(copy: estimate_note). null 이면 생략한다. */
@@ -19,5 +21,5 @@ export interface InquiryFormProps {
     panelNote: string | null;
     className?: string;
 }
-export declare function InquiryForm({ site, services, intro, sub, checklist, panelHeading, panelSub, panelNote, className, }: InquiryFormProps): React.ReactElement;
+export declare function InquiryForm({ site, services, media, intro, sub, checklist, panelHeading, panelSub, panelNote, className, }: InquiryFormProps): React.ReactElement;
 export default InquiryForm;

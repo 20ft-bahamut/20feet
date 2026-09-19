@@ -64,11 +64,11 @@ export function SiteHeader({ site, media: _media, estimateLabel, mobileEstimateL
 
         <div className="pb-nav-cta">
           {site?.phone ? (
-            <a className="pb-btn pb-btn-ghost" href={telHref(site.phone)}>
+            <a className="pb-btn pb-btn--ghost" href={telHref(site.phone)}>
               {site.phone}
             </a>
           ) : null}
-          <a className="pb-btn pb-btn-dark" href="#estimate">
+          <a className="pb-btn pb-btn--dark" href="#estimate">
             {estimate}
           </a>
           <a className="pb-mobile-link" href="#estimate">

@@ -65,7 +65,20 @@
             "Textarea",
             "Label"
         ],
-        "composite": [],
+        "composite": [
+            "Hero",
+            "AboutSection",
+            "ServiceGrid",
+            "PackageList",
+            "PriceDiscount",
+            "FaqList",
+            "CaseGallery",
+            "EstimateCalculator",
+            "InquiryForm",
+            "SiteHeader",
+            "SiteFooter",
+            "MobileBar"
+        ],
         "layout": []
     },
     "error_config": {

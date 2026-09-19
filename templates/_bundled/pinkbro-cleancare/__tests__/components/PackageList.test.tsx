@@ -15,17 +15,17 @@ const items = [
 
 describe('PackageList', () => {
   it('renders a skeleton when items is null', () => {
-    render(<PackageList intro={null} introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} items={null} />);
+    render(<PackageList intro={null} introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={null} />);
     expect(screen.getByTestId('packages-skeleton')).toBeInTheDocument();
   });
 
   it('renders an empty state when items is an empty array', () => {
-    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} items={[]} />);
+    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={[]} />);
     expect(screen.getByTestId('packages-empty')).toBeInTheDocument();
   });
 
   it('renders one card per package with price, base_total and discount_rate', () => {
-    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} items={items} />);
+    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={items} />);
 
     expect(screen.getAllByTestId('package-card')).toHaveLength(2);
     expect(screen.getByText('380,000원')).toBeInTheDocument();
@@ -34,14 +34,14 @@ describe('PackageList', () => {
   });
 
   it('renders the includes array as a list', () => {
-    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} items={items} />);
+    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={items} />);
     expect(screen.getByText('i1')).toBeInTheDocument();
     expect(screen.getByText('i2')).toBeInTheDocument();
     expect(screen.getAllByRole('list')).toHaveLength(2);
   });
 
   it('marks the featured package with an emphasis class', () => {
-    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} items={items} />);
+    render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={items} />);
     const cards = screen.getAllByTestId('package-card');
     expect(cards[0]).not.toHaveClass('pb-pkg-card--featured');
     expect(cards[1]).toHaveClass('pb-pkg-card--featured');
@@ -55,6 +55,7 @@ describe('PackageList', () => {
         benefitHeading={null}
         benefitSub={null}
         benefitItems={null}
+        media={null}
         items={items}
       />,
     );
@@ -76,6 +77,7 @@ describe('PackageList', () => {
           { condition: '3~4개 항목', amount_label: '5%' },
           { condition: '5개 이상', amount_label: '10%' },
         ]}
+        media={null}
         items={items}
       />,
     );
@@ -95,8 +97,40 @@ describe('PackageList', () => {
   it('omits the benefit box when no benefit copy and no rows are given', () => {
     render(
       <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
-        benefitItems={null} items={items} />,
+        benefitItems={null} media={null} items={items} />,
     );
     expect(screen.queryByTestId('benefit-box')).not.toBeInTheDocument();
+  });
+
+  it('renders the stage image from the package_stage media slot when the admin uploaded one', () => {
+    render(
+      <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
+        benefitItems={null} items={items}
+        media={{ package_stage: { url: '/uploads/package.webp', alt: '패키지' } }} />,
+    );
+
+    const img = screen.getByTestId('package-stage-media');
+    expect(img.tagName).toBe('IMG');
+    expect(img).toHaveAttribute('src', '/uploads/package.webp');
+    expect(img).toHaveAttribute('alt', '패키지');
+    expect(screen.queryByTestId('package-stage-fallback')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the neutral css block when package_stage is empty or media is null', () => {
+    const { unmount } = render(
+      <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
+        benefitItems={null} items={items}
+        media={{ package_stage: { url: null, alt: null } }} />,
+    );
+    expect(screen.getByTestId('package-stage-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('package-stage-media')).not.toBeInTheDocument();
+    unmount();
+
+    render(
+      <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
+        benefitItems={null} items={items} media={null} />,
+    );
+    expect(screen.getByTestId('package-stage-fallback')).toBeInTheDocument();
+    expect(screen.queryByTestId('package-stage-media')).not.toBeInTheDocument();
   });
 });

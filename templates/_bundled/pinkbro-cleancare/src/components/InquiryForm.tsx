@@ -5,6 +5,7 @@ import {
     Div,
     H2,
     H3,
+    Img,
     Input,
     Label,
     P,
@@ -25,13 +26,15 @@ import {
     type InquiryFieldErrors,
     type InquiryFormValues,
 } from '../lib/inquiry';
-import type { ServiceItem, SiteData } from '../lib/types';
+import type { MediaSlots, ServiceItem, SiteData } from '../lib/types';
 
 export interface InquiryFormProps {
     /** 사이트 기본 정보. null 이면 아직 로딩 중 — 스켈레톤. */
     site: SiteData | null;
     /** 서비스 목록. null 이면 아직 로딩 중 — 스켈레톤(스펙 5.4: null → 필드 숨김). */
     services: ServiceItem[] | null;
+    /** 미디어 슬롯 키 → 슬롯. null = 아직 로딩 중. `estimate_bg` 가 이 섹션의 배경 이미지다. */
+    media: MediaSlots | null;
     /** 섹션 제목(copy: estimate_intro). null 이면 제목 없이 렌더한다. */
     intro: string | null;
     /** 섹션 보조 문구(copy: estimate_note). null 이면 생략한다. */
@@ -52,6 +55,7 @@ type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 export function InquiryForm({
     site,
     services,
+    media,
     intro,
     sub,
     checklist,
@@ -216,11 +220,27 @@ export function InquiryForm({
     }
 
     const telHref = site.phone ? `tel:${site.phone.replace(/[^\d+]/g, '')}` : null;
+    const bg = media?.estimate_bg ?? null;
+    const bgUrl = bg?.url ?? null;
 
     return (
-        <section className={className ? `pb-inquiry ${className}` : 'pb-inquiry'} id="estimate">
+        <section className={className ? `pb-inquiry ${className}` : 'pb-inquiry'}>
             <div className="pb-inquiry-wrap">
                 <div className="pb-inquiry-shell">
+                    {bgUrl ? (
+                        <Img
+                            className="pb-inquiry-bg"
+                            data-testid="inquiry-bg"
+                            src={bgUrl}
+                            alt={bg?.alt ?? ''}
+                        />
+                    ) : (
+                        <Div
+                            className="pb-inquiry-bg-fallback"
+                            data-testid="inquiry-bg-fallback"
+                            aria-hidden="true"
+                        />
+                    )}
                     <div className="pb-inquiry-grid">
                         <div className="pb-inquiry-copy">
                             <Span className="pb-inquiry-eyebrow">Estimate</Span>

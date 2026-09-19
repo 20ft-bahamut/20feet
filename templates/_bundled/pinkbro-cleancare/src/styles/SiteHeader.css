@@ -65,40 +65,9 @@
     align-items: center;
 }
 
-/* ---- 버튼(원문 .btn / .btn.ghost / .btn.dark) ---- */
-
-.pb-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 56px;
-    padding: 0 24px;
-    border-radius: 999px;
-    border: 1px solid var(--pb-ink);
-    background: #fff;
-    color: var(--pb-ink);
-    font-size: 15px;
-    font-weight: 800;
-    transition: 0.24s ease;
-    cursor: pointer;
-}
-
-.pb-btn-ghost:hover {
-    border-color: var(--pb-pink);
-    color: var(--pb-pink);
-}
-
-.pb-btn-dark {
-    background: var(--pb-ink);
-    border-color: var(--pb-ink);
-    color: #fff;
-}
-
-.pb-btn-dark:hover {
-    transform: translateY(-2px);
-    background: #0d0f14;
-}
+/* ---- 버튼(원문 .btn / .btn.ghost / .btn.dark) ----
+   정의는 design-tokens.css 의 공용 `.pb-btn` 계열 하나뿐이다.
+   헤더와 견적 폼이 같은 시스템을 쓰므로 이 파일에서 다시 선언하지 않는다. */
 
 .pb-mobile-link {
     display: none;

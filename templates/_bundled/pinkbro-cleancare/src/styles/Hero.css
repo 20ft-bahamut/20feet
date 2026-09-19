@@ -65,17 +65,13 @@
 .pb-hero-visual-bottom b { display: block; margin-top: 9px; font-size: 26px; line-height: 1.18; letter-spacing: -.04em; }
 .pb-hero-visual-bottom p { margin: 0; max-width: 15ch; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, .80); text-align: right; }
 
-/* ---- loading skeleton ---- */
+/* ---- loading skeleton (히어로 스코프) ---- */
 .pb-skeleton { display: grid; gap: 18px; }
-.pb-skeleton-block { border-radius: 22px; background: linear-gradient(100deg, #eef0f5 40%, #f7f8fb 50%, #eef0f5 60%); background-size: 200% 100%; animation: pb-skeleton-pulse 1.4s ease-in-out infinite; }
-.pb-skeleton-block.dark { background: linear-gradient(100deg, #191c26 40%, #222633 50%, #191c26 60%); background-size: 200% 100%; }
-@keyframes pb-skeleton-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .55; }
-}
+.pb-hero .pb-skeleton-block { border-radius: 22px; background: linear-gradient(100deg, #eef0f5 40%, #f7f8fb 50%, #eef0f5 60%); background-size: 200% 100%; animation: pb-skeleton-pulse 1.4s ease-in-out infinite; }
+.pb-hero .pb-skeleton-block.dark { background: linear-gradient(100deg, #191c26 40%, #222633 50%, #191c26 60%); background-size: 200% 100%; }
 
 @media (prefers-reduced-motion: reduce) {
-    .pb-skeleton-block { animation: none; }
+    .pb-hero .pb-skeleton-block { animation: none; }
 }
 
 /* ---- responsive (원문 1100px / 720px 브레이크포인트) ---- */

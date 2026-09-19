@@ -1,5 +1,5 @@
 /**
- * PinkBro CleanCare — Design Tokens
+ * PinkBro CleanCare — Design Tokens + 공용 스타일
  *
  * 값 출처(추출 원문): _workspace/pinkbro/source/styles.css `:root` 블록.
  *   --bg / --soft / --soft-2 / --ink / --ink-2 / --muted / --line
@@ -8,6 +8,15 @@
  *
  * Fonts: Google Fonts CDN 로딩(파일 번들 없음 → template.json `assets.fonts` 는 빈 배열).
  *   원문 head.html 의 stylesheet 링크와 동일한 패밀리/웨이트를 @import 로 옮긴 것.
+ *
+ * 공용 스타일(이 파일이 유일한 정의처):
+ *   - `.pb-btn` 계열 — 헤더(SiteHeader)와 견적 폼(InquiryForm)이 같은 버튼 시스템을
+ *     공유한다. 컴포넌트별 파일에 각각 정의하면 같은 클래스가 dist/css/components.css
+ *     안에서 두 번 선언되고, 뒤에 번들된 쪽이 전역을 덮어쓴다. 수정자 규약은 BEM
+ *     `--` 하나로 통일한다(`--dark` / `--ghost` / `--kakao`).
+ *   - `@keyframes pb-skeleton-pulse` — 스켈레톤 셔머는 여러 섹션이 함께 쓰므로
+ *     키프레임은 여기 한 번만 정의한다. 각 컴포넌트는 자기 스코프
+ *     (`.pb-hero .pb-skeleton-block` 등)에서 그 키프레임을 참조한다.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap');
@@ -52,4 +61,76 @@ body {
     --pb-font-body: 'Noto Sans KR', system-ui, -apple-system, 'Apple SD Gothic Neo',
         'Malgun Gothic', Arial, sans-serif;
     --pb-font-latin: 'Manrope', 'Noto Sans KR', system-ui, sans-serif;
+}
+
+/* ---- 공용 버튼 (원문 .btn / .btn.ghost / .btn.dark / .btn.kakao) ---- */
+
+.pb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 0 24px;
+    border-radius: 999px;
+    border: 1px solid var(--pb-ink);
+    background: #fff;
+    color: var(--pb-ink);
+    font-size: 15px;
+    font-weight: 800;
+    transition: 0.24s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.pb-btn--dark {
+    background: var(--pb-ink);
+    border-color: var(--pb-ink);
+    color: #fff;
+}
+
+.pb-btn--dark:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #0d0f14;
+}
+
+.pb-btn--dark:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pb-btn--kakao {
+    background: #fee500;
+    border-color: #fee500;
+    color: #191919;
+    font-weight: 900;
+}
+
+.pb-btn--kakao:hover {
+    background: #f2d900;
+    border-color: #f2d900;
+    color: #191919;
+    transform: translateY(-2px);
+}
+
+.pb-btn--ghost {
+    background: transparent;
+}
+
+.pb-btn--ghost:hover {
+    border-color: var(--pb-pink);
+    color: var(--pb-pink);
+}
+
+/* ---- 공용 스켈레톤 셔머 키프레임 (정의는 이 한 곳뿐) ---- */
+
+@keyframes pb-skeleton-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.55;
+    }
 }

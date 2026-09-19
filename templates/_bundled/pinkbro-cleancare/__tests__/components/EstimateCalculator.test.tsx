@@ -185,4 +185,25 @@ describe('EstimateCalculator', () => {
     );
     expect(container.innerHTML).not.toMatch(/unsplash\.com/);
   });
+
+  it('points the primary cta at the estimate anchor the layout provides', () => {
+    const { container } = render(
+      <EstimateCalculator
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: '이 구성으로 견적 문의하기' })).toHaveAttribute(
+      'href',
+      '#estimate',
+    );
+    // 죽은 앵커(#inquiry)는 어디에도 남지 않는다
+    expect(container.querySelectorAll('a[href="#inquiry"]')).toHaveLength(0);
+  });
 });

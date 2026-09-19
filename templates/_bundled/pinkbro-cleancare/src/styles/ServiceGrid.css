@@ -176,6 +176,8 @@
   font-size: 13px;
   line-height: 1.68;
   color: #8a909b;
+  /* 모듈 값에 개행이 들어 있다(예: "데코타일 기준\n20평 미만") — 원문 <br> 을 살린다 */
+  white-space: pre-line;
 }
 
 .pb-service-detail {
