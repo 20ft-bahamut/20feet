@@ -1,0 +1,11 @@
+# 의존성
+node_modules/
+
+# 로컬 작업 공간
+_workspace/
+
+# TypeScript 증분 빌드 캐시
+*.tsbuildinfo
+
+# dist/ 는 커밋 대상이므로 제외하지 않는다.
+# 커밋된 빌드 산출물이 이 템플릿의 배포 형태다 — 서버에 Node 가 없어도 동작해야 한다.
