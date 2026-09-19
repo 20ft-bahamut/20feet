@@ -48,16 +48,22 @@ const DATA_SOURCE_IDS = [
     'pinkbro_media',
 ] as const;
 
-/** 섹션 순서와 그 안에 놓인 composite. `estimate` 만 두 개를 가진다. */
+/**
+ * 섹션 순서와 그 안에 놓인 composite.
+ *
+ * `pricing` 만 두 개를 가진다 — 소스 `body.html` 에서 `.estimator`(`#calc-*`
+ * 체크박스)는 `<section id="pricing">`(247행~321행) 안에 있고, `#estimate`
+ * (398행~467행)에는 문의 폼만 있다. 계산기를 `estimate` 에 두면 소스와 어긋난다.
+ */
 const SECTION_ORDER: Array<[anchor: string, components: string[]]> = [
     ['top', ['Hero']],
     ['about', ['AboutSection']],
     ['service', ['ServiceGrid']],
     ['package', ['PackageList']],
-    ['pricing', ['PriceDiscount']],
+    ['pricing', ['PriceDiscount', 'EstimateCalculator']],
     ['faq', ['FaqList']],
     ['projects', ['CaseGallery']],
-    ['estimate', ['EstimateCalculator', 'InquiryForm']],
+    ['estimate', ['InquiryForm']],
 ];
 
 /** 섹션 노드 목록 (slots.content) */
@@ -229,13 +235,20 @@ describe('home layout — 섹션 · 앵커', () => {
         expect(new Set(nodeIds).size).toBe(nodeIds.length);
     });
 
-    it('places the calculator and the inquiry form under the single estimate anchor', () => {
+    it('places the calculator inside the pricing section — 소스의 .estimator 위치', () => {
+        // 소스 body.html: `.estimator` 와 `#calc-*` 는 `<section id="pricing">`(247~321행) 안.
+        const pricing = sections.find((section: any) => section.id === 'pricing');
+
+        expect(pricing.children.map((child: any) => child.name)).toEqual([
+            'PriceDiscount',
+            'EstimateCalculator',
+        ]);
+    });
+
+    it('keeps the estimate anchor for the inquiry form alone', () => {
         const estimate = sections.find((section: any) => section.id === 'estimate');
 
-        expect(estimate.children.map((child: any) => child.name)).toEqual([
-            'EstimateCalculator',
-            'InquiryForm',
-        ]);
+        expect(estimate.children.map((child: any) => child.name)).toEqual(['InquiryForm']);
         // 계산기 CTA(`#estimate`)와 헤더 nav 가 가리키는 목적지가 이 노드 하나다.
         expect(estimate.children.every((child: any) => child.id !== 'estimate')).toBe(true);
     });

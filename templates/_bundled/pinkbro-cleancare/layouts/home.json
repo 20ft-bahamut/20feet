@@ -273,7 +273,7 @@
                 ]
             },
             {
-                "comment": "=== #pricing — 05 가격 고지 3블록 + 동시작업 할인 단계 (copy + discount)",
+                "comment": "=== #pricing — 05 가격 고지 3블록 · 동시작업 할인 단계 · 예상견적 계산기 (copy + discount + services + site)",
                 "id": "pricing",
                 "type": "basic",
                 "name": "Div",
@@ -291,6 +291,20 @@
                             "flowLabel": "{{pinkbro_copy?.data?.pricing_flow_label ?? null}}",
                             "flow": "{{pinkbro_copy?.data?.pricing_flow ?? null}}",
                             "steps": "{{pinkbro_discount?.data?.steps ?? null}}"
+                        }
+                    },
+                    {
+                        "id": "home_estimate_calculator",
+                        "type": "composite",
+                        "name": "EstimateCalculator",
+                        "props": {
+                            "heading": "{{pinkbro_copy?.data?.estimator_heading ?? null}}",
+                            "sub": "{{pinkbro_copy?.data?.estimator_sub ?? null}}",
+                            "summaryHeading": "{{pinkbro_copy?.data?.estimator_summary_heading ?? null}}",
+                            "summaryNote": "{{pinkbro_copy?.data?.estimator_summary_note ?? null}}",
+                            "services": "{{pinkbro_services?.data ?? null}}",
+                            "steps": "{{pinkbro_discount?.data?.steps ?? null}}",
+                            "site": "{{pinkbro_site?.data ?? null}}"
                         }
                     }
                 ]
@@ -333,25 +347,11 @@
                 ]
             },
             {
-                "comment": "=== #estimate — 08 예상견적 계산기 + 간편견적 문의 폼 (한 섹션, 앵커 하나)",
+                "comment": "=== #estimate — 08 간편견적 문의 폼 (copy + services + site + media.estimate_bg)",
                 "id": "estimate",
                 "type": "basic",
                 "name": "Div",
                 "children": [
-                    {
-                        "id": "home_estimate_calculator",
-                        "type": "composite",
-                        "name": "EstimateCalculator",
-                        "props": {
-                            "heading": "{{pinkbro_copy?.data?.estimator_heading ?? null}}",
-                            "sub": "{{pinkbro_copy?.data?.estimator_sub ?? null}}",
-                            "summaryHeading": "{{pinkbro_copy?.data?.estimator_summary_heading ?? null}}",
-                            "summaryNote": "{{pinkbro_copy?.data?.estimator_summary_note ?? null}}",
-                            "services": "{{pinkbro_services?.data ?? null}}",
-                            "steps": "{{pinkbro_discount?.data?.steps ?? null}}",
-                            "site": "{{pinkbro_site?.data ?? null}}"
-                        }
-                    },
                     {
                         "id": "home_estimate_inquiry",
                         "type": "composite",
