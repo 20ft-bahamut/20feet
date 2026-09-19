@@ -1,8 +1,7 @@
 /**
  * PinkBro CleanCare Gnuboard7 User Template
  *
- * 랜딩 페이지 골격 — Basic 컴포넌트 15종(Div 포함).
- * 이후 태스크가 섹션(composite) 컴포넌트를 추가한다.
+ * 랜딩 페이지 — Basic 컴포넌트 15종(Div 포함) + 섹션(composite) 컴포넌트 12종.
  *
  * 스타일시트 import 는 필수다: `resources/views/app.blade.php` 가 활성 사용자
  * 템플릿의 `css/components.css` 를 무조건 링크하므로, CSS import 가 없으면
@@ -14,6 +13,7 @@
  */
 
 import './styles/design-tokens.css';
+import templateMetadata from '../template.json';
 
 // Logger (G7Core 초기화 전에도 동작하도록 폴백 포함)
 const logger = ((window as any).G7Core?.createLogger?.('Template:pinkbro-cleancare')) ?? {
@@ -39,6 +39,44 @@ export { Select, type SelectProps } from './components/basic/Select';
 export { Textarea, type TextareaProps } from './components/basic/Textarea';
 export { Label, type LabelProps } from './components/basic/Label';
 
+// 섹션(composite) 컴포넌트 — 각 파일이 자체 CSS를 import 한다
+export { Hero, type HeroProps } from './components/Hero';
+export { AboutSection, type AboutSectionProps } from './components/AboutSection';
+export { ServiceGrid, type ServiceGridProps } from './components/ServiceGrid';
+export { PackageList, type PackageListProps } from './components/PackageList';
+export { PriceDiscount, type PriceDiscountProps } from './components/PriceDiscount';
+export { FaqList, type FaqListProps } from './components/FaqList';
+export { CaseGallery, type CaseGalleryProps } from './components/CaseGallery';
+export { EstimateCalculator, type EstimateCalculatorProps } from './components/EstimateCalculator';
+export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
+export { SiteHeader, type SiteHeaderProps, telHref } from './components/SiteHeader';
+export { SiteFooter, type SiteFooterProps } from './components/SiteFooter';
+export { MobileBar, type MobileBarProps } from './components/MobileBar';
+
+// 섹션 컴포넌트가 사용하는 lib 유틸
+export {
+    calculateEstimate,
+    discountRateFor,
+    formatWon,
+    parsePrice,
+    type EstimateResult,
+} from './lib/estimate';
+export {
+    BUSINESS_TYPES,
+    EMPTY_INQUIRY_FORM,
+    INQUIRY_ENDPOINT,
+    INQUIRY_LIMITS,
+    SERVICE_CHOICES,
+    SERVER_FIELD_MAP,
+    toInquiryPayload,
+    validateInquiry,
+    type InquiryFieldErrors,
+    type InquiryFormValues,
+} from './lib/inquiry';
+export { servicePhotoFor, SERVICE_PHOTO, SERVICE_SLOT } from './lib/serviceAssets';
+
+export { templateMetadata };
+
 // 컴포넌트 레지스트리 자동 등록
 import { Div } from './components/basic/Div';
 import { Button } from './components/basic/Button';
@@ -55,6 +93,18 @@ import { Input } from './components/basic/Input';
 import { Select } from './components/basic/Select';
 import { Textarea } from './components/basic/Textarea';
 import { Label } from './components/basic/Label';
+import { Hero } from './components/Hero';
+import { AboutSection } from './components/AboutSection';
+import { ServiceGrid } from './components/ServiceGrid';
+import { PackageList } from './components/PackageList';
+import { PriceDiscount } from './components/PriceDiscount';
+import { FaqList } from './components/FaqList';
+import { CaseGallery } from './components/CaseGallery';
+import { EstimateCalculator } from './components/EstimateCalculator';
+import { InquiryForm } from './components/InquiryForm';
+import { SiteHeader } from './components/SiteHeader';
+import { SiteFooter } from './components/SiteFooter';
+import { MobileBar } from './components/MobileBar';
 
 const registry = (window as any).G7Core?.templateEngine?.ComponentRegistry?.getInstance?.();
 if (registry) {
@@ -74,7 +124,21 @@ if (registry) {
     registry.register({ component: Select, metadata: meta('Select') });
     registry.register({ component: Textarea, metadata: meta('Textarea') });
     registry.register({ component: Label, metadata: meta('Label') });
-    logger.log('Registered 15 basic components');
+
+    const composite = (name: string) => ({ name, type: 'composite' as const });
+    registry.register({ component: Hero, metadata: composite('Hero') });
+    registry.register({ component: AboutSection, metadata: composite('AboutSection') });
+    registry.register({ component: ServiceGrid, metadata: composite('ServiceGrid') });
+    registry.register({ component: PackageList, metadata: composite('PackageList') });
+    registry.register({ component: PriceDiscount, metadata: composite('PriceDiscount') });
+    registry.register({ component: FaqList, metadata: composite('FaqList') });
+    registry.register({ component: CaseGallery, metadata: composite('CaseGallery') });
+    registry.register({ component: EstimateCalculator, metadata: composite('EstimateCalculator') });
+    registry.register({ component: InquiryForm, metadata: composite('InquiryForm') });
+    registry.register({ component: SiteHeader, metadata: composite('SiteHeader') });
+    registry.register({ component: SiteFooter, metadata: composite('SiteFooter') });
+    registry.register({ component: MobileBar, metadata: composite('MobileBar') });
+    logger.log('Registered 15 basic + 12 composite components');
 } else {
     logger.warn('ComponentRegistry not available — skipping auto-registration');
 }

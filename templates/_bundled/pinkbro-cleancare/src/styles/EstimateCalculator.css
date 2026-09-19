@@ -1,0 +1,220 @@
+/**
+ * EstimateCalculator — 견적 계산기(소스 `.estimator` 블록 이식)
+ *
+ * 값 출처(원문): _workspace/pinkbro/source/styles.css
+ *   .estimator / .estimator-grid / .estimator-list / .option-item
+ *   .air-select / .summary-box / .summary-meta / .summary-row
+ *   .summary-total / .summary-note / .summary-actions
+ * 클래스만 `pb-` 접두사로 바꾸고 토큰은 `--pb-*` 를 쓴다(값은 원문 그대로).
+ * 외부 이미지 URL 없음 — 소스의 Unsplash 배경은 이 위젯에 없다(estimate-shell 은 문의 폼 소속).
+ */
+
+.pb-estimator {
+  margin-top: 34px;
+  padding: 30px;
+  border-radius: var(--pb-radius-xl, 30px);
+  background: var(--pb-bg, #fff);
+  border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
+  box-shadow: var(--pb-shadow, 0 24px 66px rgba(15, 17, 24, 0.08));
+}
+
+.pb-estimator-intro .pb-estimator-sub {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--pb-muted, #686e7c);
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+
+.pb-estimator-grid {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.pb-estimator-list {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pb-estimate-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
+  border-radius: 18px;
+  background: var(--pb-soft-2, #fafbfe);
+}
+
+.pb-estimate-option-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pb-estimate-option input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--pb-pink, #ff2d86);
+}
+
+.pb-estimate-option label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--pb-ink, #161922);
+  cursor: pointer;
+}
+
+.pb-estimate-option-price {
+  font: 800 16px/1 var(--pb-font-latin, 'Manrope', sans-serif);
+  color: #59606d;
+}
+
+.pb-estimate-air {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+  max-width: 360px;
+}
+
+.pb-estimate-air > label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--pb-ink-2, #222632);
+}
+
+.pb-estimate-air select {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
+  background: #fff;
+  color: var(--pb-ink, #161922);
+}
+
+/* ---- 요약 박스(원문 .summary-box) ---- */
+
+.pb-estimate-summary {
+  padding: 26px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #171b25 0%, #11141c 100%);
+  color: #fff;
+}
+
+.pb-estimate-summary-meta {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pb-estimate-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pb-estimate-summary-row strong {
+  color: #fff;
+  font-weight: 800;
+}
+
+.pb-estimate-summary-total {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pb-estimate-summary-total > b {
+  display: block;
+  font: 900 42px/1 var(--pb-font-latin, 'Manrope', sans-serif);
+  letter-spacing: -0.05em;
+  color: #fff;
+}
+
+.pb-estimate-summary-note {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  line-height: 1.72;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.pb-estimate-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ---- 로딩 스켈레톤 ---- */
+
+.pb-estimate-skeleton {
+  margin-top: 34px;
+  padding: 30px;
+  border-radius: var(--pb-radius-xl, 30px);
+  background: var(--pb-bg, #fff);
+  border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 24px;
+}
+
+.pb-estimate-skeleton span {
+  display: block;
+  height: 54px;
+  border-radius: 18px;
+  background: var(--pb-soft, #f6f7fb);
+  animation: pb-estimate-pulse 1.4s ease-in-out infinite;
+}
+
+.pb-estimate-skeleton .pb-estimate-skeleton-panel {
+  height: 240px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, #1b1f2a 0%, #11141c 100%);
+  opacity: 0.55;
+}
+
+@keyframes pb-estimate-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ---- 빈 상태 ---- */
+
+.pb-estimate-empty {
+  margin-top: 34px;
+  padding: 30px;
+  border-radius: var(--pb-radius-xl, 30px);
+  background: var(--pb-soft-2, #fafbfe);
+  border: 1px dashed var(--pb-line, rgba(19, 22, 30, 0.1));
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--pb-muted, #686e7c);
+}
+
+/* ---- 반응형(원문 @media 1fr 단일 컬럼) ---- */
+
+@media (max-width: 900px) {
+  .pb-estimator-grid,
+  .pb-estimate-skeleton {
+    grid-template-columns: 1fr;
+  }
+}

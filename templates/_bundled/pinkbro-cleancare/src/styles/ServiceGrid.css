@@ -1,0 +1,216 @@
+/*
+ * ServiceGrid 섹션 스타일.
+ * 값은 _workspace/pinkbro/source/styles.css 의 .services / .service-* 원문에서
+ * 가져오고, 클래스 접두사만 pb- 로 바꿨다. 색·폰트·반경은 --pb-* 토큰을 쓴다.
+ */
+
+.pb-services {
+  background: var(--pb-soft);
+}
+
+.pb-services-intro {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--pb-muted);
+  max-width: 42ch;
+}
+
+.pb-service-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.pb-service-card {
+  overflow: hidden;
+  border-radius: var(--pb-radius-lg);
+  background: var(--pb-bg);
+  border: 1px solid var(--pb-line);
+  box-shadow: 0 18px 52px rgba(16, 18, 26, 0.07);
+  transition: 0.24s ease;
+}
+
+.pb-service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 26px 64px rgba(16, 18, 26, 0.11);
+}
+
+.pb-service-photo {
+  position: relative;
+  height: 220px;
+  background: center / cover no-repeat;
+}
+
+.pb-service-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(18, 20, 28, 0.03), rgba(18, 20, 28, 0.42));
+  z-index: 1;
+}
+
+.pb-service-photo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 슬롯·번들 자산이 모두 없을 때의 중립 CSS 블록 */
+.pb-service-photo-fallback {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(18, 20, 28, 0.03), rgba(18, 20, 28, 0.42)),
+    var(--pb-soft-2);
+}
+
+.pb-service-tag {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  z-index: 2;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  font: 800 11px/1 var(--pb-font-latin);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pb-ink);
+}
+
+.pb-service-body {
+  padding: 24px;
+}
+
+.pb-service-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pb-service-head h3 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.14;
+  letter-spacing: -0.045em;
+  color: var(--pb-ink);
+  font-weight: 700;
+}
+
+.pb-service-head span {
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  color: #98a0ac;
+}
+
+.pb-service-body p {
+  margin: 12px 0 0;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--pb-muted);
+}
+
+.pb-price-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.pb-price-row strong {
+  font: 900 34px/1 var(--pb-font-latin);
+  letter-spacing: -0.05em;
+  color: var(--pb-ink);
+}
+
+.pb-price-row small {
+  max-width: 17ch;
+  text-align: right;
+  font-size: 13px;
+  line-height: 1.68;
+  color: #8a909b;
+}
+
+.pb-service-detail {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pb-line);
+}
+
+.pb-service-detail summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  list-style: none;
+  min-height: 18px;
+  color: var(--pb-ink);
+}
+
+.pb-service-detail summary::-webkit-details-marker {
+  display: none;
+}
+
+.pb-detail-body {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--pb-soft-2);
+  color: #525866;
+  font-size: 14px;
+  line-height: 1.78;
+}
+
+/* 로딩 스켈레톤 */
+.pb-service-card--skeleton {
+  height: 420px;
+  background: linear-gradient(100deg, var(--pb-soft-2) 40%, #eef0f6 50%, var(--pb-soft-2) 60%);
+  background-size: 200% 100%;
+  animation: pb-shimmer 1.4s ease infinite;
+}
+
+@keyframes pb-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+
+/* 빈 상태 — 중립 블록 */
+.pb-services-empty-block {
+  min-height: 120px;
+  border-radius: var(--pb-radius-lg);
+  border: 1px dashed var(--pb-line);
+  background: var(--pb-soft-2);
+}
+
+@media (max-width: 1100px) {
+  .pb-service-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .pb-service-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-service-card {
+    border-radius: var(--pb-radius-md);
+  }
+
+  .pb-service-photo {
+    height: 190px;
+  }
+
+  .pb-service-body {
+    padding: 20px;
+  }
+
+  .pb-price-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

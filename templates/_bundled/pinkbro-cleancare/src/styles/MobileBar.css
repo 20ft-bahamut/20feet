@@ -1,0 +1,45 @@
+/**
+ * MobileBar 스타일 — source/styles.css 원문 이식(.mobile-bar, 720px 브레이크포인트).
+ *
+ * 값은 원문 그대로이며, 클래스 접두사 `pb-` 와 토큰 변수 `--pb-*` 만 바꿨다.
+ * 카카오 버튼 배경 `#FEE500` 은 브리프 지정대로 원문 값을 유지한다.
+ */
+
+.pb-mobile-bar {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .pb-mobile-bar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        position: fixed;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        z-index: 120;
+        background: #fff;
+        border: 1px solid rgba(19, 22, 30, 0.08);
+        border-radius: 22px;
+        box-shadow: 0 18px 46px rgba(15, 17, 24, 0.16);
+        overflow: hidden;
+    }
+
+    .pb-mobile-bar a {
+        padding: 14px 8px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--pb-ink);
+    }
+
+    .pb-mobile-bar a:nth-child(2) {
+        background: var(--pb-pink);
+        color: #fff;
+    }
+
+    .pb-mobile-bar a:nth-child(3) {
+        background: #fee500;
+        color: #191919;
+    }
+}

@@ -1,0 +1,153 @@
+/**
+ * PriceDiscount 섹션 스타일.
+ *
+ * 값 출처: _workspace/pinkbro/source/styles.css 의 .pricing / .notice-box /
+ * .notice-a / .notice-b / .notice-c 원문. 토큰은 --pb-* 로 치환.
+ * 클래스는 템플릿 내 충돌을 피하려고 pb- 접두사를 붙였다.
+ */
+
+.pb-pricing {
+  background: var(--pb-soft);
+}
+
+.pb-pricing-inner {
+  max-width: var(--pb-max);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.pb-pricing-notice {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  overflow: hidden;
+  border-radius: 30px;
+  background: #fff;
+  border: 1px solid var(--pb-line);
+  box-shadow: 0 24px 66px rgba(15, 17, 24, 0.08);
+}
+
+.pb-pricing-notice > div {
+  padding: 26px 28px;
+}
+
+.pb-pricing-eyebrow {
+  display: inline-block;
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pb-pricing-notice-a {
+  background: #151822;
+  color: #fff;
+}
+
+.pb-pricing-notice-a .pb-pricing-eyebrow {
+  color: #ff9dc6;
+}
+
+.pb-pricing-notice-title {
+  display: block;
+  margin-top: 12px;
+  font-size: 22px;
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+  white-space: pre-line;
+}
+
+.pb-pricing-notice-c {
+  background: var(--pb-pink-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pb-pricing-notice-c .pb-pricing-eyebrow {
+  color: var(--pb-pink);
+}
+
+.pb-pricing-notice-flow {
+  display: block;
+  margin-top: 10px;
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: #151822;
+  white-space: pre-line;
+}
+
+/* 동시작업 할인 단계 */
+.pb-pricing-steps {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+}
+
+.pb-pricing-step {
+  border: 1px solid var(--pb-line);
+  border-radius: 22px;
+  background: #fff;
+  padding: 20px 22px;
+  box-shadow: 0 14px 34px rgba(15, 17, 24, 0.045);
+}
+
+.pb-pricing-step-amount {
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: var(--pb-pink);
+}
+
+.pb-pricing-step-condition {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--pb-muted);
+}
+
+/* 빈 상태 — 슬롯이 비어 있을 때의 중립 폴백 */
+.pb-pricing-empty {
+  min-height: 1px;
+}
+
+/* 로딩 스켈레톤 */
+.pb-pricing-skeleton {
+  display: grid;
+  gap: 12px;
+  padding: 26px 28px;
+  border-radius: 30px;
+  background: #fff;
+  border: 1px solid var(--pb-line);
+}
+
+.pb-pricing-skeleton-line {
+  display: block;
+  height: 18px;
+  border-radius: 9px;
+  background: linear-gradient(90deg, var(--pb-soft), var(--pb-pink-soft), var(--pb-soft));
+  animation: pb-pricing-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pb-pricing-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (max-width: 1024px) {
+  .pb-pricing-notice {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-pricing-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-pricing-notice > div {
+    padding: 22px 20px;
+  }
+}

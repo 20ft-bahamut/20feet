@@ -1,0 +1,151 @@
+/**
+ * FaqList 섹션 스타일.
+ *
+ * 값 출처: _workspace/pinkbro/source/styles.css 의 .faq-section / .faq-grid /
+ * .faq-intro / .faq-list / .faq-item / .faq-answer 원문. 토큰은 --pb-* 로 치환.
+ * 클래스는 템플릿 내 충돌을 피하려고 pb- 접두사를 붙였다.
+ */
+
+.pb-faq-section {
+  background: var(--pb-soft-2);
+}
+
+.pb-faq-section > .pb-faq-grid {
+  max-width: var(--pb-max);
+  margin-inline: auto;
+  padding-inline: 24px;
+  padding-block: 24px;
+}
+
+.pb-faq-grid {
+  display: grid;
+  grid-template-columns: 0.72fr 1.28fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.pb-faq-intro {
+  position: sticky;
+  top: 120px;
+}
+
+.pb-faq-eyebrow {
+  display: inline-block;
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pb-pink);
+}
+
+.pb-faq-sub {
+  margin-top: 18px;
+  max-width: 430px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--pb-muted);
+}
+
+.pb-faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pb-faq-item {
+  border: 1px solid var(--pb-line);
+  border-radius: 22px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(15, 17, 24, 0.045);
+}
+
+.pb-faq-item summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 76px;
+  padding: 22px 24px;
+  cursor: pointer;
+  color: var(--pb-ink);
+  font-size: 17px;
+  line-height: 1.45;
+  font-weight: 800;
+}
+
+.pb-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.pb-faq-item summary::after {
+  content: '＋';
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--pb-soft);
+  color: var(--pb-ink);
+  font-size: 18px;
+  transition: 0.2s ease;
+}
+
+.pb-faq-item[open] summary::after {
+  content: '−';
+  background: var(--pb-pink);
+  color: #fff;
+}
+
+.pb-faq-answer {
+  padding: 0 24px 24px;
+  color: var(--pb-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+/* 빈 상태 — 항목이 없을 때의 중립 폴백 */
+.pb-faq-empty {
+  min-height: 1px;
+}
+
+/* 로딩 스켈레톤 */
+.pb-faq-skeleton {
+  display: grid;
+  gap: 12px;
+}
+
+.pb-faq-skeleton-line {
+  display: block;
+  height: 76px;
+  border-radius: 22px;
+  background: linear-gradient(90deg, #fff, var(--pb-pink-soft), #fff);
+  border: 1px solid var(--pb-line);
+  animation: pb-faq-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pb-faq-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (max-width: 1024px) {
+  .pb-faq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pb-faq-intro {
+    position: relative;
+    top: 0;
+  }
+
+  .pb-faq-item summary {
+    min-height: 68px;
+    padding: 19px 18px;
+    font-size: 15px;
+  }
+
+  .pb-faq-answer {
+    padding: 0 18px 20px;
+  }
+}

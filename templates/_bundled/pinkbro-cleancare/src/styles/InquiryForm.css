@@ -1,0 +1,385 @@
+/*
+ * PinkBro CleanCare — InquiryForm (소스 #estimate 섹션)
+ *
+ * 값 출처: _workspace/pinkbro/source/styles.css (#estimate / .estimate-* / .form-* / .check-tag 블록)
+ * 클래스 접두사 pb-, 색상·라디우스·폰트는 design-tokens.css 의 --pb-* 토큰을 쓴다.
+ *
+ * 소스의 .estimate-shell::before 는 그라디언트 오버레이 + Unsplash 스톡 이미지였다.
+ * 외부 이미지 URL 금지 규칙에 따라 스톡 URL 은 제거하고 그라디언트 오버레이만 남긴다
+ * (스펙 5.4: 견적 배경은 슬롯 URL → 중립 CSS 폴백, 기본 탑재 사진 없음).
+ */
+
+.pb-inquiry {
+    padding: 110px 0;
+}
+
+.pb-inquiry-wrap {
+    width: min(calc(100% - 40px), var(--pb-max));
+    margin: 0 auto;
+}
+
+.pb-inquiry-shell {
+    position: relative;
+    overflow: hidden;
+    min-height: 560px;
+    border-radius: var(--pb-radius-xl);
+    background: #11131a;
+    box-shadow: var(--pb-shadow);
+}
+
+.pb-inquiry-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        rgba(10, 11, 15, 0.88) 0%,
+        rgba(10, 11, 15, 0.76) 46%,
+        rgba(10, 11, 15, 0.34) 100%
+    );
+}
+
+.pb-inquiry-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 0.96fr 1.04fr;
+    gap: 24px;
+    padding: 62px;
+}
+
+.pb-inquiry-copy {
+    display: grid;
+    gap: 18px;
+    color: #fff;
+    align-content: start;
+}
+
+.pb-inquiry-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 800 12px/1 var(--pb-font-latin);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #ff9dc6;
+}
+
+.pb-inquiry-eyebrow::before {
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.7;
+}
+
+.pb-inquiry-sub {
+    font-size: 15px;
+    line-height: 1.82;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 41ch;
+    text-wrap: pretty;
+    word-break: keep-all;
+    overflow-wrap: normal;
+}
+
+.pb-inquiry-panel {
+    padding: 30px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 22px 58px rgba(10, 11, 15, 0.2);
+}
+
+.pb-inquiry-panel-title {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.14;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    color: var(--pb-ink);
+    word-break: keep-all;
+}
+
+.pb-inquiry-panel-lead {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--pb-muted);
+    text-wrap: pretty;
+    word-break: keep-all;
+}
+
+.pb-inquiry-form {
+    margin-top: 22px;
+}
+
+.pb-form-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.pb-field {
+    display: grid;
+    gap: 8px;
+}
+
+.pb-field-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--pb-ink);
+}
+
+.pb-field-label small {
+    color: #8b909b;
+    font-weight: 600;
+}
+
+.pb-field input:not([type='checkbox']),
+.pb-field select,
+.pb-field textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: 16px;
+    border: 1px solid var(--pb-line);
+    background: #fff;
+    color: var(--pb-ink);
+}
+
+.pb-field input[aria-invalid='true'],
+.pb-field select[aria-invalid='true'],
+.pb-field textarea[aria-invalid='true'] {
+    border-color: var(--pb-pink);
+}
+
+.pb-field textarea {
+    min-height: 110px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    resize: vertical;
+}
+
+.pb-service-check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.pb-check-tag {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--pb-line);
+    border-radius: 16px;
+    background: var(--pb-soft-2);
+    cursor: pointer;
+}
+
+.pb-check-tag input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--pb-pink);
+    flex-shrink: 0;
+}
+
+.pb-check-tag span {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--pb-ink);
+    line-height: 1.35;
+    word-break: keep-all;
+}
+
+.pb-field-error {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--pb-pink);
+    word-break: keep-all;
+}
+
+.pb-form-error {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--pb-pink);
+    background: var(--pb-pink-soft);
+    color: var(--pb-ink);
+    font-size: 13px;
+    line-height: 1.72;
+    word-break: keep-all;
+}
+
+.pb-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.pb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 0 24px;
+    border-radius: 999px;
+    border: 1px solid var(--pb-ink);
+    background: #fff;
+    color: var(--pb-ink);
+    font-size: 15px;
+    font-weight: 800;
+    transition: 0.24s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.pb-btn--dark {
+    background: var(--pb-ink);
+    border-color: var(--pb-ink);
+    color: #fff;
+}
+
+.pb-btn--dark:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #0d0f14;
+}
+
+.pb-btn--dark:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.pb-btn--kakao {
+    background: #fee500;
+    border-color: #fee500;
+    color: #191919;
+    font-weight: 900;
+}
+
+.pb-btn--kakao:hover {
+    background: #f2d900;
+    border-color: #f2d900;
+    color: #191919;
+    transform: translateY(-2px);
+}
+
+.pb-btn--ghost {
+    background: transparent;
+}
+
+.pb-btn--ghost:hover {
+    border-color: var(--pb-pink);
+    color: var(--pb-pink);
+}
+
+/* ---- 스켈레톤 (site/services 로딩 중) — 중립 CSS ---- */
+
+.pb-inquiry-skeleton {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 0.96fr 1.04fr;
+    gap: 24px;
+    padding: 62px;
+}
+
+.pb-skeleton-block {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    animation: pb-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.pb-skeleton-block--title {
+    height: 34px;
+    width: 55%;
+}
+
+.pb-skeleton-block--line {
+    height: 14px;
+    width: 80%;
+}
+
+.pb-skeleton-block--panel {
+    min-height: 420px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+@keyframes pb-skeleton-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+/* ---- 성공 화면 ---- */
+
+.pb-inquiry-success {
+    padding: 30px;
+    border-radius: 30px;
+    background: var(--pb-pink-soft);
+    border: 1px solid var(--pb-pink-2);
+    color: var(--pb-ink);
+}
+
+.pb-inquiry-success-title {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.04em;
+    font-weight: 800;
+    color: var(--pb-ink);
+    word-break: keep-all;
+}
+
+.pb-inquiry-success-body {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--pb-muted);
+    word-break: keep-all;
+}
+
+/* ---- 반응형 (원문 @media 1100px / 720px 의 estimate 관련 규칙) ---- */
+
+@media (max-width: 1100px) {
+    .pb-inquiry-grid,
+    .pb-inquiry-skeleton {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .pb-inquiry {
+        padding: 82px 0;
+    }
+
+    .pb-inquiry-wrap {
+        width: min(calc(100% - 24px), var(--pb-max));
+    }
+
+    .pb-inquiry-shell {
+        border-radius: 24px;
+    }
+
+    .pb-inquiry-panel {
+        border-radius: 22px;
+    }
+
+    .pb-service-check-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pb-inquiry-grid,
+    .pb-inquiry-skeleton {
+        padding: 30px 20px;
+        gap: 18px;
+    }
+}

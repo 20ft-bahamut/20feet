@@ -1,0 +1,90 @@
+/**
+ * PinkBro CleanCare design tokens (global) + Hero section styles.
+ *
+ * 값 출처: _workspace/pinkbro/source/styles.css 의 .hero-* / .eyebrow / .display /
+ * .lead / .btn / .wrap 규칙 원문. 클래스 접두사만 pb- 로 바꿨고,
+ * Unsplash 핫링크 3곳(.hero-shell::before, .visual-main, .visual-sub 계열)은
+ * 제거하고 브랜드 그라디언트 / 중립 폴백으로 대체했다 (스펙 §8).
+ *
+ * design-tokens.css 는 전역(import index.ts)에서 로드된다 — 여기서 @import 하지 않는다.
+ */
+
+/* ---- shared layout primitives (원문 .wrap) ---- */
+.pb-wrap { width: min(calc(100% - 40px), var(--pb-max)); margin: 0 auto; }
+
+/* ---- shared text primitives (원문 .eyebrow / .display / .lead / .h2 / .sub) ---- */
+.pb-eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 800 12px/1 var(--pb-font-latin); letter-spacing: .16em; text-transform: uppercase; color: var(--pb-pink); }
+.pb-eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
+.pb-display { font-size: clamp(48px, 6vw, 86px); line-height: .98; letter-spacing: -.065em; font-weight: 900; color: #fff; }
+.pb-display em { color: var(--pb-pink); font-style: normal; }
+.pb-lead { max-width: 38ch; font-size: clamp(18px, 1.8vw, 21px); line-height: 1.8; color: rgba(255, 255, 255, .86); }
+.pb-lead strong { color: #fff; font-weight: 800; }
+
+/* ---- hero (원문 .hero 블록) ---- */
+.pb-hero { padding: 24px 0 70px; background: linear-gradient(180deg, #ffffff 0%, #ffffff 55%, #f7f8fb 100%); }
+.pb-hero-shell { position: relative; overflow: hidden; min-height: 760px; border-radius: 40px; background: #101219; box-shadow: 0 42px 120px rgba(14, 16, 23, .15); }
+/* 원문 ::before 의 Unsplash 핫링크 제거 — 브랜드 핑크 방사 그라디언트만 남긴다 */
+.pb-hero-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 78% 20%, rgba(255, 45, 134, .22), transparent 24%),
+        radial-gradient(circle at 12% 86%, rgba(255, 108, 174, .12), transparent 30%),
+        linear-gradient(120deg, rgba(10, 11, 15, .90) 0%, rgba(10, 11, 15, .80) 34%, rgba(10, 11, 15, .30) 72%);
+}
+.pb-hero-grid { position: relative; z-index: 1; min-height: 760px; display: grid; grid-template-columns: 1.03fr .97fr; gap: 30px; padding: 70px 64px 58px; }
+.pb-hero-copy { display: flex; flex-direction: column; justify-content: space-between; gap: 34px; }
+.pb-hero-copy-top { max-width: 680px; }
+.pb-hero-copy .pb-lead { margin-top: 24px; }
+
+.pb-hero-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+.pb-hero-pills span { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .10); color: #fff; font-size: 14px; backdrop-filter: blur(12px); }
+
+/* ---- hero media slot (원문 .hero-visual-clean / .hero-visual-label / .hero-visual-bottom) ---- */
+.pb-hero-media { position: relative; min-height: 620px; border-radius: 30px; overflow: hidden; background: #11131a; }
+.pb-hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 슬롯이 비었을 때의 중립 CSS 폴백 — 텍스트 없음, 스톡 이미지 없음 (D7) */
+.pb-hero-media-fallback {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 78% 18%, rgba(255, 45, 134, .28), transparent 42%),
+        radial-gradient(circle at 18% 82%, rgba(255, 108, 174, .16), transparent 46%),
+        linear-gradient(160deg, #1a1d27 0%, #101219 100%);
+}
+.pb-hero-visual-label { position: absolute; top: 22px; right: 22px; padding: 10px 13px; border-radius: 999px; background: rgba(255, 255, 255, .88); color: #151822; font: 800 10px/1 var(--pb-font-latin); letter-spacing: .14em; backdrop-filter: blur(10px); }
+.pb-hero-visual-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 24px 25px; border-radius: 24px; background: rgba(17, 19, 26, .48); border: 1px solid rgba(255, 255, 255, .16); backdrop-filter: blur(16px); color: #fff; }
+.pb-hero-visual-bottom b { display: block; margin-top: 9px; font-size: 26px; line-height: 1.18; letter-spacing: -.04em; }
+.pb-hero-visual-bottom p { margin: 0; max-width: 15ch; font-size: 14px; line-height: 1.65; color: rgba(255, 255, 255, .80); text-align: right; }
+
+/* ---- loading skeleton ---- */
+.pb-skeleton { display: grid; gap: 18px; }
+.pb-skeleton-block { border-radius: 22px; background: linear-gradient(100deg, #eef0f5 40%, #f7f8fb 50%, #eef0f5 60%); background-size: 200% 100%; animation: pb-skeleton-pulse 1.4s ease-in-out infinite; }
+.pb-skeleton-block.dark { background: linear-gradient(100deg, #191c26 40%, #222633 50%, #191c26 60%); background-size: 200% 100%; }
+@keyframes pb-skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pb-skeleton-block { animation: none; }
+}
+
+/* ---- responsive (원문 1100px / 720px 브레이크포인트) ---- */
+@media (max-width: 1100px) {
+    .pb-hero-grid { grid-template-columns: 1fr; }
+    .pb-hero-media { min-height: 500px; }
+}
+
+@media (max-width: 720px) {
+    .pb-wrap { width: min(calc(100% - 24px), var(--pb-max)); }
+    .pb-hero { padding: 16px 0 48px; }
+    .pb-hero-shell { min-height: auto; border-radius: 28px; }
+    .pb-hero-grid { min-height: auto; padding: 30px 20px 24px; gap: 18px; }
+    .pb-hero-media { min-height: 360px; border-radius: 22px; }
+    .pb-hero-visual-bottom { left: 14px; right: 14px; bottom: 14px; padding: 18px; align-items: flex-start; flex-direction: column; gap: 10px; }
+    .pb-hero-visual-bottom p { max-width: none; text-align: left; }
+    .pb-display { font-size: clamp(42px, 10vw, 58px); }
+    .pb-lead { max-width: none; font-size: 17px; }
+}

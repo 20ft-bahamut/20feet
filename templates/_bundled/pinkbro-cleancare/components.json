@@ -95,7 +95,80 @@
                 "path": "src/components/basic/Label.tsx"
             }
         ],
-        "composite": [],
+        "composite": [
+            {
+                "name": "Hero",
+                "type": "composite",
+                "description": "Landing hero: headline, brand message, CTA area with gradient visual fallback",
+                "path": "src/components/Hero.tsx"
+            },
+            {
+                "name": "AboutSection",
+                "type": "composite",
+                "description": "About section: brand perspective copy block with why-stage visual",
+                "path": "src/components/AboutSection.tsx"
+            },
+            {
+                "name": "ServiceGrid",
+                "type": "composite",
+                "description": "Service cards grid with photo slots per cleaning service",
+                "path": "src/components/ServiceGrid.tsx"
+            },
+            {
+                "name": "PackageList",
+                "type": "composite",
+                "description": "Cleaning package list with price and included criteria details",
+                "path": "src/components/PackageList.tsx"
+            },
+            {
+                "name": "PriceDiscount",
+                "type": "composite",
+                "description": "Price notice, discount steps and service flow presentation",
+                "path": "src/components/PriceDiscount.tsx"
+            },
+            {
+                "name": "FaqList",
+                "type": "composite",
+                "description": "FAQ list rendered as native details/summary items",
+                "path": "src/components/FaqList.tsx"
+            },
+            {
+                "name": "CaseGallery",
+                "type": "composite",
+                "description": "Before/after case gallery cards linking to blog posts",
+                "path": "src/components/CaseGallery.tsx"
+            },
+            {
+                "name": "EstimateCalculator",
+                "type": "composite",
+                "description": "Interactive estimate calculator with service selection and discount steps",
+                "path": "src/components/EstimateCalculator.tsx"
+            },
+            {
+                "name": "InquiryForm",
+                "type": "composite",
+                "description": "Project inquiry form posting to pinkbro-contents module API with honeytrap and consent",
+                "path": "src/components/InquiryForm.tsx"
+            },
+            {
+                "name": "SiteHeader",
+                "type": "composite",
+                "description": "Site header with brand logo, phone link and estimate CTA",
+                "path": "src/components/SiteHeader.tsx"
+            },
+            {
+                "name": "SiteFooter",
+                "type": "composite",
+                "description": "Site footer with brand, contact and business info",
+                "path": "src/components/SiteFooter.tsx"
+            },
+            {
+                "name": "MobileBar",
+                "type": "composite",
+                "description": "Mobile fixed bottom bar: call, kakao and estimate actions",
+                "path": "src/components/MobileBar.tsx"
+            }
+        ],
         "layout": []
     }
 }

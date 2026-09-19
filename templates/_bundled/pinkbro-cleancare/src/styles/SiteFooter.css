@@ -1,0 +1,83 @@
+/**
+ * SiteFooter 스타일 — source/styles.css 원문 이식(footer / .footer-grid /
+ * .footer-logo / .footer-brand / .copyright / 모바일 브레이크포인트).
+ *
+ * 값은 원문 그대로이며, 클래스 접두사 `pb-` 와 토큰 변수 `--pb-*` 만 바꿨다.
+ * 원문 .footer-grid 는 4컬럼(brand + 서비스 2컬럼 + contact)이지만 컴포넌트가
+ * 렌더하는 블록은 brand + contact 2개라 트랙을 `1.2fr .9fr` 로 줄였다.
+ */
+
+.pb-footer {
+    padding: 42px 0 96px;
+    background: #0e1016;
+    color: #fff;
+}
+
+.pb-footer-wrap {
+    width: min(calc(100% - 40px), var(--pb-max));
+    margin: 0 auto;
+}
+
+.pb-footer-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.pb-footer-logo {
+    width: 184px;
+    max-width: 100%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    background: #fff;
+}
+
+.pb-footer-brand p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.72);
+    text-wrap: pretty;
+}
+
+.pb-footer-brand strong {
+    color: #fff;
+}
+
+.pb-footer-tagline {
+    margin: 16px 0 0;
+}
+
+.pb-footer-contact {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 6px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.pb-footer-contact a {
+    color: inherit;
+}
+
+.pb-copyright {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.48);
+}
+
+@media (max-width: 720px) {
+    .pb-footer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pb-footer {
+        padding-bottom: 112px;
+    }
+}
