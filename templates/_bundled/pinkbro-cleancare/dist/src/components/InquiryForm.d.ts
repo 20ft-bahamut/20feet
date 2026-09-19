@@ -5,9 +5,19 @@ export interface InquiryFormProps {
     site: SiteData | null;
     /** 서비스 목록. null 이면 아직 로딩 중 — 스켈레톤(스펙 5.4: null → 필드 숨김). */
     services: ServiceItem[] | null;
-    /** 섹션 도입 문구(copy 도메인). null 이면 문구 없이 렌더한다. */
+    /** 섹션 제목(copy: estimate_intro). null 이면 제목 없이 렌더한다. */
     intro: string | null;
+    /** 섹션 보조 문구(copy: estimate_note). null 이면 생략한다. */
+    sub: string | null;
+    /** 좌측 체크리스트 3항목(copy: estimate_checklist). null = 로딩 중, [] = 항목 없음. */
+    checklist: string[] | null;
+    /** 우측 패널 제목(copy: estimate_panel_heading). null 이면 생략한다. */
+    panelHeading: string | null;
+    /** 우측 패널 안내 문구(copy: estimate_panel_sub). null 이면 생략한다. */
+    panelSub: string | null;
+    /** 폼 하단 안내 문구(copy: estimate_panel_note). null 이면 생략한다. */
+    panelNote: string | null;
     className?: string;
 }
-export declare function InquiryForm({ site, services, intro, className }: InquiryFormProps): React.ReactElement;
+export declare function InquiryForm({ site, services, intro, sub, checklist, panelHeading, panelSub, panelNote, className, }: InquiryFormProps): React.ReactElement;
 export default InquiryForm;

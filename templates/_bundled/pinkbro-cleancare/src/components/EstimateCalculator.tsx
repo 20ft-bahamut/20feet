@@ -14,15 +14,21 @@ import type { DiscountStep, EstimateOption, ServiceItem, SiteData } from '../lib
  * - `services` 가 `[]` 면 빈 상태(`estimate-empty`)
  * - 배열이면 렌더
  *
- * 카피는 `intro`(섹션 도입 문구)와 `note`(요약 박스 안내 문구)로만 받는다.
+ * 카피는 `heading`(estimator_heading) · `sub`(estimator_sub) ·
+ * `summaryHeading`(estimator_summary_heading) · `summaryNote`(estimator_summary_note)
+ * 네 슬롯으로만 받는다 — 전부 copy 도메인 키와 1:1 이다(COPY POLICY).
  * 외부 이미지 URL 을 쓰지 않는다 — 이 위젯은 사진 슬롯이 없다.
  */
 
 export interface EstimateCalculatorProps {
-  /** 섹션 도입 문구 (copy.estimate_intro). null 이면 문구 블록을 생략한다. */
-  intro: string | null;
-  /** 요약 박스 안내 문구 (copy.estimate_note). null 이면 생략한다. */
-  note: string | null;
+  /** 섹션 제목 (copy.estimator_heading). null 이면 제목을 생략한다. */
+  heading: string | null;
+  /** 섹션 보조 문구 (copy.estimator_sub). null 이면 생략한다. */
+  sub: string | null;
+  /** 요약 박스 제목 (copy.estimator_summary_heading). null 이면 생략한다. */
+  summaryHeading: string | null;
+  /** 요약 박스 안내 문구 (copy.estimator_summary_note). null 이면 생략한다. */
+  summaryNote: string | null;
   /** 서비스 목록. null = 로딩 중, [] = 빈 목록. */
   services: ServiceItem[] | null;
   /** 동시작업 할인 단계. null = 로딩 중. */
@@ -61,8 +67,10 @@ function toOptions(services: ServiceItem[], airKind: string): EstimateOption[] {
 }
 
 export function EstimateCalculator({
-  intro,
-  note,
+  heading,
+  sub,
+  summaryHeading,
+  summaryNote,
   services,
   steps,
   site,
@@ -131,11 +139,22 @@ export function EstimateCalculator({
 
   return (
     <section className="pb-estimator" data-testid="estimate-calculator">
-      {intro ? (
-        <div className="pb-estimator-intro">
-          <p className="pb-estimator-sub">{intro}</p>
+      {(heading || sub) && (
+        <div className="pb-estimator-head">
+          <div className="pb-estimator-head-copy">
+            {heading && (
+              <h3 className="pb-estimator-heading" data-testid="estimator-heading">
+                {heading}
+              </h3>
+            )}
+          </div>
+          {sub && (
+            <p className="pb-estimator-sub" data-testid="estimator-sub">
+              {sub}
+            </p>
+          )}
         </div>
-      ) : null}
+      )}
 
       <div className="pb-estimator-grid">
         <div>
@@ -175,6 +194,11 @@ export function EstimateCalculator({
         </div>
 
         <div className="pb-estimate-summary">
+          {summaryHeading ? (
+            <h3 className="pb-estimate-summary-title" data-testid="estimator-summary-heading">
+              {summaryHeading}
+            </h3>
+          ) : null}
           <div className="pb-estimate-summary-meta">
             <div className="pb-estimate-summary-row">
               <span>선택한 서비스</span>
@@ -198,7 +222,11 @@ export function EstimateCalculator({
 
           <div className="pb-estimate-summary-total">
             <b data-testid="summary-final">{formatWon(result.final)}</b>
-            {note ? <div className="pb-estimate-summary-note">{note}</div> : null}
+            {summaryNote ? (
+              <div className="pb-estimate-summary-note" data-testid="estimator-summary-note">
+                {summaryNote}
+              </div>
+            ) : null}
           </div>
 
           <div className="pb-estimate-summary-actions">

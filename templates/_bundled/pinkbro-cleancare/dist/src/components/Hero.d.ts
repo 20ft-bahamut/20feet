@@ -8,6 +8,7 @@ export interface HeroProps {
     /** 미디어 슬롯 키 → 슬롯. null = 아직 로딩 중. */
     media: MediaSlots | null;
 }
+export declare function renderCopyText(text: string): React.ReactNode[];
 /**
  * Hero (#top).
  *
@@ -16,9 +17,9 @@ export interface HeroProps {
  *   - `media.hero_main.url` 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
  *   - URL 있음 → <img>
  *
- * 원문 마크업의 hero-actions(CTA 2개)·hero-scope(01/02/03 카드)·visual-bottom 보조 문구는
- * CopyData/SiteData 계약에 해당 필드가 없어 렌더하지 않는다 — 카피를 하드코딩하지 않기 위함.
- * 계약 확장은 리포트의 COPY REQUIRED 항목 참조.
+ * 원문 hero-actions(CTA 2개: `간편견적 문의하기` / `가격 · 예상견적 보기`)와
+ * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인에 키가 없어 렌더하지 않는다 —
+ * 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
  */
 export declare function Hero({ site, copy, media }: HeroProps): React.ReactElement;
 export default Hero;

@@ -4,7 +4,7 @@ import { PriceDiscount } from '../../src/components/PriceDiscount';
 
 describe('PriceDiscount', () => {
   it('renders a skeleton when steps is null', () => {
-    render(<PriceDiscount notice={null} flow={null} steps={null} />);
+    render(<PriceDiscount notice={null} flow={null} heading={null} sub={null} noticeSub={null} field={null} flowLabel={null} steps={null} />);
     expect(screen.getByTestId('discount-skeleton')).toBeInTheDocument();
   });
 
@@ -13,7 +13,7 @@ describe('PriceDiscount', () => {
       <PriceDiscount
         notice="안내"
         flow="흐름"
-        steps={[
+        heading={null} sub={null} noticeSub={null} field={null} flowLabel={null} steps={[
           { condition: '2개 항목', amount_label: '3%' },
           { condition: '3~4개 항목', amount_label: '5%' },
           { condition: '5개 이상', amount_label: '10%' },
@@ -26,15 +26,76 @@ describe('PriceDiscount', () => {
   });
 
   it('renders an empty state for an empty steps list', () => {
-    render(<PriceDiscount notice={null} flow={null} steps={[]} />);
+    render(<PriceDiscount notice={null} flow={null} heading={null} sub={null} noticeSub={null} field={null} flowLabel={null} steps={[]} />);
     expect(screen.getByTestId('discount-empty')).toBeInTheDocument();
   });
 
   it('hides notice and flow blocks when they are null', () => {
     const { container } = render(
-      <PriceDiscount notice={null} flow={null} steps={[]} />,
+      <PriceDiscount notice={null} flow={null} heading={null} sub={null} noticeSub={null} field={null} flowLabel={null} steps={[]} />,
     );
     expect(container.querySelector('.pb-pricing-notice-a')).toBeNull();
     expect(container.querySelector('.pb-pricing-notice-c')).toBeNull();
+  });
+
+  it('renders the section head copy (pricing_heading / pricing_sub)', () => {
+    render(
+      <PriceDiscount
+        heading={'가격은 투명하게,\n견적은 더 분명하게 안내합니다.'}
+        sub="홈페이지에서는 기본 작업 기준가를 먼저 보여드립니다."
+        notice={null}
+        noticeSub={null}
+        field={null}
+        flow={null}
+        flowLabel={null}
+        steps={[]}
+      />,
+    );
+
+    const heading = screen.getByTestId('pricing-heading');
+    expect(heading.tagName).toBe('H2');
+    expect(heading.textContent).toBe('가격은 투명하게,\n견적은 더 분명하게 안내합니다.');
+    expect(screen.getByTestId('pricing-sub')).toHaveTextContent('기본 작업 기준가를 먼저 보여드립니다');
+  });
+
+  it('renders the notice sub copy and the field block (pricing_notice_sub / pricing_field)', () => {
+    const { container } = render(
+      <PriceDiscount
+        heading={null}
+        sub={null}
+        notice={'표기 금액은 모두\n기본 작업 기준가입니다.'}
+        noticeSub="대략적인 예산을 쉽게 가늠할 수 있도록 시작가를 먼저 공개합니다."
+        field="확정 견적은 현장확인 원칙으로 진행합니다."
+        flow={null}
+        flowLabel={null}
+        steps={[]}
+      />,
+    );
+
+    expect(screen.getByTestId('pricing-notice-sub')).toHaveTextContent(
+      '시작가를 먼저 공개합니다',
+    );
+    expect(container.querySelector('.pb-pricing-notice-b')).not.toBeNull();
+    expect(screen.getByTestId('pricing-field')).toHaveTextContent(
+      '확정 견적은 현장확인 원칙으로 진행합니다.',
+    );
+  });
+
+  it('renders the flow label from copy instead of a literal (pricing_flow_label)', () => {
+    render(
+      <PriceDiscount
+        heading={null}
+        sub={null}
+        notice={null}
+        noticeSub={null}
+        field={null}
+        flow={'기본가 확인\n→ 문의 접수\n→ 현장확인 후 확정견적'}
+        flowLabel="Estimate Flow"
+        steps={[]}
+      />,
+    );
+
+    expect(screen.getByTestId('pricing-flow-label')).toHaveTextContent('Estimate Flow');
+    expect(screen.getByText(/기본가 확인/)).toBeInTheDocument();
   });
 });

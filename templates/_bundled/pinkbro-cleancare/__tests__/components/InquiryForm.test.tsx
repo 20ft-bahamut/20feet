@@ -79,18 +79,18 @@ describe('InquiryForm', () => {
     });
 
     it('renders a skeleton when site data is not loaded', () => {
-        render(<InquiryForm site={null} services={services} intro="i" />);
+        render(<InquiryForm site={null} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         expect(screen.getByTestId('inquiry-skeleton')).toBeInTheDocument();
         expect(screen.queryByTestId('inquiry-form')).not.toBeInTheDocument();
     });
 
     it('renders a skeleton while the service list is still loading', () => {
-        render(<InquiryForm site={site} services={null} intro="i" />);
+        render(<InquiryForm site={site} services={null} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         expect(screen.getByTestId('inquiry-skeleton')).toBeInTheDocument();
     });
 
     it('renders the form with the business type options from the source list', () => {
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
 
         expect(screen.getByLabelText('업종')).toBeInTheDocument();
         for (const value of BUSINESS_TYPES) {
@@ -100,7 +100,7 @@ describe('InquiryForm', () => {
     });
 
     it('renders the eight service choices from the source list', () => {
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
 
         for (const choice of SERVICE_CHOICES) {
             expect(screen.getByLabelText(choice)).toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('InquiryForm', () => {
     });
 
     it('blocks submit and shows field errors when required values are missing', async () => {
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fireEvent.click(screen.getByTestId('inquiry-submit-button'));
 
         await waitFor(() =>
@@ -124,7 +124,7 @@ describe('InquiryForm', () => {
         fetchMock.mockResolvedValue(
             jsonResponse(201, { data: { inquiry_id: 'abc' } })
         );
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
         submitForm();
 
@@ -155,7 +155,7 @@ describe('InquiryForm', () => {
                 errors: { business_type: ['필수'] },
             })
         );
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
         submitForm();
 
@@ -168,7 +168,7 @@ describe('InquiryForm', () => {
 
     it('shows a friendly message on 429 and keeps the form alive', async () => {
         fetchMock.mockResolvedValue(jsonResponse(429, { message: 'Too Many Attempts.' }));
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
         submitForm();
 
@@ -187,7 +187,7 @@ describe('InquiryForm', () => {
                 })
         );
 
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
 
         submitForm();
@@ -212,7 +212,7 @@ describe('InquiryForm', () => {
                 })
         );
 
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
 
         const form = screen.getByTestId('inquiry-form');
@@ -232,7 +232,7 @@ describe('InquiryForm', () => {
 
     it('keeps entered values after a network failure', async () => {
         fetchMock.mockRejectedValueOnce(new TypeError('network down'));
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
         fillValidForm();
         fireEvent.change(screen.getByTestId('inquiry-textarea-message'), {
             target: { value: 'keep me' },
@@ -255,7 +255,7 @@ describe('InquiryForm', () => {
     });
 
     it('keeps the honeypot invisible and out of the tab order', () => {
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
 
         const honeypot = screen.getByTestId('inquiry-input-website');
         expect(honeypot.closest('[aria-hidden="true"]')).not.toBeNull();
@@ -265,7 +265,7 @@ describe('InquiryForm', () => {
     });
 
     it('links the kakao channel and the phone number from site data', () => {
-        render(<InquiryForm site={site} services={services} intro="i" />);
+        render(<InquiryForm site={site} services={services} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />);
 
         const kakao = screen.getByTestId('inquiry-kakao-link');
         expect(kakao).toHaveAttribute('href', 'https://pf.kakao.com/_dummy');
@@ -333,5 +333,68 @@ describe('inquiry contract', () => {
             website: 'http://spam.example',
         });
         expect(bot.website).toBe('http://spam.example');
+    });
+
+    it('renders the estimate copy from the copy domain (intro/sub/checklist/panel)', () => {
+        render(
+            <InquiryForm
+                site={site}
+                services={services}
+                intro={'필요한 내용을 남겨주시면\n확인 후 안내드립니다.'}
+                sub="홈페이지에서는 사진 없이 업종, 필요한 서비스, 연락처를 남겨주세요."
+                checklist={[
+                    '홈페이지 문의는 사진 없이 간단한 정보만 남기면 됩니다.',
+                    '사진을 보내실 경우 휴대폰에서 카카오채널로 바로 보내주세요.',
+                    '표기 금액은 기본가이며 확정 견적은 현장 조건 확인 후 안내드립니다.',
+                ]}
+                panelHeading="간편견적 문의하기"
+                panelSub="업종, 필요한 서비스와 규모, 연락처, 요청사항을 남겨주세요."
+                panelNote={'사진 첨부가 필요하신가요?\n휴대폰으로 촬영한 현장 사진은 카카오채널로 보내주시면 가장 빠르게 확인할 수 있습니다.'}
+            />,
+        );
+
+        const heading = screen.getByTestId('inquiry-heading');
+        expect(heading.tagName).toBe('H2');
+        expect(heading.textContent).toBe('필요한 내용을 남겨주시면\n확인 후 안내드립니다.');
+
+        expect(screen.getByTestId('inquiry-sub')).toHaveTextContent(
+            '사진 없이 업종, 필요한 서비스, 연락처를 남겨주세요'
+        );
+
+        const checklist = screen.getByTestId('estimate-checklist');
+        expect(checklist.children).toHaveLength(3);
+        expect(checklist).toHaveTextContent('카카오채널로 바로 보내주세요');
+
+        expect(screen.getByTestId('inquiry-panel-heading')).toHaveTextContent('간편견적 문의하기');
+        expect(screen.getByTestId('inquiry-panel-sub')).toHaveTextContent(
+            '규모, 연락처, 요청사항을 남겨주세요'
+        );
+        expect(screen.getByTestId('inquiry-panel-note')).toHaveTextContent(
+            '사진 첨부가 필요하신가요?'
+        );
+    });
+
+    it('omits every copy slot that is null instead of falling back to a literal', () => {
+        render(
+            <InquiryForm
+                site={site}
+                services={services}
+                intro={null}
+                sub={null}
+                checklist={null}
+                panelHeading={null}
+                panelSub={null}
+                panelNote={null}
+            />,
+        );
+
+        expect(screen.queryByTestId('inquiry-heading')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('inquiry-sub')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('estimate-checklist')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('inquiry-panel-heading')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('inquiry-panel-sub')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('inquiry-panel-note')).not.toBeInTheDocument();
+        // 폼 자체는 계속 렌더된다
+        expect(screen.getByTestId('inquiry-form')).toBeInTheDocument();
     });
 });

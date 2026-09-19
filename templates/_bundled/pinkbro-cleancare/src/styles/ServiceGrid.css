@@ -14,6 +14,49 @@
   line-height: 1.8;
   color: var(--pb-muted);
   max-width: 42ch;
+  /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+  white-space: pre-line;
+}
+
+.pb-services-sub {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.82;
+  color: var(--pb-muted);
+  max-width: 52ch;
+  text-wrap: pretty;
+  word-break: keep-all;
+}
+
+/* 목록에 없는 서비스 안내 박스 (원문 .extra-box) */
+.pb-extra-box {
+  margin-top: 24px;
+  padding: 26px 28px;
+  border-radius: 28px;
+  background: #11131a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.pb-extra-box b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+
+.pb-extra-box p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.76;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 52ch;
+  text-wrap: pretty;
+  word-break: keep-all;
 }
 
 .pb-service-grid {
@@ -153,6 +196,12 @@
 
 .pb-service-detail summary::-webkit-details-marker {
   display: none;
+}
+
+/* 상세 펼침 라벨(copy: service_detail_label) 뒤의 ＋ 마커 */
+.pb-service-detail-marker {
+  margin-left: 8px;
+  color: var(--pb-pink);
 }
 
 .pb-detail-body {

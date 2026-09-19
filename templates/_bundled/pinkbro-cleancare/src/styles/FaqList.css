@@ -43,6 +43,9 @@
   font-size: 15px;
   line-height: 1.8;
   color: var(--pb-muted);
+  /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+  white-space: pre-line;
+  word-break: keep-all;
 }
 
 .pb-faq-list {

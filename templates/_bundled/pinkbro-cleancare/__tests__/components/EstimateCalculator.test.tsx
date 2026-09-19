@@ -57,14 +57,52 @@ const steps = [
 describe('EstimateCalculator', () => {
   it('renders a skeleton when services is null', () => {
     render(
-      <EstimateCalculator intro={null} note={null} services={null} steps={null} site={null} />,
+      <EstimateCalculator heading={null} sub={null} summaryHeading={null} summaryNote={null} services={null} steps={null} site={null} />,
     );
     expect(screen.getByTestId('estimate-skeleton')).toBeInTheDocument();
   });
 
+  it('renders the section head and summary copy from props (estimator_*)', () => {
+    render(
+      <EstimateCalculator
+        heading="섹션 제목"
+        sub="섹션 보조 문구"
+        summaryHeading="요약 제목"
+        summaryNote="요약 안내 문구"
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    expect(screen.getByTestId('estimator-heading')).toHaveTextContent('섹션 제목');
+    expect(screen.getByTestId('estimator-sub')).toHaveTextContent('섹션 보조 문구');
+    expect(screen.getByTestId('estimator-summary-heading')).toHaveTextContent('요약 제목');
+    expect(screen.getByTestId('estimator-summary-note')).toHaveTextContent('요약 안내 문구');
+  });
+
+  it('omits every copy slot that is null (no literal fallback text)', () => {
+    render(
+      <EstimateCalculator
+        heading={null}
+        sub={null}
+        summaryHeading={null}
+        summaryNote={null}
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    expect(screen.queryByTestId('estimator-heading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimator-sub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimator-summary-heading')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('estimator-summary-note')).not.toBeInTheDocument();
+  });
+
   it('renders an empty state when services is an empty array', () => {
     render(
-      <EstimateCalculator intro={null} note={null} services={[]} steps={steps} site={null} />,
+      <EstimateCalculator heading={null} sub={null} summaryHeading={null} summaryNote={null} services={[]} steps={steps} site={null} />,
     );
     expect(screen.getByTestId('estimate-empty')).toBeInTheDocument();
     expect(screen.queryByTestId('estimate-skeleton')).not.toBeInTheDocument();
@@ -73,8 +111,10 @@ describe('EstimateCalculator', () => {
   it('starts at zero', () => {
     render(
       <EstimateCalculator
-        intro="i"
-        note="n"
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
         services={services}
         steps={steps}
         site={null}
@@ -88,8 +128,10 @@ describe('EstimateCalculator', () => {
   it('adds up checked services and applies the 3% tier at two items', () => {
     render(
       <EstimateCalculator
-        intro="i"
-        note="n"
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
         services={services}
         steps={steps}
         site={null}
@@ -108,8 +150,10 @@ describe('EstimateCalculator', () => {
   it('uses the selected air conditioner type price, defaulting to 4WAY', () => {
     render(
       <EstimateCalculator
-        intro="i"
-        note="n"
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
         services={services}
         steps={steps}
         site={null}
@@ -130,8 +174,10 @@ describe('EstimateCalculator', () => {
   it('never renders an external image url', () => {
     const { container } = render(
       <EstimateCalculator
-        intro="i"
-        note="n"
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
         services={services}
         steps={steps}
         site={null}

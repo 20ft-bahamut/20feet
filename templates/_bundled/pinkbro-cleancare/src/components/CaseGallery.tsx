@@ -5,6 +5,8 @@ import '../styles/CaseGallery.css';
 export interface CaseGalleryProps {
   /** 섹션 소개 문구 — copy 도메인에서 온다. null 이면 렌더하지 않는다. */
   intro: string | null;
+  /** 섹션 보조 문구(copy: projects_sub). null 이면 렌더하지 않는다. */
+  sub: string | null;
   /** 하단 주의 문구 — null 이면 렌더하지 않는다. */
   note: string | null;
   /** 사례 목록. null = 로딩 중(스켈레톤), [] = 빈 상태. */
@@ -18,12 +20,20 @@ export interface CaseGalleryProps {
  * 커버 슬롯이 비면 소스 `.project-thumb` 의 CSS 그라디언트 폴백을 렌더한다.
  * `blog_url` 이 비면 `<a>` 대신 `<div aria-disabled="true">` 로 렌더한다 —
  * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
+ *
+ * 원문 카드의 킥커(`PINKBRO PROJECT`)와 링크 문구(`작업사례 자세히 보기`)는
+ * copy 도메인에 키가 없어 렌더하지 않는다 — 리포트의 COPY REQUIRED 항목 참조.
  */
-export function CaseGallery({ intro, note, items }: CaseGalleryProps): React.ReactElement {
+export function CaseGallery({ intro, sub, note, items }: CaseGalleryProps): React.ReactElement {
   return (
     <section className="pb-projects" data-testid="cases">
       <div className="pb-projects__wrap">
         {intro ? <h2 className="pb-projects__intro">{intro}</h2> : null}
+        {sub ? (
+          <p className="pb-projects__sub" data-testid="projects-sub">
+            {sub}
+          </p>
+        ) : null}
 
         {items === null ? (
           <div className="pb-project-grid" data-testid="cases-skeleton" aria-busy="true">

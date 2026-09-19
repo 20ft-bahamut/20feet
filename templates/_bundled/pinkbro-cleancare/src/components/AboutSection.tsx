@@ -17,9 +17,10 @@ export interface AboutSectionProps {
  *   - `about_perspectives` [] → 카드 없이 빈 콘텐츠 열
  *   - 배열 → .pb-why-card 로 렌더
  *
- * 원문의 stage 오버레이 보조 문구(p)·why-content h2·eyebrow 라벨("Why Pinkbro"/
- * "Brand Perspective")은 CopyData 계약에 해당 필드가 없어 렌더하지 않는다 —
- * 카피 하드코딩 금지(COPY POLICY). 계약 확장은 리포트의 COPY REQUIRED 항목 참조.
+ * 문구는 전부 copy props 에서 온다: stage 오버레이는 `about_heading`(h3) +
+ * `about_message`(p), why-content 는 `about_side_heading`(h2) + 관점 카드.
+ * 원문의 eyebrow 라벨("Why Pinkbro"/"Brand Perspective")은 copy 도메인에 키가 없어
+ * 렌더하지 않는다 — 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
  */
 export function AboutSection({ copy }: AboutSectionProps): React.ReactElement {
     if (copy === null) {
@@ -35,7 +36,9 @@ export function AboutSection({ copy }: AboutSectionProps): React.ReactElement {
         );
     }
 
+    const heading = copy.about_heading;
     const message = copy.about_message;
+    const sideHeading = copy.about_side_heading;
     const perspectives = copy.about_perspectives;
 
     return (
@@ -43,11 +46,17 @@ export function AboutSection({ copy }: AboutSectionProps): React.ReactElement {
             <div className="pb-wrap pb-why-grid">
                 <Div className="pb-why-stage">
                     <Div className="pb-why-overlay">
-                        {message && <h3>{message}</h3>}
+                        {heading && <h3 data-testid="about-heading">{heading}</h3>}
+                        {message && <p data-testid="about-message">{message}</p>}
                     </Div>
                 </Div>
 
                 <Div className="pb-why-content" data-testid="about-perspectives">
+                    {sideHeading && (
+                        <h2 className="pb-why-heading" data-testid="about-side-heading">
+                            {sideHeading}
+                        </h2>
+                    )}
                     {Array.isArray(perspectives) &&
                         perspectives.map((perspective, index) => (
                             <Div className="pb-why-card" key={index} data-testid="about-perspective">

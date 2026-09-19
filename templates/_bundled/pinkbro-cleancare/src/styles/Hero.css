@@ -41,6 +41,13 @@
 .pb-hero-pills { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
 .pb-hero-pills span { display: inline-flex; align-items: center; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .16); background: rgba(255, 255, 255, .10); color: #fff; font-size: 14px; backdrop-filter: blur(12px); }
 
+/* ---- hero scope 카드 3장 (원문 .hero-scope) ---- */
+.pb-hero-scope { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 28px; }
+.pb-hero-scope > div { padding: 16px 16px 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, .13); background: rgba(255, 255, 255, .08); backdrop-filter: blur(12px); color: #fff; }
+.pb-hero-scope small { display: block; font: 800 10px/1 var(--pb-font-latin); letter-spacing: .14em; color: #ffb8d4; }
+.pb-hero-scope b { display: block; margin-top: 8px; font: 800 13px/1.2 var(--pb-font-latin); letter-spacing: .03em; }
+.pb-hero-scope span { display: block; margin-top: 7px; font-size: 12px; line-height: 1.55; color: rgba(255, 255, 255, .72); }
+
 /* ---- hero media slot (원문 .hero-visual-clean / .hero-visual-label / .hero-visual-bottom) ---- */
 .pb-hero-media { position: relative; min-height: 620px; border-radius: 30px; overflow: hidden; background: #11131a; }
 .pb-hero-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -85,6 +92,7 @@
     .pb-hero-media { min-height: 360px; border-radius: 22px; }
     .pb-hero-visual-bottom { left: 14px; right: 14px; bottom: 14px; padding: 18px; align-items: flex-start; flex-direction: column; gap: 10px; }
     .pb-hero-visual-bottom p { max-width: none; text-align: left; }
+    .pb-hero-scope { grid-template-columns: 1fr; margin-top: 22px; max-width: 520px; }
     .pb-display { font-size: clamp(42px, 10vw, 58px); }
     .pb-lead { max-width: none; font-size: 17px; }
 }

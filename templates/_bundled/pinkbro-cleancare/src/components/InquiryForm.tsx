@@ -3,6 +3,7 @@ import {
     A,
     Button,
     Div,
+    H2,
     H3,
     Input,
     Label,
@@ -31,14 +32,34 @@ export interface InquiryFormProps {
     site: SiteData | null;
     /** 서비스 목록. null 이면 아직 로딩 중 — 스켈레톤(스펙 5.4: null → 필드 숨김). */
     services: ServiceItem[] | null;
-    /** 섹션 도입 문구(copy 도메인). null 이면 문구 없이 렌더한다. */
+    /** 섹션 제목(copy: estimate_intro). null 이면 제목 없이 렌더한다. */
     intro: string | null;
+    /** 섹션 보조 문구(copy: estimate_note). null 이면 생략한다. */
+    sub: string | null;
+    /** 좌측 체크리스트 3항목(copy: estimate_checklist). null = 로딩 중, [] = 항목 없음. */
+    checklist: string[] | null;
+    /** 우측 패널 제목(copy: estimate_panel_heading). null 이면 생략한다. */
+    panelHeading: string | null;
+    /** 우측 패널 안내 문구(copy: estimate_panel_sub). null 이면 생략한다. */
+    panelSub: string | null;
+    /** 폼 하단 안내 문구(copy: estimate_panel_note). null 이면 생략한다. */
+    panelNote: string | null;
     className?: string;
 }
 
 type SubmitState = 'idle' | 'submitting' | 'success' | 'error';
 
-export function InquiryForm({ site, services, intro, className }: InquiryFormProps): React.ReactElement {
+export function InquiryForm({
+    site,
+    services,
+    intro,
+    sub,
+    checklist,
+    panelHeading,
+    panelSub,
+    panelNote,
+    className,
+}: InquiryFormProps): React.ReactElement {
     const [values, setValues] = React.useState<InquiryFormValues>(() => ({ ...EMPTY_INQUIRY_FORM }));
     const [fieldErrors, setFieldErrors] = React.useState<InquiryFieldErrors>({});
     const [state, setState] = React.useState<SubmitState>('idle');
@@ -203,7 +224,26 @@ export function InquiryForm({ site, services, intro, className }: InquiryFormPro
                     <div className="pb-inquiry-grid">
                         <div className="pb-inquiry-copy">
                             <Span className="pb-inquiry-eyebrow">Estimate</Span>
-                            {intro && <P className="pb-inquiry-sub">{intro}</P>}
+                            {intro && (
+                                <H2 className="pb-inquiry-heading" data-testid="inquiry-heading">
+                                    {intro}
+                                </H2>
+                            )}
+                            {sub && (
+                                <P className="pb-inquiry-sub" data-testid="inquiry-sub">
+                                    {sub}
+                                </P>
+                            )}
+                            {Array.isArray(checklist) && checklist.length > 0 && (
+                                <Div className="pb-checklist" data-testid="estimate-checklist">
+                                    {checklist.map((line, index) => (
+                                        <div key={index}>
+                                            <span>{String(index + 1).padStart(2, '0')}</span>
+                                            <div>{line}</div>
+                                        </div>
+                                    ))}
+                                </Div>
+                            )}
                             {site.kakao_channel && (
                                 <A
                                     className="pb-btn pb-btn--kakao"
@@ -218,11 +258,19 @@ export function InquiryForm({ site, services, intro, className }: InquiryFormPro
                         </div>
 
                         <div className="pb-inquiry-panel">
-                            <H3 className="pb-inquiry-panel-title">간편견적 문의하기</H3>
-                            <P className="pb-inquiry-panel-lead">
-                                업종, 필요한 서비스와 규모, 연락처, 요청사항을 남겨주세요. 사진 첨부 없이
-                                간단하게 접수할 수 있습니다.
-                            </P>
+                            {panelHeading && (
+                                <H3
+                                    className="pb-inquiry-panel-title"
+                                    data-testid="inquiry-panel-heading"
+                                >
+                                    {panelHeading}
+                                </H3>
+                            )}
+                            {panelSub && (
+                                <P className="pb-inquiry-panel-lead" data-testid="inquiry-panel-sub">
+                                    {panelSub}
+                                </P>
+                            )}
 
                             <form
                                 className="pb-inquiry-form"
@@ -374,6 +422,12 @@ export function InquiryForm({ site, services, intro, className }: InquiryFormPro
                                         />
                                     </div>
                                 </div>
+
+                                {panelNote && (
+                                    <Div className="pb-panel-note" data-testid="inquiry-panel-note">
+                                        {panelNote}
+                                    </Div>
+                                )}
 
                                 {state === 'error' && formMessage && (
                                     <Div

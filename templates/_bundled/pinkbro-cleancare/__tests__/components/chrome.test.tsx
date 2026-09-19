@@ -27,18 +27,48 @@ const copy: CopyData = {
   hero_headline: null,
   hero_lead: null,
   hero_pills: null,
+  hero_visual_label: null,
+  hero_visual_brand_message: null,
+  hero_visual_body: null,
+  hero_scope: null,
+  about_heading: null,
   about_message: null,
+  about_side_heading: null,
   about_perspectives: null,
   service_intro: null,
+  service_intro_sub: null,
+  service_detail_label: null,
+  extra_box_heading: null,
+  extra_box_body: null,
   package_intro: null,
+  package_intro_sub: null,
+  benefit_heading: null,
+  benefit_sub: null,
+  benefit_items: null,
+  pricing_heading: null,
+  pricing_sub: null,
   pricing_notice: null,
+  pricing_notice_sub: null,
+  pricing_field: null,
+  pricing_flow_label: null,
   pricing_flow: null,
+  estimator_heading: null,
+  estimator_sub: null,
+  estimator_summary_heading: null,
+  estimator_summary_note: null,
+  faq_intro: null,
+  faq_intro_sub: null,
   projects_intro: null,
+  projects_sub: null,
   projects_note: null,
   estimate_intro: null,
   estimate_note: null,
-  faq_intro: null,
+  estimate_checklist: null,
+  estimate_panel_heading: null,
+  estimate_panel_sub: null,
+  estimate_panel_note: null,
   footer_text: '더미 푸터 문구',
+  footer_brand_desc: '더미 브랜드 소개',
 };
 
 describe('telHref', () => {
@@ -95,6 +125,17 @@ describe('SiteFooter', () => {
   it('renders the footer copy from props', () => {
     render(<SiteFooter site={site} copy={copy} />);
     expect(screen.getByText('더미 푸터 문구')).toBeInTheDocument();
+  });
+
+  it('renders the brand description from the copy domain (footer_brand_desc)', () => {
+    render(<SiteFooter site={site} copy={copy} />);
+    expect(screen.getByTestId('footer-brand-desc')).toHaveTextContent('더미 브랜드 소개');
+  });
+
+  it('omits the brand description when the copy domain has no value', () => {
+    render(<SiteFooter site={site} copy={{ ...copy, footer_brand_desc: null }} />);
+    expect(screen.queryByTestId('footer-brand-desc')).not.toBeInTheDocument();
+    expect(screen.getByText('깨끗한 공간, 더 나은 오늘')).toBeInTheDocument();
   });
 
   it('renders the contact values from site props', () => {

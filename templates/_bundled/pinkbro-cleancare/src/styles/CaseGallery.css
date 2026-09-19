@@ -18,6 +18,19 @@
     line-height: 1.28;
     letter-spacing: -.04em;
     font-weight: 800;
+    /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+    white-space: pre-line;
+    word-break: keep-all;
+}
+
+.pb-projects__sub {
+    margin: 16px 0 0;
+    max-width: 42ch;
+    color: var(--pb-muted);
+    font-size: 15px;
+    line-height: 1.82;
+    text-wrap: pretty;
+    word-break: keep-all;
 }
 
 .pb-project-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }

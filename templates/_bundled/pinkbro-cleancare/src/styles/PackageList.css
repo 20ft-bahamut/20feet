@@ -10,6 +10,86 @@
   line-height: 1.8;
   color: var(--pb-muted);
   max-width: 42ch;
+  /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+  white-space: pre-line;
+}
+
+.pb-packages-sub {
+  margin: 0 0 20px;
+  font-size: 15px;
+  line-height: 1.82;
+  color: var(--pb-muted);
+  max-width: 52ch;
+  text-wrap: pretty;
+  word-break: keep-all;
+}
+
+/* 동시작업 혜택 박스 (원문 .benefit-box / .benefit-top / .benefit-grid / .benefit-item) */
+.pb-benefit-box {
+  margin-top: 24px;
+  padding: 28px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid var(--pb-line);
+  box-shadow: 0 18px 48px rgba(15, 17, 24, 0.06);
+}
+
+.pb-benefit-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.pb-benefit-heading {
+  margin: 0;
+  font-size: clamp(24px, 2.2vw, 30px);
+  line-height: 1.16;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: var(--pb-ink);
+  /* 원문은 <br> 두 줄 */
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.pb-benefit-sub {
+  margin: 0;
+  max-width: 44ch;
+  font-size: 15px;
+  line-height: 1.82;
+  color: var(--pb-muted);
+  text-wrap: pretty;
+  word-break: keep-all;
+}
+
+.pb-benefit-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.pb-benefit-item {
+  padding: 22px 18px;
+  border-radius: 22px;
+  background: var(--pb-soft);
+  text-align: center;
+}
+
+.pb-benefit-item small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pb-muted);
+}
+
+.pb-benefit-item strong {
+  display: block;
+  margin-top: 10px;
+  font: 900 34px/1 var(--pb-font-latin);
+  letter-spacing: -0.05em;
+  color: var(--pb-pink);
 }
 
 .pb-package-grid {
@@ -144,11 +224,26 @@
   .pb-package-grid {
     grid-template-columns: 1fr;
   }
+
+  .pb-benefit-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 720px) {
   .pb-pkg-card {
     border-radius: var(--pb-radius-md);
     min-height: 0;
+  }
+
+  .pb-benefit-box {
+    border-radius: 22px;
+    padding: 22px 20px;
+  }
+
+  .pb-benefit-top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
   }
 }

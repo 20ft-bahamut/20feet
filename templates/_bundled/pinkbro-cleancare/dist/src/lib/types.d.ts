@@ -25,26 +25,68 @@ export interface SiteData {
     region: string | null;
     og_image_slot: string | null;
 }
-/** 페이지 카피 */
+/** 히어로 스코프 카드(01 Customer Area / 02 Kitchen Hygiene / 03 Air Care) */
+export interface HeroScopeItem {
+    no: string;
+    title: string;
+    body: string;
+}
+/**
+ * 페이지 카피 — 모듈 `pinkbro-contents` 가 COPY 도메인에 넣는 45개 키 전량.
+ *
+ * 값은 시더가 저장한 원문 그대로다. 개행(`\n`, 원문 `<br>`)과 인라인 강조
+ * (`<em>` / `<strong>`)가 값 안에 남아 있으므로 컴포넌트가 그대로 렌더한다
+ * (COPY POLICY — 여기서 문자열을 만들거나 태그를 지우지 않는다).
+ */
 export interface CopyData {
     hero_headline: string | null;
     hero_lead: string | null;
     hero_pills: string[] | null;
+    hero_visual_label: string | null;
+    hero_visual_brand_message: string | null;
+    hero_visual_body: string | null;
+    hero_scope: HeroScopeItem[] | null;
+    about_heading: string | null;
     about_message: string | null;
+    about_side_heading: string | null;
     about_perspectives: {
         title: string;
         body: string;
     }[] | null;
     service_intro: string | null;
+    service_intro_sub: string | null;
+    service_detail_label: string | null;
+    extra_box_heading: string | null;
+    extra_box_body: string | null;
     package_intro: string | null;
+    package_intro_sub: string | null;
+    benefit_heading: string | null;
+    benefit_sub: string | null;
+    benefit_items: DiscountStep[] | null;
+    pricing_heading: string | null;
+    pricing_sub: string | null;
     pricing_notice: string | null;
+    pricing_notice_sub: string | null;
+    pricing_field: string | null;
+    pricing_flow_label: string | null;
     pricing_flow: string | null;
+    estimator_heading: string | null;
+    estimator_sub: string | null;
+    estimator_summary_heading: string | null;
+    estimator_summary_note: string | null;
+    faq_intro: string | null;
+    faq_intro_sub: string | null;
     projects_intro: string | null;
+    projects_sub: string | null;
     projects_note: string | null;
     estimate_intro: string | null;
     estimate_note: string | null;
-    faq_intro: string | null;
+    estimate_checklist: string[] | null;
+    estimate_panel_heading: string | null;
+    estimate_panel_sub: string | null;
+    estimate_panel_note: string | null;
     footer_text: string | null;
+    footer_brand_desc: string | null;
 }
 /** 서비스별 에어컨 타입 옵션 */
 export interface AirType {

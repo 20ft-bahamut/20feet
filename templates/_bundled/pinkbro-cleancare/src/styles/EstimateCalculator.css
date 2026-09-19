@@ -18,13 +18,38 @@
   box-shadow: var(--pb-shadow, 0 24px 66px rgba(15, 17, 24, 0.08));
 }
 
-.pb-estimator-intro .pb-estimator-sub {
-  margin: 12px 0 0;
+/* ---- section-head (원문 .section-head / .copy / .sub / .h3) ---- */
+
+.pb-estimator-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 18px;
+}
+
+.pb-estimator-head-copy {
+  max-width: 740px;
+}
+
+.pb-estimator-heading {
+  margin: 14px 0 0;
+  font-size: clamp(24px, 2.2vw, 30px);
+  line-height: 1.16;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: var(--pb-ink, #161922);
+  word-break: keep-all;
+}
+
+.pb-estimator-sub {
+  margin: 0;
   font-size: 15px;
   line-height: 1.8;
   color: var(--pb-muted, #686e7c);
   max-width: 52ch;
   text-wrap: pretty;
+  word-break: keep-all;
 }
 
 .pb-estimator-grid {
@@ -107,6 +132,16 @@
   border-radius: 26px;
   background: linear-gradient(180deg, #171b25 0%, #11141c 100%);
   color: #fff;
+}
+
+.pb-estimate-summary-title {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.16;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: #fff;
+  word-break: keep-all;
 }
 
 .pb-estimate-summary-meta {
@@ -216,5 +251,11 @@
   .pb-estimator-grid,
   .pb-estimate-skeleton {
     grid-template-columns: 1fr;
+  }
+
+  .pb-estimator-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
 }

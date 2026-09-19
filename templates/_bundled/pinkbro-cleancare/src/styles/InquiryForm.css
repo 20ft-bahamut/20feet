@@ -73,6 +73,18 @@
     opacity: 0.7;
 }
 
+.pb-inquiry-heading {
+    margin: 0;
+    font-size: clamp(30px, 3.4vw, 46px);
+    line-height: 1.1;
+    letter-spacing: -0.05em;
+    font-weight: 900;
+    color: #fff;
+    /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+    white-space: pre-line;
+    word-break: keep-all;
+}
+
 .pb-inquiry-sub {
     font-size: 15px;
     line-height: 1.82;
@@ -81,6 +93,47 @@
     text-wrap: pretty;
     word-break: keep-all;
     overflow-wrap: normal;
+}
+
+/* 좌측 체크리스트(원문 .check-list) */
+.pb-checklist {
+    display: grid;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.pb-checklist > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.76;
+    text-wrap: pretty;
+    word-break: keep-all;
+}
+
+.pb-checklist > div > span {
+    color: #ffc2db;
+    font-weight: 900;
+}
+
+/* 폼 하단 안내(원문 .panel-note) */
+.pb-panel-note {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: var(--pb-pink-soft);
+    color: #4f5561;
+    font-size: 13px;
+    line-height: 1.72;
+    /* 원문은 <br> — 시더 값의 \n 을 그대로 살린다 */
+    white-space: pre-line;
+    word-break: keep-all;
 }
 
 .pb-inquiry-panel {

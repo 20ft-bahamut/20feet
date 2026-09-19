@@ -13,13 +13,15 @@ export interface SiteFooterProps {
  * 사이트 푸터.
  *
  * 모든 문구는 props 로 받는다(COPY POLICY — 리터럴 금지):
- * 태그라인은 `site.tagline`, 저작권 문구는 `copy.footer_text`, 연락처 값은
+ * 태그라인은 `site.tagline`, 브랜드 소개는 `copy.footer_brand_desc`,
+ * 저작권 문구는 `copy.footer_text`, 연락처 값은
  * `site.phone` / `site.kakao_channel` / `site.region` 에서 온다.
  * 소스 푸터의 서비스 목록 컬럼은 props 계약에 데이터원이 없어 렌더하지 않는다
  * (리포트의 미해결 항목 참조).
  */
 export function SiteFooter({ site, copy }: SiteFooterProps): React.ReactElement {
   const hasContact = Boolean(site?.phone || site?.kakao_channel || site?.region);
+  const brandDesc = copy?.footer_brand_desc ?? null;
 
   return (
     <footer className="pb-footer" data-testid="pb-footer">
@@ -33,9 +35,15 @@ export function SiteFooter({ site, copy }: SiteFooterProps): React.ReactElement 
                 alt={site.brand_name}
               />
             ) : null}
-            {site?.tagline ? (
+            {site?.tagline || brandDesc ? (
               <p className="pb-footer-tagline">
-                <strong>{site.tagline}</strong>
+                {site?.tagline ? <strong>{site.tagline}</strong> : null}
+                {brandDesc ? (
+                  <>
+                    <br />
+                    <span data-testid="footer-brand-desc">{brandDesc}</span>
+                  </>
+                ) : null}
               </p>
             ) : null}
           </div>
