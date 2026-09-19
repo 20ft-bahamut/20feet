@@ -295,7 +295,8 @@ describe('home layout — 노드 이름 · 속성 배치 · lang', () => {
     });
 
     it('resolves every $t: token in both ko and en', () => {
-        const tokens = [...collectTranslationTokens(layout.meta)];
+        // 레이아웃 전체를 훑는다 — meta 뿐 아니라 노드에 문구 키가 들어와도 잡는다.
+        const tokens = [...collectTranslationTokens(layout)];
 
         expect(tokens.length).toBeGreaterThan(0);
         for (const token of tokens) {
