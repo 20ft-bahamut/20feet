@@ -1,0 +1,375 @@
+{
+    "version": "1.0.0",
+    "layout_name": "home",
+    "permissions": [],
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:pinkbro.routes.home.title",
+        "description": "$t:pinkbro.routes.home.description",
+        "seo": {
+            "enabled": true,
+            "page_type": "home",
+            "data_sources": [
+                "pinkbro_site",
+                "pinkbro_media"
+            ],
+            "og": {
+                "type": "website",
+                "title": "$t:pinkbro.seo.og_title",
+                "description": "$t:pinkbro.seo.og_description",
+                "image": "{{pinkbro_media?.data?.site_og?.url ?? '/api/templates/assets/pinkbro-cleancare?file=images/og-image.png'}}"
+            },
+            "structured_data": {
+                "@graph": [
+                    {
+                        "@type": "Organization",
+                        "name": "핑크브로클린케어",
+                        "alternateName": [
+                            "PINKBRO CLEANCARE",
+                            "핑크브로 클린케어"
+                        ],
+                        "logo": "{{pinkbro_media?.data?.site_og?.url ?? '/api/templates/assets/pinkbro-cleancare?file=images/og-image.png'}}",
+                        "description": "핑크브로클린케어는 부산·울산·경남 지역의 카페, 음식점, 베이커리, 주점, 프랜차이즈 등 F&B 매장을 대상으로 바닥 기계세척, 유리창 세척, 접이식 어닝 세척, 간판 세척, 상업용 후드 세척, 에어컨 분해세척 서비스를 제공하는 F&B 매장 전문 위생 클린케어 브랜드입니다.",
+                        "telephone": "+82-10-4348-8158"
+                    },
+                    {
+                        "@type": "LocalBusiness",
+                        "name": "핑크브로클린케어",
+                        "image": "{{pinkbro_media?.data?.site_og?.url ?? '/api/templates/assets/pinkbro-cleancare?file=images/og-image.png'}}",
+                        "telephone": "+82-10-4348-8158",
+                        "areaServed": [
+                            "부산",
+                            "울산",
+                            "경상남도"
+                        ],
+                        "serviceType": [
+                            "바닥 기계세척",
+                            "유리창 세척",
+                            "접이식 어닝 세척",
+                            "간판 세척",
+                            "상업용 후드 세척",
+                            "에어컨 분해세척"
+                        ],
+                        "slogan": "깨끗한 공간, 더 나은 오늘"
+                    },
+                    {
+                        "@type": "FAQPage",
+                        "mainEntity": [
+                            {
+                                "@type": "Question",
+                                "name": "상가 바닥 기계세척 비용은 얼마인가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "바닥 기계세척은 기본 250,000원부터 시작합니다. 데코타일, 20평 미만, 기본 오염 조건 기준이며 면적, 집기 이동, 특수오염, 코팅·박리 여부 등에 따라 최종 금액이 달라질 수 있습니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "카페·음식점 유리창 세척 비용은 얼마인가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "유리창 세척은 기본 100,000원부터 시작합니다. 1층, 총 가로 10m × 높이 2m 이내, 기본 오염 기준이며 심한 물때·석회, 시트지·본드 제거, 창틀 집중세척, 고소작업은 추가비용이 발생할 수 있습니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "상업용 후드 세척 비용은 얼마인가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "상업용 후드 세척은 기본 250,000원부터 시작합니다. 일반 규모 후드의 기본 기름오염과 기본 내부·외부 세척 기준이며 후드 길이, 필터 수량, 누적 기름때, 덕트·팬·추가 분해 범위에 따라 달라질 수 있습니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "에어컨 분해세척은 종류별로 가격이 다른가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "네. 기본가는 벽걸이 80,000원~, 스탠드 120,000원~, 천장형 1WAY 100,000원~, 천장형 4WAY 150,000원~입니다. 기종, 대수, 분해 난도, 오염 상태와 접근성에 따라 확정 견적이 달라질 수 있습니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "홈페이지에 표시된 금액이 최종 확정가격인가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "아닙니다. 홈페이지 금액은 기본 작업 기준가입니다. 실제 확정 견적은 면적, 수량, 오염도, 작업 구조, 접근성, 고소장비 및 추가 작업 범위를 확인한 뒤 안내합니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "여러 서비스를 같은 날 함께 맡기면 할인이 있나요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "같은 매장·같은 일정 기준으로 2개 항목 3%, 3~4개 항목 5%, 5개 이상 10% 할인이 적용됩니다. 할인은 기본 작업금액 합계 기준이며 특수오염, 추가면적, 고소장비, 장비대여 등 추가비용은 제외됩니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "어느 지역까지 출장 가능한가요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "부산·울산·경남 전 지역을 기본 출장지역으로 안내하고 있습니다. 현장 위치와 작업 내용에 따라 일정 및 출장 가능 여부를 상담 단계에서 확인해 드립니다."
+                                }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "사진을 보내서 견적 문의하려면 어떻게 하나요?",
+                                "acceptedAnswer": {
+                                    "@type": "Answer",
+                                    "text": "현장 사진은 카카오채널로 보내주시면 가장 편리합니다. 휴대폰으로 촬영한 매장 전체와 관리가 필요한 부분 사진을 카카오채널로 보내주세요. 홈페이지에서는 사진 없이 업종, 필요 서비스, 규모, 연락처와 요청사항만 남겨도 문의할 수 있습니다."
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "data_sources": [
+        {
+            "id": "pinkbro_site",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/site",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "blocking"
+        },
+        {
+            "id": "pinkbro_copy",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/copy",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "blocking"
+        },
+        {
+            "id": "pinkbro_discount",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/discount",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "pinkbro_services",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/services",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "pinkbro_packages",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/packages",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "pinkbro_cases",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/cases",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "pinkbro_faq",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/faq",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        },
+        {
+            "id": "pinkbro_media",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/media-slots",
+            "method": "GET",
+            "auto_fetch": true,
+            "loading_strategy": "progressive"
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "comment": "=== #top — 01 HERO: 헤드라인·브랜드 메시지·행동 (copy + site + media)",
+                "id": "top",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_hero",
+                        "type": "composite",
+                        "name": "Hero",
+                        "props": {
+                            "site": "{{pinkbro_site?.data ?? null}}",
+                            "copy": "{{pinkbro_copy?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #about — 02 WHY PINKBRO: 브랜드 관점 (copy + media.why_stage)",
+                "id": "about",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_about",
+                        "type": "composite",
+                        "name": "AboutSection",
+                        "props": {
+                            "copy": "{{pinkbro_copy?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #service — 03 서비스 6종 그리드 (services + copy 섹션 문구 + media 사진 슬롯)",
+                "id": "service",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_service",
+                        "type": "composite",
+                        "name": "ServiceGrid",
+                        "props": {
+                            "intro": "{{pinkbro_copy?.data?.service_intro ?? null}}",
+                            "introSub": "{{pinkbro_copy?.data?.service_intro_sub ?? null}}",
+                            "detailLabel": "{{pinkbro_copy?.data?.service_detail_label ?? null}}",
+                            "extraHeading": "{{pinkbro_copy?.data?.extra_box_heading ?? null}}",
+                            "extraBody": "{{pinkbro_copy?.data?.extra_box_body ?? null}}",
+                            "items": "{{pinkbro_services?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #package — 04 패키지 3종 + 동시작업 혜택 (packages + copy + media.package_stage)",
+                "id": "package",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_package",
+                        "type": "composite",
+                        "name": "PackageList",
+                        "props": {
+                            "intro": "{{pinkbro_copy?.data?.package_intro ?? null}}",
+                            "introSub": "{{pinkbro_copy?.data?.package_intro_sub ?? null}}",
+                            "benefitHeading": "{{pinkbro_copy?.data?.benefit_heading ?? null}}",
+                            "benefitSub": "{{pinkbro_copy?.data?.benefit_sub ?? null}}",
+                            "benefitItems": "{{pinkbro_copy?.data?.benefit_items ?? null}}",
+                            "items": "{{pinkbro_packages?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #pricing — 05 가격 고지 3블록 + 동시작업 할인 단계 (copy + discount)",
+                "id": "pricing",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_pricing",
+                        "type": "composite",
+                        "name": "PriceDiscount",
+                        "props": {
+                            "heading": "{{pinkbro_copy?.data?.pricing_heading ?? null}}",
+                            "sub": "{{pinkbro_copy?.data?.pricing_sub ?? null}}",
+                            "notice": "{{pinkbro_copy?.data?.pricing_notice ?? null}}",
+                            "noticeSub": "{{pinkbro_copy?.data?.pricing_notice_sub ?? null}}",
+                            "field": "{{pinkbro_copy?.data?.pricing_field ?? null}}",
+                            "flowLabel": "{{pinkbro_copy?.data?.pricing_flow_label ?? null}}",
+                            "flow": "{{pinkbro_copy?.data?.pricing_flow ?? null}}",
+                            "steps": "{{pinkbro_discount?.data?.steps ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #faq — 06 FAQ 8문항 (faq + copy 도입 문구). JSON-LD FAQPage 와 같은 원문을 쓴다",
+                "id": "faq",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_faq",
+                        "type": "composite",
+                        "name": "FaqList",
+                        "props": {
+                            "intro": "{{pinkbro_copy?.data?.faq_intro ?? null}}",
+                            "introSub": "{{pinkbro_copy?.data?.faq_intro_sub ?? null}}",
+                            "items": "{{pinkbro_faq?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #projects — 07 작업사례 갤러리 (cases + copy)",
+                "id": "projects",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_projects",
+                        "type": "composite",
+                        "name": "CaseGallery",
+                        "props": {
+                            "intro": "{{pinkbro_copy?.data?.projects_intro ?? null}}",
+                            "sub": "{{pinkbro_copy?.data?.projects_sub ?? null}}",
+                            "note": "{{pinkbro_copy?.data?.projects_note ?? null}}",
+                            "items": "{{pinkbro_cases?.data ?? null}}"
+                        }
+                    }
+                ]
+            },
+            {
+                "comment": "=== #estimate — 08 예상견적 계산기 + 간편견적 문의 폼 (한 섹션, 앵커 하나)",
+                "id": "estimate",
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                    {
+                        "id": "home_estimate_calculator",
+                        "type": "composite",
+                        "name": "EstimateCalculator",
+                        "props": {
+                            "heading": "{{pinkbro_copy?.data?.estimator_heading ?? null}}",
+                            "sub": "{{pinkbro_copy?.data?.estimator_sub ?? null}}",
+                            "summaryHeading": "{{pinkbro_copy?.data?.estimator_summary_heading ?? null}}",
+                            "summaryNote": "{{pinkbro_copy?.data?.estimator_summary_note ?? null}}",
+                            "services": "{{pinkbro_services?.data ?? null}}",
+                            "steps": "{{pinkbro_discount?.data?.steps ?? null}}",
+                            "site": "{{pinkbro_site?.data ?? null}}"
+                        }
+                    },
+                    {
+                        "id": "home_estimate_inquiry",
+                        "type": "composite",
+                        "name": "InquiryForm",
+                        "props": {
+                            "site": "{{pinkbro_site?.data ?? null}}",
+                            "services": "{{pinkbro_services?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}",
+                            "intro": "{{pinkbro_copy?.data?.estimate_intro ?? null}}",
+                            "sub": "{{pinkbro_copy?.data?.estimate_note ?? null}}",
+                            "checklist": "{{pinkbro_copy?.data?.estimate_checklist ?? null}}",
+                            "panelHeading": "{{pinkbro_copy?.data?.estimate_panel_heading ?? null}}",
+                            "panelSub": "{{pinkbro_copy?.data?.estimate_panel_sub ?? null}}",
+                            "panelNote": "{{pinkbro_copy?.data?.estimate_panel_note ?? null}}"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

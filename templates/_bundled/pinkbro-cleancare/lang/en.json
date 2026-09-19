@@ -22,6 +22,16 @@
                 "title": "Something went wrong",
                 "description": "Please try again in a moment."
             }
+        },
+        "routes": {
+            "home": {
+                "title": "PinkBro CleanCare | F&B Store Hygiene CleanCare in Busan, Ulsan and Gyeongnam",
+                "description": "PinkBro CleanCare is an F&B hygiene clean-care brand for cafés, restaurants, bakeries, pubs and franchises in Busan, Ulsan and Gyeongnam. See base prices, packages and estimated quotes for floor machine cleaning, glass, awning, sign, commercial hood and air-conditioner disassembly cleaning."
+            }
+        },
+        "seo": {
+            "og_title": "PinkBro CleanCare | F&B Store Hygiene CleanCare",
+            "og_description": "A clean space, a better today. Every hygiene clean-care service an F&B store needs, in one place."
         }
     }
 }
