@@ -1,0 +1,86 @@
+{
+    "version": "1.0.0",
+    "layout_name": "errors/403",
+    "extends": "_user_base",
+    "meta": {
+        "title": "$t:pinkbro.errors.403.title",
+        "description": "$t:pinkbro.errors.403.description"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "error_403_section",
+                "type": "basic",
+                "name": "Div",
+                "style": {
+                    "display": "flex",
+                    "alignItems": "center",
+                    "justifyContent": "center",
+                    "minHeight": "50vh",
+                    "padding": "72px 16px"
+                },
+                "children": [
+                    {
+                        "id": "error_403_body",
+                        "type": "basic",
+                        "name": "Div",
+                        "style": {
+                            "textAlign": "center",
+                            "maxWidth": "560px"
+                        },
+                        "children": [
+                            {
+                                "id": "error_403_code",
+                                "type": "basic",
+                                "name": "Div",
+                                "style": {
+                                    "fontFamily": "var(--pb-font-latin)",
+                                    "fontSize": "64px",
+                                    "fontWeight": "800",
+                                    "lineHeight": "1",
+                                    "color": "var(--pb-line)",
+                                    "marginBottom": "16px"
+                                },
+                                "text": "403"
+                            },
+                            {
+                                "id": "error_403_title",
+                                "type": "basic",
+                                "name": "H2",
+                                "style": {
+                                    "fontSize": "24px",
+                                    "fontWeight": "800",
+                                    "color": "var(--pb-ink)",
+                                    "margin": "0 0 12px"
+                                },
+                                "text": "$t:pinkbro.errors.403.title"
+                            },
+                            {
+                                "id": "error_403_description",
+                                "type": "basic",
+                                "name": "P",
+                                "style": {
+                                    "fontSize": "15px",
+                                    "lineHeight": "1.7",
+                                    "color": "var(--pb-muted)",
+                                    "margin": "0 0 28px"
+                                },
+                                "text": "$t:pinkbro.errors.403.description"
+                            },
+                            {
+                                "id": "error_403_home",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/",
+                                    "className": "pb-btn pb-btn-dark"
+                                },
+                                "text": "$t:pinkbro.errors.back_to_home"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

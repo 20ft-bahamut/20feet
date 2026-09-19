@@ -7,6 +7,21 @@
         },
         "nav": {
             "home": "Home"
+        },
+        "errors": {
+            "back_to_home": "Back to Home",
+            "403": {
+                "title": "Access denied",
+                "description": "You don't have permission to access this page."
+            },
+            "404": {
+                "title": "Page not found",
+                "description": "The page you're looking for may have moved or no longer exists."
+            },
+            "500": {
+                "title": "Something went wrong",
+                "description": "Please try again in a moment."
+            }
         }
     }
 }

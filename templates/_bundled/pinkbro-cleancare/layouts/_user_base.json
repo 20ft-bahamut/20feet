@@ -1,0 +1,76 @@
+{
+    "version": "1.0.0",
+    "layout_name": "_user_base",
+    "meta": {
+        "title": "$t:pinkbro.base_layout_title",
+        "description": "$t:pinkbro.base_layout_description",
+        "is_base": true
+    },
+    "data_sources": [],
+    "components": [
+        {
+            "id": "user_layout_root",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+                "className": "user-layout-root"
+            },
+            "style": {
+                "minHeight": "100vh",
+                "display": "flex",
+                "flexDirection": "column",
+                "backgroundColor": "var(--pb-bg, #ffffff)",
+                "color": "var(--pb-ink, #161922)"
+            },
+            "children": [
+                {
+                    "comment": "=== Site Header === data_source 는 base 가 소유하지 않는다 — home 레이아웃이 선언한 pinkbro_site / pinkbro_media 를 페이지 스코프에서 바인딩한다(중복 fetch 방지).",
+                    "id": "site_header",
+                    "type": "composite",
+                    "name": "SiteHeader",
+                    "props": {
+                        "site": "{{pinkbro_site?.data ?? null}}",
+                        "media": "{{pinkbro_media?.data ?? null}}"
+                    }
+                },
+                {
+                    "comment": "=== Main Content Slot ===",
+                    "id": "main_content_area",
+                    "type": "basic",
+                    "name": "Div",
+                    "style": {
+                        "flex": "1 1 auto"
+                    },
+                    "children": [
+                        {
+                            "id": "main_content",
+                            "type": "basic",
+                            "name": "Div",
+                            "slot": "content",
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "comment": "=== Site Footer ===",
+                    "id": "site_footer",
+                    "type": "composite",
+                    "name": "SiteFooter",
+                    "props": {
+                        "site": "{{pinkbro_site?.data ?? null}}",
+                        "copy": "{{pinkbro_copy?.data ?? null}}"
+                    }
+                },
+                {
+                    "comment": "=== Mobile Bottom Bar ===",
+                    "id": "mobile_bar",
+                    "type": "composite",
+                    "name": "MobileBar",
+                    "props": {
+                        "site": "{{pinkbro_site?.data ?? null}}"
+                    }
+                }
+            ]
+        }
+    ]
+}
