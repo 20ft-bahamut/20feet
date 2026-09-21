@@ -1,0 +1,405 @@
+{
+  "version": "1.0.0",
+  "layout_name": "admin_content_form",
+  "permissions": [
+    "pinkbro-contents.content.read"
+  ],
+  "extends": "_admin_base",
+  "meta": {
+    "title": "{{route.id ? '$t:pinkbro-contents.menu.content_edit' : '$t:pinkbro-contents.menu.content_create'}}"
+  },
+  "state": {
+    "isSaving": false,
+    "errors": null
+  },
+  "init_actions": [
+    {
+      "comment": "생성 모드 도메인별 폼 기본값 — SPEC §4.5 키 집합. 수정 모드는 data_sources.content.initLocal 이 단건 응답으로 덮어쓴다.",
+      "handler": "setState",
+      "if": "{{!route.id && route.domain === 'service'}}",
+      "params": {
+        "target": "_local",
+        "form": {
+          "slug": "",
+          "title": "",
+          "tag": "",
+          "summary": "",
+          "base_price": "",
+          "criteria": "",
+          "extra_note": "",
+          "photo_slot": "",
+          "air_types": [],
+          "sort": 0,
+          "is_visible": true
+        }
+      }
+    },
+    {
+      "handler": "setState",
+      "if": "{{!route.id && route.domain === 'package'}}",
+      "params": {
+        "target": "_local",
+        "form": {
+          "title": "",
+          "summary": "",
+          "includes": [],
+          "base_total": "",
+          "price": "",
+          "discount_rate": 0,
+          "is_featured": false,
+          "sort": 0
+        }
+      }
+    },
+    {
+      "handler": "setState",
+      "if": "{{!route.id && route.domain === 'case'}}",
+      "params": {
+        "target": "_local",
+        "form": {
+          "title": "",
+          "summary": "",
+          "blog_url": "",
+          "cover_slot": "",
+          "sort": 0
+        }
+      }
+    },
+    {
+      "handler": "setState",
+      "if": "{{!route.id && route.domain === 'faq'}}",
+      "params": {
+        "target": "_local",
+        "form": {
+          "question": "",
+          "answer": "",
+          "sort": 0
+        }
+      }
+    }
+  ],
+  "data_sources": [
+    {
+      "id": "content",
+      "label_key": "$t:pinkbro-contents.menu.content",
+      "type": "api",
+      "endpoint": "/api/modules/pinkbro-contents/admin/{{route.domain}}/{{route.id}}",
+      "method": "GET",
+      "if": "{{!!route.id}}",
+      "initLocal": {
+        "form": "{{data}}"
+      },
+      "auto_fetch": true,
+      "auth_mode": "required",
+      "cache": false,
+      "refetchOnMount": true,
+      "loading_strategy": "blocking",
+      "errorHandling": {
+        "403": {
+          "handler": "showErrorPage",
+          "params": {
+            "target": "content"
+          }
+        },
+        "404": {
+          "handler": "showErrorPage",
+          "params": {
+            "target": "content"
+          }
+        }
+      }
+    }
+  ],
+  "slots": {
+    "content": [
+      {
+        "id": "content_form_wrapper",
+        "type": "basic",
+        "name": "Div",
+        "props": {
+          "className": "admin-page-content"
+        },
+        "children": [
+          {
+            "id": "page_header",
+            "type": "composite",
+            "name": "PageHeader",
+            "props": {
+              "title": "{{route.id ? '$t:pinkbro-contents.menu.content_edit' : '$t:pinkbro-contents.menu.content_create'}}",
+              "description": "{{route.domain === 'service' ? '서비스' : route.domain === 'package' ? '패키지' : route.domain === 'case' ? '사례' : 'FAQ'}}"
+            },
+            "children": [
+              {
+                "id": "cancel_button",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/{{route.domain}}",
+                  "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                },
+                "text": "$t:common.cancel"
+              },
+              {
+                "id": "save_button",
+                "type": "basic",
+                "name": "Button",
+                "props": {
+                  "disabled": "{{_local.isSaving}}",
+                  "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Span",
+                    "text": "{{_local.isSaving ? '$t:common.saving' : '$t:common.save'}}"
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "click",
+                    "handler": "sequence",
+                    "params": {
+                      "actions": [
+                        {
+                          "handler": "setState",
+                          "params": {
+                            "target": "_local",
+                            "isSaving": true,
+                            "errors": null
+                          }
+                        },
+                        {
+                          "handler": "apiCall",
+                          "auth_mode": "required",
+                          "target": "{{route.id ? '/api/modules/pinkbro-contents/admin/' + route.domain + '/' + route.id : '/api/modules/pinkbro-contents/admin/' + route.domain}}",
+                          "params": {
+                            "method": "{{route.id ? 'PUT' : 'POST'}}",
+                            "body": "{{_local.form}}"
+                          },
+                          "onSuccess": [
+                            {
+                              "handler": "setState",
+                              "params": {
+                                "target": "_local",
+                                "isSaving": false
+                              }
+                            },
+                            {
+                              "handler": "toast",
+                              "params": {
+                                "type": "success",
+                                "message": "{{route.id ? '수정했습니다.' : '생성했습니다.'}}"
+                              }
+                            },
+                            {
+                              "handler": "navigate",
+                              "params": {
+                                "path": "/admin/pinkbro-contents/content/{{route.domain}}",
+                                "mergeQuery": true,
+                                "query": {}
+                              }
+                            }
+                          ],
+                          "onError": [
+                            {
+                              "handler": "setState",
+                              "params": {
+                                "target": "_local",
+                                "isSaving": false,
+                                "errors": "{{error.errors}}"
+                              }
+                            },
+                            {
+                              "handler": "toast",
+                              "params": {
+                                "type": "error",
+                                "message": "{{error.message || '$t:common.validation_error'}}"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "validation_error_banner",
+            "type": "basic",
+            "name": "Div",
+            "if": "{{_local.errors}}",
+            "props": {
+              "className": "mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex gap-2"
+            },
+            "children": [
+              {
+                "type": "basic",
+                "name": "Icon",
+                "props": {
+                  "name": "triangle-exclamation",
+                  "size": "sm",
+                  "className": "text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5"
+                }
+              },
+              {
+                "type": "basic",
+                "name": "Div",
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "H3",
+                    "props": {
+                      "className": "text-sm font-semibold text-red-700 dark:text-red-400"
+                    },
+                    "text": "$t:common.validation_error"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Ul",
+                    "if": "{{typeof _local.errors === 'object'}}",
+                    "props": {
+                      "className": "mt-2 list-disc list-inside space-y-1"
+                    },
+                    "iteration": {
+                      "source": "Object.entries(_local.errors ?? {}).flatMap(([field, messages]) => Array.isArray(messages) ? messages : [messages])",
+                      "item_var": "message"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Li",
+                        "props": {
+                          "className": "text-xs text-red-600 dark:text-red-400"
+                        },
+                        "text": "{{message}}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "partial": "partials/admin_content_form/_field_group_service.json"
+          },
+          {
+            "partial": "partials/admin_content_form/_field_group_package.json"
+          },
+          {
+            "partial": "partials/admin_content_form/_field_group_case.json"
+          },
+          {
+            "partial": "partials/admin_content_form/_field_group_faq.json"
+          },
+          {
+            "id": "form_footer_actions",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mt-6 flex justify-end gap-2"
+            },
+            "children": [
+              {
+                "id": "cancel_button_bottom",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/{{route.domain}}",
+                  "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                },
+                "text": "$t:common.cancel"
+              },
+              {
+                "id": "save_button_bottom",
+                "type": "basic",
+                "name": "Button",
+                "props": {
+                  "type": "button",
+                  "disabled": "{{_local.isSaving}}",
+                  "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Span",
+                    "text": "{{_local.isSaving ? '$t:common.saving' : '$t:common.save'}}"
+                  }
+                ],
+                "actions": [
+                  {
+                    "type": "click",
+                    "handler": "sequence",
+                    "params": {
+                      "actions": [
+                        {
+                          "handler": "setState",
+                          "params": {
+                            "target": "_local",
+                            "isSaving": true,
+                            "errors": null
+                          }
+                        },
+                        {
+                          "handler": "apiCall",
+                          "auth_mode": "required",
+                          "target": "{{route.id ? '/api/modules/pinkbro-contents/admin/' + route.domain + '/' + route.id : '/api/modules/pinkbro-contents/admin/' + route.domain}}",
+                          "params": {
+                            "method": "{{route.id ? 'PUT' : 'POST'}}",
+                            "body": "{{_local.form}}"
+                          },
+                          "onSuccess": [
+                            {
+                              "handler": "setState",
+                              "params": {
+                                "target": "_local",
+                                "isSaving": false
+                              }
+                            },
+                            {
+                              "handler": "toast",
+                              "params": {
+                                "type": "success",
+                                "message": "{{route.id ? '수정했습니다.' : '생성했습니다.'}}"
+                              }
+                            },
+                            {
+                              "handler": "navigate",
+                              "params": {
+                                "path": "/admin/pinkbro-contents/content/{{route.domain}}",
+                                "mergeQuery": true,
+                                "query": {}
+                              }
+                            }
+                          ],
+                          "onError": [
+                            {
+                              "handler": "setState",
+                              "params": {
+                                "target": "_local",
+                                "isSaving": false,
+                                "errors": "{{error.errors}}"
+                              }
+                            },
+                            {
+                              "handler": "toast",
+                              "params": {
+                                "type": "error",
+                                "message": "{{error.message || '$t:common.validation_error'}}"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

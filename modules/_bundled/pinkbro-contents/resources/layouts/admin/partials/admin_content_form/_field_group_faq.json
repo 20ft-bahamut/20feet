@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "is_partial": true,
+    "description": "faq 도메인 필드 그룹 — SPEC §4.5 키: question, answer, sort"
+  },
+  "id": "field_group_faq",
+  "type": "basic",
+  "name": "Div",
+  "if": "{{route.domain === 'faq'}}",
+  "children": [
+    {
+      "id": "faq_basic_card",
+      "type": "basic",
+      "name": "Div",
+      "props": {
+        "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+      },
+      "children": [
+        {
+          "type": "basic",
+          "name": "H3",
+          "props": {
+            "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+          },
+          "text": "기본 정보"
+        },
+        {
+          "id": "field_faq_question",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "질문 (필수)"
+            },
+            {
+              "type": "basic",
+              "name": "Input",
+              "props": {
+                "type": "text",
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{_local.form.question ?? ''}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.question": "{{$event.target.value}}"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "field_faq_answer",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "답변"
+            },
+            {
+              "type": "basic",
+              "name": "Textarea",
+              "props": {
+                "rows": 5,
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{_local.form.answer ?? ''}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.answer": "{{$event.target.value}}"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "field_faq_sort",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "정렬"
+            },
+            {
+              "type": "basic",
+              "name": "Input",
+              "props": {
+                "type": "number",
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{_local.form.sort ?? 0}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.sort": "{{$event.target.value === '' ? null : Number($event.target.value)}}"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

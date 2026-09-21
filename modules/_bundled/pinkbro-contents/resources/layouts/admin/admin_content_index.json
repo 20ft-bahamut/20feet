@@ -1,0 +1,319 @@
+{
+  "version": "1.0.0",
+  "layout_name": "admin_content_index",
+  "permissions": [
+    "pinkbro-contents.content.read"
+  ],
+  "extends": "_admin_base",
+  "meta": {
+    "title": "$t:pinkbro-contents.menu.content",
+    "description": "$t:pinkbro-contents.cards.content"
+  },
+  "initGlobal": {
+    "deleteTarget": null,
+    "isDeleting": false
+  },
+  "data_sources": [
+    {
+      "id": "content_list",
+      "label_key": "$t:pinkbro-contents.menu.content",
+      "type": "api",
+      "endpoint": "/api/modules/pinkbro-contents/admin/{{route.domain}}",
+      "method": "GET",
+      "auto_fetch": true,
+      "auth_mode": "required",
+      "loading_strategy": "blocking",
+      "errorHandling": {
+        "403": {
+          "handler": "showErrorPage",
+          "params": {
+            "target": "content"
+          }
+        },
+        "404": {
+          "handler": "showErrorPage",
+          "params": {
+            "target": "content"
+          }
+        }
+      },
+      "fallback": {
+        "data": {
+          "data": [],
+          "meta": {
+            "total": 0
+          }
+        }
+      }
+    }
+  ],
+  "slots": {
+    "content": [
+      {
+        "id": "content_index_wrapper",
+        "type": "basic",
+        "name": "Div",
+        "props": {
+          "className": "admin-page-content"
+        },
+        "children": [
+          {
+            "id": "page_header",
+            "type": "composite",
+            "name": "PageHeader",
+            "props": {
+              "title": "$t:pinkbro-contents.menu.content",
+              "description": "$t:pinkbro-contents.cards.content"
+            },
+            "children": [
+              {
+                "id": "create_button",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/{{route.domain}}/create",
+                  "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors no-underline"
+                },
+                "text": "$t:pinkbro-contents.menu.content_create"
+              }
+            ]
+          },
+          {
+            "id": "domain_tabs",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "flex flex-wrap gap-2"
+            },
+            "children": [
+              {
+                "id": "tab_service",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/service",
+                  "className": "{{route.domain === 'service' ? 'px-4 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-100 dark:text-gray-900 rounded-lg no-underline' : 'px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 no-underline transition-colors'}}"
+                },
+                "text": "서비스"
+              },
+              {
+                "id": "tab_package",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/package",
+                  "className": "{{route.domain === 'package' ? 'px-4 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-100 dark:text-gray-900 rounded-lg no-underline' : 'px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 no-underline transition-colors'}}"
+                },
+                "text": "패키지"
+              },
+              {
+                "id": "tab_case",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/case",
+                  "className": "{{route.domain === 'case' ? 'px-4 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-100 dark:text-gray-900 rounded-lg no-underline' : 'px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 no-underline transition-colors'}}"
+                },
+                "text": "사례"
+              },
+              {
+                "id": "tab_faq",
+                "type": "basic",
+                "name": "A",
+                "props": {
+                  "href": "/admin/pinkbro-contents/content/faq",
+                  "className": "{{route.domain === 'faq' ? 'px-4 py-2 text-sm font-medium text-white bg-gray-800 dark:bg-gray-100 dark:text-gray-900 rounded-lg no-underline' : 'px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 no-underline transition-colors'}}"
+                },
+                "text": "FAQ"
+              }
+            ]
+          },
+          {
+            "id": "content_table",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mt-6 overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl"
+            },
+            "children": [
+              {
+                "id": "content_table_header",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-4"
+                    },
+                    "text": "{{route.domain === 'faq' ? '질문' : '제목'}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-3"
+                    },
+                    "text": "{{route.domain === 'faq' ? '답변' : '요약'}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-1"
+                    },
+                    "text": "정렬"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-2"
+                    },
+                    "text": "표시"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-2 text-right"
+                    },
+                    "text": "관리"
+                  }
+                ]
+              },
+              {
+                "id": "content_row_{{idx}}",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                  "className": "grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors items-center"
+                },
+                "iteration": {
+                  "source": "{{content_list?.data?.data ?? []}}",
+                  "item_var": "item",
+                  "index_var": "idx"
+                },
+                "children": [
+                  {
+                    "type": "basic",
+                    "name": "A",
+                    "props": {
+                      "href": "/admin/pinkbro-contents/content/{{route.domain}}/{{item.id}}/edit",
+                      "className": "col-span-4 font-medium text-gray-900 dark:text-white no-underline hover:underline"
+                    },
+                    "text": "{{item.title ?? item.question ?? ('#' + item.id)}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-3 text-gray-600 dark:text-gray-300 truncate"
+                    },
+                    "text": "{{route.domain === 'faq' ? (item.answer ?? '-') : (item.summary ?? '-')}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-1 text-gray-600 dark:text-gray-300"
+                    },
+                    "text": "{{item.sort ?? 0}}"
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-2"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "Span",
+                        "props": {
+                          "className": "{{route.domain === 'service' && item.is_visible === true ? 'px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 rounded' : route.domain === 'package' && item.is_featured === true ? 'px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded' : 'px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 rounded'}}"
+                        },
+                        "text": "{{route.domain === 'service' ? (item.is_visible === true ? '표시' : '숨김') : route.domain === 'package' ? (item.is_featured === true ? '추천' : '-') : '-'}}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "basic",
+                    "name": "Div",
+                    "props": {
+                      "className": "col-span-2 flex items-center justify-end gap-2"
+                    },
+                    "children": [
+                      {
+                        "type": "basic",
+                        "name": "A",
+                        "props": {
+                          "href": "/admin/pinkbro-contents/content/{{route.domain}}/{{item.id}}/edit",
+                          "className": "px-2 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 no-underline"
+                        },
+                        "text": "$t:common.edit"
+                      },
+                      {
+                        "id": "row_delete_button_{{idx}}",
+                        "type": "basic",
+                        "name": "Button",
+                        "props": {
+                          "type": "button",
+                          "className": "px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30 rounded hover:bg-red-100 dark:hover:bg-red-900/50"
+                        },
+                        "text": "$t:common.delete",
+                        "actions": [
+                          {
+                            "type": "click",
+                            "handler": "sequence",
+                            "params": {
+                              "actions": [
+                                {
+                                  "handler": "setState",
+                                  "params": {
+                                    "target": "global",
+                                    "deleteTarget": {
+                                      "id": "{{item.id}}",
+                                      "name": "{{item.title ?? item.question ?? ('#' + item.id)}}"
+                                    }
+                                  }
+                                },
+                                {
+                                  "handler": "openModal",
+                                  "target": "modal_delete_confirm"
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "empty_state",
+            "type": "basic",
+            "name": "Div",
+            "props": {
+              "className": "mt-8 p-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl"
+            },
+            "if": "{{(content_list?.data?.data ?? []).length === 0}}",
+            "text": "등록된 콘텐츠가 없습니다."
+          }
+        ]
+      }
+    ]
+  },
+  "modals": [
+    {
+      "partial": "partials/admin_content_index/_modal_delete_confirm.json"
+    }
+  ]
+}

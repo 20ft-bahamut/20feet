@@ -1,0 +1,361 @@
+{
+  "meta": {
+    "is_partial": true,
+    "description": "package 도메인 필드 그룹 — SPEC §4.5 키: title, summary, includes, base_total, price, discount_rate, is_featured, sort"
+  },
+  "id": "field_group_package",
+  "type": "basic",
+  "name": "Div",
+  "if": "{{route.domain === 'package'}}",
+  "children": [
+    {
+      "id": "package_basic_card",
+      "type": "basic",
+      "name": "Div",
+      "props": {
+        "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+      },
+      "children": [
+        {
+          "type": "basic",
+          "name": "H3",
+          "props": {
+            "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+          },
+          "text": "기본 정보"
+        },
+        {
+          "id": "field_package_title",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "제목 (필수)"
+            },
+            {
+              "type": "basic",
+              "name": "Input",
+              "props": {
+                "type": "text",
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{_local.form.title ?? ''}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.title": "{{$event.target.value}}"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "field_package_summary",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "요약"
+            },
+            {
+              "type": "basic",
+              "name": "Textarea",
+              "props": {
+                "rows": 3,
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{_local.form.summary ?? ''}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.summary": "{{$event.target.value}}"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "field_package_includes",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "space-y-1"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+              },
+              "text": "포함 항목"
+            },
+            {
+              "type": "basic",
+              "name": "Textarea",
+              "props": {
+                "rows": 5,
+                "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                "value": "{{(_local.form.includes ?? []).join('\n')}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.includes": "{{$event.target.value.split('\n').filter(l => l.trim() !== '')}}"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "basic",
+              "name": "P",
+              "props": {
+                "className": "text-xs text-gray-500 dark:text-gray-400"
+              },
+              "text": "한 줄에 항목 하나씩 입력합니다."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "package_price_card",
+      "type": "basic",
+      "name": "Div",
+      "props": {
+        "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+      },
+      "children": [
+        {
+          "type": "basic",
+          "name": "H3",
+          "props": {
+            "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+          },
+          "text": "가격·표시"
+        },
+        {
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+          },
+          "children": [
+            {
+              "id": "field_package_base_total",
+              "type": "basic",
+              "name": "Div",
+              "props": {
+                "className": "space-y-1"
+              },
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "Label",
+                  "props": {
+                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                  },
+                  "text": "정가"
+                },
+                {
+                  "type": "basic",
+                  "name": "Input",
+                  "props": {
+                    "type": "text",
+                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                    "value": "{{_local.form.base_total ?? ''}}"
+                  },
+                  "actions": [
+                    {
+                      "type": "change",
+                      "handler": "setState",
+                      "params": {
+                        "target": "_local",
+                        "form.base_total": "{{$event.target.value}}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "field_package_price",
+              "type": "basic",
+              "name": "Div",
+              "props": {
+                "className": "space-y-1"
+              },
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "Label",
+                  "props": {
+                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                  },
+                  "text": "가격"
+                },
+                {
+                  "type": "basic",
+                  "name": "Input",
+                  "props": {
+                    "type": "text",
+                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                    "value": "{{_local.form.price ?? ''}}"
+                  },
+                  "actions": [
+                    {
+                      "type": "change",
+                      "handler": "setState",
+                      "params": {
+                        "target": "_local",
+                        "form.price": "{{$event.target.value}}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "field_package_discount_rate",
+              "type": "basic",
+              "name": "Div",
+              "props": {
+                "className": "space-y-1"
+              },
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "Label",
+                  "props": {
+                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                  },
+                  "text": "할인율 (%)"
+                },
+                {
+                  "type": "basic",
+                  "name": "Input",
+                  "props": {
+                    "type": "number",
+                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                    "value": "{{_local.form.discount_rate ?? 0}}"
+                  },
+                  "actions": [
+                    {
+                      "type": "change",
+                      "handler": "setState",
+                      "params": {
+                        "target": "_local",
+                        "form.discount_rate": "{{$event.target.value === '' ? null : Number($event.target.value)}}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "field_package_sort",
+              "type": "basic",
+              "name": "Div",
+              "props": {
+                "className": "space-y-1"
+              },
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "Label",
+                  "props": {
+                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                  },
+                  "text": "정렬"
+                },
+                {
+                  "type": "basic",
+                  "name": "Input",
+                  "props": {
+                    "type": "number",
+                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
+                    "value": "{{_local.form.sort ?? 0}}"
+                  },
+                  "actions": [
+                    {
+                      "type": "change",
+                      "handler": "setState",
+                      "params": {
+                        "target": "_local",
+                        "form.sort": "{{$event.target.value === '' ? null : Number($event.target.value)}}"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "field_package_is_featured",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "flex-center gap-2"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Input",
+              "props": {
+                "type": "checkbox",
+                "className": "checkbox-aligned",
+                "checked": "{{_local.form.is_featured === true}}"
+              },
+              "actions": [
+                {
+                  "type": "change",
+                  "handler": "setState",
+                  "params": {
+                    "target": "_local",
+                    "form.is_featured": "{{!_local.form.is_featured}}"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "basic",
+              "name": "Label",
+              "props": {
+                "className": "text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+              },
+              "text": "추천"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
