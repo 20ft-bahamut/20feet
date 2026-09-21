@@ -1,6 +1,6 @@
 import React from 'react';
 import { templateAsset } from '../lib/templateAsset';
-import type { MediaSlots, SiteData } from '../lib/types';
+import type { CopyData, MediaSlots, SiteData } from '../lib/types';
 import '../styles/SiteHeader.css';
 
 /**
@@ -9,17 +9,16 @@ import '../styles/SiteHeader.css';
  */
 const NAV_ITEMS = ['about', 'service', 'package', 'pricing', 'projects', 'faq', 'estimate'] as const;
 
-/**
- * 소스 원문 헤더 CTA 라벨(source/body.html 원문 이식).
- * 컴포넌트 리터럴이 아니라 소스 카피 이관 값이다 — 관리자 copy 로 옮길 수
- * 있게 optional props 로도 받는다(기본값은 소스 원문).
- */
 export interface SiteHeaderProps {
   site: SiteData | null;
   media: MediaSlots | null;
-  /** CTA 라벨 오버라이드(생략 시 소스 원문 라벨 사용) */
-  estimateLabel?: string;
-  mobileEstimateLabel?: string;
+  /**
+   * 페이지 카피(null = 아직 로딩 중). CTA 라벨은 원문 그대로 copy 도메인에서 온다 —
+   * 데스크톱 CTA 는 `header_cta`(원문 15행), 좁은 화면용 `.mobile-link` 는
+   * `mobile_cta_estimate`(원문 16행, 모바일바 498행과 같은 문자열)다.
+   * 값이 없으면 그 링크만 조용히 생략한다(리터럴 대체 금지).
+   */
+  copy: CopyData | null;
 }
 
 /**
@@ -39,9 +38,9 @@ export function telHref(phone: string | null | undefined): string {
  * (스펙 5.4 — templateAsset('images/brand-logo.webp')). `media` 는 계약
  * 유지를 위해 받지만 로고에는 쓰지 않는다.
  */
-export function SiteHeader({ site, media: _media, estimateLabel, mobileEstimateLabel }: SiteHeaderProps): React.ReactElement {
-  const estimate = estimateLabel ?? '간편견적 문의';
-  const mobileEstimate = mobileEstimateLabel ?? '간편견적';
+export function SiteHeader({ site, media: _media, copy }: SiteHeaderProps): React.ReactElement {
+  const estimate = copy?.header_cta ?? null;
+  const mobileEstimate = copy?.mobile_cta_estimate ?? null;
 
   return (
     <header className="pb-header" data-testid="pb-header">
@@ -68,12 +67,16 @@ export function SiteHeader({ site, media: _media, estimateLabel, mobileEstimateL
               {site.phone}
             </a>
           ) : null}
-          <a className="pb-btn pb-btn--dark" href="#estimate">
-            {estimate}
-          </a>
-          <a className="pb-mobile-link" href="#estimate">
-            {mobileEstimate}
-          </a>
+          {estimate !== null && (
+            <a className="pb-btn pb-btn--dark" data-testid="header-cta" href="#estimate">
+              {estimate}
+            </a>
+          )}
+          {mobileEstimate !== null && (
+            <a className="pb-mobile-link" data-testid="header-mobile-cta" href="#estimate">
+              {mobileEstimate}
+            </a>
+          )}
         </div>
       </div>
     </header>

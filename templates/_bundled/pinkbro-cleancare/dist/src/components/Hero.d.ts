@@ -17,9 +17,10 @@ export declare function renderCopyText(text: string): React.ReactNode[];
  *   - `media.hero_main.url` 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
  *   - URL 있음 → <img>
  *
- * 원문 hero-actions(CTA 2개: `간편견적 문의하기` / `가격 · 예상견적 보기`)와
- * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인에 키가 없어 렌더하지 않는다 —
- * 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
+ * 원문 hero-actions(CTA 2개 — `간편견적 문의하기` / `가격 · 예상견적 보기`)와
+ * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인 키
+ * (hero_cta_primary / hero_cta_secondary / hero_visual_message_label)로 배선됐다.
+ * 값이 없으면 그 CTA·라벨만 조용히 생략한다 — 리터럴로 대체하지 않는다.
  */
 export declare function Hero({ site, copy, media }: HeroProps): React.ReactElement;
 export default Hero;

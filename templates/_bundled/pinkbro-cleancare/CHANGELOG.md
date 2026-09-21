@@ -8,6 +8,9 @@
 
 ### Fixed
 
+- **`#package` 섹션 패딩 누락.** 원문 `section { padding:110px 0 }`(source/styles.css 63행,
+  720px 이하 82px — 310행)이 이 섹션 루트에만 빠져 있어 섹션 높이가 원문보다 220px 짧았다
+  (1233 vs 1453). `.pb-packages` 에 같은 규칙·같은 중단점 구조를 추가해 1453 으로 일치했다.
 - **중복 렌더 제거 — 동시작업 할인 표.** 원문 `#pricing`(body.html 247~321행)에는 할인 표가
   없고 표는 `#package` 의 `.benefit-box`(229~243행)에만 있습니다. `PriceDiscount` 가
   `discount` 데이터로 표를 한 번 더 그리던 렌더를 제거하고, 그 때문에 필요했던 `steps` prop
@@ -17,18 +20,27 @@
 
 ### Added
 
-- **원문에만 있던 문구 30키 복원** — 모듈 `copy` 도메인에 키가 없어 렌더되지 않던 눈금·
-  라벨·CTA 를 시더에 추가하고 전부 배선했습니다(45키 → 75키): `about_stage_eyebrow`,
-  `about_side_eyebrow`, `service_eyebrow`, `extra_box_cta`, `package_stage_eyebrow`,
-  `package_a_label`·`package_b_label`·`package_c_label`, `package_{a,b,c}_note`(+`_sub`),
-  `benefit_eyebrow`, `pricing_eyebrow`, `pricing_notice_label`, `estimator_eyebrow`,
-  `estimator_air_label`, `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
-  `estimator_row_discount_amount`, `estimator_summary_total_label`, `estimator_cta_submit`,
-  `estimator_cta_kakao`, `faq_eyebrow`, `projects_eyebrow`, `projects_card_kicker`,
-  `projects_link_label`. 값은 전부 원문 `body.html` 그대로입니다.
+- **원문에만 있던 문구 37키 복원** — 모듈 `copy` 도메인에 키가 없어 렌더되지 않던 눈금·
+  라벨·CTA 를 시더에 추가하고 전부 배선했습니다(45키 → 82키).
+  - 1차 30키: `about_stage_eyebrow`, `about_side_eyebrow`, `service_eyebrow`,
+    `extra_box_cta`, `package_stage_eyebrow`, `package_a_label`·`package_b_label`·
+    `package_c_label`, `package_{a,b,c}_note`(+`_sub`), `benefit_eyebrow`, `pricing_eyebrow`,
+    `pricing_notice_label`, `estimator_eyebrow`, `estimator_air_label`,
+    `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
+    `estimator_row_discount_amount`, `estimator_summary_total_label`, `estimator_cta_submit`,
+    `estimator_cta_kakao`, `faq_eyebrow`, `projects_eyebrow`, `projects_card_kicker`,
+    `projects_link_label`.
+  - 2차 7키: `hero_cta_primary`·`hero_cta_secondary` — 히어로의 CTA 2개입니다. 이 키가
+    없던 동안 히어로에는 **행동 유도 수단이 하나도 없었습니다**(원문 32·33행).
+    `hero_visual_message_label`(원문 53행 `BRAND MESSAGE`), `header_cta`(원문 15행),
+    `mobile_cta_estimate`·`mobile_cta_phone`·`mobile_cta_kakao`(원문 16·497~499행).
+    값은 전부 원문 `body.html` 그대로입니다.
 - 문구가 없을 때의 계약은 그대로입니다 — 키가 `null` 이면 각 컴포넌트가 그 문구를
-  조용히 생략하고, 리터럴로 대체하지 않습니다. 컴포넌트·레이아웃 테스트가 복원된 문구의
-  렌더와 미렌더를 각각 검증합니다. 테스트 17 파일 / 233개.
+  조용히 생략하고, 리터럴로 대체하지 않습니다. `SiteHeader`·`MobileBar` 의 라벨
+  기본값 리터럴은 제거하고 두 컴포넌트가 `copy` 페이로드를 받도록 바꿨습니다
+  (`SiteFooter` 와 같은 방식, `_user_base.json` 이 바인딩).
+- 컴포넌트·레이아웃 테스트가 복원된 문구의 렌더와 미렌더를 각각 검증하고,
+  `.pb-packages` 패딩 회귀를 CSS 검사로 막습니다. 테스트 17 파일 / 241개.
 
 ## [0.1.0] - 2026-09-19
 

@@ -55,9 +55,10 @@ export function renderCopyText(text: string): React.ReactNode[] {
  *   - `media.hero_main.url` 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
  *   - URL 있음 → <img>
  *
- * 원문 hero-actions(CTA 2개: `간편견적 문의하기` / `가격 · 예상견적 보기`)와
- * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인에 키가 없어 렌더하지 않는다 —
- * 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
+ * 원문 hero-actions(CTA 2개 — `간편견적 문의하기` / `가격 · 예상견적 보기`)와
+ * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인 키
+ * (hero_cta_primary / hero_cta_secondary / hero_visual_message_label)로 배선됐다.
+ * 값이 없으면 그 CTA·라벨만 조용히 생략한다 — 리터럴로 대체하지 않는다.
  */
 export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
     if (site === null || copy === null) {
@@ -78,11 +79,14 @@ export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
     const headline = copy.hero_headline ?? '';
     const lead = copy.hero_lead;
     const pills = copy.hero_pills;
+    const ctaPrimary = copy.hero_cta_primary;
+    const ctaSecondary = copy.hero_cta_secondary;
     const heroSlot = media?.hero_main ?? null;
     const slotUrl = heroSlot?.url ?? null;
 
     // visual 라벨은 copy 원문이 우선이고, 없으면 기존 사이트 영문명으로 폴백한다.
     const visualLabel = copy.hero_visual_label ?? site.brand_name_en;
+    const visualMessageLabel = copy.hero_visual_message_label;
     const brandMessage = copy.hero_visual_brand_message ?? site.tagline;
     const visualBody = copy.hero_visual_body;
     const scope = copy.hero_scope;
@@ -106,6 +110,28 @@ export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
                                     <P className="pb-lead" style={{ marginTop: 24 }}>
                                         {renderCopyText(lead)}
                                     </P>
+                                )}
+                                {(ctaPrimary || ctaSecondary) && (
+                                    <Div className="pb-hero-actions" data-testid="hero-actions">
+                                        {ctaPrimary && (
+                                            <a
+                                                className="pb-btn pb-hero-cta--primary"
+                                                data-testid="hero-cta-primary"
+                                                href="#estimate"
+                                            >
+                                                {ctaPrimary}
+                                            </a>
+                                        )}
+                                        {ctaSecondary && (
+                                            <a
+                                                className="pb-btn pb-hero-cta--soft"
+                                                data-testid="hero-cta-secondary"
+                                                href="#pricing"
+                                            >
+                                                {ctaSecondary}
+                                            </a>
+                                        )}
+                                    </Div>
                                 )}
                                 {Array.isArray(pills) && pills.length > 0 && (
                                     <Div className="pb-hero-pills" data-testid="hero-pills">
@@ -147,6 +173,11 @@ export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
                             {(brandMessage || visualBody) && (
                                 <Div className="pb-hero-visual-bottom">
                                     <div>
+                                        {visualMessageLabel && (
+                                            <span data-testid="hero-visual-message-label">
+                                                {visualMessageLabel}
+                                            </span>
+                                        )}
                                         {brandMessage && <b>{renderCopyText(brandMessage)}</b>}
                                     </div>
                                     {visualBody && (

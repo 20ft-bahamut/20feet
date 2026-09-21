@@ -28,9 +28,12 @@ const copy: CopyData = {
   hero_lead: null,
   hero_pills: null,
   hero_visual_label: null,
+  hero_visual_message_label: null,
   hero_visual_brand_message: null,
   hero_visual_body: null,
   hero_scope: null,
+  hero_cta_primary: null,
+  hero_cta_secondary: null,
   about_heading: null,
   about_message: null,
   about_side_heading: null,
@@ -99,6 +102,10 @@ const copy: CopyData = {
   estimate_panel_note: null,
   footer_text: '더미 푸터 문구',
   footer_brand_desc: '더미 브랜드 소개',
+  header_cta: '간편견적 문의',
+  mobile_cta_estimate: '간편견적',
+  mobile_cta_phone: '전화상담',
+  mobile_cta_kakao: '카카오문의',
 };
 
 describe('telHref', () => {
@@ -118,7 +125,7 @@ describe('telHref', () => {
 
 describe('SiteHeader', () => {
   it('renders the brand logo from the template asset', () => {
-    render(<SiteHeader site={site} media={null} />);
+    render(<SiteHeader site={site} media={null} copy={copy} />);
     const logo = screen.getByRole('img', { name: /핑크브로클린케어/ });
     expect(logo.getAttribute('src')).toContain(
       '/api/templates/assets/pinkbro-cleancare?file=images/brand-logo.webp',
@@ -126,14 +133,14 @@ describe('SiteHeader', () => {
   });
 
   it('nav links point at the source anchors', () => {
-    render(<SiteHeader site={site} media={null} />);
+    render(<SiteHeader site={site} media={null} copy={copy} />);
     for (const id of ['about', 'service', 'package', 'pricing', 'projects', 'faq', 'estimate']) {
       expect(screen.getByRole('link', { name: id })).toHaveAttribute('href', `#${id}`);
     }
   });
 
   it('phone link strips hyphens for tel:', () => {
-    render(<SiteHeader site={site} media={null} />);
+    render(<SiteHeader site={site} media={null} copy={copy} />);
     expect(screen.getByRole('link', { name: '010-4348-8158' })).toHaveAttribute(
       'href',
       'tel:01043488158',
@@ -141,8 +148,31 @@ describe('SiteHeader', () => {
   });
 
   it('renders with a null site without crashing (nav anchors stay)', () => {
-    render(<SiteHeader site={null} media={null} />);
+    render(<SiteHeader site={null} media={null} copy={null} />);
     expect(screen.getByRole('link', { name: 'about' })).toHaveAttribute('href', '#about');
+  });
+
+  it('takes both CTAs from the copy domain (header_cta / mobile_cta_estimate)', () => {
+    render(<SiteHeader site={site} media={null} copy={copy} />);
+    expect(screen.getByTestId('header-cta')).toHaveTextContent('간편견적 문의');
+    expect(screen.getByTestId('header-cta')).toHaveAttribute('href', '#estimate');
+    expect(screen.getByTestId('header-mobile-cta')).toHaveTextContent('간편견적');
+    expect(screen.getByTestId('header-mobile-cta')).toHaveAttribute('href', '#estimate');
+  });
+
+  it('omits a CTA whose copy key is null — 리터럴로 대체하지 않는다', () => {
+    render(
+      <SiteHeader
+        site={site}
+        media={null}
+        copy={{ ...copy, header_cta: null, mobile_cta_estimate: null }}
+      />,
+    );
+    expect(screen.queryByTestId('header-cta')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('header-mobile-cta')).not.toBeInTheDocument();
+    // 헤더 자체와 전화 링크는 남는다
+    expect(screen.getByTestId('pb-header')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '010-4348-8158' })).toBeInTheDocument();
   });
 });
 
@@ -189,7 +219,7 @@ describe('SiteFooter', () => {
 
 describe('MobileBar', () => {
   it('exposes phone, estimate and kakao actions', () => {
-    render(<MobileBar site={site} />);
+    render(<MobileBar site={site} copy={copy} />);
     expect(screen.getByRole('link', { name: /전화상담/ })).toHaveAttribute('href', 'tel:01043488158');
     expect(screen.getByRole('link', { name: /카카오문의/ })).toHaveAttribute(
       'href',
@@ -198,8 +228,29 @@ describe('MobileBar', () => {
     expect(screen.getByRole('link', { name: /간편견적/ })).toHaveAttribute('href', '#estimate');
   });
 
-  it('renders with a null site without crashing', () => {
-    render(<MobileBar site={null} />);
+  it('renders with a null site without crashing (labels still from copy)', () => {
+    render(<MobileBar site={null} copy={copy} />);
     expect(screen.getByRole('link', { name: /간편견적/ })).toHaveAttribute('href', '#estimate');
+  });
+
+  it('takes every label from the copy domain (mobile_cta_*)', () => {
+    render(<MobileBar site={site} copy={copy} />);
+    expect(screen.getByRole('link', { name: '전화상담' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '간편견적' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '카카오문의' })).toBeInTheDocument();
+  });
+
+  it('omits each action whose copy key is null — 리터럴로 대체하지 않는다', () => {
+    render(
+      <MobileBar
+        site={site}
+        copy={{ ...copy, mobile_cta_phone: null, mobile_cta_estimate: null, mobile_cta_kakao: null }}
+      />,
+    );
+    // 카카오는 채널이 있어도 라벨이 없으면 렌더하지 않는다
+    expect(screen.queryByRole('link', { name: '전화상담' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: '간편견적' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: '카카오문의' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('pb-mobile-bar')).toBeInTheDocument();
   });
 });

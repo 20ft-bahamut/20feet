@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { PackageList } from '../../src/components/PackageList';
+
+const css = (): string =>
+  readFileSync(join(__dirname, '..', '..', 'src', 'styles', 'PackageList.css'), 'utf8');
 
 const items = [
   {
@@ -312,5 +317,15 @@ describe('PackageList', () => {
     );
     expect(screen.getByTestId('package-stage-fallback')).toBeInTheDocument();
     expect(screen.queryByTestId('package-stage-media')).not.toBeInTheDocument();
+  });
+
+  it('keeps the source section padding on the package root (원문 section { padding:110px 0 })', () => {
+    const source = css();
+    // 원문 source/styles.css 63행 — 다른 섹션과 같은 규칙. 이 섹션만 빠져 높이가 220px 짧았다.
+    expect(source).toMatch(/\.pb-packages\s*{\s*padding:\s*110px 0;\s*}/);
+    // 원문 310행 @media (max-width:720px) { section { padding:82px 0 } }
+    expect(source).toMatch(
+      /@media \(max-width: 720px\)[\s\S]*?\.pb-packages\s*{\s*padding:\s*82px 0;\s*}/,
+    );
   });
 });

@@ -7,6 +7,13 @@
  * 원문의 Unsplash 스톡 배경은 제거하고(스펙 §8), 슬롯 URL → 중립 CSS 폴백으로 대체한다.
  */
 
+/* 원문 section { padding:110px 0 } (source/styles.css 63행) — #package 섹션 스코프.
+   다른 섹션(about / service / pricing / faq / projects / estimate)도 같은 규칙을
+   각자의 루트 클래스에 갖고 있다. 이 섹션만 빠져 있어 높이가 220px 짧았다. */
+.pb-packages {
+  padding: 110px 0;
+}
+
 .pb-package-stage {
   position: relative;
   overflow: hidden;
@@ -327,6 +334,11 @@
 }
 
 @media (max-width: 720px) {
+  /* 원문 @media (max-width:720px) { section { padding:82px 0 } } (310행) */
+  .pb-packages {
+    padding: 82px 0;
+  }
+
   .pb-package-stage {
     border-radius: 24px;
   }

@@ -125,12 +125,16 @@ describe('base layout — 구조', () => {
         expect(header.props).toEqual({
             site: '{{pinkbro_site?.data ?? null}}',
             media: '{{pinkbro_media?.data ?? null}}',
+            copy: '{{pinkbro_copy?.data ?? null}}',
         });
         expect(footer.props).toEqual({
             site: '{{pinkbro_site?.data ?? null}}',
             copy: '{{pinkbro_copy?.data ?? null}}',
         });
-        expect(mobileBar.props).toEqual({ site: '{{pinkbro_site?.data ?? null}}' });
+        expect(mobileBar.props).toEqual({
+            site: '{{pinkbro_site?.data ?? null}}',
+            copy: '{{pinkbro_copy?.data ?? null}}',
+        });
     });
 });
 
@@ -229,7 +233,7 @@ describe('layout contract — 노드 이름 · 속성 배치 · lang', () => {
 
 describe('base layout — 크롬 composite 렌더', () => {
     it('renders the chrome with the props the base binds (site present)', () => {
-        render(<SiteHeader site={site} media={null} />);
+        render(<SiteHeader site={site} media={null} copy={null} />);
         expect(screen.getByTestId('pb-header')).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /010-4348-8158/ })).toHaveAttribute(
             'href',
@@ -239,16 +243,16 @@ describe('base layout — 크롬 composite 렌더', () => {
         render(<SiteFooter site={site} copy={null} />);
         expect(screen.getByTestId('pb-footer')).toBeInTheDocument();
 
-        render(<MobileBar site={site} />);
+        render(<MobileBar site={site} copy={null} />);
         expect(screen.getByTestId('pb-mobile-bar')).toBeInTheDocument();
     });
 
     it('renders the chrome when no data source resolved (error layouts)', () => {
         render(
             <>
-                <SiteHeader site={null} media={null} />
+                <SiteHeader site={null} media={null} copy={null} />
                 <SiteFooter site={null} copy={null} />
-                <MobileBar site={null} />
+                <MobileBar site={null} copy={null} />
             </>,
         );
 

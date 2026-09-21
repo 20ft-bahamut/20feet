@@ -94,6 +94,98 @@ describe('Hero', () => {
     expect(screen.queryByTestId('hero-scope')).not.toBeInTheDocument();
   });
 
+  it('renders the two hero CTAs from the copy domain (hero_cta_primary / hero_cta_secondary)', () => {
+    render(
+      <Hero
+        site={site}
+        copy={{
+          ...copy,
+          hero_cta_primary: '간편견적 문의하기',
+          hero_cta_secondary: '가격 · 예상견적 보기',
+        }}
+        media={null}
+      />,
+    );
+
+    const primary = screen.getByTestId('hero-cta-primary');
+    expect(primary).toHaveTextContent('간편견적 문의하기');
+    expect(primary).toHaveAttribute('href', '#estimate');
+    expect(primary.tagName).toBe('A');
+    // 원문 .btn.primary — 공용 .pb-btn 위에 핑크 변형을 덮는다
+    expect(primary.className).toContain('pb-btn');
+    expect(primary.className).toContain('pb-hero-cta--primary');
+
+    const secondary = screen.getByTestId('hero-cta-secondary');
+    expect(secondary).toHaveTextContent('가격 · 예상견적 보기');
+    expect(secondary).toHaveAttribute('href', '#pricing');
+    expect(secondary.className).toContain('pb-hero-cta--soft');
+
+    // 원문 .hero-actions — CTA 가 pills 보다 먼저 온다
+    const actions = screen.getByTestId('hero-actions');
+    expect(
+      actions.compareDocumentPosition(screen.getByTestId('hero-pills')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('omits each hero CTA whose copy key is null — 리터럴로 대체하지 않는다', () => {
+    const { unmount } = render(
+      <Hero
+        site={site}
+        copy={{ ...copy, hero_cta_primary: '간편견적 문의하기', hero_cta_secondary: null }}
+        media={null}
+      />,
+    );
+    expect(screen.getByTestId('hero-cta-primary')).toBeInTheDocument();
+    expect(screen.queryByTestId('hero-cta-secondary')).not.toBeInTheDocument();
+    unmount();
+
+    render(
+      <Hero
+        site={site}
+        copy={{ ...copy, hero_cta_primary: null, hero_cta_secondary: null }}
+        media={null}
+      />,
+    );
+    // 두 키가 모두 없으면 액션 줄 자체가 남지 않는다 (리터럴 CTA 가 살아나면 여기서 깨진다)
+    expect(screen.queryByTestId('hero-actions')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('hero-cta-primary')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hero')).toBeInTheDocument();
+  });
+
+  it('renders the visual brand-message label from copy (hero_visual_message_label)', () => {
+    const { unmount } = render(
+      <Hero
+        site={site}
+        copy={{
+          ...copy,
+          hero_visual_message_label: 'BRAND MESSAGE',
+          hero_visual_brand_message: '깨끗한 공간, 더 나은 오늘',
+        }}
+        media={null}
+      />,
+    );
+    const label = screen.getByTestId('hero-visual-message-label');
+    expect(label).toHaveTextContent('BRAND MESSAGE');
+    expect(label.tagName).toBe('SPAN');
+    // 라벨이 브랜드 메시지(b) 바로 위에 온다
+    expect(
+      label.compareDocumentPosition(screen.getByText('깨끗한 공간, 더 나은 오늘')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    unmount();
+
+    render(
+      <Hero
+        site={site}
+        copy={{ ...copy, hero_visual_message_label: null, hero_visual_brand_message: '메시지' }}
+        media={null}
+      />,
+    );
+    expect(screen.queryByTestId('hero-visual-message-label')).not.toBeInTheDocument();
+    expect(screen.getByText('메시지')).toBeInTheDocument();
+  });
+
   it('renders inline <em>/<strong> markup instead of printing the tags', () => {
     const { container } = render(
       <Hero

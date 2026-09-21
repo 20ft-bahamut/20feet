@@ -577,7 +577,10 @@ describe('home layout — 섹션 composite 렌더', () => {
         hero_headline: '작은 공간에서도\n깨끗함은 타협하지 않습니다.',
         hero_lead: 'F&B 매장 전문 위생 클린케어.',
         hero_pills: ['바닥', '유리창', '후드'],
+        hero_cta_primary: '간편견적 문의하기',
+        hero_cta_secondary: '가격 · 예상견적 보기',
         hero_visual_label: null,
+        hero_visual_message_label: 'BRAND MESSAGE',
         hero_visual_brand_message: null,
         hero_visual_body: null,
         hero_scope: null,
@@ -649,6 +652,10 @@ describe('home layout — 섹션 composite 렌더', () => {
         estimate_panel_note: '사진은 카카오채널로 보내주세요.',
         footer_text: '핑크브로클린케어',
         footer_brand_desc: 'F&B 매장 전문 위생 클린케어',
+        header_cta: '간편견적 문의',
+        mobile_cta_estimate: '간편견적',
+        mobile_cta_phone: '전화상담',
+        mobile_cta_kakao: '카카오문의',
     };
 
     const services: ServiceItem[] = [

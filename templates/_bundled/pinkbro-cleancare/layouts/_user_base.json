@@ -30,7 +30,8 @@
                     "name": "SiteHeader",
                     "props": {
                         "site": "{{pinkbro_site?.data ?? null}}",
-                        "media": "{{pinkbro_media?.data ?? null}}"
+                        "media": "{{pinkbro_media?.data ?? null}}",
+                        "copy": "{{pinkbro_copy?.data ?? null}}"
                     }
                 },
                 {
@@ -67,7 +68,8 @@
                     "type": "composite",
                     "name": "MobileBar",
                     "props": {
-                        "site": "{{pinkbro_site?.data ?? null}}"
+                        "site": "{{pinkbro_site?.data ?? null}}",
+                        "copy": "{{pinkbro_copy?.data ?? null}}"
                     }
                 }
             ]

@@ -32,7 +32,7 @@ export interface HeroScopeItem {
     body: string;
 }
 /**
- * 페이지 카피 — 모듈 `pinkbro-contents` 가 COPY 도메인에 넣는 75개 키 전량.
+ * 페이지 카피 — 모듈 `pinkbro-contents` 가 COPY 도메인에 넣는 82개 키 전량.
  *
  * 값은 시더가 저장한 원문 그대로다. 개행(`\n`, 원문 `<br>`)과 인라인 강조
  * (`<em>` / `<strong>`)가 값 안에 남아 있으므로 컴포넌트가 그대로 렌더한다
@@ -47,9 +47,12 @@ export interface CopyData {
     hero_lead: string | null;
     hero_pills: string[] | null;
     hero_visual_label: string | null;
+    hero_visual_message_label: string | null;
     hero_visual_brand_message: string | null;
     hero_visual_body: string | null;
     hero_scope: HeroScopeItem[] | null;
+    hero_cta_primary: string | null;
+    hero_cta_secondary: string | null;
     about_heading: string | null;
     about_message: string | null;
     about_side_heading: string | null;
@@ -121,6 +124,10 @@ export interface CopyData {
     estimate_panel_note: string | null;
     footer_text: string | null;
     footer_brand_desc: string | null;
+    header_cta: string | null;
+    mobile_cta_estimate: string | null;
+    mobile_cta_phone: string | null;
+    mobile_cta_kakao: string | null;
 }
 /** 서비스별 에어컨 타입 옵션 */
 export interface AirType {
