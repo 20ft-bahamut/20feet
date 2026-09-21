@@ -354,6 +354,14 @@
   .pb-benefit-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* 원문 @media(max-width:1100px) 그룹의 .benefit-top — flex 요소이므로
+     grid-template-columns:1fr 대신 flex-direction:column 으로 쌓는다.
+     원문이 같은 블록에서 선언한 align-items:flex-start 를 유지한다. */
+  .pb-benefit-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 720px) {
@@ -378,6 +386,13 @@
   .pb-benefit-box {
     border-radius: 22px;
     padding: 22px 20px;
+  }
+
+  /* 원문 @media (max-width:720px) 의
+     `.service-grid, .benefit-grid, .service-check-grid, .project-grid { grid-template-columns:1fr }`
+     — 이 섹션의 할인 표(.benefit-grid)가 1100px 의 2컬럼에 머물러 있었다. */
+  .pb-benefit-grid {
+    grid-template-columns: 1fr;
   }
 
   .pb-benefit-top {

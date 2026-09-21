@@ -72,6 +72,14 @@
     color: rgba(255, 255, 255, 0.48);
 }
 
+@media (max-width: 1100px) {
+    /* 원문 @media(max-width:1100px) 그룹의 .footer-grid — 1100px 에서 이미 단일 컬럼이다.
+       (원문은 4컬럼, 이 템플릿은 brand+contact 2컬럼이지만 쌓이는 시점은 같다.) */
+    .pb-footer-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 720px) {
     .pb-footer-grid {
         grid-template-columns: 1fr;

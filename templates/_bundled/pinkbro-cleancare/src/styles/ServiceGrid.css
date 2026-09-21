@@ -314,10 +314,15 @@
   background: var(--pb-soft-2);
 }
 
-/* 원문 @media(max-width:1100px) — .section-head align-items:flex-start */
+/* 원문 @media(max-width:1100px) — .section-head 은 단일 컬럼으로 쌓인다.
+   원문은 `.section-head { grid-template-columns:1fr }` 을 썼지만 원문 자신이
+   같은 클래스를 display:flex (styles.css:108) 로 선언해서 그 규칙은 죽어 있었다.
+   작성자의 의도(제목 열이 보조 문구 위로 올라온다)를 메커니즘에 맞춰 되살린다:
+   flex 요소이므로 flex-direction:column. 원문이 선언한 align-items 는 유지한다. */
 @media (max-width: 1100px) {
   .pb-section-head {
     align-items: flex-start;
+    flex-direction: column;
   }
 
   .pb-service-grid {
