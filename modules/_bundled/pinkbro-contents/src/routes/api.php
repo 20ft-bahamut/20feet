@@ -19,6 +19,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminContentController;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminMediaController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminSiteController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\InquiryController;
@@ -158,4 +159,40 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
         Route::put('admin/discount', [AdminSiteController::class, 'updateDiscount'])
             ->middleware('permission:admin,pinkbro-contents.site.update')
             ->name('admin.discount.update');
+    });
+
+/*
+| 관리자 미디어 슬롯 API — 업로드된 첨부를 슬롯에 연결/해제
+|
+| GET    api/modules/pinkbro-contents/admin/media
+| PUT    api/modules/pinkbro-contents/admin/media
+| DELETE api/modules/pinkbro-contents/admin/media/{slot}
+|
+| 인증·관리자·스로틀 값은 위 두 관리자 그룹과 같다. 권한은 읽기/수정 두 갈래다:
+| `pinkbro-contents.media.{read|update}` (module.php 의 media 카테고리).
+|
+| 이 그룹이 콘텐츠 CRUD 그룹(`admin/{domain}`)보다 **뒤에** 있어도 `admin/media`
+| 가 그쪽에 삼켜지지 않는 이유는 그 그룹의 `{domain}` 이 service|package|case|faq
+| 로 제약돼 있기 때문이다 (위 주석 참조). 제약이 풀리면 admin/media 는
+| 콘텐츠 그룹에 먼저 걸려 403 이 된다 — 404 가 아니라서 권한 문제로 오인하기 쉽다.
+|
+| GET 은 게시판·게시글이 필요 없다 (슬롯 메타는 전역 스코프다). PUT 의 본문은
+| `{slot, temp_key, alt?}` 이고, 응답은 GET 과 같은 `{data: {slots: [...]}}` 다 —
+| 리소스 하나에 응답 모양 하나. DELETE 는 204 이다.
+*/
+Route::middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
+    ->prefix('admin/media')
+    ->name('admin.media.')
+    ->group(function () {
+        Route::get('/', [AdminMediaController::class, 'index'])
+            ->middleware('permission:admin,pinkbro-contents.media.read')
+            ->name('index');
+
+        Route::put('/', [AdminMediaController::class, 'link'])
+            ->middleware('permission:admin,pinkbro-contents.media.update')
+            ->name('link');
+
+        Route::delete('/{slot}', [AdminMediaController::class, 'destroy'])
+            ->middleware('permission:admin,pinkbro-contents.media.update')
+            ->name('destroy');
     });
