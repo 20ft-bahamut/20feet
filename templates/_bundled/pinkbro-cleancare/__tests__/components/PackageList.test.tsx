@@ -322,6 +322,28 @@ describe('PackageList', () => {
     expect(screen.queryByTestId('package-stage-fallback')).not.toBeInTheDocument();
   });
 
+  it('keeps the source scrim on .pb-package-stage::before — 스톡 URL 만 빠진 원문 그라디언트', () => {
+    const flat = css().replace(/\s+/g, ' ');
+
+    // 원문 source/styles.css 156~158행의 값 그대로 (그 선언에서 Unsplash URL 만 제거).
+    expect(flat).toContain('.pb-package-stage::before');
+    for (const stop of [
+      'rgba(10, 11, 15, 0.84) 0%',
+      'rgba(10, 11, 15, 0.66) 44%',
+      'rgba(10, 11, 15, 0.24) 100%',
+    ]) {
+      expect(flat).toContain(stop);
+    }
+    expect(flat).toMatch(/\.pb-package-stage::before { [^}]*z-index: 1;/);
+
+    // 스크림은 사진 위(media z-index 0), 카피 아래(2) — 이미지가 무엇이든 대비는 같다.
+    expect(flat).toMatch(/\.pb-package-stage-media { [^}]*z-index: 0;/);
+    expect(flat).toMatch(/\.pb-package-copy { [^}]*z-index: 2;/);
+
+    // 스톡 URL 은 되살아나지 않는다
+    expect(flat).not.toMatch(/unsplash\.com/);
+  });
+
   it('keeps the source section padding on the package root (원문 section { padding:110px 0 })', () => {
     const source = css();
     // 원문 source/styles.css 63행 — 다른 섹션과 같은 규칙. 이 섹션만 빠져 높이가 220px 짧았다.

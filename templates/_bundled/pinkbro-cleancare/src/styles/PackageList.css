@@ -23,6 +23,27 @@
   box-shadow: var(--pb-shadow);
 }
 
+/* 원문 source/styles.css 156~158행 `.package-stage::before` 는 다크 그라디언트와
+   Unsplash 스톡 사진을 **한 선언**으로 갖고 있었다. 스톡 URL 을 빼면서 그라디언트까지
+   같이 사라졌고, 그 결과 스테이지에 사진이 들어오는 순간 흰색 도입 카피의 대비가
+   없어졌다. `InquiryForm.css` 의 `.pb-inquiry-shell::before` 와 같은 정책으로
+   그라디언트 오버레이만 되살린다 — 값은 원문 그대로다.
+
+   스크림은 사진(업로드 슬롯 / 번들 자리표시자) 위, 카피 아래에 온다.
+   어느 이미지가 깔리든 대비는 같아야 한다. */
+.pb-package-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    120deg,
+    rgba(10, 11, 15, 0.84) 0%,
+    rgba(10, 11, 15, 0.66) 44%,
+    rgba(10, 11, 15, 0.24) 100%
+  );
+}
+
 /* 슬롯(package_stage) 이미지 / 슬롯이 비었을 때의 중립 CSS 폴백 */
 .pb-package-stage-media {
   position: absolute;
@@ -40,9 +61,11 @@
   background: linear-gradient(160deg, #1a1d27 0%, #101219 100%);
 }
 
+/* 원문 .package-copy 는 z-index:1 이고 ::before 보다 뒤에 온다(styles.css 159행).
+   우리는 ::before 에 z-index 를 줬으므로 카피를 한 단계 위(2)로 올려 같은 순서를 만든다. */
 .pb-package-copy {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   max-width: 620px;
   padding: 62px;
   color: #fff;
