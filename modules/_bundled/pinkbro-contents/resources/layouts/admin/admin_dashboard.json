@@ -1,0 +1,235 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_dashboard",
+    "permissions": [
+        "pinkbro-contents.content.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:pinkbro-contents.menu.dashboard",
+        "description": "$t:pinkbro-contents.description"
+    },
+    "slots": {
+        "content": [
+            {
+                "id": "dashboard_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:pinkbro-contents.menu.dashboard",
+                            "description": "$t:pinkbro-contents.description"
+                        }
+                    },
+                    {
+                        "id": "section_cards",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8"
+                        },
+                        "children": [
+                            {
+                                "id": "content_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "content_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.content"
+                                    },
+                                    {
+                                        "id": "content_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:pinkbro-contents.cards.content"
+                                    },
+                                    {
+                                        "id": "content_card_link",
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/pinkbro-contents/content/service",
+                                            "className": "mt-4 inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.content"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "inquiry_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "inquiry_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.inquiry"
+                                    },
+                                    {
+                                        "id": "inquiry_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:pinkbro-contents.cards.inquiry"
+                                    },
+                                    {
+                                        "id": "inquiry_card_link",
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/pinkbro-contents/inquiry",
+                                            "className": "mt-4 inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.inquiry"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "media_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "media_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.media"
+                                    },
+                                    {
+                                        "id": "media_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:pinkbro-contents.cards.media"
+                                    },
+                                    {
+                                        "id": "media_card_link",
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/pinkbro-contents/media",
+                                            "className": "mt-4 inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.media"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "site_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "site_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.site"
+                                    },
+                                    {
+                                        "id": "site_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:pinkbro-contents.cards.site"
+                                    },
+                                    {
+                                        "id": "site_card_link",
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/pinkbro-contents/site",
+                                            "className": "mt-4 inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.site"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "copy_card",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                                },
+                                "children": [
+                                    {
+                                        "id": "copy_card_title",
+                                        "type": "basic",
+                                        "name": "H2",
+                                        "props": {
+                                            "className": "text-lg font-semibold text-gray-900 dark:text-white"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.copy"
+                                    },
+                                    {
+                                        "id": "copy_card_desc",
+                                        "type": "basic",
+                                        "name": "P",
+                                        "props": {
+                                            "className": "mt-2 text-sm text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "$t:pinkbro-contents.cards.copy"
+                                    },
+                                    {
+                                        "id": "copy_card_link",
+                                        "type": "basic",
+                                        "name": "A",
+                                        "props": {
+                                            "href": "/admin/pinkbro-contents/copy",
+                                            "className": "mt-4 inline-block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                        },
+                                        "text": "$t:pinkbro-contents.menu.copy"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

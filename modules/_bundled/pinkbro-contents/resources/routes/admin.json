@@ -1,5 +1,87 @@
 {
     "version": "1.0.0",
     "description": "PinkBro Contents admin routes",
-    "routes": []
+    "routes": [
+        {
+            "path": "*/admin/pinkbro-contents",
+            "layout": "admin_dashboard",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.dashboard",
+                "permission": "pinkbro-contents.content.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/content/:domain",
+            "layout": "admin_content_index",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.content",
+                "permission": "pinkbro-contents.content.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/content/:domain/create",
+            "layout": "admin_content_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.content_create",
+                "permission": "pinkbro-contents.content.create"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/content/:domain/:id/edit",
+            "layout": "admin_content_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.content_edit",
+                "permission": "pinkbro-contents.content.update"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/site",
+            "layout": "admin_site_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.site",
+                "permission": "pinkbro-contents.site.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/copy",
+            "layout": "admin_copy_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.copy",
+                "permission": "pinkbro-contents.site.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/media",
+            "layout": "admin_media_form",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.media",
+                "permission": "pinkbro-contents.media.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/inquiry",
+            "layout": "admin_inquiry_index",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.inquiry",
+                "permission": "pinkbro-contents.inquiries.read"
+            }
+        },
+        {
+            "path": "*/admin/pinkbro-contents/inquiry/:id",
+            "layout": "admin_inquiry_detail",
+            "auth_required": true,
+            "meta": {
+                "title": "$t:pinkbro-contents.menu.inquiry_detail",
+                "permission": "pinkbro-contents.inquiries.read"
+            }
+        }
+    ]
 }

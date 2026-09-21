@@ -4,9 +4,19 @@
     "menu": {
         "dashboard": "핑크브로 콘텐츠",
         "content": "콘텐츠",
+        "content_create": "콘텐츠 생성",
+        "content_edit": "콘텐츠 수정",
         "inquiry": "문의",
+        "inquiry_detail": "문의 상세",
         "media": "미디어",
         "site": "사이트 설정",
         "copy": "문구"
+    },
+    "cards": {
+        "content": "서비스·패키지·사례·FAQ 관리",
+        "inquiry": "문의 조회·상태 변경",
+        "media": "이미지 슬롯 관리",
+        "site": "연락처·브랜드 문구",
+        "copy": "섹션 도입 문구"
     }
 }

@@ -4,9 +4,19 @@
     "menu": {
         "dashboard": "PinkBro Contents",
         "content": "Content",
+        "content_create": "Create content",
+        "content_edit": "Edit content",
         "inquiry": "Inquiries",
+        "inquiry_detail": "Inquiry detail",
         "media": "Media",
         "site": "Site",
         "copy": "Copy"
+    },
+    "cards": {
+        "content": "Services, packages, cases, FAQ",
+        "inquiry": "Inquiry list and status",
+        "media": "Image slot management",
+        "site": "Contact and brand copy",
+        "copy": "Section intro copy"
     }
 }
