@@ -179,7 +179,10 @@
     font-size: 28px;
     line-height: 1.14;
     letter-spacing: -0.045em;
-    font-weight: 800;
+    /* 원문 .estimate-panel h3 (styles.css 234행)은 font-weight 를 선언하지 않는다 —
+       h3 기본 굵기 700 이 적용된다. 800 은 원문에 없는 값이었다.
+       (.field label 의 800 은 원문 239행이 실제로 선언하는 값이라 그대로 둔다.) */
+    font-weight: 700;
     color: var(--pb-ink);
     word-break: keep-all;
 }

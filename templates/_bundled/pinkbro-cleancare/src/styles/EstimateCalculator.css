@@ -9,6 +9,19 @@
  * 외부 이미지 URL 없음 — 소스의 Unsplash 배경은 이 위젯에 없다(estimate-shell 은 문의 폼 소속).
  */
 
+/* 원문 #pricing > .wrap — 계산기 루트는 레이아웃에서 .wrap 을 받지 않으므로(레아웃은
+   #pricing 아래에 이 컴포넌트를 바로 놓는다) 루트가 직접 같은 컨테이너 폭을 갖는다.
+   값은 .pb-wrap / .pb-pricing-inner 와 동일하다: 40px 여백, 720px 이하 24px, 최대 1280.
+   이 규칙이 없으면 .estimator / 요약 박스가 뷰포트 폭(1440)으로 퍼져 원문(1280)보다
+   넓어진다 — 요약 박스 내용 폭이 544 vs 원문 473 이던 원인이다. */
+.pb-estimator,
+.pb-estimate-skeleton,
+.pb-estimate-empty {
+  width: min(calc(100% - 40px), var(--pb-max, 1280px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* 원문 .estimator — radius 30px · shadow 0 24px 66px (공용 토큰 --pb-radius-xl 36px /
    --pb-shadow 와 값이 다르므로 원문 값을 직접 쓴다) */
 .pb-estimator {
@@ -320,11 +333,18 @@
   }
 }
 
-/* 원문 720px — .estimator padding 24px 20px · radius 22px */
+/* 원문 720px — .estimator padding 24px 20px · radius 22px, 그리고 .wrap 의 24px 여백 */
 @media (max-width: 720px) {
   .pb-estimator,
   .pb-estimate-skeleton {
     padding: 24px 20px;
     border-radius: 22px;
+  }
+
+  /* 원문 @media (max-width:720px) { .wrap { width:min(calc(100% - 24px), var(--max)) } } */
+  .pb-estimator,
+  .pb-estimate-skeleton,
+  .pb-estimate-empty {
+    width: min(calc(100% - 24px), var(--pb-max, 1280px));
   }
 }

@@ -316,6 +316,25 @@ describe('inquiry contract', () => {
         expect(source).not.toMatch(/\.pb-field-label small/);
     });
 
+    it('keeps the panel heading at the source weight (원문 .estimate-panel h3 — 선언 없음 → 700)', () => {
+        const flat = readFileSync(
+            join(__dirname, '..', '..', 'src', 'styles', 'InquiryForm.css'),
+            'utf8',
+        ).replace(/\s+/g, ' ');
+
+        // 원문 styles.css 234행 .estimate-panel h3 은 font-weight 를 선언하지 않는다 — h3 기본 700.
+        // (800 은 원문에 없는 값이었고, 패널 제목이 원문보다 굵게 보이던 원인이다.)
+        expect(flat).toMatch(/\.pb-inquiry-panel-title { [^}]*font-weight: 700;/);
+        expect(flat).not.toMatch(/\.pb-inquiry-panel-title { [^}]*font-weight: 800;/);
+        // 원문에 있는 나머지 값은 그대로
+        expect(flat).toMatch(
+            /\.pb-inquiry-panel-title { [^}]*font-size: 28px; line-height: 1\.14; letter-spacing: -0\.045em;/,
+        );
+
+        // 원문 239행이 실제로 선언하는 800 은 .field label 에 남아 있어야 한다
+        expect(flat).toMatch(/\.pb-field-label { font-size: 13px; font-weight: 800;/);
+    });
+
     it('keeps the source choice strings verbatim', () => {
         expect(BUSINESS_TYPES).toEqual([
             '카페',

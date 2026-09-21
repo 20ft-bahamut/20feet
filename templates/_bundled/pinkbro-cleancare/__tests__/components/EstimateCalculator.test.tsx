@@ -316,4 +316,30 @@ describe('EstimateCalculator', () => {
       /\.pb-estimate-summary-note\s*{[^}]*font-size:\s*13px;[^}]*line-height:\s*1\.72;[^}]*color:\s*rgba\(255, 255, 255, 0\.78\);[^}]*}/,
     );
   });
+
+  it('keeps the container #pricing 의 .wrap 이 계산기 루트에 적용된다 (원문 .wrap 값)', () => {
+    // 줄바꿈·들여쓰기에 흔들리지 않도록 공백을 정규화해 비교한다.
+    const flat = readFileSync(
+      join(__dirname, '..', '..', 'src', 'styles', 'EstimateCalculator.css'),
+      'utf8',
+    ).replace(/\s+/g, ' ');
+
+    // 레이아웃은 #pricing 아래에 이 컴포넌트를 바로 놓는다 — .wrap 이 없으면
+    // 계산기와 요약 박스가 뷰포트 폭으로 퍼져 원문(1280)보다 넓어진다.
+    // 세 분기(로딩 스켈레톤 · 빈 상태 · 콘텐츠)가 모두 같은 컨테이너를 쓴다.
+    expect(flat).toContain(
+      '.pb-estimator, .pb-estimate-skeleton, .pb-estimate-empty { width: min(calc(100% - 40px), var(--pb-max, 1280px)); margin-left: auto; margin-right: auto; }',
+    );
+    // 원문 @media (max-width:720px) 의 .wrap 은 24px 여백이다
+    expect(flat).toContain(
+      '.pb-estimator, .pb-estimate-skeleton, .pb-estimate-empty { width: min(calc(100% - 24px), var(--pb-max, 1280px)); }',
+    );
+
+    // 원문 .estimator-grid 비율·간격은 그대로다 (styles.css 200행)
+    expect(flat).toContain(
+      '.pb-estimator-grid { display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 24px; align-items: start; }',
+    );
+    // 원문 .summary-box padding 26px (styles.css 210행)
+    expect(flat).toMatch(/\.pb-estimate-summary { padding: 26px;/);
+  });
 });
