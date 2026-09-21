@@ -75,7 +75,7 @@
             }
         },
         {
-            "path": "*/admin/pinkbro-contents/inquiry/:id",
+            "path": "*/admin/pinkbro-contents/inquiry/:post_id",
             "layout": "admin_inquiry_detail",
             "auth_required": true,
             "meta": {
