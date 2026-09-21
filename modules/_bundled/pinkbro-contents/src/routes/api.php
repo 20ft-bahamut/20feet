@@ -19,6 +19,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminContentController;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminInquiryController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminMediaController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminSiteController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
@@ -195,4 +196,43 @@ Route::middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
         Route::delete('/{slot}', [AdminMediaController::class, 'destroy'])
             ->middleware('permission:admin,pinkbro-contents.media.update')
             ->name('destroy');
+    });
+
+/*
+| 관리자 문의 API — 목록·단건·상태 변경
+|
+| GET api/modules/pinkbro-contents/admin/inquiry
+| GET api/modules/pinkbro-contents/admin/inquiry/{id}
+| PUT  api/modules/pinkbro-contents/admin/inquiry/{id}
+|
+| 인증·관리자·스로틀 값은 위 세 관리자 그룹과 같다. 권한은 읽기/수정 두 갈래다:
+| `pinkbro-contents.inquiries.{read|update}` (module.php 의 inquiries 카테고리).
+|
+| 이 그룹이 콘텐츠 CRUD 그룹(`admin/{domain}`)보다 뒤에 있어도 `admin/inquiry` 가
+| 그쪽에 삼켜지지 않는 이유는 그 그룹의 `{domain}` 이 service|package|case|faq
+| 로 제약돼 있기 때문이다 (위 주석 참조). 문의는 접수 때만 만들어지므로 POST/DELETE
+| 를 두지 않는다. `{id}` 는 숫자만 받는다: 숫자가 아닌 값이 컨트롤러의 int
+| 파라미터에 닿으면 TypeError 로 500 이 된다.
+|
+| 응답은 목록만 이중 중첩(`{data: {data: [...], meta: {total, per_page, current_page}}}`)이고
+| 단건·수정은 단일 래핑(`{data: {...}}`)이다 — 콘텐츠 관리자 API 와 같은 계약.
+| PUT 의 본문은 `{status?, internal_note?}` 이고, status 는 InquiryStatus enum 이다.
+*/
+Route::middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
+    ->prefix('admin/inquiry')
+    ->name('admin.inquiry.')
+    ->group(function () {
+        Route::get('/', [AdminInquiryController::class, 'index'])
+            ->middleware('permission:admin,pinkbro-contents.inquiries.read')
+            ->name('index');
+
+        Route::get('/{id}', [AdminInquiryController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->middleware('permission:admin,pinkbro-contents.inquiries.read')
+            ->name('show');
+
+        Route::put('/{id}', [AdminInquiryController::class, 'update'])
+            ->where('id', '[0-9]+')
+            ->middleware('permission:admin,pinkbro-contents.inquiries.update')
+            ->name('update');
     });
