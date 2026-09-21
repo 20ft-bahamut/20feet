@@ -27,6 +27,7 @@ import {
     type InquiryFormValues,
 } from '../lib/inquiry';
 import type { MediaSlots, ServiceItem, SiteData } from '../lib/types';
+import { slotPhotoFor } from '../lib/serviceAssets';
 
 export interface InquiryFormProps {
     /** 사이트 기본 정보. null 이면 아직 로딩 중 — 스켈레톤. */
@@ -221,7 +222,8 @@ export function InquiryForm({
 
     const telHref = site.phone ? `tel:${site.phone.replace(/[^\d+]/g, '')}` : null;
     const bg = media?.estimate_bg ?? null;
-    const bgUrl = bg?.url ?? null;
+    // 슬롯 URL 이 있으면 그 URL, 없으면 번들 자리표시자(service-sign-care) — 완성된 URL 이다.
+    const bgUrl = slotPhotoFor('estimate_bg', media);
 
     return (
         <section className={className ? `pb-inquiry ${className}` : 'pb-inquiry'}>

@@ -136,15 +136,18 @@ describe('AboutSection', () => {
     expect(screen.queryByTestId('about-media-fallback')).not.toBeInTheDocument();
   });
 
-  it('falls back to the neutral css block when why_stage is empty or media is null', () => {
+  it('renders the bundled placeholder photo when why_stage is empty or media is null', () => {
+    const placeholder =
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-floor-care.webp';
+
     const { unmount } = render(
       <AboutSection
         copy={{ about_message: '본문', about_perspectives: [] } as any}
         media={{ why_stage: { url: null, alt: null } }}
       />,
     );
-    expect(screen.getByTestId('about-media-fallback')).toBeInTheDocument();
-    expect(screen.queryByTestId('about-media')).not.toBeInTheDocument();
+    expect(screen.getByTestId('about-media')).toHaveAttribute('src', placeholder);
+    expect(screen.queryByTestId('about-media-fallback')).not.toBeInTheDocument();
     unmount();
 
     render(
@@ -153,8 +156,8 @@ describe('AboutSection', () => {
         media={null}
       />,
     );
-    expect(screen.getByTestId('about-media-fallback')).toBeInTheDocument();
-    expect(screen.queryByTestId('about-media')).not.toBeInTheDocument();
+    expect(screen.getByTestId('about-media')).toHaveAttribute('src', placeholder);
+    expect(screen.queryByTestId('about-media-fallback')).not.toBeInTheDocument();
   });
 
   it('renders no section anchor id — the layout owns anchor targets', () => {

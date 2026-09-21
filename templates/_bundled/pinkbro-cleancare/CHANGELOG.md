@@ -69,6 +69,17 @@
   (`SiteFooter` 와 같은 방식, `_user_base.json` 이 바인딩).
 - 컴포넌트·레이아웃 테스트가 복원된 문구의 렌더와 미렌더를 각각 검증하고,
   `.pb-packages` 패딩 회귀를 CSS 검사로 막습니다. 테스트 17 파일 / 241개.
+- **배경·스테이지·작업사례 커버 슬롯에 번들 자리표시자 사진 배선.** `hero_main`·
+  `why_stage`·`package_stage`·`estimate_bg`·`case_1`~`case_4` 슬롯이 비어 있을 때
+  중립 CSS 블록만 남아 페이지가 비어 보이던 자리를, 이미 승인된 서비스 사진 6장
+  (`public/images/service-*.webp`)으로 채웁니다. `src/lib/serviceAssets.ts` 에
+  `SLOT_PHOTO`(슬롯 키 → 자산 경로)와 `slotPhotoFor()` 를 추가해 서비스 사진과 같은
+  2단 폴백을 씁니다 — **슬롯 URL 우선, 없으면 번들 자산, 둘 다 없으면 중립 CSS 블록**.
+  소비처는 `Hero`(hero_main) · `AboutSection`(why_stage) · `PackageList`(package_stage) ·
+  `InquiryForm`(estimate_bg) · `CaseGallery`(case_1~4, 카드 순번 = 슬롯 순번)이며
+  `CaseGallery` 에 `media` prop 과 레이아웃 바인딩을 새로 추가했습니다. 새 이미지 파일은
+  추가하지 않았고 외부 URL 도 쓰지 않습니다. 관리자가 슬롯에 업로드하면 그 이미지가
+  항상 이깁니다. 테스트 18 파일 / 269개.
 
 ## [0.1.0] - 2026-09-19
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Div, Img, P, Span } from './basic';
+import { slotPhotoFor } from '../lib/serviceAssets';
 import type { CopyData, MediaSlots, SiteData } from '../lib/types';
 import '../styles/Hero.css';
 
@@ -52,8 +53,9 @@ export function renderCopyText(text: string): React.ReactNode[] {
  *
  * 3단 폴백 계약:
  *   - `site` 또는 `copy` 가 null → 로딩 스켈레톤 (data-testid="hero-skeleton")
- *   - `media.hero_main.url` 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
- *   - URL 있음 → <img>
+ *   - `media.hero_main.url` 없음 → 번들 자리표시자 사진 (SLOT_PHOTO.hero_main)
+ *   - 슬롯도 번들 자산도 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
+ *   - 슬롯 URL 있음 → 그 URL (업로드가 항상 이긴다)
  *
  * 원문 hero-actions(CTA 2개 — `간편견적 문의하기` / `가격 · 예상견적 보기`)와
  * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인 키
@@ -82,7 +84,8 @@ export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
     const ctaPrimary = copy.hero_cta_primary;
     const ctaSecondary = copy.hero_cta_secondary;
     const heroSlot = media?.hero_main ?? null;
-    const slotUrl = heroSlot?.url ?? null;
+    // 슬롯 URL 이 있으면 그 URL, 없으면 번들 자리표시자(service-kitchen-care) — 완성된 URL 이다.
+    const slotUrl = slotPhotoFor('hero_main', media);
 
     // visual 라벨은 copy 원문이 우선이고, 없으면 기존 사이트 영문명으로 폴백한다.
     const visualLabel = copy.hero_visual_label ?? site.brand_name_en;
@@ -157,7 +160,11 @@ export function Hero({ site, copy, media }: HeroProps): React.ReactElement {
 
                         <Div className="pb-hero-media" data-testid="hero-media">
                             {slotUrl ? (
-                                <Img src={slotUrl} alt={heroSlot?.alt ?? ''} />
+                                <Img
+                                    data-testid="hero-media-img"
+                                    src={slotUrl}
+                                    alt={heroSlot?.alt ?? ''}
+                                />
                             ) : (
                                 <Div
                                     className="pb-hero-media-fallback"

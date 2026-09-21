@@ -371,7 +371,16 @@ describe('home layout — props 계약', () => {
             'sub',
         ],
         FaqList: ['eyebrow', 'intro', 'introSub', 'items'],
-        CaseGallery: ['cardKicker', 'eyebrow', 'intro', 'items', 'linkLabel', 'note', 'sub'],
+        CaseGallery: [
+            'cardKicker',
+            'eyebrow',
+            'intro',
+            'items',
+            'linkLabel',
+            'media',
+            'note',
+            'sub',
+        ],
         EstimateCalculator: [
             'airLabel',
             'ctaKakaoLabel',
@@ -420,9 +429,10 @@ describe('home layout — props 계약', () => {
         }
     });
 
-    it('binds media to the three components that render an admin-uploadable slot', () => {
-        // AboutSection(why_stage) · PackageList(package_stage) · InquiryForm(estimate_bg)
-        for (const name of ['AboutSection', 'PackageList', 'InquiryForm']) {
+    it('binds media to every component that renders an admin-uploadable slot', () => {
+        // Hero(hero_main) · AboutSection(why_stage) · PackageList(package_stage)
+        // · CaseGallery(case_1~4) · InquiryForm(estimate_bg)
+        for (const name of ['Hero', 'AboutSection', 'PackageList', 'CaseGallery', 'InquiryForm']) {
             const node = sections
                 .flatMap((section: any) => section.children ?? [])
                 .find((child: any) => child.name === name);
@@ -768,6 +778,7 @@ describe('home layout — 섹션 composite 렌더', () => {
                     note={copy.projects_note}
                     cardKicker={copy.projects_card_kicker}
                     linkLabel={copy.projects_link_label}
+                    media={media}
                     items={[
                         {
                             title: '작업사례',
@@ -938,6 +949,7 @@ describe('home layout — 섹션 composite 렌더', () => {
                     note={blank.projects_note}
                     cardKicker={blank.projects_card_kicker}
                     linkLabel={blank.projects_link_label}
+                    media={media}
                     items={[
                         {
                             title: '작업사례',

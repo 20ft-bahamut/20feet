@@ -1,5 +1,6 @@
 import React from 'react';
-import type { CaseItem } from '../lib/types';
+import type { CaseItem, MediaSlots } from '../lib/types';
+import { slotPhotoFor } from '../lib/serviceAssets';
 import '../styles/CaseGallery.css';
 
 export interface CaseGalleryProps {
@@ -11,6 +12,11 @@ export interface CaseGalleryProps {
   note: string | null;
   /** 사례 목록. null = 로딩 중(스켈레톤), [] = 빈 상태. */
   items: CaseItem[] | null;
+  /**
+   * 미디어 슬롯 키 → 슬롯. null = 아직 로딩 중.
+   * `case_1`…`case_4` 가 카드 순서대로의 커버 슬롯이다.
+   */
+  media: MediaSlots | null;
   /**
    * 섹션 눈금(원문 `Recent Projects`, 371행 / copy: projects_eyebrow).
    * 값을 받으면 렌더하고, 없으면 헤더는 소개 문구만 렌더한다.
@@ -35,7 +41,17 @@ export interface CaseGalleryProps {
  * 하단 정렬 2단) → `.project-grid`(4열 카드) → `.project-note`.
  *
  * 3단계 폴백: items null → 스켈레톤, [] → 빈 상태, 배열 → 카드 렌더.
- * 커버 슬롯이 비면 소스 `.project-thumb` 의 CSS 그라디언트 폴백을 렌더한다.
+ *
+ * 카드 커버는 3단 폴백이다:
+ *   1. 항목이 이미 해석해 온 슬롯 결과(`item.cover.url`) — 있으면 그 URL 이 이긴다
+ *   2. 카드 순번의 슬롯(`case_1`…`case_4`)에 관리자가 올린 URL
+ *   3. 번들 자리표시자 사진(SLOT_PHOTO) — 슬롯이 비어 있을 때 그 자리를 채운다
+ *   4. 셋 다 없으면 `.pb-project-thumb` 의 CSS 그라디언트 폴백
+ *
+ * 슬롯 키는 항목이 `cover_slot` 을 들고 오면 그 키를, 아니면 카드 순번을 쓴다.
+ * 공개 API(CaseResource)는 아직 `cover_slot` 을 내려주지 않으므로 현재는 순번으로
+ * 해석된다 — 관리자가 순서를 바꾸면 그 순번의 슬롯 사진이 그 자리에 온다.
+ *
  * `blog_url` 이 비면 `<a>` 대신 `<div aria-disabled="true">` 로 렌더한다 —
  * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
  *
@@ -49,6 +65,7 @@ export function CaseGallery({
   sub,
   note,
   items,
+  media,
   eyebrow,
   cardKicker,
   linkLabel,
@@ -87,6 +104,7 @@ export function CaseGallery({
                 key={`${item.title}-${index}`}
                 item={item}
                 index={index}
+                media={media}
                 cardKicker={cardKicker}
                 linkLabel={linkLabel}
               />
@@ -103,24 +121,31 @@ export function CaseGallery({
 function CaseCard({
   item,
   index,
+  media,
   cardKicker,
   linkLabel,
 }: {
   item: CaseItem;
   index: number;
+  media: MediaSlots | null;
   cardKicker?: string | null;
   linkLabel?: string | null;
 }): React.ReactElement {
   const hasLink = typeof item.blog_url === 'string' && item.blog_url.length > 0;
-  const coverUrl = item.cover?.url ?? null;
+  // 항목이 cover_slot 을 들고 오면 그 키, 아니면 카드 순번(case_1…)이 이 카드의 슬롯이다.
+  const coverSlotKey = item.cover_slot ?? `case_${index + 1}`;
+  // 슬롯 업로드(항목이 해석해 온 cover → 슬롯 맵)가 번들 자리표시자를 이긴다.
+  const coverUrl = item.cover?.url ?? slotPhotoFor(coverSlotKey, media);
+  const coverAlt = item.cover?.alt ?? media?.[coverSlotKey]?.alt ?? '';
 
   const body = (
     <>
       <div className="pb-project-thumb">
         {coverUrl ? (
           <img
+            data-testid="case-cover"
             src={coverUrl}
-            alt={item.cover?.alt ?? ''}
+            alt={coverAlt}
             className="pb-project-thumb__img"
             loading="lazy"
           />

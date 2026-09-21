@@ -14,6 +14,9 @@ const copy = {
   hero_pills: ['부울경 전 지역 출장', '기본가격 공개', '현장확인 후 확정견적'],
 } as any;
 
+const PLACEHOLDER_SRC =
+  '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp';
+
 describe('Hero', () => {
   it('renders a loading skeleton when site data is null', () => {
     render(<Hero site={null} copy={null} media={null} />);
@@ -26,13 +29,19 @@ describe('Hero', () => {
     expect(screen.getByText(/카페, 음식점, 베이커리/)).toBeInTheDocument();
   });
 
-  it('renders a neutral css fallback when no hero image slot is uploaded', () => {
-    render(<Hero site={site} copy={copy} media={null} />);
-    expect(screen.getByTestId('hero-media-fallback')).toBeInTheDocument();
-    expect(screen.queryByRole('img', { name: /히어로/ })).not.toBeInTheDocument();
+  it('renders the bundled placeholder photo when no hero image slot is uploaded', () => {
+    const { unmount } = render(<Hero site={site} copy={copy} media={null} />);
+    expect(screen.getByTestId('hero-media-img')).toHaveAttribute('src', PLACEHOLDER_SRC);
+    expect(screen.queryByTestId('hero-media-fallback')).not.toBeInTheDocument();
+    unmount();
+
+    // 슬롯 키는 있고 값만 비어도(업로드 없음) 자리표시자가 그 자리를 채운다
+    render(<Hero site={site} copy={copy} media={{ hero_main: { url: null, alt: null } }} />);
+    expect(screen.getByTestId('hero-media-img')).toHaveAttribute('src', PLACEHOLDER_SRC);
+    expect(screen.queryByTestId('hero-media-fallback')).not.toBeInTheDocument();
   });
 
-  it('renders the uploaded image when the slot has a url', () => {
+  it('renders the uploaded image when the slot has a url — 업로드가 자리표시자를 이긴다', () => {
     render(<Hero site={site} copy={copy} media={{ hero_main: { url: '/x.webp', alt: '매장' } }} />);
     expect(screen.getByRole('img', { name: '매장' })).toHaveAttribute('src', '/x.webp');
     expect(screen.queryByTestId('hero-media-fallback')).not.toBeInTheDocument();

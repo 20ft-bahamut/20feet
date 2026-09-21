@@ -11,8 +11,9 @@ export interface AboutSectionProps {
  *
  * 폴백 계약:
  *   - `copy` null → 로딩 스켈레톤 (data-testid="about-skeleton")
- *   - `media.why_stage.url` 없음 → 중립 CSS 폴백 (data-testid="about-media-fallback")
- *   - URL 있음 → <img>
+ *   - `media.why_stage.url` 없음 → 번들 자리표시자 사진 (SLOT_PHOTO.why_stage)
+ *   - 슬롯도 번들 자산도 없음 → 중립 CSS 폴백 (data-testid="about-media-fallback")
+ *   - 슬롯 URL 있음 → 그 URL (업로드가 항상 이긴다)
  *   - `about_perspectives` null → 관점 카드 영역 미렌더(데이터 도착 대기)
  *   - `about_perspectives` [] → 카드 없이 빈 콘텐츠 열
  *   - 배열 → .pb-why-card 로 렌더

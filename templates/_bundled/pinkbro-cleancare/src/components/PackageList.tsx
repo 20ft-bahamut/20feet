@@ -1,6 +1,7 @@
 import React from 'react';
 import { Div, Img } from './basic';
 import '../styles/PackageList.css';
+import { slotPhotoFor } from '../lib/serviceAssets';
 import type { DiscountStep, MediaSlots, PackageItem } from '../lib/types';
 
 export interface PackageListProps {
@@ -48,7 +49,8 @@ export interface PackageListProps {
  *
  * 원문 `#package` 는 패키지 카드 위에 스테이지(.package-stage)를 두고 그 안에
  * 도입 카피를 얹는다(body.html 171–180). 그 스테이지가 모듈 슬롯 `package_stage` 의
- * 자리다 — 슬롯 URL 이 있으면 이미지, 없으면 중립 CSS 폴백(원문 Unsplash 제거, 스펙 §8).
+ * 자리다 — 슬롯 URL 이 있으면 그 이미지, 없으면 번들 자리표시자 사진(SLOT_PHOTO.package_stage),
+ * 둘 다 없으면 중립 CSS 폴백(원문 Unsplash 제거, 스펙 §8).
  * 카드 아래에는 동시작업 혜택 박스(benefit-box)를 둔다(body.html 229–243).
  *
  * 문구는 전부 props 로 받는다(COPY POLICY — 하드코딩 금지).
@@ -115,7 +117,8 @@ export function PackageList({
   }
 
   const stage = media?.package_stage ?? null;
-  const stageUrl = stage?.url ?? null;
+  // 슬롯 URL 이 있으면 그 URL, 없으면 번들 자리표시자(service-awning-care) — 완성된 URL 이다.
+  const stageUrl = slotPhotoFor('package_stage', media);
 
   const hasBenefit =
     Boolean(benefitHeading) ||

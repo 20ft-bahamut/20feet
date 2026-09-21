@@ -14,8 +14,9 @@ export declare function renderCopyText(text: string): React.ReactNode[];
  *
  * 3단 폴백 계약:
  *   - `site` 또는 `copy` 가 null → 로딩 스켈레톤 (data-testid="hero-skeleton")
- *   - `media.hero_main.url` 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
- *   - URL 있음 → <img>
+ *   - `media.hero_main.url` 없음 → 번들 자리표시자 사진 (SLOT_PHOTO.hero_main)
+ *   - 슬롯도 번들 자산도 없음 → 중립 CSS 폴백 (data-testid="hero-media-fallback")
+ *   - 슬롯 URL 있음 → 그 URL (업로드가 항상 이긴다)
  *
  * 원문 hero-actions(CTA 2개 — `간편견적 문의하기` / `가격 · 예상견적 보기`)와
  * visual-bottom 의 `BRAND MESSAGE` 라벨은 copy 도메인 키

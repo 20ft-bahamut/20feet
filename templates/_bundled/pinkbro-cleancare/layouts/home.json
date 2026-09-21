@@ -352,7 +352,7 @@
                 ]
             },
             {
-                "comment": "=== #projects — 07 작업사례 갤러리 (cases + copy)",
+                "comment": "=== #projects — 07 작업사례 갤러리 (cases + copy + media.case_1~4)",
                 "id": "projects",
                 "type": "basic",
                 "name": "Div",
@@ -368,7 +368,8 @@
                             "note": "{{pinkbro_copy?.data?.projects_note ?? null}}",
                             "cardKicker": "{{pinkbro_copy?.data?.projects_card_kicker ?? null}}",
                             "linkLabel": "{{pinkbro_copy?.data?.projects_link_label ?? null}}",
-                            "items": "{{pinkbro_cases?.data ?? null}}"
+                            "items": "{{pinkbro_cases?.data ?? null}}",
+                            "media": "{{pinkbro_media?.data ?? null}}"
                         }
                     }
                 ]

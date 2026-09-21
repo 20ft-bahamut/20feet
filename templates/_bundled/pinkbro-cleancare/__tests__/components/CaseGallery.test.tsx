@@ -5,31 +5,90 @@ import type { CaseItem } from '../../src/lib/types';
 
 describe('CaseGallery', () => {
   it('renders a skeleton when items is null', () => {
-    render(<CaseGallery intro={null} note={null} sub={null} items={null} />);
+    render(<CaseGallery intro={null} note={null} sub={null} media={null}
+        items={null} />);
     expect(screen.getByTestId('cases-skeleton')).toBeInTheDocument();
   });
 
-  it('renders four cards with the css gradient fallback when no cover is uploaded', () => {
+  it('renders the bundled placeholder cover on every card when no cover is uploaded', () => {
     const items = [1, 2, 3, 4].map(n => ({
       title: `실제 작업사례 0${n}`, summary: `설명 ${n}`, blog_url: '',
       cover: { url: null, alt: null },
     }));
-    render(<CaseGallery intro="소개" note="주의" sub={null} items={items} />);
+    render(<CaseGallery intro="소개" note="주의" sub={null} media={null}
+        items={items} />);
 
     expect(screen.getAllByTestId('case-card')).toHaveLength(4);
-    expect(screen.getAllByTestId('case-cover-fallback')).toHaveLength(4);
+    // 카드 순서 = 슬롯 순서 (case_1…case_4)
+    expect(screen.getAllByTestId('case-cover').map(img => img.getAttribute('src'))).toEqual([
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-floor-care.webp',
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-glass-care.webp',
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp',
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-air-care.webp',
+    ]);
+    expect(screen.queryAllByTestId('case-cover-fallback')).toHaveLength(0);
+  });
+
+  it('lets the uploaded slot url win over the bundled placeholder', () => {
+    const items: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '',
+      cover: { url: null, alt: null } }];
+    const { unmount } = render(
+      <CaseGallery intro="i" note="n" sub={null}
+        media={{ case_1: { url: '/uploads/case1.webp', alt: '현장 1' } }} items={items} />,
+    );
+    const cover = screen.getByTestId('case-cover');
+    expect(cover).toHaveAttribute('src', '/uploads/case1.webp');
+    expect(cover).toHaveAttribute('alt', '현장 1');
+    unmount();
+
+    // 항목이 서버에서 해석해 온 cover 도 업로드다 — 슬롯 맵이 아직 안 왔어도 이긴다.
+    render(
+      <CaseGallery intro="i" note="n" sub={null} media={null}
+        items={[{ title: 'T', summary: 'S', blog_url: '',
+          cover: { url: '/api/files/c.webp', alt: '업로드 커버' } }]} />,
+    );
+    expect(screen.getByTestId('case-cover')).toHaveAttribute('src', '/api/files/c.webp');
+    expect(screen.getByTestId('case-cover')).toHaveAttribute('alt', '업로드 커버');
+  });
+
+  it('keeps the neutral css gradient only for a card whose slot has no bundled asset', () => {
+    // 5번째 카드 = case_5 — SLOT_PHOTO 에 자산이 없다. 자리표시자도 없으니 중립 폴백이 남는다.
+    const items = [1, 2, 3, 4, 5].map(n => ({
+      title: `실제 작업사례 0${n}`, summary: `설명 ${n}`, blog_url: '',
+      cover: { url: null, alt: null },
+    }));
+    render(<CaseGallery intro="소개" note="주의" sub={null} media={null} items={items} />);
+
+    expect(screen.getAllByTestId('case-cover')).toHaveLength(4);
+    expect(screen.getAllByTestId('case-cover-fallback')).toHaveLength(1);
+  });
+
+  it('honours an item-level cover_slot over the card position', () => {
+    // 순서가 바뀐 항목 — 항목이 슬롯 키를 들고 오면 그 키가 순번을 이긴다.
+    const items: CaseItem[] = [1, 2].map(n => ({
+      title: `T${n}`, summary: 'S', blog_url: '',
+      cover: { url: null, alt: null }, cover_slot: `case_${n + 2}`,
+    }));
+    render(<CaseGallery intro="i" note="n" sub={null} media={null} items={items} />);
+
+    expect(screen.getAllByTestId('case-cover').map(img => img.getAttribute('src'))).toEqual([
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp',
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-air-care.webp',
+    ]);
   });
 
   it('renders the uploaded cover image when a slot is set', () => {
     const items: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: 'https://blog.naver.com/x',
       cover: { url: '/c.webp', alt: '현장' } }];
-    render(<CaseGallery intro="i" note="n" sub={null} items={items} />);
+    render(<CaseGallery intro="i" note="n" sub={null} media={null}
+        items={items} />);
     expect(screen.getByRole('img', { name: '현장' })).toHaveAttribute('src', '/c.webp');
   });
 
   it('does not render a link when blog_url is empty', () => {
     const items: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }];
-    render(<CaseGallery intro="i" note="n" sub={null} items={items} />);
+    render(<CaseGallery intro="i" note="n" sub={null} media={null}
+        items={items} />);
     const card = screen.getByTestId('case-card');
     expect(card.tagName).not.toBe('A');
     expect(card).toHaveAttribute('aria-disabled', 'true');
@@ -38,12 +97,14 @@ describe('CaseGallery', () => {
   it('renders an anchor with the blog url when present', () => {
     const items: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: 'https://blog.naver.com/x',
       cover: { url: null, alt: null } }];
-    render(<CaseGallery intro="i" note="n" sub={null} items={items} />);
+    render(<CaseGallery intro="i" note="n" sub={null} media={null}
+        items={items} />);
     expect(screen.getByTestId('case-card')).toHaveAttribute('href', 'https://blog.naver.com/x');
   });
 
   it('renders an empty state when items is an empty array', () => {
-    render(<CaseGallery intro={null} note={null} sub={null} items={[]} />);
+    render(<CaseGallery intro={null} note={null} sub={null} media={null}
+        items={[]} />);
     expect(screen.getByTestId('cases-empty')).toBeInTheDocument();
   });
 
@@ -53,6 +114,7 @@ describe('CaseGallery', () => {
         intro={null}
         sub="핑크브로클린케어가 직접 진행한 현장의 작업 내용과 전후 과정은 네이버 블로그에서 자세히 확인할 수 있습니다."
         note={null}
+        media={null}
         items={[{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }]}
       />,
     );
@@ -63,7 +125,7 @@ describe('CaseGallery', () => {
 
   it('omits the section sub copy when the key is null', () => {
     render(
-      <CaseGallery intro="i" sub={null} note={null}
+      <CaseGallery intro="i" sub={null} note={null} media={null}
         items={[{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }]} />,
     );
     expect(screen.queryByTestId('projects-sub')).not.toBeInTheDocument();
@@ -72,7 +134,7 @@ describe('CaseGallery', () => {
   it('renders the two-column section head: intro on the left, sub on the right (source .section-head)', () => {
     render(
       <CaseGallery intro="실제 현장에서 확인해 보세요.\n최근 작업 사례입니다."
-        sub="핑크브로클린케어가 직접 진행한 현장의 작업 내용입니다." note={null} items={[]} />,
+        sub="핑크브로클린케어가 직접 진행한 현장의 작업 내용입니다." note={null} media={null} items={[]} />,
     );
     const head = document.querySelector('.pb-projects__head');
     expect(head).not.toBeNull();
@@ -86,12 +148,12 @@ describe('CaseGallery', () => {
 
   it('renders the eyebrow above the intro only when a value is provided', () => {
     const { rerender } = render(
-      <CaseGallery intro="소개" sub={null} note={null} items={[]} eyebrow="Recent Projects" />,
+      <CaseGallery intro="소개" sub={null} note={null} media={null} items={[]} eyebrow="Recent Projects" />,
     );
     expect(screen.getByTestId('projects-eyebrow')).toHaveTextContent('Recent Projects');
 
     // 모듈에 copy 키가 없는 동안은 배선이 값을 주지 않는다 — 눈금 없이 렌더.
-    rerender(<CaseGallery intro="소개" sub={null} note={null} items={[]} />);
+    rerender(<CaseGallery intro="소개" sub={null} note={null} media={null} items={[]} />);
     expect(screen.queryByTestId('projects-eyebrow')).not.toBeInTheDocument();
   });
 
@@ -100,13 +162,14 @@ describe('CaseGallery', () => {
       title: `실제 작업사례 0${n}`, summary: 'S', blog_url: '', cover: { url: null, alt: null },
     }));
     const { rerender } = render(
-      <CaseGallery intro={null} sub={null} note={null} items={items} cardKicker="PINKBRO PROJECT" />,
+      <CaseGallery intro={null} sub={null} note={null} media={null}
+        items={items} cardKicker="PINKBRO PROJECT" />,
     );
     expect(screen.getAllByTestId('case-card-kicker')).toHaveLength(4);
     expect(screen.getAllByTestId('case-card-kicker')[0]).toHaveTextContent('PINKBRO PROJECT');
 
     // copy 키(projects_card_kicker)가 없으면 킥커를 만들지 않는다 — 리터럴 대체 금지
-    rerender(<CaseGallery intro={null} sub={null} note={null} items={items} />);
+    rerender(<CaseGallery intro={null} sub={null} note={null} media={null} items={items} />);
     expect(screen.queryByTestId('case-card-kicker')).not.toBeInTheDocument();
   });
 
@@ -114,17 +177,19 @@ describe('CaseGallery', () => {
     const linked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: 'https://blog.naver.com/x',
       cover: { url: null, alt: null } }];
     const { rerender } = render(
-      <CaseGallery intro={null} sub={null} note={null} items={linked} linkLabel="작업사례 자세히 보기" />,
+      <CaseGallery intro={null} sub={null} note={null} media={null}
+        items={linked} linkLabel="작업사례 자세히 보기" />,
     );
     expect(screen.getByTestId('case-card-link')).toHaveTextContent('작업사례 자세히 보기');
 
     // 링크 문구(copy 키)가 없으면 링크 라벨을 만들지 않는다.
-    rerender(<CaseGallery intro={null} sub={null} note={null} items={linked} />);
+    rerender(<CaseGallery intro={null} sub={null} note={null} media={null} items={linked} />);
     expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
 
     // blog_url 이 비면 링크 문구가 있어도 렌더하지 않는다.
     const unlinked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }];
-    rerender(<CaseGallery intro={null} sub={null} note={null} items={unlinked} linkLabel="작업사례 자세히 보기" />);
+    rerender(<CaseGallery intro={null} sub={null} note={null} media={null}
+        items={unlinked} linkLabel="작업사례 자세히 보기" />);
     expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
   });
 });

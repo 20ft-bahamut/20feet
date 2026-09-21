@@ -301,22 +301,25 @@ describe('PackageList', () => {
     expect(screen.queryByTestId('package-stage-fallback')).not.toBeInTheDocument();
   });
 
-  it('falls back to the neutral css block when package_stage is empty or media is null', () => {
+  it('renders the bundled placeholder photo when package_stage is empty or media is null', () => {
+    const placeholder =
+      '/api/templates/assets/pinkbro-cleancare?file=images/service-awning-care.webp';
+
     const { unmount } = render(
       <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
         benefitItems={null} items={items}
         media={{ package_stage: { url: null, alt: null } }} />,
     );
-    expect(screen.getByTestId('package-stage-fallback')).toBeInTheDocument();
-    expect(screen.queryByTestId('package-stage-media')).not.toBeInTheDocument();
+    expect(screen.getByTestId('package-stage-media')).toHaveAttribute('src', placeholder);
+    expect(screen.queryByTestId('package-stage-fallback')).not.toBeInTheDocument();
     unmount();
 
     render(
       <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
         benefitItems={null} items={items} media={null} />,
     );
-    expect(screen.getByTestId('package-stage-fallback')).toBeInTheDocument();
-    expect(screen.queryByTestId('package-stage-media')).not.toBeInTheDocument();
+    expect(screen.getByTestId('package-stage-media')).toHaveAttribute('src', placeholder);
+    expect(screen.queryByTestId('package-stage-fallback')).not.toBeInTheDocument();
   });
 
   it('keeps the source section padding on the package root (원문 section { padding:110px 0 })', () => {

@@ -491,7 +491,10 @@ describe('inquiry contract', () => {
         expect(screen.queryByTestId('inquiry-bg-fallback')).not.toBeInTheDocument();
     });
 
-    it('falls back to the neutral css block when estimate_bg is empty or media is null', () => {
+    it('renders the bundled placeholder photo when estimate_bg is empty or media is null', () => {
+        const placeholder =
+            '/api/templates/assets/pinkbro-cleancare?file=images/service-sign-care.webp';
+
         const { unmount } = render(
             <InquiryForm
                 site={site}
@@ -505,8 +508,8 @@ describe('inquiry contract', () => {
                 panelNote={null}
             />,
         );
-        expect(screen.getByTestId('inquiry-bg-fallback')).toBeInTheDocument();
-        expect(screen.queryByTestId('inquiry-bg')).not.toBeInTheDocument();
+        expect(screen.getByTestId('inquiry-bg')).toHaveAttribute('src', placeholder);
+        expect(screen.queryByTestId('inquiry-bg-fallback')).not.toBeInTheDocument();
         unmount();
 
         render(
@@ -522,8 +525,8 @@ describe('inquiry contract', () => {
                 panelNote={null}
             />,
         );
-        expect(screen.getByTestId('inquiry-bg-fallback')).toBeInTheDocument();
-        expect(screen.queryByTestId('inquiry-bg')).not.toBeInTheDocument();
+        expect(screen.getByTestId('inquiry-bg')).toHaveAttribute('src', placeholder);
+        expect(screen.queryByTestId('inquiry-bg-fallback')).not.toBeInTheDocument();
     });
 
     it('renders no section anchor id — the layout owns anchor targets', () => {

@@ -164,6 +164,14 @@ export interface CaseItem {
     summary: string;
     blog_url: string;
     cover: MediaSlot;
+    /**
+     * 이 사례가 쓰는 커버 슬롯 키(`case_1`…`case_4`).
+     *
+     * 공개 API(`CaseResource`)는 아직 이 키를 내려주지 않는다 — 서버가 `cover_slot` 을
+     * 해석해 `cover` 로만 돌려주기 때문이다. 그래서 현재 카드의 슬롯은 카드 순번으로
+     * 정해진다(CaseGallery 참조). 계약이 이 키를 노출하면 이 값이 순번을 이긴다.
+     */
+    cover_slot?: string | null;
 }
 /** FAQ 항목 */
 export interface FaqItem {
