@@ -139,7 +139,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:hero_main",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -147,7 +147,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -219,10 +220,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:hero_main"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -429,7 +431,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:hero_sub",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -437,7 +439,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -509,10 +512,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:hero_sub"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -719,7 +723,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:why_stage",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -727,7 +731,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -799,10 +804,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:why_stage"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1009,7 +1015,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:package_stage",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -1017,7 +1023,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -1089,10 +1096,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:package_stage"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1299,7 +1307,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:estimate_bg",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -1307,7 +1315,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -1379,10 +1388,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:estimate_bg"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1589,7 +1599,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:case_1",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -1597,7 +1607,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -1669,10 +1680,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:case_1"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1879,7 +1891,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:case_2",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -1887,7 +1899,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -1959,10 +1972,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:case_2"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2169,7 +2183,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:case_3",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -2177,7 +2191,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -2249,10 +2264,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:case_3"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2459,7 +2475,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:case_4",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -2467,7 +2483,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -2539,10 +2556,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:case_4"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2749,7 +2767,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:site_og",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -2757,7 +2775,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -2829,10 +2848,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:site_og"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3039,7 +3059,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_floor",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -3047,7 +3067,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -3119,10 +3140,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_floor"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3329,7 +3351,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_glass",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -3337,7 +3359,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -3409,10 +3432,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_glass"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3619,7 +3643,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_awning",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -3627,7 +3651,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -3699,10 +3724,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_awning"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3909,7 +3935,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_sign",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -3917,7 +3943,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -3989,10 +4016,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_sign"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -4199,7 +4227,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_kitchen",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -4207,7 +4235,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -4279,10 +4308,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_kitchen"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -4489,7 +4519,7 @@
                                         "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
                                     },
                                     "autoUpload": false,
-                                    "uploadTriggerEvent": "upload:pinkbro_media",
+                                    "uploadTriggerEvent": "upload:pinkbro_media:services_air",
                                     "compact": true,
                                     "confirmBeforeRemove": true,
                                     "uploadParams": {
@@ -4497,7 +4527,8 @@
                                     },
                                     "apiEndpoints": {
                                         "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
-                                    }
+                                    },
+                                    "initialFiles": "{{[]}}"
                                 },
                                 "actions": [
                                     {
@@ -4569,10 +4600,11 @@
                                                         {
                                                             "handler": "emitEvent",
                                                             "params": {
-                                                                "event": "upload:pinkbro_media"
+                                                                "event": "upload:pinkbro_media:services_air"
                                                             }
                                                         },
                                                         {
+                                                            "handler": "apiCall",
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
