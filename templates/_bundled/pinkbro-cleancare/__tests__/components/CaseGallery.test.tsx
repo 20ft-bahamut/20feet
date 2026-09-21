@@ -68,4 +68,63 @@ describe('CaseGallery', () => {
     );
     expect(screen.queryByTestId('projects-sub')).not.toBeInTheDocument();
   });
+
+  it('renders the two-column section head: intro on the left, sub on the right (source .section-head)', () => {
+    render(
+      <CaseGallery intro="실제 현장에서 확인해 보세요.\n최근 작업 사례입니다."
+        sub="핑크브로클린케어가 직접 진행한 현장의 작업 내용입니다." note={null} items={[]} />,
+    );
+    const head = document.querySelector('.pb-projects__head');
+    expect(head).not.toBeNull();
+    // sub 는 소개 문구 아래(왼쪽 컬럼 내부)가 아니라 헤더의 직계 오른쪽 컬럼이다.
+    expect(head).toContainElement(screen.getByTestId('projects-sub'));
+    expect(head!.querySelector('.pb-projects__copy')).toContainElement(
+      screen.getByRole('heading', { level: 2 }),
+    );
+    expect(screen.getByRole('heading', { level: 2 }).nextElementSibling).toBeNull();
+  });
+
+  it('renders the eyebrow above the intro only when a value is provided', () => {
+    const { rerender } = render(
+      <CaseGallery intro="소개" sub={null} note={null} items={[]} eyebrow="Recent Projects" />,
+    );
+    expect(screen.getByTestId('projects-eyebrow')).toHaveTextContent('Recent Projects');
+
+    // 모듈에 copy 키가 없는 동안은 배선이 값을 주지 않는다 — 눈금 없이 렌더.
+    rerender(<CaseGallery intro="소개" sub={null} note={null} items={[]} />);
+    expect(screen.queryByTestId('projects-eyebrow')).not.toBeInTheDocument();
+  });
+
+  it('renders the card kicker on every card when a value is provided, and omits it otherwise', () => {
+    const items: CaseItem[] = [1, 2, 3, 4].map(n => ({
+      title: `실제 작업사례 0${n}`, summary: 'S', blog_url: '', cover: { url: null, alt: null },
+    }));
+    const { rerender } = render(
+      <CaseGallery intro={null} sub={null} note={null} items={items} cardKicker="PINKBRO PROJECT" />,
+    );
+    expect(screen.getAllByTestId('case-card-kicker')).toHaveLength(4);
+    expect(screen.getAllByTestId('case-card-kicker')[0]).toHaveTextContent('PINKBRO PROJECT');
+
+    // COPY REQUIRED 가 채워지기 전까지는 킥커 없이 렌더한다.
+    rerender(<CaseGallery intro={null} sub={null} note={null} items={items} />);
+    expect(screen.queryByTestId('case-card-kicker')).not.toBeInTheDocument();
+  });
+
+  it('renders the card link label with the arrow only when both the label and blog_url exist', () => {
+    const linked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: 'https://blog.naver.com/x',
+      cover: { url: null, alt: null } }];
+    const { rerender } = render(
+      <CaseGallery intro={null} sub={null} note={null} items={linked} linkLabel="작업사례 자세히 보기" />,
+    );
+    expect(screen.getByTestId('case-card-link')).toHaveTextContent('작업사례 자세히 보기');
+
+    // 링크 문구(copy 키)가 없으면 링크 라벨을 만들지 않는다.
+    rerender(<CaseGallery intro={null} sub={null} note={null} items={linked} />);
+    expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
+
+    // blog_url 이 비면 링크 문구가 있어도 렌더하지 않는다.
+    const unlinked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }];
+    rerender(<CaseGallery intro={null} sub={null} note={null} items={unlinked} linkLabel="작업사례 자세히 보기" />);
+    expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
+  });
 });

@@ -25,6 +25,42 @@ describe('PriceDiscount', () => {
     expect(screen.getAllByTestId('discount-step')).toHaveLength(3);
   });
 
+  it('orders each step condition-first and amount-second (원문 .benefit-item 순서)', () => {
+    render(
+      <PriceDiscount
+        notice={null}
+        flow={null}
+        heading={null} sub={null} noticeSub={null} field={null} flowLabel={null}
+        steps={[{ condition: '2개 항목', amount_label: '3%' }]}
+      />,
+    );
+
+    const step = screen.getByTestId('discount-step');
+    const condition = step.querySelector('.pb-pricing-step-condition');
+    const amount = step.querySelector('.pb-pricing-step-amount');
+    expect(condition).not.toBeNull();
+    expect(amount).not.toBeNull();
+    // 원문 benefit-item — small(조건) 이 strong(금액) 보다 먼저 온다
+    expect(condition!.compareDocumentPosition(amount!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('renders the source "Pricing" eyebrow above the heading (원문 복원)', () => {
+    render(
+      <PriceDiscount
+        heading="가격은 투명하게,\n견적은 더 분명하게 안내합니다."
+        sub={null}
+        notice={null} noticeSub={null} field={null} flow={null} flowLabel={null} steps={[]}
+      />,
+    );
+
+    const eyebrow = screen.getByTestId('pricing-eyebrow');
+    expect(eyebrow).toHaveTextContent('Pricing');
+    // 대시는 CSS ::before 이므로 요소 텍스트에는 섞이지 않는다
+    expect(eyebrow.textContent).toBe('Pricing');
+    // notice-c 의 Estimate Flow 라벨과 달리 대시를 갖는 변형이 아니다
+    expect(eyebrow.className).not.toContain('pb-pricing-eyebrow--plain');
+  });
+
   it('renders an empty state for an empty steps list', () => {
     render(<PriceDiscount notice={null} flow={null} heading={null} sub={null} noticeSub={null} field={null} flowLabel={null} steps={[]} />);
     expect(screen.getByTestId('discount-empty')).toBeInTheDocument();
@@ -97,5 +133,24 @@ describe('PriceDiscount', () => {
 
     expect(screen.getByTestId('pricing-flow-label')).toHaveTextContent('Estimate Flow');
     expect(screen.getByText(/기본가 확인/)).toBeInTheDocument();
+  });
+
+  it('marks the flow eyebrow as the plain variant (원문 notice-c span — 대시 없음)', () => {
+    render(
+      <PriceDiscount
+        heading={null}
+        sub={null}
+        notice={null}
+        noticeSub={null}
+        field={null}
+        flow="기본가 확인"
+        flowLabel="Estimate Flow"
+        steps={[]}
+      />,
+    );
+
+    expect(screen.getByTestId('pricing-flow-label').className).toContain(
+      'pb-pricing-eyebrow--plain',
+    );
   });
 });

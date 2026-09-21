@@ -5,35 +5,71 @@ import '../styles/CaseGallery.css';
 export interface CaseGalleryProps {
   /** 섹션 소개 문구 — copy 도메인에서 온다. null 이면 렌더하지 않는다. */
   intro: string | null;
-  /** 섹션 보조 문구(copy: projects_sub). null 이면 렌더하지 않는다. */
+  /** 섹션 보조 문구(copy: projects_sub). null 이면 렌더하지 않는다. 헤더 오른쪽 하단에 정렬된다. */
   sub: string | null;
   /** 하단 주의 문구 — null 이면 렌더하지 않는다. */
   note: string | null;
   /** 사례 목록. null = 로딩 중(스켈레톤), [] = 빈 상태. */
   items: CaseItem[] | null;
+  /**
+   * 섹션 눈금(원문 `Recent Projects`). 모듈 COPY 도메인에 키가 없어 현재 배선이
+   * 줄 수 없다 — 값을 받으면 렌더하고, 없으면 헤더는 소개 문구만 렌더한다.
+   */
+  eyebrow?: string | null;
+  /**
+   * 카드 킥커(원문 `PINKBRO PROJECT`). 모듈 COPY 도메인에 키가 없다 —
+   * 값을 받으면 카드마다 렌더하고, 없으면 생략한다.
+   */
+  cardKicker?: string | null;
+  /**
+   * 카드 링크 문구(원문 `작업사례 자세히 보기`). 모듈 COPY 도메인에 키가 없다 —
+   * 값을 받고 `blog_url` 이 있을 때만 렌더한다.
+   */
+  linkLabel?: string | null;
 }
 
 /**
  * 작업사례 갤러리 (소스 `#projects` / `.project-*` 이식).
+ *
+ * 구조는 원문 그대로다: `.section-head`(왼쪽 눈금+소개 / 오른쪽 보조 문구,
+ * 하단 정렬 2단) → `.project-grid`(4열 카드) → `.project-note`.
  *
  * 3단계 폴백: items null → 스켈레톤, [] → 빈 상태, 배열 → 카드 렌더.
  * 커버 슬롯이 비면 소스 `.project-thumb` 의 CSS 그라디언트 폴백을 렌더한다.
  * `blog_url` 이 비면 `<a>` 대신 `<div aria-disabled="true">` 로 렌더한다 —
  * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
  *
- * 원문 카드의 킥커(`PINKBRO PROJECT`)와 링크 문구(`작업사례 자세히 보기`)는
- * copy 도메인에 키가 없어 렌더하지 않는다 — 리포트의 COPY REQUIRED 항목 참조.
+ * 눈금(`Recent Projects`)·카드 킥커(`PINKBRO PROJECT`)·링크 문구
+ * (`작업사례 자세히 보기`)는 원문에 있는 문구지만 모듈 COPY 도메인에 키가
+ * 없다 — props 로만 받고 리터럴로 만들지 않는다 (COPY POLICY, COPY REQUIRED).
  */
-export function CaseGallery({ intro, sub, note, items }: CaseGalleryProps): React.ReactElement {
+export function CaseGallery({
+  intro,
+  sub,
+  note,
+  items,
+  eyebrow,
+  cardKicker,
+  linkLabel,
+}: CaseGalleryProps): React.ReactElement {
   return (
     <section className="pb-projects" data-testid="cases">
       <div className="pb-projects__wrap">
-        {intro ? <h2 className="pb-projects__intro">{intro}</h2> : null}
-        {sub ? (
-          <p className="pb-projects__sub" data-testid="projects-sub">
-            {sub}
-          </p>
-        ) : null}
+        <div className="pb-projects__head">
+          <div className="pb-projects__copy">
+            {eyebrow ? (
+              <span className="pb-projects__eyebrow" data-testid="projects-eyebrow">
+                {eyebrow}
+              </span>
+            ) : null}
+            {intro ? <h2 className="pb-projects__intro">{intro}</h2> : null}
+          </div>
+          {sub ? (
+            <p className="pb-projects__sub" data-testid="projects-sub">
+              {sub}
+            </p>
+          ) : null}
+        </div>
 
         {items === null ? (
           <div className="pb-project-grid" data-testid="cases-skeleton" aria-busy="true">
@@ -46,7 +82,13 @@ export function CaseGallery({ intro, sub, note, items }: CaseGalleryProps): Reac
         ) : (
           <div className="pb-project-grid">
             {items.map((item, index) => (
-              <CaseCard key={`${item.title}-${index}`} item={item} index={index} />
+              <CaseCard
+                key={`${item.title}-${index}`}
+                item={item}
+                index={index}
+                cardKicker={cardKicker}
+                linkLabel={linkLabel}
+              />
             ))}
           </div>
         )}
@@ -57,7 +99,17 @@ export function CaseGallery({ intro, sub, note, items }: CaseGalleryProps): Reac
   );
 }
 
-function CaseCard({ item, index }: { item: CaseItem; index: number }): React.ReactElement {
+function CaseCard({
+  item,
+  index,
+  cardKicker,
+  linkLabel,
+}: {
+  item: CaseItem;
+  index: number;
+  cardKicker?: string | null;
+  linkLabel?: string | null;
+}): React.ReactElement {
   const hasLink = typeof item.blog_url === 'string' && item.blog_url.length > 0;
   const coverUrl = item.cover?.url ?? null;
 
@@ -77,9 +129,14 @@ function CaseCard({ item, index }: { item: CaseItem; index: number }): React.Rea
         <span className="pb-project-index">Case {String(index + 1).padStart(2, '0')}</span>
       </div>
       <div className="pb-project-body">
+        {cardKicker ? <span className="pb-project-kicker" data-testid="case-card-kicker">{cardKicker}</span> : null}
         <h3>{item.title}</h3>
         <p>{item.summary}</p>
-        {hasLink ? <span className="pb-project-link" aria-hidden="true" /> : null}
+        {hasLink && linkLabel ? (
+          <span className="pb-project-link" data-testid="case-card-link" aria-hidden="true">
+            {linkLabel}
+          </span>
+        ) : null}
       </div>
     </>
   );

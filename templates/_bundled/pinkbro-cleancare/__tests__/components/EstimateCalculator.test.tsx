@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { EstimateCalculator } from '../../src/components/EstimateCalculator';
-import type { ServiceItem } from '../../src/lib/types';
+import type { ServiceItem, SiteData } from '../../src/lib/types';
 
 /** 브리프 더미 데이터 — 브랜드 문구가 아니라 테스트용 짧은 문자열/원문 가격 라벨 */
 const services = [
@@ -165,7 +165,7 @@ describe('EstimateCalculator', () => {
     expect(screen.getByTestId('summary-base')).toHaveTextContent('150,000원');
 
     // select 를 벽걸이로 바꾸면 80,000 으로 바뀐다
-    fireEvent.change(screen.getByLabelText('에어컨 종류'), {
+    fireEvent.change(screen.getByLabelText('에어컨 종류 선택'), {
       target: { value: '벽걸이 에어컨' },
     });
     expect(screen.getByTestId('summary-base')).toHaveTextContent('80,000원');
@@ -205,5 +205,96 @@ describe('EstimateCalculator', () => {
     );
     // 죽은 앵커(#inquiry)는 어디에도 남지 않는다
     expect(container.querySelectorAll('a[href="#inquiry"]')).toHaveLength(0);
+  });
+
+  it('renders the source eyebrow and the "Estimated Base Price" total label (원문 복원)', () => {
+    render(
+      <EstimateCalculator
+        heading="예상 기본금액을 먼저 확인해 보세요."
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    // 원문 section-head eyebrow — 대시(::before)는 CSS 이므로 요소 존재만 검증
+    expect(screen.getByTestId('estimator-eyebrow')).toHaveTextContent('Expected Estimate');
+    // 원문 .summary-total b 라벨
+    expect(screen.getByTestId('summary-final-label')).toHaveTextContent('Estimated Base Price');
+  });
+
+  it('splits the final value into a big number and a small 원 unit (원문 .value 구조)', () => {
+    render(
+      <EstimateCalculator
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    const value = screen.getByTestId('summary-final');
+    expect(value.tagName).toBe('SPAN');
+    expect(value.querySelector('small')).not.toBeNull();
+    expect(value.textContent).toBe('0원');
+  });
+
+  it('styles the summary actions as real pill buttons (원문 .btn.primary / .btn.kakao)', () => {
+    render(
+      <EstimateCalculator
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
+        services={services}
+        steps={steps}
+        site={{
+          brand_name: null,
+          brand_name_en: null,
+          tagline: null,
+          eyebrow: null,
+          phone: null,
+          kakao_channel: 'http://pf.kakao.com/_gmcuG',
+          region: null,
+          og_image_slot: null,
+        } as SiteData}
+      />,
+    );
+
+    const primary = screen.getByRole('link', { name: '이 구성으로 견적 문의하기' });
+    expect(primary).toHaveClass('pb-btn');
+    expect(primary).toHaveClass('pb-estimate-btn-primary');
+
+    const kakao = screen.getByRole('link', { name: '카카오채널 문의하기' });
+    expect(kakao).toHaveClass('pb-btn');
+    expect(kakao).toHaveClass('pb-btn--kakao');
+    expect(kakao).toHaveAttribute('href', 'http://pf.kakao.com/_gmcuG');
+    expect(kakao).toHaveAttribute('target', '_blank');
+  });
+
+  it('uses the source air-select label text', () => {
+    render(
+      <EstimateCalculator
+        heading="h"
+        sub="s"
+        summaryHeading="m"
+        summaryNote="n"
+        services={services}
+        steps={steps}
+        site={null}
+      />,
+    );
+
+    // 원문 .air-select label — "에어컨 종류 선택" (select 는 air-care 선택 시 렌더된다)
+    fireEvent.click(screen.getByLabelText('에어컨 분해세척'));
+    expect(screen.getByLabelText('에어컨 종류 선택')).toBeInTheDocument();
+    // 옵션 라벨은 종류 · 금액 형식을 유지한다
+    expect(screen.getByRole('option', { name: '천장형 4WAY · 150,000원' })).toBeInTheDocument();
   });
 });

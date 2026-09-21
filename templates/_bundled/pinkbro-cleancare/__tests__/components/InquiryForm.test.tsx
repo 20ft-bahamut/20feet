@@ -6,7 +6,7 @@
  * 폼 선택지(BUSINESS_TYPES / SERVICE_CHOICES)는 소스 원문 고정 값이라 원문 그대로 단언한다.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import InquiryForm from '../../src/components/InquiryForm';
 import {
     BUSINESS_TYPES,
@@ -365,6 +365,19 @@ describe('inquiry contract', () => {
         const checklist = screen.getByTestId('estimate-checklist');
         expect(checklist.children).toHaveLength(3);
         expect(checklist).toHaveTextContent('카카오채널로 바로 보내주세요');
+
+        // 원문 구조: <div><span>01</span><div>텍스트</div></div>
+        // CSS(.pb-checklist div 후손 셀렉터)가 내부 div 도 알약으로 꾸며서
+        // 원본의 중첩 알약 렌더가 된다 — 이 DOM 계약이 무너지면 중첩 알약도 사라진다.
+        const rows = within(checklist).queryAllByText(/홈페이지 문의는|사진을 보내실|표기 금액은/);
+        expect(rows).toHaveLength(3);
+        for (const row of Array.from(checklist.children)) {
+            expect(row.tagName).toBe('DIV');
+            expect(row.querySelector('span')).not.toBeNull();
+            expect(row.querySelector('span')?.textContent).toMatch(/^\d{2}$/);
+            expect(row.querySelector('div')).not.toBeNull();
+            expect(row.querySelector('div')?.textContent?.length).toBeGreaterThan(0);
+        }
 
         expect(screen.getByTestId('inquiry-panel-heading')).toHaveTextContent('간편견적 문의하기');
         expect(screen.getByTestId('inquiry-panel-sub')).toHaveTextContent(

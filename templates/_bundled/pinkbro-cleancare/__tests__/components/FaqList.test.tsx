@@ -33,7 +33,7 @@ describe('FaqList', () => {
     expect(screen.getByText('A1')).toBeInTheDocument();
   });
 
-  it('renders the intro sub copy from the copy domain (faq_intro_sub)', () => {
+  it('renders the intro copy as the section h2 heading (faq_intro)', () => {
     render(
       <FaqList
         intro={'견적 전에 많이 묻는 내용을\n먼저 확인해 보세요.'}
@@ -42,14 +42,18 @@ describe('FaqList', () => {
       />,
     );
 
-    expect(screen.getByText(/견적 전에 많이 묻는 내용을/)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 2, name: /견적 전에 많이 묻는 내용을/ });
+    expect(heading).toHaveClass('pb-faq-h2');
+    expect(screen.getByTestId('faq-heading')).toBe(heading);
+    expect(screen.getByText(/FAQ/)).toHaveClass('pb-faq-eyebrow');
     expect(screen.getByTestId('faq-intro-sub')).toHaveTextContent(
       '상담 전에 가장 많이 확인하는 내용을 짧고 분명하게 정리했습니다.',
     );
   });
 
-  it('omits the intro sub copy when the key is null', () => {
+  it('omits the intro heading and sub copy when the keys are null', () => {
     render(<FaqList intro={null} introSub={null} items={[{ question: 'Q1', answer: 'A1' }]} />);
+    expect(screen.queryByTestId('faq-heading')).not.toBeInTheDocument();
     expect(screen.queryByTestId('faq-intro-sub')).not.toBeInTheDocument();
   });
 });

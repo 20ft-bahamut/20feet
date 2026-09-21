@@ -6,14 +6,16 @@
  * 클래스는 템플릿 내 충돌을 피하려고 pb- 접두사를 붙였다.
  */
 
+/* 원문 section { padding:110px 0 } — #pricing 스코프 */
 .pb-pricing {
+  padding: 110px 0;
   background: var(--pb-soft);
 }
 
+/* 원문 .wrap — width:min(calc(100% - 40px), 1280px) + margin auto */
 .pb-pricing-inner {
-  max-width: var(--pb-max);
+  width: min(calc(100% - 40px), var(--pb-max, 1280px));
   margin-inline: auto;
-  padding-inline: 24px;
 }
 
 /* section-head (원문 .section-head / .copy / .sub) */
@@ -30,7 +32,7 @@
 }
 
 .pb-pricing-heading {
-  margin: 0;
+  margin: 16px 0 0; /* 원문 h2 style="margin-top:16px" */
   font-size: clamp(34px, 4vw, 58px);
   line-height: 1.06;
   letter-spacing: -0.055em;
@@ -65,11 +67,27 @@
   padding: 26px 28px;
 }
 
+/* 원문 .eyebrow — 대시(18px 선) 포함. notice-c 의 span 은 원문에서 대시가 없으므로
+   --plain 변형으로 끈다. */
 .pb-pricing-eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font: 800 12px/1 var(--pb-font-latin);
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+.pb-pricing-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.pb-pricing-eyebrow--plain::before {
+  content: none;
 }
 
 .pb-pricing-notice-a {
@@ -83,7 +101,7 @@
 
 .pb-pricing-notice-title {
   display: block;
-  margin-top: 12px;
+  margin-top: 0; /* 원문 .notice-a b — 상단 여백 없음(eyebrow 바로 아래) */
   font-size: 22px;
   line-height: 1.22;
   letter-spacing: -0.04em;
@@ -131,37 +149,41 @@
   white-space: pre-line;
 }
 
-/* 동시작업 할인 단계 */
+/* 동시작업 할인 단계 — 원문 .benefit-box > .benefit-grid > .benefit-item 의
+   구조·값을 그대로 쓴다(흰 박스 안 soft 셀, 중앙 정렬, 조건 위 · 금액 아래).
+   모듈 steps 는 3행이므로 열만 3으로 둔다(원문 benefit-grid 는 4열). */
 .pb-pricing-steps {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin: 18px 0 0;
-  padding: 0;
+  gap: 14px;
+  margin: 24px 0 0;
+  padding: 28px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid var(--pb-line);
+  box-shadow: 0 18px 48px rgba(15, 17, 24, 0.06);
 }
 
 .pb-pricing-step {
-  border: 1px solid var(--pb-line);
+  padding: 22px 18px;
   border-radius: 22px;
-  background: #fff;
-  padding: 20px 22px;
-  box-shadow: 0 14px 34px rgba(15, 17, 24, 0.045);
+  background: var(--pb-soft);
+  text-align: center;
 }
 
 .pb-pricing-step-amount {
   display: block;
-  font-size: 24px;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
+  margin-top: 10px;
+  font: 900 34px/1 var(--pb-font-latin);
+  letter-spacing: -0.05em;
   color: var(--pb-pink);
 }
 
 .pb-pricing-step-condition {
   display: block;
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--pb-muted);
 }
 
@@ -193,7 +215,8 @@
   50% { opacity: 0.55; }
 }
 
-@media (max-width: 1024px) {
+/* 원문 @media (max-width:1100px) — notice-box · section-head 단일 컬럼 */
+@media (max-width: 1100px) {
   .pb-pricing-notice {
     grid-template-columns: 1fr;
   }
@@ -204,9 +227,21 @@
     gap: 14px;
     margin-bottom: 28px;
   }
+}
+
+/* 원문 @media (max-width:720px) — section 패딩 축소 · wrap 여백 24px · notice 패딩 */
+@media (max-width: 720px) {
+  .pb-pricing {
+    padding: 82px 0;
+  }
+
+  .pb-pricing-inner {
+    width: min(calc(100% - 24px), var(--pb-max, 1280px));
+  }
 
   .pb-pricing-steps {
     grid-template-columns: 1fr;
+    padding: 22px 20px;
   }
 
   .pb-pricing-notice > div {

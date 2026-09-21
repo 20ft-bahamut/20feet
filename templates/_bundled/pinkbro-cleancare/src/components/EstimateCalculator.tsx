@@ -40,8 +40,8 @@ export interface EstimateCalculatorProps {
 /** 에어컨 항목의 slug — 모듈 시더가 쓰는 원문 slug */
 const AIR_SLUG = 'air-care';
 
-/** 에어컨 종류 선택 라벨 — 위젯 내부 폼 라벨(브랜드 카피 아님) */
-const AIR_KIND_LABEL = '에어컨 종류';
+/** 에어컨 종류 선택 라벨 — 위젯 내부 폼 라벨(원문 .air-select label 과 같은 문구) */
+const AIR_KIND_LABEL = '에어컨 종류 선택';
 
 function defaultAirKind(service: ServiceItem): string {
   const types = service.air_types ?? [];
@@ -142,6 +142,12 @@ export function EstimateCalculator({
       {(heading || sub) && (
         <div className="pb-estimator-head">
           <div className="pb-estimator-head-copy">
+            {/* 원문 .estimator section-head 의 eyebrow(`Expected Estimate`) — copy
+                도메인에 키가 없어 원문 그대로 리터럴로 복구했다. 모듈 키 추가 시
+                props 로 교체할 것(리포트 copy_required 참조). */}
+            <span className="pb-estimator-eyebrow" data-testid="estimator-eyebrow">
+              Expected Estimate
+            </span>
             {heading && (
               <h3 className="pb-estimator-heading" data-testid="estimator-heading">
                 {heading}
@@ -221,7 +227,16 @@ export function EstimateCalculator({
           </div>
 
           <div className="pb-estimate-summary-total">
-            <b data-testid="summary-final">{formatWon(result.final)}</b>
+            {/* 원문 .summary-total — b(라벨 `Estimated Base Price`) + span.value(숫자+small 원).
+                라벨은 copy 도메인에 키가 없어 원문 그대로 리터럴로 복구했다(모듈 키 추가 시
+                props 로 교체 — 리포트 copy_required 참조). */}
+            <b className="pb-estimate-summary-total-label" data-testid="summary-final-label">
+              Estimated Base Price
+            </b>
+            <span className="pb-estimate-summary-value" data-testid="summary-final">
+              {formatWon(result.final).replace(/원$/, '')}
+              <small>원</small>
+            </span>
             {summaryNote ? (
               <div className="pb-estimate-summary-note" data-testid="estimator-summary-note">
                 {summaryNote}
@@ -231,12 +246,12 @@ export function EstimateCalculator({
 
           <div className="pb-estimate-summary-actions">
             {/* 앵커 목적지는 견적/문의 섹션(#estimate)이다 — 레이아웃이 그 id 를 소유한다 */}
-            <a className="pb-estimate-option-price" href="#estimate">
+            <a className="pb-btn pb-estimate-btn-primary" href="#estimate">
               이 구성으로 견적 문의하기
             </a>
             {site?.kakao_channel ? (
               <a
-                className="pb-estimate-option-price"
+                className="pb-btn pb-btn--kakao"
                 href={site.kakao_channel}
                 target="_blank"
                 rel="noopener noreferrer"

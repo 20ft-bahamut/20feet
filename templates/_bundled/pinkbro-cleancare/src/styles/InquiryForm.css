@@ -94,10 +94,11 @@
 }
 
 .pb-inquiry-heading {
-    margin: 0;
-    font-size: clamp(30px, 3.4vw, 46px);
-    line-height: 1.1;
-    letter-spacing: -0.05em;
+    /* 원문 .h2: clamp(34px,4vw,58px) / 1.06 / -.055em + inline margin-top:14px */
+    margin: 14px 0 0;
+    font-size: clamp(34px, 4vw, 58px);
+    line-height: 1.06;
+    letter-spacing: -0.055em;
     font-weight: 900;
     color: #fff;
     /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
@@ -122,7 +123,11 @@
     margin-top: 4px;
 }
 
-.pb-checklist > div {
+/* 좌측 체크리스트(원문 .check-list)
+   원문 셀렉터는 후손 셀렉터라 내부 텍스트 div 도 같은 알약 스타일을 받아
+   "바깥 알약 안에 번호 + 안쪽 알약(텍스트)" 중첩 구조로 렌더된다(원본 스크린샷 참조).
+   자식 셀렉터로 바꾸면 그 중첩 알약이 사라지므로 후손 셀렉터를 그대로 유지한다. */
+.pb-checklist div {
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -137,9 +142,14 @@
     word-break: keep-all;
 }
 
-.pb-checklist > div > span {
+.pb-checklist span {
     color: #ffc2db;
     font-weight: 900;
+}
+
+/* 원문 좌측 카카오 버튼에 inline margin-top:22px — 패널 내 버튼과 공유 클래스라 여기서만 스코프 */
+.pb-inquiry-copy .pb-btn--kakao {
+    margin-top: 22px;
 }
 
 /* 폼 하단 안내(원문 .panel-note) */

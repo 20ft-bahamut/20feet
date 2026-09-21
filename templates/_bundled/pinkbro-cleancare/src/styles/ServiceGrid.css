@@ -1,60 +1,72 @@
 /*
  * ServiceGrid 섹션 스타일.
- * 값은 _workspace/pinkbro/source/styles.css 의 .services / .service-* 원문에서
- * 가져오고, 클래스 접두사만 pb- 로 바꿨다. 색·폰트·반경은 --pb-* 토큰을 쓴다.
+ * 값은 _workspace/pinkbro/source/styles.css 의 .services / .section-head / .service-* /
+ * .extra-box / .btn.primary 원문에서 가져오고, 클래스 접두사만 pb- 로 바꿨다.
+ * 색·폰트·반경은 --pb-* 토큰을 쓴다.
  */
 
+/* 원문 section { padding:110px 0 } + .services { background:var(--soft) } */
 .pb-services {
+  padding: 110px 0;
   background: var(--pb-soft);
 }
 
-.pb-services-intro {
-  margin: 0 0 20px;
-  font-size: 15px;
-  line-height: 1.8;
-  color: var(--pb-muted);
-  max-width: 42ch;
-  /* 원문은 <br> 두 줄 — 시더 값의 \n 을 그대로 살린다 */
+/* 원문 .section-head — 제목 열과 보조 문구를 아래정렬 나란히 */
+.pb-section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 42px;
+}
+
+.pb-section-copy {
+  max-width: 740px;
+}
+
+/* 원문 .eyebrow — 대시 마커(::before) 포함. copy 키가 없어 props 가 null 이면 렌더하지 않는다 */
+.pb-services-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pb-pink);
+}
+
+.pb-services-eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+/* 원문 .h2 — eyebrow 바로 아래 16px (원문 inline margin-top:16px) */
+.pb-services-title {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 58px);
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  color: var(--pb-ink);
+  word-break: keep-all;
+  /* 모듈 service_intro 값의 \n 을 원문 <br> 처럼 살린다 */
   white-space: pre-line;
 }
 
+.pb-services-eyebrow + .pb-services-title {
+  margin-top: 16px;
+}
+
+/* 원문 .section-head > .sub */
 .pb-services-sub {
-  margin: 0 0 20px;
+  margin: 0;
   font-size: 15px;
   line-height: 1.82;
   color: var(--pb-muted);
-  max-width: 52ch;
-  text-wrap: pretty;
-  word-break: keep-all;
-}
-
-/* 목록에 없는 서비스 안내 박스 (원문 .extra-box) */
-.pb-extra-box {
-  margin-top: 24px;
-  padding: 26px 28px;
-  border-radius: 28px;
-  background: #11131a;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.pb-extra-box b {
-  display: block;
-  font-size: 24px;
-  line-height: 1.2;
-  letter-spacing: -0.04em;
-  word-break: keep-all;
-}
-
-.pb-extra-box p {
-  margin: 8px 0 0;
-  font-size: 14px;
-  line-height: 1.76;
-  color: rgba(255, 255, 255, 0.78);
-  max-width: 52ch;
+  max-width: 42ch;
   text-wrap: pretty;
   word-break: keep-all;
 }
@@ -154,6 +166,7 @@
   font-size: 15px;
   line-height: 1.8;
   color: var(--pb-muted);
+  word-break: keep-all;
 }
 
 .pb-price-row {
@@ -168,6 +181,12 @@
   font: 900 34px/1 var(--pb-font-latin);
   letter-spacing: -0.05em;
   color: var(--pb-ink);
+}
+
+/* 원문 .price-row strong > span — 단위(원~)는 본문 폰트 15px */
+.pb-price-row strong span {
+  font-size: 15px;
+  font-family: var(--pb-font-body);
 }
 
 .pb-price-row small {
@@ -186,13 +205,16 @@
   border-top: 1px solid var(--pb-line);
 }
 
+/* 원문 .detail summary — 라벨 왼쪽, ＋ 오른쪽 */
 .pb-service-detail summary {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   cursor: pointer;
   list-style: none;
   min-height: 18px;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--pb-ink);
 }
 
@@ -200,10 +222,10 @@
   display: none;
 }
 
-/* 상세 펼침 라벨(copy: service_detail_label) 뒤의 ＋ 마커 */
+/* 라벨(copy: service_detail_label)이 없을 때도 ＋ 를 오른쪽에 둔다 */
 .pb-service-detail-marker {
-  margin-left: 8px;
-  color: var(--pb-pink);
+  margin-left: auto;
+  color: inherit;
 }
 
 .pb-detail-body {
@@ -214,6 +236,61 @@
   color: #525866;
   font-size: 14px;
   line-height: 1.78;
+  word-break: keep-all;
+}
+
+/* 목록에 없는 서비스 안내 박스 (원문 .extra-box) */
+.pb-extra-box {
+  margin-top: 24px;
+  padding: 26px 28px;
+  border-radius: 28px;
+  background: #11131a;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.pb-extra-box b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  word-break: keep-all;
+}
+
+.pb-extra-box p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.76;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 52ch;
+  text-wrap: pretty;
+  word-break: keep-all;
+}
+
+/* 원문 .btn.primary — copy 키(extra_box_cta)가 없어 props 가 null 이면 렌더하지 않는다 */
+.pb-extra-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid var(--pb-pink);
+  background: var(--pb-pink);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  transition: 0.24s ease;
+  cursor: pointer;
+}
+
+.pb-extra-cta:hover {
+  background: #ef2278;
+  transform: translateY(-2px);
 }
 
 /* 로딩 스켈레톤 */
@@ -237,13 +314,23 @@
   background: var(--pb-soft-2);
 }
 
+/* 원문 @media(max-width:1100px) — .section-head align-items:flex-start */
 @media (max-width: 1100px) {
+  .pb-section-head {
+    align-items: flex-start;
+  }
+
   .pb-service-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* 원문 @media(max-width:720px) — section padding 82px, 카드 반경 22px */
 @media (max-width: 720px) {
+  .pb-services {
+    padding: 82px 0;
+  }
+
   .pb-service-grid {
     grid-template-columns: 1fr;
   }

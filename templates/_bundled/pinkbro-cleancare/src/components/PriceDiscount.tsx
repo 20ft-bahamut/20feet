@@ -59,6 +59,12 @@ export function PriceDiscount({
         {(heading !== null || sub !== null) && (
           <div className="pb-pricing-head">
             <div className="pb-pricing-head-copy">
+              {/* 원문 #pricing section-head 의 eyebrow(`Pricing`) — copy 도메인에 키가
+                  없어 원문 그대로 리터럴로 복구했다. 모듈 키 추가 시 props 로 교체할 것
+                  (리포트 copy_required 참조). */}
+              <span className="pb-pricing-eyebrow" data-testid="pricing-eyebrow">
+                Pricing
+              </span>
               {heading !== null && (
                 <h2 className="pb-pricing-heading" data-testid="pricing-heading">
                   {heading}
@@ -94,7 +100,10 @@ export function PriceDiscount({
             {flow !== null && (
               <div className="pb-pricing-notice-c">
                 {flowLabel !== null && (
-                  <span className="pb-pricing-eyebrow" data-testid="pricing-flow-label">
+                  <span
+                    className="pb-pricing-eyebrow pb-pricing-eyebrow--plain"
+                    data-testid="pricing-flow-label"
+                  >
                     {flowLabel}
                   </span>
                 )}
@@ -112,8 +121,9 @@ export function PriceDiscount({
           <ul className="pb-pricing-steps">
             {steps.map((step, i) => (
               <li className="pb-pricing-step" data-testid="discount-step" key={`${step.condition}-${i}`}>
-                <b className="pb-pricing-step-amount">{step.amount_label}</b>
+                {/* 원문 .benefit-item 순서 — small(조건) 위, strong(금액) 아래 */}
                 <span className="pb-pricing-step-condition">{step.condition}</span>
+                <b className="pb-pricing-step-amount">{step.amount_label}</b>
               </li>
             ))}
           </ul>

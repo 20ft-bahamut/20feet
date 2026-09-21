@@ -9,13 +9,15 @@
  * 외부 이미지 URL 없음 — 소스의 Unsplash 배경은 이 위젯에 없다(estimate-shell 은 문의 폼 소속).
  */
 
+/* 원문 .estimator — radius 30px · shadow 0 24px 66px (공용 토큰 --pb-radius-xl 36px /
+   --pb-shadow 와 값이 다르므로 원문 값을 직접 쓴다) */
 .pb-estimator {
   margin-top: 34px;
   padding: 30px;
-  border-radius: var(--pb-radius-xl, 30px);
+  border-radius: 30px;
   background: var(--pb-bg, #fff);
   border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
-  box-shadow: var(--pb-shadow, 0 24px 66px rgba(15, 17, 24, 0.08));
+  box-shadow: 0 24px 66px rgba(15, 17, 24, 0.08);
 }
 
 /* ---- section-head (원문 .section-head / .copy / .sub / .h3) ---- */
@@ -45,11 +47,30 @@
 .pb-estimator-sub {
   margin: 0;
   font-size: 15px;
-  line-height: 1.8;
+  line-height: 1.82; /* 원문 .sub */
   color: var(--pb-muted, #686e7c);
-  max-width: 52ch;
+  max-width: 42ch; /* 원문 .section-head .sub */
   text-wrap: pretty;
   word-break: keep-all;
+}
+
+/* 원문 .eyebrow — 대시(18px 선) 포함 */
+.pb-estimator-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 12px/1 var(--pb-font-latin, 'Manrope', sans-serif);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pb-pink, #ff2d86);
+}
+
+.pb-estimator-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
 }
 
 .pb-estimator-grid {
@@ -112,7 +133,7 @@
 .pb-estimate-air > label {
   font-size: 13px;
   font-weight: 800;
-  color: var(--pb-ink-2, #222632);
+  color: var(--pb-ink, #161922); /* 원문 .air-select label — --ink */
 }
 
 .pb-estimate-air select {
@@ -164,17 +185,37 @@
   font-weight: 800;
 }
 
+/* 원문 .summary-total — b 는 라벨(13px · 자간 .12em · 대문자 · #ffb9d6),
+   .value 가 큰 숫자(900 42px Manrope, small 원 은 16px Noto) */
 .pb-estimate-summary-total {
   margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.pb-estimate-summary-total > b {
+.pb-estimate-summary-total-label {
   display: block;
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffb9d6;
+  font-family: var(--pb-font-latin, 'Manrope', sans-serif);
+}
+
+.pb-estimate-summary-value {
+  display: block;
+  margin-top: 12px;
   font: 900 42px/1 var(--pb-font-latin, 'Manrope', sans-serif);
   letter-spacing: -0.05em;
   color: #fff;
+}
+
+.pb-estimate-summary-value small {
+  font-size: 16px;
+  font-family: var(--pb-font-body, 'Noto Sans KR', sans-serif);
+  letter-spacing: 0;
 }
 
 .pb-estimate-summary-note {
@@ -194,12 +235,26 @@
   margin-top: 18px;
 }
 
+/* 원문 .btn.primary (핑크) — 공용 .pb-btn 에 없는 변형이라 여기서만 정의한다 */
+.pb-estimate-btn-primary {
+  background: var(--pb-pink, #ff2d86);
+  border-color: var(--pb-pink, #ff2d86);
+  color: #fff;
+}
+
+.pb-estimate-btn-primary:hover {
+  background: #ef2278;
+  border-color: #ef2278;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 /* ---- 로딩 스켈레톤 ---- */
 
 .pb-estimate-skeleton {
   margin-top: 34px;
   padding: 30px;
-  border-radius: var(--pb-radius-xl, 30px);
+  border-radius: 30px;
   background: var(--pb-bg, #fff);
   border: 1px solid var(--pb-line, rgba(19, 22, 30, 0.1));
   display: grid;
@@ -237,7 +292,7 @@
 .pb-estimate-empty {
   margin-top: 34px;
   padding: 30px;
-  border-radius: var(--pb-radius-xl, 30px);
+  border-radius: 30px;
   background: var(--pb-soft-2, #fafbfe);
   border: 1px dashed var(--pb-line, rgba(19, 22, 30, 0.1));
   font-size: 14px;
@@ -245,9 +300,10 @@
   color: var(--pb-muted, #686e7c);
 }
 
-/* ---- 반응형(원문 @media 1fr 단일 컬럼) ---- */
+/* ---- 반응형(원문 @media) ---- */
 
-@media (max-width: 900px) {
+/* 원문 1100px — .estimator-grid · .section-head 단일 컬럼 */
+@media (max-width: 1100px) {
   .pb-estimator-grid,
   .pb-estimate-skeleton {
     grid-template-columns: 1fr;
@@ -257,5 +313,14 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+}
+
+/* 원문 720px — .estimator padding 24px 20px · radius 22px */
+@media (max-width: 720px) {
+  .pb-estimator,
+  .pb-estimate-skeleton {
+    padding: 24px 20px;
+    border-radius: 22px;
   }
 }

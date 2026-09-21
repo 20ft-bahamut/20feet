@@ -5,11 +5,11 @@ import { PackageList } from '../../src/components/PackageList';
 const items = [
   {
     title: 'A', summary: 'sa', includes: ['i1', 'i2'],
-    base_total: '400,000원', price: '380,000원', discount_rate: 5, is_featured: false,
+    base_total: '400,000원', price: '380,000원~', discount_rate: 5, is_featured: false,
   },
   {
     title: 'B', summary: 'sb', includes: ['i3'],
-    base_total: '900,000원', price: '810,000원', discount_rate: 10, is_featured: true,
+    base_total: '900,000원', price: '810,000원~', discount_rate: 10, is_featured: true,
   },
 ];
 
@@ -24,13 +24,47 @@ describe('PackageList', () => {
     expect(screen.getByTestId('packages-empty')).toBeInTheDocument();
   });
 
-  it('renders one card per package with price, base_total and discount_rate', () => {
+  it('renders one card per package with price, base_total, suffix and old price', () => {
     render(<PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null} benefitItems={null} media={null} items={items} />);
 
     expect(screen.getAllByTestId('package-card')).toHaveLength(2);
-    expect(screen.getByText('380,000원')).toBeInTheDocument();
+    // 원문 .pkg-total — 금액 본문(42px)과 접미사 `원~`(16px small)을 나눠 렌더한다
+    expect(screen.getByText('380,000')).toBeInTheDocument();
+    expect(screen.getAllByTestId('package-price-suffix')[0]).toHaveTextContent('원~');
     expect(screen.getByText('400,000원')).toBeInTheDocument();
-    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('810,000')).toBeInTheDocument();
+  });
+
+  it('renders the section intro as a stage heading (원문 .package-copy .h2)', () => {
+    render(
+      <PackageList
+        intro={'매장에 필요한 것만 골라\n더 효율적으로 관리하세요.'}
+        introSub={null}
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={items}
+      />,
+    );
+    expect(screen.getByRole('heading', { level: 2, name: /매장에 필요한 것만 골라/ })).toBeInTheDocument();
+    expect(screen.getByTestId('packages-intro').tagName).toBe('H2');
+  });
+
+  it('keeps the price intact when it has no 원 suffix to split', () => {
+    render(
+      <PackageList
+        intro={null}
+        introSub={null}
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={[{ ...items[0], price: '380,000' }]}
+      />,
+    );
+    expect(screen.getByText('380,000')).toBeInTheDocument();
+    expect(screen.queryByTestId('package-price-suffix')).not.toBeInTheDocument();
   });
 
   it('renders the includes array as a list', () => {

@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import AboutSection from '../../src/components/AboutSection';
+
+const css = (): string =>
+  readFileSync(join(__dirname, '..', '..', 'src', 'styles', 'AboutSection.css'), 'utf8');
 
 describe('AboutSection', () => {
   it('renders the message and each perspective', () => {
@@ -101,5 +106,25 @@ describe('AboutSection', () => {
       />,
     );
     expect(container.querySelector('#about')).toBeNull();
+  });
+
+  it('keeps the restored original metrics in AboutSection.css', () => {
+    const source = css();
+    // 원문 section { padding:110px 0 }
+    expect(source).toMatch(/\.pb-about\s*{\s*padding:\s*110px 0;\s*}/);
+    // 원문 .h2 값 — 사이드 헤딩이 원본보다 작게 렌더되던 결함(clamp 42px)의 회귀 방지
+    expect(source).toMatch(
+      /\.pb-why-heading\s*{[^}]*font-size:\s*clamp\(34px,\s*4vw,\s*58px\)[^}]*line-height:\s*1\.06[^}]*letter-spacing:\s*-\.055em[^}]*}/,
+    );
+    // 원문 리셋 h2 { margin:0 } — 카드와의 간격은 grid gap 18px 만 남는다
+    expect(source).toMatch(/\.pb-why-heading\s*{[^}]*margin:\s*0;[^}]*}/);
+    // 원문 그리드/스테이지/오버레이/카드 원문 값
+    expect(source).toMatch(/\.pb-why-grid\s*{[^}]*grid-template-columns:\s*\.95fr 1\.05fr[^}]*}/);
+    expect(source).toMatch(/\.pb-why-stage\s*{[^}]*min-height:\s*620px[^}]*}/);
+    expect(source).toMatch(/\.pb-why-overlay h3\s*{[^}]*font-size:\s*32px[^}]*}/);
+    expect(source).toMatch(/\.pb-why-card\s*{[^}]*padding:\s*30px[^}]*}/);
+    // 원문 브레이크포인트
+    expect(source).toContain('@media (max-width: 1100px)');
+    expect(source).toContain('@media (max-width: 720px)');
   });
 });
