@@ -5,6 +5,7 @@ namespace Modules\Pinkbro\Contents;
 use App\Extension\AbstractModule;
 use Illuminate\Database\Seeder;
 use Modules\Pinkbro\Contents\Database\Seeders\PinkbroContentsSeeder;
+use Modules\Pinkbro\Contents\Listeners\MetaCleanupListener;
 
 /**
  * PinkBro Contents 모듈
@@ -257,9 +258,7 @@ class Module extends AbstractModule
      */
     public function getHookListeners(): array
     {
-        // 고아 메타 정리 리스너(MetaCleanupListener)는 이후 태스크에서 추가한다.
-        // 같은 이유로 지금은 비운다.
-        return [];
+        return [MetaCleanupListener::class];
     }
 
     /**
