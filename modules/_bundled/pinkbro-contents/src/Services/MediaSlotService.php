@@ -109,6 +109,74 @@ class MediaSlotService
         ]);
     }
 
+    /**
+     * 슬롯이 지금 가리키는 첨부 id — 연결돼 있지 않으면 null.
+     *
+     * `resolve()` 의 url 판정과 같은 조건을 쓴다: 메타 행이 없거나 `attachment_id` 가
+     * 비어 있으면 "연결 없음"이다. 첨부 행 자체의 생존은 보지 않는다 — 소실된 첨부를
+     * 가리키는 슬롯은 `resolve()` 가 url null 로 보므로 여기서도 id 만 돌려주고,
+     * 그 판정은 호출자(`relabel()`·컨트롤러)가 한다.
+     */
+    public function linkedAttachmentId(string $slot): ?int
+    {
+        self::assertKnown($slot);
+
+        $row = $this->meta->get(null, null, MetaDomain::MEDIA, $slot);
+
+        if (! is_array($row) || empty($row['attachment_id'])) {
+            return null;
+        }
+
+        return (int) $row['attachment_id'];
+    }
+
+    /**
+     * 이미 연결된 슬롯의 대체 텍스트만 바꾼다 — 새 업로드가 없는 저장 경로다.
+     *
+     * 첨부는 `link()` 로 같은 id 를 다시 쓴다: 새 첨부를 만들지 않고, 슬롯이 가리키는
+     * 대상도 바꾸지 않는다. 그래서 이 경로는 앵커 게시글의 첨부 예산을 쓰지 않는다.
+     *
+     * 연결된 첨부가 없으면(또는 그 첨부 행이 사라졌으면) `false` 를 돌려준다 —
+     * 붙일 대상이 없는 저장을 성공으로 위장하지 않기 위해서다. 호출자가 422 로 매핑한다.
+     */
+    public function relabel(string $slot, ?string $alt): bool
+    {
+        self::assertKnown($slot);
+
+        $attachment = Attachment::find($this->linkedAttachmentId($slot) ?? 0);
+
+        if (! $attachment) {
+            return false;
+        }
+
+        $this->link($slot, (int) $attachment->id, $alt);
+
+        return true;
+    }
+
+    /**
+     * 그 첨부를 아직 가리키는 슬롯이 남아 있는가.
+     *
+     * 재연결로 슬롯이 놓은 첨부를 정리할 때, 다른 슬롯이 같은 첨부를 가리키고 있으면
+     * 손대면 안 된다 (두 슬롯이 한 첨부를 공유하는 상태는 메타를 직접 만진 경우에도
+     * 생길 수 있다). `$exceptSlot` 은 "지금 다시 연결하는 슬롯"을 세지 않기 위한 것이다 —
+     * 이 판정은 새 연결을 쓰기 **전에** 부르므로, 제외하지 않으면 자기 자신이 걸린다.
+     */
+    public function attachmentInUse(int $attachmentId, ?string $exceptSlot = null): bool
+    {
+        foreach (self::slotKeys() as $slot) {
+            if ($slot === $exceptSlot) {
+                continue;
+            }
+
+            if ($this->linkedAttachmentId($slot) === $attachmentId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function unlink(string $slot): void
     {
         self::assertKnown($slot);

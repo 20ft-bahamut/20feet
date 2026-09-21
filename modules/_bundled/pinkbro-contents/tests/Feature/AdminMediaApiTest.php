@@ -220,6 +220,158 @@ class AdminMediaApiTest extends PinkbroContentsTestCase
         $this->assertNotSame($first->id, $this->metaFor('hero_main')['attachment_id']);
     }
 
+    // ── 재연결 시 이전 첨부 놓아주기 (첨부 상한) ─────────────────────────────
+
+    /**
+     * 앵커 게시글의 **살아있는** 첨부 수.
+     *
+     * `max_file_count` 판정이 보는 집합과 같은 조건이다 (소프트 삭제 제외 · 게시글 기준).
+     */
+    private function anchorAttachmentCount(): int
+    {
+        $boardId = Board::where('slug', 'pinkbro_media')->value('id');
+
+        return Attachment::query()
+            ->where('board_id', $boardId)
+            ->whereNotNull('post_id')
+            ->count();
+    }
+
+    public function test_relinking_releases_the_previous_attachment(): void
+    {
+        $first = $this->createTempAttachment('tk-rel-1', 'one.jpg');
+        $second = $this->createTempAttachment('tk-rel-2', 'two.jpg');
+        $this->actingAsAdmin();
+
+        $this->linkSlot('hero_main', 'tk-rel-1');
+        $this->assertSame(1, $this->anchorAttachmentCount());
+
+        $this->linkSlot('hero_main', 'tk-rel-2');
+
+        // 이전 첨부는 놓인다 — 행은 남지만(소프트 삭제) 살아있는 첨부가 아니다.
+        $this->assertTrue(
+            Attachment::withTrashed()->findOrFail($first->id)->trashed(),
+            '재연결이 이전 첨부를 놓지 않았다'
+        );
+
+        // 파일은 지우지 않는다 — 경로가 그대로 남아 보존기간 뒤 정리 대상이 된다.
+        $this->assertSame('pinkbro_media/'.date('Y/m/d').'/one.jpg', Attachment::withTrashed()->find($first->id)->path);
+
+        // 새 첨부만 살아있다 — 앵커 게시글의 첨부 수가 늘지 않는다.
+        $this->assertSame(1, $this->anchorAttachmentCount());
+        $this->assertSame($second->id, $this->metaFor('hero_main')['attachment_id']);
+    }
+
+    public function test_relinking_does_not_release_an_attachment_another_slot_still_points_at(): void
+    {
+        $shared = $this->createTempAttachment('tk-shared', 'shared.jpg');
+        $this->createTempAttachment('tk-next', 'next.jpg');
+        $this->actingAsAdmin();
+
+        $this->linkSlot('hero_main', 'tk-shared');
+
+        // case_1 이 같은 첨부를 가리키게 만든다 — API 로는 생기지 않지만
+        // 메타를 직접 만진 상태를 서비스 계층은 방어해야 한다.
+        app(MediaSlotService::class)->link('case_1', $shared->id, '공유');
+
+        $this->linkSlot('hero_main', 'tk-next');
+
+        // 다른 슬롯이 아직 가리키므로 놓지 않는다 — 파일이 사라지면 안 된다.
+        $this->assertFalse(Attachment::withTrashed()->findOrFail($shared->id)->trashed());
+        $this->assertSame($shared->id, $this->metaFor('case_1')['attachment_id']);
+    }
+
+    public function test_swapping_a_slot_more_often_than_the_board_limit_keeps_the_anchor_bounded(): void
+    {
+        $boardLimit = (int) Board::where('slug', 'pinkbro_media')->value('max_file_count');
+        $swaps = $boardLimit + 4;
+
+        $this->actingAsAdmin();
+
+        for ($i = 0; $i < $swaps; $i++) {
+            $this->createTempAttachment('tk-swap-'.$i, "swap-{$i}.jpg");
+            $this->linkSlot('hero_main', 'tk-swap-'.$i);
+        }
+
+        // 교체 횟수가 상한을 넘어도 앵커 게시글의 살아있는 첨부는 1개다.
+        $this->assertGreaterThan($boardLimit, $swaps);
+        $this->assertSame(1, $this->anchorAttachmentCount());
+        $this->assertNotNull($this->metaFor('hero_main')['attachment_id']);
+    }
+
+    // ── alt 만 저장 (새 업로드 없는 경로) ────────────────────────────────────
+
+    public function test_alt_only_update_persists_without_a_new_upload(): void
+    {
+        $attachment = $this->createTempAttachment('tk-alt', 'alt.jpg');
+        $this->actingAsAdmin();
+
+        $this->linkSlot('hero_main', 'tk-alt', '처음 문구');
+
+        // temp_key 없이 alt 만 — 이미지 교체 없이 문구만 고치는 경로.
+        $res = $this->putJson(self::BASE, [
+            'slot' => 'hero_main',
+            'alt' => '바뀐 문구',
+        ])->assertOk();
+
+        // ① 응답이 그 값을 돌려준다.
+        $slots = collect($res->json('data.slots'))->keyBy('key');
+        $this->assertSame('바뀐 문구', $slots['hero_main']['alt']);
+
+        // ② 메타가 바뀌고, 첨부 참조는 그대로다.
+        $meta = $this->metaFor('hero_main');
+        $this->assertSame('바뀐 문구', $meta['alt']);
+        $this->assertSame($attachment->id, $meta['attachment_id']);
+
+        // ③ 첨부 예산을 쓰지 않는다 — 첨부는 그대로 살아있고 앵커 수가 늘지 않는다.
+        $this->assertFalse(Attachment::withTrashed()->findOrFail($attachment->id)->trashed());
+        $this->assertSame(1, $this->anchorAttachmentCount());
+
+        // ④ 공개로 다시 읽어서 확인한다.
+        $this->assertSame('바뀐 문구', $this->readPublicSlots()['hero_main']['alt']);
+    }
+
+    public function test_alt_only_update_on_an_unlinked_slot_is_rejected(): void
+    {
+        $this->actingAsAdmin();
+
+        // 붙일 대상이 없으면 성공으로 위장하지 않는다.
+        $this->putJson(self::BASE, [
+            'slot' => 'hero_sub',
+            'alt' => '문구',
+        ])->assertStatus(422);
+
+        $this->assertNull($this->metaFor('hero_sub'));
+    }
+
+    public function test_alt_only_request_without_alt_is_rejected(): void
+    {
+        $this->createTempAttachment('tk-noalt', 'noalt.jpg');
+        $this->actingAsAdmin();
+        $this->linkSlot('hero_main', 'tk-noalt', '보존되어야 한다');
+
+        // temp_key 도 alt 도 없는 요청은 바꿀 것이 없다 — 조용한 200 을 만들지 않는다.
+        $this->putJson(self::BASE, ['slot' => 'hero_main'])->assertStatus(422);
+
+        $this->assertSame('보존되어야 한다', $this->metaFor('hero_main')['alt']);
+    }
+
+    public function test_alt_only_update_does_not_change_the_attachment_reference(): void
+    {
+        $this->createTempAttachment('tk-keep-1', 'keep-1.jpg');
+        $second = $this->createTempAttachment('tk-keep-2', 'keep-2.jpg');
+        $this->actingAsAdmin();
+
+        // 두 번 갈아끼운 뒤 alt 만 고친다 — 이미 놓인 첨부가 되살아나면 안 된다.
+        $this->linkSlot('hero_main', 'tk-keep-1');
+        $this->linkSlot('hero_main', 'tk-keep-2');
+
+        $this->putJson(self::BASE, ['slot' => 'hero_main', 'alt' => '문구'])->assertOk();
+
+        $this->assertSame($second->id, $this->metaFor('hero_main')['attachment_id']);
+        $this->assertSame(1, $this->anchorAttachmentCount());
+    }
+
     public function test_linking_an_unknown_slot_is_rejected(): void
     {
         $this->createTempAttachment('tk-unknown-slot');

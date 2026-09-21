@@ -20,6 +20,11 @@ use Modules\Pinkbro\Contents\Services\MediaSlotService;
  * 그래서 없는 키·이미 소비된 키·삭제된 키는 모두 422 가 되고 컨트롤러까지
  * 내려가지 않는다 (조용히 아무것도 연결하지 않는 성공 응답을 만들지 않는다).
  *
+ * `temp_key` 는 **없어도 된다** — 없는 요청은 새 업로드 없이 대체 텍스트만 바꾸는
+ * 경로다. 그때 붙일 대상이 없으면(슬롯이 비어 있으면) 컨트롤러가 같은 문구로 422 를 낸다.
+ * 그래서 "키가 없다" 는 실패가 아니라 "이번에는 새 첨부가 없다" 는 뜻이고,
+ * "키가 있는데 임시 첨부가 아니다"(`Rule::exists` 불일치)는 그대로 실패다.
+ *
  * `alt` 는 선택이다. 보내지 않으면 `null` 로 남는다.
  *
  * 권한은 라우트 미들웨어(`permission:admin,pinkbro-contents.media.update`)가 판정한다.
@@ -46,7 +51,10 @@ class MediaLinkRequest extends FormRequest
                 Rule::in(MediaSlotService::slotKeys()),
             ],
             'temp_key' => [
-                'required',
+                // `nullable` 은 여기서 "새 업로드 없음" 을 뜻한다. Laravel 은 nullable 로
+                // 표시된 필드가 null 이면 비암묵 규칙(`exists`)을 건너뛰므로, 키를 보내지
+                // 않은 요청은 exists 검증에 걸리지 않는다.
+                'nullable',
                 'string',
                 'max:64',
                 Rule::exists('board_attachments', 'temp_key')->where(function ($query): void {

@@ -139,6 +139,70 @@ class MediaSlotServiceTest extends PinkbroContentsTestCase
         app(MediaSlotService::class)->unlink('nope_slot');
     }
 
+    // ── linkedAttachmentId / relabel / attachmentInUse ─────────────────────
+
+    public function test_linked_attachment_id_is_null_for_an_unset_slot(): void
+    {
+        $this->assertNull(app(MediaSlotService::class)->linkedAttachmentId('hero_main'));
+    }
+
+    public function test_linked_attachment_id_matches_the_linked_attachment(): void
+    {
+        $attachment = $this->createAttachment();
+        $service = app(MediaSlotService::class);
+        $service->link('hero_main', $attachment->id);
+
+        $this->assertSame($attachment->id, $service->linkedAttachmentId('hero_main'));
+    }
+
+    public function test_relabel_changes_only_the_alt(): void
+    {
+        $attachment = $this->createAttachment();
+        $service = app(MediaSlotService::class);
+        $service->link('hero_main', $attachment->id, '처음');
+
+        $this->assertTrue($service->relabel('hero_main', '바뀜'));
+
+        $resolved = $service->resolve('hero_main');
+        $this->assertSame('바뀜', $resolved['alt']);
+        // 첨부 참조는 그대로다 — relabel 은 새 첨부를 만들지 않는다.
+        $this->assertSame($attachment->id, $service->linkedAttachmentId('hero_main'));
+        $this->assertStringContainsString($attachment->hash, $resolved['url']);
+    }
+
+    public function test_relabel_is_false_when_the_slot_is_not_linked(): void
+    {
+        $this->assertFalse(app(MediaSlotService::class)->relabel('hero_main', '문구'));
+    }
+
+    public function test_relabel_is_false_when_the_linked_attachment_row_is_gone(): void
+    {
+        // 첨부 행이 사라진 슬롯은 resolve() 가 url null 로 본다 — 그 상태를
+        // "연결됨" 으로 취급해 alt 만 남은 유령 슬롯을 만들지 않는다.
+        app(ContentMetaService::class)->set(null, null, MetaDomain::MEDIA, 'hero_main', [
+            'attachment_id' => 999999,
+            'hash' => 'deadbeef',
+            'alt' => null,
+        ]);
+
+        $this->assertFalse(app(MediaSlotService::class)->relabel('hero_main', '문구'));
+    }
+
+    public function test_attachment_in_use_sees_other_slots_but_not_the_excepted_one(): void
+    {
+        $attachment = $this->createAttachment();
+        $service = app(MediaSlotService::class);
+        $service->link('hero_main', $attachment->id);
+
+        // 다른 첨부는 어느 슬롯도 가리키지 않는다.
+        $this->assertFalse($service->attachmentInUse($attachment->id + 12345));
+
+        // 가리키는 슬롯이 있으면 true — 제외 대상이 아니면 자기 자신도 포함한다.
+        $this->assertTrue($service->attachmentInUse($attachment->id));
+        // 제외 대상으로 넘긴 슬롯은 세지 않는다 (재연결 직전 판정에 쓴다).
+        $this->assertFalse($service->attachmentInUse($attachment->id, 'hero_main'));
+    }
+
     public function test_resolve_all_reflects_linked_slots(): void
     {
         $attachment = $this->createAttachment();

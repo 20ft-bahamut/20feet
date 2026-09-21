@@ -184,6 +184,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "hero_main",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'hero_main')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -231,7 +232,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "hero_main",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.hero_main ?? (media?.data?.slots ?? []).find(s => s.key === 'hero_main')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -277,7 +278,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -476,6 +478,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "hero_sub",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'hero_sub')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -523,7 +526,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "hero_sub",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.hero_sub ?? (media?.data?.slots ?? []).find(s => s.key === 'hero_sub')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -569,7 +572,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -768,6 +772,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "why_stage",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'why_stage')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -815,7 +820,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "why_stage",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.why_stage ?? (media?.data?.slots ?? []).find(s => s.key === 'why_stage')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -861,7 +866,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -1060,6 +1066,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "package_stage",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'package_stage')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -1107,7 +1114,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "package_stage",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.package_stage ?? (media?.data?.slots ?? []).find(s => s.key === 'package_stage')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -1153,7 +1160,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -1352,6 +1360,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "estimate_bg",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'estimate_bg')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -1399,7 +1408,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "estimate_bg",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.estimate_bg ?? (media?.data?.slots ?? []).find(s => s.key === 'estimate_bg')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -1445,7 +1454,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -1644,6 +1654,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "case_1",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'case_1')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -1691,7 +1702,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "case_1",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.case_1 ?? (media?.data?.slots ?? []).find(s => s.key === 'case_1')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -1737,7 +1748,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -1936,6 +1948,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "case_2",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'case_2')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -1983,7 +1996,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "case_2",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.case_2 ?? (media?.data?.slots ?? []).find(s => s.key === 'case_2')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -2029,7 +2042,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -2228,6 +2242,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "case_3",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'case_3')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -2275,7 +2290,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "case_3",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.case_3 ?? (media?.data?.slots ?? []).find(s => s.key === 'case_3')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -2321,7 +2336,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -2520,6 +2536,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "case_4",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'case_4')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -2567,7 +2584,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "case_4",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.case_4 ?? (media?.data?.slots ?? []).find(s => s.key === 'case_4')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -2613,7 +2630,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -2812,6 +2830,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "site_og",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'site_og')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -2859,7 +2878,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "site_og",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.site_og ?? (media?.data?.slots ?? []).find(s => s.key === 'site_og')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -2905,7 +2924,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -3104,6 +3124,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_floor",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_floor')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -3151,7 +3172,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_floor",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_floor ?? (media?.data?.slots ?? []).find(s => s.key === 'services_floor')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -3197,7 +3218,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -3396,6 +3418,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_glass",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_glass')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -3443,7 +3466,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_glass",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_glass ?? (media?.data?.slots ?? []).find(s => s.key === 'services_glass')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -3489,7 +3512,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -3688,6 +3712,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_awning",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_awning')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -3735,7 +3760,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_awning",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_awning ?? (media?.data?.slots ?? []).find(s => s.key === 'services_awning')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -3781,7 +3806,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -3980,6 +4006,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_sign",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_sign')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -4027,7 +4054,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_sign",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_sign ?? (media?.data?.slots ?? []).find(s => s.key === 'services_sign')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -4073,7 +4100,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -4272,6 +4300,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_kitchen",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_kitchen')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -4319,7 +4348,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_kitchen",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_kitchen ?? (media?.data?.slots ?? []).find(s => s.key === 'services_kitchen')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -4365,7 +4394,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [
@@ -4564,6 +4594,7 @@
                                         "props": {
                                             "type": "text",
                                             "name": "services_air",
+                                            "value": "{{(media?.data?.slots ?? []).find(s => s.key === 'services_air')?.alt ?? ''}}",
                                             "placeholder": "이미지 대체 텍스트",
                                             "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                                         }
@@ -4611,7 +4642,7 @@
                                                                 "method": "PUT",
                                                                 "body": {
                                                                     "slot": "services_air",
-                                                                    "temp_key": "{{_local.tempKey}}",
+                                                                    "temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : null}}",
                                                                     "alt": "{{_local.alt?.services_air ?? (media?.data?.slots ?? []).find(s => s.key === 'services_air')?.alt ?? null}}"
                                                                 }
                                                             },
@@ -4657,7 +4688,8 @@
                                                             ]
                                                         }
                                                     ]
-                                                }
+                                                },
+                                                "comment": "저장 = 업로드 트리거 + 슬롯 연결. temp_key 는 **이번 저장에서 실제로 업로드가 있었을 때만** 싣는다 — `_local._eventResult` 는 바로 앞 emitEvent(업로드)의 리스너 반환값이고, 업로드가 없으면 빈 배열이라 temp_key 가 null 이 된다. 소비된 temp_key 를 다시 보내면 422 이므로(FormRequest 의 exists 규칙) 그 판단을 클라이언트가 한다. alt 만 고치는 저장은 temp_key null 로 나가 서버가 문구만 갱신한다."
                                             }
                                         ],
                                         "children": [

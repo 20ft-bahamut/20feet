@@ -10,6 +10,7 @@ use InvalidArgumentException;
 use Modules\Pinkbro\Contents\Http\Requests\Admin\MediaLinkRequest;
 use Modules\Pinkbro\Contents\Services\MediaSlotService;
 use Modules\Sirsoft\Board\Enums\PostStatus;
+use Modules\Sirsoft\Board\Models\Attachment;
 use Modules\Sirsoft\Board\Models\Board;
 use Modules\Sirsoft\Board\Models\Post;
 use Modules\Sirsoft\Board\Services\AttachmentService;
@@ -36,10 +37,19 @@ use Modules\Sirsoft\Board\Services\PostService;
  * 그 키를 읽는 곳이 없다 (SPEC §4.5 와 구현이 어긋나는 지점 — 코드를 따랐다).
  *
  * ## 첨부 상한 주의
- * 앵커 게시글의 첨부는 재연결 시에도 쌓인다(슬롯 메타만 새 첨부로 바뀐다).
- * `pinkbro_media` 의 `max_file_count` 는 16 이고 슬롯도 16개라, 누적 17번째
- * 연결은 `AttachmentLimitExceededException` 으로 실패한다 — 슬롯을 여러 번
- * 갈아끼우면 도달한다. 이 태스크의 범위 밖이라 동작을 바꾸지 않고 보고한다.
+ * 앵커 게시글의 첨부는 재연결 시에도 쌓인다 — 그래서 재연결 경로가 **이전 첨부를 놓아준다**
+ * (`release()`). 놓아주지 않으면 갈아끼울 때마다 앵커 게시글의 첨부가 하나씩 늘어
+ * 무한히 쌓인다 (실측: 교체 20회 = 첨부 20개 누적).
+ *
+ * `max_file_count` 판정(`AttachmentService::assertAttachmentCountWithin`)은 **게시글 기준**으로
+ * 세지만 컬렉션을 `attachments` 로 고정해 조회한다. 이 모듈의 업로드는 `collection: main`
+ * (레이아웃의 FileUploader `collection`)이라 지금은 그 판정에 0 으로 잡힌다 — 즉 상한은
+ * 아직 물지 않는다. 그래도 놓아주는 이유는 두 가지다: ① 누적은 실제로 무한하고,
+ * ② 컬렉션이 정렬되는 순간 앵커가 곧바로 상한에 걸린다. 놓아주면 슬롯 수만큼만
+ * 살아있으므로 어느 쪽이든 성립한다.
+ *
+ * 놓아주는 순서는 **새 첨부를 붙이기 전**이다. 상한 판정은 "기존 첨부 + 이번에 붙일 개수" 를
+ * 보므로, 슬롯 16개가 다 찬 상태의 교체는 먼저 놓아야 16 이하로 남는다.
  */
 class AdminMediaController extends Controller
 {
@@ -70,21 +80,48 @@ class AdminMediaController extends Controller
     }
 
     /**
-     * 업로드된 임시 첨부 1건을 슬롯에 연결한다.
+     * 슬롯을 연결한다 — 두 가지 모드가 있다.
      *
-     * 순서: 임시 첨부 확보 → 앵커 게시글 확보 → 공식 쓰기 경로로 첨부 연결 →
-     * 슬롯 메타 기록. 첨부 연결과 메타 기록은 한 트랜잭션이다 — 절반만 반영된
-     * 상태(첨부는 붙었는데 슬롯은 빈 상태)를 만들지 않는다.
+     * ① `temp_key` 가 있는 요청: 업로드된 임시 첨부 1건을 슬롯에 연결한다.
+     *    순서: 임시 첨부 확보 → 앵커 게시글 확보 → 이전 첨부 놓아주기 →
+     *    공식 쓰기 경로로 첨부 연결 → 슬롯 메타 기록. 첨부 연결과 메타 기록은
+     *    한 트랜잭션이다 — 절반만 반영된 상태(첨부는 붙었는데 슬롯은 빈 상태)를
+     *    만들지 않는다.
+     *
+     * ② `temp_key` 가 없는 요청: **새 업로드 없이 대체 텍스트만** 바꾼다.
+     *    이미 연결된 슬롯에만 허용하고(`MediaSlotService::relabel`), 연결된 첨부가
+     *    없는 슬롯이면 422 다 — 붙일 대상이 없는 저장을 성공으로 위장하지 않는다.
+     *    이 경로는 앵커 게시글의 첨부 예산을 쓰지 않는다(첨부를 새로 만들지 않는다).
      */
     public function link(MediaLinkRequest $request): JsonResponse
     {
         $data = $request->validated();
         $board = $this->mediaBoard();
+        $slot = $data['slot'];
+        $tempKey = $data['temp_key'] ?? null;
+
+        if ($tempKey === null) {
+            // `alt` 가 아예 없는 요청은 바꿀 것이 없다 — 조용한 성공을 만들지 않고
+            // `temp_key` 누락과 같은 422 로 끝낸다 (FormRequest 가 내는 문구를 그대로 쓴다).
+            if (! array_key_exists('alt', $data)) {
+                throw ValidationException::withMessages([
+                    'temp_key' => [__('validation.exists', ['attribute' => 'temp_key'])],
+                ]);
+            }
+
+            if (! $this->slots->relabel($slot, $data['alt'])) {
+                throw ValidationException::withMessages([
+                    'temp_key' => [__('validation.exists', ['attribute' => 'temp_key'])],
+                ]);
+            }
+
+            return $this->slotsResponse();
+        }
 
         // 연결되고 나면 temp_key 가 비워져 다시 조회할 수 없다 — 먼저 확보한다.
         // 정렬은 `order` 오름차순이다 (`getByTempKey`). 슬롯 하나에는 첨부 하나가
         // 대응하므로 가장 마지막에 올린 첨부를 그 슬롯의 것으로 본다.
-        $pending = app(AttachmentService::class)->getTempAttachments($board->slug, $data['temp_key']);
+        $pending = app(AttachmentService::class)->getTempAttachments($board->slug, $tempKey);
 
         if ($pending->isEmpty()) {
             // FormRequest 의 exists 규칙과 같은 판정이다. 여기까지 왔다면 검증과
@@ -96,19 +133,64 @@ class AdminMediaController extends Controller
 
         $attachment = $pending->last();
 
-        DB::transaction(function () use ($board, $attachment, $data, $request): void {
+        DB::transaction(function () use ($board, $attachment, $data, $slot, $tempKey, $request): void {
             $anchor = $this->anchorPost($board, $request->ip());
 
-            // 공식 쓰기 경로 — temp_key 첨부 연결 + after_update 훅 + 캐시 무효화.
-            // 첨부 연결을 직접 하지 않고 이 경로를 쓰는 것은 참조 관리자 컨트롤러와 같다.
+            // 새 첨부를 붙이기 전에, 이 슬롯이 이전에 가리키던 첨부를 놓아준다.
+            // 순서가 중요하다 — 상한 판정은 "앵커의 기존 첨부 + 이번에 붙일 개수" 를
+            // 보므로, 먼저 놓아야 슬롯 16개가 다 찬 상태의 교체가 상한에 걸리지 않는다.
+            $previous = $this->slots->linkedAttachmentId($slot);
+
             app(PostService::class)->updatePost($board->slug, (int) $anchor->id, [
-                'temp_key' => $data['temp_key'],
+                'temp_key' => $tempKey,
             ]);
 
-            $this->slots->link($data['slot'], (int) $attachment->id, $data['alt'] ?? null);
+            $this->release($board, $anchor, $previous, (int) $attachment->id, $slot);
+
+            $this->slots->link($slot, (int) $attachment->id, $data['alt'] ?? null);
         });
 
         return $this->slotsResponse();
+    }
+
+    /**
+     * 재연결로 더 이상 쓰이지 않게 된 이전 첨부를 놓아준다.
+     *
+     * `AttachmentService::delete()` 는 **소프트 삭제**다 — 물리 파일은 남고(휴지통),
+     * 보존기간이 지나면 운영자가 켠 `sirsoft-board:prune-attachments` 가 정리한다.
+     * 그래서 "파일을 지우지 않고 연결만 놓는다" 는 요구와 맞는다: 되돌릴 수 있고,
+     * 파일을 즉시 파기하지 않는다.
+     *
+     * 손대지 않는 조건 (하나라도 걸리면 그대로 둔다):
+     *  - 이전 첨부가 없거나, 새 첨부와 같은 첨부다 (갈아끼운 게 아니다)
+     *  - 다른 슬롯이 아직 그 첨부를 가리킨다 (`attachmentInUse`)
+     *  - 그 첨부가 이 앵커 게시글의 것이 아니다 — 메타가 게시판 밖 첨부를 가리키는
+     *    상태에서 호출되더라도 남의 첨부를 건드리지 않는다
+     *
+     * 이 메서드는 **새 연결을 쓰기 전에** 부른다. 그래서 `attachmentInUse` 에 지금 슬롯을
+     * 제외 대상으로 넘긴다 — 아직 그 슬롯이 이전 첨부를 가리키고 있기 때문이다.
+     */
+    private function release(Board $board, Post $anchor, ?int $previousId, int $newId, string $slot): void
+    {
+        if ($previousId === null || $previousId === $newId) {
+            return;
+        }
+
+        if ($this->slots->attachmentInUse($previousId, $slot)) {
+            return;
+        }
+
+        $attachment = Attachment::query()
+            ->whereKey($previousId)
+            ->where('board_id', $board->id)
+            ->where('post_id', $anchor->id)
+            ->first();
+
+        if (! $attachment) {
+            return;
+        }
+
+        app(AttachmentService::class)->delete($board->slug, $previousId, 'admin');
     }
 
     /**
