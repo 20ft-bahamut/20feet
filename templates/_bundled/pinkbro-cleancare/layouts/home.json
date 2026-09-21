@@ -239,11 +239,13 @@
                         "type": "composite",
                         "name": "ServiceGrid",
                         "props": {
+                            "eyebrow": "{{pinkbro_copy?.data?.service_eyebrow ?? null}}",
                             "intro": "{{pinkbro_copy?.data?.service_intro ?? null}}",
                             "introSub": "{{pinkbro_copy?.data?.service_intro_sub ?? null}}",
                             "detailLabel": "{{pinkbro_copy?.data?.service_detail_label ?? null}}",
                             "extraHeading": "{{pinkbro_copy?.data?.extra_box_heading ?? null}}",
                             "extraBody": "{{pinkbro_copy?.data?.extra_box_body ?? null}}",
+                            "extraCtaLabel": "{{pinkbro_copy?.data?.extra_box_cta ?? null}}",
                             "items": "{{pinkbro_services?.data ?? null}}",
                             "media": "{{pinkbro_media?.data ?? null}}"
                         }
@@ -261,8 +263,19 @@
                         "type": "composite",
                         "name": "PackageList",
                         "props": {
+                            "stageEyebrow": "{{pinkbro_copy?.data?.package_stage_eyebrow ?? null}}",
                             "intro": "{{pinkbro_copy?.data?.package_intro ?? null}}",
                             "introSub": "{{pinkbro_copy?.data?.package_intro_sub ?? null}}",
+                            "labelA": "{{pinkbro_copy?.data?.package_a_label ?? null}}",
+                            "labelB": "{{pinkbro_copy?.data?.package_b_label ?? null}}",
+                            "labelC": "{{pinkbro_copy?.data?.package_c_label ?? null}}",
+                            "noteA": "{{pinkbro_copy?.data?.package_a_note ?? null}}",
+                            "noteASub": "{{pinkbro_copy?.data?.package_a_note_sub ?? null}}",
+                            "noteB": "{{pinkbro_copy?.data?.package_b_note ?? null}}",
+                            "noteBSub": "{{pinkbro_copy?.data?.package_b_note_sub ?? null}}",
+                            "noteC": "{{pinkbro_copy?.data?.package_c_note ?? null}}",
+                            "noteCSub": "{{pinkbro_copy?.data?.package_c_note_sub ?? null}}",
+                            "benefitEyebrow": "{{pinkbro_copy?.data?.benefit_eyebrow ?? null}}",
                             "benefitHeading": "{{pinkbro_copy?.data?.benefit_heading ?? null}}",
                             "benefitSub": "{{pinkbro_copy?.data?.benefit_sub ?? null}}",
                             "benefitItems": "{{pinkbro_copy?.data?.benefit_items ?? null}}",
@@ -273,7 +286,7 @@
                 ]
             },
             {
-                "comment": "=== #pricing — 05 가격 고지 3블록 · 동시작업 할인 단계 · 예상견적 계산기 (copy + discount + services + site)",
+                "comment": "=== #pricing — 05 가격 고지 3블록 · 예상견적 계산기 (copy + services + discount + site). 원문 #pricing(247~321행)에 할인 표는 없다 — 표는 #package 의 benefit-box 하나뿐이다",
                 "id": "pricing",
                 "type": "basic",
                 "name": "Div",
@@ -283,14 +296,15 @@
                         "type": "composite",
                         "name": "PriceDiscount",
                         "props": {
+                            "eyebrow": "{{pinkbro_copy?.data?.pricing_eyebrow ?? null}}",
                             "heading": "{{pinkbro_copy?.data?.pricing_heading ?? null}}",
                             "sub": "{{pinkbro_copy?.data?.pricing_sub ?? null}}",
                             "notice": "{{pinkbro_copy?.data?.pricing_notice ?? null}}",
+                            "noticeLabel": "{{pinkbro_copy?.data?.pricing_notice_label ?? null}}",
                             "noticeSub": "{{pinkbro_copy?.data?.pricing_notice_sub ?? null}}",
                             "field": "{{pinkbro_copy?.data?.pricing_field ?? null}}",
                             "flowLabel": "{{pinkbro_copy?.data?.pricing_flow_label ?? null}}",
-                            "flow": "{{pinkbro_copy?.data?.pricing_flow ?? null}}",
-                            "steps": "{{pinkbro_discount?.data?.steps ?? null}}"
+                            "flow": "{{pinkbro_copy?.data?.pricing_flow ?? null}}"
                         }
                     },
                     {
@@ -298,10 +312,19 @@
                         "type": "composite",
                         "name": "EstimateCalculator",
                         "props": {
+                            "eyebrow": "{{pinkbro_copy?.data?.estimator_eyebrow ?? null}}",
                             "heading": "{{pinkbro_copy?.data?.estimator_heading ?? null}}",
                             "sub": "{{pinkbro_copy?.data?.estimator_sub ?? null}}",
                             "summaryHeading": "{{pinkbro_copy?.data?.estimator_summary_heading ?? null}}",
+                            "summaryTotalLabel": "{{pinkbro_copy?.data?.estimator_summary_total_label ?? null}}",
                             "summaryNote": "{{pinkbro_copy?.data?.estimator_summary_note ?? null}}",
+                            "airLabel": "{{pinkbro_copy?.data?.estimator_air_label ?? null}}",
+                            "rowCountLabel": "{{pinkbro_copy?.data?.estimator_row_count ?? null}}",
+                            "rowBaseLabel": "{{pinkbro_copy?.data?.estimator_row_base ?? null}}",
+                            "rowDiscountLabel": "{{pinkbro_copy?.data?.estimator_row_discount ?? null}}",
+                            "rowDiscountAmountLabel": "{{pinkbro_copy?.data?.estimator_row_discount_amount ?? null}}",
+                            "ctaSubmitLabel": "{{pinkbro_copy?.data?.estimator_cta_submit ?? null}}",
+                            "ctaKakaoLabel": "{{pinkbro_copy?.data?.estimator_cta_kakao ?? null}}",
                             "services": "{{pinkbro_services?.data ?? null}}",
                             "steps": "{{pinkbro_discount?.data?.steps ?? null}}",
                             "site": "{{pinkbro_site?.data ?? null}}"
@@ -320,6 +343,7 @@
                         "type": "composite",
                         "name": "FaqList",
                         "props": {
+                            "eyebrow": "{{pinkbro_copy?.data?.faq_eyebrow ?? null}}",
                             "intro": "{{pinkbro_copy?.data?.faq_intro ?? null}}",
                             "introSub": "{{pinkbro_copy?.data?.faq_intro_sub ?? null}}",
                             "items": "{{pinkbro_faq?.data ?? null}}"
@@ -338,9 +362,12 @@
                         "type": "composite",
                         "name": "CaseGallery",
                         "props": {
+                            "eyebrow": "{{pinkbro_copy?.data?.projects_eyebrow ?? null}}",
                             "intro": "{{pinkbro_copy?.data?.projects_intro ?? null}}",
                             "sub": "{{pinkbro_copy?.data?.projects_sub ?? null}}",
                             "note": "{{pinkbro_copy?.data?.projects_note ?? null}}",
+                            "cardKicker": "{{pinkbro_copy?.data?.projects_card_kicker ?? null}}",
+                            "linkLabel": "{{pinkbro_copy?.data?.projects_link_label ?? null}}",
                             "items": "{{pinkbro_cases?.data ?? null}}"
                         }
                     }

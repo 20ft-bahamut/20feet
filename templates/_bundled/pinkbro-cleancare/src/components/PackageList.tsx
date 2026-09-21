@@ -4,10 +4,33 @@ import '../styles/PackageList.css';
 import type { DiscountStep, MediaSlots, PackageItem } from '../lib/types';
 
 export interface PackageListProps {
+  /** 스테이지 눈금(copy: package_stage_eyebrow, 원문 175행). null 이면 생략한다. */
+  stageEyebrow?: string | null;
   /** 섹션 도입 문구(copy: package_intro — 원문 .package-copy 안의 h2). null 이면 생략한다. */
   intro: string | null;
   /** 섹션 보조 문구(copy: package_intro_sub — 원문 .sub). null 이면 생략한다. */
   introSub: string | null;
+  /**
+   * 카드 라벨(copy: package_a_label / package_b_label / package_c_label, 원문 .pkg-label).
+   * 원문 카드 순서(A·B·C)와 모듈 `sort`(1·2·3)가 같으므로 카드 index 로 대응한다.
+   * null 이면 그 카드의 라벨만 생략한다.
+   */
+  labelA?: string | null;
+  labelB?: string | null;
+  labelC?: string | null;
+  /**
+   * 카드 가격 아래 원문 노트(copy: package_a_note / package_a_note_sub …).
+   * 원문 .pkg-note 는 `기본가 합계 …<br>… 동시작업 … 적용` 한 줄이라
+   * 두 값을 사이에 <br> 을 두고 렌더한다. null 이면 그 카드의 노트만 생략한다.
+   */
+  noteA?: string | null;
+  noteASub?: string | null;
+  noteB?: string | null;
+  noteBSub?: string | null;
+  noteC?: string | null;
+  noteCSub?: string | null;
+  /** 동시작업 혜택 박스 눈금(copy: benefit_eyebrow, 원문 232행). null 이면 생략한다. */
+  benefitEyebrow?: string | null;
   /** 동시작업 혜택 박스 제목(copy: benefit_heading). null 이면 제목을 생략한다. */
   benefitHeading: string | null;
   /** 동시작업 혜택 박스 안내 문구(copy: benefit_sub). */
@@ -29,10 +52,10 @@ export interface PackageListProps {
  * 카드 아래에는 동시작업 혜택 박스(benefit-box)를 둔다(body.html 229–243).
  *
  * 문구는 전부 props 로 받는다(COPY POLICY — 하드코딩 금지).
- * 원문의 eyebrow(`Pinkbro F&B Package`/`Multi-Service Benefit`), 카드 라벨
- * (`A Package` 등), 카드 가격 아래 원문 노트(`기본가 합계 400,000원` /
- * `3개 항목 동시작업 5% 적용`)는 copy 도메인에 키가 없어 렌더하지 않는다 —
- * 리포트의 COPY REQUIRED 참조.
+ * 원문의 눈금(`Pinkbro F&B Package` / `Multi-Service Benefit`, 175·232행),
+ * 카드 라벨(`A Package` 등, 182·197·212행), 카드 가격 아래 노트
+ * (`기본가 합계 400,000원` / `3개 항목 동시작업 5% 적용`, 193·208·225행)는
+ * copy 도메인 키로 배선됐다 — 값이 없으면 리터럴로 대체하지 않고 조용히 생략한다.
  */
 /**
  * 원문 .pkg-total 은 금액 본체(42px)와 접미사 `원~`(16px small, body.html 191)를
@@ -48,8 +71,19 @@ function splitPriceSuffix(price: string): { amount: string; suffix: string | nul
 }
 
 export function PackageList({
+  stageEyebrow,
   intro,
   introSub,
+  labelA,
+  labelB,
+  labelC,
+  noteA,
+  noteASub,
+  noteB,
+  noteBSub,
+  noteC,
+  noteCSub,
+  benefitEyebrow,
   benefitHeading,
   benefitSub,
   benefitItems,
@@ -103,6 +137,11 @@ export function PackageList({
           />
         )}
         <div className="pb-package-copy">
+          {stageEyebrow ? (
+            <div className="pb-package-copy-eyebrow" data-testid="package-stage-eyebrow">
+              {stageEyebrow}
+            </div>
+          ) : null}
           {intro ? (
             <h2 className="pb-package-copy-title" data-testid="packages-intro">
               {intro}
@@ -116,8 +155,13 @@ export function PackageList({
         </div>
       </div>
       <div className="pb-package-grid">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const { amount, suffix } = splitPriceSuffix(item.price);
+          // 원문 카드 순서(A·B·C) = 모듈 sort 순서(1·2·3) — index 로 대응한다.
+          // 키가 비어 있으면 그 카드의 라벨/노트만 생략한다(리터럴 대체 금지).
+          const label = [labelA, labelB, labelC][index] ?? null;
+          const note = [noteA, noteB, noteC][index] ?? null;
+          const noteSub = [noteASub, noteBSub, noteCSub][index] ?? null;
           return (
             <article
               key={item.title}
@@ -126,6 +170,11 @@ export function PackageList({
               }
               data-testid="package-card"
             >
+              {label ? (
+                <div className="pb-pkg-label" data-testid="package-label">
+                  {label}
+                </div>
+              ) : null}
               <h3>{item.title}</h3>
               <p>{item.summary}</p>
               <ul className="pb-pkg-list">
@@ -143,6 +192,13 @@ export function PackageList({
                     </small>
                   )}
                 </div>
+                {note || noteSub ? (
+                  <div className="pb-pkg-note" data-testid="package-note">
+                    {note}
+                    {note && noteSub ? <br /> : null}
+                    {noteSub}
+                  </div>
+                ) : null}
               </div>
             </article>
           );
@@ -153,6 +209,11 @@ export function PackageList({
         <div className="pb-benefit-box" data-testid="benefit-box">
           <div className="pb-benefit-top">
             <div>
+              {benefitEyebrow && (
+                <div className="pb-benefit-eyebrow" data-testid="benefit-eyebrow">
+                  {benefitEyebrow}
+                </div>
+              )}
               {benefitHeading && (
                 <h3 className="pb-benefit-heading" data-testid="benefit-heading">
                   {benefitHeading}

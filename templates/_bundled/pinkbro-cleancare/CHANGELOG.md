@@ -4,6 +4,32 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [Unreleased]
+
+### Fixed
+
+- **중복 렌더 제거 — 동시작업 할인 표.** 원문 `#pricing`(body.html 247~321행)에는 할인 표가
+  없고 표는 `#package` 의 `.benefit-box`(229~243행)에만 있습니다. `PriceDiscount` 가
+  `discount` 데이터로 표를 한 번 더 그리던 렌더를 제거하고, 그 때문에 필요했던 `steps` prop
+  과 스켈레톤·빈 상태·`.pb-pricing-step*` CSS 를 함께 지웠습니다. 표는 이제
+  `PackageList`(`benefit_items`) 한 곳에서만 그립니다. `discount` 데이터 소스는
+  `EstimateCalculator` 가 계속 쓰므로 유지합니다.
+
+### Added
+
+- **원문에만 있던 문구 30키 복원** — 모듈 `copy` 도메인에 키가 없어 렌더되지 않던 눈금·
+  라벨·CTA 를 시더에 추가하고 전부 배선했습니다(45키 → 75키): `about_stage_eyebrow`,
+  `about_side_eyebrow`, `service_eyebrow`, `extra_box_cta`, `package_stage_eyebrow`,
+  `package_a_label`·`package_b_label`·`package_c_label`, `package_{a,b,c}_note`(+`_sub`),
+  `benefit_eyebrow`, `pricing_eyebrow`, `pricing_notice_label`, `estimator_eyebrow`,
+  `estimator_air_label`, `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
+  `estimator_row_discount_amount`, `estimator_summary_total_label`, `estimator_cta_submit`,
+  `estimator_cta_kakao`, `faq_eyebrow`, `projects_eyebrow`, `projects_card_kicker`,
+  `projects_link_label`. 값은 전부 원문 `body.html` 그대로입니다.
+- 문구가 없을 때의 계약은 그대로입니다 — 키가 `null` 이면 각 컴포넌트가 그 문구를
+  조용히 생략하고, 리터럴로 대체하지 않습니다. 컴포넌트·레이아웃 테스트가 복원된 문구의
+  렌더와 미렌더를 각각 검증합니다. 테스트 17 파일 / 233개.
+
 ## [0.1.0] - 2026-09-19
 
 PinkBro CleanCare 랜딩 페이지 사용자 템플릿(`pinkbro-cleancare`) 최초 릴리스.

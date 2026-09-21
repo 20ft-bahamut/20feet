@@ -62,6 +62,65 @@ describe('AboutSection', () => {
     expect(screen.getByTestId('about-message')).toHaveTextContent('본문');
   });
 
+  it('renders the two source eyebrows from the copy domain (about_stage_eyebrow / about_side_eyebrow)', () => {
+    render(
+      <AboutSection
+        copy={
+          {
+            about_stage_eyebrow: 'Why Pinkbro',
+            about_heading: '좋은 매장은 공간의 컨디션까지 다릅니다.',
+            about_message: '보조 설명 문구',
+            about_side_eyebrow: 'Brand Perspective',
+            about_side_heading: '매장에 꼭 필요한 위생관리만\n더 분명하게 제안합니다.',
+            about_perspectives: [],
+          } as any
+        }
+        media={null}
+      />,
+    );
+
+    // 원문 68행 .why-overlay > .eyebrow — h3 바로 위
+    const stageEyebrow = screen.getByTestId('about-stage-eyebrow');
+    expect(stageEyebrow).toHaveTextContent('Why Pinkbro');
+    expect(stageEyebrow.textContent).toBe('Why Pinkbro');
+    expect(
+      stageEyebrow.compareDocumentPosition(screen.getByTestId('about-heading')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    // 원문 76행 .copy > .eyebrow — h2 바로 위
+    const sideEyebrow = screen.getByTestId('about-side-eyebrow');
+    expect(sideEyebrow).toHaveTextContent('Brand Perspective');
+    expect(
+      sideEyebrow.compareDocumentPosition(screen.getByTestId('about-side-heading')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('omits both eyebrows when their copy keys are null — 리터럴로 대체하지 않는다', () => {
+    render(
+      <AboutSection
+        copy={
+          {
+            about_stage_eyebrow: null,
+            about_heading: '제목',
+            about_message: '본문',
+            about_side_eyebrow: null,
+            about_side_heading: '사이드 제목',
+            about_perspectives: [],
+          } as any
+        }
+        media={null}
+      />,
+    );
+
+    expect(screen.queryByTestId('about-stage-eyebrow')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('about-side-eyebrow')).not.toBeInTheDocument();
+    // 제목·본문은 그대로 남는다
+    expect(screen.getByTestId('about-heading')).toBeInTheDocument();
+    expect(screen.getByTestId('about-side-heading')).toBeInTheDocument();
+  });
+
   it('renders the stage image from the why_stage media slot when the admin uploaded one', () => {
     render(
       <AboutSection

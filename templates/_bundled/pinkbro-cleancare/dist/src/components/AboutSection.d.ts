@@ -20,10 +20,11 @@ export interface AboutSectionProps {
  * 섹션 앵커(`#about`)는 컴포넌트가 아니라 레이아웃이 소유한다 — 섹션 id 를
  * 컴포넌트가 직접 달면 레이아웃과 중복 id 가 생긴다.
  *
- * 문구는 전부 copy props 에서 온다: stage 오버레이는 `about_heading`(h3) +
- * `about_message`(p), why-content 는 `about_side_heading`(h2) + 관점 카드.
- * 원문의 eyebrow 라벨("Why Pinkbro"/"Brand Perspective")은 copy 도메인에 키가 없어
- * 렌더하지 않는다 — 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
+ * 문구는 전부 copy props 에서 온다: stage 오버레이는 `about_stage_eyebrow`(눈금) +
+ * `about_heading`(h3) + `about_message`(p), why-content 는 `about_side_eyebrow`(눈금) +
+ * `about_side_heading`(h2) + 관점 카드. 두 눈금(`Why Pinkbro` / `Brand Perspective`)은
+ * 원문 68·76행 그대로이며 모듈 COPY 키가 없던 동안 렌더되지 않았다 — 이제 값이 오면
+ * 렌더하고 없으면 조용히 생략한다.
  */
 export declare function AboutSection({ copy, media }: AboutSectionProps): React.ReactElement;
 export default AboutSection;

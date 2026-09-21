@@ -18,11 +18,24 @@
 /* 원문 ::before 의 Unsplash 핫링크 제거 — 이미지 위에 남는 다크 오버레이(가독성)만 유지한다 */
 .pb-why-stage::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(11, 12, 18, .12), rgba(11, 12, 18, .68)); }
 .pb-why-overlay { position: absolute; z-index: 2; inset: auto 24px 24px; padding: 28px; border-radius: 26px; border: 1px solid rgba(255, 255, 255, .18); background: rgba(255, 255, 255, .14); backdrop-filter: blur(14px); color: #fff; }
+/* 원문 .why-overlay > .eyebrow (body.html 68행) — 인라인 color:#ffc7df, 대시 마커 포함 */
+.pb-why-eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 800 12px/1 var(--pb-font-latin); letter-spacing: .16em; text-transform: uppercase; color: #ffc7df; }
+.pb-why-eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
 /* 원문 리셋 h3 { margin:0; text-wrap:balance } + .why-overlay h3 원문 값 */
 .pb-why-overlay h3 { font-size: 32px; line-height: 1.14; letter-spacing: -.045em; margin: 0; word-break: keep-all; text-wrap: balance; }
+/* 원문 inline margin-top:12px — 눈금 바로 아래 h3. 위 규칙(margin:0)과 명시도가 같아지지
+   않도록 오버레이 스코프를 붙인다(.pb-why-overlay h3 = 0,1,1). */
+.pb-why-overlay .pb-why-eyebrow + h3 { margin-top: 12px; }
 .pb-why-overlay p { margin: 12px 0 0; font-size: 15px; line-height: 1.82; color: rgba(255, 255, 255, .84); text-wrap: pretty; word-break: keep-all; }
 
 .pb-why-content { display: grid; gap: 18px; }
+/* 원문 .why-content > .section-head > .copy — 눈금 + h2 묶음 */
+.pb-why-copy { display: block; }
+/* 원문 .copy > .eyebrow (body.html 76행) — 기본 핑크, 대시 마커 포함 */
+.pb-why-side-eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 800 12px/1 var(--pb-font-latin); letter-spacing: .16em; text-transform: uppercase; color: var(--pb-pink); }
+.pb-why-side-eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; opacity: .7; }
+/* 원문 inline margin-top:16px — 눈금 바로 아래 h2 (ServiceGrid 의 같은 규칙과 동형) */
+.pb-why-side-eyebrow + .pb-why-heading { margin-top: 16px; }
 /* why-content h2 (copy: about_side_heading) — 원문은 <br> 로 두 줄, 값은 \n 을 포함한다.
    값 출처: 원문 .h2 (clamp(34px,4vw,58px) / 1.06 / -.055em / 900) + 원문 리셋 h2 { margin:0; text-wrap:balance }.
    원문 about 은 section-head 에 inline margin-bottom:0 이므로 카드와의 간격은 grid gap 18px 뿐이다. */

@@ -149,72 +149,9 @@
   white-space: pre-line;
 }
 
-/* 동시작업 할인 단계 — 원문 .benefit-box > .benefit-grid > .benefit-item 의
-   구조·값을 그대로 쓴다(흰 박스 안 soft 셀, 중앙 정렬, 조건 위 · 금액 아래).
-   모듈 steps 는 3행이므로 열만 3으로 둔다(원문 benefit-grid 는 4열). */
-.pb-pricing-steps {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin: 24px 0 0;
-  padding: 28px;
-  border-radius: 28px;
-  background: #fff;
-  border: 1px solid var(--pb-line);
-  box-shadow: 0 18px 48px rgba(15, 17, 24, 0.06);
-}
-
-.pb-pricing-step {
-  padding: 22px 18px;
-  border-radius: 22px;
-  background: var(--pb-soft);
-  text-align: center;
-}
-
-.pb-pricing-step-amount {
-  display: block;
-  margin-top: 10px;
-  font: 900 34px/1 var(--pb-font-latin);
-  letter-spacing: -0.05em;
-  color: var(--pb-pink);
-}
-
-.pb-pricing-step-condition {
-  display: block;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--pb-muted);
-}
-
-/* 빈 상태 — 슬롯이 비어 있을 때의 중립 폴백 */
-.pb-pricing-empty {
-  min-height: 1px;
-}
-
-/* 로딩 스켈레톤 */
-.pb-pricing-skeleton {
-  display: grid;
-  gap: 12px;
-  padding: 26px 28px;
-  border-radius: 30px;
-  background: #fff;
-  border: 1px solid var(--pb-line);
-}
-
-.pb-pricing-skeleton-line {
-  display: block;
-  height: 18px;
-  border-radius: 9px;
-  background: linear-gradient(90deg, var(--pb-soft), var(--pb-pink-soft), var(--pb-soft));
-  animation: pb-pricing-pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes pb-pricing-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-
+/* 동시작업 할인 표(.pb-pricing-steps / .pb-pricing-step*)와 그 스켈레톤·빈 상태는
+   여기서 제거했다 — 원문 #pricing(247~321행)에 할인 표가 없고, 표는 #package 의
+   .benefit-box(229~243행)에만 있다. 그 표는 PackageList(.pb-benefit-grid)가 그린다. */
 /* 원문 @media (max-width:1100px) — notice-box · section-head 단일 컬럼 */
 @media (max-width: 1100px) {
   .pb-pricing-notice {
@@ -237,11 +174,6 @@
 
   .pb-pricing-inner {
     width: min(calc(100% - 24px), var(--pb-max, 1280px));
-  }
-
-  .pb-pricing-steps {
-    grid-template-columns: 1fr;
-    padding: 22px 20px;
   }
 
   .pb-pricing-notice > div {

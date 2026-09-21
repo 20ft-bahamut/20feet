@@ -1,13 +1,16 @@
 import '../styles/PriceDiscount.css';
-import type { DiscountStep } from '../lib/types';
 
 export interface PriceDiscountProps {
+  /** 섹션 eyebrow(copy: pricing_eyebrow). 원문 `.section-head .copy > .eyebrow`(251행). null 이면 생략한다. */
+  eyebrow: string | null;
   /** 섹션 제목(copy: pricing_heading). null 이면 제목을 생략한다. */
   heading: string | null;
   /** 섹션 보조 문구(copy: pricing_sub). null 이면 생략한다. */
   sub: string | null;
-  /** 표기 금액 관련 안내 문구(copy: pricing_notice). null 이면 블록을 숨긴다. */
+  /** 표기 금액 관련 안내 문구(copy: pricing_notice). null 이면 notice-a 블록을 숨긴다. */
   notice: string | null;
+  /** notice-a eyebrow(copy: pricing_notice_label). 원문 `.notice-a .eyebrow`(259행). null 이면 생략한다. */
+  noticeLabel: string | null;
   /** 안내 블록 보조 문구(copy: pricing_notice_sub). null 이면 생략한다. */
   noticeSub: string | null;
   /** 확정 견적 원칙 본문(copy: pricing_field). null 이면 가운데 블록을 숨긴다. */
@@ -16,55 +19,45 @@ export interface PriceDiscountProps {
   flowLabel: string | null;
   /** 견적 진행 흐름 문구(copy: pricing_flow). null 이면 블록을 숨긴다. */
   flow: string | null;
-  /** 동시작업 할인 단계. null = 로딩 중(스켈레톤), [] = 빈 목록. */
-  steps: DiscountStep[] | null;
-}
-
-function Skeleton() {
-  return (
-    <div className="pb-pricing-skeleton" data-testid="discount-skeleton">
-      <span className="pb-pricing-skeleton-line" style={{ width: '38%' }} />
-      <span className="pb-pricing-skeleton-line" style={{ width: '82%' }} />
-      <span className="pb-pricing-skeleton-line" style={{ width: '64%' }} />
-      <span className="pb-pricing-skeleton-line" style={{ width: '46%' }} />
-    </div>
-  );
 }
 
 /**
  * 가격 안내 섹션 — 원본 #pricing 의 section-head + notice-box 3블록
- * (notice-a 가격 고지 / notice-b 확정 견적 원칙 / notice-c 진행 흐름)과
- * 동시작업 할인 단계.
+ * (notice-a 가격 고지 / notice-b 확정 견적 원칙 / notice-c 진행 흐름).
  *
- * 3단 폴백: steps === null → 스켈레톤, [] → 빈 상태, 배열 → 렌더.
+ * 동시작업 할인 표는 **여기 없다.** 원본 #pricing(body.html 247~321행)에는
+ * 할인 단계 표가 없고, 그 표는 #package 의 `.benefit-box`(229~243행) 안에만 있다.
+ * 이 컴포넌트가 `discount` 데이터로 다시 그리던 중복 렌더는 제거했다 —
+ * 표는 PackageList(benefit_items)가 한 번만 그린다.
+ *
  * 문구는 전부 props 로 받는다(COPY POLICY — 하드코딩 금지).
- * 원문 notice-a 의 eyebrow(`Pricing Notice`)는 copy 도메인에 키가 없어
- * 리터럴로 남아 있다 — 리포트의 COPY REQUIRED 항목 참조.
+ * 값이 null 인 블록은 조용히 생략한다(3단 폴백의 문자열 판).
  */
 export function PriceDiscount({
+  eyebrow,
   heading,
   sub,
   notice,
+  noticeLabel,
   noticeSub,
   field,
   flowLabel,
   flow,
-  steps,
 }: PriceDiscountProps) {
+  const hasHead = eyebrow !== null || heading !== null || sub !== null;
   const hasNotice = notice !== null || noticeSub !== null || field !== null || flow !== null;
 
   return (
     <section className="pb-pricing">
       <div className="pb-pricing-inner">
-        {(heading !== null || sub !== null) && (
+        {hasHead && (
           <div className="pb-pricing-head">
             <div className="pb-pricing-head-copy">
-              {/* 원문 #pricing section-head 의 eyebrow(`Pricing`) — copy 도메인에 키가
-                  없어 원문 그대로 리터럴로 복구했다. 모듈 키 추가 시 props 로 교체할 것
-                  (리포트 copy_required 참조). */}
-              <span className="pb-pricing-eyebrow" data-testid="pricing-eyebrow">
-                Pricing
-              </span>
+              {eyebrow !== null && (
+                <span className="pb-pricing-eyebrow" data-testid="pricing-eyebrow">
+                  {eyebrow}
+                </span>
+              )}
               {heading !== null && (
                 <h2 className="pb-pricing-heading" data-testid="pricing-heading">
                   {heading}
@@ -83,7 +76,11 @@ export function PriceDiscount({
           <div className="pb-pricing-notice">
             {notice !== null && (
               <div className="pb-pricing-notice-a">
-                <span className="pb-pricing-eyebrow">Pricing Notice</span>
+                {noticeLabel !== null && (
+                  <span className="pb-pricing-eyebrow" data-testid="pricing-notice-label">
+                    {noticeLabel}
+                  </span>
+                )}
                 <b className="pb-pricing-notice-title">{notice}</b>
                 {noticeSub !== null && (
                   <p className="pb-pricing-notice-sub" data-testid="pricing-notice-sub">
@@ -112,23 +109,9 @@ export function PriceDiscount({
             )}
           </div>
         )}
-
-        {steps === null ? (
-          <Skeleton />
-        ) : steps.length === 0 ? (
-          <div className="pb-pricing-empty" data-testid="discount-empty" />
-        ) : (
-          <ul className="pb-pricing-steps">
-            {steps.map((step, i) => (
-              <li className="pb-pricing-step" data-testid="discount-step" key={`${step.condition}-${i}`}>
-                {/* 원문 .benefit-item 순서 — small(조건) 위, strong(금액) 아래 */}
-                <span className="pb-pricing-step-condition">{step.condition}</span>
-                <b className="pb-pricing-step-amount">{step.amount_label}</b>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </section>
   );
 }
+
+export default PriceDiscount;

@@ -12,17 +12,17 @@ export interface CaseGalleryProps {
   /** 사례 목록. null = 로딩 중(스켈레톤), [] = 빈 상태. */
   items: CaseItem[] | null;
   /**
-   * 섹션 눈금(원문 `Recent Projects`). 모듈 COPY 도메인에 키가 없어 현재 배선이
-   * 줄 수 없다 — 값을 받으면 렌더하고, 없으면 헤더는 소개 문구만 렌더한다.
+   * 섹션 눈금(원문 `Recent Projects`, 371행 / copy: projects_eyebrow).
+   * 값을 받으면 렌더하고, 없으면 헤더는 소개 문구만 렌더한다.
    */
   eyebrow?: string | null;
   /**
-   * 카드 킥커(원문 `PINKBRO PROJECT`). 모듈 COPY 도메인에 키가 없다 —
+   * 카드 킥커(원문 `PINKBRO PROJECT`, 379·383·387·391행 / copy: projects_card_kicker).
    * 값을 받으면 카드마다 렌더하고, 없으면 생략한다.
    */
   cardKicker?: string | null;
   /**
-   * 카드 링크 문구(원문 `작업사례 자세히 보기`). 모듈 COPY 도메인에 키가 없다 —
+   * 카드 링크 문구(원문 `작업사례 자세히 보기`, 379행 / copy: projects_link_label).
    * 값을 받고 `blog_url` 이 있을 때만 렌더한다.
    */
   linkLabel?: string | null;
@@ -40,8 +40,9 @@ export interface CaseGalleryProps {
  * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
  *
  * 눈금(`Recent Projects`)·카드 킥커(`PINKBRO PROJECT`)·링크 문구
- * (`작업사례 자세히 보기`)는 원문에 있는 문구지만 모듈 COPY 도메인에 키가
- * 없다 — props 로만 받고 리터럴로 만들지 않는다 (COPY POLICY, COPY REQUIRED).
+ * (`작업사례 자세히 보기`)는 원문에 있는 문구이며 copy 도메인 키
+ * (projects_eyebrow / projects_card_kicker / projects_link_label)로 배선됐다.
+ * 값이 없으면 리터럴로 대체하지 않고 조용히 생략한다 (COPY POLICY).
  */
 export function CaseGallery({
   intro,

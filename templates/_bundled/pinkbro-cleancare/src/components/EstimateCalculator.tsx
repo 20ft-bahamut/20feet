@@ -14,21 +14,43 @@ import type { DiscountStep, EstimateOption, ServiceItem, SiteData } from '../lib
  * - `services` 가 `[]` 면 빈 상태(`estimate-empty`)
  * - 배열이면 렌더
  *
- * 카피는 `heading`(estimator_heading) · `sub`(estimator_sub) ·
- * `summaryHeading`(estimator_summary_heading) · `summaryNote`(estimator_summary_note)
- * 네 슬롯으로만 받는다 — 전부 copy 도메인 키와 1:1 이다(COPY POLICY).
+ * 카피는 전부 copy 도메인 키와 1:1 인 props 로 받는다(COPY POLICY):
+ * `eyebrow`(estimator_eyebrow) · `heading`(estimator_heading) · `sub`(estimator_sub) ·
+ * `summaryHeading`(estimator_summary_heading) · `summaryTotalLabel`(estimator_summary_total_label) ·
+ * `summaryNote`(estimator_summary_note) · `airLabel`(estimator_air_label) ·
+ * `rowCountLabel`/`rowBaseLabel`/`rowDiscountLabel`/`rowDiscountAmountLabel`
+ * (estimator_row_*) · `ctaSubmitLabel`(estimator_cta_submit) · `ctaKakaoLabel`(estimator_cta_kakao).
+ * 값이 null 인 문구는 리터럴로 대체하지 않고 조용히 생략한다.
  * 외부 이미지 URL 을 쓰지 않는다 — 이 위젯은 사진 슬롯이 없다.
  */
 
 export interface EstimateCalculatorProps {
+  /** 섹션 eyebrow (copy.estimator_eyebrow). 원문 `.estimator section-head .eyebrow`(275행). null 이면 생략한다. */
+  eyebrow: string | null;
   /** 섹션 제목 (copy.estimator_heading). null 이면 제목을 생략한다. */
   heading: string | null;
   /** 섹션 보조 문구 (copy.estimator_sub). null 이면 생략한다. */
   sub: string | null;
   /** 요약 박스 제목 (copy.estimator_summary_heading). null 이면 생략한다. */
   summaryHeading: string | null;
+  /** 요약 박스 합계 라벨 (copy.estimator_summary_total_label). 원문 `.summary-total > b`(309행). null 이면 생략한다. */
+  summaryTotalLabel: string | null;
   /** 요약 박스 안내 문구 (copy.estimator_summary_note). null 이면 생략한다. */
   summaryNote: string | null;
+  /** 에어컨 종류 선택 라벨 (copy.estimator_air_label). 원문 `.air-select label`(291행). null 이면 생략한다. */
+  airLabel: string | null;
+  /** 요약 행 라벨 — 선택한 서비스 (copy.estimator_row_count). null 이면 생략한다. */
+  rowCountLabel: string | null;
+  /** 요약 행 라벨 — 기본가 합계 (copy.estimator_row_base). null 이면 생략한다. */
+  rowBaseLabel: string | null;
+  /** 요약 행 라벨 — 적용 할인 (copy.estimator_row_discount). null 이면 생략한다. */
+  rowDiscountLabel: string | null;
+  /** 요약 행 라벨 — 할인 금액 (copy.estimator_row_discount_amount). null 이면 생략한다. */
+  rowDiscountAmountLabel: string | null;
+  /** 1차 CTA 라벨 (copy.estimator_cta_submit). 원문 `.summary-actions a.btn.primary`(314행). */
+  ctaSubmitLabel: string | null;
+  /** 카카오 CTA 라벨 (copy.estimator_cta_kakao). 원문 `.summary-actions a.btn.kakao`(315행). */
+  ctaKakaoLabel: string | null;
   /** 서비스 목록. null = 로딩 중, [] = 빈 목록. */
   services: ServiceItem[] | null;
   /** 동시작업 할인 단계. null = 로딩 중. */
@@ -39,9 +61,6 @@ export interface EstimateCalculatorProps {
 
 /** 에어컨 항목의 slug — 모듈 시더가 쓰는 원문 slug */
 const AIR_SLUG = 'air-care';
-
-/** 에어컨 종류 선택 라벨 — 위젯 내부 폼 라벨(원문 .air-select label 과 같은 문구) */
-const AIR_KIND_LABEL = '에어컨 종류 선택';
 
 function defaultAirKind(service: ServiceItem): string {
   const types = service.air_types ?? [];
@@ -67,10 +86,19 @@ function toOptions(services: ServiceItem[], airKind: string): EstimateOption[] {
 }
 
 export function EstimateCalculator({
+  eyebrow,
   heading,
   sub,
   summaryHeading,
+  summaryTotalLabel,
   summaryNote,
+  airLabel,
+  rowCountLabel,
+  rowBaseLabel,
+  rowDiscountLabel,
+  rowDiscountAmountLabel,
+  ctaSubmitLabel,
+  ctaKakaoLabel,
   services,
   steps,
   site,
@@ -142,12 +170,11 @@ export function EstimateCalculator({
       {(heading || sub) && (
         <div className="pb-estimator-head">
           <div className="pb-estimator-head-copy">
-            {/* 원문 .estimator section-head 의 eyebrow(`Expected Estimate`) — copy
-                도메인에 키가 없어 원문 그대로 리터럴로 복구했다. 모듈 키 추가 시
-                props 로 교체할 것(리포트 copy_required 참조). */}
-            <span className="pb-estimator-eyebrow" data-testid="estimator-eyebrow">
-              Expected Estimate
-            </span>
+            {eyebrow && (
+              <span className="pb-estimator-eyebrow" data-testid="estimator-eyebrow">
+                {eyebrow}
+              </span>
+            )}
             {heading && (
               <h3 className="pb-estimator-heading" data-testid="estimator-heading">
                 {heading}
@@ -183,7 +210,7 @@ export function EstimateCalculator({
 
           {showAirSelect ? (
             <div className="pb-estimate-air">
-              <label htmlFor="pb-estimate-air-kind">{AIR_KIND_LABEL}</label>
+              {airLabel ? <label htmlFor="pb-estimate-air-kind">{airLabel}</label> : null}
               <select
                 id="pb-estimate-air-kind"
                 value={airKind}
@@ -207,19 +234,25 @@ export function EstimateCalculator({
           ) : null}
           <div className="pb-estimate-summary-meta">
             <div className="pb-estimate-summary-row">
-              <span>선택한 서비스</span>
+              {rowCountLabel ? <span data-testid="estimator-row-count-label">{rowCountLabel}</span> : null}
               <strong data-testid="summary-count">{result.count}개</strong>
             </div>
             <div className="pb-estimate-summary-row">
-              <span>기본가 합계</span>
+              {rowBaseLabel ? <span data-testid="estimator-row-base-label">{rowBaseLabel}</span> : null}
               <strong data-testid="summary-base">{formatWon(result.base)}</strong>
             </div>
             <div className="pb-estimate-summary-row">
-              <span>적용 할인</span>
+              {rowDiscountLabel ? (
+                <span data-testid="estimator-row-discount-label">{rowDiscountLabel}</span>
+              ) : null}
               <strong data-testid="summary-discount">{result.rate}%</strong>
             </div>
             <div className="pb-estimate-summary-row">
-              <span>할인 금액</span>
+              {rowDiscountAmountLabel ? (
+                <span data-testid="estimator-row-discount-amount-label">
+                  {rowDiscountAmountLabel}
+                </span>
+              ) : null}
               <strong data-testid="summary-discount-amount">
                 {formatWon(result.discountAmount)}
               </strong>
@@ -227,12 +260,13 @@ export function EstimateCalculator({
           </div>
 
           <div className="pb-estimate-summary-total">
-            {/* 원문 .summary-total — b(라벨 `Estimated Base Price`) + span.value(숫자+small 원).
-                라벨은 copy 도메인에 키가 없어 원문 그대로 리터럴로 복구했다(모듈 키 추가 시
-                props 로 교체 — 리포트 copy_required 참조). */}
-            <b className="pb-estimate-summary-total-label" data-testid="summary-final-label">
-              Estimated Base Price
-            </b>
+            {/* 원문 .summary-total — b(라벨, copy: estimator_summary_total_label) +
+                span.value(숫자+small 원). 라벨이 null 이면 생략한다. */}
+            {summaryTotalLabel ? (
+              <b className="pb-estimate-summary-total-label" data-testid="summary-final-label">
+                {summaryTotalLabel}
+              </b>
+            ) : null}
             <span className="pb-estimate-summary-value" data-testid="summary-final">
               {formatWon(result.final).replace(/원$/, '')}
               <small>원</small>
@@ -245,18 +279,26 @@ export function EstimateCalculator({
           </div>
 
           <div className="pb-estimate-summary-actions">
-            {/* 앵커 목적지는 견적/문의 섹션(#estimate)이다 — 레이아웃이 그 id 를 소유한다 */}
-            <a className="pb-btn pb-estimate-btn-primary" href="#estimate">
-              이 구성으로 견적 문의하기
-            </a>
-            {site?.kakao_channel ? (
+            {/* 앵커 목적지는 견적/문의 섹션(#estimate)이다 — 레이아웃이 그 id 를 소유한다.
+                라벨은 copy 도메인(estimator_cta_submit / estimator_cta_kakao)에서 온다. */}
+            {ctaSubmitLabel ? (
+              <a
+                className="pb-btn pb-estimate-btn-primary"
+                data-testid="estimator-cta-submit"
+                href="#estimate"
+              >
+                {ctaSubmitLabel}
+              </a>
+            ) : null}
+            {site?.kakao_channel && ctaKakaoLabel ? (
               <a
                 className="pb-btn pb-btn--kakao"
+                data-testid="estimator-cta-kakao"
                 href={site.kakao_channel}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                카카오채널 문의하기
+                {ctaKakaoLabel}
               </a>
             ) : null}
           </div>

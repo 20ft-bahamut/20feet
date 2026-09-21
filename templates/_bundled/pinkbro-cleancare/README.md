@@ -136,7 +136,7 @@ php artisan template:activate {이전-식별자}
 | FAQ 8문항 | 게시판 `pinkbro_faq` 게시글 + `faq` 메타 |
 | 문의 접수 내역 | 게시판 `pinkbro_inquiry` 게시글 + `inquiry` 메타 |
 | 연락처·브랜드 문구 (전화·카카오 채널·태그라인 등) | `site` 메타 |
-| 섹션 문구 45키 | `copy` 메타 |
+| 섹션 문구 75키 | `copy` 메타 |
 | 동시작업 할인 단계 | `discount` 메타 |
 | 이미지 슬롯 16종 | `media` 메타 (슬롯 키 → 첨부 id) |
 

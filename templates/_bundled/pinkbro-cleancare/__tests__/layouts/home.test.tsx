@@ -329,25 +329,67 @@ describe('home layout — props 계약', () => {
         ServiceGrid: [
             'detailLabel',
             'extraBody',
+            'extraCtaLabel',
             'extraHeading',
+            'eyebrow',
             'intro',
             'introSub',
             'items',
             'media',
         ],
         PackageList: [
+            'benefitEyebrow',
             'benefitHeading',
             'benefitItems',
             'benefitSub',
             'intro',
             'introSub',
             'items',
+            'labelA',
+            'labelB',
+            'labelC',
             'media',
+            'noteA',
+            'noteASub',
+            'noteB',
+            'noteBSub',
+            'noteC',
+            'noteCSub',
+            'stageEyebrow',
         ],
-        PriceDiscount: ['field', 'flow', 'flowLabel', 'heading', 'notice', 'noticeSub', 'steps', 'sub'],
-        FaqList: ['intro', 'introSub', 'items'],
-        CaseGallery: ['intro', 'items', 'note', 'sub'],
-        EstimateCalculator: ['heading', 'services', 'site', 'steps', 'sub', 'summaryHeading', 'summaryNote'],
+        // 원문 #pricing(247~321행)에 할인 표가 없으므로 PriceDiscount 는 목록 데이터를
+        // 받지 않는다(steps 제거) — 표는 PackageList 의 benefit_items 하나뿐이다.
+        PriceDiscount: [
+            'eyebrow',
+            'field',
+            'flow',
+            'flowLabel',
+            'heading',
+            'notice',
+            'noticeLabel',
+            'noticeSub',
+            'sub',
+        ],
+        FaqList: ['eyebrow', 'intro', 'introSub', 'items'],
+        CaseGallery: ['cardKicker', 'eyebrow', 'intro', 'items', 'linkLabel', 'note', 'sub'],
+        EstimateCalculator: [
+            'airLabel',
+            'ctaKakaoLabel',
+            'ctaSubmitLabel',
+            'eyebrow',
+            'heading',
+            'rowBaseLabel',
+            'rowCountLabel',
+            'rowDiscountAmountLabel',
+            'rowDiscountLabel',
+            'services',
+            'site',
+            'steps',
+            'sub',
+            'summaryHeading',
+            'summaryNote',
+            'summaryTotalLabel',
+        ],
         InquiryForm: [
             'checklist',
             'intro',
@@ -542,30 +584,60 @@ describe('home layout — 섹션 composite 렌더', () => {
         about_heading: '왜 핑크브로인가',
         about_message: '매장을 쓰는 사람의 하루를 먼저 생각합니다.',
         about_side_heading: '브랜드 관점',
+        about_stage_eyebrow: 'Why Pinkbro',
+        about_side_eyebrow: 'Brand Perspective',
         about_perspectives: [{ title: '현장 기준', body: '현장에서 확인합니다.' }],
+        service_eyebrow: 'Core Service',
         service_intro: '서비스 안내',
         service_intro_sub: '서비스별 기본 작업 조건과 시작가를 먼저 확인할 수 있습니다.',
         service_detail_label: '자세한 작업기준 확인',
         extra_box_heading: '찾으시는 서비스가 목록에 없나요?',
         extra_box_body: '기타 관리가 필요하시면 문의해 주세요.',
+        extra_box_cta: '기타 서비스 문의하기',
+        package_stage_eyebrow: 'Pinkbro F&B Package',
         package_intro: '패키지 안내',
         package_intro_sub: '자주 선택하는 조합을 정리했습니다.',
+        package_a_label: 'A Package',
+        package_b_label: 'B Package',
+        package_c_label: 'C Package',
+        package_a_note: '기본가 합계 400,000원',
+        package_a_note_sub: '3개 항목 동시작업 5% 적용',
+        package_b_note: '기본가 합계 650,000원',
+        package_b_note_sub: '3개 항목 동시작업 5% 적용',
+        package_c_note: '기본가 합계 900,000원',
+        package_c_note_sub: '5개 항목 동시작업 10% 적용',
+        benefit_eyebrow: 'Multi-Service Benefit',
         benefit_heading: '함께 맡길수록 더 효율적입니다.',
         benefit_sub: '서비스 종류 기준으로 항목을 계산합니다.',
         benefit_items: [{ condition: '2개 항목', amount_label: '3%' }],
+        pricing_eyebrow: 'Pricing',
         pricing_heading: '가격은 투명하게 안내합니다.',
         pricing_sub: '기본 작업 기준가를 먼저 보여드립니다.',
         pricing_notice: '표기 금액은 모두 기본 작업 기준가입니다.',
+        pricing_notice_label: 'Pricing Notice',
         pricing_notice_sub: '시작가를 먼저 공개합니다.',
         pricing_field: '확정 견적은 현장확인 원칙으로 진행합니다.',
         pricing_flow_label: 'Estimate Flow',
         pricing_flow: '기본가 확인 → 문의 접수 → 현장확인 후 확정견적',
+        estimator_eyebrow: 'Expected Estimate',
         estimator_heading: '예상 기본금액을 먼저 확인해 보세요.',
         estimator_sub: '항목을 체크하면 합계와 할인율이 계산됩니다.',
         estimator_summary_heading: '예상 기본금액 요약',
+        estimator_summary_total_label: 'Estimated Base Price',
         estimator_summary_note: '모든 금액은 기본 작업 기준가입니다.',
+        estimator_air_label: '에어컨 종류 선택',
+        estimator_row_count: '선택한 서비스',
+        estimator_row_base: '기본가 합계',
+        estimator_row_discount: '적용 할인',
+        estimator_row_discount_amount: '할인 금액',
+        estimator_cta_submit: '이 구성으로 견적 문의하기',
+        estimator_cta_kakao: '카카오채널 문의하기',
+        faq_eyebrow: 'FAQ',
         faq_intro: '견적 전에 많이 묻는 내용을 먼저 확인해 보세요.',
         faq_intro_sub: '가격, 작업 기준, 출장지역을 정리했습니다.',
+        projects_eyebrow: 'Recent Projects',
+        projects_card_kicker: 'PINKBRO PROJECT',
+        projects_link_label: '작업사례 자세히 보기',
         projects_intro: '작업사례',
         projects_sub: '현장의 작업 내용과 전후 과정입니다.',
         projects_note: '자세한 내용은 블로그에서 확인할 수 있습니다.',
@@ -635,17 +707,30 @@ describe('home layout — 섹션 composite 렌더', () => {
         render(
             <>
                 <ServiceGrid
+                    eyebrow={copy.service_eyebrow}
                     intro={copy.service_intro}
                     introSub={copy.service_intro_sub}
                     detailLabel={copy.service_detail_label}
                     extraHeading={copy.extra_box_heading}
                     extraBody={copy.extra_box_body}
+                    extraCtaLabel={copy.extra_box_cta}
                     items={services}
                     media={media}
                 />
                 <PackageList
+                    stageEyebrow={copy.package_stage_eyebrow}
                     intro={copy.package_intro}
                     introSub={copy.package_intro_sub}
+                    labelA={copy.package_a_label}
+                    labelB={copy.package_b_label}
+                    labelC={copy.package_c_label}
+                    noteA={copy.package_a_note}
+                    noteASub={copy.package_a_note_sub}
+                    noteB={copy.package_b_note}
+                    noteBSub={copy.package_b_note_sub}
+                    noteC={copy.package_c_note}
+                    noteCSub={copy.package_c_note_sub}
+                    benefitEyebrow={copy.benefit_eyebrow}
                     benefitHeading={copy.benefit_heading}
                     benefitSub={copy.benefit_sub}
                     benefitItems={copy.benefit_items}
@@ -653,34 +738,52 @@ describe('home layout — 섹션 composite 렌더', () => {
                     media={media}
                 />
                 <PriceDiscount
+                    eyebrow={copy.pricing_eyebrow}
                     heading={copy.pricing_heading}
                     sub={copy.pricing_sub}
                     notice={copy.pricing_notice}
+                    noticeLabel={copy.pricing_notice_label}
                     noticeSub={copy.pricing_notice_sub}
                     field={copy.pricing_field}
                     flowLabel={copy.pricing_flow_label}
                     flow={copy.pricing_flow}
-                    steps={steps}
                 />
-                <FaqList intro={copy.faq_intro} introSub={copy.faq_intro_sub} items={faqItems} />
+                <FaqList
+                    eyebrow={copy.faq_eyebrow}
+                    intro={copy.faq_intro}
+                    introSub={copy.faq_intro_sub}
+                    items={faqItems}
+                />
                 <CaseGallery
+                    eyebrow={copy.projects_eyebrow}
                     intro={copy.projects_intro}
                     sub={copy.projects_sub}
                     note={copy.projects_note}
+                    cardKicker={copy.projects_card_kicker}
+                    linkLabel={copy.projects_link_label}
                     items={[
                         {
                             title: '작업사례',
                             summary: '사례 요약',
-                            blog_url: '',
+                            blog_url: 'https://blog.naver.com/example/1',
                             cover: { url: null, alt: null },
                         },
                     ]}
                 />
                 <EstimateCalculator
+                    eyebrow={copy.estimator_eyebrow}
                     heading={copy.estimator_heading}
                     sub={copy.estimator_sub}
                     summaryHeading={copy.estimator_summary_heading}
+                    summaryTotalLabel={copy.estimator_summary_total_label}
                     summaryNote={copy.estimator_summary_note}
+                    airLabel={copy.estimator_air_label}
+                    rowCountLabel={copy.estimator_row_count}
+                    rowBaseLabel={copy.estimator_row_base}
+                    rowDiscountLabel={copy.estimator_row_discount}
+                    rowDiscountAmountLabel={copy.estimator_row_discount_amount}
+                    ctaSubmitLabel={copy.estimator_cta_submit}
+                    ctaKakaoLabel={copy.estimator_cta_kakao}
                     services={services}
                     steps={steps}
                     site={site}
@@ -713,6 +816,183 @@ describe('home layout — 섹션 composite 렌더', () => {
             '예상 기본금액을 먼저 확인해 보세요.',
         );
         expect(screen.getByTestId('inquiry-form')).toBeInTheDocument();
+
+        // 원문에만 있던 눈금·라벨·CTA 가 레이아웃 배선으로 실제 렌더된다
+        expect(screen.getByTestId('about-stage-eyebrow')).toHaveTextContent('Why Pinkbro');
+        expect(screen.getByTestId('about-side-eyebrow')).toHaveTextContent('Brand Perspective');
+        expect(screen.getByTestId('services-eyebrow')).toHaveTextContent('Core Service');
+        expect(screen.getByTestId('extra-box-cta')).toHaveTextContent('기타 서비스 문의하기');
+        expect(screen.getByTestId('package-stage-eyebrow')).toHaveTextContent('Pinkbro F&B Package');
+        expect(screen.getAllByTestId('package-label')[0]).toHaveTextContent('A Package');
+        expect(screen.getAllByTestId('package-note')[0]).toHaveTextContent('기본가 합계 400,000원');
+        expect(screen.getByTestId('benefit-eyebrow')).toHaveTextContent('Multi-Service Benefit');
+        expect(screen.getByTestId('pricing-eyebrow')).toHaveTextContent('Pricing');
+        expect(screen.getByTestId('pricing-notice-label')).toHaveTextContent('Pricing Notice');
+        expect(screen.getByTestId('estimator-eyebrow')).toHaveTextContent('Expected Estimate');
+        expect(screen.getByTestId('estimator-row-base-label')).toHaveTextContent('기본가 합계');
+        expect(screen.getByTestId('summary-final-label')).toHaveTextContent('Estimated Base Price');
+        expect(screen.getByTestId('estimator-cta-submit')).toHaveTextContent('이 구성으로 견적 문의하기');
+        expect(screen.getByTestId('faq-eyebrow')).toHaveTextContent('FAQ');
+        expect(screen.getByTestId('projects-eyebrow')).toHaveTextContent('Recent Projects');
+        expect(screen.getAllByTestId('case-card-kicker')[0]).toHaveTextContent('PINKBRO PROJECT');
+        expect(screen.getAllByTestId('case-card-link')[0]).toHaveTextContent('작업사례 자세히 보기');
+    });
+
+    it('omits every restored string when its copy key is null (레이아웃은 리터럴을 만들지 않는다)', () => {
+        const blank: CopyData = {
+            ...copy,
+            about_stage_eyebrow: null,
+            about_side_eyebrow: null,
+            service_eyebrow: null,
+            extra_box_cta: null,
+            package_stage_eyebrow: null,
+            package_a_label: null,
+            package_b_label: null,
+            package_c_label: null,
+            package_a_note: null,
+            package_a_note_sub: null,
+            package_b_note: null,
+            package_b_note_sub: null,
+            package_c_note: null,
+            package_c_note_sub: null,
+            benefit_eyebrow: null,
+            pricing_eyebrow: null,
+            pricing_notice_label: null,
+            estimator_eyebrow: null,
+            estimator_summary_total_label: null,
+            estimator_air_label: null,
+            estimator_row_count: null,
+            estimator_row_base: null,
+            estimator_row_discount: null,
+            estimator_row_discount_amount: null,
+            estimator_cta_submit: null,
+            estimator_cta_kakao: null,
+            faq_eyebrow: null,
+            projects_eyebrow: null,
+            projects_card_kicker: null,
+            projects_link_label: null,
+        };
+
+        render(
+            <>
+                <AboutSection copy={blank} media={media} />
+                <ServiceGrid
+                    eyebrow={blank.service_eyebrow}
+                    intro={blank.service_intro}
+                    introSub={blank.service_intro_sub}
+                    detailLabel={blank.service_detail_label}
+                    extraHeading={blank.extra_box_heading}
+                    extraBody={blank.extra_box_body}
+                    extraCtaLabel={blank.extra_box_cta}
+                    items={services}
+                    media={media}
+                />
+                <PackageList
+                    stageEyebrow={blank.package_stage_eyebrow}
+                    intro={blank.package_intro}
+                    introSub={blank.package_intro_sub}
+                    labelA={blank.package_a_label}
+                    labelB={blank.package_b_label}
+                    labelC={blank.package_c_label}
+                    noteA={blank.package_a_note}
+                    noteASub={blank.package_a_note_sub}
+                    noteB={blank.package_b_note}
+                    noteBSub={blank.package_b_note_sub}
+                    noteC={blank.package_c_note}
+                    noteCSub={blank.package_c_note_sub}
+                    benefitEyebrow={blank.benefit_eyebrow}
+                    benefitHeading={blank.benefit_heading}
+                    benefitSub={blank.benefit_sub}
+                    benefitItems={blank.benefit_items}
+                    items={packages}
+                    media={media}
+                />
+                <PriceDiscount
+                    eyebrow={blank.pricing_eyebrow}
+                    heading={blank.pricing_heading}
+                    sub={blank.pricing_sub}
+                    notice={blank.pricing_notice}
+                    noticeLabel={blank.pricing_notice_label}
+                    noticeSub={blank.pricing_notice_sub}
+                    field={blank.pricing_field}
+                    flowLabel={blank.pricing_flow_label}
+                    flow={blank.pricing_flow}
+                />
+                <FaqList
+                    eyebrow={blank.faq_eyebrow}
+                    intro={blank.faq_intro}
+                    introSub={blank.faq_intro_sub}
+                    items={faqItems}
+                />
+                <CaseGallery
+                    eyebrow={blank.projects_eyebrow}
+                    intro={blank.projects_intro}
+                    sub={blank.projects_sub}
+                    note={blank.projects_note}
+                    cardKicker={blank.projects_card_kicker}
+                    linkLabel={blank.projects_link_label}
+                    items={[
+                        {
+                            title: '작업사례',
+                            summary: '사례 요약',
+                            blog_url: 'https://blog.naver.com/example/1',
+                            cover: { url: null, alt: null },
+                        },
+                    ]}
+                />
+                <EstimateCalculator
+                    eyebrow={blank.estimator_eyebrow}
+                    heading={blank.estimator_heading}
+                    sub={blank.estimator_sub}
+                    summaryHeading={blank.estimator_summary_heading}
+                    summaryTotalLabel={blank.estimator_summary_total_label}
+                    summaryNote={blank.estimator_summary_note}
+                    airLabel={blank.estimator_air_label}
+                    rowCountLabel={blank.estimator_row_count}
+                    rowBaseLabel={blank.estimator_row_base}
+                    rowDiscountLabel={blank.estimator_row_discount}
+                    rowDiscountAmountLabel={blank.estimator_row_discount_amount}
+                    ctaSubmitLabel={blank.estimator_cta_submit}
+                    ctaKakaoLabel={blank.estimator_cta_kakao}
+                    services={services}
+                    steps={steps}
+                    site={site}
+                />
+            </>,
+        );
+
+        // 복원한 30개 키가 전부 null 이면 그 문구들은 화면에 없다 — 하드코딩된 리터럴이
+        // 남아 있으면 이 검사가 깨진다(모듈 키가 사라져도 조용히 살아남는 결함 방지).
+        for (const id of [
+            'about-stage-eyebrow',
+            'about-side-eyebrow',
+            'services-eyebrow',
+            'extra-box-cta',
+            'package-stage-eyebrow',
+            'package-label',
+            'package-note',
+            'benefit-eyebrow',
+            'pricing-eyebrow',
+            'pricing-notice-label',
+            'estimator-eyebrow',
+            'summary-final-label',
+            'estimator-row-count-label',
+            'estimator-row-base-label',
+            'estimator-row-discount-label',
+            'estimator-row-discount-amount-label',
+            'estimator-cta-submit',
+            'estimator-cta-kakao',
+            'faq-eyebrow',
+            'projects-eyebrow',
+            'case-card-kicker',
+            'case-card-link',
+        ]) {
+            expect(screen.queryAllByTestId(id), id).toHaveLength(0);
+        }
+
+        // 값(금액·제목)은 그대로 남는다 — 사라진 것은 문구뿐이다
+        expect(screen.getByTestId('about-heading')).toBeInTheDocument();
+        expect(screen.getByTestId('summary-final')).toBeInTheDocument();
     });
 
     it('renders every section in the loading state when no data source resolved', () => {

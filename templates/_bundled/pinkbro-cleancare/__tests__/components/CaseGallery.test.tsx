@@ -105,7 +105,7 @@ describe('CaseGallery', () => {
     expect(screen.getAllByTestId('case-card-kicker')).toHaveLength(4);
     expect(screen.getAllByTestId('case-card-kicker')[0]).toHaveTextContent('PINKBRO PROJECT');
 
-    // COPY REQUIRED 가 채워지기 전까지는 킥커 없이 렌더한다.
+    // copy 키(projects_card_kicker)가 없으면 킥커를 만들지 않는다 — 리터럴 대체 금지
     rerender(<CaseGallery intro={null} sub={null} note={null} items={items} />);
     expect(screen.queryByTestId('case-card-kicker')).not.toBeInTheDocument();
   });

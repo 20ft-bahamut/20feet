@@ -24,10 +24,11 @@ export interface AboutSectionProps {
  * 섹션 앵커(`#about`)는 컴포넌트가 아니라 레이아웃이 소유한다 — 섹션 id 를
  * 컴포넌트가 직접 달면 레이아웃과 중복 id 가 생긴다.
  *
- * 문구는 전부 copy props 에서 온다: stage 오버레이는 `about_heading`(h3) +
- * `about_message`(p), why-content 는 `about_side_heading`(h2) + 관점 카드.
- * 원문의 eyebrow 라벨("Why Pinkbro"/"Brand Perspective")은 copy 도메인에 키가 없어
- * 렌더하지 않는다 — 카피 하드코딩 금지(COPY POLICY). 리포트의 COPY REQUIRED 항목 참조.
+ * 문구는 전부 copy props 에서 온다: stage 오버레이는 `about_stage_eyebrow`(눈금) +
+ * `about_heading`(h3) + `about_message`(p), why-content 는 `about_side_eyebrow`(눈금) +
+ * `about_side_heading`(h2) + 관점 카드. 두 눈금(`Why Pinkbro` / `Brand Perspective`)은
+ * 원문 68·76행 그대로이며 모듈 COPY 키가 없던 동안 렌더되지 않았다 — 이제 값이 오면
+ * 렌더하고 없으면 조용히 생략한다.
  */
 export function AboutSection({ copy, media }: AboutSectionProps): React.ReactElement {
     if (copy === null) {
@@ -45,7 +46,9 @@ export function AboutSection({ copy, media }: AboutSectionProps): React.ReactEle
 
     const heading = copy.about_heading;
     const message = copy.about_message;
+    const stageEyebrow = copy.about_stage_eyebrow;
     const sideHeading = copy.about_side_heading;
+    const sideEyebrow = copy.about_side_eyebrow;
     const perspectives = copy.about_perspectives;
     const stage = media?.why_stage ?? null;
     const stageUrl = stage?.url ?? null;
@@ -70,17 +73,31 @@ export function AboutSection({ copy, media }: AboutSectionProps): React.ReactEle
                         />
                     )}
                     <Div className="pb-why-overlay">
+                        {stageEyebrow && (
+                            <div className="pb-why-eyebrow" data-testid="about-stage-eyebrow">
+                                {stageEyebrow}
+                            </div>
+                        )}
                         {heading && <h3 data-testid="about-heading">{heading}</h3>}
                         {message && <p data-testid="about-message">{message}</p>}
                     </Div>
                 </Div>
 
                 <Div className="pb-why-content" data-testid="about-perspectives">
-                    {sideHeading && (
-                        <h2 className="pb-why-heading" data-testid="about-side-heading">
-                            {sideHeading}
-                        </h2>
-                    )}
+                    {/* 원문 .why-content > .section-head > .copy — 눈금(eyebrow)과 h2 를
+                        한 덩어리로 묶어 카드와의 간격을 grid gap 18px 로 유지한다. */}
+                    <Div className="pb-why-copy">
+                        {sideEyebrow && (
+                            <div className="pb-why-side-eyebrow" data-testid="about-side-eyebrow">
+                                {sideEyebrow}
+                            </div>
+                        )}
+                        {sideHeading && (
+                            <h2 className="pb-why-heading" data-testid="about-side-heading">
+                                {sideHeading}
+                            </h2>
+                        )}
+                    </Div>
                     {Array.isArray(perspectives) &&
                         perspectives.map((perspective, index) => (
                             <Div className="pb-why-card" key={index} data-testid="about-perspective">

@@ -41,6 +41,26 @@
   color: #fff;
 }
 
+/* 원문 .eyebrow (body.html 175행) — package-copy 눈금. 인라인 color:#ff9dc6, 대시 마커 포함.
+   바로 아래 h2 는 원문 inline margin-top:16px 이며 .pb-package-copy-title 이 이미 갖고 있다. */
+.pb-package-copy-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #ff9dc6;
+}
+
+.pb-package-copy-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
 /* 원문 .package-copy .h2 — 스테이지 안 도입 제목(흰색, h2 900) */
 .pb-package-copy-title {
   margin: 16px 0 0;
@@ -81,6 +101,25 @@
   gap: 32px;
 }
 
+/* 원문 .benefit-top .eyebrow (body.html 232행) — 기본 핑크, 대시 마커 포함 */
+.pb-benefit-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pb-pink);
+}
+
+.pb-benefit-eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
 .pb-benefit-heading {
   margin: 0;
   font-size: clamp(24px, 2.2vw, 30px);
@@ -91,6 +130,11 @@
   /* 원문은 <br> 두 줄 */
   white-space: pre-line;
   word-break: keep-all;
+}
+
+/* 원문 inline margin-top:14px — 눈금 바로 아래 h3 */
+.pb-benefit-eyebrow + .pb-benefit-heading {
+  margin-top: 14px;
 }
 
 .pb-benefit-sub {
@@ -157,6 +201,15 @@
   background: linear-gradient(180deg, #171b25 0%, #11141c 100%);
   color: #fff;
   border-color: #202532;
+}
+
+/* 원문 .pkg-label (body.html 182·197·212행) — 대시 마커 없음, letter-spacing .18em.
+   원문에 featured 변형이 없으므로 색은 카드 상태와 무관하게 --pb-pink 하나다. */
+.pb-pkg-label {
+  font: 800 12px/1 var(--pb-font-latin);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pb-pink);
 }
 
 .pb-pkg-card h3 {

@@ -136,6 +136,152 @@ describe('PackageList', () => {
     expect(screen.queryByTestId('benefit-box')).not.toBeInTheDocument();
   });
 
+  it('renders the stage eyebrow from copy (package_stage_eyebrow)', () => {
+    const { unmount } = render(
+      <PackageList
+        stageEyebrow="Pinkbro F&B Package"
+        intro="도입 문구"
+        introSub={null}
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={items}
+      />,
+    );
+    expect(screen.getByTestId('package-stage-eyebrow')).toHaveTextContent('Pinkbro F&B Package');
+    expect(screen.getByTestId('package-stage-eyebrow').className).toContain(
+      'pb-package-copy-eyebrow',
+    );
+    unmount();
+
+    render(
+      <PackageList
+        intro="도입 문구"
+        introSub={null}
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={items}
+      />,
+    );
+    expect(screen.queryByTestId('package-stage-eyebrow')).not.toBeInTheDocument();
+  });
+
+  it('renders each card label and note from copy, in card order A → B → C', () => {
+    // 주의: 아래 fixture 의 두 번째 카드 금액(900,000원)은 원문 C 패키지 값이다.
+    // 이 테스트가 검증하는 것은 금액이 아니라 **copy 키 → 카드 index 대응**이다.
+    render(
+      <PackageList
+        intro="도입 문구"
+        introSub={null}
+        labelA="A Package"
+        labelB="B Package"
+        labelC="C Package"
+        noteA="기본가 합계 400,000원"
+        noteASub="3개 항목 동시작업 5% 적용"
+        noteB="기본가 합계 650,000원"
+        noteBSub="3개 항목 동시작업 5% 적용"
+        noteC="기본가 합계 900,000원"
+        noteCSub="5개 항목 동시작업 10% 적용"
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={items}
+      />,
+    );
+
+    const labels = screen.getAllByTestId('package-label');
+    expect(labels).toHaveLength(2);
+    expect(labels[0]).toHaveTextContent('A Package');
+    expect(labels[0].className).toContain('pb-pkg-label');
+    expect(labels[1]).toHaveTextContent('B Package');
+
+    // 원문 .pkg-note 는 `기본가 합계 …<br>… 동시작업 … 적용` 한 줄이다
+    const notes = screen.getAllByTestId('package-note');
+    expect(notes).toHaveLength(2);
+    expect(notes[0].textContent).toBe('기본가 합계 400,000원3개 항목 동시작업 5% 적용');
+    expect(notes[0].querySelector('br')).not.toBeNull();
+    expect(notes[1].textContent).toBe('기본가 합계 650,000원3개 항목 동시작업 5% 적용');
+
+    // 라벨은 카드의 h3 바로 위에 온다 (원문 .pkg-label → h3)
+    expect(
+      labels[0].compareDocumentPosition(labels[0].parentElement!.querySelector('h3')!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('renders only the note half that exists and omits both when the keys are null', () => {
+    const { unmount } = render(
+      <PackageList
+        intro={null}
+        introSub={null}
+        noteA="기본가 합계 400,000원"
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={[items[0]]}
+      />,
+    );
+    const note = screen.getByTestId('package-note');
+    expect(note.textContent).toBe('기본가 합계 400,000원');
+    expect(note.querySelector('br')).toBeNull();
+    unmount();
+
+    render(
+      <PackageList
+        intro={null}
+        introSub={null}
+        benefitHeading={null}
+        benefitSub={null}
+        benefitItems={null}
+        media={null}
+        items={items}
+      />,
+    );
+    expect(screen.queryByTestId('package-note')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('package-label')).not.toBeInTheDocument();
+  });
+
+  it('renders the benefit eyebrow from copy (benefit_eyebrow)', () => {
+    const { unmount } = render(
+      <PackageList
+        intro={null}
+        introSub={null}
+        benefitEyebrow="Multi-Service Benefit"
+        benefitHeading="함께 맡길수록 더 효율적입니다."
+        benefitSub={null}
+        benefitItems={[{ condition: '1개 항목', amount_label: '정상가' }]}
+        media={null}
+        items={items}
+      />,
+    );
+    const eyebrow = screen.getByTestId('benefit-eyebrow');
+    expect(eyebrow).toHaveTextContent('Multi-Service Benefit');
+    expect(eyebrow.className).toContain('pb-benefit-eyebrow');
+    expect(
+      eyebrow.compareDocumentPosition(screen.getByTestId('benefit-heading')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    unmount();
+
+    render(
+      <PackageList
+        intro={null}
+        introSub={null}
+        benefitHeading="함께 맡길수록 더 효율적입니다."
+        benefitSub={null}
+        benefitItems={[{ condition: '1개 항목', amount_label: '정상가' }]}
+        media={null}
+        items={items}
+      />,
+    );
+    expect(screen.queryByTestId('benefit-eyebrow')).not.toBeInTheDocument();
+  });
+
   it('renders the stage image from the package_stage media slot when the admin uploaded one', () => {
     render(
       <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}
