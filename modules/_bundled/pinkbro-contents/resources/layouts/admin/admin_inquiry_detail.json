@@ -1,0 +1,446 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_inquiry_detail",
+    "permissions": [
+        "pinkbro-contents.inquiries.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:pinkbro-contents.menu.inquiry_detail",
+        "description": "$t:pinkbro-contents.description"
+    },
+    "state": {
+        "isSaving": false,
+        "errors": null
+    },
+    "data_sources": [
+        {
+            "id": "inquiry",
+            "label_key": "$t:pinkbro-contents.menu.inquiry",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/admin/inquiry/{{route.post_id}}",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "initLocal": "form",
+            "loading_strategy": "blocking",
+            "errorHandling": {
+                "404": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                },
+                "403": {
+                    "handler": "showErrorPage",
+                    "params": {
+                        "target": "content"
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "detail_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "dataKey": "form",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "{{_local.form?.business_type ?? '$t:pinkbro-contents.menu.inquiry_detail'}}",
+                            "description": "$t:pinkbro-contents.description"
+                        },
+                        "children": [
+                            {
+                                "id": "back_to_list",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:pinkbro-contents.menu.inquiry"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "receipt_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "문의 정보"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "접수일"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.created_at || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "상태"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.status ?? '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "연락처"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.contact || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "규모"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{_local.form?.store_size || '-'}}"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "서비스"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Div",
+                                                "props": {
+                                                    "className": "text-sm text-gray-900 dark:text-white"
+                                                },
+                                                "text": "{{(_local.form?.services ?? []).join(', ') || '-'}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "space-y-1 pt-2"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Label",
+                                        "props": {
+                                            "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                        },
+                                        "text": "문의 내용"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "text-sm text-gray-900 dark:text-white whitespace-pre-wrap leading-relaxed"
+                                        },
+                                        "text": "{{_local.form?.message || '-'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "status_card",
+                        "type": "basic",
+                        "name": "Div",
+                        "permissions": [
+                            "pinkbro-contents.inquiries.update"
+                        ],
+                        "props": {
+                            "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+                        },
+                        "children": [
+                            {
+                                "type": "basic",
+                                "name": "H3",
+                                "props": {
+                                    "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+                                },
+                                "text": "상태·내부 메모"
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-1 md:grid-cols-2 gap-4"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "상태"
+                                            },
+                                            {
+                                                "type": "composite",
+                                                "name": "Select",
+                                                "props": {
+                                                    "name": "status",
+                                                    "options": [
+                                                        {
+                                                            "value": "new",
+                                                            "label": "접수"
+                                                        },
+                                                        {
+                                                            "value": "in_progress",
+                                                            "label": "진행중"
+                                                        },
+                                                        {
+                                                            "value": "done",
+                                                            "label": "완료"
+                                                        }
+                                                    ],
+                                                    "className": "w-full"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "space-y-1"
+                                        },
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Label",
+                                                "props": {
+                                                    "className": "text-sm font-medium text-gray-700 dark:text-gray-300"
+                                                },
+                                                "text": "내부 메모"
+                                            },
+                                            {
+                                                "type": "basic",
+                                                "name": "Textarea",
+                                                "props": {
+                                                    "name": "internal_note",
+                                                    "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "pt-2"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Button",
+                                        "props": {
+                                            "disabled": "{{_local.isSaving}}",
+                                            "className": "px-4 py-2 text-sm font-medium text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        },
+                                        "actions": [
+                                            {
+                                                "type": "click",
+                                                "handler": "sequence",
+                                                "params": {
+                                                    "actions": [
+                                                        {
+                                                            "handler": "setState",
+                                                            "params": {
+                                                                "target": "local",
+                                                                "isSaving": true,
+                                                                "errors": null
+                                                            }
+                                                        },
+                                                        {
+                                                            "handler": "apiCall",
+                                                            "auth_required": true,
+                                                            "target": "/api/modules/pinkbro-contents/admin/inquiry/{{route.post_id}}",
+                                                            "params": {
+                                                                "method": "PUT",
+                                                                "body": {
+                                                                    "status": "{{_local.form.status}}",
+                                                                    "internal_note": "{{_local.form.internal_note ?? ''}}"
+                                                                }
+                                                            },
+                                                            "onSuccess": [
+                                                                {
+                                                                    "handler": "setState",
+                                                                    "params": {
+                                                                        "target": "local",
+                                                                        "isSaving": false,
+                                                                        "errors": null
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "toast",
+                                                                    "params": {
+                                                                        "type": "success",
+                                                                        "message": "저장했습니다."
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "navigate",
+                                                                    "params": {
+                                                                        "path": "/admin/pinkbro-contents/inquiry",
+                                                                        "mergeQuery": true,
+                                                                        "query": {}
+                                                                    }
+                                                                }
+                                                            ],
+                                                            "onError": [
+                                                                {
+                                                                    "handler": "setState",
+                                                                    "params": {
+                                                                        "target": "local",
+                                                                        "isSaving": false,
+                                                                        "errors": "{{error.errors}}"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "handler": "toast",
+                                                                    "params": {
+                                                                        "type": "error",
+                                                                        "message": "{{error.message ?? '저장에 실패했습니다.'}}"
+                                                                    }
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "basic",
+                                                "name": "Span",
+                                                "text": "{{_local.isSaving ? '저장 중...' : '저장'}}"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}

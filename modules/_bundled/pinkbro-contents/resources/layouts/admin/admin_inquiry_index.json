@@ -1,0 +1,250 @@
+{
+    "version": "1.0.0",
+    "layout_name": "admin_inquiry_index",
+    "permissions": [
+        "pinkbro-contents.inquiries.read"
+    ],
+    "extends": "_admin_base",
+    "meta": {
+        "title": "$t:pinkbro-contents.menu.inquiry",
+        "description": "$t:pinkbro-contents.description"
+    },
+    "data_sources": [
+        {
+            "id": "inquiries",
+            "label_key": "$t:pinkbro-contents.menu.inquiry",
+            "type": "api",
+            "endpoint": "/api/modules/pinkbro-contents/admin/inquiry",
+            "method": "GET",
+            "auto_fetch": true,
+            "auth_required": true,
+            "loading_strategy": "progressive",
+            "params": {
+                "page": "{{query.page || 1}}",
+                "per_page": "{{query.per_page || 20}}",
+                "status": "{{query.status}}"
+            },
+            "fallback": {
+                "data": {
+                    "data": [],
+                    "meta": {
+                        "total": 0,
+                        "per_page": 20,
+                        "current_page": 1
+                    }
+                }
+            }
+        }
+    ],
+    "slots": {
+        "content": [
+            {
+                "id": "inquiry_wrapper",
+                "type": "basic",
+                "name": "Div",
+                "props": {
+                    "className": "admin-page-content"
+                },
+                "children": [
+                    {
+                        "id": "page_header",
+                        "type": "composite",
+                        "name": "PageHeader",
+                        "props": {
+                            "title": "$t:pinkbro-contents.menu.inquiry",
+                            "description": "$t:pinkbro-contents.description"
+                        },
+                        "children": [
+                            {
+                                "id": "back_to_dashboard",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "$t:pinkbro-contents.menu.dashboard"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "status_filters",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 flex flex-wrap gap-2"
+                        },
+                        "children": [
+                            {
+                                "id": "status_filter_all",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "전체"
+                            },
+                            {
+                                "id": "status_filter_new",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry?new",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "접수"
+                            },
+                            {
+                                "id": "status_filter_in_progress",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry?in_progress",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "진행중"
+                            },
+                            {
+                                "id": "status_filter_done",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry?done",
+                                    "className": "px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline"
+                                },
+                                "text": "완료"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "inquiry_table",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-6 overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl"
+                        },
+                        "children": [
+                            {
+                                "id": "inquiry_header",
+                                "type": "basic",
+                                "name": "Div",
+                                "props": {
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 text-sm font-medium text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2"
+                                        },
+                                        "text": "업종"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-3"
+                                        },
+                                        "text": "연락처"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-3"
+                                        },
+                                        "text": "서비스"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2 whitespace-nowrap"
+                                        },
+                                        "text": "접수일"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2"
+                                        },
+                                        "text": "상태"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "inquiry_row_{{idx}}",
+                                "type": "basic",
+                                "name": "A",
+                                "props": {
+                                    "href": "/admin/pinkbro-contents/inquiry/{{item.id}}",
+                                    "className": "grid grid-cols-12 gap-4 px-4 py-3 text-sm border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors no-underline items-center"
+                                },
+                                "iteration": {
+                                    "source": "{{inquiries?.data?.data ?? []}}",
+                                    "item_var": "item",
+                                    "index_var": "idx"
+                                },
+                                "children": [
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2 font-medium text-gray-900 dark:text-white"
+                                        },
+                                        "text": "{{item.business_type ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-3 text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "{{item.contact ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-3 text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "{{(item.services ?? []).join(', ') || '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2 whitespace-nowrap text-gray-500 dark:text-gray-400"
+                                        },
+                                        "text": "{{item.created_at ?? '-'}}"
+                                    },
+                                    {
+                                        "type": "basic",
+                                        "name": "Div",
+                                        "props": {
+                                            "className": "col-span-2 text-gray-600 dark:text-gray-300"
+                                        },
+                                        "text": "{{item.status ?? '-'}}"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "empty_state",
+                        "type": "basic",
+                        "name": "Div",
+                        "props": {
+                            "className": "mt-8 p-8 text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl"
+                        },
+                        "if": "{{(inquiries?.data?.data ?? []).length === 0}}",
+                        "text": "접수된 문의가 없습니다."
+                    }
+                ]
+            }
+        ]
+    }
+}
