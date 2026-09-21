@@ -444,6 +444,9 @@ class PinkbroContentsSeeder extends Seeder
                 'body' => '단일 작업부터 패키지 조합까지 매장 상황에 맞게 선택할 수 있도록 설계했습니다. 찾으시는 항목이 없더라도 기타 F&B 관리 문의를 함께 받을 수 있습니다.',
             ],
         ],
+        // 원문 body.html 68행(.why-overlay > .eyebrow) / 76행(.copy > .eyebrow).
+        'about_stage_eyebrow' => 'Why Pinkbro',
+        'about_side_eyebrow' => 'Brand Perspective',
         'service_intro' => "F&B 매장의 핵심 관리 영역을\n한 곳에서 함께 관리합니다.",
         'package_intro' => "매장에 필요한 것만 골라\n더 효율적으로 관리하세요.",
         'pricing_notice' => "표기 금액은 모두\n기본 작업 기준가입니다.",
@@ -480,7 +483,23 @@ class PinkbroContentsSeeder extends Seeder
         'service_detail_label' => '자세한 작업기준 확인',
         'extra_box_heading' => '찾으시는 서비스가 목록에 없나요?',
         'extra_box_body' => '메인에 안내된 항목 외에도 F&B 매장과 상업공간 관련 기타 관리가 필요하시면 문의해 주세요. 사진 확인이 필요한 경우 카카오채널로 보내주시면 현장에 맞는 범위를 함께 검토해 드립니다.',
+        // 원문 body.html 100행(.section-head .copy > .eyebrow) / 166행(extra-box CTA).
+        'service_eyebrow' => 'Core Service',
+        'extra_box_cta' => '기타 서비스 문의하기',
         'package_intro_sub' => '첫인상, 주방, 공조환경까지 F&B 매장에서 자주 선택하는 조합을 패키지 기준으로 정리했습니다. 필요한 항목만 선택해 단일 작업과 패키지를 자유롭게 비교할 수 있습니다.',
+        // 원문 body.html 175행(package-stage .eyebrow) / 182·197·212행(.pkg-label).
+        'package_stage_eyebrow' => 'Pinkbro F&B Package',
+        'package_a_label' => 'A Package',
+        'package_b_label' => 'B Package',
+        'package_c_label' => 'C Package',
+        // 원문 .pkg-note 는 한 줄이지만(193·208·225행) 앞줄(기본가 합계)과
+        // 뒷줄(동시작업 할인)을 나눠 담는다 — 표시 계층이 사이에 <br> 을 둔다.
+        'package_a_note' => '기본가 합계 400,000원',
+        'package_a_note_sub' => '3개 항목 동시작업 5% 적용',
+        'package_b_note' => '기본가 합계 650,000원',
+        'package_b_note_sub' => '3개 항목 동시작업 5% 적용',
+        'package_c_note' => '기본가 합계 900,000원',
+        'package_c_note_sub' => '5개 항목 동시작업 10% 적용',
         'benefit_heading' => "같은 매장, 같은 일정이라면\n함께 맡길수록 더 효율적입니다.",
         'benefit_sub' => '서비스 종류 기준으로 항목을 계산합니다. 예를 들어 어닝이 3개여도 ‘어닝 세척’ 1개 서비스 항목으로 계산합니다. 추가 면적, 특수오염, 고소장비, 장비 대여 비용은 할인 대상에서 제외됩니다.',
         'benefit_items' => [
@@ -501,16 +520,41 @@ class PinkbroContentsSeeder extends Seeder
                 'amount_label' => '10%',
             ],
         ],
+        // 원문 body.html 232행(benefit-box .eyebrow).
+        'benefit_eyebrow' => 'Multi-Service Benefit',
         'pricing_heading' => "가격은 투명하게,\n견적은 더 분명하게 안내합니다.",
         'pricing_sub' => '홈페이지에서는 기본 작업 기준가를 먼저 보여드립니다. 실제 확정 견적은 현장 상태와 작업 범위를 확인한 뒤 안내합니다.',
         'pricing_notice_sub' => '대략적인 예산을 쉽게 가늠할 수 있도록 시작가를 먼저 공개합니다.',
         'pricing_field' => '확정 견적은 현장확인 원칙으로 진행합니다. 면적, 오염 상태, 작업 구조, 고소작업 여부, 추가 분해 범위에 따라 최종 금액은 달라질 수 있습니다.',
         'pricing_flow_label' => 'Estimate Flow',
+        // 원문 body.html 251행(pricing section-head .eyebrow) / 259행(notice-a .eyebrow).
+        'pricing_eyebrow' => 'Pricing',
+        'pricing_notice_label' => 'Pricing Notice',
         'estimator_heading' => '예상 기본금액을 먼저 확인해 보세요.',
         'estimator_sub' => '항목을 체크하면 기본가 합계와 동시작업 할인율이 자동으로 계산됩니다. 예상금액은 참고용이며, 최종 견적은 현장 기준으로 확정됩니다.',
+        // 원문 body.html 275행(estimator section-head .eyebrow) /
+        // 291행(.air-select label) / 301행(summary-box h3) /
+        // 303~306행(summary-row span 4종) / 309행(summary-total b) /
+        // 314~315행(summary-actions CTA 2종).
+        'estimator_eyebrow' => 'Expected Estimate',
+        'estimator_air_label' => '에어컨 종류 선택',
+        'estimator_row_count' => '선택한 서비스',
+        'estimator_row_base' => '기본가 합계',
+        'estimator_row_discount' => '적용 할인',
+        'estimator_row_discount_amount' => '할인 금액',
+        'estimator_summary_total_label' => 'Estimated Base Price',
+        'estimator_cta_submit' => '이 구성으로 견적 문의하기',
+        'estimator_cta_kakao' => '카카오채널 문의하기',
         'estimator_summary_heading' => '예상 기본금액 요약',
         'estimator_summary_note' => '모든 금액은 기본 작업 기준가입니다. 최종 확정 견적은 현장 상태, 면적, 오염도, 추가 작업 여부를 확인한 뒤 안내합니다.',
+        // 원문 body.html 326행(faq-intro .eyebrow).
+        'faq_eyebrow' => 'FAQ',
         'faq_intro_sub' => '가격, 작업 기준, 출장지역처럼 상담 전에 가장 많이 확인하는 내용을 짧고 분명하게 정리했습니다.',
+        // 원문 body.html 371행(projects section-head .eyebrow) /
+        // 379행 카드 4장의 .project-kicker / .project-link.
+        'projects_eyebrow' => 'Recent Projects',
+        'projects_card_kicker' => 'PINKBRO PROJECT',
+        'projects_link_label' => '작업사례 자세히 보기',
         'projects_sub' => '핑크브로클린케어가 직접 진행한 현장의 작업 내용과 전후 과정은 네이버 블로그에서 자세히 확인할 수 있습니다.',
         'estimate_checklist' => [
             '홈페이지 문의는 사진 없이 간단한 정보만 남기면 됩니다.',

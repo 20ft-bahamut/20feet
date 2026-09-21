@@ -4,6 +4,33 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르며,
 [Semantic Versioning](https://semver.org/lang/ko/)을 준수합니다.
 
+## [Unreleased]
+
+### Added
+
+- 시더 `COPY` 상수에 원문(`_workspace/pinkbro/source/body.html`)에만 있고 키가 없던
+  문구 30개를 추가했습니다(45키 → 75키). 값은 원문 그대로이며, 어느 행에서 왔는지는
+  상수의 주석에 남겼습니다.
+  - about: `about_stage_eyebrow`(68행) · `about_side_eyebrow`(76행)
+  - service: `service_eyebrow`(100행) · `extra_box_cta`(166행)
+  - package: `package_stage_eyebrow`(175행) · `package_a_label`(182행) ·
+    `package_b_label`(197행) · `package_c_label`(212행) · `package_{a,b,c}_note` 와
+    `_sub`(193·208·225행의 `.pkg-note` 두 줄) · `benefit_eyebrow`(232행)
+  - pricing/estimator: `pricing_eyebrow`(251행) · `pricing_notice_label`(259행) ·
+    `estimator_eyebrow`(275행) · `estimator_air_label`(291행) ·
+    `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
+    `estimator_row_discount_amount`(303~306행) · `estimator_summary_total_label`(309행) ·
+    `estimator_cta_submit`·`estimator_cta_kakao`(314~315행)
+  - faq: `faq_eyebrow`(326행)
+  - projects: `projects_eyebrow`(371행) · `projects_card_kicker`·`projects_link_label`(379행)
+- `estimator_summary_heading`(‘예상 기본금액 요약’)은 0.1.0 에 이미 있으므로 중복 키를
+  만들지 않았습니다.
+
+### Note
+
+- 시더는 멱등합니다. `module:seed pinkbro-contents --class=PinkbroContentsSeeder` 를 다시
+  돌리면 새 키만 upsert 되고 기존 값은 그대로입니다.
+
 ## [0.1.0] - 2026-09-18
 
 ### Added
