@@ -93,10 +93,12 @@ export function PackageList({
   if (items === null) {
     return (
       <div className="pb-packages" data-testid="packages-skeleton">
-        <div className="pb-package-grid" aria-hidden="true">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="pb-pkg-card pb-pkg-card--skeleton" />
-          ))}
+        <div className="pb-wrap">
+          <div className="pb-package-grid" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="pb-pkg-card pb-pkg-card--skeleton" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -105,7 +107,9 @@ export function PackageList({
   if (items.length === 0) {
     return (
       <div className="pb-packages" data-testid="packages-empty">
-        <div className="pb-packages-empty-block" />
+        <div className="pb-wrap">
+          <div className="pb-packages-empty-block" />
+        </div>
       </div>
     );
   }
@@ -120,129 +124,131 @@ export function PackageList({
 
   return (
     <div className="pb-packages">
-      <div className="pb-package-stage" data-testid="package-stage">
-        {stageUrl ? (
-          <Img
-            className="pb-package-stage-media"
-            data-testid="package-stage-media"
-            src={stageUrl}
-            alt={stage?.alt ?? ''}
-            loading="lazy"
-          />
-        ) : (
-          <Div
-            className="pb-package-stage-fallback"
-            data-testid="package-stage-fallback"
-            aria-hidden="true"
-          />
-        )}
-        <div className="pb-package-copy">
-          {stageEyebrow ? (
-            <div className="pb-package-copy-eyebrow" data-testid="package-stage-eyebrow">
-              {stageEyebrow}
-            </div>
-          ) : null}
-          {intro ? (
-            <h2 className="pb-package-copy-title" data-testid="packages-intro">
-              {intro}
-            </h2>
-          ) : null}
-          {introSub ? (
-            <p className="pb-package-copy-sub" data-testid="packages-intro-sub">
-              {introSub}
-            </p>
-          ) : null}
+      <div className="pb-wrap">
+        <div className="pb-package-stage" data-testid="package-stage">
+          {stageUrl ? (
+            <Img
+              className="pb-package-stage-media"
+              data-testid="package-stage-media"
+              src={stageUrl}
+              alt={stage?.alt ?? ''}
+              loading="lazy"
+            />
+          ) : (
+            <Div
+              className="pb-package-stage-fallback"
+              data-testid="package-stage-fallback"
+              aria-hidden="true"
+            />
+          )}
+          <div className="pb-package-copy">
+            {stageEyebrow ? (
+              <div className="pb-package-copy-eyebrow" data-testid="package-stage-eyebrow">
+                {stageEyebrow}
+              </div>
+            ) : null}
+            {intro ? (
+              <h2 className="pb-package-copy-title" data-testid="packages-intro">
+                {intro}
+              </h2>
+            ) : null}
+            {introSub ? (
+              <p className="pb-package-copy-sub" data-testid="packages-intro-sub">
+                {introSub}
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
-      <div className="pb-package-grid">
-        {items.map((item, index) => {
-          const { amount, suffix } = splitPriceSuffix(item.price);
-          // 원문 카드 순서(A·B·C) = 모듈 sort 순서(1·2·3) — index 로 대응한다.
-          // 키가 비어 있으면 그 카드의 라벨/노트만 생략한다(리터럴 대체 금지).
-          const label = [labelA, labelB, labelC][index] ?? null;
-          const note = [noteA, noteB, noteC][index] ?? null;
-          const noteSub = [noteASub, noteBSub, noteCSub][index] ?? null;
-          return (
-            <article
-              key={item.title}
-              className={
-                item.is_featured ? 'pb-pkg-card pb-pkg-card--featured' : 'pb-pkg-card'
-              }
-              data-testid="package-card"
-            >
-              {label ? (
-                <div className="pb-pkg-label" data-testid="package-label">
-                  {label}
-                </div>
-              ) : null}
-              <h3>{item.title}</h3>
-              <p>{item.summary}</p>
-              <ul className="pb-pkg-list">
-                {item.includes.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-              <div className="pb-pkg-total">
-                <div className="pb-pkg-old">{item.base_total}</div>
-                <div className="pb-pkg-new">
-                  {amount}
-                  {suffix && (
-                    <small className="pb-pkg-new-suffix" data-testid="package-price-suffix">
-                      {suffix}
-                    </small>
-                  )}
-                </div>
-                {note || noteSub ? (
-                  <div className="pb-pkg-note" data-testid="package-note">
-                    {note}
-                    {note && noteSub ? <br /> : null}
-                    {noteSub}
+        <div className="pb-package-grid">
+          {items.map((item, index) => {
+            const { amount, suffix } = splitPriceSuffix(item.price);
+            // 원문 카드 순서(A·B·C) = 모듈 sort 순서(1·2·3) — index 로 대응한다.
+            // 키가 비어 있으면 그 카드의 라벨/노트만 생략한다(리터럴 대체 금지).
+            const label = [labelA, labelB, labelC][index] ?? null;
+            const note = [noteA, noteB, noteC][index] ?? null;
+            const noteSub = [noteASub, noteBSub, noteCSub][index] ?? null;
+            return (
+              <article
+                key={item.title}
+                className={
+                  item.is_featured ? 'pb-pkg-card pb-pkg-card--featured' : 'pb-pkg-card'
+                }
+                data-testid="package-card"
+              >
+                {label ? (
+                  <div className="pb-pkg-label" data-testid="package-label">
+                    {label}
                   </div>
                 ) : null}
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      {hasBenefit && (
-        <div className="pb-benefit-box" data-testid="benefit-box">
-          <div className="pb-benefit-top">
-            <div>
-              {benefitEyebrow && (
-                <div className="pb-benefit-eyebrow" data-testid="benefit-eyebrow">
-                  {benefitEyebrow}
+                <h3>{item.title}</h3>
+                <p>{item.summary}</p>
+                <ul className="pb-pkg-list">
+                  {item.includes.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+                <div className="pb-pkg-total">
+                  <div className="pb-pkg-old">{item.base_total}</div>
+                  <div className="pb-pkg-new">
+                    {amount}
+                    {suffix && (
+                      <small className="pb-pkg-new-suffix" data-testid="package-price-suffix">
+                        {suffix}
+                      </small>
+                    )}
+                  </div>
+                  {note || noteSub ? (
+                    <div className="pb-pkg-note" data-testid="package-note">
+                      {note}
+                      {note && noteSub ? <br /> : null}
+                      {noteSub}
+                    </div>
+                  ) : null}
                 </div>
-              )}
-              {benefitHeading && (
-                <h3 className="pb-benefit-heading" data-testid="benefit-heading">
-                  {benefitHeading}
-                </h3>
+              </article>
+            );
+          })}
+        </div>
+
+        {hasBenefit && (
+          <div className="pb-benefit-box" data-testid="benefit-box">
+            <div className="pb-benefit-top">
+              <div>
+                {benefitEyebrow && (
+                  <div className="pb-benefit-eyebrow" data-testid="benefit-eyebrow">
+                    {benefitEyebrow}
+                  </div>
+                )}
+                {benefitHeading && (
+                  <h3 className="pb-benefit-heading" data-testid="benefit-heading">
+                    {benefitHeading}
+                  </h3>
+                )}
+              </div>
+              {benefitSub && (
+                <p className="pb-benefit-sub" data-testid="benefit-sub">
+                  {benefitSub}
+                </p>
               )}
             </div>
-            {benefitSub && (
-              <p className="pb-benefit-sub" data-testid="benefit-sub">
-                {benefitSub}
-              </p>
+
+            {Array.isArray(benefitItems) && benefitItems.length > 0 && (
+              <div className="pb-benefit-grid">
+                {benefitItems.map((step, index) => (
+                  <div
+                    className="pb-benefit-item"
+                    data-testid="benefit-item"
+                    key={`${step.condition}-${index}`}
+                  >
+                    <small>{step.condition}</small>
+                    <strong>{step.amount_label}</strong>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-
-          {Array.isArray(benefitItems) && benefitItems.length > 0 && (
-            <div className="pb-benefit-grid">
-              {benefitItems.map((step, index) => (
-                <div
-                  className="pb-benefit-item"
-                  data-testid="benefit-item"
-                  key={`${step.condition}-${index}`}
-                >
-                  <small>{step.condition}</small>
-                  <strong>{step.amount_label}</strong>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

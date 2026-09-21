@@ -328,4 +328,51 @@ describe('PackageList', () => {
       /@media \(max-width: 720px\)[\s\S]*?\.pb-packages\s*{\s*padding:\s*82px 0;\s*}/,
     );
   });
+
+  it('puts the stage, the grid and the benefit box inside the template container (pb-wrap)', () => {
+    // 원문 #package > .wrap 안에 .package-stage / .package-grid / .benefit-box 가 모두 들어간다
+    // (body.html 171~243행). 컨테이너가 없으면 셋 다 뷰포트 폭(1440)으로 퍼져
+    // 원문(1280)과 어긋나고, 스테이지 오른쪽이 빈 다크 영역으로 남는다.
+    render(
+      <PackageList
+        intro="도입 문구"
+        introSub={null}
+        benefitHeading="혜택"
+        benefitSub={null}
+        benefitItems={[{ condition: '1개 항목', amount_label: '정상가' }]}
+        media={null}
+        items={items}
+      />,
+    );
+
+    for (const id of ['package-stage', 'package-grid', 'benefit-box']) {
+      const node =
+        id === 'package-grid'
+          ? screen.getAllByTestId('package-card')[0].parentElement
+          : screen.getByTestId(id);
+      expect(node, id).not.toBeNull();
+      expect(node!.closest('.pb-wrap'), id).not.toBeNull();
+      // 컨테이너는 섹션 루트 바로 아래 하나뿐이다
+      expect(node!.closest('.pb-packages')!.querySelectorAll(':scope > .pb-wrap')).toHaveLength(1);
+    }
+  });
+
+  it('gives the loading skeleton and the empty state the same container (폭이 튀지 않는다)', () => {
+    const { unmount } = render(
+      <PackageList intro={null} introSub={null} benefitHeading={null} benefitSub={null}
+        benefitItems={null} media={null} items={null} />,
+    );
+    const skeletonGrid = screen.getByTestId('packages-skeleton').querySelector('.pb-package-grid');
+    expect(skeletonGrid).not.toBeNull();
+    expect(skeletonGrid!.closest('.pb-wrap')).not.toBeNull();
+    unmount();
+
+    render(
+      <PackageList intro={null} introSub={null} benefitHeading={null} benefitSub={null}
+        benefitItems={null} media={null} items={[]} />,
+    );
+    const emptyBlock = screen.getByTestId('packages-empty').querySelector('.pb-packages-empty-block');
+    expect(emptyBlock).not.toBeNull();
+    expect(emptyBlock!.closest('.pb-wrap')).not.toBeNull();
+  });
 });
