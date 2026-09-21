@@ -18,6 +18,7 @@
 */
 
 use Illuminate\Support\Facades\Route;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminContentController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\InquiryController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\MediaController;
@@ -61,3 +62,49 @@ Route::get('faq', [ContentController::class, 'faq'])->name('faq');
 Route::post('inquiry', [InquiryController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('inquiry');
+
+/*
+| 관리자 콘텐츠 CRUD API — service / package / case / faq
+|
+| GET    api/modules/pinkbro-contents/admin/{domain}
+| GET    api/modules/pinkbro-contents/admin/{domain}/{id}
+| POST   api/modules/pinkbro-contents/admin/{domain}
+| PUT    api/modules/pinkbro-contents/admin/{domain}/{id}
+| DELETE api/modules/pinkbro-contents/admin/{domain}/{id}
+|
+| 인증·관리자·스로틀 값은 참조 관리자 그룹(twentyft-content)과 같다. 권한은
+| 엔드포인트마다 `pinkbro-contents.content.{action}` 로 나눈다.
+|
+| `{domain}` 은 라우트에서 제약하지 않는다 — 알 수 없는 도메인은 컨트롤러가 404 로
+| 정리한다(관리자 레이아웃이 404 핸들러를 갖는다). `{id}` 는 숫자만 받는다:
+| 숫자가 아닌 값이 컨트롤러의 int 파라미터에 닿으면 TypeError 로 500 이 된다.
+|
+| 응답은 목록만 이중 중첩(`{data: {data: [...], meta: {...}}}`)이다.
+*/
+Route::prefix('admin/{domain}')
+    ->middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
+    ->name('admin.content.')
+    ->group(function () {
+        Route::get('/', [AdminContentController::class, 'index'])
+            ->middleware('permission:admin,pinkbro-contents.content.read')
+            ->name('index');
+
+        Route::get('/{id}', [AdminContentController::class, 'show'])
+            ->where('id', '[0-9]+')
+            ->middleware('permission:admin,pinkbro-contents.content.read')
+            ->name('show');
+
+        Route::post('/', [AdminContentController::class, 'store'])
+            ->middleware('permission:admin,pinkbro-contents.content.create')
+            ->name('store');
+
+        Route::put('/{id}', [AdminContentController::class, 'update'])
+            ->where('id', '[0-9]+')
+            ->middleware('permission:admin,pinkbro-contents.content.update')
+            ->name('update');
+
+        Route::delete('/{id}', [AdminContentController::class, 'destroy'])
+            ->where('id', '[0-9]+')
+            ->middleware('permission:admin,pinkbro-contents.content.delete')
+            ->name('destroy');
+    });

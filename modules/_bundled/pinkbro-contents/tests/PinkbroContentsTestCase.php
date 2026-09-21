@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Sanctum;
 use Modules\Pinkbro\Contents\Providers\PinkbroContentsServiceProvider;
 use Tests\TestCase;
 
@@ -382,6 +383,27 @@ abstract class PinkbroContentsTestCase extends TestCase
         }
 
         return $user;
+    }
+
+    /**
+     * 관리자 역할 사용자로 인증합니다.
+     *
+     * createAdminUser() 가 admin 역할(+추가 권한)을 붙인 사용자를 만들고,
+     * 선례(twentyft-content InquiryAdminApiTest)와 같은 방식으로 Sanctum 인증한다.
+     * `app('auth')->shouldUse('sanctum')` 까지 처리되므로 AdminMiddleware 의
+     * `Auth::check()` 도 이 사용자를 본다.
+     *
+     * createModulePermissions() 가 끝난 뒤에 호출해야 admin 역할이 모듈 권한을
+     * 갖는다 — setUp 단계에서 이미 끝난다.
+     *
+     * @param  array  $permissions  추가 권한 식별자 목록
+     * @return static
+     */
+    protected function actingAsAdmin(array $permissions = []): static
+    {
+        Sanctum::actingAs($this->createAdminUser($permissions), ['*'], 'sanctum');
+
+        return $this;
     }
 
     /**
