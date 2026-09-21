@@ -19,6 +19,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminContentController;
+use Modules\Pinkbro\Contents\Http\Controllers\Api\Admin\AdminSiteController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\ContentController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\InquiryController;
 use Modules\Pinkbro\Contents\Http\Controllers\Api\MediaController;
@@ -75,13 +76,17 @@ Route::post('inquiry', [InquiryController::class, 'store'])
 | 인증·관리자·스로틀 값은 참조 관리자 그룹(twentyft-content)과 같다. 권한은
 | 엔드포인트마다 `pinkbro-contents.content.{action}` 로 나눈다.
 |
-| `{domain}` 은 라우트에서 제약하지 않는다 — 알 수 없는 도메인은 컨트롤러가 404 로
-| 정리한다(관리자 레이아웃이 404 핸들러를 갖는다). `{id}` 는 숫자만 받는다:
-| 숫자가 아닌 값이 컨트롤러의 int 파라미터에 닿으면 TypeError 로 500 이 된다.
+| `{domain}` 은 콘텐츠 4도메인으로 제약한다 (`service|package|case|faq`). 알 수 없는
+| 도메인은 라우트에 걸리지 않아 404 다 — 결과는 예전과 같지만(컨트롤러의 404 정리)
+| 판정 자리가 라우터로 올라온다. 제약이 없으면 아래 사이트 설정 라우트
+| (`admin/site` 등)가 등록 순서에 따라 이 그룹에 먼저 걸려 404 가 된다.
+| `{id}` 는 숫자만 받는다: 숫자가 아닌 값이 컨트롤러의 int 파라미터에 닿으면
+| TypeError 로 500 이 된다.
 |
 | 응답은 목록만 이중 중첩(`{data: {data: [...], meta: {...}}}`)이다.
 */
 Route::prefix('admin/{domain}')
+    ->where(['domain' => 'service|package|case|faq'])
     ->middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
     ->name('admin.content.')
     ->group(function () {
@@ -107,4 +112,50 @@ Route::prefix('admin/{domain}')
             ->where('id', '[0-9]+')
             ->middleware('permission:admin,pinkbro-contents.content.delete')
             ->name('destroy');
+    });
+
+/*
+| 관리자 사이트 설정 API — site / copy / discount
+|
+| GET api/modules/pinkbro-contents/admin/site
+| PUT api/modules/pinkbro-contents/admin/site
+| GET|PUT api/modules/pinkbro-contents/admin/copy
+| GET|PUT api/modules/pinkbro-contents/admin/discount
+|
+| 세 도메인은 게시판·게시글에 매이지 않은 전역 메타다 (SPEC §4.5) — 콘텐츠 CRUD 의
+| `{domain}` 그룹과 달리 게시글 id 가 없어 경로가 한 단계 얕다. 그래서 콘텐츠
+| 그룹의 `{domain}` 을 4도메인으로 제약해 두었다 (위 주석 참조).
+|
+| 인증·관리자·스로틀 값은 콘텐츠 그룹과 같다. 권한은 읽기/수정 두 갈래로만
+| 나눈다: `pinkbro-contents.site.{read|update}` (module.php 의 site 카테고리).
+| 세 도메인이 한 카테고리를 공유한다 — 사이트 설정은 한 화면에서 함께 편집된다.
+|
+| PUT 은 부분 갱신이고, 응답은 공개 읽기와 같은 단일 래핑(`{data: {...}}`)이다.
+| 관리자 읽기는 공개 읽기와 같은 리소스를 쓴다.
+*/
+Route::middleware(['auth:sanctum', 'admin', 'throttle:600,1'])
+    ->group(function () {
+        Route::get('admin/site', [AdminSiteController::class, 'site'])
+            ->middleware('permission:admin,pinkbro-contents.site.read')
+            ->name('admin.site.read');
+
+        Route::put('admin/site', [AdminSiteController::class, 'updateSite'])
+            ->middleware('permission:admin,pinkbro-contents.site.update')
+            ->name('admin.site.update');
+
+        Route::get('admin/copy', [AdminSiteController::class, 'copy'])
+            ->middleware('permission:admin,pinkbro-contents.site.read')
+            ->name('admin.copy.read');
+
+        Route::put('admin/copy', [AdminSiteController::class, 'updateCopy'])
+            ->middleware('permission:admin,pinkbro-contents.site.update')
+            ->name('admin.copy.update');
+
+        Route::get('admin/discount', [AdminSiteController::class, 'discount'])
+            ->middleware('permission:admin,pinkbro-contents.site.read')
+            ->name('admin.discount.read');
+
+        Route::put('admin/discount', [AdminSiteController::class, 'updateDiscount'])
+            ->middleware('permission:admin,pinkbro-contents.site.update')
+            ->name('admin.discount.update');
     });
