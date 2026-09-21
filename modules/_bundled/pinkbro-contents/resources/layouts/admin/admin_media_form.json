@@ -217,7 +217,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -502,7 +507,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -787,7 +797,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1072,7 +1087,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1357,7 +1377,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1642,7 +1667,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -1927,7 +1957,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2212,7 +2247,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2497,7 +2537,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -2782,7 +2827,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3067,7 +3117,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3352,7 +3407,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3637,7 +3697,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -3922,7 +3987,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -4207,7 +4277,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
@@ -4492,7 +4567,12 @@
                                                             }
                                                         },
                                                         {
-                                                            "handler": "apiCall",
+                                                            "handler": "emitEvent",
+                                                            "params": {
+                                                                "event": "upload:pinkbro_media"
+                                                            }
+                                                        },
+                                                        {
                                                             "auth_required": true,
                                                             "target": "/api/modules/pinkbro-contents/admin/media",
                                                             "params": {
