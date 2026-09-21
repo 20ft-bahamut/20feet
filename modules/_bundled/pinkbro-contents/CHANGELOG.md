@@ -25,6 +25,14 @@
   - projects: `projects_eyebrow`(371행) · `projects_card_kicker`·`projects_link_label`(379행)
 - `estimator_summary_heading`(‘예상 기본금액 요약’)은 0.1.0 에 이미 있으므로 중복 키를
   만들지 않았습니다.
+- 헤더·히어로·모바일바 7키를 추가했습니다(75키 → 82키). 값은 원문 그대로입니다.
+  - hero: `hero_cta_primary`(32행) · `hero_cta_secondary`(33행) ·
+    `hero_visual_message_label`(53행)
+  - header: `header_cta`(15행)
+  - mobile bar: `mobile_cta_estimate`(16·498행 — 두 자리가 같은 문자열이라 키 하나) ·
+    `mobile_cta_phone`(497행) · `mobile_cta_kakao`(499행)
+  - `BRAND MESSAGE` 는 기존 `hero_visual_label`(상단 배지, 50행)과 다른 자리라
+    이름을 `hero_visual_message_label` 로 구분했습니다.
 
 ### Note
 

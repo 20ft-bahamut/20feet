@@ -429,6 +429,9 @@ class PinkbroContentsSeeder extends Seeder
             '기본가격 공개',
             '현장확인 후 확정견적',
         ],
+        // 원문 body.html 32·33행(.hero-actions > a.btn.primary / a.btn.soft).
+        'hero_cta_primary' => '간편견적 문의하기',
+        'hero_cta_secondary' => '가격 · 예상견적 보기',
         'about_message' => '손님이 처음 보는 외관, 매일 밟는 바닥, 오래 사용하는 에어컨, 반복적으로 사용하는 후드까지. 핑크브로는 F&B 매장에 필요한 관리 포인트를 브랜드 기준으로 정리합니다.',
         'about_perspectives' => [
             [
@@ -460,6 +463,9 @@ class PinkbroContentsSeeder extends Seeder
         'about_heading' => '좋은 매장은 공간의 컨디션까지 다릅니다.',
         'about_side_heading' => "매장에 꼭 필요한 위생관리만\n더 분명하게 제안합니다.",
         'hero_visual_label' => 'PINKBRO F&B HYGIENE CARE',
+        // 원문 53행(.hero-visual-bottom span) — 아래 `hero_visual_brand_message`(b)의 라벨이다.
+        // 기존 `hero_visual_label`(상단 배지)과 다른 자리이므로 이름을 구분했다.
+        'hero_visual_message_label' => 'BRAND MESSAGE',
         'hero_visual_brand_message' => '깨끗한 공간, 더 나은 오늘',
         'hero_visual_body' => "매장에 필요한 위생관리만\n더 체계적으로.",
         'hero_scope' => [
@@ -565,6 +571,12 @@ class PinkbroContentsSeeder extends Seeder
         'estimate_panel_sub' => '업종, 필요한 서비스와 규모, 연락처, 요청사항을 남겨주세요. 사진 첨부 없이 간단하게 접수할 수 있습니다.',
         'estimate_panel_note' => "사진 첨부가 필요하신가요?\n휴대폰으로 촬영한 현장 사진은 카카오채널로 보내주시면 가장 빠르게 확인할 수 있습니다. 홈페이지 문의는 사진 없이 접수됩니다.",
         'footer_brand_desc' => '핑크브로클린케어는 카페, 음식점, 베이커리, 주점, 프랜차이즈 등 F&B 매장을 위한 전문 위생 클린케어 브랜드입니다.',
+        // --- 헤더·모바일바 (원문 body.html 15·16·497·498·499행) ---
+        // 16행(헤더 mobile-link)과 498행(모바일바)은 같은 문자열이라 키를 하나로 쓴다.
+        'header_cta' => '간편견적 문의',
+        'mobile_cta_estimate' => '간편견적',
+        'mobile_cta_phone' => '전화상담',
+        'mobile_cta_kakao' => '카카오문의',
     ];
 
     /**
