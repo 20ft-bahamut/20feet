@@ -17,5 +17,9 @@ export interface FaqListProps {
  * intro(copy: faq_intro)는 원본 .h2 제목 — <h2> 로 렌더하며, 시더 값의 \n 이
  * 줄바꿈이 된다(원본 <br> 대응). introSub(copy: faq_intro_sub)는 .sub 문단.
  * eyebrow(copy: faq_eyebrow)는 원문 326행의 눈금이며, 값이 없으면 생략한다.
+ *
+ * 답변의 첫 문장은 원문에서 `<strong>` 이다(body.html 333~361행). 모듈은 답변을
+ * 평문으로 저장하므로 표시 계층이 첫 문장 경계를 추정해 그 문장만 굵게 렌더한다 —
+ * 판정 규칙과 한계는 `src/lib/faqAnswer.ts` 와 README 의 [알려진 한계] 참조.
  */
 export declare function FaqList({ eyebrow, intro, introSub, items }: FaqListProps): import("react").JSX.Element;

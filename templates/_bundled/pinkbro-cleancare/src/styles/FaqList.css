@@ -130,6 +130,12 @@
   line-height: 1.85;
 }
 
+/* 원문 .faq-answer strong (styles.css 262행) — 색만 --ink 로 올린다.
+   굵기는 원문도 선언하지 않으므로 UA 기본(strong → 700)을 그대로 쓴다. */
+.pb-faq-answer strong {
+  color: var(--pb-ink);
+}
+
 /* 빈 상태 — 항목이 없을 때의 중립 폴백 */
 .pb-faq-empty {
   min-height: 1px;

@@ -29,4 +29,5 @@ export { MobileBar, type MobileBarProps } from './components/MobileBar';
 export { calculateEstimate, discountRateFor, formatWon, parsePrice, type EstimateResult, } from './lib/estimate';
 export { BUSINESS_TYPES, EMPTY_INQUIRY_FORM, INQUIRY_ENDPOINT, INQUIRY_LIMITS, SERVICE_CHOICES, SERVER_FIELD_MAP, toInquiryPayload, validateInquiry, type InquiryFieldErrors, type InquiryFormValues, } from './lib/inquiry';
 export { servicePhotoFor, SERVICE_PHOTO, SERVICE_SLOT } from './lib/serviceAssets';
+export { splitFaqAnswer, type FaqAnswerParts } from './lib/faqAnswer';
 export { templateMetadata };

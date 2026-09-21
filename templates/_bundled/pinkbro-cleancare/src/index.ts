@@ -74,6 +74,7 @@ export {
     type InquiryFormValues,
 } from './lib/inquiry';
 export { servicePhotoFor, SERVICE_PHOTO, SERVICE_SLOT } from './lib/serviceAssets';
+export { splitFaqAnswer, type FaqAnswerParts } from './lib/faqAnswer';
 
 export { templateMetadata };
 

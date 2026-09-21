@@ -5,6 +5,8 @@
  * 코어 테스트 유틸을 쓰지 않는다. 브랜드 문구를 만들지 않고 더미 문자열을 쓴다.
  * 폼 선택지(BUSINESS_TYPES / SERVICE_CHOICES)는 소스 원문 고정 값이라 원문 그대로 단언한다.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act, within } from '@testing-library/react';
 import InquiryForm from '../../src/components/InquiryForm';
@@ -278,6 +280,42 @@ describe('InquiryForm', () => {
 });
 
 describe('inquiry contract', () => {
+    it('renders the (복수 선택 가능) hint as a span at the label size (원문 431행)', () => {
+        const { container } = render(
+            <InquiryForm site={site} services={services} media={null} intro="i" sub={null} checklist={null} panelHeading={null} panelSub={null} panelNote={null} />,
+        );
+
+        // 서비스 필드 라벨 — aria-labelledby 가 가리키는 요소
+        const label = container.querySelector('#inquiry-services-label');
+        expect(label, '#inquiry-services-label').not.toBeNull();
+
+        const hint = label!.querySelector('span');
+        expect(hint, '복수 선택 가능 span').not.toBeNull();
+        expect(hint!.textContent).toBe('(복수 선택 가능)');
+        // 원문은 <span> 이고 크기를 .field label(13px)에서 상속한다.
+        // <small> 로 두면 UA 의 smaller(≈10.8px)가 적용되어 원문보다 작아진다.
+        expect(hint!.tagName).toBe('SPAN');
+        expect(label!.querySelector('small')).toBeNull();
+        expect(label!.textContent).toBe('필요 서비스 (복수 선택 가능)');
+    });
+
+    it('keeps the field label and hint metrics in InquiryForm.css (원문 .field label / 인라인 span)', () => {
+        const source = readFileSync(
+            join(__dirname, '..', '..', 'src', 'styles', 'InquiryForm.css'),
+            'utf8',
+        );
+
+        // 원문 styles.css 239행 .field label { font-size:13px; font-weight:800; color:var(--ink) }
+        expect(source).toMatch(
+            /\.pb-field-label\s*{\s*font-size:\s*13px;\s*font-weight:\s*800;\s*color:\s*var\(--pb-ink\);\s*}/,
+        );
+        // 힌트 span 은 색(#8b909b)과 굵기(600)만 갖고 크기는 상속한다 — font-size 선언이 없다
+        expect(source).toMatch(/\.pb-field-label span\s*{[^}]*color:\s*#8b909b;[^}]*}/);
+        expect(source).toMatch(/\.pb-field-label span\s*{[^}]*font-weight:\s*600;[^}]*}/);
+        expect(source).not.toMatch(/\.pb-field-label span\s*{[^}]*font-size/s);
+        expect(source).not.toMatch(/\.pb-field-label small/);
+    });
+
     it('keeps the source choice strings verbatim', () => {
         expect(BUSINESS_TYPES).toEqual([
             '카페',

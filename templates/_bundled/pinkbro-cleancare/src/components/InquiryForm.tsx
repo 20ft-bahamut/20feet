@@ -325,7 +325,7 @@ export function InquiryForm({
 
                                     <div className="pb-field">
                                         <Span className="pb-field-label" id="inquiry-services-label">
-                                            필요 서비스 <small>(복수 선택 가능)</small>
+                                            필요 서비스 <span>(복수 선택 가능)</span>
                                         </Span>
                                         <div
                                             className="pb-service-check-grid"

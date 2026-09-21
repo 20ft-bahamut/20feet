@@ -160,7 +160,9 @@
   font-size: 28px;
   line-height: 1.16;
   letter-spacing: -0.04em;
-  font-weight: 800;
+  /* 원문 .summary-box h3 (styles.css 211행)은 font-weight 를 선언하지 않는다 —
+     브라우저 기본 h3 굵기 700 이 적용된다. 800 은 원문에 없는 값이었다. */
+  font-weight: 700;
   color: #fff;
   word-break: keep-all;
 }
@@ -197,7 +199,9 @@
   display: block;
   font-size: 13px;
   line-height: 1;
-  font-weight: 800;
+  /* 원문 .summary-total b (216행)도 font-weight 를 선언하지 않는다 — b 기본값 700.
+     (800 은 원문에 없는 값이었다. 폭·자간·색·대문자는 원문 그대로다.) */
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #ffb9d6;

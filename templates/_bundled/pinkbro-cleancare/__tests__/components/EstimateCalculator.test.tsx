@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
@@ -272,5 +274,46 @@ describe('EstimateCalculator', () => {
     expect(screen.getByLabelText('에어컨 종류 선택')).toBeInTheDocument();
     // 옵션 라벨은 종류 · 금액 형식을 유지한다
     expect(screen.getByRole('option', { name: '천장형 4WAY · 150,000원' })).toBeInTheDocument();
+  });
+
+  it('keeps the source summary-box metrics in EstimateCalculator.css (원문 210~219행)', () => {
+    const source = readFileSync(
+      join(__dirname, '..', '..', 'src', 'styles', 'EstimateCalculator.css'),
+      'utf8',
+    );
+
+    // 원문 .summary-box h3 은 font-weight 를 선언하지 않는다 — 기본 h3 굵기 700 이 적용된다.
+    // (800 은 원문에 없는 값이었고, 요약 제목이 원문보다 굵게 보이던 원인이다.)
+    expect(source).toMatch(/\.pb-estimate-summary-title\s*{[^}]*font-weight:\s*700;[^}]*}/);
+    expect(source).not.toMatch(/\.pb-estimate-summary-title\s*{[^}]*font-weight:\s*800;[^}]*}/);
+
+    // 원문 .summary-total b 도 font-weight 를 선언하지 않는다 — b 기본값 700.
+    expect(source).toMatch(
+      /\.pb-estimate-summary-total-label\s*{[^}]*font-weight:\s*700;[^}]*}/,
+    );
+    expect(source).not.toMatch(
+      /\.pb-estimate-summary-total-label\s*{[^}]*font-weight:\s*800;[^}]*}/,
+    );
+
+    // 나머지 요약 박스 값은 원문 그대로다 (210~219행)
+    expect(source).toMatch(
+      /\.pb-estimate-summary-title\s*{[^}]*font-size:\s*28px;[^}]*line-height:\s*1\.16;[^}]*letter-spacing:\s*-0\.04em;[^}]*}/,
+    );
+    expect(source).toMatch(
+      /\.pb-estimate-summary-row\s*{[^}]*font-size:\s*14px;[^}]*color:\s*rgba\(255, 255, 255, 0\.8\);[^}]*}/,
+    );
+    expect(source).toMatch(
+      /\.pb-estimate-summary-row strong\s*{[^}]*color:\s*#fff;[^}]*font-weight:\s*800;[^}]*}/,
+    );
+    expect(source).toMatch(
+      /\.pb-estimate-summary-total-label\s*{[^}]*font-size:\s*13px;[^}]*letter-spacing:\s*0\.12em;[^}]*text-transform:\s*uppercase;[^}]*color:\s*#ffb9d6;[^}]*}/,
+    );
+    expect(source).toMatch(
+      /\.pb-estimate-summary-value\s*{[^}]*font:\s*900 42px\/1[^}]*letter-spacing:\s*-0\.05em;[^}]*}/,
+    );
+    expect(source).toMatch(/\.pb-estimate-summary-value small\s*{[^}]*font-size:\s*16px;[^}]*}/);
+    expect(source).toMatch(
+      /\.pb-estimate-summary-note\s*{[^}]*font-size:\s*13px;[^}]*line-height:\s*1\.72;[^}]*color:\s*rgba\(255, 255, 255, 0\.78\);[^}]*}/,
+    );
   });
 });

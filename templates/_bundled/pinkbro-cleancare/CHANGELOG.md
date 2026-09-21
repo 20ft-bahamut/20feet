@@ -17,6 +17,23 @@
   과 스켈레톤·빈 상태·`.pb-pricing-step*` CSS 를 함께 지웠습니다. 표는 이제
   `PackageList`(`benefit_items`) 한 곳에서만 그립니다. `discount` 데이터 소스는
   `EstimateCalculator` 가 계속 쓰므로 유지합니다.
+- **원문에 없는 굵기 제거 — 예상견적 요약 박스.** 원문 `.summary-box h3`(styles.css 211행)와
+  `.summary-total b`(216행)는 `font-weight` 를 선언하지 않으므로 기본값(700, h3/b)이
+  적용됩니다. 우리 CSS 는 둘 다 800 을 선언하고 있어 원문보다 굵게 보였습니다
+  (700 으로 정정). 나머지 요약 박스 값(28px/1.16/-.04em, 행 14px · `rgba(255,255,255,.80)`
+  · strong 800/#fff, 라벨 13px · 자간 .12em · 대문자 · #ffb9d6, 값 900 42px Manrope +
+  16px Noto small, 노트 13px/1.72)은 원문과 이미 일치함을 측정으로 확인했습니다.
+- **`(복수 선택 가능)` 힌트 크기.** 원문(body.html 431행)은 `<span>` 이고 크기를
+  `.field label`(13px)에서 상속합니다. 우리는 `<small>` 이라 UA 의 `smaller`(≈10.8px)가
+  적용돼 원문보다 작았습니다 — 마크업을 `<span>` 으로, CSS 를 `.pb-field-label span`
+  으로 되돌려 13px 상속으로 맞췄습니다(색 `#8b909b` · 굵기 600 유지). 폼의 나머지
+  필드 라벨은 전부 13px/800/`--ink` 로 원문과 일치했습니다.
+- **FAQ 답변 첫 문장 강조 복원.** 원문은 여덟 답변 모두 첫 문장을 `<strong>` 으로
+  감쌌지만 모듈이 답변을 평문으로 저장해 굵기가 사라져 있었습니다. 표시 단계에서
+  첫 문장 경계를 추정해 그 문장만 굵게 렌더합니다(`src/lib/faqAnswer.ts`,
+  `.pb-faq-answer strong { color: var(--pb-ink) }` — 원문 262행).
+  판정 규칙(마침표 + 공백 + 뒤 텍스트)과 한계는 README [알려진 한계] 8번에 기록했습니다.
+  저장값은 글자 단위로 그대로 렌더됩니다(문구·부호·공백을 바꾸지 않습니다).
 
 ### Added
 

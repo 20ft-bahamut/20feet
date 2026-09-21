@@ -213,7 +213,10 @@
     color: var(--pb-ink);
 }
 
-.pb-field-label small {
+/* 원문 body.html 431행의 `(복수 선택 가능)` span — 인라인으로 color 와 font-weight 만
+   갖고 크기는 .field label(13px)을 상속한다. <small> 로 두면 UA 의 smaller(≈10.8px)가
+   적용되어 원문보다 작아진다(그래서 span 으로 되돌렸다). */
+.pb-field-label span {
     color: #8b909b;
     font-weight: 600;
 }
