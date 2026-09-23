@@ -11,7 +11,7 @@ export interface PriceDiscountProps {
     noticeLabel: string | null;
     /** 안내 블록 보조 문구(copy: pricing_notice_sub). null 이면 생략한다. */
     noticeSub: string | null;
-    /** 확정 견적 원칙 본문(copy: pricing_field). null 이면 가운데 블록을 숨긴다. */
+    /** 확정 견적 원칙 본문(copy: pricing_field). 원문 264행처럼 <strong> 인라인 마크업을 담는다. null 이면 가운데 블록을 숨긴다. */
     field: string | null;
     /** 견적 진행 흐름 라벨(copy: pricing_flow_label). null 이면 라벨을 생략한다. */
     flowLabel: string | null;

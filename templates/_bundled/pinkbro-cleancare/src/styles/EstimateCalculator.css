@@ -211,9 +211,9 @@
 .pb-estimate-summary-total-label {
   display: block;
   font-size: 13px;
-  line-height: 1;
-  /* 원문 .summary-total b (216행)도 font-weight 를 선언하지 않는다 — b 기본값 700.
-     (800 은 원문에 없는 값이었다. 폭·자간·색·대문자는 원문 그대로다.) */
+  /* 원문 .summary-total b (styles.css 216행)는 line-height 를 선언하지 않는다 —
+     UA 기본(normal)을 그대로 쓴다. line-height:1 은 원본에 없는 선언이었다.
+     font-weight 도 선언하지 않는다 — b 기본값 700. */
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -229,10 +229,11 @@
   color: #fff;
 }
 
+/* 원문 .summary-total .value small (styles.css 218행)는 letter-spacing 을 선언하지 않는다 —
+   부모 .value 의 -.05em 을 상속한다. letter-spacing:0 은 원본에 없는 선언이었다. */
 .pb-estimate-summary-value small {
   font-size: 16px;
   font-family: var(--pb-font-body, 'Noto Sans KR', sans-serif);
-  letter-spacing: 0;
 }
 
 .pb-estimate-summary-note {

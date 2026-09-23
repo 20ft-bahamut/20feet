@@ -2,6 +2,8 @@ import React from 'react';
 import { Div, Img } from './basic';
 import '../styles/PackageList.css';
 import { slotPhotoFor } from '../lib/serviceAssets';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import type { DiscountStep, MediaSlots, PackageItem } from '../lib/types';
 
 export interface PackageListProps {
@@ -72,6 +74,13 @@ function splitPriceSuffix(price: string): { amount: string; suffix: string | nul
   return { amount: match[1], suffix: match[2] };
 }
 
+/**
+ * 패키지 카드 리빌 시차 — 원문 body.html 181(A .02)·196(B .08)·211(C featured .14)행
+ * 그대로다. 원문 카드는 3장이다 — 4번째 항목부터는 원문에 근거가 없으므로 시차를
+ * 만들지 않는다(0s).
+ */
+const PACKAGE_CARD_DELAYS = ['0.02s', '0.08s', '0.14s'];
+
 export function PackageList({
   stageEyebrow,
   intro,
@@ -92,6 +101,9 @@ export function PackageList({
   items,
   media,
 }: PackageListProps): React.ReactElement {
+  // 리빌 — 원문 body.html 173(package-stage)·181/196/211(pkg-card ×3)·229(benefit-box
+  // --delay:.08)행. ref key 는 React key 와 같은 item.title 을 쓴다.
+  const reveal = usePbRevealRef<HTMLElement>();
   if (items === null) {
     return (
       <div className="pb-packages" data-testid="packages-skeleton">
@@ -128,7 +140,8 @@ export function PackageList({
   return (
     <div className="pb-packages">
       <div className="pb-wrap">
-        <div className="pb-package-stage" data-testid="package-stage">
+        {/* 원문 body.html 173행 — .package-stage reveal */}
+        <div className="pb-package-stage pb-reveal" ref={reveal('package-stage')} data-testid="package-stage">
           {stageUrl ? (
             <Img
               className="pb-package-stage-media"
@@ -147,17 +160,17 @@ export function PackageList({
           <div className="pb-package-copy">
             {stageEyebrow ? (
               <div className="pb-package-copy-eyebrow" data-testid="package-stage-eyebrow">
-                {stageEyebrow}
+                {renderCopyText(stageEyebrow)}
               </div>
             ) : null}
             {intro ? (
               <h2 className="pb-package-copy-title" data-testid="packages-intro">
-                {intro}
+                {renderCopyText(intro)}
               </h2>
             ) : null}
             {introSub ? (
               <p className="pb-package-copy-sub" data-testid="packages-intro-sub">
-                {introSub}
+                {renderCopyText(introSub)}
               </p>
             ) : null}
           </div>
@@ -170,24 +183,28 @@ export function PackageList({
             const label = [labelA, labelB, labelC][index] ?? null;
             const note = [noteA, noteB, noteC][index] ?? null;
             const noteSub = [noteASub, noteBSub, noteCSub][index] ?? null;
+            // 원문 body.html 181/196/211행 — .pkg-card reveal, 시차 .02/.08/.14.
+            const cardDelay = PACKAGE_CARD_DELAYS[index] ?? '0s';
             return (
               <article
                 key={item.title}
                 className={
-                  item.is_featured ? 'pb-pkg-card pb-pkg-card--featured' : 'pb-pkg-card'
+                  item.is_featured ? 'pb-pkg-card pb-pkg-card--featured pb-reveal' : 'pb-pkg-card pb-reveal'
                 }
+                style={{ '--pb-delay': cardDelay } as React.CSSProperties}
+                ref={reveal(`package-card-${index}`)}
                 data-testid="package-card"
               >
                 {label ? (
                   <div className="pb-pkg-label" data-testid="package-label">
-                    {label}
+                    {renderCopyText(label)}
                   </div>
                 ) : null}
                 <h3>{item.title}</h3>
-                <p>{item.summary}</p>
+                <p>{renderCopyText(item.summary)}</p>
                 <ul className="pb-pkg-list">
                   {item.includes.map((line) => (
-                    <li key={line}>{line}</li>
+                    <li key={line}>{renderCopyText(line)}</li>
                   ))}
                 </ul>
                 <div className="pb-pkg-total">
@@ -202,9 +219,11 @@ export function PackageList({
                   </div>
                   {note || noteSub ? (
                     <div className="pb-pkg-note" data-testid="package-note">
-                      {note}
+                      {/* 원문 .pkg-note 는 두 줄 사이에 <br> 이다 — 표시 계층이 그 <br> 을
+                          유지하고, 값 안의 \n(관리자 편집 시)도 renderCopyText 가 <br> 로 렌더한다. */}
+                      {note ? renderCopyText(note) : null}
                       {note && noteSub ? <br /> : null}
-                      {noteSub}
+                      {noteSub ? renderCopyText(noteSub) : null}
                     </div>
                   ) : null}
                 </div>
@@ -213,24 +232,30 @@ export function PackageList({
           })}
         </div>
 
+        {/* 원문 body.html 229행 — .benefit-box reveal --delay:.08s */}
         {hasBenefit && (
-          <div className="pb-benefit-box" data-testid="benefit-box">
+          <div
+            className="pb-benefit-box pb-reveal"
+            style={{ '--pb-delay': '0.08s' } as React.CSSProperties}
+            ref={reveal('package-benefit')}
+            data-testid="benefit-box"
+          >
             <div className="pb-benefit-top">
               <div>
                 {benefitEyebrow && (
                   <div className="pb-benefit-eyebrow" data-testid="benefit-eyebrow">
-                    {benefitEyebrow}
+                    {renderCopyText(benefitEyebrow)}
                   </div>
                 )}
                 {benefitHeading && (
                   <h3 className="pb-benefit-heading" data-testid="benefit-heading">
-                    {benefitHeading}
+                    {renderCopyText(benefitHeading)}
                   </h3>
                 )}
               </div>
               {benefitSub && (
                 <p className="pb-benefit-sub" data-testid="benefit-sub">
-                  {benefitSub}
+                  {renderCopyText(benefitSub)}
                 </p>
               )}
             </div>
@@ -243,8 +268,8 @@ export function PackageList({
                     data-testid="benefit-item"
                     key={`${step.condition}-${index}`}
                   >
-                    <small>{step.condition}</small>
-                    <strong>{step.amount_label}</strong>
+                    <small>{renderCopyText(step.condition)}</small>
+                    <strong>{renderCopyText(step.amount_label)}</strong>
                   </div>
                 ))}
               </div>

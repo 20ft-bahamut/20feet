@@ -63,6 +63,12 @@
                     }
                 },
                 {
+                    "comment": "=== Top Arrow === 원문 body.html 495행 — footer 뒤 · mobile-bar 앞 순서. 데이터 바인딩 없음(원문도 정적 버튼).",
+                    "id": "top_arrow",
+                    "type": "composite",
+                    "name": "TopArrow"
+                },
+                {
                     "comment": "=== Mobile Bottom Bar ===",
                     "id": "mobile_bar",
                     "type": "composite",

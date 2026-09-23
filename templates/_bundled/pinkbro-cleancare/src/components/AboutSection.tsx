@@ -1,6 +1,8 @@
 import React from 'react';
 import { Div, Img } from './basic';
 import { slotPhotoFor } from '../lib/serviceAssets';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import type { CopyData, MediaSlots } from '../lib/types';
 import '../styles/AboutSection.css';
 
@@ -33,6 +35,11 @@ export interface AboutSectionProps {
  * 렌더하고 없으면 조용히 생략한다.
  */
 export function AboutSection({ copy, media }: AboutSectionProps): React.ReactElement {
+    // 리빌 — 원문 body.html 66(why-stage left)·75(copy right)·80/84/88(why-card right
+    // --delay .03/.08/.13)행. 원문 카드는 3장이고 시차도 3개다 — 4번째 카드부터는
+    // 원문에 근거가 없으므로 시차를 만들지 않는다(--pb-delay 미지정 = 0s).
+    const reveal = usePbRevealRef<HTMLDivElement>();
+    const perspectiveDelays = ['0.03s', '0.08s', '0.13s'];
     if (copy === null) {
         return (
             <section className="pb-about" data-testid="about-skeleton">
@@ -59,7 +66,11 @@ export function AboutSection({ copy, media }: AboutSectionProps): React.ReactEle
     return (
         <section className="pb-about" data-testid="about-section">
             <div className="pb-wrap pb-why-grid">
-                <Div className="pb-why-stage">
+                {/* 원문 body.html 66행 — .why-stage reveal left */}
+                <Div
+                    className="pb-why-stage pb-reveal pb-reveal--left"
+                    ref={reveal('about-stage')}
+                >
                     {stageUrl ? (
                         <Img
                             className="pb-why-stage-media"
@@ -78,34 +89,48 @@ export function AboutSection({ copy, media }: AboutSectionProps): React.ReactEle
                     <Div className="pb-why-overlay">
                         {stageEyebrow && (
                             <div className="pb-why-eyebrow" data-testid="about-stage-eyebrow">
-                                {stageEyebrow}
+                                {renderCopyText(stageEyebrow)}
                             </div>
                         )}
-                        {heading && <h3 data-testid="about-heading">{heading}</h3>}
-                        {message && <p data-testid="about-message">{message}</p>}
+                        {heading && <h3 data-testid="about-heading">{renderCopyText(heading)}</h3>}
+                        {message && <p data-testid="about-message">{renderCopyText(message)}</p>}
                     </Div>
                 </Div>
 
                 <Div className="pb-why-content" data-testid="about-perspectives">
                     {/* 원문 .why-content > .section-head > .copy — 눈금(eyebrow)과 h2 를
                         한 덩어리로 묶어 카드와의 간격을 grid gap 18px 로 유지한다. */}
-                    <Div className="pb-why-copy">
+                    {/* 원문 body.html 75행 — .copy reveal right */}
+                    <Div
+                        className="pb-why-copy pb-reveal pb-reveal--right"
+                        ref={reveal('about-copy')}
+                    >
                         {sideEyebrow && (
                             <div className="pb-why-side-eyebrow" data-testid="about-side-eyebrow">
-                                {sideEyebrow}
+                                {renderCopyText(sideEyebrow)}
                             </div>
                         )}
                         {sideHeading && (
                             <h2 className="pb-why-heading" data-testid="about-side-heading">
-                                {sideHeading}
+                                {renderCopyText(sideHeading)}
                             </h2>
                         )}
                     </Div>
                     {Array.isArray(perspectives) &&
                         perspectives.map((perspective, index) => (
-                            <Div className="pb-why-card" key={index} data-testid="about-perspective">
-                                <b>{perspective.title}</b>
-                                <p>{perspective.body}</p>
+                            <Div
+                                className="pb-why-card pb-reveal pb-reveal--right"
+                                style={
+                                    perspectiveDelays[index] !== undefined
+                                        ? ({ '--pb-delay': perspectiveDelays[index] } as React.CSSProperties)
+                                        : undefined
+                                }
+                                ref={reveal(`about-card-${index}`)}
+                                key={index}
+                                data-testid="about-perspective"
+                            >
+                                <b>{renderCopyText(perspective.title)}</b>
+                                <p>{renderCopyText(perspective.body)}</p>
                             </Div>
                         ))}
                 </Div>

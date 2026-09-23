@@ -1,6 +1,8 @@
 import React from 'react';
 import type { CaseItem, MediaSlots } from '../lib/types';
 import { slotPhotoFor } from '../lib/serviceAssets';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import '../styles/CaseGallery.css';
 
 export interface CaseGalleryProps {
@@ -29,7 +31,8 @@ export interface CaseGalleryProps {
   cardKicker?: string | null;
   /**
    * 카드 링크 문구(원문 `작업사례 자세히 보기`, 379행 / copy: projects_link_label).
-   * 값을 받고 `blog_url` 이 있을 때만 렌더한다.
+   * 값을 받으면 `blog_url` 여부와 무관하게 렌더한다 — 원문도 링크가 비어 있어도
+   * `.project-link` 라벨을 항상 보여준다 (body.html 379행 / styles.css 276행).
    */
   linkLabel?: string | null;
 }
@@ -42,11 +45,12 @@ export interface CaseGalleryProps {
  *
  * 3단계 폴백: items null → 스켈레톤, [] → 빈 상태, 배열 → 카드 렌더.
  *
- * 카드 커버는 3단 폴백이다:
+ * 카드 커버는 2단 폴백이다:
  *   1. 항목이 이미 해석해 온 슬롯 결과(`item.cover.url`) — 있으면 그 URL 이 이긴다
  *   2. 카드 순번의 슬롯(`case_1`…`case_4`)에 관리자가 올린 URL
- *   3. 번들 자리표시자 사진(SLOT_PHOTO) — 슬롯이 비어 있을 때 그 자리를 채운다
- *   4. 셋 다 없으면 `.pb-project-thumb` 의 CSS 그라디언트 폴백
+ *   둘 다 없으면 사진을 렌더하지 않는다 — `.pb-project-thumb` 자체의 CSS 그라디언트
+ *   원문 배경이 그대로 보인다 (원문 styles.css 269-270행. 원본도 사례 커버를
+ *   사진으로 채우지 않는다 — body.html 379행의 썸은 그라디언트 + `Case 01` 라벨뿐이다).
  *
  * 슬롯 키는 항목이 `cover_slot` 을 들고 오면 그 키를, 아니면 카드 순번을 쓴다.
  * 공개 API(CaseResource)는 아직 `cover_slot` 을 내려주지 않으므로 현재는 순번으로
@@ -54,12 +58,21 @@ export interface CaseGalleryProps {
  *
  * `blog_url` 이 비면 `<a>` 대신 `<div aria-disabled="true">` 로 렌더한다 —
  * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
+ * 링크 문구(`.pb-project-link`)는 이 결정과 무관하게 항상 렌더한다 — 원문도
+ * `blog_url` 이 비어 있어도 라벨을 보여준다 (body.html 379행).
  *
  * 눈금(`Recent Projects`)·카드 킥커(`PINKBRO PROJECT`)·링크 문구
  * (`작업사례 자세히 보기`)는 원문에 있는 문구이며 copy 도메인 키
  * (projects_eyebrow / projects_card_kicker / projects_link_label)로 배선됐다.
  * 값이 없으면 리터럴로 대체하지 않고 조용히 생략한다 (COPY POLICY).
  */
+/**
+ * 프로젝트 카드 리빌 시차 — 원문 body.html 377(–)·381(.04)·385(.08)·389(.12)행
+ * 그대로다. 원문 카드는 4장이다 — 5번째 항목부터는 원문에 근거가 없으므로 시차를
+ * 만들지 않는다(0s).
+ */
+const PROJECT_CARD_DELAYS = ['0s', '0.04s', '0.08s', '0.12s'];
+
 export function CaseGallery({
   intro,
   sub,
@@ -70,21 +83,29 @@ export function CaseGallery({
   cardKicker,
   linkLabel,
 }: CaseGalleryProps): React.ReactElement {
+  // 리빌 — 원문 body.html 370(copy)·374(sub right)·377~391(project-card ×4)행.
+  const reveal = usePbRevealRef<HTMLElement>();
   return (
     <section className="pb-projects" data-testid="cases">
       <div className="pb-projects__wrap">
         <div className="pb-projects__head">
-          <div className="pb-projects__copy">
+          {/* 원문 body.html 370행 — .copy reveal */}
+          <div className="pb-projects__copy pb-reveal" ref={reveal('projects-copy')}>
             {eyebrow ? (
               <span className="pb-projects__eyebrow" data-testid="projects-eyebrow">
-                {eyebrow}
+                {renderCopyText(eyebrow)}
               </span>
             ) : null}
-            {intro ? <h2 className="pb-projects__intro">{intro}</h2> : null}
+            {intro ? <h2 className="pb-projects__intro">{renderCopyText(intro)}</h2> : null}
           </div>
+          {/* 원문 body.html 374행 — .sub reveal right */}
           {sub ? (
-            <p className="pb-projects__sub" data-testid="projects-sub">
-              {sub}
+            <p
+              className="pb-projects__sub pb-reveal pb-reveal--right"
+              ref={reveal('projects-sub')}
+              data-testid="projects-sub"
+            >
+              {renderCopyText(sub)}
             </p>
           ) : null}
         </div>
@@ -107,12 +128,14 @@ export function CaseGallery({
                 media={media}
                 cardKicker={cardKicker}
                 linkLabel={linkLabel}
+                cardRef={reveal(`project-card-${index}`)}
+                delay={PROJECT_CARD_DELAYS[index] ?? '0s'}
               />
             ))}
           </div>
         )}
 
-        {note ? <p className="pb-project-note">{note}</p> : null}
+        {note ? <p className="pb-project-note">{renderCopyText(note)}</p> : null}
       </div>
     </section>
   );
@@ -124,17 +147,24 @@ function CaseCard({
   media,
   cardKicker,
   linkLabel,
+  cardRef,
+  delay,
 }: {
   item: CaseItem;
   index: number;
   media: MediaSlots | null;
   cardKicker?: string | null;
   linkLabel?: string | null;
+  /** 리빌 ref — 원문 body.html 377~391행의 .project-card reveal */
+  cardRef: React.RefCallback<HTMLElement>;
+  /** 원문 --delay 값 ('0s' 포함) */
+  delay: string;
 }): React.ReactElement {
   const hasLink = typeof item.blog_url === 'string' && item.blog_url.length > 0;
   // 항목이 cover_slot 을 들고 오면 그 키, 아니면 카드 순번(case_1…)이 이 카드의 슬롯이다.
   const coverSlotKey = item.cover_slot ?? `case_${index + 1}`;
-  // 슬롯 업로드(항목이 해석해 온 cover → 슬롯 맵)가 번들 자리표시자를 이긴다.
+  // 항목이 해석해 온 cover → 슬롯 업로드 순으로 이긴다. 슬롯이 비면 null 이 정상 경로다 —
+  // 그때는 사진을 렌더하지 않고 .pb-project-thumb 의 그라디언트 원문 배경만 남긴다.
   const coverUrl = item.cover?.url ?? slotPhotoFor(coverSlotKey, media);
   const coverAlt = item.cover?.alt ?? media?.[coverSlotKey]?.alt ?? '';
 
@@ -149,30 +179,34 @@ function CaseCard({
             className="pb-project-thumb__img"
             loading="lazy"
           />
-        ) : (
-          <div className="pb-project-thumb__fallback" data-testid="case-cover-fallback" />
-        )}
+        ) : null}
         <span className="pb-project-index">Case {String(index + 1).padStart(2, '0')}</span>
       </div>
       <div className="pb-project-body">
-        {cardKicker ? <span className="pb-project-kicker" data-testid="case-card-kicker">{cardKicker}</span> : null}
+        {cardKicker ? <span className="pb-project-kicker" data-testid="case-card-kicker">{renderCopyText(cardKicker)}</span> : null}
         <h3>{item.title}</h3>
-        <p>{item.summary}</p>
-        {hasLink && linkLabel ? (
+        <p>{renderCopyText(item.summary)}</p>
+        {/* 원문은 blog_url 이 비어도 .project-link 라벨을 항상 보여준다
+            (body.html 379행 / styles.css 276-277행) — 라벨은 링크 여부와 무관하게 렌더하고
+            링크 여부는 카드 엘리먼트 결정에만 쓴다. */}
+        {linkLabel ? (
           <span className="pb-project-link" data-testid="case-card-link" aria-hidden="true">
-            {linkLabel}
+            {renderCopyText(linkLabel)}
           </span>
         ) : null}
       </div>
     </>
   );
 
-  const className = 'pb-project-card';
+  const className = 'pb-project-card pb-reveal';
+  const cardStyle = { '--pb-delay': delay } as React.CSSProperties;
 
   if (!hasLink) {
     return (
       <div
         className={className}
+        style={cardStyle}
+        ref={cardRef}
         data-testid="case-card"
         aria-disabled="true"
       >
@@ -184,6 +218,8 @@ function CaseCard({
   return (
     <a
       className={className}
+      style={cardStyle}
+      ref={cardRef}
       data-testid="case-card"
       href={item.blog_url}
       target="_blank"

@@ -41,35 +41,44 @@ describe('serviceAssets', () => {
 });
 
 describe('slotAssets', () => {
-  it('maps every background / stage / case slot to a bundled template asset', () => {
+  it('maps the five background / stage slots to the bundled original-page photos', () => {
     expect(Object.keys(SLOT_PHOTO).sort()).toEqual([
-      'case_1', 'case_2', 'case_3', 'case_4',
       'estimate_bg', 'hero_main', 'hero_sub', 'package_stage', 'why_stage',
     ]);
-    for (const path of Object.values(SLOT_PHOTO)) {
-      expect(path).toMatch(/^images\/service-.*\.webp$/);
-    }
+    expect(SLOT_PHOTO).toEqual({
+      hero_main: 'images/hero-visual.webp',
+      hero_sub: 'images/hero-shell.webp',
+      why_stage: 'images/why-stage.webp',
+      package_stage: 'images/package-stage.webp',
+      estimate_bg: 'images/estimate-bg.webp',
+    });
   });
 
-  it('reuses only the six approved service photos — 자리표시자는 새 자산을 만들지 않는다', () => {
-    const approved = new Set(Object.values(SERVICE_PHOTO));
-    for (const path of Object.values(SLOT_PHOTO)) {
-      expect(approved.has(path)).toBe(true);
-    }
+  it('case_* slots have no bundled placeholder — 슬롯이 비면 사진을 깔지 않는다', () => {
+    expect(slotPhotoFor('case_1', null)).toBeNull();
+    expect(slotPhotoFor('case_4', { case_4: { url: null, alt: null } })).toBeNull();
   });
 
   it('prefers the uploaded slot url over the bundled asset — 업로드가 항상 이긴다', () => {
     expect(slotPhotoFor('hero_main', { hero_main: { url: '/up.webp', alt: 'a' } }))
       .toBe('/up.webp');
+    expect(slotPhotoFor('hero_sub', { hero_sub: { url: '/shell.webp', alt: 'a' } }))
+      .toBe('/shell.webp');
     expect(slotPhotoFor('case_3', { case_3: { url: '/c.webp', alt: null } }))
       .toBe('/c.webp');
   });
 
   it('falls back to the bundled asset url when the slot is empty', () => {
     expect(slotPhotoFor('hero_main', null))
-      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp');
+      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/hero-visual.webp');
+    expect(slotPhotoFor('hero_sub', null))
+      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/hero-shell.webp');
     expect(slotPhotoFor('estimate_bg', { estimate_bg: { url: null, alt: null } }))
-      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/service-sign-care.webp');
+      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/estimate-bg.webp');
+    expect(slotPhotoFor('why_stage', { why_stage: { url: null, alt: null } }))
+      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/why-stage.webp');
+    expect(slotPhotoFor('package_stage', { package_stage: { url: null, alt: null } }))
+      .toBe('/api/templates/assets/pinkbro-cleancare?file=images/package-stage.webp');
   });
 
   it('returns null for a slot that has no bundled asset — 중립 폴백은 그때만 남는다', () => {

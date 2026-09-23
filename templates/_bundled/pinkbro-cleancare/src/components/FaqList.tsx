@@ -1,5 +1,6 @@
 import '../styles/FaqList.css';
-import { splitFaqAnswer } from '../lib/faqAnswer';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import type { FaqItem } from '../lib/types';
 
 export interface FaqListProps {
@@ -33,28 +34,36 @@ function Skeleton() {
  * 줄바꿈이 된다(원본 <br> 대응). introSub(copy: faq_intro_sub)는 .sub 문단.
  * eyebrow(copy: faq_eyebrow)는 원문 326행의 눈금이며, 값이 없으면 생략한다.
  *
- * 답변의 첫 문장은 원문에서 `<strong>` 이다(body.html 333~361행). 모듈은 답변을
- * 평문으로 저장하므로 표시 계층이 첫 문장 경계를 추정해 그 문장만 굵게 렌더한다 —
- * 판정 규칙과 한계는 `src/lib/faqAnswer.ts` 와 README 의 [알려진 한계] 참조.
+ * 답변의 강조는 데이터에 있다 — 시더가 원문 마크업(body.html 333~361행)을 그대로
+ * 저장하므로(<strong> 등), 표시 계층은 그것을 글자로 노출하지 않고 요소로 렌더만
+ * 한다(Hero 의 renderCopyText — \n 도 원본 <br> 처럼 줄바꿈으로 렌더한다).
+ * 경계를 추정하는 첫 문장 휴리스틱은 제거됐다: 마크업이 데이터에 있으면 추정은
+ * 이중 강조가 된다.
  */
 export function FaqList({ eyebrow, intro, introSub, items }: FaqListProps) {
+  // 리빌 — 원문 body.html 325(faq-intro left)·331~359(faq-item ×8, 시차 없음)행.
+  const reveal = usePbRevealRef<HTMLElement>();
   return (
     <section className="pb-faq-section">
       <div className="pb-faq-grid">
-        <div className="pb-faq-intro">
+        {/* 원문 body.html 325행 — .faq-intro reveal left */}
+        <div
+          className="pb-faq-intro pb-reveal pb-reveal--left"
+          ref={reveal('faq-intro')}
+        >
           {eyebrow ? (
             <span className="pb-faq-eyebrow" data-testid="faq-eyebrow">
-              {eyebrow}
+              {renderCopyText(eyebrow)}
             </span>
           ) : null}
           {intro !== null && (
             <h2 className="pb-faq-h2" data-testid="faq-heading">
-              {intro}
+              {renderCopyText(intro)}
             </h2>
           )}
           {introSub !== null && (
             <p className="pb-faq-sub" data-testid="faq-intro-sub">
-              {introSub}
+              {renderCopyText(introSub)}
             </p>
           )}
         </div>
@@ -65,21 +74,21 @@ export function FaqList({ eyebrow, intro, introSub, items }: FaqListProps) {
           ) : items.length === 0 ? (
             <div className="pb-faq-empty" data-testid="faq-empty" />
           ) : (
-            items.map((item, i) => {
-              // 원문은 첫 문장을 <strong> 으로 감싼다 — 경계 판정은 lib 에 위임한다.
-              // lead 가 null 이면(한 문장짜리 답변) 평문 그대로 렌더한다.
-              const { lead, rest } = splitFaqAnswer(item.answer);
-
-              return (
-                <details className="pb-faq-item" open={i === 0} key={`${item.question}-${i}`}>
-                  <summary>{item.question}</summary>
-                  <div className="pb-faq-answer" data-testid="faq-answer">
-                    {lead !== null ? <strong data-testid="faq-answer-lead">{lead}</strong> : null}
-                    {rest}
-                  </div>
-                </details>
-              );
-            })
+            items.map((item, i) => (
+              // 답변 강조는 저장된 마크업(<strong>)이 담당한다 — 평문 노출도, 추정도 없다.
+              // 원문 body.html 331~359행 — .faq-item reveal (시차 없음, 8문항).
+              <details
+                className="pb-faq-item pb-reveal"
+                ref={reveal(`faq-item-${i}`)}
+                open={i === 0}
+                key={`${item.question}-${i}`}
+              >
+                <summary>{item.question}</summary>
+                <div className="pb-faq-answer" data-testid="faq-answer">
+                  {renderCopyText(item.answer)}
+                </div>
+              </details>
+            ))
           )}
         </div>
       </div>

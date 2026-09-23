@@ -9,13 +9,15 @@ export declare const SERVICE_SLOT: Record<string, string>;
  */
 export declare function servicePhotoFor(slug: string, media: MediaSlots | null): string | null;
 /**
- * 배경·스테이지·작업사례 커버 슬롯 키 → 템플릿 자산 경로. public/images 기준.
+ * 배경·스테이지 슬롯 키 → 템플릿 자산 경로. public/images 기준.
  *
  * 관리자가 슬롯에 사진을 올리기 전까지 그 자리를 채우는 번들 자리표시자다.
- * 값은 이미 승인된 서비스 사진 6장(SERVICE_PHOTO)을 재사용한다 — 새 자산을 만들지 않는다.
+ * 값은 원본 페이지가 쓰던 사진을 그대로 옮겨 온 webp 5장이다
+ * (hero_main=우측 비주얼 544x663, hero_sub=히어로 셸 전체 배경 1280x791 —
+ * _workspace/pinkbro/source/styles.css 67·101행의 두 Unsplash 핫링크 자리).
  *
- * `hero_sub` 는 모듈 슬롯 레지스트리에 있으나 현재 Hero 에 두 번째 비주얼이 없어
- * 소비되지 않는다. 슬롯이 업로드되면 그때 쓸 자리를 지켜 둔다.
+ * `case_1..4` 는 일부러 없다 — 작업사례 커버는 관리자 업로드가 있을 때만 사진을 깔고,
+ * 슬롯이 비면 중립 폴백을 남긴다 (원본도 사례 커버를 사진으로 채우지 않는다).
  */
 export declare const SLOT_PHOTO: Record<string, string>;
 /**

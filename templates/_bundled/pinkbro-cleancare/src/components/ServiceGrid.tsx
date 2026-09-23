@@ -1,6 +1,8 @@
 import React from 'react';
 import '../styles/ServiceGrid.css';
 import { servicePhotoFor } from '../lib/serviceAssets';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import type { MediaSlots, ServiceItem } from '../lib/types';
 
 export interface ServiceGridProps {
@@ -37,6 +39,13 @@ function splitPrice(value: string): { amount: string; unit: string | null } {
 }
 
 /**
+ * 서비스 카드 리빌 시차 — 원문 body.html 106/115/124/133/142/151행 순서 그대로
+ * (.02/.06/.10/.14/.18/.22). 원문 카드는 6장이다 — 7번째 항목부터는 원문에 근거가
+ * 없으므로 시차를 만들지 않는다(0s).
+ */
+const SERVICE_CARD_DELAYS = ['0.02s', '0.06s', '0.10s', '0.14s', '0.18s', '0.22s'];
+
+/**
  * 서비스 그리드 — 사진 우선순위: 슬롯 URL → 번들 템플릿 자산 → 중립 CSS 블록.
  * (D7 + D9 결합: 서비스 6종은 기본 탑재 사진이 있으므로 폴백이 중립 블록이 아니다)
  *
@@ -57,6 +66,9 @@ export function ServiceGrid({
   items,
   media,
 }: ServiceGridProps): React.ReactElement {
+  // 리빌 — 원문 body.html 99(copy)·103(sub right)·106~151(카드 6장)·161(extra-box
+  // --delay:.08)행. ref key 는 슬롯 slug 를 쓴다(데이터 순서가 바뀌어도 같은 카드다).
+  const reveal = usePbRevealRef<HTMLElement>();
   if (items === null) {
     return (
       <div className="pb-services" data-testid="services-skeleton">
@@ -85,21 +97,27 @@ export function ServiceGrid({
     <div className="pb-services">
       <div className="pb-wrap">
         <div className="pb-section-head">
-          <div className="pb-section-copy">
+          {/* 원문 body.html 99행 — .copy reveal */}
+        <div className="pb-section-copy pb-reveal" ref={reveal('service-copy')}>
             {eyebrow ? (
               <div className="pb-services-eyebrow" data-testid="services-eyebrow">
-                {eyebrow}
+                {renderCopyText(eyebrow)}
               </div>
             ) : null}
             {intro ? (
               <h2 className="pb-services-title" data-testid="services-title">
-                {intro}
+                {renderCopyText(intro)}
               </h2>
             ) : null}
           </div>
+          {/* 원문 body.html 103행 — .sub reveal right */}
           {introSub ? (
-            <p className="pb-services-sub" data-testid="services-intro-sub">
-              {introSub}
+            <p
+              className="pb-services-sub pb-reveal pb-reveal--right"
+              ref={reveal('service-sub')}
+              data-testid="services-intro-sub"
+            >
+              {renderCopyText(introSub)}
             </p>
           ) : null}
         </div>
@@ -108,8 +126,16 @@ export function ServiceGrid({
           {items.map((item, index) => {
             const photoUrl = servicePhotoFor(item.slug, media);
             const price = splitPrice(item.base_price);
+            // 원문 body.html 106~151행 — .service-card reveal, 시차 .02→.22 (6장).
+            const cardDelay = SERVICE_CARD_DELAYS[index] ?? '0s';
             return (
-              <article key={item.slug} className="pb-service-card" data-testid="service-card">
+              <article
+                key={item.slug}
+                className="pb-service-card pb-reveal"
+                style={{ '--pb-delay': cardDelay } as React.CSSProperties}
+                ref={reveal(`service-card-${item.slug}`)}
+                data-testid="service-card"
+              >
                 <div className="pb-service-photo">
                   {photoUrl ? (
                     <img
@@ -129,22 +155,22 @@ export function ServiceGrid({
                     <h3>{item.title}</h3>
                     <span>{String(index + 1).padStart(2, '0')}</span>
                   </div>
-                  <p>{item.summary}</p>
+                  <p>{renderCopyText(item.summary)}</p>
                   <div className="pb-price-row">
                     <strong>
                       {price.amount}
                       {price.unit ? <span>{price.unit}</span> : null}
                     </strong>
-                    <small>{item.extra_note}</small>
+                    <small>{renderCopyText(item.extra_note)}</small>
                   </div>
                   <details className="pb-service-detail">
                     <summary aria-label={item.criteria}>
-                      {detailLabel ?? null}
+                      {detailLabel ? renderCopyText(detailLabel) : null}
                       <span aria-hidden="true" className="pb-service-detail-marker">
                         ＋
                       </span>
                     </summary>
-                    <div className="pb-detail-body">{item.criteria}</div>
+                    <div className="pb-detail-body">{renderCopyText(item.criteria)}</div>
                   </details>
                 </div>
               </article>
@@ -152,11 +178,17 @@ export function ServiceGrid({
           })}
         </div>
 
+        {/* 원문 body.html 161행 — .extra-box reveal --delay:.08s */}
         {(extraHeading || extraBody) && (
-          <div className="pb-extra-box" data-testid="extra-box">
+          <div
+            className="pb-extra-box pb-reveal"
+            style={{ '--pb-delay': '0.08s' } as React.CSSProperties}
+            ref={reveal('service-extra')}
+            data-testid="extra-box"
+          >
             <div>
-              {extraHeading && <b data-testid="extra-box-heading">{extraHeading}</b>}
-              {extraBody && <p data-testid="extra-box-body">{extraBody}</p>}
+              {extraHeading && <b data-testid="extra-box-heading">{renderCopyText(extraHeading)}</b>}
+              {extraBody && <p data-testid="extra-box-body">{renderCopyText(extraBody)}</p>}
             </div>
             {extraCtaLabel ? (
               <a
@@ -164,7 +196,7 @@ export function ServiceGrid({
                 data-testid="extra-box-cta"
                 href={extraCtaHref ?? '#estimate'}
               >
-                {extraCtaLabel}
+                {renderCopyText(extraCtaLabel)}
               </a>
             ) : null}
           </div>

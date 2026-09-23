@@ -26,35 +26,10 @@ export interface CaseGalleryProps {
     cardKicker?: string | null;
     /**
      * 카드 링크 문구(원문 `작업사례 자세히 보기`, 379행 / copy: projects_link_label).
-     * 값을 받고 `blog_url` 이 있을 때만 렌더한다.
+     * 값을 받으면 `blog_url` 여부와 무관하게 렌더한다 — 원문도 링크가 비어 있어도
+     * `.project-link` 라벨을 항상 보여준다 (body.html 379행 / styles.css 276행).
      */
     linkLabel?: string | null;
 }
-/**
- * 작업사례 갤러리 (소스 `#projects` / `.project-*` 이식).
- *
- * 구조는 원문 그대로다: `.section-head`(왼쪽 눈금+소개 / 오른쪽 보조 문구,
- * 하단 정렬 2단) → `.project-grid`(4열 카드) → `.project-note`.
- *
- * 3단계 폴백: items null → 스켈레톤, [] → 빈 상태, 배열 → 카드 렌더.
- *
- * 카드 커버는 3단 폴백이다:
- *   1. 항목이 이미 해석해 온 슬롯 결과(`item.cover.url`) — 있으면 그 URL 이 이긴다
- *   2. 카드 순번의 슬롯(`case_1`…`case_4`)에 관리자가 올린 URL
- *   3. 번들 자리표시자 사진(SLOT_PHOTO) — 슬롯이 비어 있을 때 그 자리를 채운다
- *   4. 셋 다 없으면 `.pb-project-thumb` 의 CSS 그라디언트 폴백
- *
- * 슬롯 키는 항목이 `cover_slot` 을 들고 오면 그 키를, 아니면 카드 순번을 쓴다.
- * 공개 API(CaseResource)는 아직 `cover_slot` 을 내려주지 않으므로 현재는 순번으로
- * 해석된다 — 관리자가 순서를 바꾸면 그 순번의 슬롯 사진이 그 자리에 온다.
- *
- * `blog_url` 이 비면 `<a>` 대신 `<div aria-disabled="true">` 로 렌더한다 —
- * 소스가 `href="#"` 플레이스홀더로 두었던 문제를 없앤다 (SPEC §12 사용자 대기 항목).
- *
- * 눈금(`Recent Projects`)·카드 킥커(`PINKBRO PROJECT`)·링크 문구
- * (`작업사례 자세히 보기`)는 원문에 있는 문구이며 copy 도메인 키
- * (projects_eyebrow / projects_card_kicker / projects_link_label)로 배선됐다.
- * 값이 없으면 리터럴로 대체하지 않고 조용히 생략한다 (COPY POLICY).
- */
 export declare function CaseGallery({ intro, sub, note, items, media, eyebrow, cardKicker, linkLabel, }: CaseGalleryProps): React.ReactElement;
 export default CaseGallery;

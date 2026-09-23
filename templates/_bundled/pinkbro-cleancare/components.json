@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "templateId": "pinkbro-cleancare",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "components": {
         "basic": [
             {
@@ -167,6 +167,12 @@
                 "type": "composite",
                 "description": "Mobile fixed bottom bar: call, kakao and estimate actions",
                 "path": "src/components/MobileBar.tsx"
+            },
+            {
+                "name": "TopArrow",
+                "type": "composite",
+                "description": "Fixed scroll-to-top arrow button, bottom-right (raised above the mobile bar on mobile)",
+                "path": "src/components/TopArrow.tsx"
             }
         ],
         "layout": []

@@ -6,6 +6,82 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-23
+
+### Added
+
+- **스크롤 리빌 이식.** 원문 `_workspace/pinkbro/source/` 의 리빌(app.js 1~9행
+  IntersectionObserver + styles.css 47~50행 `.reveal` 계열)을 템플릿에 이식했습니다.
+  리빌 지점은 원문 body.html 의 42곳과 1:1(방향·시차 포함)이고, `src/lib/reveal.ts` 의
+  ref 콜백 훅(`usePbRevealRef`)이 데이터 로딩 후 마운트되는 요소도 관찰하며, 리빌이
+  끝난 요소가 교체돼도 다시 애니메이션하지 않습니다. 원문에 없던 보강 2건: JS 실패 시
+  백지가 되지 않게 숨김 상태를 `html.pb-js` 아래로 한정, `prefers-reduced-motion:
+  reduce` 에서 애니메이션 끔. (`_workspace/pinkbro/tools/measure.mjs` 의 기하 실측은
+  `.reveal,.pb-reveal{opacity:1!important;…}` 주입으로 리빌을 무력화한 뒤 잰다.)
+
+- **원문에만 있던 문구 37키 복원** — 모듈 `copy` 도메인에 키가 없어 렌더되지 않던 눈금·
+  라벨·CTA 를 시더에 추가하고 전부 배선했습니다(45키 → 82키).
+  - 1차 30키: `about_stage_eyebrow`, `about_side_eyebrow`, `service_eyebrow`,
+    `extra_box_cta`, `package_stage_eyebrow`, `package_a_label`·`package_b_label`·
+    `package_c_label`, `package_{a,b,c}_note`(+`_sub`), `benefit_eyebrow`, `pricing_eyebrow`,
+    `pricing_notice_label`, `estimator_eyebrow`, `estimator_air_label`,
+    `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
+    `estimator_row_discount_amount`, `estimator_summary_total_label`, `estimator_cta_submit`,
+    `estimator_cta_kakao`, `faq_eyebrow`, `projects_eyebrow`, `projects_card_kicker`,
+    `projects_link_label`.
+  - 2차 7키: `hero_cta_primary`·`hero_cta_secondary` — 히어로의 CTA 2개입니다. 이 키가
+    없던 동안 히어로에는 **행동 유도 수단이 하나도 없었습니다**(원문 32·33행).
+    `hero_visual_message_label`(원문 53행 `BRAND MESSAGE`), `header_cta`(원문 15행),
+    `mobile_cta_estimate`·`mobile_cta_phone`·`mobile_cta_kakao`(원문 16·497~499행).
+    값은 전부 원문 `body.html` 그대로입니다.
+- 문구가 없을 때의 계약은 그대로입니다 — 키가 `null` 이면 각 컴포넌트가 그 문구를
+  조용히 생략하고, 리터럴로 대체하지 않습니다. `SiteHeader`·`MobileBar` 의 라벨
+  기본값 리터럴은 제거하고 두 컴포넌트가 `copy` 페이로드를 받도록 바꿨습니다
+  (`SiteFooter` 와 같은 방식, `_user_base.json` 이 바인딩).
+- 컴포넌트·레이아웃 테스트가 복원된 문구의 렌더와 미렌더를 각각 검증하고,
+  `.pb-packages` 패딩 회귀를 CSS 검사로 막습니다. 테스트 17 파일 / 241개.
+- **배경·스테이지·작업사례 커버 슬롯에 번들 자리표시자 사진 배선.** `hero_main`·
+  `why_stage`·`package_stage`·`estimate_bg`·`case_1`~`case_4` 슬롯이 비어 있을 때
+  중립 CSS 블록만 남아 페이지가 비어 보이던 자리를, 이미 승인된 서비스 사진 6장
+  (`public/images/service-*.webp`)으로 채웁니다. `src/lib/serviceAssets.ts` 에
+  `SLOT_PHOTO`(슬롯 키 → 자산 경로)와 `slotPhotoFor()` 를 추가해 서비스 사진과 같은
+  2단 폴백을 씁니다 — **슬롯 URL 우선, 없으면 번들 자산, 둘 다 없으면 중립 CSS 블록**.
+  소비처는 `Hero`(hero_main) · `AboutSection`(why_stage) · `PackageList`(package_stage) ·
+  `InquiryForm`(estimate_bg) · `CaseGallery`(case_1~4, 카드 순번 = 슬롯 순번)이며
+  `CaseGallery` 에 `media` prop 과 레이아웃 바인딩을 새로 추가했습니다. 새 이미지 파일은
+  추가하지 않았고 외부 URL 도 쓰지 않습니다. 관리자가 슬롯에 업로드하면 그 이미지가
+  항상 이깁니다. 테스트 18 파일 / 269개.
+
+- **상단 이동 버튼(TopArrow).** 원문 `body.html` 495행의 `.top-arrow` 를 composite
+  컴포넌트로 이식했습니다(composite 12종 → 13종). 값은 원문 그대로입니다 — 52×52,
+  right/bottom 18px, 배경 `#151822`, hover 시 `var(--pb-pink)`(원문 styles.css 287~288행),
+  720px 이하에서 46px · right 12px · bottom 82px(340행 — 모바일바와 겹치지 않는 자리).
+  `aria-label` 도 원문 문구(`상단으로 이동`)를 그대로 쓰고, 클릭은 원문 `onclick` 과 같은
+  `window.scrollTo({top:0, behavior:'smooth'})` 입니다. 원문에 없던 보강 1건:
+  `prefers-reduced-motion: reduce` 환경에서는 behavior 를 `auto` 로 내려 즉시 이동시킵니다.
+  `components.json`·`src/index.ts` 레지스트리(15 basic + 13 composite)와
+  `layouts/_user_base.json` 의 `top_arrow` 노드(footer 뒤 · mobile-bar 앞 — 원문 순서)에
+  배선했고, 데이터 바인딩은 없습니다(원문도 정적 버튼).
+- **원문 Unsplash 사진 5장을 번들 자산으로 편입.** `_workspace/pinkbro/assets/unsplash/`
+  의 5장을 webp 로 변환해 `public/images/`·`dist/images/` 에 넣고 `template.json` assets 에
+  등록했습니다 — `hero-shell.webp`(원문 styles.css 70행)·`hero-visual.webp`(101행)·
+  `why-stage.webp`(116행)·`package-stage.webp`(158행)·`estimate-bg.webp`(225행).
+  `tools/optimize-assets.sh` 에 변환 단계를 추가했고 폭·품질은 표시 배수와 원본 대비
+  손실을 실측해 파일마다 정했습니다(스크립트 주석). `SLOT_PHOTO` 도 서비스 사진
+  재사용에서 각 슬롯 고유 자산으로 재배선했습니다 — `hero_main`→`hero-visual.webp`,
+  `hero_sub`→`hero-shell.webp`, `why_stage`·`package_stage`·`estimate_bg` 도 각 자산으로.
+- **히어로 셸 배경(hero_sub 슬롯) 배선.** `Hero` 가 `media.hero_sub` 슬롯(없으면 번들
+  `hero-shell.webp`)을 `.pb-hero-shell` 인라인 배경으로 깔고, 스크림은 원문 그라디언트가
+  사진 위에 겹칩니다(원문 styles.css 67~70행 스택과 같은 사진→스크림→콘텐츠 3단 순서).
+  이전에는 `hero_sub` 슬롯의 소비처가 없었습니다.
+- **푸터 4컬럼용 카피 키 7개.** `CopyData` 를 82키 → 89키로 늘리고 모듈 시더·관리자 폼·
+  허용 키 목록과 함께 배선했습니다 — `footer_core_service_heading`·`footer_core_service`
+  ·`footer_more_service_heading`·`footer_more_service`·`footer_contact_heading`
+  ·`footer_contact_phone_label`·`footer_contact_kakao_label`(모듈 CHANGELOG 참조).
+- 테스트를 위 변경에 맞게 갱신했습니다 — `TopArrow`·`reveal` 테스트 신설,
+  `faqAnswer` 테스트는 첫 문장 휴리스틱 삭제와 함께 제거, 항상 렌더·마크업 렌더·
+  푸터 4컬럼에 맞춰 컴포넌트·레이아웃 테스트를 갱신했습니다.
+
 ### Fixed
 
 - **`#package` 스테이지 도입 카피의 대비 복원 — 원문 스크림 되살림.** 원문
@@ -58,40 +134,70 @@
   판정 규칙(마침표 + 공백 + 뒤 텍스트)과 한계는 README [알려진 한계] 8번에 기록했습니다.
   저장값은 글자 단위로 그대로 렌더됩니다(문구·부호·공백을 바꾸지 않습니다).
 
-### Added
+- **푸터 4컬럼 복원.** `SiteFooter` 가 원문 `body.html` 471~493행의 4컬럼(brand + Core
+  Service + More Service + Contact)을 렌더합니다. 이전에는 서비스 목록 컬럼에 데이터원이
+  없어 brand + contact 2블록(그리드 `1.2fr .9fr`)이었고 CSS 주석에도 그 사실이 적혀
+  있었습니다. 원문 그리드(`1.2fr .8fr .8fr .9fr`)와 `.footer-col h4`(styles.css 283행)·
+  `.footer-col p`(284행) 값을 이식했습니다. Contact 컬럼은 라벨이 copy 도메인
+  (`footer_contact_phone_label`/`footer_contact_kakao_label`), 값이 site 도메인
+  (`site.phone`/`site.kakao_channel`/`site.region`)이고, 라벨 키가 비면 라벨 없이 값만
+  렌더합니다(리터럴 대체 없음).
+- **계산기의 에어컨 종류 select 를 체크 전에도 렌더.** `selected.has(AIR_SLUG)` 게이트는
+  원문에 없는 조건이었습니다 — 원문 `.air-select`(body.html 290행)는 `calc-air` 체크
+  여부와 무관하게 항상 렌더됩니다. 게이트를 제거했고 air-care 서비스 데이터가 없을 때만
+  생략합니다(기존 폴백 계약 유지).
+- **pricing eyebrow 색 누락 복원.** `.pb-pricing-eyebrow` 에 원문 `.eyebrow` 의
+  `color: var(--pink)`(styles.css 26행)이 빠져 상속색으로 그려졌습니다 →
+  `var(--pb-pink)`.
+- **히어로 우측 비주얼 스크림 복원.** 원문 `.hero-visual-clean` 의 첫 배경 레이어
+  (styles.css 101행 — 180° 세로 그라디언트, 상단 `rgba(12,14,19,.02)` 28% → 하단 `.64`)를
+  `.pb-hero-media::after` 로 사진 위에 겹쳤습니다. 사진이 `<img>` 슬롯이라 같은 레이어를
+  `::after` 로 만든 것이고, 라벨·BRAND MESSAGE 카드는 `z-index:2` 로 스크림 위에 둡니다
+  (원문 스택: 사진 0 → 스크림 1 → 카드 2).
+- **문의 폼 체크칩 간격 복원.** `.pb-field input:not([type='checkbox'])` 의 `:not` 배제를
+  제거했습니다 — 원문 styles.css 240행은 checkbox 도 `.field input` 규칙을 받고,
+  `.check-tag input`(245행)이 width/height/accent-color 만 덮으므로 남는 `min-height`
+  52px 가 체크박스를 세워 칩 60px·피치 70px(원문 실측)이 됩니다. 같은 원문 규칙에 없는
+  `.pb-check-tag input` 의 `flex-shrink:0` 도 제거했습니다. 승인 예외(동의 체크박스
+  18×18 무테두리)는 TSX 인라인 스타일로 고정했습니다.
+- **pricing 내부 간격 재배치.** `.pb-pricing` 의 하단 110px(원문 `section` padding,
+  styles.css 63행)을 `#pricing` 래퍼의 `padding-bottom`(모바일 82px — styles.css 310행)으로
+  옮겼습니다. 레이아웃이 계산기를 `#pricing` 의 형제 노드로 놓는 구조에서 이 110px 가
+  notice 박스에 남으면 notice↔계산기 간격이 원문 34px(styles.css 199행 `.estimator
+  margin-top`)가 아니라 144px 로 벌어집니다(실측). 배경(`var(--pb-soft)`)도 래퍼에 뒀습니다.
+- **예상견적 요약 라벨의 원문에 없는 선언 제거.** `.pb-estimate-summary-total-label` 의
+  `line-height: 1`(원문 styles.css 216행은 `line-height` 를 선언하지 않음)과
+  `.pb-estimate-summary-value small` 의 `letter-spacing: 0`(원문 218행은 부모의 `-.05em`
+  을 상속)을 지웠습니다.
+- **사례 카드 링크 라벨을 `blog_url` 유무와 무관하게 렌더.** 원문도 링크가 비어 있어도
+  `.project-link` 라벨을 보여줍니다(body.html 379행). 링크 여부는 카드 엘리먼트
+  (`<a>` / `<div aria-disabled>`) 결정에만 씁니다.
+- **카피의 개행이 공백으로 접히던 렌더 복원.** 히어로 외의 컴포넌트들이 copy 문자열을
+  raw 로 렌더해 시더 값의 `\n`(원문 `<br>`)이 공백으로 접혔습니다 — `renderCopyText` 를
+  `SiteFooter`·`SiteHeader`·`MobileBar`·`ServiceGrid`·`PackageList`·`PriceDiscount`·
+  `EstimateCalculator`·`FaqList`·`CaseGallery`·`InquiryForm` 에 적용했습니다. FAQ 답변·
+  `pricing_field`·`estimate_panel_note` 의 `<strong>` 도 요소로 렌더합니다(시더가 원문
+  마크업을 저장 — 모듈 CHANGELOG 참조).
 
-- **원문에만 있던 문구 37키 복원** — 모듈 `copy` 도메인에 키가 없어 렌더되지 않던 눈금·
-  라벨·CTA 를 시더에 추가하고 전부 배선했습니다(45키 → 82키).
-  - 1차 30키: `about_stage_eyebrow`, `about_side_eyebrow`, `service_eyebrow`,
-    `extra_box_cta`, `package_stage_eyebrow`, `package_a_label`·`package_b_label`·
-    `package_c_label`, `package_{a,b,c}_note`(+`_sub`), `benefit_eyebrow`, `pricing_eyebrow`,
-    `pricing_notice_label`, `estimator_eyebrow`, `estimator_air_label`,
-    `estimator_row_count`·`estimator_row_base`·`estimator_row_discount`·
-    `estimator_row_discount_amount`, `estimator_summary_total_label`, `estimator_cta_submit`,
-    `estimator_cta_kakao`, `faq_eyebrow`, `projects_eyebrow`, `projects_card_kicker`,
-    `projects_link_label`.
-  - 2차 7키: `hero_cta_primary`·`hero_cta_secondary` — 히어로의 CTA 2개입니다. 이 키가
-    없던 동안 히어로에는 **행동 유도 수단이 하나도 없었습니다**(원문 32·33행).
-    `hero_visual_message_label`(원문 53행 `BRAND MESSAGE`), `header_cta`(원문 15행),
-    `mobile_cta_estimate`·`mobile_cta_phone`·`mobile_cta_kakao`(원문 16·497~499행).
-    값은 전부 원문 `body.html` 그대로입니다.
-- 문구가 없을 때의 계약은 그대로입니다 — 키가 `null` 이면 각 컴포넌트가 그 문구를
-  조용히 생략하고, 리터럴로 대체하지 않습니다. `SiteHeader`·`MobileBar` 의 라벨
-  기본값 리터럴은 제거하고 두 컴포넌트가 `copy` 페이로드를 받도록 바꿨습니다
-  (`SiteFooter` 와 같은 방식, `_user_base.json` 이 바인딩).
-- 컴포넌트·레이아웃 테스트가 복원된 문구의 렌더와 미렌더를 각각 검증하고,
-  `.pb-packages` 패딩 회귀를 CSS 검사로 막습니다. 테스트 17 파일 / 241개.
-- **배경·스테이지·작업사례 커버 슬롯에 번들 자리표시자 사진 배선.** `hero_main`·
-  `why_stage`·`package_stage`·`estimate_bg`·`case_1`~`case_4` 슬롯이 비어 있을 때
-  중립 CSS 블록만 남아 페이지가 비어 보이던 자리를, 이미 승인된 서비스 사진 6장
-  (`public/images/service-*.webp`)으로 채웁니다. `src/lib/serviceAssets.ts` 에
-  `SLOT_PHOTO`(슬롯 키 → 자산 경로)와 `slotPhotoFor()` 를 추가해 서비스 사진과 같은
-  2단 폴백을 씁니다 — **슬롯 URL 우선, 없으면 번들 자산, 둘 다 없으면 중립 CSS 블록**.
-  소비처는 `Hero`(hero_main) · `AboutSection`(why_stage) · `PackageList`(package_stage) ·
-  `InquiryForm`(estimate_bg) · `CaseGallery`(case_1~4, 카드 순번 = 슬롯 순번)이며
-  `CaseGallery` 에 `media` prop 과 레이아웃 바인딩을 새로 추가했습니다. 새 이미지 파일은
-  추가하지 않았고 외부 URL 도 쓰지 않습니다. 관리자가 슬롯에 업로드하면 그 이미지가
-  항상 이깁니다. 테스트 18 파일 / 269개.
+### Changed
+
+- **`renderCopyText` 를 `src/lib/copyText.tsx` 로 분리.** 히어로 파일에 있던 카피 렌더
+  함수를 copy 도메인 문자열을 내보내는 모든 컴포넌트가 쓰는 공용 util 로 옮겼고, `Hero` 는
+  기존 import 가 깨지지 않게 재export 합니다. 함수 로직은 바뀌지 않았습니다(`\n` → `<br>`,
+  `<em>`/`<strong>` → 요소).
+
+### Removed
+
+- **FAQ 첫 문장 휴리스틱(`src/lib/faqAnswer.ts`).** 시더가 원문 `<strong>` 마크업을 그대로
+  저장하므로(모듈 CHANGELOG 참조) 표시 계층의 경계 추정이 필요 없어졌습니다 — 남겨두면
+  이중 강조가 되고, 2건(`네. 기본가는 …` / `아닙니다. 홈페이지 금액은 …`)은 원문보다 짧게
+  나왔습니다. 답변은 저장된 마크업을 `renderCopyText` 로 렌더합니다. `splitFaqAnswer`
+  export 와 그 테스트도 함께 지웠고 README [알려진 한계] 8번을 데이터 마크업 기준으로
+  갱신했습니다.
+- **`SLOT_PHOTO` 의 `case_1`~`case_4`.** 작업사례 커버 슬롯이 비면 사진을 깔지 않고
+  `.pb-project-thumb` 자체의 원문 그라디언트(styles.css 269~270행)와 `Case 0N` 라벨만
+  남깁니다 — 원본도 사례 커버를 사진으로 채우지 않습니다. 이에 따라
+  `.pb-project-thumb__fallback` 요소를 지우고 그라디언트를 썸 배경으로 옮겼습니다.
 
 ## [0.1.0] - 2026-09-19
 

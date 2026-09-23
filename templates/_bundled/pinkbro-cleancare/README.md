@@ -11,7 +11,7 @@ Gnuboard 7 **사용자 템플릿**(`type: user`)입니다.
 |---|---|
 | 식별자 | `pinkbro-cleancare` |
 | 벤더 | `pinkbro` |
-| 버전 | `0.1.0` |
+| 버전 | `0.2.0` |
 | 타입 | `user` |
 | 라이선스 | MIT (`LICENSE`) |
 | 작성자 | `pinkbro` |
@@ -297,12 +297,33 @@ git archive --prefix=pinkbro-cleancare-0.1.0/ -o /tmp/pinkbro-cleancare-0.1.0.zi
 레지스트리가 경고만 남기고 건너뛰어 컴포넌트가 화면에서 조용히 사라집니다.
 
 등록된 컴포넌트: basic 15종(`Div` `Button` `H2` `H3` `H4` `P` `A` `Img` `Span` `Details`
-`Summary` `Input` `Select` `Textarea` `Label`), composite 12종(`Hero` `AboutSection`
+`Summary` `Input` `Select` `Textarea` `Label`), composite 13종(`Hero` `AboutSection`
 `ServiceGrid` `PackageList` `PriceDiscount` `FaqList` `CaseGallery` `EstimateCalculator`
-`InquiryForm` `SiteHeader` `SiteFooter` `MobileBar`).
+`InquiryForm` `SiteHeader` `SiteFooter` `MobileBar` `TopArrow`).
 
 레이아웃은 `layouts/home.json`(`extends: _user_base`), `layouts/_user_base.json`, 그리고
 에러 레이아웃 3종(`layouts/errors/{403,404,500}.json`)입니다.
+
+## 스크롤 리빌 (`src/lib/reveal.ts`)
+
+원문 `_workspace/pinkbro/source/`의 스크롤 리빌(app.js 1~9행의 IntersectionObserver,
+styles.css 47~50행의 `.reveal` 계열)을 이식했습니다. 리빌 지점은 원문 `body.html` 의
+42곳과 1:1(히어로 3·소개 5·서비스 9·패키지 5·가격 안내 4·FAQ 9·작업사례 6·문의 셸 1)이며
+방향(left/right)과 시차(`--pb-delay`, 원문 `--delay`)도 원문 표 그대로입니다. 상단이동
+버튼(TopArrow)에는 리빌이 없습니다 — 원문에도 없습니다.
+
+원문과 다른 보강 두 가지:
+
+1. **JS 실패 안전** — 원문은 `.reveal{opacity:0}` 을 CSS 에 박고 JS 로만 풀어서 스크립트가
+   죽으면 백지가 됩니다. 템플릿은 리빌 훅이 살아 있을 때만 `documentElement` 에 `pb-js` 를
+   붙이고 숨김 상태는 `html.pb-js .pb-reveal` 처럼 그 클래스 아래에서만 적용합니다.
+   IntersectionObserver 가 없는 환경에서는 숨기지도 관찰하지도 않습니다.
+2. **`prefers-reduced-motion: reduce`** 에서는 애니메이션을 끕니다(원문은 무시).
+
+원문은 정적 HTML 이라 한 번만 훑으면 됐지만 템플릿은 데이터가 늦게 옵니다 — 리빌 요소는
+ref 콜백으로 관찰하고, 리빌이 끝난 논리 key 는 기억해 데이터 로딩 전후로 DOM 노드가
+교체돼도 애니메이션을 다시 트리거하지 않습니다. 기하 실측(`tools/measure.mjs`)은
+`.reveal,.pb-reveal{opacity:1!important;…}` 스타일 주입으로 리빌을 무력화한 뒤 잽니다.
 
 ## 알려진 한계 (숨기지 않고 기록)
 
@@ -330,17 +351,15 @@ git archive --prefix=pinkbro-cleancare-0.1.0/ -o /tmp/pinkbro-cleancare-0.1.0.zi
 7. **CHANGELOG 의 `0.1.0` 날짜(2026-09-19)와 `template.json` 의 `release_date`
    (2026-09-18)가 하루 다릅니다** — 전자는 문서 작성일, 후자는 매니페스트에 기록된
    릴리스 날짜입니다. 버전 번호는 양쪽 모두 `0.1.0` 으로 같습니다.
-8. **FAQ 답변의 굵은 첫 문장은 데이터가 아니라 추정입니다.** 원문(body.html 333~361행)은
-   여덟 답변 모두 **첫 문장을 `<strong>`** 으로 감쌌지만, 모듈은 답변을 **평문 문자열
-   하나**로 저장하므로 강조 위치가 데이터에 없습니다. 그래서 템플릿이 표시 단계에서
-   첫 문장 경계를 추정해 그 문장만 굵게 렌더합니다(`src/lib/faqAnswer.ts`).
-   - 경계 규칙: **마침표 + 공백 + 뒤에 더 있는 텍스트** 인 첫 지점. 다른 부호로는
-     나누지 않습니다.
-   - **관리자가 답변을 다시 쓰면 굵게 나오는 자리도 함께 바뀝니다.** 강조를 고정하려면
-     모듈이 강조 범위(또는 원문 마크업)를 함께 저장해야 하고, 그건 모듈 계약 변경입니다.
-   - 현재 시더 값 기준으로 여덟 답변 중 **6건은 원문과 정확히 일치**하고, 2건
-     (`네. 기본가는 …`, `아닙니다. 홈페이지 금액은 …`)은 원문이 **두 문장을 한 번에**
-     굵게 처리했기 때문에 추정 규칙이 굵게 하는 범위가 원문보다 짧습니다.
+8. **FAQ 답변·pricing_field·estimate_panel_note 의 인라인 마크업은 데이터에 있습니다.**
+   원문(body.html 264·333~361·456행)의 `<strong>` 마크업은 이제 시더가 그대로 저장하고
+   표시 계층(`Hero` 의 `renderCopyText`)이 요소로 렌더합니다 — 경계를 추정하지 않습니다.
+   - **관리자가 답변을 다시 쓰면 강조는 마크업이 정합니다.** 마크업을 지우면 굵기도
+     사라지고, `<strong>` 을 직접 넣으면 그 범위가 굵게 렌더됩니다 — 모듈 계약에
+     포함된 관례입니다.
+   - 예전의 첫 문장 추정 휴리스틱(`src/lib/faqAnswer.ts`)은 제거됐습니다: 마크업이
+     데이터에 있으면 추정은 이중 강조가 되고, 범위 2건(`네. 기본가는 …`,
+     `아닙니다. …`)은 원문보다 짧게 나왔습니다.
 
 ## 미해결 / 관리자 입력 대기
 

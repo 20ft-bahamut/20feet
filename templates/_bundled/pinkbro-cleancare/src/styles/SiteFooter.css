@@ -1,10 +1,12 @@
 /**
  * SiteFooter 스타일 — source/styles.css 원문 이식(footer / .footer-grid /
- * .footer-logo / .footer-brand / .copyright / 모바일 브레이크포인트).
+ * .footer-logo / .footer-col / .footer-brand / .copyright / 모바일 브레이크포인트).
  *
  * 값은 원문 그대로이며, 클래스 접두사 `pb-` 와 토큰 변수 `--pb-*` 만 바꿨다.
- * 원문 .footer-grid 는 4컬럼(brand + 서비스 2컬럼 + contact)이지만 컴포넌트가
- * 렌더하는 블록은 brand + contact 2개라 트랙을 `1.2fr .9fr` 로 줄였다.
+ * 원문 .footer-grid 는 4컬럼(brand 1.2fr + Core .8fr + More .8fr + Contact .9fr)이고
+ * 컴포넌트도 같은 4블록을 렌더한다.
+ * 원문의 링크 규칙(a{color:inherit;text-decoration:none}, styles.css 22행)은
+ * design-tokens.css 의 전역 규칙이 같은 값으로 대신한다 — 이 파일에 반복하지 않는다.
  */
 
 .pb-footer {
@@ -20,7 +22,7 @@
 
 .pb-footer-grid {
     display: grid;
-    grid-template-columns: 1.2fr 0.9fr;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr 0.9fr;
     gap: 18px;
     align-items: start;
 }
@@ -33,7 +35,9 @@
     background: #fff;
 }
 
-.pb-footer-brand p {
+/* 원문 .footer-brand p, .footer-col p (styles.css 284행) — 값 원문 그대로. */
+.pb-footer-brand p,
+.pb-footer-col p {
     margin: 0;
     font-size: 14px;
     line-height: 1.8;
@@ -41,27 +45,22 @@
     text-wrap: pretty;
 }
 
+/* 원문 .footer-col h4 (styles.css 283행). */
+.pb-footer-col h4 {
+    margin: 0 0 12px;
+    font: 800 12px/1 "Manrope", sans-serif;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #ff8fbe;
+}
+
+/* 원문 body.html 476행의 <strong style="color:#fff"> — 인라인 스타일을 규칙으로 뺀 것. */
 .pb-footer-brand strong {
     color: #fff;
 }
 
 .pb-footer-tagline {
     margin: 16px 0 0;
-}
-
-.pb-footer-contact {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    gap: 6px;
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.8;
-    color: rgba(255, 255, 255, 0.72);
-}
-
-.pb-footer-contact a {
-    color: inherit;
 }
 
 .pb-copyright {
@@ -73,8 +72,8 @@
 }
 
 @media (max-width: 1100px) {
-    /* 원문 @media(max-width:1100px) 그룹의 .footer-grid — 1100px 에서 이미 단일 컬럼이다.
-       (원문은 4컬럼, 이 템플릿은 brand+contact 2컬럼이지만 쌓이는 시점은 같다.) */
+    /* 원문 @media(max-width:1100px) 그룹의 .footer-grid (styles.css 294행) —
+       1100px 에서 이미 단일 컬럼으로 쌓인다. */
     .pb-footer-grid {
         grid-template-columns: 1fr;
     }

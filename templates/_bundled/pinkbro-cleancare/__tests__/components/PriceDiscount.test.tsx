@@ -33,7 +33,9 @@ describe('PriceDiscount', () => {
 
     const heading = screen.getByTestId('pricing-heading');
     expect(heading.tagName).toBe('H2');
-    expect(heading.textContent).toBe('가격은 투명하게,\n견적은 더 분명하게 안내합니다.');
+    // 시더 값의 \n 은 <br> 요소로 렌더된다 — 날 newline 은 남지 않는다
+    expect(heading.textContent).toBe('가격은 투명하게,견적은 더 분명하게 안내합니다.');
+    expect(heading.querySelectorAll('br')).toHaveLength(1);
     expect(screen.getByTestId('pricing-sub')).toHaveTextContent('기본 작업 기준가를 먼저 보여드립니다');
   });
 
@@ -139,6 +141,30 @@ describe('PriceDiscount', () => {
     expect(screen.getByTestId('pricing-field')).toHaveTextContent(
       '확정 견적은 현장확인 원칙으로 진행합니다.',
     );
+  });
+
+  it('renders the stored <strong> markup of the field as an element — 리터럴 노출 금지 (원문 264행)', () => {
+    const { container } = render(
+      <PriceDiscount
+        eyebrow={null}
+        heading={null}
+        sub={null}
+        notice={null}
+        noticeLabel={null}
+        noticeSub={null}
+        field="<strong>확정 견적은 현장확인 원칙</strong>으로 진행합니다."
+        flow={null}
+        flowLabel={null}
+      />,
+    );
+
+    const strong = container.querySelector('[data-testid="pricing-field"] strong');
+    expect(strong?.textContent).toBe('확정 견적은 현장확인 원칙');
+    expect(screen.getByTestId('pricing-field')).toHaveTextContent(
+      '확정 견적은 현장확인 원칙으로 진행합니다.',
+    );
+    // 태그 문자열이 화면 텍스트로 새어 나오지 않는다
+    expect(screen.getByTestId('pricing-field').textContent).not.toContain('<strong>');
   });
 
   it('renders the flow label from copy instead of a literal (pricing_flow_label)', () => {

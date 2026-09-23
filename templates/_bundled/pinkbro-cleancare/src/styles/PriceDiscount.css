@@ -6,9 +6,22 @@
  * 클래스는 템플릿 내 충돌을 피하려고 pb- 접두사를 붙였다.
  */
 
-/* 원문 section { padding:110px 0 } — #pricing 스코프 */
+/* 원문 section { padding:110px 0 } — #pricing 스코프. 하단 110px 은 이 박스가 아니라
+   아래 #pricing 래퍼의 padding-bottom 으로 옮겼다: 레이아웃은 home_pricing 다음
+   home_estimate_calculator 를 형제로 놓는다(원문 <section id="pricing"> 안의
+   .estimator — body.html 272행). 이 박스에 110px 하단 패딩이 그대로 남으면
+   notice↔계산기 간격이 원문 34px(styles.css:199 .estimator margin-top)가 아니라
+   144px 로 벌어진다(실측). */
 .pb-pricing {
-  padding: 110px 0;
+  padding: 110px 0 0;
+  background: var(--pb-soft);
+}
+
+/* 원문 section { padding:110px 0 } 의 하단 밴드(styles.css:63)와
+   .pricing { background:var(--soft) } (styles.css:188) — 레이아웃 래퍼 div#pricing 은
+   배경·패딩이 없어(실측 pt/pb 0, 배경 투명) estimator 뒤 110px 밴드가 사라져 있었다. */
+#pricing {
+  padding-bottom: 110px;
   background: var(--pb-soft);
 }
 
@@ -68,7 +81,9 @@
 }
 
 /* 원문 .eyebrow — 대시(18px 선) 포함. notice-c 의 span 은 원문에서 대시가 없으므로
-   --plain 변형으로 끈다. */
+   --plain 변형으로 끈다.
+   color 는 원문 .eyebrow 의 color:var(--pink)(styles.css:26) 이다 — 이 선언이 빠지면
+   상속색 rgb(22,25,34) 로 그려진다(원본 실측 rgb(255,45,134)). */
 .pb-pricing-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -76,6 +91,7 @@
   font: 800 12px/1 var(--pb-font-latin);
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: var(--pb-pink);
 }
 
 .pb-pricing-eyebrow::before {
@@ -128,6 +144,11 @@
   word-break: keep-all;
 }
 
+/* 원문 .notice-b strong (styles.css 195행) — 강조는 데이터 마크업이 담당한다 */
+.pb-pricing-notice-b strong {
+  color: #151822;
+}
+
 .pb-pricing-notice-c {
   background: var(--pb-pink-soft);
   display: flex;
@@ -166,10 +187,16 @@
   }
 }
 
-/* 원문 @media (max-width:720px) — section 패딩 축소 · wrap 여백 24px · notice 패딩 */
+/* 원문 @media (max-width:720px) — section 패딩 축소 · wrap 여백 24px · notice 패딩.
+   82px 의 하단 밴드도 데스크톱과 같은 재배치(#pricing 래퍼)로 옮긴다
+   (원문 styles.css:310 section { padding:82px 0 }). */
 @media (max-width: 720px) {
   .pb-pricing {
-    padding: 82px 0;
+    padding: 82px 0 0;
+  }
+
+  #pricing {
+    padding-bottom: 82px;
   }
 
   .pb-pricing-inner {

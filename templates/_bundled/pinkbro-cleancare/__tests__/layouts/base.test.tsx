@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { SiteHeader } from '../../src/components/SiteHeader';
 import { SiteFooter } from '../../src/components/SiteFooter';
 import { MobileBar } from '../../src/components/MobileBar';
+import { TopArrow } from '../../src/components/TopArrow';
 import type { SiteData } from '../../src/lib/types';
 import componentsManifest from '../../components.json';
 import templateMetadata from '../../template.json';
@@ -98,12 +99,12 @@ describe('base layout — 구조', () => {
         expect((baseLayout as any).data_sources ?? []).toEqual([]);
     });
 
-    it('lays out header → content slot → footer → mobile bar, in that order', () => {
+    it('lays out header → content slot → footer → top arrow → mobile bar, in that order', () => {
         const root = (baseLayout as any).components[0];
         expect(root.name).toBe('Div');
 
         const order = root.children.map((child: any) => child.name);
-        expect(order).toEqual(['SiteHeader', 'Div', 'SiteFooter', 'MobileBar']);
+        expect(order).toEqual(['SiteHeader', 'Div', 'SiteFooter', 'TopArrow', 'MobileBar']);
 
         const slotHolder = root.children[1];
         expect(slotHolder.children).toHaveLength(1);
@@ -115,12 +116,13 @@ describe('base layout — 구조', () => {
             'basic',
             'composite',
             'composite',
+            'composite',
         ]);
     });
 
     it('binds the chrome components to the data sources home declares', () => {
         const root = (baseLayout as any).components[0];
-        const [header, , footer, mobileBar] = root.children;
+        const [header, , footer, , mobileBar] = root.children;
 
         expect(header.props).toEqual({
             site: '{{pinkbro_site?.data ?? null}}',
@@ -245,6 +247,9 @@ describe('base layout — 크롬 composite 렌더', () => {
 
         render(<MobileBar site={site} copy={null} />);
         expect(screen.getByTestId('pb-mobile-bar')).toBeInTheDocument();
+
+        render(<TopArrow />);
+        expect(screen.getByTestId('pb-top-arrow')).toBeInTheDocument();
     });
 
     it('renders the chrome when no data source resolved (error layouts)', () => {
@@ -253,11 +258,13 @@ describe('base layout — 크롬 composite 렌더', () => {
                 <SiteHeader site={null} media={null} copy={null} />
                 <SiteFooter site={null} copy={null} />
                 <MobileBar site={null} copy={null} />
+                <TopArrow />
             </>,
         );
 
         expect(screen.getByTestId('pb-header')).toBeInTheDocument();
         expect(screen.getByTestId('pb-footer')).toBeInTheDocument();
         expect(screen.getByTestId('pb-mobile-bar')).toBeInTheDocument();
+        expect(screen.getByTestId('pb-top-arrow')).toBeInTheDocument();
     });
 });

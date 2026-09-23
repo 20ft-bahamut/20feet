@@ -1,0 +1,46 @@
+/**
+ * TopArrow 스타일 — source 원문 이식.
+ *
+ * 원문: `_workspace/pinkbro/source/styles.css:287-288` (.top-arrow / .top-arrow:hover)
+ *   및 720px 브레이크포인트(styles.css:340)의 모바일 오버라이드.
+ * 값은 원문 그대로이며, 클래스 접두사 `pb-` 와 토큰 변수 `--pb-*`(`--pink` → `--pb-pink`)
+ * 만 바꿨다. 원문은 `html { scroll-behavior:smooth; }` 를 쓰지 않는 버튼 자체
+ * 스크롤이므로 여기서 reduced-motion 용 behavior 내림은 하지 않는다 —
+ * behavior 는 TopArrow.tsx 의 클릭 핸들러가 matchMedia 로 내린다.
+ */
+
+.pb-top-arrow {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 110;
+    width: 52px;
+    height: 52px;
+    border: none;
+    border-radius: 50%;
+    background: #151822;
+    color: #fff;
+    box-shadow: 0 18px 40px rgba(15, 17, 24, 0.2);
+    cursor: pointer;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.22s ease;
+}
+
+.pb-top-arrow:hover {
+    background: var(--pb-pink);
+    transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+    /* 원문 styles.css:340 — 모바일에서는 하단 .mobile-bar 와 겹치지 않게
+     * bottom 을 82px 로 올리고 크기·위치를 줄인다(값 원문 그대로). */
+    .pb-top-arrow {
+        width: 46px;
+        height: 46px;
+        right: 12px;
+        bottom: 82px;
+    }
+}

@@ -1,4 +1,6 @@
 import '../styles/PriceDiscount.css';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 
 export interface PriceDiscountProps {
   /** 섹션 eyebrow(copy: pricing_eyebrow). 원문 `.section-head .copy > .eyebrow`(251행). null 이면 생략한다. */
@@ -13,7 +15,7 @@ export interface PriceDiscountProps {
   noticeLabel: string | null;
   /** 안내 블록 보조 문구(copy: pricing_notice_sub). null 이면 생략한다. */
   noticeSub: string | null;
-  /** 확정 견적 원칙 본문(copy: pricing_field). null 이면 가운데 블록을 숨긴다. */
+  /** 확정 견적 원칙 본문(copy: pricing_field). 원문 264행처럼 <strong> 인라인 마크업을 담는다. null 이면 가운데 블록을 숨긴다. */
   field: string | null;
   /** 견적 진행 흐름 라벨(copy: pricing_flow_label). null 이면 라벨을 생략한다. */
   flowLabel: string | null;
@@ -44,6 +46,9 @@ export function PriceDiscount({
   flowLabel,
   flow,
 }: PriceDiscountProps) {
+  // 리빌 — 원문 body.html 250(copy)·254(sub right)·257(notice-box)행.
+  // .estimator(--delay:.08)는 EstimateCalculator 루트가 담당한다.
+  const reveal = usePbRevealRef<HTMLDivElement>();
   const hasHead = eyebrow !== null || heading !== null || sub !== null;
   const hasNotice = notice !== null || noticeSub !== null || field !== null || flow !== null;
 
@@ -52,46 +57,55 @@ export function PriceDiscount({
       <div className="pb-pricing-inner">
         {hasHead && (
           <div className="pb-pricing-head">
-            <div className="pb-pricing-head-copy">
+            {/* 원문 body.html 250행 — .copy reveal */}
+            <div className="pb-pricing-head-copy pb-reveal" ref={reveal('pricing-copy')}>
               {eyebrow !== null && (
                 <span className="pb-pricing-eyebrow" data-testid="pricing-eyebrow">
-                  {eyebrow}
+                  {renderCopyText(eyebrow)}
                 </span>
               )}
               {heading !== null && (
                 <h2 className="pb-pricing-heading" data-testid="pricing-heading">
-                  {heading}
+                  {renderCopyText(heading)}
                 </h2>
               )}
             </div>
+            {/* 원문 body.html 254행 — .sub reveal right */}
             {sub !== null && (
-              <p className="pb-pricing-sub" data-testid="pricing-sub">
-                {sub}
+              <p
+                className="pb-pricing-sub pb-reveal pb-reveal--right"
+                ref={reveal('pricing-sub')}
+                data-testid="pricing-sub"
+              >
+                {renderCopyText(sub)}
               </p>
             )}
           </div>
         )}
 
+        {/* 원문 body.html 257행 — .notice-box reveal */}
         {hasNotice && (
-          <div className="pb-pricing-notice">
+          <div className="pb-pricing-notice pb-reveal" ref={reveal('pricing-notice')}>
             {notice !== null && (
               <div className="pb-pricing-notice-a">
                 {noticeLabel !== null && (
                   <span className="pb-pricing-eyebrow" data-testid="pricing-notice-label">
-                    {noticeLabel}
+                    {renderCopyText(noticeLabel)}
                   </span>
                 )}
-                <b className="pb-pricing-notice-title">{notice}</b>
+                <b className="pb-pricing-notice-title">{renderCopyText(notice)}</b>
                 {noticeSub !== null && (
                   <p className="pb-pricing-notice-sub" data-testid="pricing-notice-sub">
-                    {noticeSub}
+                    {renderCopyText(noticeSub)}
                   </p>
                 )}
               </div>
             )}
             {field !== null && (
               <div className="pb-pricing-notice-b" data-testid="pricing-field">
-                <div>{field}</div>
+                {/* 원문 264행이 첫 문장을 <strong> 으로 감싼다 — 시더가 저장한 마크업을
+                    요소로 렌더한다(리터럴 노출 금지). */}
+                <div>{renderCopyText(field)}</div>
               </div>
             )}
             {flow !== null && (
@@ -101,10 +115,10 @@ export function PriceDiscount({
                     className="pb-pricing-eyebrow pb-pricing-eyebrow--plain"
                     data-testid="pricing-flow-label"
                   >
-                    {flowLabel}
+                    {renderCopyText(flowLabel)}
                   </span>
                 )}
-                <b className="pb-pricing-notice-flow">{flow}</b>
+                <b className="pb-pricing-notice-flow">{renderCopyText(flow)}</b>
               </div>
             )}
           </div>

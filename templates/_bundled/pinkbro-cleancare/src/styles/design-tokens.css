@@ -171,6 +171,48 @@ p {
     color: var(--pb-pink);
 }
 
+/* ---- 스크롤 리빌 (원문 styles.css 47~50행 .reveal 계열) ----
+ * 값은 원문 그대로다: 28px / ±30px / .8s ease / 시차 --pb-delay(원문 --delay).
+ * 원문과 다른 두 보강:
+ *   1. JS 실패 안전 — 원문은 .reveal{opacity:0} 을 CSS 에 박고 JS 로만 풀어서
+ *      스크립트가 죽으면 백지다. 템플릿은 숨김 상태를 `html.pb-js` 아래에만
+ *      적용한다(src/lib/reveal.ts 가 관찰 훅 마운트 시 붙인다). 스크립트가
+ *      안 돌면 pb-js 가 없으니 전부 그냥 보인다.
+ *   2. prefers-reduced-motion: reduce 에서 애니메이션을 끈다(원문은 무시한다).
+ * 여기 두는 이유: .pb-btn 처럼 여러 섹션이 함께 쓰는 공용 스타일이므로
+ * 전역 토큰 파일이 유일한 정의처다. */
+
+html.pb-js .pb-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    transition-delay: var(--pb-delay, 0s);
+}
+
+html.pb-js .pb-reveal--left {
+    transform: translateX(-30px);
+}
+
+html.pb-js .pb-reveal--right {
+    transform: translateX(30px);
+}
+
+/* --visible 은 뒤에 둔다 — 위 숨김 규칙과 같은 명시도라 순서로 이긴다. */
+html.pb-js .pb-reveal--visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.pb-js .pb-reveal,
+    html.pb-js .pb-reveal--left,
+    html.pb-js .pb-reveal--right {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 /* ---- 공용 스켈레톤 셔머 키프레임 (정의는 이 한 곳뿐) ---- */
 
 @keyframes pb-skeleton-pulse {

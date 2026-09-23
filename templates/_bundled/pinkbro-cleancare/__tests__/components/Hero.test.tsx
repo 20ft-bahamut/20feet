@@ -1,6 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import Hero from '../../src/components/Hero';
+
+const heroCss = (): string =>
+  readFileSync(join(__dirname, '..', '..', 'src', 'styles', 'Hero.css'), 'utf8');
 
 const site = {
   brand_name: '핑크브로클린케어', brand_name_en: 'PINKBRO CLEANCARE',
@@ -15,7 +20,9 @@ const copy = {
 } as any;
 
 const PLACEHOLDER_SRC =
-  '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp';
+  '/api/templates/assets/pinkbro-cleancare?file=images/hero-visual.webp';
+const SHELL_BG_SRC =
+  '/api/templates/assets/pinkbro-cleancare?file=images/hero-shell.webp';
 
 describe('Hero', () => {
   it('renders a loading skeleton when site data is null', () => {
@@ -50,6 +57,54 @@ describe('Hero', () => {
   it('never renders an external image url', () => {
     const { container } = render(<Hero site={site} copy={copy} media={null} />);
     expect(container.innerHTML).not.toMatch(/unsplash\.com/);
+  });
+
+  it('paints the bundled hero-shell photo behind the scrim when hero_sub slot is empty', () => {
+    const { unmount } = render(<Hero site={site} copy={copy} media={null} />);
+    const shell = document.querySelector('.pb-hero-shell') as HTMLElement;
+    expect(shell.style.backgroundImage).toBe(`url("${SHELL_BG_SRC}")`);
+    expect(shell.style.backgroundSize).toBe('cover');
+    // jsdom 을 비롯한 CSSOM 은 background-position 의 단일 키워드 center 를 center center 로 정규화한다
+    expect(shell.style.backgroundPosition).toBe('center center');
+    unmount();
+
+    // 슬롯 키는 있고 값만 비어도(업로드 없음) 번들 배경이 그 자리를 채운다
+    render(<Hero site={site} copy={copy} media={{ hero_sub: { url: null, alt: null } }} />);
+    expect((document.querySelector('.pb-hero-shell') as HTMLElement).style.backgroundImage)
+      .toBe(`url("${SHELL_BG_SRC}")`);
+  });
+
+  it('the uploaded hero_sub url wins the shell background — 업로드가 항상 이긴다', () => {
+    render(<Hero site={site} copy={copy} media={{ hero_sub: { url: '/shell.webp', alt: 'a' } }} />);
+    const shell = document.querySelector('.pb-hero-shell') as HTMLElement;
+    expect(shell.style.backgroundImage).toBe('url("/shell.webp")');
+    // 셸 베이스 컬러는 CSS 가 유지한다 — 배경 사진은 그 위에 깔린다
+    expect(shell.className).toContain('pb-hero-shell');
+  });
+
+  it('keeps a plain shell when neither slot nor bundle has a background', async () => {
+    // SLOT_PHOTO.hero_sub 가 사라진 상황을 시뮬레이션 — Hero 는 slotPhotoFor 로만 소비하므로
+    // slotPhotoFor 이 null 을 돌려주면 배경 인라인 스타일이 아예 남지 않아야 한다.
+    // (모듈 스코프의 SLOT_PHOTO 객체만 갈아끼우는 doMock 스프레드는 slotPhotoFor 내부
+    //  바인딩을 바꾸지 못하므로 함수 자체를 갈아끼운다. 또한 파일 상단의 정적 import 가
+    //  Hero 를 이미 평가해 두었으므로 resetModules 로 캐시를 비운 뒤 다시 import 해야
+    //  doMock 이 적용된 모듈 그래프로 평가된다.)
+    vi.resetModules();
+    vi.doMock('../../src/lib/serviceAssets', async (importOriginal) => ({
+      ...(await importOriginal<object>()),
+      slotPhotoFor: () => null,
+    }));
+    try {
+      const { default: HeroFresh } = await import('../../src/components/Hero');
+      const { container } = render(
+        <HeroFresh site={site} copy={copy} media={null} />,
+      );
+      const shell = container.querySelector('.pb-hero-shell') as HTMLElement;
+      expect(shell.style.backgroundImage).toBe('');
+    } finally {
+      vi.doUnmock('../../src/lib/serviceAssets');
+      vi.resetModules();
+    }
   });
 
   it('renders the hero visual copy from the copy domain (label / brand message / body)', () => {
@@ -216,5 +271,26 @@ describe('Hero', () => {
     // 태그가 문자열로 노출되지 않는다
     expect(container.textContent).not.toContain('<em>');
     expect(container.textContent).not.toContain('<strong>');
+  });
+
+  it('keeps the source scrim over the hero visual photo (.pb-hero-media::after)', () => {
+    // 원문 .hero-visual-clean 배경 첫 레이어(_workspace/pinkbro/source/styles.css:101) —
+    // 사진 위 180° 세로 스크림(상 .02 → 하 .64). 이 값이 빠지면 사진 위 하단
+    // BRAND MESSAGE 바가 읽히지 않는다. (원문 표기 rgba(12,14,19,.02) — 공백만 다름)
+    const flat = heroCss().replace(/\s+/g, ' ');
+
+    expect(flat).toContain('.pb-hero-media::after');
+    for (const stop of ['rgba(12, 14, 19, .02) 28%', 'rgba(12, 14, 19, .64) 100%']) {
+      expect(flat).toContain(stop);
+    }
+
+    // 스택은 원문과 같다 — 사진(0) 위 스크림(1), 라벨·BRAND MESSAGE 카드(2).
+    // 슬롯 업로드 사진이 무엇이든 오버레이는 같아서 대비가 유지된다.
+    expect(flat).toMatch(/\.pb-hero-media::after { [^}]*z-index: 1;/);
+    expect(flat).toMatch(/\.pb-hero-visual-label { [^}]*z-index: 2;/);
+    expect(flat).toMatch(/\.pb-hero-visual-bottom { [^}]*z-index: 2;/);
+
+    // 스톡 URL 은 되살아나지 않는다
+    expect(flat).not.toMatch(/unsplash\.com/);
   });
 });

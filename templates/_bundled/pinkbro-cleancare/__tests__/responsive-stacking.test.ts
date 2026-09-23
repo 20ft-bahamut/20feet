@@ -168,7 +168,7 @@ describe('데스크톱은 미디어 블록 밖에서 바뀌지 않는다', () =>
     it.each(FILES)('%s 의 스태킹 규칙은 전부 미디어 블록 안에 있다', (file) => {
         const desktop = withoutMedia(read(file));
         // 데스크톱 CSS 에 flex-direction:column 이 새로 생기면 1440px 이 깨진다.
-        // (원문에 이미 있던 .pb-pricing-notice-c / .pb-footer-contact 는 제외)
+        // (원문에 이미 있던 .pb-pricing-notice-c 는 제외 — 이 템플릿에도 남아 있다)
         for (const selector of [
             '.pb-section-head', '.pb-pricing-head', '.pb-projects__head',
             '.pb-estimator-head', '.pb-benefit-top', '.pb-hero-scope',

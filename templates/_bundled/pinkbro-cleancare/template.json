@@ -5,7 +5,7 @@
         "ko": "PinkBro CleanCare",
         "en": "PinkBro CleanCare"
     },
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license": "MIT",
     "description": {
         "ko": "핑크브로클린케어 랜딩 페이지 Gnuboard 7 사용자 템플릿",
@@ -44,7 +44,12 @@
             "images/service-awning-care.webp",
             "images/service-sign-care.webp",
             "images/service-kitchen-care.webp",
-            "images/service-air-care.webp"
+            "images/service-air-care.webp",
+            "images/hero-shell.webp",
+            "images/hero-visual.webp",
+            "images/why-stage.webp",
+            "images/package-stage.webp",
+            "images/estimate-bg.webp"
         ]
     },
     "components": {
@@ -77,7 +82,8 @@
             "InquiryForm",
             "SiteHeader",
             "SiteFooter",
-            "MobileBar"
+            "MobileBar",
+            "TopArrow"
         ],
         "layout": []
     },

@@ -10,7 +10,7 @@ describe('CaseGallery', () => {
     expect(screen.getByTestId('cases-skeleton')).toBeInTheDocument();
   });
 
-  it('renders the bundled placeholder cover on every card when no cover is uploaded', () => {
+  it('renders no cover img when no photo is uploaded — the thumb shows its own gradient (source body.html:379)', () => {
     const items = [1, 2, 3, 4].map(n => ({
       title: `실제 작업사례 0${n}`, summary: `설명 ${n}`, blog_url: '',
       cover: { url: null, alt: null },
@@ -19,17 +19,16 @@ describe('CaseGallery', () => {
         items={items} />);
 
     expect(screen.getAllByTestId('case-card')).toHaveLength(4);
-    // 카드 순서 = 슬롯 순서 (case_1…case_4)
-    expect(screen.getAllByTestId('case-cover').map(img => img.getAttribute('src'))).toEqual([
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-floor-care.webp',
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-glass-care.webp',
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp',
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-air-care.webp',
+    // 슬롯이 비면 사진을 렌더하지 않는다 — 그라디언트는 .pb-project-thumb 의 CSS 배경이다.
+    expect(screen.queryAllByTestId('case-cover')).toHaveLength(0);
+    expect(document.querySelectorAll('.pb-project-thumb img')).toHaveLength(0);
+    // Case 0N 라벨은 사진 유무와 무관하게 항상 남는다.
+    expect([...document.querySelectorAll('.pb-project-index')].map(el => el.textContent)).toEqual([
+      'Case 01', 'Case 02', 'Case 03', 'Case 04',
     ]);
-    expect(screen.queryAllByTestId('case-cover-fallback')).toHaveLength(0);
   });
 
-  it('lets the uploaded slot url win over the bundled placeholder', () => {
+  it('lets the uploaded slot url win over the empty slot', () => {
     const items: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '',
       cover: { url: null, alt: null } }];
     const { unmount } = render(
@@ -51,16 +50,17 @@ describe('CaseGallery', () => {
     expect(screen.getByTestId('case-cover')).toHaveAttribute('alt', '업로드 커버');
   });
 
-  it('keeps the neutral css gradient only for a card whose slot has no bundled asset', () => {
-    // 5번째 카드 = case_5 — SLOT_PHOTO 에 자산이 없다. 자리표시자도 없으니 중립 폴백이 남는다.
+  it('renders no img for every card whose slot has no photo — the gradient is css on .pb-project-thumb', () => {
+    // 슬롯 업로드가 없으면 슬롯 함수는 null 을 돌려준다 — 그것이 정상 경로다.
     const items = [1, 2, 3, 4, 5].map(n => ({
       title: `실제 작업사례 0${n}`, summary: `설명 ${n}`, blog_url: '',
       cover: { url: null, alt: null },
     }));
     render(<CaseGallery intro="소개" note="주의" sub={null} media={null} items={items} />);
 
-    expect(screen.getAllByTestId('case-cover')).toHaveLength(4);
-    expect(screen.getAllByTestId('case-cover-fallback')).toHaveLength(1);
+    expect(screen.queryAllByTestId('case-cover')).toHaveLength(0);
+    expect(document.querySelectorAll('.pb-project-thumb')).toHaveLength(5);
+    expect(document.querySelectorAll('.pb-project-index')).toHaveLength(5);
   });
 
   it('honours an item-level cover_slot over the card position', () => {
@@ -69,11 +69,16 @@ describe('CaseGallery', () => {
       title: `T${n}`, summary: 'S', blog_url: '',
       cover: { url: null, alt: null }, cover_slot: `case_${n + 2}`,
     }));
-    render(<CaseGallery intro="i" note="n" sub={null} media={null} items={items} />);
+    render(<CaseGallery intro="i" note="n" sub={null}
+      media={{
+        case_3: { url: '/uploads/case3.webp', alt: '현장 3' },
+        case_4: { url: '/uploads/case4.webp', alt: '현장 4' },
+      }}
+      items={items} />);
 
     expect(screen.getAllByTestId('case-cover').map(img => img.getAttribute('src'))).toEqual([
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-kitchen-care.webp',
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-air-care.webp',
+      '/uploads/case3.webp',
+      '/uploads/case4.webp',
     ]);
   });
 
@@ -173,7 +178,7 @@ describe('CaseGallery', () => {
     expect(screen.queryByTestId('case-card-kicker')).not.toBeInTheDocument();
   });
 
-  it('renders the card link label with the arrow only when both the label and blog_url exist', () => {
+  it('renders the card link label whenever a label value exists — the source shows the label even without a url (body.html:379)', () => {
     const linked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: 'https://blog.naver.com/x',
       cover: { url: null, alt: null } }];
     const { rerender } = render(
@@ -186,10 +191,14 @@ describe('CaseGallery', () => {
     rerender(<CaseGallery intro={null} sub={null} note={null} media={null} items={linked} />);
     expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
 
-    // blog_url 이 비면 링크 문구가 있어도 렌더하지 않는다.
+    // blog_url 이 비어도 라벨은 항상 렌더한다 — 원문의 시각 계약이다.
     const unlinked: CaseItem[] = [{ title: 'T', summary: 'S', blog_url: '', cover: { url: null, alt: null } }];
     rerender(<CaseGallery intro={null} sub={null} note={null} media={null}
         items={unlinked} linkLabel="작업사례 자세히 보기" />);
-    expect(screen.queryByTestId('case-card-link')).not.toBeInTheDocument();
+    expect(screen.getByTestId('case-card-link')).toHaveTextContent('작업사례 자세히 보기');
+    // 다만 URL 이 없으면 카드 자체는 비링크 <div> 로 남는다 (href="#" 최상단 점프 결함 재현 금지).
+    const card = screen.getByTestId('case-card');
+    expect(card.tagName).not.toBe('A');
+    expect(card).toHaveAttribute('aria-disabled', 'true');
   });
 });

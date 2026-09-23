@@ -1,5 +1,6 @@
 import React from 'react';
 import { templateAsset } from '../lib/templateAsset';
+import { renderCopyText } from '../lib/copyText';
 import type { CopyData, MediaSlots, SiteData } from '../lib/types';
 import '../styles/SiteHeader.css';
 
@@ -69,12 +70,12 @@ export function SiteHeader({ site, media: _media, copy }: SiteHeaderProps): Reac
           ) : null}
           {estimate !== null && (
             <a className="pb-btn pb-btn--dark" data-testid="header-cta" href="#estimate">
-              {estimate}
+              {renderCopyText(estimate)}
             </a>
           )}
           {mobileEstimate !== null && (
             <a className="pb-mobile-link" data-testid="header-mobile-cta" href="#estimate">
-              {mobileEstimate}
+              {renderCopyText(mobileEstimate)}
             </a>
           )}
         </div>

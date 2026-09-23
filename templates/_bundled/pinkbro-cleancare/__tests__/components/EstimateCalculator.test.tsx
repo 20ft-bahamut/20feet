@@ -147,6 +147,10 @@ describe('EstimateCalculator', () => {
     // 금액 자체는 라벨과 무관하게 남는다 — 값은 데이터에서 온다
     expect(screen.getByTestId('summary-count')).toHaveTextContent('0개');
     expect(screen.getByTestId('summary-final')).toBeInTheDocument();
+
+    // 원문 .air-select 는 항상 렌더된다 — airLabel 이 null 이면 라벨만 생략한다(기존 계약)
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.queryByLabelText('에어컨 종류 선택')).not.toBeInTheDocument();
   });
 
   it('renders the source eyebrow only when its copy key is present (estimator_eyebrow)', () => {
@@ -269,11 +273,27 @@ describe('EstimateCalculator', () => {
   it('uses the air-select label from copy (estimator_air_label)', () => {
     renderCalculator();
 
-    // 원문 .air-select label — "에어컨 종류 선택" (select 는 air-care 선택 시 렌더된다)
-    fireEvent.click(screen.getByLabelText('에어컨 분해세척'));
+    // 원문 .air-select label — "에어컨 종류 선택" (select 는 체크와 무관하게 항상 렌더된다)
     expect(screen.getByLabelText('에어컨 종류 선택')).toBeInTheDocument();
     // 옵션 라벨은 종류 · 금액 형식을 유지한다
     expect(screen.getByRole('option', { name: '천장형 4WAY · 150,000원' })).toBeInTheDocument();
+  });
+
+  it('renders the air select before any service is checked (원문 .air-select 는 무조건 렌더)', () => {
+    renderCalculator();
+
+    // 원문 body.html 290행 — .air-select 는 calc-air 체크 여부와 무관하게 항상 렌더된다
+    expect(screen.getByLabelText('에어컨 종류 선택')).toBeInTheDocument();
+    // 원문 body.html 296행 — 기본 선택은 천장형 4WAY (우리는 default_selected 데이터로 같은 결과)
+    expect(screen.getByRole('combobox')).toHaveValue('천장형 4WAY');
+
+    // 옵션 목록은 원문 body.html 293~296행과 값·순서·문구가 같다
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual([
+      '벽걸이 에어컨 · 80,000원',
+      '스탠드 에어컨 · 120,000원',
+      '천장형 1WAY · 100,000원',
+      '천장형 4WAY · 150,000원',
+    ]);
   });
 
   it('keeps the source summary-box metrics in EstimateCalculator.css (원문 210~219행)', () => {

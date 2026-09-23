@@ -1,6 +1,8 @@
 import React from 'react';
 import '../styles/EstimateCalculator.css';
 import { calculateEstimate, formatWon, parsePrice } from '../lib/estimate';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 import type { DiscountStep, EstimateOption, ServiceItem, SiteData } from '../lib/types';
 
 /**
@@ -103,6 +105,8 @@ export function EstimateCalculator({
   steps,
   site,
 }: EstimateCalculatorProps): React.ReactElement {
+  // 리빌 — 원문 body.html 272행 — .estimator reveal --delay:.08s (섹션 루트).
+  const reveal = usePbRevealRef<HTMLElement>();
   const isLoading = services === null || steps === null;
 
   const [selected, setSelected] = React.useState<Set<string>>(() => new Set());
@@ -162,28 +166,36 @@ export function EstimateCalculator({
     );
   }
 
-  const showAirSelect =
-    airService !== null && selected.has(AIR_SLUG) && (airService.air_types?.length ?? 0) > 0;
+  // 원문 .air-select(body.html 290행)는 calc-air 체크 여부와 무관하게 항상 렌더된다 —
+  // selected.has 게이트는 원문에 없는 조건이었고, 체크 전 select 가 사라져
+  // pricing 섹션 높이가 원문보다 24px 작아지던 원인이었다.
+  // air-care 서비스/종류 데이터가 없을 때만 생략한다(3단 폴백 계약과 같은 데이터 기반 생략).
+  const showAirSelect = airService !== null && (airService.air_types?.length ?? 0) > 0;
 
   return (
-    <section className="pb-estimator" data-testid="estimate-calculator">
+    <section
+      className="pb-estimator pb-reveal"
+      style={{ '--pb-delay': '0.08s' } as React.CSSProperties}
+      ref={reveal('estimator')}
+      data-testid="estimate-calculator"
+    >
       {(heading || sub) && (
         <div className="pb-estimator-head">
           <div className="pb-estimator-head-copy">
             {eyebrow && (
               <span className="pb-estimator-eyebrow" data-testid="estimator-eyebrow">
-                {eyebrow}
+                {renderCopyText(eyebrow)}
               </span>
             )}
             {heading && (
               <h3 className="pb-estimator-heading" data-testid="estimator-heading">
-                {heading}
+                {renderCopyText(heading)}
               </h3>
             )}
           </div>
           {sub && (
             <p className="pb-estimator-sub" data-testid="estimator-sub">
-              {sub}
+              {renderCopyText(sub)}
             </p>
           )}
         </div>
@@ -210,7 +222,7 @@ export function EstimateCalculator({
 
           {showAirSelect ? (
             <div className="pb-estimate-air">
-              {airLabel ? <label htmlFor="pb-estimate-air-kind">{airLabel}</label> : null}
+              {airLabel ? <label htmlFor="pb-estimate-air-kind">{renderCopyText(airLabel)}</label> : null}
               <select
                 id="pb-estimate-air-kind"
                 value={airKind}
@@ -229,28 +241,28 @@ export function EstimateCalculator({
         <div className="pb-estimate-summary">
           {summaryHeading ? (
             <h3 className="pb-estimate-summary-title" data-testid="estimator-summary-heading">
-              {summaryHeading}
+              {renderCopyText(summaryHeading)}
             </h3>
           ) : null}
           <div className="pb-estimate-summary-meta">
             <div className="pb-estimate-summary-row">
-              {rowCountLabel ? <span data-testid="estimator-row-count-label">{rowCountLabel}</span> : null}
+              {rowCountLabel ? <span data-testid="estimator-row-count-label">{renderCopyText(rowCountLabel)}</span> : null}
               <strong data-testid="summary-count">{result.count}개</strong>
             </div>
             <div className="pb-estimate-summary-row">
-              {rowBaseLabel ? <span data-testid="estimator-row-base-label">{rowBaseLabel}</span> : null}
+              {rowBaseLabel ? <span data-testid="estimator-row-base-label">{renderCopyText(rowBaseLabel)}</span> : null}
               <strong data-testid="summary-base">{formatWon(result.base)}</strong>
             </div>
             <div className="pb-estimate-summary-row">
               {rowDiscountLabel ? (
-                <span data-testid="estimator-row-discount-label">{rowDiscountLabel}</span>
+                <span data-testid="estimator-row-discount-label">{renderCopyText(rowDiscountLabel)}</span>
               ) : null}
               <strong data-testid="summary-discount">{result.rate}%</strong>
             </div>
             <div className="pb-estimate-summary-row">
               {rowDiscountAmountLabel ? (
                 <span data-testid="estimator-row-discount-amount-label">
-                  {rowDiscountAmountLabel}
+                  {renderCopyText(rowDiscountAmountLabel)}
                 </span>
               ) : null}
               <strong data-testid="summary-discount-amount">
@@ -264,7 +276,7 @@ export function EstimateCalculator({
                 span.value(숫자+small 원). 라벨이 null 이면 생략한다. */}
             {summaryTotalLabel ? (
               <b className="pb-estimate-summary-total-label" data-testid="summary-final-label">
-                {summaryTotalLabel}
+                {renderCopyText(summaryTotalLabel)}
               </b>
             ) : null}
             <span className="pb-estimate-summary-value" data-testid="summary-final">
@@ -273,7 +285,7 @@ export function EstimateCalculator({
             </span>
             {summaryNote ? (
               <div className="pb-estimate-summary-note" data-testid="estimator-summary-note">
-                {summaryNote}
+                {renderCopyText(summaryNote)}
               </div>
             ) : null}
           </div>
@@ -287,7 +299,7 @@ export function EstimateCalculator({
                 data-testid="estimator-cta-submit"
                 href="#estimate"
               >
-                {ctaSubmitLabel}
+                {renderCopyText(ctaSubmitLabel)}
               </a>
             ) : null}
             {site?.kakao_channel && ctaKakaoLabel ? (
@@ -298,7 +310,7 @@ export function EstimateCalculator({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {ctaKakaoLabel}
+                {renderCopyText(ctaKakaoLabel)}
               </a>
             ) : null}
           </div>

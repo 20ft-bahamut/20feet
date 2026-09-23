@@ -1,5 +1,6 @@
 import React from 'react';
 import { telHref } from './SiteHeader';
+import { renderCopyText } from '../lib/copyText';
 import type { CopyData, SiteData } from '../lib/types';
 import '../styles/MobileBar.css';
 
@@ -27,11 +28,11 @@ export function MobileBar({ site, copy }: MobileBarProps): React.ReactElement {
 
   return (
     <div className="pb-mobile-bar" data-testid="pb-mobile-bar">
-      {phone !== null && <a href={telHref(site?.phone)}>{phone}</a>}
-      {estimate !== null && <a href="#estimate">{estimate}</a>}
+      {phone !== null && <a href={telHref(site?.phone)}>{renderCopyText(phone)}</a>}
+      {estimate !== null && <a href="#estimate">{renderCopyText(estimate)}</a>}
       {site?.kakao_channel && kakao !== null ? (
         <a href={site.kakao_channel} target="_blank" rel="noopener">
-          {kakao}
+          {renderCopyText(kakao)}
         </a>
       ) : null}
     </div>

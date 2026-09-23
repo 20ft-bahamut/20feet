@@ -1,6 +1,6 @@
 {
     "name": "@pinkbro/pinkbro-cleancare",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "PinkBro CleanCare Gnuboard7 User Template (랜딩 페이지)",
     "type": "module",
     "main": "dist/js/components.iife.js",

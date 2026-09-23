@@ -1,7 +1,7 @@
 /**
  * PinkBro CleanCare Gnuboard7 User Template
  *
- * 랜딩 페이지 — Basic 컴포넌트 15종(Div 포함) + 섹션(composite) 컴포넌트 12종.
+ * 랜딩 페이지 — Basic 컴포넌트 15종(Div 포함) + 섹션(composite) 컴포넌트 13종.
  *
  * 스타일시트 import 는 필수다: `resources/views/app.blade.php` 가 활성 사용자
  * 템플릿의 `css/components.css` 를 무조건 링크하므로, CSS import 가 없으면
@@ -52,6 +52,7 @@ export { InquiryForm, type InquiryFormProps } from './components/InquiryForm';
 export { SiteHeader, type SiteHeaderProps, telHref } from './components/SiteHeader';
 export { SiteFooter, type SiteFooterProps } from './components/SiteFooter';
 export { MobileBar, type MobileBarProps } from './components/MobileBar';
+export { TopArrow, type TopArrowProps } from './components/TopArrow';
 
 // 섹션 컴포넌트가 사용하는 lib 유틸
 export {
@@ -75,7 +76,6 @@ export {
 } from './lib/inquiry';
 export { servicePhotoFor, SERVICE_PHOTO, SERVICE_SLOT } from './lib/serviceAssets';
 export { slotPhotoFor, SLOT_PHOTO } from './lib/serviceAssets';
-export { splitFaqAnswer, type FaqAnswerParts } from './lib/faqAnswer';
 
 export { templateMetadata };
 
@@ -107,6 +107,7 @@ import { InquiryForm } from './components/InquiryForm';
 import { SiteHeader } from './components/SiteHeader';
 import { SiteFooter } from './components/SiteFooter';
 import { MobileBar } from './components/MobileBar';
+import { TopArrow } from './components/TopArrow';
 
 const registry = (window as any).G7Core?.templateEngine?.ComponentRegistry?.getInstance?.();
 if (registry) {
@@ -140,7 +141,8 @@ if (registry) {
     registry.register({ component: SiteHeader, metadata: composite('SiteHeader') });
     registry.register({ component: SiteFooter, metadata: composite('SiteFooter') });
     registry.register({ component: MobileBar, metadata: composite('MobileBar') });
-    logger.log('Registered 15 basic + 12 composite components');
+    registry.register({ component: TopArrow, metadata: composite('TopArrow') });
+    logger.log('Registered 15 basic + 13 composite components');
 } else {
     logger.warn('ComponentRegistry not available — skipping auto-registration');
 }

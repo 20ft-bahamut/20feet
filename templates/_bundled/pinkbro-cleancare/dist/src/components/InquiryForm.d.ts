@@ -17,7 +17,7 @@ export interface InquiryFormProps {
     panelHeading: string | null;
     /** 우측 패널 안내 문구(copy: estimate_panel_sub). null 이면 생략한다. */
     panelSub: string | null;
-    /** 폼 하단 안내 문구(copy: estimate_panel_note). null 이면 생략한다. */
+    /** 폼 하단 안내 문구(copy: estimate_panel_note). 원문 456행처럼 <strong> 마크업과 \n(원본 <br>)을 담는다. null 이면 생략한다. */
     panelNote: string | null;
     className?: string;
 }

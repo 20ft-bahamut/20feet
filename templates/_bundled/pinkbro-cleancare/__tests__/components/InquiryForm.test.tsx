@@ -413,7 +413,9 @@ describe('inquiry contract', () => {
 
         const heading = screen.getByTestId('inquiry-heading');
         expect(heading.tagName).toBe('H2');
-        expect(heading.textContent).toBe('필요한 내용을 남겨주시면\n확인 후 안내드립니다.');
+        // 시더 값의 \n 은 <br> 요소로 렌더된다 — 날 newline 은 남지 않는다
+        expect(heading.textContent).toBe('필요한 내용을 남겨주시면확인 후 안내드립니다.');
+        expect(heading.querySelectorAll('br')).toHaveLength(1);
 
         expect(screen.getByTestId('inquiry-sub')).toHaveTextContent(
             '사진 없이 업종, 필요한 서비스, 연락처를 남겨주세요'
@@ -443,6 +445,32 @@ describe('inquiry contract', () => {
         expect(screen.getByTestId('inquiry-panel-note')).toHaveTextContent(
             '사진 첨부가 필요하신가요?'
         );
+    });
+
+    it('renders the stored panel-note markup as <strong> and \\n as <br> — 리터럴 노출 금지 (원문 456행)', () => {
+        render(
+            <InquiryForm
+                site={site}
+                services={services}
+                media={null}
+                intro="i"
+                sub={null}
+                checklist={null}
+                panelHeading={null}
+                panelSub={null}
+                panelNote={
+                    '<strong>사진 첨부가 필요하신가요?</strong>\n휴대폰으로 촬영한 현장 사진은 카카오채널로 보내주시면 가장 빠르게 확인할 수 있습니다.'
+                }
+            />,
+        );
+
+        const note = screen.getByTestId('inquiry-panel-note');
+        const strong = note.querySelector('strong');
+        expect(strong?.textContent).toBe('사진 첨부가 필요하신가요?');
+        // \n 은 원문 <br> 처럼 줄바꿈 요소로 렌더된다
+        expect(note.querySelector('br')).not.toBeNull();
+        // 태그 문자열이 화면 텍스트로 새어 나오지 않는다
+        expect(note.textContent).not.toContain('<strong>');
     });
 
     it('omits every copy slot that is null instead of falling back to a literal', () => {
@@ -492,8 +520,9 @@ describe('inquiry contract', () => {
     });
 
     it('renders the bundled placeholder photo when estimate_bg is empty or media is null', () => {
+        // SLOT_PHOTO.estimate_bg — 원본 페이지의 견적 섹션 배경 사진
         const placeholder =
-            '/api/templates/assets/pinkbro-cleancare?file=images/service-sign-care.webp';
+            '/api/templates/assets/pinkbro-cleancare?file=images/estimate-bg.webp';
 
         const { unmount } = render(
             <InquiryForm

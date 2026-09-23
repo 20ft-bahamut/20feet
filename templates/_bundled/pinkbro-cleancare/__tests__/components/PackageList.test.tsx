@@ -302,8 +302,9 @@ describe('PackageList', () => {
   });
 
   it('renders the bundled placeholder photo when package_stage is empty or media is null', () => {
+    // SLOT_PHOTO.package_stage — 원본 페이지의 패키지 스테이지 사진
     const placeholder =
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-awning-care.webp';
+      '/api/templates/assets/pinkbro-cleancare?file=images/package-stage.webp';
 
     const { unmount } = render(
       <PackageList intro="소개" introSub={null} benefitHeading={null} benefitSub={null}

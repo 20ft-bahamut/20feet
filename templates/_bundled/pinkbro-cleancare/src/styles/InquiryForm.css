@@ -161,7 +161,8 @@
     color: #4f5561;
     font-size: 13px;
     line-height: 1.72;
-    /* 원문은 <br> — 시더 값의 \n 을 그대로 살린다 */
+    /* 원문은 <br> — 시더 값의 \n 을 표시 계층(renderCopyText)이 <br> 요소로 렌더한다.
+       pre-line 은 다른 텍스트 노드의 개행만 남긴다. */
     white-space: pre-line;
     word-break: keep-all;
 }
@@ -224,7 +225,14 @@
     font-weight: 600;
 }
 
-.pb-field input:not([type='checkbox']),
+/* 원문 styles.css:240 `.field input, .field select, .field textarea` — 체크박스 배제(:not)가 없다.
+   .field 후손 input 은 checkbox 도 같은 규칙을 받고, .check-tag input(245행)이 width/height/
+   accent-color 만 덮어쓰므로 남는 min-height:52px 이 체크박스를 52px 로 세운다(Chrome 은 네이티브
+   체크박스의 padding/border/radius 를 렌더에서 무시 — 양쪽 실측 모두 computed 0px).
+   칩 60px = 체크박스 52 + UA 마진 3+3 + 칩 보더 1+1, 피치 70px = 60 + grid gap 10
+   (실측 probe_checktag_input.mjs / probe_checktag_fixed.mjs). 원문에 없던 :not([type=checkbox])
+   배제를 제거해 값·처리를 원문과 맞춘다. 승인 예외(동의 체크박스)는 TSX 인라인으로 모양을 고정한다. */
+.pb-field input,
 .pb-field select,
 .pb-field textarea {
     width: 100%;
@@ -267,11 +275,11 @@
     cursor: pointer;
 }
 
+/* 원문 styles.css:245 과 동일 값. flex-shrink:0 은 원문에 없는 선언이라 뺐다(원문은 기본값 1). */
 .pb-check-tag input {
     width: 18px;
     height: 18px;
     accent-color: var(--pb-pink);
-    flex-shrink: 0;
 }
 
 .pb-check-tag span {

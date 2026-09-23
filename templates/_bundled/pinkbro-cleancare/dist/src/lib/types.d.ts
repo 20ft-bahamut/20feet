@@ -32,7 +32,7 @@ export interface HeroScopeItem {
     body: string;
 }
 /**
- * 페이지 카피 — 모듈 `pinkbro-contents` 가 COPY 도메인에 넣는 82개 키 전량.
+ * 페이지 카피 — 모듈 `pinkbro-contents` 가 COPY 도메인에 넣는 89개 키 전량.
  *
  * 값은 시더가 저장한 원문 그대로다. 개행(`\n`, 원문 `<br>`)과 인라인 강조
  * (`<em>` / `<strong>`)가 값 안에 남아 있으므로 컴포넌트가 그대로 렌더한다
@@ -124,6 +124,20 @@ export interface CopyData {
     estimate_panel_note: string | null;
     footer_text: string | null;
     footer_brand_desc: string | null;
+    /** 원문 body.html 479행 — footer .footer-col h4 */
+    footer_core_service_heading: string | null;
+    /** 원문 480행 — 원문 <br> 이 \n 으로 남은 스칼라 문구(renderCopyText 가 <br> 로 렌더) */
+    footer_core_service: string | null;
+    /** 원문 483행 */
+    footer_more_service_heading: string | null;
+    /** 원문 484행 */
+    footer_more_service: string | null;
+    /** 원문 487행 */
+    footer_contact_heading: string | null;
+    /** 원문 488행 1줄의 표시 라벨 — 번호 값은 site.phone 이 갖는다 */
+    footer_contact_phone_label: string | null;
+    /** 원문 488행 2줄 표시 라벨 — 채널 URL 값은 site.kakao_channel 이 갖는다 */
+    footer_contact_kakao_label: string | null;
     header_cta: string | null;
     mobile_cta_estimate: string | null;
     mobile_cta_phone: string | null;

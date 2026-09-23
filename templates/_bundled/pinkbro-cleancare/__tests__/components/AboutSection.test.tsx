@@ -48,10 +48,12 @@ describe('AboutSection', () => {
     expect(screen.getByTestId('about-message')).toHaveTextContent('보조 설명 문구');
     expect(screen.getByTestId('about-message').tagName).toBe('P');
 
-    // why-content h2 = about_side_heading (원문 \n 은 CSS pre-line 으로 보존)
+    // why-content h2 = about_side_heading. 원문 \n 은 <br> 요소로 렌더된다
+    // (날 newline 은 HTML 에서 공백으로 접히므로 renderCopyText 가 요소로 바꾼다)
     const sideHeading = screen.getByTestId('about-side-heading');
     expect(sideHeading.tagName).toBe('H2');
-    expect(sideHeading.textContent).toBe('매장에 꼭 필요한 위생관리만\n더 분명하게 제안합니다.');
+    expect(sideHeading.textContent).toBe('매장에 꼭 필요한 위생관리만더 분명하게 제안합니다.');
+    expect(sideHeading.querySelectorAll('br')).toHaveLength(1);
     expect(container.querySelector('.pb-why-heading')).not.toBeNull();
   });
 
@@ -137,8 +139,9 @@ describe('AboutSection', () => {
   });
 
   it('renders the bundled placeholder photo when why_stage is empty or media is null', () => {
+    // SLOT_PHOTO.why_stage — 원본 페이지의 why 스테이지 사진(_workspace/pinkbro/compare/original.json)
     const placeholder =
-      '/api/templates/assets/pinkbro-cleancare?file=images/service-floor-care.webp';
+      '/api/templates/assets/pinkbro-cleancare?file=images/why-stage.webp';
 
     const { unmount } = render(
       <AboutSection

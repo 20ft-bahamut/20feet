@@ -28,6 +28,8 @@ import {
 } from '../lib/inquiry';
 import type { MediaSlots, ServiceItem, SiteData } from '../lib/types';
 import { slotPhotoFor } from '../lib/serviceAssets';
+import { renderCopyText } from '../lib/copyText';
+import { usePbRevealRef } from '../lib/reveal';
 
 export interface InquiryFormProps {
     /** 사이트 기본 정보. null 이면 아직 로딩 중 — 스켈레톤. */
@@ -46,7 +48,7 @@ export interface InquiryFormProps {
     panelHeading: string | null;
     /** 우측 패널 안내 문구(copy: estimate_panel_sub). null 이면 생략한다. */
     panelSub: string | null;
-    /** 폼 하단 안내 문구(copy: estimate_panel_note). null 이면 생략한다. */
+    /** 폼 하단 안내 문구(copy: estimate_panel_note). 원문 456행처럼 <strong> 마크업과 \n(원본 <br>)을 담는다. null 이면 생략한다. */
     panelNote: string | null;
     className?: string;
 }
@@ -77,6 +79,8 @@ export function InquiryForm({
      * 모두 옛 state 를 읽어 그대로 통과한다. ref 로 막는다.
      */
     const inFlightRef = React.useRef(false);
+    // 리빌 — 원문 body.html 400행 — .estimate-shell reveal (섹션 셸 전체).
+    const reveal = usePbRevealRef<HTMLDivElement>();
 
     React.useEffect(() => {
         return () => {
@@ -228,7 +232,8 @@ export function InquiryForm({
     return (
         <section className={className ? `pb-inquiry ${className}` : 'pb-inquiry'}>
             <div className="pb-inquiry-wrap">
-                <div className="pb-inquiry-shell">
+                {/* 원문 body.html 400행 — .estimate-shell reveal */}
+                <div className="pb-inquiry-shell pb-reveal" ref={reveal('estimate-shell')}>
                     {bgUrl ? (
                         <Img
                             className="pb-inquiry-bg"
@@ -248,12 +253,12 @@ export function InquiryForm({
                             <Span className="pb-inquiry-eyebrow">Estimate</Span>
                             {intro && (
                                 <H2 className="pb-inquiry-heading" data-testid="inquiry-heading">
-                                    {intro}
+                                    {renderCopyText(intro)}
                                 </H2>
                             )}
                             {sub && (
                                 <P className="pb-inquiry-sub" data-testid="inquiry-sub">
-                                    {sub}
+                                    {renderCopyText(sub)}
                                 </P>
                             )}
                             {Array.isArray(checklist) && checklist.length > 0 && (
@@ -261,7 +266,7 @@ export function InquiryForm({
                                     {checklist.map((line, index) => (
                                         <div key={index}>
                                             <span>{String(index + 1).padStart(2, '0')}</span>
-                                            <div>{line}</div>
+                                            <div>{renderCopyText(line)}</div>
                                         </div>
                                     ))}
                                 </Div>
@@ -285,12 +290,12 @@ export function InquiryForm({
                                     className="pb-inquiry-panel-title"
                                     data-testid="inquiry-panel-heading"
                                 >
-                                    {panelHeading}
+                                    {renderCopyText(panelHeading)}
                                 </H3>
                             )}
                             {panelSub && (
                                 <P className="pb-inquiry-panel-lead" data-testid="inquiry-panel-sub">
-                                    {panelSub}
+                                    {renderCopyText(panelSub)}
                                 </P>
                             )}
 
@@ -418,7 +423,20 @@ export function InquiryForm({
                                                 checked={values.privacy_consent}
                                                 onChange={(e) => updateField('privacy_consent', e.target.checked)}
                                                 aria-invalid={fieldErrors.privacy_consent ? true : undefined}
-                                                style={{ width: 18, height: 18, marginRight: 8, accentColor: 'var(--pb-pink)' }}
+                                                /* .pb-field input 규칙이 원문처럼 체크박스에도 적용되므로
+                                                   (InquiryForm.css .pb-field input 주석), 원문에 없는
+                                                   승인 예외인 동의 체크박스의 승인된 모양(18×18 무테두리)을
+                                                   인라인으로 고정해 유지한다. */
+                                                style={{
+                                                    width: 18,
+                                                    height: 18,
+                                                    minHeight: 18,
+                                                    padding: 0,
+                                                    borderWidth: 0,
+                                                    background: 'transparent',
+                                                    marginRight: 8,
+                                                    accentColor: 'var(--pb-pink)',
+                                                }}
                                                 data-testid="inquiry-input-privacy"
                                             />
                                             문의 응대를 위해 업종·필요 서비스·연락처와 문의 내용을 수집하는 데 동의합니다.
@@ -447,7 +465,9 @@ export function InquiryForm({
 
                                 {panelNote && (
                                     <Div className="pb-panel-note" data-testid="inquiry-panel-note">
-                                        {panelNote}
+                                        {/* 원문 456행이 첫 문장 <strong> + <br> 다 — 시더가 저장한
+                                            마크업(<strong>)과 줄바꿈(\n)을 요소로 렌더한다. */}
+                                        {renderCopyText(panelNote)}
                                     </Div>
                                 )}
 
