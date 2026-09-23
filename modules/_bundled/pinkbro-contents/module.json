@@ -5,7 +5,7 @@
         "ko": "핑크브로 콘텐츠",
         "en": "PinkBro Contents"
     },
-    "version": "0.1.0",
+    "version": "0.2.0",
     "license": "MIT",
     "description": {
         "ko": "핑크브로클린케어 랜딩의 콘텐츠·문의·미디어 슬롯 관리 모듈",

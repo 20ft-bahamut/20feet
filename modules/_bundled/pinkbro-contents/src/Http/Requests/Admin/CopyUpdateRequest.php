@@ -10,14 +10,14 @@ use Illuminate\Foundation\Http\FormRequest;
  * copy 도메인은 게시판·게시글에 매이지 않은 전역 메타다 (SPEC §4.5) —
  * `board_id` / `post_id` 는 둘 다 null 이다.
  *
- * **키 목록의 출처는 시더다.** `PinkbroContentsSeeder::COPY` 가 현재 82키를 쓰고,
+ * **키 목록의 출처는 시더다.** `PinkbroContentsSeeder::COPY` 가 현재 89키를 쓰고,
  * 그 82키를 전부 받는다. SPEC §4.5 의 copy 행은 목록이 `…` 로 줄여 적혀 있어
  * 그대로 옮기면 문구가 조용히 사라진다 — 그래서 짧은 목록을 손으로 적지 않는다.
  * `AdminSiteApiTest::test_the_accepted_key_lists_match_what_the_domains_read_back`
  * 이 이 목록과 시더 상수를 집합으로 비교한다 (키를 늘리면 시더와 함께 고쳐야 한다).
  *
  * 값 모양은 세 가지다:
- *  - 스칼라 문구 77개 — `string`
+ *  - 스칼라 문구 84개 — `string`
  *  - 문자열 목록 2개(`hero_pills` `estimate_checklist`) — `array` + 원소 `string`
  *  - 객체 목록 3개(`about_perspectives` `hero_scope` `benefit_items`) — 원소 계약 고정
  *
@@ -30,7 +30,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class CopyUpdateRequest extends FormRequest
 {
     /**
-     * 스칼라 문구 키 77개 — 시더 `COPY` 의 스칼라 항목 그대로.
+     * 스칼라 문구 키 84개 — 시더 `COPY` 의 스칼라 항목 그대로.
      *
      * @var array<int, string>
      */
@@ -52,6 +52,13 @@ class CopyUpdateRequest extends FormRequest
         'estimate_note',
         'faq_intro',
         'footer_text',
+        'footer_core_service_heading',
+        'footer_core_service',
+        'footer_more_service_heading',
+        'footer_more_service',
+        'footer_contact_heading',
+        'footer_contact_phone_label',
+        'footer_contact_kakao_label',
         'about_heading',
         'about_side_heading',
         'hero_visual_label',

@@ -183,7 +183,7 @@ class AdminSiteApiTest extends PinkbroContentsTestCase
     }
 
     /**
-     * 시더가 쓰는 카피 키 82개를 전부 받는다 — 목록이 짧으면 문구가 조용히 사라진다.
+     * 시더가 쓰는 카피 키 89개를 전부 받는다 — 목록이 짧으면 문구가 조용히 사라진다.
      *
      * 시더 원문을 그대로 PUT 하고, 공개 API 로 되읽어 값까지 같은지 본다.
      */
@@ -294,7 +294,7 @@ class AdminSiteApiTest extends PinkbroContentsTestCase
             $this->sorted(array_keys($this->readSite()))
         );
 
-        // copy — 시더가 쓰는 82키와 정확히 같다 (짧은 목록 금지).
+        // copy — 시더가 쓰는 89키와 정확히 같다 (짧은 목록 금지).
         $this->assertSame(
             $this->sorted(CopyUpdateRequest::allowedKeys()),
             $this->sorted(array_keys($this->seederCopy()))

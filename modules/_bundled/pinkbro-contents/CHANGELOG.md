@@ -6,6 +6,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-23
+
 ### Added
 
 - 시더 `COPY` 상수에 원문(`_workspace/pinkbro/source/body.html`)에만 있고 키가 없던
@@ -33,6 +35,25 @@
     `mobile_cta_phone`(497행) · `mobile_cta_kakao`(499행)
   - `BRAND MESSAGE` 는 기존 `hero_visual_label`(상단 배지, 50행)과 다른 자리라
     이름을 `hero_visual_message_label` 로 구분했습니다.
+
+- 푸터 카피 7키를 추가했습니다(82키 → 89키). 값은 원문 `body.html` 479~488행 그대로입니다.
+  - `footer_core_service_heading`(479행) · `footer_core_service`(480행 — 원문 `<br>` 을
+    개행(`\n`)으로 보존한 스칼라) · `footer_more_service_heading`(483행) ·
+    `footer_more_service`(484행) · `footer_contact_heading`(487행) ·
+    `footer_contact_phone_label`·`footer_contact_kakao_label`(488행의 표시 라벨 2줄).
+  - Contact 의 값(전화번호·채널 URL·지역)은 SITE 도메인이 갖습니다(`site.phone` /
+    `site.kakao_channel` / `site.region`) — COPY 는 표시 라벨만 갖습니다.
+- 관리자 copy 편집 폼(`resources/layouts/admin/admin_copy_form.json`)에 푸터 7키 필드를
+  추가하고, `CopyUpdateRequest` 의 허용 키 목록을 82키 → 89키(스칼라 77개 → 84개)로
+  확장했습니다. `AdminSiteApiTest` 의 키 수 단언도 함께 갱신했습니다.
+
+### Fixed
+
+- 시더가 원문의 인라인 마크업을 그대로 저장하도록 복원했습니다. FAQ 답변 8건
+  (`body.html` 333~361행 — 여덟 답변 모두 첫 문장이 `<strong>`)과 `pricing_field`
+  (264행), `estimate_panel_note`(456행) 값에 `<strong>` 마크업을 넣었습니다(10건).
+  강조 경계는 원본과 글자 단위로 일치합니다(345행은 "네. 기본가는 … 150,000원~입니다."
+  까지, 349행은 "아닙니다. … 기준가입니다." 까지). 표시 계층이 경계를 추정하지 않습니다.
 
 ### Note
 
