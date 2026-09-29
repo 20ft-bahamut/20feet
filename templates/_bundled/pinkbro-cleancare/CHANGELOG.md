@@ -6,6 +6,23 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-29
+
+### Changed
+
+- **버전 정렬 + 번들 재빌드.** `template.json`·`components.json`·`package.json`·
+  `package-lock.json`·README 의 버전 표기를 0.3.0 으로 올렸고 `template.json`
+  의존성(`pinkbro-contents >=0.1.0`)은 그대로 뒀습니다. 번들에 박히는
+  `version:"0.3.0"` 은 `src/index.ts` 가 import 하는 `template.json` 에서 옵니다.
+  이번 릴리스의 기능 변경은 모듈 쪽입니다 — **관리자 사례 폼 커버 업로드**
+  (pinkbro-contents 0.3.0, 모듈 CHANGELOG 참조). 템플릿 소스·레이아웃·컴포넌트는
+  0.2.0 과 동일합니다(작업 트리 diff 기준 템플릿 파일 0건).
+- 사례 카드가 커버 사진을 소비하는 계약도 0.2.0 의 것 그대로입니다 — `media-slots`
+  데이터소스가 해석한 슬롯 URL 을 `CaseGallery` 카드가 받고(슬롯 순번 = 카드 순번),
+  슬롯 URL 이 비면 0.2.0 에서 정한 원문 그라디언트 + `Case 0N` 라벨 폴백만 남습니다.
+  이번 모듈 변경으로 그 슬롯에 사진을 넣는 길이 미디어 화면 외에 **사례 폼의
+  업로더로도** 열렸을 뿐입니다.
+
 ## [0.2.0] - 2026-09-23
 
 ### Added

@@ -11,7 +11,7 @@ Gnuboard 7 **사용자 템플릿**(`type: user`)입니다.
 |---|---|
 | 식별자 | `pinkbro-cleancare` |
 | 벤더 | `pinkbro` |
-| 버전 | `0.2.0` |
+| 버전 | `0.3.0` |
 | 타입 | `user` |
 | 라이선스 | MIT (`LICENSE`) |
 | 작성자 | `pinkbro` |
