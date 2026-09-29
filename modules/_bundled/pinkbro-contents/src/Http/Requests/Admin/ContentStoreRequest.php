@@ -3,6 +3,8 @@
 namespace Modules\Pinkbro\Contents\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Modules\Pinkbro\Contents\Services\MediaSlotService;
 
 /**
  * 관리자 콘텐츠 생성 검증 — 도메인 4종 공용 (service / package / case / faq).
@@ -16,6 +18,10 @@ use Illuminate\Foundation\Http\FormRequest;
  * 도메인 키 집합은 이 표(입력 계약)와 `AdminContentResource::KEYS`(응답 계약) 두 곳에
  * 있다 — 입출력 키가 같아야 하므로 어긋나면 `AdminContentApiTest` 의 정합성 테스트가
  * 실패한다. 키를 늘릴 때는 양쪽을 함께 고친다.
+ *
+ * 예외는 1회용 연산 키다: `cover_temp_key`(case) 는 메타 행이 아니라 임시 첨부를
+ * 가리키는 키라 응답 계약에 없다 — `rules()` 에서 도메인별로 붙이므로 이 표
+ * (메타 키 목록)에 넣지 않는다. 정합성 테스트는 FIELDS 만 본다.
  *
  * 필수 키는 도메인마다 하나다: 게시글 제목 컬럼의 값 출처(`title`, faq 는 `question`).
  * 나머지 키는 전부 선택이다 — 값이 없으면 메타 행을 만들지 않는다.
@@ -126,6 +132,50 @@ class ContentStoreRequest extends FormRequest
             };
         }
 
+        if ($domain === 'case') {
+            // 커버 업로드는 사례 도메인에만 있다. temp_key 규약은 `MediaLinkRequest`
+            // (슬롯 연결 FormRequest)와 같다: 업로드 직후 상태의 임시 첨부
+            // (board_id=0, post_id NULL, 삭제 안 된 행)를 가리키는 키여야 하고,
+            // 연결되면 temp_key 가 비워지므로 소비된 키 재발송은 exists 로 422 낸다.
+            // 이 키는 응답 계약(`AdminContentResource::KEYS`)에 없는 1회용 연산 키라
+            // 메타 표(`self::FIELDS`)에 넣지 않는다 — 컨트롤러가 메타 저장에서 떼어낸다.
+            $rules['cover_temp_key'] = [
+                'nullable',
+                'string',
+                'max:64',
+                Rule::exists('board_attachments', 'temp_key')->where(function ($q): void {
+                    $q->where('board_id', 0)->whereNull('post_id')->whereNull('deleted_at');
+                }),
+            ];
+
+            // cover_slot 은 목록 밖 키를 받지 않는다 — 선택지도 검증도
+            // `MediaSlotService::caseSlotKeys()` 파생이다 (레지스트리가 유일한 출처).
+            // 업로드가 있으면 슬롯 정해진다 — 어느 슬롯에 붙일지 없는 저장은
+            // 조용히 넘어가지 않는다(required_with). 주의: 부분 갱신 모드의
+            // `sometimes` 를 cover_slot 에서 뺀다 — sometimes 는 "키 없음" 을
+            // 건너뛰므로 업로드가 있는데 슬롯 없는 저장을 잡지 못한다. 없는 키는
+            // nullable 이 흘려보내고 required_with 만 업로드 조합을 잡는다.
+            $rules['cover_slot'] = [
+                ...self::FIELDS[$domain]['cover_slot'],
+                'required_with:cover_temp_key',
+                Rule::in(MediaSlotService::caseSlotKeys()),
+            ];
+        }
+
         return $rules;
+    }
+
+    /**
+     * 빈 문자열은 목록 밖이라 `Rule::in` 이 422 를 낸다. "미지정" 은 빈 문자열이
+     * 아니라 null 로 정규화한다 — 부분 갱신(수정)에선 null 이 "메타 삭제" 다.
+     * 업로드 후 저장 재시도에서도 소비된 temp_key 를 null 로 만들어 같은 규칙을 탄다.
+     */
+    protected function prepareForValidation(): void
+    {
+        foreach (['cover_slot', 'cover_temp_key'] as $key) {
+            if ($this->input($key) === '') {
+                $this->merge([$key => null]);
+            }
+        }
     }
 }

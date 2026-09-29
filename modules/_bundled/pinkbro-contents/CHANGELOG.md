@@ -6,6 +6,59 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-29
+
+### Added
+
+- **사례(case) 커버 업로드 — 저장 API 가 `cover_temp_key` 를 슬롯 연결로 푸는 경로.**
+  case 도메인의 생성·수정(`admin/content/{domain}`)이 검증 통과 요청에 1회용 연산 키
+  `cover_temp_key` 를 받으면, 저장 트랜잭션 안에서 그 임시 첨부를 `cover_slot` 이
+  가리키는 슬롯에 연결합니다(`MediaSlotLinkService::linkTemp` — 미디어 API 와 같은
+  공용 경로, `AdminContentController::linkCaseCover`). 연결 실패(예: 검증과 연결 사이
+  키 소비)면 사례 게시글·메타 쓰기도 함께 롤백됩니다 — 연결이 호출자 트랜잭션 안에서
+  세이브포인트로 중첩되기 때문입니다. 업로드와 저장이 한 흐름이므로 "글은 저장,
+  사진은 실패" 상태를 만들지 않습니다. 대신 커버 연결 실패는 422 로 보입니다.
+  `cover_temp_key` 는 메타 표(`ContentStoreRequest::FIELDS`)에 넣지 않은 키라 컨트롤러가
+  `pullCoverTempKey` 로 검증 통과 데이터에서 떼어냅니다.
+- `ContentStoreRequest` case 규칙 — `cover_temp_key` 는 `board_attachments` 의
+  임시 첨부( board_id=0 · post_id NULL · 삭제 안 된 행, max 64자)만 받고,
+  `cover_slot` 은 `required_with:cover_temp_key` + `Rule::in(caseSlotKeys())` 로
+  목록 밖 키를 받지 않습니다. `prepareForValidation` 이 빈 문자열을 null 로
+  정규화합니다("미지정" 은 null — 부분 갱신에서 메타 삭제). 수정 요청
+  (`ContentUpdateRequest`)도 생성 요청을 상속하므로 같은 규칙을 씁니다.
+- `AdminContentResource` — case 도메인 응답(목록·단건·생성·수정 공통)에
+  `cover{slot,url,alt}` 컴포지트를 추가했습니다. 컨트롤러 `payload` 가
+  `cover_slot` 메타를 `MediaSlotService::resolve` 로 해석해 내려주고, 레지스트리 밖
+  키(레거시 손입력 잔여값)는 해석하지 않고 url null 로 돌려줍니다. 이 키는 메타 키가
+  아니므로 `KEYS` 정합성 표에 넣지 않았습니다 — 정합성 테스트가 비교하는 범위가 유지됩니다.
+- `MediaSlotService::caseSlotKeys()` — 레지스트리에서 `case_` 접두 키만 고르는 파생
+  목록입니다. 요청 검증과 관리자 폼 선택지가 각자 목록을 적을 때 어긋나지 않게
+  레지스트리가 유일한 출처로 유지됩니다.
+- **관리자 사례 폼에 커버 업로더**(`resources/layouts/admin/admin_content_form.json` +
+  `partials/admin_content_form/_field_group_case.json`). 미리보기 · 업로더
+  (`case_cover_uploader`) · 커버 해제 버튼이 들어갔고 업로더 계약은 미디어 폼 슬롯
+  하나와 같습니다(collection `main`, maxFiles 1, `autoUpload false`, init_actions 가
+  생성한 tempKey 를 FormData `temp_key` 로) — 이벤트 이름은 미디어 폼의 16개와
+  겹치지 않는 `upload:pinkbro-contents:case_cover` 입니다. 저장 버튼은 case 도메인이면
+  emitEvent 로 업로드를 실행하고, 실제로 업로드된 첨부가 있을 때만
+  `cover_temp_key` 를 싣습니다(파일 없는 저장은 커버 없이 메타만 갱신).
+  커버 해제는 미디어 폼과 같은 슬롯 단위 DELETE(첨부 파일은 남습니다)이며 대상은
+  폼 값이 아니라 리소스가 보고한 현재 연결 슬롯입니다.
+- 사례 폼의 `cover_slot` 입력을 손 입력에서 select 로 바꿨습니다. 선택지는
+  `GET admin/media` 응답의 case_ 슬롯(키·라벨 모두 레지스트리 파생)이고, 기록값이
+  목록 밖이면 첫 항목으로, 빈값은 그대로 둡니다(랜딩은 카드 순번 폴백).
+- Feature 테스트 `AdminCaseCoverApiTest` 6개 — 생성/수정에서 커버 연결, 목록 밖
+  슬롯 422, 업로드에 슬롯 없음 422, 모르는 temp_key 422, 연결 실패 롤백(사례 게시글
+  쓰기 흔적 제거). DB 미가용 환경 skip 을 선례와 같이 setUp 에서 유지합니다.
+
+### Changed
+
+- `AdminMediaController::link` 본문의 연결 체인(임시 첨부 확보 → 앵커 게시글 확보 →
+  이전 첨부 release → temp_key 소비 → 슬롯 메타 기록)을 공용 서비스
+  `MediaSlotLinkService` 로 추출했습니다. 사례 저장이 같은 코드를 써야 하기 위해서입니다.
+  동작 변화는 없습니다(alt-only 경로에서 첨부 상한·release 조건·앵커 생성 규칙과
+  게시판 404 확인 시점 포함) — 근거 주석도 옮겨간 곳에 있습니다.
+
 ## [0.2.0] - 2026-09-23
 
 ### Added

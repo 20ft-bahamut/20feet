@@ -1,13 +1,194 @@
 {
   "meta": {
     "is_partial": true,
-    "description": "case 도메인 필드 그룹 — SPEC §4.5 키: title, summary, blog_url, cover_slot, sort"
+    "description": "case 도메인 필드 그룹 — SPEC §4.5 키: title, summary, blog_url, cover_slot, sort + 커버 사진 업로드(관리자 폼 전용: 파일 업로드와 슬롯 미리보기·해제)"
   },
   "id": "field_group_case",
   "type": "basic",
   "name": "Div",
   "if": "{{route.domain === 'case'}}",
   "children": [
+    {
+      "id": "case_cover_card",
+      "type": "basic",
+      "name": "Div",
+      "props": {
+        "className": "mt-6 p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl space-y-4"
+      },
+      "children": [
+        {
+          "type": "basic",
+          "name": "H3",
+          "props": {
+            "className": "text-lg font-semibold text-gray-900 dark:text-white mb-4"
+          },
+          "text": "커버 사진"
+        },
+        {
+          "comment": "현재 커버 미리보기 — 출처는 AdminContentResource 의 cover{slot,url,alt}(서버가 해석한 슬롯 사진)다. 해제 후에는 coverCleared 가 여기서 사진을 숨긴다(저장 성공 navigate 의 remount 로 갱신되기 전에도 폼이 해제 사실을 반영한다).",
+          "id": "case_cover_preview",
+          "type": "basic",
+          "name": "Div",
+          "props": {
+            "className": "flex items-start gap-4"
+          },
+          "children": [
+            {
+              "type": "basic",
+              "name": "Img",
+              "if": "{{!!content?.data?.cover?.url && !_local.coverCleared}}",
+              "props": {
+                "src": "{{content?.data?.cover?.url}}",
+                "alt": "{{content?.data?.cover?.alt ?? '커버 사진 미리보기'}}",
+                "className": "w-40 h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+              }
+            },
+            {
+              "type": "basic",
+              "name": "Div",
+              "props": {
+                "className": "space-y-2"
+              },
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "P",
+                  "props": {
+                    "className": "text-sm text-gray-700 dark:text-gray-300"
+                  },
+                  "text": "{{content?.data?.cover?.slot ? '연결 슬롯: ' + content.data.cover.slot : ''}}"
+                },
+                {
+                  "comment": "해제 = 미디어 폼과 같은 슬롯 단위 DELETE. 대상은 폼 안의 값을 쓰지 않고 리소스가 보고한 현재 연결 슬롯(서버 상태)이다 — 선택지 변경이 아직 저장 안 된 상태에서 해제가 슬롯을 어긋나게 지우지 않으려는 것이다.",
+                  "id": "case_cover_unlink_button",
+                  "type": "basic",
+                  "name": "Button",
+                  "if": "{{!!content?.data?.cover?.slot && !_local.coverCleared}}",
+                  "props": {
+                    "type": "button",
+                    "disabled": "{{_local.coverUnlinking}}",
+                    "className": "px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  },
+                  "text": "{{_local.coverUnlinking ? '해제 중...' : '커버 해제'}}",
+                  "actions": [
+                    {
+                      "type": "click",
+                      "handler": "sequence",
+                      "params": {
+                        "actions": [
+                          {
+                            "handler": "setState",
+                            "params": {
+                              "target": "_local",
+                              "coverUnlinking": true
+                            }
+                          },
+                          {
+                            "comment": "슬롯 메타만 지운다(첨부 파일은 남는다) — media_form.json 의 해제 sequence 와 같은 엔드포인트·계약. 미리보기는 coverCleared 로 가린다.",
+                            "handler": "apiCall",
+                            "auth_mode": "required",
+                            "target": "/api/modules/pinkbro-contents/admin/media/{{content?.data?.cover?.slot}}",
+                            "params": {
+                              "method": "DELETE"
+                            },
+                            "onSuccess": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "_local",
+                                  "coverUnlinking": false,
+                                  "coverCleared": true
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "success",
+                                  "message": "커버 사진을 해제했습니다."
+                                }
+                              },
+                              {
+                                "handler": "refetchDataSource",
+                                "params": {
+                                  "dataSourceId": "media"
+                                }
+                              }
+                            ],
+                            "onError": [
+                              {
+                                "handler": "setState",
+                                "params": {
+                                  "target": "_local",
+                                  "coverUnlinking": false
+                                }
+                              },
+                              {
+                                "handler": "toast",
+                                "params": {
+                                  "type": "error",
+                                  "message": "{{error.message || '해제에 실패했습니다.'}}"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "comment": "업로더 — 미디어 폼 슬롯 하나의 검증된 계약(CASE_COVER_CONTRACT §1.2)을 그대로 옮긴 것: collection main 고정, maxFiles 1, autoUpload false, init_actions 생성 tempKey 를 FormData 의 temp_key 로 보낸다. 이벤트 이름은 미디어 폼의 16개(upload:pinkbro_media:*)와 겹치지 않는다. 업로드 실행은 저장 버튼의 emitEvent 가 한다(autoUpload false).",
+          "id": "case_cover_uploader",
+          "type": "composite",
+          "name": "FileUploader",
+          "props": {
+            "collection": "main",
+            "maxFiles": 1,
+            "maxSize": "{{_global.settings?.upload?.max_file_size ?? 10}}",
+            "accept": ".jpg,.jpeg,.png,.gif,.webp",
+            "imageCompression": {
+              "maxSizeMB": 1,
+              "maxWidthOrHeight": "{{_global.settings?.upload?.image_max_width ?? 1200}}"
+            },
+            "autoUpload": false,
+            "uploadTriggerEvent": "upload:pinkbro-contents:case_cover",
+            "compact": true,
+            "confirmBeforeRemove": true,
+            "uploadParams": {
+              "temp_key": "{{_local.tempKey}}"
+            },
+            "apiEndpoints": {
+              "upload": "/api/modules/sirsoft-board/admin/board/pinkbro_media/attachments"
+            },
+            "initialFiles": "{{[]}}"
+          },
+          "actions": [
+            {
+              "event": "onUploadError",
+              "type": "change",
+              "handler": "toast",
+              "params": {
+                "type": "error",
+                "message": "{{$args[0]}}",
+                "icon": "triangle-exclamation"
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "name": "P",
+          "props": {
+            "className": "text-xs text-gray-500 dark:text-gray-400"
+          },
+          "text": "파일을 고르고 저장을 누르면 선택한 슬롯에 연결됩니다 — 외부 이미지 주소는 받지 않습니다."
+        }
+      ]
+    },
     {
       "id": "case_basic_card",
       "type": "basic",
@@ -136,6 +317,7 @@
           ]
         },
         {
+          "comment": "커버 슬롯 선택 — 손 입력 대신 선택으로 바꿨다. 선택지는 data_sources.media(GET admin/media) 응답에서 case_ 슬롯만 이르는 것이며 키·라벨 모두 레지스트리(MediaSlotService)가 유일한 출처이다. 지금 기록값이 목록 안에 있으면 그 값이 선택되고, 목록 밖이면 첫 항목으로 떨어진다. 빈값(미지정) 은 랜딩 폴백(카드 순번 슬롯)이라 그대로 둔다 — 선택해 저장하면 cover_slot 메타가 null 로 지워진다.",
           "id": "field_case_cover_slot",
           "type": "basic",
           "name": "Div",
@@ -153,11 +335,10 @@
             },
             {
               "type": "basic",
-              "name": "Input",
+              "name": "Select",
               "props": {
-                "type": "text",
                 "className": "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm",
-                "value": "{{_local.form.cover_slot ?? ''}}"
+                "value": "{{!(_local.form.cover_slot ?? '') ? '' : ((media?.data?.slots ?? []).find(s => s.key === (_local.form.cover_slot ?? ''))?.key ?? (media?.data?.slots ?? []).find(s => s.key?.startsWith('case_'))?.key ?? '')}}"
               },
               "actions": [
                 {
@@ -165,18 +346,32 @@
                   "handler": "setState",
                   "params": {
                     "target": "_local",
-                    "form.cover_slot": "{{$event.target.value}}"
+                    "form.cover_slot": "{{$event.target.value || null}}"
                   }
                 }
+              ],
+              "children": [
+                {
+                  "type": "basic",
+                  "name": "Option",
+                  "props": {
+                    "value": ""
+                  },
+                  "text": "미지정 (랜딩 폴백 표시)"
+                },
+                {
+                  "type": "basic",
+                  "name": "Option",
+                  "iteration": {
+                    "source": "(media?.data?.slots ?? []).filter(s => s.key?.startsWith('case_'))",
+                    "item_var": "slot"
+                  },
+                  "props": {
+                    "value": "{{slot.key}}"
+                  },
+                  "text": "{{slot.label?.ko ?? slot.key}}"
+                }
               ]
-            },
-            {
-              "type": "basic",
-              "name": "P",
-              "props": {
-                "className": "text-xs text-gray-500 dark:text-gray-400"
-              },
-              "text": "미디어 슬롯 키 (예: case_1) — 비어 있으면 랜딩 폴백이 표시됩니다."
             }
           ]
         },

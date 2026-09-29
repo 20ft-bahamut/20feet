@@ -45,6 +45,23 @@ class MediaSlotService
         return array_keys(self::SLOTS);
     }
 
+    /**
+     * 사례(작업사례 카드)용 슬롯 키들 — 레지스트리에서 `case_` 접두만 고른다.
+     *
+     * 사례 도메인은 카드 4장과 슬롯 4키(case_1..case_4)가 1:1 이다. 이 메서드가
+     * 목록의 유일한 사본이다 — 요청 검증(`ContentStoreRequest`)과 관리자 폼의
+     * 선택지가 이 목록 밖의 키를 각자 적으면 어긋나므로, 파생이라서 레지스트리가
+     * 바뀌면 함께 움직인다. SLOTS 자체는 건드리지 않는다.
+     *
+     * @return string[]
+     */
+    public static function caseSlotKeys(): array
+    {
+        return array_values(
+            array_filter(self::slotKeys(), fn (string $key): bool => str_starts_with($key, 'case_'))
+        );
+    }
+
     public static function labels(): array
     {
         return self::SLOTS;

@@ -10,9 +10,21 @@
   },
   "state": {
     "isSaving": false,
-    "errors": null
+    "errors": null,
+    "coverUnlinking": false,
+    "coverCleared": false
   },
   "init_actions": [
+    {
+      "comment": "tempKey 생성 (취소 시 안전을 위해 항상 생성) — 미디어 폼(admin_media_form.json)과 같은 계약. 엔진이 자동 생성하지 않으므로 init_actions 가 만들어야 한다. 업로드 FormData 의 temp_key 가 이 값이다.",
+      "handler": "setState",
+      "params": {
+        "target": "global",
+        "_local": {
+          "tempKey": "{{('temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9))}}"
+        }
+      }
+    },
     {
       "comment": "생성 모드 도메인별 폼 기본값 — SPEC §4.5 키 집합. 수정 모드는 data_sources.content.initLocal 이 단건 응답으로 덮어쓴다.",
       "handler": "setState",
@@ -79,6 +91,22 @@
     }
   ],
   "data_sources": [
+    {
+      "comment": "현재 커버 사진·슬롯 목록 출처 — 미디어 폼(admin_media_form.json)과 같은 소스다. 사례 폼의 미리보기와 커버 슬롯 선택지(라벨 포함)가 이 응답에서 온다.",
+      "id": "media",
+      "label_key": "$t:pinkbro-contents.menu.media",
+      "type": "api",
+      "endpoint": "/api/modules/pinkbro-contents/admin/media",
+      "method": "GET",
+      "auto_fetch": true,
+      "auth_required": true,
+      "loading_strategy": "progressive",
+      "fallback": {
+        "data": {
+          "slots": []
+        }
+      }
+    },
     {
       "id": "content",
       "label_key": "$t:pinkbro-contents.menu.content",
@@ -166,6 +194,23 @@
                             "target": "_local",
                             "isSaving": true,
                             "errors": null
+                          }
+                        },
+                        {
+                          "comment": "사례 커버 업로드 — 파일을 골라둔 FileUploader 의 내부 리스너가 이 이벤트로 업로드를 실행한다. 미디어 폼의 저장 순서(setState → emitEvent → apiCall)를 따른다. ⚠ 파일 단위 업로드 실패는 리스너 안에서 흡수되어(useFileUploader 의 processQueue catch + onUploadError 토스트) emitEvent 가 정상 반환하므로 이 지점에서 저장이 멈추지 않는다. 그때는 아래 cover_temp_key 가 null 로 나가 사례가 커버 없이 저장되고 성공 토스트가 뜬다 — 업로드 실패는 FileUploader 가 띄우는 오류 토스트로만 드러난다.",
+                          "if": "{{route.domain === 'case'}}",
+                          "handler": "emitEvent",
+                          "params": {
+                            "event": "upload:pinkbro-contents:case_cover"
+                          }
+                        },
+                        {
+                          "comment": "temp_key 는 이번 저장에서 업로드가 있었으면 그 값을, 없었으면 직전 값을 유지한다. 미디어 폼은 없으면 null 로 덮지만, 그러면 저장이 한 번 실패한 뒤(제목 누락 같은 무관한 422) 재시도할 때 이미 업로드된 파일이 재집계되지 않아(useFileUploader 는 pending·error 만 재발화한다) temp_key 가 null 로 덮이고 커버가 조용히 유실된다. 실패한 저장은 temp_key 를 소비하지 않으므로(슬롯 연결이 사례 저장과 한 트랜잭션이다) 직전 값을 그대로 다시 실어 보내면 재시도가 성공한다. 저장이 성공하면 연결과 함께 소비되고 폼은 목록으로 이동한다.",
+                          "if": "{{route.domain === 'case'}}",
+                          "handler": "setState",
+                          "params": {
+                            "target": "_local",
+                            "form.cover_temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : (_local.form.cover_temp_key ?? null)}}"
                           }
                         },
                         {
@@ -339,6 +384,23 @@
                             "target": "_local",
                             "isSaving": true,
                             "errors": null
+                          }
+                        },
+                        {
+                          "comment": "사례 커버 업로드 — 파일을 골라둔 FileUploader 의 내부 리스너가 이 이벤트로 업로드를 실행한다. 미디어 폼의 저장 순서(setState → emitEvent → apiCall)를 따른다. ⚠ 파일 단위 업로드 실패는 리스너 안에서 흡수되어(useFileUploader 의 processQueue catch + onUploadError 토스트) emitEvent 가 정상 반환하므로 이 지점에서 저장이 멈추지 않는다. 그때는 아래 cover_temp_key 가 null 로 나가 사례가 커버 없이 저장되고 성공 토스트가 뜬다 — 업로드 실패는 FileUploader 가 띄우는 오류 토스트로만 드러난다.",
+                          "if": "{{route.domain === 'case'}}",
+                          "handler": "emitEvent",
+                          "params": {
+                            "event": "upload:pinkbro-contents:case_cover"
+                          }
+                        },
+                        {
+                          "comment": "temp_key 는 이번 저장에서 업로드가 있었으면 그 값을, 없었으면 직전 값을 유지한다. 미디어 폼은 없으면 null 로 덮지만, 그러면 저장이 한 번 실패한 뒤(제목 누락 같은 무관한 422) 재시도할 때 이미 업로드된 파일이 재집계되지 않아(useFileUploader 는 pending·error 만 재발화한다) temp_key 가 null 로 덮이고 커버가 조용히 유실된다. 실패한 저장은 temp_key 를 소비하지 않으므로(슬롯 연결이 사례 저장과 한 트랜잭션이다) 직전 값을 그대로 다시 실어 보내면 재시도가 성공한다. 저장이 성공하면 연결과 함께 소비되고 폼은 목록으로 이동한다.",
+                          "if": "{{route.domain === 'case'}}",
+                          "handler": "setState",
+                          "params": {
+                            "target": "_local",
+                            "form.cover_temp_key": "{{(_local._eventResult?.data?.uploadedAttachments ?? []).length ? _local.tempKey : (_local.form.cover_temp_key ?? null)}}"
                           }
                         },
                         {
